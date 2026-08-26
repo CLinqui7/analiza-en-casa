@@ -1,4 +1,91 @@
 {
   "chapter": "CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id":"CH08-F01",
+      "name":"Perfil administrativo de ejecución",
+      "description":"Detalles de Hospitalización contiene un perfil administrativo asociado a PIC Ejecución, con Guardar y Cancelar.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0002","timestamp":"00:16:16.400","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0002_00h16m16s400ms_abrupt_change.jpg"}]
+    },
+    {
+      "id":"CH08-F02",
+      "name":"Campos administrativos y de aseguradora",
+      "description":"El perfil solicita health manager, referido por, tipo Revenue, tipo, fecha, días, forma de pago, aseguradora, tipo de solicitud, categoría, subcategoría, hospital de origen y clasificación del paciente.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0010","timestamp":"00:16:25.600","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0010_00h16m25s600ms_DETAIL.jpg"}]
+    },
+    {
+      "id":"CH08-F03",
+      "name":"Guardado del perfil administrativo",
+      "description":"Guardar produce una transición de Procesando y devuelve a PIC Ejecución.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0021","timestamp":"00:16:46.200","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0021_00h16m46s200ms_stable_change.jpg"}]
+    },
+    {
+      "id":"CH08-F04",
+      "name":"Listado de cuentas por cobrar y exportaciones",
+      "description":"Cuentas por cobrar separa Cuentas y Pagos; ofrece búsqueda, paginación y botones Excel con filtros, Reporte y Excel. La tabla incluye inicio, paciente, hospitalización, estado, tipo, gestor y totales.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0037","timestamp":"00:17:08.800","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0037_00h17m08s800ms_DETAIL.jpg"}]
+    },
+    {
+      "id":"CH08-F05",
+      "name":"Acciones de una cuenta",
+      "description":"El menú de la cuenta ofrece Ver Cotizaciones, Estados de cuenta, Ver pagos, Archivar y Registro XPO.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0041","timestamp":"00:17:33.600","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0041_00h17m33s600ms_DETAIL.jpg"}]
+    },
+    {
+      "id":"CH08-F06",
+      "name":"Histórico de estados de cuenta",
+      "description":"El histórico separa Estados Particulares y Estados Mixtos y prevé fecha, creador, período, saldo anterior, facturas, pagos y pendiente; la fila consultada no tiene histórico visible.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0044","timestamp":"00:17:41.600","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0044_00h17m41s600ms_abrupt_change.jpg"}]
+    },
+    {
+      "id":"CH08-F07",
+      "name":"Pagos de hospitalización",
+      "description":"Ver pagos abre una lista con Añadir pago, fecha, tipo, monto, pagado por y estado. Cada pago ofrece Editar pago, Imprimir y Eliminar pagos.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0049","timestamp":"00:17:51.800","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0049_00h17m51s800ms_DETAIL.jpg"},{"chapter_id":"CH08","chapter_event_id":"CH08-E0056","timestamp":"00:18:06.200","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0056_00h18m06s200ms_DETAIL.jpg"}]
+    },
+    {
+      "id":"CH08-F08",
+      "name":"Configuración de estado de cuenta",
+      "description":"Reporte permite seleccionar tipo Paciente, persona, código de hospitalización, tipo de paciente y rango de fecha antes de Vista previa.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0068","timestamp":"00:19:00.400","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0068_00h19m00s400ms_DETAIL.jpg"}]
+    },
+    {
+      "id":"CH08-F09",
+      "name":"Vista previa de cuenta del paciente",
+      "description":"La vista previa presenta datos del paciente y hospitalización; contiene pestañas Cotizaciones, Pagos y Documentos, casillas de selección, deuda y pagos acumulados.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0075","timestamp":"00:19:26.800","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0075_00h19m26s800ms_abrupt_change.jpg"},{"chapter_id":"CH08","chapter_event_id":"CH08-E0083","timestamp":"00:19:34.200","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0083_00h19m34s200ms_abrupt_change.jpg"}]
+    },
+    {
+      "id":"CH08-F10",
+      "name":"Resumen de pago",
+      "description":"Ver resumen calcula Saldo Anterior, Total Facturas, Total Pagos y Total Pendientes, y ofrece Cerrar, Imprimir y Guardar cambios.",
+      "classification":"VISIBLE","confidence":"HIGH","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0087","timestamp":"00:19:52.000","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0087_00h19m52s000ms_abrupt_change.jpg"}]
+    },
+    {
+      "id":"CH08-F11",
+      "name":"Interpretación de total pendiente negativo",
+      "description":"El ejemplo visible tiene pagos mayores que facturas y muestra Total Pendientes negativo. El capítulo no explica si representa crédito, sobrepago o un error.",
+      "classification":"UNCERTAIN","confidence":"MEDIUM","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0087","timestamp":"00:19:52.000","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0087_00h19m52s000ms_abrupt_change.jpg"}]
+    },
+    {
+      "id":"CH08-F12",
+      "name":"Estado de cuenta automático",
+      "description":"La conversación considera que el estado de cuenta podría generarse de forma automática, pero no demuestra programación ni entrega automática.",
+      "classification":"VERBAL","confidence":"LOW","current_platform_status":"NOT_TESTABLE",
+      "evidence":[{"chapter_id":"CH08","chapter_event_id":"CH08-E0095","timestamp":"00:20:59.600","path":"references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0095_00h20m59s600ms_DETAIL.jpg"}],
+      "transcript_evidence":"00:18:30.000–00:18:37.000: se plantea que el estado de cuenta quizá sea automático."
+    }
+  ]
 }

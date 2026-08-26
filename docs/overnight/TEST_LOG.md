@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH08 forensic audit
+
+- Python/npm verifiers: PASS (95/95 events; 12 features; 14 valid feature evidence references).
+- The auditor completed a second per-frame semantic pass, including distinct closed/open payment-menu states.
+- Independent visual review corrected F10/F11 from an empty preview crop to CH08-E0087, which visibly contains the four summary totals and negative pending amount.
+
 ## 2026-08-26 · CH07 forensic audit
 
 - Python and npm verifiers: PASS (18/18 events, 11/11 crops, all event/safety sheets, 9 valid feature evidence paths).
