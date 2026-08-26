@@ -4,7 +4,7 @@
 - Controles: 75
 - Aprobados: 75
 - Fallidos: 0
-- Generado: 2026-08-26T07:21:42.546Z
+- Generado: 2026-08-26T12:21:45.758Z
 
 | Control | Resultado | Detalle |
 |---|---|---|
@@ -44,7 +44,7 @@
 | integrity:coverage-sum | PASS | Total = seguro + paciente |
 | integrity:committed-not-over-stock | PASS | Comprometido no supera existencia |
 | integrity:closure-review-step | PASS | Los cierres no saltan revisión |
-| ui:actions-have-handlers | PASS | 14 acciones cubiertas |
+| ui:actions-have-handlers | PASS | 15 acciones cubiertas |
 | ui:route-permission-enforcement | PASS | Rutas directas validan permisos |
 | ui:quote-labels-normalized | PASS | Estados no renderizan objetos |
 | ui:save-actions-no-generic-toast | PASS | Guardar no dispara aviso duplicado |

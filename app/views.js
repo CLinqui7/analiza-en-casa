@@ -999,29 +999,41 @@ function renderQaCoverage(state,store,ui){
 }
 
 function renderPortal(state,store,ui,token){
-  const quote=state.quotes.find((q)=>q.portalToken===token);
-  if(!quote) return `<div class="portal-shell">${emptyState("Enlace no válido","El enlace no existe o ya no está disponible.")}</div>`;
-  const patient=state.patients.find((p)=>p.id===quote.patientId);
-  const request=state.insuranceRequests.find((r)=>r.quoteId===quote.id);
-  const payments=state.payments.filter((p)=>p.quoteId===quote.id&&p.status==="APPLIED");
-  const events=request?.events||[{date:quote.createdAt,status:"DRAFT",note:"Cotización creada."}];
+  const snapshot=ui.portalSnapshot?.token===token?ui.portalSnapshot.data:null;
+  if(!snapshot) return `
+    <div class="portal-shell">
+      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Verificación requerida</span></header>
+      <main class="portal-main">
+        <section class="portal-card span-2"><header><h1>Verifica el acceso</h1><p>Para proteger tu información, usa el código de un solo uso enviado al canal previamente registrado.</p></header>
+          <button class="btn btn-secondary" data-action="request-portal-code">Enviar código de verificación</button>
+          <p class="privacy-note" aria-live="polite">${esc(ui.portalMessage||"No mostramos datos de la solicitud hasta completar la verificación.")}</p>
+          <form id="portal-verification-form" class="form-grid" novalidate>
+            <input type="hidden" name="token" value="${esc(token)}">
+            <label class="full">Código de verificación<input name="verificationCode" inputmode="numeric" autocomplete="one-time-code" maxlength="128" required></label>
+            <div class="form-actions full"><button class="btn btn-primary" type="submit">Continuar de forma segura</button></div>
+          </form>
+        </section>
+      </main>
+      <footer class="portal-footer">Este portal no muestra diagnósticos ni información clínica.</footer>
+    </div>`;
+  const events=Array.isArray(snapshot.events)?snapshot.events:[];
   return `
     <div class="portal-shell">
-      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Sesión de demostración</span></header>
+      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Acceso verificado</span></header>
       <main class="portal-main">
-        <div class="portal-welcome"><div><p class="eyebrow">Solicitud ${esc(quote.id)}</p><h1>Hola, ${esc(patient?.firstName)}</h1><p>Consulta el avance de tu cotización y los pasos pendientes sin llamar al personal clínico.</p></div><div class="portal-status">${badge(quote.status)}<strong>${quoteProgress(quote.status)}%</strong></div></div>
+        <div class="portal-welcome"><div><p class="eyebrow">Solicitud ${esc(snapshot.quote_id)}</p><h1>Estado de la cotización</h1><p>Consulta el avance y los pasos administrativos pendientes.</p></div><div class="portal-status">${badge(snapshot.status)}<strong>${quoteProgress(snapshot.status)}%</strong></div></div>
         <section class="portal-status-card">
-          <div><span class="pulse-dot"></span><p>Estado actual</p><h2>${esc(QUOTE_ADMIN_LABELS[quote.status]||quote.status)}</h2><small>Actualizado ${formatDate(events.at(-1)?.date||quote.sentAt,true)}</small></div>
-          <aside><h3>¿Qué sigue?</h3><p>${esc(portalNextAction(quote.status))}</p></aside>
+          <div><span class="pulse-dot"></span><p>Estado actual</p><h2>${esc(QUOTE_ADMIN_LABELS[snapshot.status]||snapshot.status)}</h2><small>Actualizado ${formatDate(events.at(-1)?.date||snapshot.updated_at,true)}</small></div>
+          <aside><h3>¿Qué sigue?</h3><p>${esc(portalNextAction(snapshot.status))}</p></aside>
         </section>
         <div class="portal-grid">
-          <section class="portal-card span-2"><header><h2>Historial de la solicitud</h2><p>Cada cambio queda registrado.</p></header><div class="portal-timeline">${events.map((event,index)=>`<article class="${index===events.length-1?"current":""}"><span>${index<events.length-1?"✓":index+1}</span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small><p>${esc(event.note)}</p></div></article>`).join("")}</div></section>
-          <section class="portal-card financial"><header><h2>Resumen de pago</h2></header><div><span>Total cotizado</span><strong>${money(quote.total)}</strong></div><div><span>Cubre el seguro</span><strong>${money(quote.insurerAmount)}</strong></div><div><span>Responsabilidad del paciente</span><strong>${money(quote.patientAmount)}</strong></div><div><span>Pagado</span><strong>${money(payments.reduce((s,p)=>s+p.amount,0))}</strong></div><div class="balance"><span>Saldo pendiente</span><strong>${money(quoteBalance(quote,state.payments))}</strong></div>${actionButton("Descargar cotización","print-quote",{kind:"primary",iconName:"print",data:`data-id="${quote.id}"`})}</section>
-          <section class="portal-card"><header><h2>Documentos y acciones</h2></header><div class="portal-task done">${icon("check")} Cotización recibida</div><div class="portal-task ${quote.status==="INFO_REQUIRED"?"pending":"done"}">${icon(quote.status==="INFO_REQUIRED"?"clock":"check")} Información para aseguradora</div><div class="portal-task ${quoteBalance(quote,state.payments)>0?"pending":"done"}">${icon(quoteBalance(quote,state.payments)>0?"clock":"check")} Pago del paciente</div></section>
+          <section class="portal-card span-2"><header><h2>Historial de la solicitud</h2><p>Cada cambio queda registrado.</p></header><div class="portal-timeline">${events.map((event,index)=>`<article class="${index===events.length-1?"current":""}"><span>${index<events.length-1?"✓":index+1}</span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small></div></article>`).join("")}</div></section>
+          <section class="portal-card financial"><header><h2>Resumen de pago</h2></header><div><span>Total cotizado</span><strong>${money(snapshot.total)}</strong></div><div><span>Cubre el seguro</span><strong>${money(snapshot.insurer_amount)}</strong></div><div><span>Responsabilidad del paciente</span><strong>${money(snapshot.patient_amount)}</strong></div><div><span>Pagado</span><strong>${money(snapshot.paid)}</strong></div><div class="balance"><span>Saldo pendiente</span><strong>${money(snapshot.balance)}</strong></div></section>
+          <section class="portal-card"><header><h2>Documentos y acciones</h2></header><div class="portal-task done">${icon("check")} Cotización recibida</div><div class="portal-task ${snapshot.status==="INFO_REQUIRED"?"pending":"done"}">${icon(snapshot.status==="INFO_REQUIRED"?"clock":"check")} Información para aseguradora</div><div class="portal-task ${Number(snapshot.balance)>0?"pending":"done"}">${icon(Number(snapshot.balance)>0?"clock":"check")} Pago del paciente</div></section>
           <section class="portal-card support"><div class="qr-demo">${renderQrPattern(token)}</div><div><h2>Necesitas ayuda</h2><p>Contacta únicamente al área administrativa. La información clínica no se muestra en este portal.</p><button data-action="portal-support">${icon("send")} Escribir a administración</button></div></section>
         </div>
       </main>
-      <footer class="portal-footer">Protegemos tu información. Este entorno contiene únicamente datos ficticios.</footer>
+      <footer class="portal-footer">Protegemos tu información. Este portal muestra sólo información administrativa necesaria.</footer>
     </div>`;
 }
 

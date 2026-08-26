@@ -44,6 +44,8 @@ const ui = {
   notificationsOpen: false,
   commandOpen: false,
   quoteDraft: null,
+  portalSnapshot: null,
+  portalMessage: "",
   currentRoute: ""
 };
 
@@ -68,6 +70,10 @@ function render() {
     ui.search = "";
     ui.tab = "overview";
     ui.currentRoute = route;
+    if (!isPortalRoute(route)) {
+      ui.portalSnapshot = null;
+      ui.portalMessage = "";
+    }
   }
 
   document.body.classList.toggle("portal-mode", isPortalRoute(route));
@@ -771,6 +777,51 @@ function copyPortalLink(token) {
   });
 }
 
+function portalTokenFromRoute() {
+  const route = routeFromHash();
+  return isPortalRoute(route) ? route.slice("portal/".length) : "";
+}
+
+async function requestPortalCode() {
+  const token = portalTokenFromRoute();
+  if (!token) return;
+  try {
+    const response = await fetch("/api/portal-request-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token })
+    });
+    const payload = await response.json().catch(() => ({}));
+    ui.portalMessage = response.ok
+      ? (payload.message || "Si el enlace es válido, enviamos un código al canal registrado.")
+      : "No fue posible completar la solicitud. Intenta más tarde.";
+  } catch {
+    ui.portalMessage = "No fue posible completar la solicitud. Intenta más tarde.";
+  }
+  render();
+}
+
+async function verifyPortalAccess(form) {
+  const data = new FormData(form);
+  const token = String(data.get("token") || "");
+  const verificationCode = String(data.get("verificationCode") || "").trim();
+  try {
+    const response = await fetch("/api/portal-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token, verificationCode })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.quote_id) throw new Error("invalid");
+    ui.portalSnapshot = { token, data: payload };
+    ui.portalMessage = "";
+  } catch {
+    ui.portalSnapshot = null;
+    ui.portalMessage = "No fue posible validar el acceso.";
+  }
+  render();
+}
+
 async function runInternalQa() {
   showToast("Ejecutando controles internos…", "info");
   const response = await fetch("/api/health").catch(() => null);
@@ -870,6 +921,7 @@ document.addEventListener("click", (event) => {
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
     case "portal-support": showToast("Solicitud enviada a administración en modo simulado."); break;
+    case "request-portal-code": requestPortalCode(); break;
     case "save-settings": document.querySelector("#settings-form")?.requestSubmit(); break;
     default: showToast(`Acción ${action} registrada para QA.`, "info");
   }
@@ -925,6 +977,11 @@ document.addEventListener("submit", (event) => {
     const email=formValue(form,"email");
     const user=store.getState().users.find((u)=>u.email===email) || store.getState().users[0];
     runSafely(()=>store.login(user.id),"Bienvenido al sistema.");
+    return;
+  }
+
+  if (form.id === "portal-verification-form") {
+    verifyPortalAccess(form);
     return;
   }
 

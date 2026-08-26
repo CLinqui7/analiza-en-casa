@@ -19,10 +19,9 @@ function snakeCaseObject(input) {
   ]));
 }
 
-function toPatientRow(patient, organizationId) {
+function toPatientRow(patient) {
   return {
     id: patient.id,
-    organization_id: organizationId,
     document_type: patient.documentType,
     document_number: patient.document,
     first_name: patient.firstName,
@@ -38,10 +37,9 @@ function toPatientRow(patient, organizationId) {
   };
 }
 
-function toCaseRow(record, organizationId) {
+function toCaseRow(record) {
   return {
     id: record.id,
-    organization_id: organizationId,
     patient_id: record.patientId,
     insurer_id: record.insurerId || null,
     account_type: record.accountType,
@@ -56,10 +54,9 @@ function toCaseRow(record, organizationId) {
   };
 }
 
-function toQuoteRow(record, organizationId) {
+function toQuoteRow(record) {
   return {
     id: record.id,
-    organization_id: organizationId,
     hospitalization_id: record.caseId,
     patient_id: record.patientId,
     status: record.status,
@@ -75,7 +72,7 @@ function toQuoteRow(record, organizationId) {
   };
 }
 
-export async function createSupabaseAdapter(config, organizationId = null) {
+export async function createSupabaseAdapter(config) {
   if (config.dataMode !== "supabase") {
     return {
       mode: "mock",
@@ -129,20 +126,18 @@ export async function createSupabaseAdapter(config, organizationId = null) {
     return data;
   }
 
-  async function sync(action, payload, organization = organizationId) {
-    const orgId = organization || payload?.organizationId;
+  async function sync(action, payload) {
     switch (action) {
       case "CREATE_PATIENT":
-        return insert("patients", toPatientRow(payload.patient, orgId));
+        return insert("patients", toPatientRow(payload.patient));
       case "CREATE_CASE":
-        return insert("hospitalizations", toCaseRow(payload.case, orgId));
+        return insert("hospitalizations", toCaseRow(payload.case));
       case "CREATE_QUOTE": {
         const quote = payload.quote;
-        await insert("quotes", toQuoteRow(quote, orgId));
+        await insert("quotes", toQuoteRow(quote));
         const versionId = `${quote.id}-V${quote.version}`;
         await insert("quote_versions", {
           id: versionId,
-          organization_id: orgId,
           quote_id: quote.id,
           version_number: quote.version,
           subtotal: quote.subtotal,
@@ -155,7 +150,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
         });
         const rows = quote.items.map((item, index) => ({
           id: item.id || `${versionId}-${index + 1}`,
-          organization_id: orgId,
           quote_version_id: versionId,
           catalog_item_id: item.catalogItemId || null,
           category: item.category,
@@ -177,7 +171,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
         if (error) throw error;
         return insert("quote_status_events", {
           id: payload.eventId,
-          organization_id: orgId,
           quote_id: payload.quoteId,
           status: payload.status,
           note: payload.note || null
@@ -186,7 +179,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_PAYMENT":
         return insert("payments", {
           id: payload.payment.id,
-          organization_id: orgId,
           quote_id: payload.payment.quoteId,
           patient_id: payload.payment.patientId,
           paid_at: payload.payment.date,
@@ -199,7 +191,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {
           id: payload.document.id,
-          organization_id: orgId,
           hospitalization_id: payload.document.caseId,
           patient_id: payload.document.patientId,
           document_type: payload.document.type,
@@ -213,7 +204,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_SHIFT":
         return insert("shifts", {
           id: payload.shift.id,
-          organization_id: orgId,
           hospitalization_id: payload.shift.caseId,
           patient_id: payload.shift.patientId,
           resource_id: payload.shift.resourceId || null,
@@ -226,7 +216,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_PURCHASE":
         return insert("purchases", {
           id: payload.purchase.id,
-          organization_id: orgId,
           supplier_id: payload.purchase.supplierId,
           purchase_date: payload.purchase.date,
           invoice_number: payload.purchase.invoiceNumber,
@@ -240,7 +229,6 @@ export async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_INVENTORY_MOVEMENT":
         return insert("inventory_movements", {
           id: payload.movement.id,
-          organization_id: orgId,
           inventory_item_id: payload.movement.inventoryItemId,
           hospitalization_id: payload.movement.caseId || null,
           movement_type: payload.movement.type,

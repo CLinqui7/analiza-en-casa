@@ -1,5 +1,13 @@
 # Decisions
 
+## 2026-08-26 · P0 lot 1 authorization and verification boundary
+
+- Supersede the earlier checkpoint-only restriction for the two authorized findings: `SAFE-P0-001` and `SAFE-P0-005` only.
+- Keep both findings at `IMPLEMENTED_PARTIAL`: the code, migration and contract tests are present, but no local Supabase runtime exists to demonstrate persisted RLS and RPC behavior.
+- The patient portal releases no local quote or patient data before the server validates a hashed link token and single-use OTP. Its default delivery transport is a safe simulated provider; the delivery message contains no clinical or financial content.
+- Organization membership is created from a trusted invitation, while role assignment is confined to an authorized database function that derives the caller organization and appends audit evidence. Browser-originated `organization_id` is ignored by the persistence path.
+- Do not begin another P0 lot after committing and pushing this change.
+
 ## 2026-08-26 · Audit checkpoint and quota boundary
 
 - Freeze this checkpoint at evidence audit, canonical requirements, feature/gap matrices, P0 classification, one final baseline run, commit and push.

@@ -36,7 +36,7 @@ function loadLocalState() {
 
 export async function createAppStore(config) {
   let state = loadLocalState();
-  let adapter = await createSupabaseAdapter(config, state.organization.id);
+  let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
   if (adapter.mode === "supabase") {
@@ -83,7 +83,7 @@ export async function createAppStore(config) {
 
   async function safeSync(action, payload) {
     try {
-      const result = await adapter.sync(action, payload, state.organization.id);
+      const result = await adapter.sync(action, payload);
       if (result?.error) throw result.error;
       return result;
     } catch (error) {

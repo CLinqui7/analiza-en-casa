@@ -4681,10 +4681,9 @@ function snakeCaseObject(input) {
   ]));
 }
 
-function toPatientRow(patient, organizationId) {
+function toPatientRow(patient) {
   return {
     id: patient.id,
-    organization_id: organizationId,
     document_type: patient.documentType,
     document_number: patient.document,
     first_name: patient.firstName,
@@ -4700,10 +4699,9 @@ function toPatientRow(patient, organizationId) {
   };
 }
 
-function toCaseRow(record, organizationId) {
+function toCaseRow(record) {
   return {
     id: record.id,
-    organization_id: organizationId,
     patient_id: record.patientId,
     insurer_id: record.insurerId || null,
     account_type: record.accountType,
@@ -4718,10 +4716,9 @@ function toCaseRow(record, organizationId) {
   };
 }
 
-function toQuoteRow(record, organizationId) {
+function toQuoteRow(record) {
   return {
     id: record.id,
-    organization_id: organizationId,
     hospitalization_id: record.caseId,
     patient_id: record.patientId,
     status: record.status,
@@ -4737,7 +4734,7 @@ function toQuoteRow(record, organizationId) {
   };
 }
 
-async function createSupabaseAdapter(config, organizationId = null) {
+async function createSupabaseAdapter(config) {
   if (config.dataMode !== "supabase") {
     return {
       mode: "mock",
@@ -4791,20 +4788,18 @@ async function createSupabaseAdapter(config, organizationId = null) {
     return data;
   }
 
-  async function sync(action, payload, organization = organizationId) {
-    const orgId = organization || payload?.organizationId;
+  async function sync(action, payload) {
     switch (action) {
       case "CREATE_PATIENT":
-        return insert("patients", toPatientRow(payload.patient, orgId));
+        return insert("patients", toPatientRow(payload.patient));
       case "CREATE_CASE":
-        return insert("hospitalizations", toCaseRow(payload.case, orgId));
+        return insert("hospitalizations", toCaseRow(payload.case));
       case "CREATE_QUOTE": {
         const quote = payload.quote;
-        await insert("quotes", toQuoteRow(quote, orgId));
+        await insert("quotes", toQuoteRow(quote));
         const versionId = `${quote.id}-V${quote.version}`;
         await insert("quote_versions", {
           id: versionId,
-          organization_id: orgId,
           quote_id: quote.id,
           version_number: quote.version,
           subtotal: quote.subtotal,
@@ -4817,7 +4812,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
         });
         const rows = quote.items.map((item, index) => ({
           id: item.id || `${versionId}-${index + 1}`,
-          organization_id: orgId,
           quote_version_id: versionId,
           catalog_item_id: item.catalogItemId || null,
           category: item.category,
@@ -4839,7 +4833,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
         if (error) throw error;
         return insert("quote_status_events", {
           id: payload.eventId,
-          organization_id: orgId,
           quote_id: payload.quoteId,
           status: payload.status,
           note: payload.note || null
@@ -4848,7 +4841,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_PAYMENT":
         return insert("payments", {
           id: payload.payment.id,
-          organization_id: orgId,
           quote_id: payload.payment.quoteId,
           patient_id: payload.payment.patientId,
           paid_at: payload.payment.date,
@@ -4861,7 +4853,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {
           id: payload.document.id,
-          organization_id: orgId,
           hospitalization_id: payload.document.caseId,
           patient_id: payload.document.patientId,
           document_type: payload.document.type,
@@ -4875,7 +4866,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_SHIFT":
         return insert("shifts", {
           id: payload.shift.id,
-          organization_id: orgId,
           hospitalization_id: payload.shift.caseId,
           patient_id: payload.shift.patientId,
           resource_id: payload.shift.resourceId || null,
@@ -4888,7 +4878,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_PURCHASE":
         return insert("purchases", {
           id: payload.purchase.id,
-          organization_id: orgId,
           supplier_id: payload.purchase.supplierId,
           purchase_date: payload.purchase.date,
           invoice_number: payload.purchase.invoiceNumber,
@@ -4902,7 +4891,6 @@ async function createSupabaseAdapter(config, organizationId = null) {
       case "CREATE_INVENTORY_MOVEMENT":
         return insert("inventory_movements", {
           id: payload.movement.id,
-          organization_id: orgId,
           inventory_item_id: payload.movement.inventoryItemId,
           hospitalization_id: payload.movement.caseId || null,
           movement_type: payload.movement.type,
@@ -4949,7 +4937,7 @@ function loadLocalState() {
 
 async function createAppStore(config) {
   let state = loadLocalState();
-  let adapter = await createSupabaseAdapter(config, state.organization.id);
+  let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
   if (adapter.mode === "supabase") {
@@ -4996,7 +4984,7 @@ async function createAppStore(config) {
 
   async function safeSync(action, payload) {
     try {
-      const result = await adapter.sync(action, payload, state.organization.id);
+      const result = await adapter.sync(action, payload);
       if (result?.error) throw result.error;
       return result;
     } catch (error) {
@@ -6995,29 +6983,41 @@ function renderQaCoverage(state,store,ui){
 }
 
 function renderPortal(state,store,ui,token){
-  const quote=state.quotes.find((q)=>q.portalToken===token);
-  if(!quote) return `<div class="portal-shell">${emptyState("Enlace no válido","El enlace no existe o ya no está disponible.")}</div>`;
-  const patient=state.patients.find((p)=>p.id===quote.patientId);
-  const request=state.insuranceRequests.find((r)=>r.quoteId===quote.id);
-  const payments=state.payments.filter((p)=>p.quoteId===quote.id&&p.status==="APPLIED");
-  const events=request?.events||[{date:quote.createdAt,status:"DRAFT",note:"Cotización creada."}];
+  const snapshot=ui.portalSnapshot?.token===token?ui.portalSnapshot.data:null;
+  if(!snapshot) return `
+    <div class="portal-shell">
+      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Verificación requerida</span></header>
+      <main class="portal-main">
+        <section class="portal-card span-2"><header><h1>Verifica el acceso</h1><p>Para proteger tu información, usa el código de un solo uso enviado al canal previamente registrado.</p></header>
+          <button class="btn btn-secondary" data-action="request-portal-code">Enviar código de verificación</button>
+          <p class="privacy-note" aria-live="polite">${esc(ui.portalMessage||"No mostramos datos de la solicitud hasta completar la verificación.")}</p>
+          <form id="portal-verification-form" class="form-grid" novalidate>
+            <input type="hidden" name="token" value="${esc(token)}">
+            <label class="full">Código de verificación<input name="verificationCode" inputmode="numeric" autocomplete="one-time-code" maxlength="128" required></label>
+            <div class="form-actions full"><button class="btn btn-primary" type="submit">Continuar de forma segura</button></div>
+          </form>
+        </section>
+      </main>
+      <footer class="portal-footer">Este portal no muestra diagnósticos ni información clínica.</footer>
+    </div>`;
+  const events=Array.isArray(snapshot.events)?snapshot.events:[];
   return `
     <div class="portal-shell">
-      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Sesión de demostración</span></header>
+      <header class="portal-header"><a href="#/"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Portal seguro del paciente</small></div></a><span>${icon("lock")} Acceso verificado</span></header>
       <main class="portal-main">
-        <div class="portal-welcome"><div><p class="eyebrow">Solicitud ${esc(quote.id)}</p><h1>Hola, ${esc(patient?.firstName)}</h1><p>Consulta el avance de tu cotización y los pasos pendientes sin llamar al personal clínico.</p></div><div class="portal-status">${badge(quote.status)}<strong>${quoteProgress(quote.status)}%</strong></div></div>
+        <div class="portal-welcome"><div><p class="eyebrow">Solicitud ${esc(snapshot.quote_id)}</p><h1>Estado de la cotización</h1><p>Consulta el avance y los pasos administrativos pendientes.</p></div><div class="portal-status">${badge(snapshot.status)}<strong>${quoteProgress(snapshot.status)}%</strong></div></div>
         <section class="portal-status-card">
-          <div><span class="pulse-dot"></span><p>Estado actual</p><h2>${esc(QUOTE_ADMIN_LABELS[quote.status]||quote.status)}</h2><small>Actualizado ${formatDate(events.at(-1)?.date||quote.sentAt,true)}</small></div>
-          <aside><h3>¿Qué sigue?</h3><p>${esc(portalNextAction(quote.status))}</p></aside>
+          <div><span class="pulse-dot"></span><p>Estado actual</p><h2>${esc(QUOTE_ADMIN_LABELS[snapshot.status]||snapshot.status)}</h2><small>Actualizado ${formatDate(events.at(-1)?.date||snapshot.updated_at,true)}</small></div>
+          <aside><h3>¿Qué sigue?</h3><p>${esc(portalNextAction(snapshot.status))}</p></aside>
         </section>
         <div class="portal-grid">
-          <section class="portal-card span-2"><header><h2>Historial de la solicitud</h2><p>Cada cambio queda registrado.</p></header><div class="portal-timeline">${events.map((event,index)=>`<article class="${index===events.length-1?"current":""}"><span>${index<events.length-1?"✓":index+1}</span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small><p>${esc(event.note)}</p></div></article>`).join("")}</div></section>
-          <section class="portal-card financial"><header><h2>Resumen de pago</h2></header><div><span>Total cotizado</span><strong>${money(quote.total)}</strong></div><div><span>Cubre el seguro</span><strong>${money(quote.insurerAmount)}</strong></div><div><span>Responsabilidad del paciente</span><strong>${money(quote.patientAmount)}</strong></div><div><span>Pagado</span><strong>${money(payments.reduce((s,p)=>s+p.amount,0))}</strong></div><div class="balance"><span>Saldo pendiente</span><strong>${money(quoteBalance(quote,state.payments))}</strong></div>${actionButton("Descargar cotización","print-quote",{kind:"primary",iconName:"print",data:`data-id="${quote.id}"`})}</section>
-          <section class="portal-card"><header><h2>Documentos y acciones</h2></header><div class="portal-task done">${icon("check")} Cotización recibida</div><div class="portal-task ${quote.status==="INFO_REQUIRED"?"pending":"done"}">${icon(quote.status==="INFO_REQUIRED"?"clock":"check")} Información para aseguradora</div><div class="portal-task ${quoteBalance(quote,state.payments)>0?"pending":"done"}">${icon(quoteBalance(quote,state.payments)>0?"clock":"check")} Pago del paciente</div></section>
+          <section class="portal-card span-2"><header><h2>Historial de la solicitud</h2><p>Cada cambio queda registrado.</p></header><div class="portal-timeline">${events.map((event,index)=>`<article class="${index===events.length-1?"current":""}"><span>${index<events.length-1?"✓":index+1}</span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small></div></article>`).join("")}</div></section>
+          <section class="portal-card financial"><header><h2>Resumen de pago</h2></header><div><span>Total cotizado</span><strong>${money(snapshot.total)}</strong></div><div><span>Cubre el seguro</span><strong>${money(snapshot.insurer_amount)}</strong></div><div><span>Responsabilidad del paciente</span><strong>${money(snapshot.patient_amount)}</strong></div><div><span>Pagado</span><strong>${money(snapshot.paid)}</strong></div><div class="balance"><span>Saldo pendiente</span><strong>${money(snapshot.balance)}</strong></div></section>
+          <section class="portal-card"><header><h2>Documentos y acciones</h2></header><div class="portal-task done">${icon("check")} Cotización recibida</div><div class="portal-task ${snapshot.status==="INFO_REQUIRED"?"pending":"done"}">${icon(snapshot.status==="INFO_REQUIRED"?"clock":"check")} Información para aseguradora</div><div class="portal-task ${Number(snapshot.balance)>0?"pending":"done"}">${icon(Number(snapshot.balance)>0?"clock":"check")} Pago del paciente</div></section>
           <section class="portal-card support"><div class="qr-demo">${renderQrPattern(token)}</div><div><h2>Necesitas ayuda</h2><p>Contacta únicamente al área administrativa. La información clínica no se muestra en este portal.</p><button data-action="portal-support">${icon("send")} Escribir a administración</button></div></section>
         </div>
       </main>
-      <footer class="portal-footer">Protegemos tu información. Este entorno contiene únicamente datos ficticios.</footer>
+      <footer class="portal-footer">Protegemos tu información. Este portal muestra sólo información administrativa necesaria.</footer>
     </div>`;
 }
 
@@ -7250,6 +7250,8 @@ const ui = {
   notificationsOpen: false,
   commandOpen: false,
   quoteDraft: null,
+  portalSnapshot: null,
+  portalMessage: "",
   currentRoute: ""
 };
 
@@ -7274,6 +7276,10 @@ function render() {
     ui.search = "";
     ui.tab = "overview";
     ui.currentRoute = route;
+    if (!isPortalRoute(route)) {
+      ui.portalSnapshot = null;
+      ui.portalMessage = "";
+    }
   }
 
   document.body.classList.toggle("portal-mode", isPortalRoute(route));
@@ -7977,6 +7983,51 @@ function copyPortalLink(token) {
   });
 }
 
+function portalTokenFromRoute() {
+  const route = routeFromHash();
+  return isPortalRoute(route) ? route.slice("portal/".length) : "";
+}
+
+async function requestPortalCode() {
+  const token = portalTokenFromRoute();
+  if (!token) return;
+  try {
+    const response = await fetch("/api/portal-request-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token })
+    });
+    const payload = await response.json().catch(() => ({}));
+    ui.portalMessage = response.ok
+      ? (payload.message || "Si el enlace es válido, enviamos un código al canal registrado.")
+      : "No fue posible completar la solicitud. Intenta más tarde.";
+  } catch {
+    ui.portalMessage = "No fue posible completar la solicitud. Intenta más tarde.";
+  }
+  render();
+}
+
+async function verifyPortalAccess(form) {
+  const data = new FormData(form);
+  const token = String(data.get("token") || "");
+  const verificationCode = String(data.get("verificationCode") || "").trim();
+  try {
+    const response = await fetch("/api/portal-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token, verificationCode })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.quote_id) throw new Error("invalid");
+    ui.portalSnapshot = { token, data: payload };
+    ui.portalMessage = "";
+  } catch {
+    ui.portalSnapshot = null;
+    ui.portalMessage = "No fue posible validar el acceso.";
+  }
+  render();
+}
+
 async function runInternalQa() {
   showToast("Ejecutando controles internos…", "info");
   const response = await fetch("/api/health").catch(() => null);
@@ -8076,6 +8127,7 @@ document.addEventListener("click", (event) => {
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
     case "portal-support": showToast("Solicitud enviada a administración en modo simulado."); break;
+    case "request-portal-code": requestPortalCode(); break;
     case "save-settings": document.querySelector("#settings-form")?.requestSubmit(); break;
     default: showToast(`Acción ${action} registrada para QA.`, "info");
   }
@@ -8131,6 +8183,11 @@ document.addEventListener("submit", (event) => {
     const email=formValue(form,"email");
     const user=store.getState().users.find((u)=>u.email===email) || store.getState().users[0];
     runSafely(()=>store.login(user.id),"Bienvenido al sistema.");
+    return;
+  }
+
+  if (form.id === "portal-verification-form") {
+    verifyPortalAccess(form);
     return;
   }
 

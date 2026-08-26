@@ -9113,16 +9113,20 @@
       "evidence_paths": [
         "app/views.js",
         "app/main.js",
-        "supabase/migrations/202608260002_security_rls_functions.sql"
+        "api/portal-request-code.js",
+        "api/portal-status.js",
+        "api/_portal-security.js",
+        "supabase/migrations/202608260004_p0_organization_portal_hardening.sql",
+        "tests/p0-security.test.mjs"
       ],
-      "current_platform_evidence": "La RPC SQL valida token hash, expiración, documento y código, pero la ruta demo #/portal/:token se renderiza antes del login y busca portalToken directamente, sin verificación secundaria ni expiración.",
+      "current_platform_evidence": "La ruta pública no consulta cotizaciones locales: solicita un código de un solo uso por API y sólo renderiza el snapshot administrativo devuelto por el servidor tras validar token hash, expiración, revocación, límite de intentos y OTP. La migración asocia el enlace con una cotización, paciente y organización, guarda sólo hashes y registra eventos.",
       "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Puede exponer identidad y estado de atención a quien obtenga el enlace demo.",
       "financial_impact": "Puede exponer cotización, cobertura, pagos y saldo.",
-      "recommended_action": "Unificar el portal con la ruta de validación server-side, respuestas genéricas, expiración, rate limiting y auditoría; no usar DUI como único factor.",
+      "recommended_action": "Aplicar la migración en un proyecto Supabase y ejecutar pruebas de integración contra RLS/RPC antes de elevar el estado; configurar un proveedor real sólo cuando el cliente entregue credenciales.",
       "blocked_by_client_information": false,
-      "notes": "No implementar en este checkpoint; hallazgo de seguridad confirmado por inspección de código."
+      "notes": "Implementado en el lote P0 1 y cubierto por pruebas de contrato. Mantiene estado parcial porque no hay instancia Supabase local para verificar persistencia y RLS en ejecución."
     },
     {
       "finding_id": "SAFE-P0-002",
@@ -9189,16 +9193,19 @@
       "feature": "Asignación de organización confiable y funciones privilegiadas cerradas",
       "detailed_behavior": "La organización del usuario debe provenir de una invitación/relación confiable y las funciones SECURITY DEFINER no deben quedar ejecutables por PUBLIC.",
       "evidence_paths": [
-        "supabase/migrations/202608260002_security_rls_functions.sql"
+        "app/supabase-adapter.js",
+        "app/store.js",
+        "supabase/migrations/202608260004_p0_organization_portal_hardening.sql",
+        "tests/p0-security.test.mjs"
       ],
-      "current_platform_evidence": "bootstrap_new_user toma organization_id de raw_user_meta_data; las funciones SECURITY DEFINER se crean en public sin REVOKE EXECUTE FROM PUBLIC explícito.",
-      "status": "MISSING",
+      "current_platform_evidence": "La membresía inicial procede sólo de una invitación que valida rol y sucursal de la misma organización; usuarios sin invitación quedan sin organización. La asignación de rol se realiza por función autorizada, bloquea autoasignación y registra auditoría. RLS cubre roles, permisos y membresías, los triggers derivan organization_id del actor y las funciones privilegiadas usan search_path seguro con REVOKE/GRANT explícitos.",
+      "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Puede cruzar límites organizacionales y exponer datos clínicos.",
       "financial_impact": "Puede cruzar cuentas, cotizaciones, pagos e inventario entre organizaciones.",
-      "recommended_action": "Resolver organización mediante invitación confiable y revocar/grantar EXECUTE explícitamente por función/rol.",
+      "recommended_action": "Aplicar la migración en un proyecto Supabase y ejecutar pruebas de integración con dos organizaciones, usuarios autenticados y llamadas RPC antes de elevar el estado.",
       "blocked_by_client_information": false,
-      "notes": "Hallazgo estático; Supabase local no está disponible para una prueba RLS real en este checkpoint."
+      "notes": "Implementado en el lote P0 1 y cubierto por pruebas de contrato. Mantiene estado parcial porque no hay instancia Supabase local para verificar RLS y privilegios en ejecución."
     },
     {
       "finding_id": "SAFE-P0-006",
