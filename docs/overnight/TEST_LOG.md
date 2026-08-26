@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH09 forensic audit
+
+- Python/npm verifiers: PASS (137/137 events, 61/61 crops, 16/16 event sheets, 24/24 safety sheets and 14 traceable features).
+- Independent visual sample: CH09-E0009, E0030, E0083 and E0127 matched the hospitalization table, coded diagnosis selector, date-range picker and unexpected exit confirmation after Print.
+- The ledger keeps the print result, event gap and final document contents explicitly uncertain instead of claiming an unobserved PDF generation.
+
 ## 2026-08-26 · CH02 forensic audit
 
 - Python/npm verifiers: PASS (82/82 events, 48/48 crops, all sheets; 16 features with valid IDs/timestamps/paths).

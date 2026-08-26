@@ -1,4 +1,123 @@
 {
   "chapter": "CH09_hospitalizacion_clinica_y_reporte_de_salud",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH09-F01",
+      "name": "Listado de Hospitalización Clínica",
+      "description": "La vista ofrece filtros por estado clínico, activador, tipo de servicio y tipo de atención, y una tabla con paciente, DUI/NIT, hospitalización, triage, empresa, clínico, fechas y duración.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0009","timestamp":"00:21:12.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0009_00h21m12s200ms_abrupt_change.jpg"}]
+    },
+    {
+      "id": "CH09-F02",
+      "name": "Acciones de una hospitalización clínica",
+      "description": "El menú de fila ofrece Ver cotizaciones, Perfil clínico, documento y acciones relacionadas con reingresos, reinfecciones y ulceraciones.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0016","timestamp":"00:21:34.800","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0016_00h21m34s800ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH09-F03",
+      "name": "Versiones de perfiles clínicos por hospitalización",
+      "description": "Perfiles Clínicos lista perfiles con fecha de inicio, triage, médico tratante, tipo de servicio, estatus y fecha fin, y permite crear Nuevo perfil clínico.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0019","timestamp":"00:21:43.000","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0019_00h21m43s000ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH09-F04",
+      "name": "Formulario de perfil clínico",
+      "description": "El perfil contiene fechas, adjuntos, médico tratante y otros médicos, diagnóstico, grupo diagnóstico, triage, grupo/subgrupo de paciente, tipo, responsables, tags y frecuencias.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0024","timestamp":"00:21:47.600","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0024_00h21m47s600ms_abrupt_change.jpg"},
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0040","timestamp":"00:22:18.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0040_00h22m18s200ms_abrupt_change.jpg"}
+      ]
+    },
+    {
+      "id": "CH09-F05",
+      "name": "Catálogo codificado de diagnósticos",
+      "description": "Diagnósticos es un selector buscable con códigos visibles A00–A02 y descripciones de cólera, fiebres tifoideas y salmonelosis. La conversación lo llama un estándar, pero la transcripción de la versión es ambigua.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0030","timestamp":"00:22:01.400","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0030_00h22m01s400ms_DETAIL.jpg"}],
+      "transcript_evidence": "00:21:50.480–00:22:05.000: se menciona un estándar de diagnósticos, transcrito con baja certeza como ‘SIE 10’ y ‘MCE11’."
+    },
+    {
+      "id": "CH09-F06",
+      "name": "Grupos operativos del perfil",
+      "description": "Grupo perfil del paciente es configurable y muestra opciones como Administración IV, Alquiler de Equipo, Antibioticoterapia, Citas Especialistas, ECV, Hidratación y Laboratorios Clínicos.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0046","timestamp":"00:22:25.600","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0046_00h22m25s600ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH09-F07",
+      "name": "Dispositivos y planificación de turnos",
+      "description": "El perfil permite preparar dispositivos con fecha, calibre, motivo, frecuencia y observaciones; debajo configura rango de fechas para turnos, frecuencia y tipo de atención.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0055","timestamp":"00:22:33.800","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0055_00h22m33s800ms_abrupt_change.jpg"},
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0058","timestamp":"00:22:35.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0058_00h22m35s200ms_stable_change.jpg"}
+      ]
+    },
+    {
+      "id": "CH09-F08",
+      "name": "Listado de Reporte de salud y menú clínico",
+      "description": "Reporte de salud lista cédula, nombre, empresa, hospitalización, período, auditoría, triage y estatus. El menú incluye Historial clínico, Reporte Clínico, visitas, notas, Reporte de salud, Auditorías y Registro XPO.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0073","timestamp":"00:22:56.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0073_00h22m56s200ms_DETAIL.jpg"},
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0076","timestamp":"00:23:01.600","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0076_00h23m01s600ms_DETAIL.jpg"}
+      ]
+    },
+    {
+      "id": "CH09-F09",
+      "name": "Reporte longitudinal por pestañas",
+      "description": "El reporte contiene Información Principal, Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos y Evidencia y Documentos, con datos de paciente y seguros.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0089","timestamp":"00:23:34.800","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0089_00h23m34s800ms_stable_change.jpg"}]
+    },
+    {
+      "id": "CH09-F10",
+      "name": "Cambio de rango del reporte",
+      "description": "Cambiar rango de fechas abre un modal y un calendario doble para seleccionar inicio y fin antes de cargar nuevamente el reporte.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0083","timestamp":"00:23:16.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0083_00h23m16s200ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH09-F11",
+      "name": "Configuración de secciones para impresión",
+      "description": "Configuración de reporte permite incluir adjuntos y ordenar títulos entre Títulos disponibles y Títulos para el reporte; al pie ofrece Cerrar e Imprimir.",
+      "classification": "VISIBLE", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0115","timestamp":"00:24:10.000","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0115_00h24m10s000ms_abrupt_change.jpg"},
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0126","timestamp":"00:24:26.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0126_00h24m26s200ms_DETAIL.jpg"}
+      ]
+    },
+    {
+      "id": "CH09-F12",
+      "name": "Resultado de Imprimir no demostrado",
+      "description": "Al pulsar Imprimir aparece una confirmación de salida en lugar de un PDF visible. Ni los frames ni la comprobación del clip exacto demuestran que se genere o descargue un documento.",
+      "classification": "UNCERTAIN", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0127","timestamp":"00:24:28.000","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0127_00h24m28s000ms_abrupt_change.jpg"}],
+      "exact_clip_evidence": "video-audit-reviews/CH09_hospitalizacion_clinica_y_reporte_de_salud/exact_clip_checks/clip_offset_0379s0.jpg",
+      "transcript_evidence": "00:24:27.240–00:24:38.000: tras ‘darle imprimir’, los hablantes comentan que aparece otra cosa con una confirmación de salida."
+    },
+    {
+      "id": "CH09-F13",
+      "name": "Intervalo visual discontinuo antes de repetir la confirmación",
+      "description": "Entre E0129 y E0130 hay un salto de aproximadamente 146.6 segundos; luego se alterna de nuevo entre confirmación y configuración. No se infiere el estado intermedio ni un resultado de impresión.",
+      "classification": "UNCERTAIN", "confidence": "HIGH", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0129","timestamp":"00:24:47.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0129_00h24m47s200ms_DETAIL.jpg"},
+        {"chapter_id":"CH09","chapter_event_id":"CH09-E0130","timestamp":"00:27:13.800","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0130_00h27m13s800ms_abrupt_change.jpg"}
+      ]
+    },
+    {
+      "id": "CH09-F14",
+      "name": "Contenido del expediente impreso descrito verbalmente",
+      "description": "La conversación describe que el expediente incluiría datos del paciente, historial, duración, médicos, diagnóstico, signos vitales, medicamentos y notas de enfermería, pero el documento final no aparece legible en la evidencia visual.",
+      "classification": "VERBAL", "confidence": "MEDIUM", "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH09","chapter_event_id":"CH09-E0129","timestamp":"00:24:47.200","path":"references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0129_00h24m47s200ms_DETAIL.jpg"}],
+      "transcript_evidence": "00:24:50.360–00:25:14.000 y 00:25:42.000–00:25:49.000: se enumeran contenidos del expediente; no se muestra el PDF final."
+    }
+  ]
 }
