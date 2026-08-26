@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH16 forensic audit
+
+- Per-chapter Python verifier: PASS (44/44 events, 19/19 crops, 5 event sheets, 6 safety sheets and 9 traceable features).
+- Ledger review confirmed 44 concrete observations across the discount matrix, pagination, new profiles and transition to the health report.
+- Negotiated category rules and the claimed clinical post-save lock remain VERBAL; no percentage or clinical rule is inferred.
+
 ## 2026-08-26 · CH15 forensic audit
 
 - Per-chapter Python verifier: PASS (148/148 events, 56/56 crops, 17 event sheets, 16 safety sheets and 16 traceable features).
