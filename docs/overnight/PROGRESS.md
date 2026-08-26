@@ -3,7 +3,7 @@
 - Status: IN PROGRESS
 - Current phase: video audit
 - Completed phases: repository preparation; reproducible baseline
-- Completed chapters: 4/17 (CH01 and CH06–CH08 independently validated)
+- Completed chapters: 5/17 (CH01–CH02 and CH06–CH08 independently validated)
 - Branch: `codex/overnight-audit-hardening`
 - Baseline automated tests: PASS
 - Baseline browser routes: 33/33 desktop; 33/33 mobile

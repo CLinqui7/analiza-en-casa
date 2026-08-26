@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH02 forensic audit
+
+- Python/npm verifiers: PASS (82/82 events, 48/48 crops, all sheets; 16 features with valid IDs/timestamps/paths).
+- Independent visual sample: CH02-E0009, E0022, E0058 and E0082 matched form sections, notification opt-in, anomalous insurer results and unsaved exit actions.
+- Eight unresolved business/security questions remain explicit; the video does not demonstrate a successful patient save.
+
 ## 2026-08-26 · CH08 forensic audit
 
 - Python/npm verifiers: PASS (95/95 events; 12 features; 14 valid feature evidence references).
