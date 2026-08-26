@@ -135,22 +135,68 @@ export async function createSupabaseAdapter(config) {
       case "CREATE_QUOTE": {
         const quote = payload.quote;
         await insert("quotes", toQuoteRow(quote));
-        const versionId = `${quote.id}-V${quote.version}`;
-        await insert("quote_versions", {
-          id: versionId,
+        const version = await insert("quote_versions", {
           quote_id: quote.id,
-          version_number: quote.version,
+          version: quote.version,
+          status_snapshot: quote.status,
           subtotal: quote.subtotal,
           discount_amount: quote.discountAmount,
           total: quote.total,
           insurer_amount: quote.insurerAmount,
           patient_amount: quote.patientAmount,
+          discount_snapshot: snakeCaseObject(quote.discount || {}),
           comments: quote.comments || null,
-          immutable_snapshot: snakeCaseObject(quote)
+          immutable: Boolean(quote.immutable),
+          revision_reason: quote.revisionReason || null,
+          snapshot: snakeCaseObject(quote.sentSnapshot || quote)
         });
         const rows = quote.items.map((item, index) => ({
-          id: item.id || `${versionId}-${index + 1}`,
-          quote_version_id: versionId,
+          quote_version_id: version.id,
+          catalog_item_id: item.catalogItemId || null,
+          category: item.category,
+          description: item.name,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          discount_amount: item.discountAmount || 0
+        }));
+        if (rows.length) {
+          const { error } = await client.from("quote_items").insert(rows);
+          if (error) throw error;
+        }
+        return { ok: true };
+      }
+      case "CREATE_QUOTE_REVISION": {
+        const { data, error } = await client.rpc("create_quote_revision", {
+          p_quote_id: payload.quote.quoteId,
+          p_source_version_id: payload.sourceQuoteId,
+          p_reason: payload.quote.revisionReason
+        });
+        if (error) throw error;
+        return { ok: true, quoteVersionId: data };
+      }
+      case "UPDATE_QUOTE_DRAFT": {
+        const quote = payload.quote;
+        const { error: quoteError } = await client.from("quotes")
+          .update(toQuoteRow(quote))
+          .eq("id", quote.quoteId || quote.id);
+        if (quoteError) throw quoteError;
+        const { error: versionError } = await client.from("quote_versions")
+          .update({
+            subtotal: quote.subtotal,
+            discount_amount: quote.discountAmount,
+            total: quote.total,
+            insurer_amount: quote.insurerAmount,
+            patient_amount: quote.patientAmount,
+            discount_snapshot: snakeCaseObject(quote.discount || {}),
+            comments: quote.comments || null,
+            snapshot: snakeCaseObject(quote)
+          })
+          .eq("id", quote.id);
+        if (versionError) throw versionError;
+        const { error: deleteError } = await client.from("quote_items").delete().eq("quote_version_id", quote.id);
+        if (deleteError) throw deleteError;
+        const rows = quote.items.map((item) => ({
+          quote_version_id: quote.id,
           catalog_item_id: item.catalogItemId || null,
           category: item.category,
           description: item.name,
@@ -165,17 +211,39 @@ export async function createSupabaseAdapter(config) {
         return { ok: true };
       }
       case "UPDATE_QUOTE_STATUS": {
-        const { error } = await client.from("quotes")
-          .update({ status: payload.status, updated_at: new Date().toISOString() })
-          .eq("id", payload.quoteId);
-        if (error) throw error;
-        return insert("quote_status_events", {
-          id: payload.eventId,
-          quote_id: payload.quoteId,
-          status: payload.status,
-          note: payload.note || null
+        const { error } = await client.rpc("transition_quote_status", {
+          p_quote_id: payload.quoteId,
+          p_to_status: payload.status,
+          p_note: payload.note || null
         });
+        if (error) throw error;
+        return { ok: true };
       }
+      case "SEND_QUOTE_VERSION": {
+        const quote = payload.quote;
+        const { error } = await client.rpc("send_quote_version", {
+          p_quote_id: quote.quoteId || quote.id,
+          p_quote_version_id: quote.id
+        });
+        if (error) throw error;
+        return { ok: true };
+      }
+      case "SIGN_CLINICAL_DOCUMENT":
+        return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
+      case "SIGN_MEDICATION_CARD":
+        return client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
+      case "VOID_CLINICAL_DOCUMENT":
+        return client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
+      case "VOID_CLINICAL_RECORD":
+        return client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
+      case "CREATE_CLINICAL_CORRECTION":
+        return client.rpc("create_clinical_record_correction", {
+          p_subject_type: payload.correction.subjectType,
+          p_subject_id: payload.correction.subjectId,
+          p_correction_kind: payload.correction.correctionKind,
+          p_reason: payload.correction.reason,
+          p_content: snakeCaseObject(payload.correction.content || {})
+        });
       case "CREATE_PAYMENT":
         return insert("payments", {
           id: payload.payment.id,

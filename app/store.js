@@ -36,6 +36,28 @@ function loadLocalState() {
 
 export async function createAppStore(config) {
   let state = loadLocalState();
+  state.clinicalCorrections ||= [];
+  state.quotes = state.quotes.map((quote) => ({
+    ...quote,
+    organizationId: quote.organizationId || state.organization?.id,
+    quoteId: quote.quoteId || quote.id,
+    originalQuoteId: quote.originalQuoteId || quote.quoteId || quote.id,
+    immutable: Boolean(quote.immutable || quote.sentAt),
+    revisionReason: quote.revisionReason || ""
+  }));
+  state.medicationCards = state.medicationCards.map((card) => ({
+    ...card,
+    organizationId: card.organizationId || state.organization?.id,
+    documentStatus: card.documentStatus || "DRAFT",
+    version: card.version || 1,
+    signatureMetadata: card.signatureMetadata || null
+  }));
+  state.nursingNotes = state.nursingNotes.map((note) => ({
+    ...note,
+    organizationId: note.organizationId || state.organization?.id,
+    signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
+    signatureMetadata: note.signatureMetadata || null
+  }));
   let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
@@ -110,6 +132,60 @@ export async function createAppStore(config) {
 
   function quoteById(id) {
     return state.quotes.find((quote) => quote.id === id);
+  }
+
+  function assertCurrentOrganization(record, label = "Registro") {
+    const recordOrganizationId = record?.organizationId || state.organization?.id;
+    if (!record || recordOrganizationId !== state.organization?.id) {
+      throw new Error(`${label} no disponible.`);
+    }
+  }
+
+  function quoteIsImmutable(quote) {
+    return Boolean(quote?.immutable || quote?.sentAt);
+  }
+
+  function quoteRootId(quote) {
+    return quote.quoteId || quote.originalQuoteId || quote.id;
+  }
+
+  function quoteVersions(quote) {
+    const rootId = quoteRootId(quote);
+    return state.quotes
+      .filter((candidate) => quoteRootId(candidate) === rootId)
+      .sort((left, right) => Number(left.version || 0) - Number(right.version || 0));
+  }
+
+  function clinicalRecord(subjectType, id) {
+    if (subjectType === "CLINICAL_DOCUMENT") {
+      return state.clinicalDocuments.find((candidate) => candidate.id === id);
+    }
+    if (subjectType === "NURSING_NOTE") {
+      return state.nursingNotes.find((candidate) => candidate.id === id);
+    }
+    if (subjectType === "MEDICATION_CARD") {
+      return state.medicationCards.find((candidate) => candidate.id === id);
+    }
+    return null;
+  }
+
+  function clinicalRecordStatus(subjectType, id) {
+    const record = clinicalRecord(subjectType, id);
+    if (!record) return null;
+    const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (status === "VOIDED") return status;
+    return state.clinicalCorrections.some((correction) => correction.subjectType === subjectType && correction.subjectId === id)
+      ? "CORRECTED"
+      : status;
+  }
+
+  function clinicalHistory(subjectType, id) {
+    const original = clinicalRecord(subjectType, id);
+    if (!original) return [];
+    const corrections = state.clinicalCorrections
+      .filter((correction) => correction.subjectType === subjectType && correction.subjectId === id)
+      .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+    return [original, ...corrections];
   }
 
   function login(userId, role = null) {
@@ -255,6 +331,10 @@ export async function createAppStore(config) {
     const sequence = 150 + state.quotes.length;
     const quote = {
       id: `QT-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`,
+      quoteId: null,
+      originalQuoteId: null,
+      previousVersionId: null,
+      organizationId: state.organization?.id,
       caseId: recordCase.id,
       patientId: patient.id,
       status: "DRAFT",
@@ -272,11 +352,16 @@ export async function createAppStore(config) {
       discount: input.discount || { type: "PERCENT", value: 0, reason: "" },
       ...calculation,
       comments: input.comments || "",
+      revisionReason: "",
+      immutable: false,
+      createdBy: currentUser().id,
       createdAt: nowIso(),
       sentAt: null,
       portalToken: `demo-${uid("portal").toLowerCase()}`,
       expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
     };
+    quote.quoteId = quote.id;
+    quote.originalQuoteId = quote.id;
 
     setState((draft) => {
       draft.quotes.unshift(quote);
@@ -291,27 +376,81 @@ export async function createAppStore(config) {
     requirePermission("quotes:write");
     const original = quoteById(id);
     if (!original) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(original, "Cotización");
+    const revisionReason = String(input.revisionReason || "").trim();
+    if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
     const calculation = calculateQuote(
       input.items || original.items,
       input.discount || original.discount,
       input.insurerAmount ?? original.insurerAmount
     );
+    const rootId = quoteRootId(original);
+    const nextVersion = quoteVersions(original).reduce((highest, candidate) => Math.max(highest, Number(candidate.version || 0)), 0) + 1;
     let revised;
+    setState((draft) => {
+      const source = draft.quotes.find((candidate) => candidate.id === id);
+      if (!source) throw new Error("Cotización no encontrada.");
+      revised = {
+        ...clone(source),
+        id: uid("QTV"),
+        quoteId: rootId,
+        originalQuoteId: source.originalQuoteId || rootId,
+        previousVersionId: source.id,
+        version: nextVersion,
+        status: "DRAFT",
+        immutable: false,
+        sentAt: null,
+        sentSnapshot: null,
+        revisionReason,
+        createdBy: currentUser().id,
+        createdAt: nowIso(),
+        items: (input.items || source.items).map((item) => ({ ...clone(item), id: uid("QTI") })),
+        discount: clone(input.discount || source.discount),
+        comments: input.comments ?? source.comments,
+        ...calculation,
+        portalToken: `demo-${uid("portal").toLowerCase()}`,
+        expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
+      };
+      draft.quotes.unshift(revised);
+      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${source.id}; motivo: ${revisionReason}.`, {
+        quoteId: rootId,
+        previousVersionId: source.id,
+        version: revised.version
+      });
+    });
+    safeSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id });
+    return revised;
+  }
+
+  function updateQuoteDraft(id, input) {
+    requirePermission("quotes:write");
+    const original = quoteById(id);
+    if (!original) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(original, "Cotización");
+    if (original.status !== "DRAFT" || quoteIsImmutable(original)) {
+      throw new Error("La versión enviada no se puede editar. Cree una nueva versión.");
+    }
+    const calculation = calculateQuote(
+      input.items || original.items,
+      input.discount || original.discount,
+      input.insurerAmount ?? original.insurerAmount
+    );
+    let updated;
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === id);
       if (!quote) throw new Error("Cotización no encontrada.");
-      quote.version += 1;
       quote.items = clone(input.items || quote.items);
       quote.discount = clone(input.discount || quote.discount);
-      Object.assign(quote, calculation);
       quote.comments = input.comments ?? quote.comments;
-      quote.status = "DRAFT";
-      quote.sentAt = null;
-      revised = clone(quote);
-      audit("REVISE_QUOTE", id, `Nueva versión ${quote.version} creada; la versión enviada anterior no se sobrescribe.`);
+      Object.assign(quote, calculation);
+      updated = clone(quote);
+      audit("UPDATE_QUOTE_DRAFT", quote.id, `Borrador v${quote.version} actualizado.`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version
+      });
     });
-    safeSync("CREATE_QUOTE", { quote: revised });
-    return revised;
+    safeSync("UPDATE_QUOTE_DRAFT", { quote: updated });
+    return updated;
   }
 
   function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
@@ -320,8 +459,13 @@ export async function createAppStore(config) {
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
       if (!quote) throw new Error("Cotización no encontrada.");
+      assertCurrentOrganization(quote, "Cotización");
       if (!canTransitionQuote(quote.status, status)) {
         throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
+      }
+      const previousStatus = quote.status;
+      if (quoteIsImmutable(quote) && approvedAmount !== null && approvedAmount !== "" && Number(approvedAmount) !== Number(quote.insurerAmount)) {
+        throw new Error("La cobertura de una versión enviada es inmutable. Cree una nueva versión.");
       }
       quote.status = status;
       if (approvedAmount !== null && approvedAmount !== "") {
@@ -357,7 +501,10 @@ export async function createAppStore(config) {
         status: "QUEUED",
         safePreview: "Su solicitud tiene una actualización. Consulte el portal seguro."
       });
-      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado a ${status}. ${note}`);
+      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version
+      });
     });
     safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
   }
@@ -367,11 +514,23 @@ export async function createAppStore(config) {
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
       if (!quote) throw new Error("Cotización no encontrada.");
+      assertCurrentOrganization(quote, "Cotización");
+      if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
+      if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) {
+        throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
+      }
       if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) {
         throw new Error("No se puede enviar una cotización con precios faltantes.");
       }
       if (quote.status === "DRAFT") quote.status = "SENT_TO_PATIENT";
       quote.sentAt = nowIso();
+      quote.immutable = true;
+      quote.sentSnapshot = clone({
+        ...quote,
+        sentSnapshot: undefined,
+        items: quote.items,
+        discount: quote.discount
+      });
       const patient = patientById(quote.patientId);
       draft.notifications.unshift({
         id: uid("NOT"),
@@ -382,8 +541,13 @@ export async function createAppStore(config) {
         status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
         safePreview: "Su cotización está disponible en el portal seguro."
       });
-      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel}.`);
+      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version,
+        channel
+      });
     });
+    safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
   }
 
   function createPayment(input) {
@@ -430,12 +594,14 @@ export async function createAppStore(config) {
       caseId: input.caseId,
       patientId: caseById(input.caseId)?.patientId || input.patientId,
       type: input.type || "HEALTH_REPORT",
+      organizationId: state.organization?.id,
       title: input.title || "Documento clínico",
       status: "DRAFT",
       authorId: currentUser().id,
       authorName: currentUser().name,
       createdAt: nowIso(),
       signedAt: null,
+      signatureMetadata: null,
       version: 1,
       summary: input.summary || "",
       content: input.content || {}
@@ -453,9 +619,8 @@ export async function createAppStore(config) {
     setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
       if (!document) throw new Error("Documento clínico no encontrado.");
-      if (document.status === "SIGNED" && state.session.role === "NURSE") {
-        throw new Error("Una enfermera no puede editar un documento firmado. Solicite corrección administrativa auditada.");
-      }
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "DRAFT") throw new Error("El documento firmado no puede editarse. Cree una corrección auditada.");
       document.version += 1;
       Object.assign(document, patch);
       audit("UPDATE_CLINICAL_DOCUMENT", id, `Documento actualizado a versión ${document.version}.`);
@@ -463,27 +628,169 @@ export async function createAppStore(config) {
   }
 
   function signClinicalDocument(id) {
-    if (!roleCan(state.session.role, "clinical:sign") && state.session.role !== "NURSE") {
-      throw new Error("El rol actual no puede firmar este documento.");
-    }
-    setState((draft) => {
-      const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      document.status = "SIGNED";
-      document.signedAt = nowIso();
-      audit("SIGN_CLINICAL_DOCUMENT", id, "Documento firmado y bloqueado para edición ordinaria.");
-    });
-  }
-
-  function voidClinicalDocument(id, reason) {
     requirePermission("clinical:sign");
     setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
       if (!document) throw new Error("Documento clínico no encontrado.");
-      document.status = "VOIDED";
-      document.voidReason = reason;
-      audit("VOID_CLINICAL_DOCUMENT", id, `Documento anulado: ${reason}.`);
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
+      document.status = "SIGNED";
+      document.signedAt = nowIso();
+      document.signedBy = currentUser().id;
+      document.signatureMetadata = {
+        signedAt: document.signedAt,
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      };
+      audit("SIGN_CLINICAL_DOCUMENT", id, "Documento firmado y bloqueado para edición ordinaria.", {
+        version: document.version,
+        signatureMetadata: document.signatureMetadata
+      });
     });
+    safeSync("SIGN_CLINICAL_DOCUMENT", { documentId: id });
+  }
+
+  function voidClinicalDocument(id, reason) {
+    requirePermission("clinical:correct_signed");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
+    setState((draft) => {
+      const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
+      if (!document) throw new Error("Documento clínico no encontrado.");
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
+      document.status = "VOIDED";
+      document.voidReason = normalizedReason;
+      document.voidedAt = nowIso();
+      document.voidedBy = currentUser().id;
+      audit("VOID_CLINICAL_DOCUMENT", id, `Documento anulado: ${normalizedReason}.`, {
+        version: document.version,
+        reason: normalizedReason
+      });
+    });
+    safeSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason });
+    return true;
+  }
+
+  function createClinicalCorrection(subjectType, subjectId, input) {
+    requirePermission("clinical:correct_signed");
+    const record = clinicalRecord(subjectType, subjectId);
+    if (!record) throw new Error("Registro clínico no encontrado.");
+    assertCurrentOrganization(record, "Registro clínico");
+    const sourceStatus = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (sourceStatus !== "SIGNED") throw new Error("Sólo se puede corregir un registro firmado.");
+    const reason = String(input.reason || "").trim();
+    if (!reason) throw new Error("Indique el motivo de la corrección.");
+    const correctionKind = input.kind || "ADDENDUM";
+    if (!["AMENDMENT", "ADDENDUM", "ERRATA"].includes(correctionKind)) {
+      throw new Error("Tipo de corrección no válido.");
+    }
+    let correction;
+    setState((draft) => {
+      const prior = draft.clinicalCorrections
+        .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
+        .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+      correction = {
+        id: uid("COR"),
+        organizationId: state.organization?.id,
+        subjectType,
+        subjectId,
+        originalDocumentId: subjectId,
+        previousVersionId: prior?.id || subjectId,
+        correctionKind,
+        reason,
+        content: clone(input.content || {}),
+        authorId: currentUser().id,
+        authorName: currentUser().name,
+        authorRole: state.session.role,
+        status: "CORRECTED",
+        createdAt: nowIso()
+      };
+      draft.clinicalCorrections.unshift(correction);
+      audit("CREATE_CLINICAL_CORRECTION", correction.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
+        subjectType,
+        subjectId,
+        previousVersionId: correction.previousVersionId,
+        correctionKind
+      });
+    });
+    safeSync("CREATE_CLINICAL_CORRECTION", { correction });
+    return correction;
+  }
+
+  function createMedicationCard(input) {
+    requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    const card = {
+      id: uid("MC"),
+      organizationId: state.organization?.id,
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      status: "ACTIVE",
+      documentStatus: "DRAFT",
+      version: 1,
+      createdAt: nowIso(),
+      createdBy: currentUser().id,
+      signatureMetadata: null,
+      items: clone(input.items || [])
+    };
+    setState((draft) => {
+      draft.medicationCards.unshift(card);
+      audit("CREATE_MEDICATION_CARD", card.id, "Tarjeta de medicamentos creada en borrador.");
+    });
+    safeSync("CREATE_MEDICATION_CARD", { card });
+    return card;
+  }
+
+  function signMedicationCard(id) {
+    requirePermission("clinical:sign");
+    setState((draft) => {
+      const card = draft.medicationCards.find((candidate) => candidate.id === id);
+      if (!card) throw new Error("Tarjeta de medicamentos no encontrada.");
+      assertCurrentOrganization(card, "Tarjeta de medicamentos");
+      if (card.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
+      card.documentStatus = "SIGNED";
+      card.signedAt = nowIso();
+      card.signedBy = currentUser().id;
+      card.signatureMetadata = {
+        signedAt: card.signedAt,
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      };
+      audit("SIGN_MEDICATION_CARD", id, "Tarjeta de medicamentos firmada y bloqueada.");
+    });
+    safeSync("SIGN_MEDICATION_CARD", { cardId: id });
+  }
+
+  function voidClinicalRecord(subjectType, subjectId, reason) {
+    requirePermission("clinical:correct_signed");
+    const record = clinicalRecord(subjectType, subjectId);
+    if (!record) throw new Error("Registro clínico no encontrado.");
+    assertCurrentOrganization(record, "Registro clínico");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
+    const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (status !== "SIGNED") throw new Error("Sólo se puede anular un registro firmado.");
+    setState((draft) => {
+      const target = clinicalRecord(subjectType, subjectId);
+      if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
+      else target.status = "VOIDED";
+      target.voidReason = normalizedReason;
+      target.voidedAt = nowIso();
+      target.voidedBy = currentUser().id;
+      audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
+        subjectType,
+        version: target.version || 1,
+        reason: normalizedReason
+      });
+    });
+    safeSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason });
+    return true;
   }
 
   function addVitalSigns(input) {
@@ -511,6 +818,7 @@ export async function createAppStore(config) {
 
   function addNursingNote(input) {
     requirePermission("clinical:write");
+    if (input.sign) requirePermission("clinical:sign");
     const note = {
       id: uid("NOTE"),
       caseId: input.caseId,
@@ -518,14 +826,23 @@ export async function createAppStore(config) {
       createdAt: nowIso(),
       authorId: currentUser().id,
       authorName: currentUser().name,
+      organizationId: state.organization?.id,
       status: input.sign ? "SIGNED" : "DRAFT",
+      signedAt: input.sign ? nowIso() : null,
+      signatureMetadata: input.sign ? {
+        signedAt: nowIso(),
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      } : null,
       text: input.text,
       shareStatus: "NOT_SHARED",
       sharedAt: null
     };
     setState((draft) => {
       draft.nursingNotes.unshift(note);
-      audit("ADD_NURSING_NOTE", note.id, `Nota de enfermería ${note.status === "SIGNED" ? "firmada" : "guardada"}.`);
+      audit("ADD_NURSING_NOTE", note.id, `Nota de enfermería ${note.status === "SIGNED" ? "firmada y bloqueada" : "guardada"}.`);
     });
     return note;
   }
@@ -819,6 +1136,8 @@ export async function createAppStore(config) {
     updateCase,
     createQuote,
     reviseQuote,
+    updateQuoteDraft,
+    quoteVersions,
     updateQuoteStatus,
     sendQuote,
     createPayment,
@@ -826,6 +1145,12 @@ export async function createAppStore(config) {
     updateClinicalDocument,
     signClinicalDocument,
     voidClinicalDocument,
+    createClinicalCorrection,
+    clinicalHistory,
+    clinicalRecordStatus,
+    createMedicationCard,
+    signMedicationCard,
+    voidClinicalRecord,
     addVitalSigns,
     addNursingNote,
     shareNursingNote,

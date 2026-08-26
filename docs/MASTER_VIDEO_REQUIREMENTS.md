@@ -14,8 +14,8 @@
 | ID | Módulo | Gap | Estado |
 |---|---|---|---|
 | SAFE-P0-001 | Portal del paciente | Verificación secundaria, expiración y anti-enumeración | IMPLEMENTED_PARTIAL |
-| SAFE-P0-002 | Cotizaciones | Inmutabilidad de versiones enviadas | CONFLICTS_WITH_VIDEO |
-| SAFE-P0-003 | Documentos clínicos | Correcciones auditadas sin edición silenciosa de documentos firmados | CONFLICTS_WITH_VIDEO |
+| SAFE-P0-002 | Cotizaciones | Inmutabilidad de versiones enviadas | IMPLEMENTED_PARTIAL |
+| SAFE-P0-003 | Documentos clínicos | Correcciones auditadas sin edición silenciosa de documentos firmados | IMPLEMENTED_PARTIAL |
 | SAFE-P0-004 | Mensajería | Autorización organizacional e idempotencia de notificaciones | MISSING |
 | SAFE-P0-005 | Supabase / acceso multi-organización | Asignación de organización confiable y funciones privilegiadas cerradas | IMPLEMENTED_PARTIAL |
 | SAFE-P0-006 | Pagos e inventario | Contratos persistentes e idempotencia alineados con el esquema | CONFLICTS_WITH_VIDEO |

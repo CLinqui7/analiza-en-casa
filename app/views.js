@@ -569,9 +569,10 @@ function renderQuotes(state, store, ui) {
 function renderQuoteDetail(state, store, ui, id) {
   const quote=state.quotes.find((item)=>item.id===id);
   if(!quote) return notFound("Cotización");
+  const draftEditable=quote.status==="DRAFT"&&!quote.immutable;
   return `
     ${pageHeader(`${quote.id} · versión ${quote.version}`, `${patientName(state,quote.patientId)} · ${quote.caseId}`,
-      `${actionButton("Revisar / nueva versión","revise-quote",{iconName:"edit",data:`data-id="${quote.id}"`})}${actionButton("Imprimir","print-quote",{iconName:"print",data:`data-id="${quote.id}"`})}${actionButton("Enviar","send-quote",{kind:"primary",iconName:"send",data:`data-id="${quote.id}"`})}`)}
+      `${draftEditable?actionButton("Editar borrador","edit-quote-draft",{iconName:"edit",data:`data-id="${quote.id}"`}):actionButton("Revisar / nueva versión","revise-quote",{iconName:"edit",data:`data-id="${quote.id}"`})}${actionButton("Imprimir","print-quote",{iconName:"print",data:`data-id="${quote.id}"`})}${!quote.immutable?actionButton("Enviar","send-quote",{kind:"primary",iconName:"send",data:`data-id="${quote.id}"`}):""}`)}
     ${renderQuoteDetailContent(state,store,ui,quote)}
   `;
 }
@@ -580,6 +581,9 @@ function renderQuoteDetailContent(state, store, ui, quote) {
   const patient=state.patients.find((item)=>item.id===quote.patientId);
   const request=state.insuranceRequests.find((item)=>item.quoteId===quote.id);
   const payments=state.payments.filter((item)=>item.quoteId===quote.id);
+  const versions=state.quotes
+    .filter((candidate)=>(candidate.quoteId||candidate.originalQuoteId||candidate.id)===(quote.quoteId||quote.originalQuoteId||quote.id))
+    .sort((left,right)=>Number(left.version||0)-Number(right.version||0));
   const grouped={};
   quote.items.forEach((item)=>{(grouped[item.category] ||= []).push(item);});
   return `
@@ -596,6 +600,7 @@ function renderQuoteDetailContent(state, store, ui, quote) {
             ${table(["Concepto","Cantidad","Precio","Descuento","Subtotal"],items.map((item)=>`<tr><td>${esc(item.name)}</td><td>${item.quantity}</td><td>${money(item.unitPrice)}</td><td>${money(item.discountAmount||0)}</td><td>${money(item.quantity*item.unitPrice-(item.discountAmount||0))}</td></tr>`),{compact:true})}
           </div>`).join("")}
         ${request ? card("Historial con aseguradora", `<div class="vertical-timeline">${request.events.map((event)=>`<article><span></span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small><p>${esc(event.note)}</p></div></article>`).join("")}</div>`,{className:"nested-card"}) : ""}
+        ${card("Historial de versiones", table(["Versión","Estado","Creación","Motivo","Total",""], versions.map((version)=>`<tr><td>v${version.version}</td><td>${badge(version.immutable?"SENT_TO_PATIENT":version.status)}</td><td>${formatDate(version.createdAt,true)}</td><td>${esc(version.revisionReason||"Versión inicial")}</td><td>${money(version.total)}</td><td><a class="row-action" href="#/cotizaciones/${version.id}">Consultar</a></td></tr>`)),{className:"nested-card"})}
       </section>
       <aside class="quote-summary-panel">
         <div class="summary-line"><span>Subtotal</span><strong>${money(quote.subtotal)}</strong></div>
@@ -698,11 +703,19 @@ function renderClinicalDocuments(state, store, ui, type) {
   const title=DOC_TYPE_LABELS[type] || "Documentos clínicos";
   if(type==="MEDICATION_CARD") return renderMedicationCards(state,store,ui);
   const docs=state.clinicalDocuments.filter((d)=>d.type===type);
+  const rows = docs.map((doc) => {
+    const status = store.clinicalRecordStatus("CLINICAL_DOCUMENT", doc.id);
+    const correctionCount = store.clinicalHistory("CLINICAL_DOCUMENT", doc.id).length - 1;
+    const actions = `<button data-action="view-document" data-id="${doc.id}" title="Ver">${icon("view")}</button>`
+      + (doc.status === "DRAFT" ? `<button data-action="sign-document" data-id="${doc.id}" title="Firmar">${icon("check")}</button>` : "")
+      + (doc.status === "SIGNED" ? `<button data-action="open-clinical-correction" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}" title="Corregir">${icon("edit")}</button><button data-action="open-clinical-void" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}" title="Anular">×</button>` : "");
+    return `<tr><td><strong>${esc(doc.title)}</strong><small>${esc(doc.summary)}</small></td><td><a href="#/hospitalizaciones/${doc.caseId}">${esc(doc.caseId)}</a><small>${esc(patientName(state,doc.patientId))}</small></td><td>${esc(doc.authorName)}</td><td>${formatDate(doc.createdAt,true)}</td><td>${doc.signedAt?formatDate(doc.signedAt,true):"—"}</td><td>v${doc.version}<small>${correctionCount?`${correctionCount} corrección(es)`:""}</small></td><td>${badge(status)}</td><td><div class="row-actions">${actions}</div></td></tr>`;
+  });
   return `
     ${pageHeader(title, clinicalDescription(type),
       `${actionButton(`Nuevo ${title.toLowerCase()}`,"open-clinical-document",{kind:"primary",iconName:"plus",data:`data-doc-type="${type}"`})}`)}
     ${card(title,table(["Documento","Caso / paciente","Autor","Creación","Firma","Versión","Estado",""],
-      docs.map((doc)=>`<tr><td><strong>${esc(doc.title)}</strong><small>${esc(doc.summary)}</small></td><td><a href="#/hospitalizaciones/${doc.caseId}">${esc(doc.caseId)}</a><small>${esc(patientName(state,doc.patientId))}</small></td><td>${esc(doc.authorName)}</td><td>${formatDate(doc.createdAt,true)}</td><td>${doc.signedAt?formatDate(doc.signedAt,true):"—"}</td><td>v${doc.version}</td><td>${badge(doc.status)}</td><td><div class="row-actions"><button data-action="view-document" data-id="${doc.id}" title="Ver">${icon("view")}</button>${doc.status==="DRAFT"?`<button data-action="sign-document" data-id="${doc.id}" title="Firmar">${icon("check")}</button>`:""}</div></td></tr>`)))}
+      rows))}
   `;
 }
 
@@ -724,12 +737,12 @@ function renderMedicationCards(state, store, ui){
     <div class="medication-grid">
       ${state.medicationCards.map((cardData)=>`
         <article class="card medication-card">
-          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)}</p></div>${badge(cardData.status)}</header>
+          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
           <div class="card-body">
             ${table(["Medicamento","Dosis / vía","Frecuencia","Horario","Última administración","Estado"],
               cardData.items.map((item)=>`<tr><td><strong>${esc(item.medication)}</strong><small>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</small></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${item.schedule.map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("")}</td><td>${item.lastAdministration?formatDate(item.lastAdministration,true):"—"}</td><td>${badge(item.administrationStatus)}</td></tr>`),{compact:true})}
           </div>
-          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
+          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
         </article>`).join("")}
     </div>`;
 }
@@ -743,7 +756,7 @@ function renderEvolutions(state, store, ui) {
       ${card("Evoluciones clínicas", evolutions.length?evolutions.map((doc)=>`<article class="note-card"><header><div><strong>${esc(patientName(state,doc.patientId))}</strong><small>${formatDate(doc.createdAt,true)} · ${esc(doc.authorName)}</small></div>${badge(doc.status)}</header><h3>${esc(doc.title)}</h3><p>${esc(doc.summary)}</p><footer><button class="row-action" data-action="view-document" data-id="${doc.id}">Abrir / imprimir</button></footer></article>`).join(""):emptyState("Sin evoluciones","Crea la primera evolución clínica."),{className:"span-2"})}
       ${card("Últimos controles", state.vitalSigns.map((v)=>`<article class="vitals-card"><strong>${esc(patientName(state,v.patientId))}</strong><small>${formatDate(v.recordedAt,true)}</small><div><span>TA ${v.systolic}/${v.diastolic}</span><span>FC ${v.heartRate}</span><span>FR ${v.respiratoryRate}</span><span>SpO₂ ${v.spo2}%</span><span>T° ${v.temperature}</span><span>Dolor ${v.pain}/10</span></div></article>`).join(""))}
     </div>
-    ${card("Notas de enfermería",state.nursingNotes.map((note)=>`<article class="note-card"><header><div><strong>${esc(note.authorName)}</strong><small>${esc(patientName(state,note.patientId))} · ${formatDate(note.createdAt,true)}</small></div>${badge(note.status)}</header><p>${esc(note.text)}</p><footer>${badge(note.shareStatus,note.shareStatus==="SHARED_WITH_DOCTOR"?"Compartida con médico":"Pendiente de compartir")}${note.status==="SIGNED"&&note.shareStatus!=="SHARED_WITH_DOCTOR"?actionButton("Compartir con médico","share-note",{kind:"ghost",iconName:"send",data:`data-id="${note.id}"`}):""}</footer></article>`).join(""))}
+    ${card("Notas de enfermería",state.nursingNotes.map((note)=>`<article class="note-card"><header><div><strong>${esc(note.authorName)}</strong><small>${esc(patientName(state,note.patientId))} · ${formatDate(note.createdAt,true)}</small></div>${badge(store.clinicalRecordStatus("NURSING_NOTE",note.id)||note.status)}</header><p>${esc(note.text)}</p><footer>${badge(note.shareStatus,note.shareStatus==="SHARED_WITH_DOCTOR"?"Compartida con médico":"Pendiente de compartir")}${note.status==="SIGNED"&&note.shareStatus!=="SHARED_WITH_DOCTOR"?actionButton("Compartir con médico","share-note",{kind:"ghost",iconName:"send",data:`data-id="${note.id}"`}):""}${note.status==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="NURSING_NOTE" data-id="${note.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="NURSING_NOTE" data-id="${note.id}"`})}`:""}</footer></article>`).join(""))}
   `;
 }
 

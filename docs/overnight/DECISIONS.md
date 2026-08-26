@@ -1,5 +1,13 @@
 # Decisions
 
+## 2026-08-26 · P0 lot 2 integrity boundary
+
+- `SAFE-P0-002` and `SAFE-P0-003` are implemented as `IMPLEMENTED_PARTIAL`: application behavior, an ordered migration and focused contract tests exist, but no Supabase runtime is available to execute persisted RLS, trigger and RPC paths.
+- A sent quote version is represented separately from a new editable revision. The previous version remains addressable for viewing, printing and audit; revision numbering is serialized by locking the parent quote in the database RPC.
+- Signed clinical documents, nursing notes and medication cards are immutable. Corrections are separate append-only records with a mandatory reason and prior-record link; an annulment preserves content and records the reason, responsible user and timestamp.
+- Signature data is explicitly application metadata, not an invented legal or certified electronic signature. Legal-signature integration remains `NEEDS_CLIENT_CONFIRMATION`.
+- No clinical, financial, coverage, dosage, tax or legal rule was inferred. Do not begin P0 lot 3 under this authorization.
+
 ## 2026-08-26 · P0 lot 1 authorization and verification boundary
 
 - Supersede the earlier checkpoint-only restriction for the two authorized findings: `SAFE-P0-001` and `SAFE-P0-005` only.

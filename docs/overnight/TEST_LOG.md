@@ -1,5 +1,14 @@
 # Test log
 
+## 2026-08-26 · P0 lot 2 immutable records
+
+- `node --test tests/p0-immutable-records.test.mjs`: PASS (8/8). Covers authorized draft edits, sent-version and item blocking, sequential revisions, historic totals, invalid transitions, organization boundary checks, signature blocking, append-only corrections, annulment reason checks, nursing notes, medication cards, printing and static SQL/RLS/RPC contracts.
+- `node --check app/store.js app/main.js app/views.js app/templates.js app/supabase-adapter.js`: PASS.
+- `npm run check`: PASS (25/25 tests, 75/75 QA checks, standalone build 394,197 bytes).
+- `npm run audit:verify`: PASS (17/17 chapters, 0 pending, 0 failed).
+- `npm run codex:preflight`: PASS (17 chapters, 1,359 events, 730 crops, 17 exact clips, 0 errors, 0 warnings).
+- Live Supabase validation: NOT RUN. No configured local/project runtime was available to execute the persisted RLS, trigger, RPC and concurrency paths; both P0 gaps remain `IMPLEMENTED_PARTIAL`.
+
 ## 2026-08-26 · Final audit checkpoint
 
 - Global video audit gate: PASS (17 verified, 0 pending, 0 failed); `audit:status` reports 17/17 fully receipted and 17/17 fully noted, covering 1,359 events.

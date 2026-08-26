@@ -73,6 +73,7 @@ export const QUOTE_STATUS_LABELS = {
 export const CLINICAL_STATUS_LABELS = {
   DRAFT: "Borrador",
   SIGNED: "Firmado",
+  CORRECTED: "Corregido",
   VOIDED: "Anulado"
 };
 
@@ -311,6 +312,7 @@ export function roleCan(role, permission) {
     NURSE: [
       "dashboard:read", "patients:read", "patients:write", "cases:read",
       "quotes:read", "insurance:read", "clinical:read", "clinical:write",
+      "clinical:sign",
       "agenda:read", "inventory:read"
     ],
     DOCTOR: [

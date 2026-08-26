@@ -3425,11 +3425,11 @@
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/preautorizaciones; #/cotizaciones",
-        "test_path": "#/preautorizaciones; #/cotizaciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "current_platform_evidence": "#/preautorizaciones; #/cotizaciones; app/store.js; supabase/migrations/202608260005_p0_quote_clinical_immutability.sql",
+        "test_path": "#/preautorizaciones; #/cotizaciones; node --test tests/p0-immutable-records.test.mjs",
+        "recommended_action": "Mantener la UI de menú pendiente de comparación visual; la inmutabilidad, las revisiones y el historial ya están protegidos y deben verificarse contra Supabase real.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "SAFE-P0-002 implementa el comportamiento de integridad relacionado; la evidencia de menú permanece en IMPLEMENTED_PARTIAL porque el video no ejecuta sus acciones."
       }
     },
     {
@@ -5072,11 +5072,11 @@
         "priority": "P2",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
+        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos; app/store.js; supabase/migrations/202608260005_p0_quote_clinical_immutability.sql",
+        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; node --test tests/p0-immutable-records.test.mjs",
+        "recommended_action": "Conservar la incertidumbre de paridad del video; mantener la protección implementada de borradores, firma, corrección append-only y anulación auditada.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección."
       }
     },
     {
@@ -9139,14 +9139,14 @@
         "app/supabase-adapter.js",
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
-      "current_platform_evidence": "reviseQuote incrementa version y muta el mismo objeto/items; no conserva el snapshot anterior. El adaptador además usa columnas version_number/immutable_snapshot que no existen en quote_versions.",
-      "status": "CONFLICTS_WITH_VIDEO",
+      "current_platform_evidence": "El estado local conserva cada versión como registro separado, bloquea la versión enviada y sus ítems, exige motivo para una revisión y conserva la cadena previa para consulta e impresión. La migración 202608260005 añade RLS de borradores, triggers de inmutabilidad, numeración serializada bajo bloqueo y RPCs auditadas para revisión, envío y transición.",
+      "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Una versión histórica incorrecta puede alterar lo autorizado para la atención.",
       "financial_impact": "Puede perder evidencia de importes, cobertura y términos ya enviados.",
-      "recommended_action": "Crear versiones append-only y pruebas de que una revisión nunca cambia el snapshot enviado; alinear adaptador y esquema.",
+      "recommended_action": "Aplicar la migración en Supabase y ejecutar pruebas de integración con dos organizaciones y concurrencia real antes de elevar el estado.",
       "blocked_by_client_information": false,
-      "notes": "Relacionado con CH07-F04 (Versiones). No implementar en este checkpoint."
+      "notes": "Implementado en el lote P0 2 con pruebas focalizadas de borrador, ítems enviados, versiones secuenciales, auditoría y límites organizacionales. Permanece parcial hasta validar RLS, RPC y bloqueo de fila en una instancia Supabase. Relacionado con CH07-F04 (Versiones)."
     },
     {
       "finding_id": "SAFE-P0-003",
@@ -9158,14 +9158,14 @@
         "app/store.js",
         "supabase/migrations/202608260002_security_rls_functions.sql"
       ],
-      "current_platform_evidence": "updateClinicalDocument sólo bloquea a NURSE y muta el documento firmado para otros roles; el trigger SQL permite update in-place con permiso y no exige motivo ni preserva el snapshot firmado.",
-      "status": "CONFLICTS_WITH_VIDEO",
+      "current_platform_evidence": "La aplicación sólo permite editar borradores; firma con metadatos no legales, bloquea el registro firmado y crea correcciones append-only con motivo, autor, rol y vínculo previo. La migración 202608260005 protege documentos, notas y tarjetas mediante RLS, triggers y RPCs auditadas de firma, corrección y anulación.",
+      "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Puede borrar o alterar silenciosamente una orden o nota clínica firmada.",
       "financial_impact": "Puede afectar evidencia de servicios y responsabilidad profesional.",
-      "recommended_action": "Implementar corrección append-only con razón obligatoria, autorización específica, vínculo de versiones y auditoría inmutable.",
+      "recommended_action": "Aplicar la migración en Supabase y ejecutar pruebas de integración con dos organizaciones y usuarios con/sin clinical:correct_signed antes de elevar el estado.",
       "blocked_by_client_information": false,
-      "notes": "Relacionado con CH10-F10. No implementar en este checkpoint."
+      "notes": "Implementado en el lote P0 2 con pruebas focalizadas de firma, bloqueo, corrección, anulación, impresión e historial. La firma permanece como metadato de aplicación y requiere confirmación del cliente para cualquier integración legal. Permanece parcial hasta validar RLS/RPC persistentes. Relacionado con CH10-F10."
     },
     {
       "finding_id": "SAFE-P0-004",
