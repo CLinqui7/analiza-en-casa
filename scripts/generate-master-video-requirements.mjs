@@ -168,14 +168,14 @@ function defaultSafetyFindings() {
       feature: "Autorización organizacional e idempotencia de notificaciones",
       detailed_behavior: "Toda solicitud de envío debe autenticar al actor, derivar organization_id del servidor y deduplicarse con una clave estable.",
       evidence_paths: ["video-audit-reviews/CH02_alta_y_edicion_de_pacientes/chapter_feature_inventory.json", "video-audit-reviews/CH07_preautorizacion_seguro_y_reclamo/chapter_feature_inventory.json", "api/notifications.js", "supabase/migrations/202608260001_initial_schema.sql"],
-      current_platform_evidence: "api/notifications.js acepta organizationId del body, no autentica al caller y no inserta idempotency_key; el esquema exige idempotencia.",
-      status: "MISSING",
+    current_platform_evidence: "La API sólo acepta plantilla allowlisted, destinatario registrado, entidad relacionada e idempotency_key; requiere JWT de usuario y queue_notification deriva organización/contacto, deduplica y registra auditoría. El worker registra intentos, backoff y simulación sin afirmar entrega real.",
+    status: "IMPLEMENTED_PARTIAL",
       priority: "P0",
       patient_safety_impact: "Permite solicitudes no autorizadas o duplicadas y riesgo de destinatario incorrecto.",
       financial_impact: "Puede duplicar mensajes y costos de proveedor.",
-      recommended_action: "Exigir sesión/autorización server-side, plantilla administrativa allowlisted, organización derivada y clave idempotente única.",
+    recommended_action: "Validar queue_notification, RLS, worker y adaptadores de proveedor en una instancia Supabase real; configurar proveedor sólo con credenciales del cliente.",
       blocked_by_client_information: false,
-      notes: "Las credenciales del proveedor sí son información de cliente, pero no bloquean el cierre del control de autorización/idempotencia."
+    notes: "Implementado en lote P0 3; mantener parcial hasta prueba real de RLS/RPC y proveedor."
     },
     {
       finding_id: "SAFE-P0-005",
@@ -198,14 +198,14 @@ function defaultSafetyFindings() {
       feature: "Contratos persistentes e idempotencia alineados con el esquema",
       detailed_behavior: "Pagos y movimientos de inventario deben persistir de forma atómica, auditada e idempotente con las columnas requeridas por el esquema.",
       evidence_paths: ["video-audit-reviews/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/chapter_feature_inventory.json", "video-audit-reviews/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/chapter_feature_inventory.json", "app/supabase-adapter.js", "supabase/migrations/202608260001_initial_schema.sql", "supabase/migrations/202608260002_security_rls_functions.sql"],
-      current_platform_evidence: "El adaptador inserta payer_name en vez de payer y omite receipt_code/idempotency_key; también inserta inventory_movements sin idempotency_key y evita la RPC atómica apply_inventory_movement.",
-      status: "CONFLICTS_WITH_VIDEO",
+    current_platform_evidence: "El adaptador usa apply_payment y apply_inventory_movement_v2. Las RPCs derivan organización, aplican idempotencia, saldo/stock, lotes/reservas, comprobante/asignación, reversión y auditoría append-only.",
+    status: "IMPLEMENTED_PARTIAL",
       priority: "P0",
       patient_safety_impact: "Un stock incorrecto puede afectar disponibilidad operativa de insumos.",
       financial_impact: "Pagos duplicados/fallidos y movimientos no atómicos pueden desalinear saldos e inventario.",
-      recommended_action: "Alinear payloads con el esquema y usar transacciones/RPC idempotentes con pruebas de reintento y concurrencia.",
+    recommended_action: "Ejecutar pruebas de concurrencia, RLS, lotes, transferencias y reversión contra Supabase real antes de elevar el estado.",
       blocked_by_client_information: false,
-      notes: "No implementar ni migrar Supabase en este checkpoint."
+    notes: "Implementado en lote P0 3; available = stock - committed y permanece parcial hasta validación persistente real."
     }
   ];
 }

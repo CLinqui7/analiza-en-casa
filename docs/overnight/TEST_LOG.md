@@ -1,5 +1,17 @@
 # Test log
 
+## 2026-08-26 · P0 lot 3 notifications, payments and inventory
+
+- `node --test tests/p0-notifications-payments-inventory.test.mjs`: PASS (4/4). Covers template-only notification API/JWT forwarding, rejection of client destination/content, payment reference/overpay/reversal evidence, inventory entry/reservation/consumption/return/idempotency/org boundary, and static RLS/RPC/trigger contracts.
+- `npm test`: PASS (29/29).
+- `npm run check`: PASS (29/29 tests, 75/75 QA checks, standalone build 407,920 bytes).
+- `npm run audit:master`: PASS (210 requirements, 73 open questions, 6 safety findings).
+- `npm run audit:verify`: PASS (17/17 chapters, 0 pending, 0 failed).
+- `npm run codex:preflight`: PASS (17 chapters, 1,359 events, 730 crops, 17 exact clips, 0 errors, 0 warnings).
+- Supabase CLI was absent and Docker Desktop daemon was unavailable; live RLS/RPC, trigger, transfer/lot and concurrency validation is explicitly `NEEDS_REAL_SUPABASE_VALIDATION`.
+- Vercel CLI was absent, so no preview was attempted; deployment state is `READY_REQUIRES_AUTH`.
+- Smoke local de navegador: `GET /` y `GET /api/health` devolvieron 200 en un servidor local; el health reportó modo mock y Supabase no configurado. La infraestructura de navegador end-to-end no está declarada como dependencia; el baseline ya conserva 33/33 rutas de escritorio/móvil y 6/6 roles, y debe repetirse con Playwright configurado antes de producción.
+
 ## 2026-08-26 · P0 lot 2 immutable records
 
 - `node --test tests/p0-immutable-records.test.mjs`: PASS (8/8). Covers authorized draft edits, sent-version and item blocking, sequential revisions, historic totals, invalid transitions, organization boundary checks, signature blocking, append-only corrections, annulment reason checks, nursing notes, medication cards, printing and static SQL/RLS/RPC contracts.

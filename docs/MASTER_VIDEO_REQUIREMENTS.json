@@ -9176,16 +9176,22 @@
         "video-audit-reviews/CH02_alta_y_edicion_de_pacientes/chapter_feature_inventory.json",
         "video-audit-reviews/CH07_preautorizacion_seguro_y_reclamo/chapter_feature_inventory.json",
         "api/notifications.js",
-        "supabase/migrations/202608260001_initial_schema.sql"
+        "api/_notification-contract.js",
+        "api/_notification-provider.js",
+        "api/cron-retries.js",
+        "app/store.js",
+        "app/supabase-adapter.js",
+        "supabase/migrations/202608260006_p0_notifications_payments_inventory.sql",
+        "tests/p0-notifications-payments-inventory.test.mjs"
       ],
-      "current_platform_evidence": "api/notifications.js acepta organizationId del body, no autentica al caller y no inserta idempotency_key; el esquema exige idempotencia.",
-      "status": "MISSING",
+      "current_platform_evidence": "La API sólo acepta plantilla allowlisted, destinatario registrado, entidad relacionada e idempotency_key; requiere JWT de usuario y llama a queue_notification con la clave publishable, nunca con service role. La RPC deriva organización y contacto del registro autorizado, deduplica bajo bloqueo, registra auditoría y la cola/worker registra intentos, backoff y simulación sin afirmar entrega real.",
+      "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Permite solicitudes no autorizadas o duplicadas y riesgo de destinatario incorrecto.",
       "financial_impact": "Puede duplicar mensajes y costos de proveedor.",
-      "recommended_action": "Exigir sesión/autorización server-side, plantilla administrativa allowlisted, organización derivada y clave idempotente única.",
+      "recommended_action": "Validar queue_notification, RLS, worker y adaptadores de proveedor en una instancia Supabase real; configurar un proveedor sólo con credenciales entregadas por el cliente.",
       "blocked_by_client_information": false,
-      "notes": "Las credenciales del proveedor sí son información de cliente, pero no bloquean el cierre del control de autorización/idempotencia."
+      "notes": "Implementado en el lote P0 3 con prueba focalizada de autenticación, destinatario registrado, sanitización, idempotencia y simulación segura. Permanece parcial hasta probar RLS/RPC y proveedor en una instancia real; no se finge entrega real."
     },
     {
       "finding_id": "SAFE-P0-005",
@@ -9215,18 +9221,19 @@
       "evidence_paths": [
         "video-audit-reviews/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/chapter_feature_inventory.json",
         "video-audit-reviews/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/chapter_feature_inventory.json",
+        "app/store.js",
         "app/supabase-adapter.js",
-        "supabase/migrations/202608260001_initial_schema.sql",
-        "supabase/migrations/202608260002_security_rls_functions.sql"
+        "supabase/migrations/202608260006_p0_notifications_payments_inventory.sql",
+        "tests/p0-notifications-payments-inventory.test.mjs"
       ],
-      "current_platform_evidence": "El adaptador inserta payer_name en vez de payer y omite receipt_code/idempotency_key; también inserta inventory_movements sin idempotency_key y evita la RPC atómica apply_inventory_movement.",
-      "status": "CONFLICTS_WITH_VIDEO",
+      "current_platform_evidence": "El adaptador usa apply_payment y apply_inventory_movement_v2, no inserts directos. Las RPCs derivan organización, bloquean cotización/ítem y clave idempotente, validan saldo, referencia, versión, lotes, reservas y stock disponible; emiten asignación/comprobante, preservan reversión y registran movimientos/auditoría append-only.",
+      "status": "IMPLEMENTED_PARTIAL",
       "priority": "P0",
       "patient_safety_impact": "Un stock incorrecto puede afectar disponibilidad operativa de insumos.",
       "financial_impact": "Pagos duplicados/fallidos y movimientos no atómicos pueden desalinear saldos e inventario.",
-      "recommended_action": "Alinear payloads con el esquema y usar transacciones/RPC idempotentes con pruebas de reintento y concurrencia.",
+      "recommended_action": "Ejecutar las migraciones y pruebas de concurrencia, RLS, lotes, transferencias y reversión contra una instancia Supabase real antes de elevar el estado.",
       "blocked_by_client_information": false,
-      "notes": "No implementar ni migrar Supabase en este checkpoint."
+      "notes": "Implementado en el lote P0 3 con pruebas focalizadas de pago, reversión, comprobante/asignación, reserva, consumo, devolución, duplicado y organización. Permanece parcial hasta validación persistente en Supabase. La convención canónica es available = stock - committed."
     }
   ],
   "summary": {

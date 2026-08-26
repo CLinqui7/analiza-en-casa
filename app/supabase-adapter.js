@@ -245,16 +245,23 @@ export async function createSupabaseAdapter(config) {
           p_content: snakeCaseObject(payload.correction.content || {})
         });
       case "CREATE_PAYMENT":
-        return insert("payments", {
-          id: payload.payment.id,
-          quote_id: payload.payment.quoteId,
-          patient_id: payload.payment.patientId,
-          paid_at: payload.payment.date,
-          method: payload.payment.method,
-          payer_name: payload.payment.payer,
-          external_reference: payload.payment.reference || null,
-          amount: payload.payment.amount,
-          status: payload.payment.status
+        return client.rpc("apply_payment", {
+          p_quote_id: payload.payment.quoteId,
+          p_quote_version_id: payload.payment.quoteVersionId || null,
+          p_hospitalization_id: payload.payment.caseId || null,
+          p_patient_id: payload.payment.patientId,
+          p_amount: payload.payment.amount,
+          p_currency: payload.payment.currency || "USD",
+          p_method: payload.payment.method,
+          p_payer: payload.payment.payer || null,
+          p_external_reference: payload.payment.reference || null,
+          p_idempotency_key: payload.payment.idempotencyKey
+        });
+      case "REVERSE_PAYMENT":
+        return client.rpc("reverse_payment", {
+          p_payment_id: payload.paymentId,
+          p_reason: payload.reason,
+          p_idempotency_key: payload.idempotencyKey
         });
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {
@@ -295,16 +302,28 @@ export async function createSupabaseAdapter(config) {
           total: payload.purchase.total
         });
       case "CREATE_INVENTORY_MOVEMENT":
-        return insert("inventory_movements", {
-          id: payload.movement.id,
-          inventory_item_id: payload.movement.inventoryItemId,
-          hospitalization_id: payload.movement.caseId || null,
-          movement_type: payload.movement.type,
-          quantity: payload.movement.quantity,
-          warehouse_from_id: payload.movement.warehouseFrom || null,
-          warehouse_to_id: payload.movement.warehouseTo || null,
-          reference: payload.movement.reference || null,
-          note: payload.movement.note || null
+        return client.rpc("apply_inventory_movement_v2", {
+          p_inventory_item_id: payload.movement.inventoryItemId,
+          p_movement_type: payload.movement.type,
+          p_quantity: payload.movement.quantity,
+          p_hospitalization_id: payload.movement.caseId || null,
+          p_warehouse_to_id: payload.movement.warehouseTo || null,
+          p_lot_id: payload.movement.lotId || null,
+          p_lot_number: payload.movement.lotNumber || null,
+          p_lot_expires_at: payload.movement.lotExpiresAt || null,
+          p_reference: payload.movement.reference || null,
+          p_note: payload.movement.note || null,
+          p_idempotency_key: payload.movement.idempotencyKey
+        });
+      case "QUEUE_NOTIFICATION":
+        return client.rpc("queue_notification", {
+          p_channel: payload.notification.channel,
+          p_template_code: payload.notification.templateCode,
+          p_recipient_type: payload.notification.recipientType,
+          p_recipient_id: payload.notification.recipientId,
+          p_related_entity_type: payload.notification.relatedEntityType,
+          p_related_entity_id: payload.notification.relatedEntityId,
+          p_idempotency_key: payload.notification.idempotencyKey
         });
       default:
         return { ok: true, skipped: true, action };

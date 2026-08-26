@@ -573,6 +573,7 @@ function openPurchaseForm() {
 function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
   const state = store.getState();
   const item = state.inventoryItems.find((i) => i.id === itemId) || state.inventoryItems[0];
+  const lots = (state.inventoryLots || []).filter((lot) => lot.inventoryItemId === item?.id && lot.status === "AVAILABLE");
   openModal({
     title: "Movimiento de inventario",
     subtitle: "Todos los movimientos modifican existencias o comprometidos y quedan auditados.",
@@ -584,6 +585,9 @@ function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
       <label>Hospitalización<select name="caseId"><option value="">Sin caso</option>${caseOptions(caseId)}</select></label>
       <label>Bodega origen<select name="warehouseFrom">${warehouseOptions(item?.warehouseId)}</select></label>
       <label>Bodega destino<select name="warehouseTo"><option value="">No aplica</option>${warehouseOptions()}</select></label>
+      <label>Lote/serie<select name="lotId"><option value="">Sin lote configurado</option>${lots.map((lot) => `<option value="${lot.id}">${safeText(lot.lotNumber || lot.serialNumber || lot.id)}${lot.expiresAt ? ` · vence ${lot.expiresAt}` : ""}</option>`).join("")}</select></label>
+      <label>Lote nuevo<input name="lotNumber" placeholder="Sólo para entrada configurada"></label>
+      <label>Vencimiento<input type="date" name="lotExpiresAt"></label>
       <label>Referencia<input name="reference" value="MOV-DEMO-${Date.now()}"></label>
       <label class="full">Nota<textarea name="note" rows="3"></textarea></label>
     </form>`,

@@ -1816,8 +1816,11 @@ body.portal-mode #app { min-height: 100vh; }
   .form-grid { grid-template-columns:1fr; }
   .form-grid .full { grid-column:auto; }
   .quote-item-list article { grid-template-columns:1fr 70px 90px 70px 28px; }
-  .login-shell { grid-template-columns:1fr; }
-  .login-brand { min-height:370px;padding:30px; }
+  .login-shell { grid-template-columns:1fr;min-width:0;width:100%; }
+  .login-brand { min-width:0;width:100%;box-sizing:border-box;min-height:370px;padding:30px; }
+  .login-copy,.login-copy h1,.login-copy p { min-width:0;width:100%;max-width:100%;overflow-wrap:anywhere; }
+  .login-panel { min-width:0;box-sizing:border-box;padding:30px; }
+  .login-card { min-width:0;box-sizing:border-box;width:100%; }
   .login-copy { margin:50px 0; }
   .login-copy h1 { font-size:38px; }
   .portal-welcome { flex-direction:column; }
@@ -2013,6 +2016,7 @@ const QUOTE_STATUS_LABELS = {
 const CLINICAL_STATUS_LABELS = {
   DRAFT: "Borrador",
   SIGNED: "Firmado",
+  CORRECTED: "Corregido",
   VOIDED: "Anulado"
 };
 
@@ -2251,6 +2255,7 @@ function roleCan(role, permission) {
     NURSE: [
       "dashboard:read", "patients:read", "patients:write", "cases:read",
       "quotes:read", "insurance:read", "clinical:read", "clinical:write",
+      "clinical:sign",
       "agenda:read", "inventory:read"
     ],
     DOCTOR: [
@@ -4797,22 +4802,68 @@ async function createSupabaseAdapter(config) {
       case "CREATE_QUOTE": {
         const quote = payload.quote;
         await insert("quotes", toQuoteRow(quote));
-        const versionId = `${quote.id}-V${quote.version}`;
-        await insert("quote_versions", {
-          id: versionId,
+        const version = await insert("quote_versions", {
           quote_id: quote.id,
-          version_number: quote.version,
+          version: quote.version,
+          status_snapshot: quote.status,
           subtotal: quote.subtotal,
           discount_amount: quote.discountAmount,
           total: quote.total,
           insurer_amount: quote.insurerAmount,
           patient_amount: quote.patientAmount,
+          discount_snapshot: snakeCaseObject(quote.discount || {}),
           comments: quote.comments || null,
-          immutable_snapshot: snakeCaseObject(quote)
+          immutable: Boolean(quote.immutable),
+          revision_reason: quote.revisionReason || null,
+          snapshot: snakeCaseObject(quote.sentSnapshot || quote)
         });
         const rows = quote.items.map((item, index) => ({
-          id: item.id || `${versionId}-${index + 1}`,
-          quote_version_id: versionId,
+          quote_version_id: version.id,
+          catalog_item_id: item.catalogItemId || null,
+          category: item.category,
+          description: item.name,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          discount_amount: item.discountAmount || 0
+        }));
+        if (rows.length) {
+          const { error } = await client.from("quote_items").insert(rows);
+          if (error) throw error;
+        }
+        return { ok: true };
+      }
+      case "CREATE_QUOTE_REVISION": {
+        const { data, error } = await client.rpc("create_quote_revision", {
+          p_quote_id: payload.quote.quoteId,
+          p_source_version_id: payload.sourceQuoteId,
+          p_reason: payload.quote.revisionReason
+        });
+        if (error) throw error;
+        return { ok: true, quoteVersionId: data };
+      }
+      case "UPDATE_QUOTE_DRAFT": {
+        const quote = payload.quote;
+        const { error: quoteError } = await client.from("quotes")
+          .update(toQuoteRow(quote))
+          .eq("id", quote.quoteId || quote.id);
+        if (quoteError) throw quoteError;
+        const { error: versionError } = await client.from("quote_versions")
+          .update({
+            subtotal: quote.subtotal,
+            discount_amount: quote.discountAmount,
+            total: quote.total,
+            insurer_amount: quote.insurerAmount,
+            patient_amount: quote.patientAmount,
+            discount_snapshot: snakeCaseObject(quote.discount || {}),
+            comments: quote.comments || null,
+            snapshot: snakeCaseObject(quote)
+          })
+          .eq("id", quote.id);
+        if (versionError) throw versionError;
+        const { error: deleteError } = await client.from("quote_items").delete().eq("quote_version_id", quote.id);
+        if (deleteError) throw deleteError;
+        const rows = quote.items.map((item) => ({
+          quote_version_id: quote.id,
           catalog_item_id: item.catalogItemId || null,
           category: item.category,
           description: item.name,
@@ -4827,28 +4878,57 @@ async function createSupabaseAdapter(config) {
         return { ok: true };
       }
       case "UPDATE_QUOTE_STATUS": {
-        const { error } = await client.from("quotes")
-          .update({ status: payload.status, updated_at: new Date().toISOString() })
-          .eq("id", payload.quoteId);
-        if (error) throw error;
-        return insert("quote_status_events", {
-          id: payload.eventId,
-          quote_id: payload.quoteId,
-          status: payload.status,
-          note: payload.note || null
+        const { error } = await client.rpc("transition_quote_status", {
+          p_quote_id: payload.quoteId,
+          p_to_status: payload.status,
+          p_note: payload.note || null
         });
+        if (error) throw error;
+        return { ok: true };
       }
+      case "SEND_QUOTE_VERSION": {
+        const quote = payload.quote;
+        const { error } = await client.rpc("send_quote_version", {
+          p_quote_id: quote.quoteId || quote.id,
+          p_quote_version_id: quote.id
+        });
+        if (error) throw error;
+        return { ok: true };
+      }
+      case "SIGN_CLINICAL_DOCUMENT":
+        return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
+      case "SIGN_MEDICATION_CARD":
+        return client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
+      case "VOID_CLINICAL_DOCUMENT":
+        return client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
+      case "VOID_CLINICAL_RECORD":
+        return client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
+      case "CREATE_CLINICAL_CORRECTION":
+        return client.rpc("create_clinical_record_correction", {
+          p_subject_type: payload.correction.subjectType,
+          p_subject_id: payload.correction.subjectId,
+          p_correction_kind: payload.correction.correctionKind,
+          p_reason: payload.correction.reason,
+          p_content: snakeCaseObject(payload.correction.content || {})
+        });
       case "CREATE_PAYMENT":
-        return insert("payments", {
-          id: payload.payment.id,
-          quote_id: payload.payment.quoteId,
-          patient_id: payload.payment.patientId,
-          paid_at: payload.payment.date,
-          method: payload.payment.method,
-          payer_name: payload.payment.payer,
-          external_reference: payload.payment.reference || null,
-          amount: payload.payment.amount,
-          status: payload.payment.status
+        return client.rpc("apply_payment", {
+          p_quote_id: payload.payment.quoteId,
+          p_quote_version_id: payload.payment.quoteVersionId || null,
+          p_hospitalization_id: payload.payment.caseId || null,
+          p_patient_id: payload.payment.patientId,
+          p_amount: payload.payment.amount,
+          p_currency: payload.payment.currency || "USD",
+          p_method: payload.payment.method,
+          p_payer: payload.payment.payer || null,
+          p_external_reference: payload.payment.reference || null,
+          p_idempotency_key: payload.payment.idempotencyKey
+        });
+      case "REVERSE_PAYMENT":
+        return client.rpc("reverse_payment", {
+          p_payment_id: payload.paymentId,
+          p_reason: payload.reason,
+          p_idempotency_key: payload.idempotencyKey
         });
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {
@@ -4889,16 +4969,28 @@ async function createSupabaseAdapter(config) {
           total: payload.purchase.total
         });
       case "CREATE_INVENTORY_MOVEMENT":
-        return insert("inventory_movements", {
-          id: payload.movement.id,
-          inventory_item_id: payload.movement.inventoryItemId,
-          hospitalization_id: payload.movement.caseId || null,
-          movement_type: payload.movement.type,
-          quantity: payload.movement.quantity,
-          warehouse_from_id: payload.movement.warehouseFrom || null,
-          warehouse_to_id: payload.movement.warehouseTo || null,
-          reference: payload.movement.reference || null,
-          note: payload.movement.note || null
+        return client.rpc("apply_inventory_movement_v2", {
+          p_inventory_item_id: payload.movement.inventoryItemId,
+          p_movement_type: payload.movement.type,
+          p_quantity: payload.movement.quantity,
+          p_hospitalization_id: payload.movement.caseId || null,
+          p_warehouse_to_id: payload.movement.warehouseTo || null,
+          p_lot_id: payload.movement.lotId || null,
+          p_lot_number: payload.movement.lotNumber || null,
+          p_lot_expires_at: payload.movement.lotExpiresAt || null,
+          p_reference: payload.movement.reference || null,
+          p_note: payload.movement.note || null,
+          p_idempotency_key: payload.movement.idempotencyKey
+        });
+      case "QUEUE_NOTIFICATION":
+        return client.rpc("queue_notification", {
+          p_channel: payload.notification.channel,
+          p_template_code: payload.notification.templateCode,
+          p_recipient_type: payload.notification.recipientType,
+          p_recipient_id: payload.notification.recipientId,
+          p_related_entity_type: payload.notification.relatedEntityType,
+          p_related_entity_id: payload.notification.relatedEntityId,
+          p_idempotency_key: payload.notification.idempotencyKey
         });
       default:
         return { ok: true, skipped: true, action };
@@ -4937,6 +5029,36 @@ function loadLocalState() {
 
 async function createAppStore(config) {
   let state = loadLocalState();
+  state.clinicalCorrections ||= [];
+  state.quotes = state.quotes.map((quote) => ({
+    ...quote,
+    organizationId: quote.organizationId || state.organization?.id,
+    quoteId: quote.quoteId || quote.id,
+    originalQuoteId: quote.originalQuoteId || quote.quoteId || quote.id,
+    immutable: Boolean(quote.immutable || quote.sentAt),
+    revisionReason: quote.revisionReason || ""
+  }));
+  state.medicationCards = state.medicationCards.map((card) => ({
+    ...card,
+    organizationId: card.organizationId || state.organization?.id,
+    documentStatus: card.documentStatus || "DRAFT",
+    version: card.version || 1,
+    signatureMetadata: card.signatureMetadata || null
+  }));
+  state.nursingNotes = state.nursingNotes.map((note) => ({
+    ...note,
+    organizationId: note.organizationId || state.organization?.id,
+    signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
+    signatureMetadata: note.signatureMetadata || null
+  }));
+  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications"]) {
+    state[collection] ||= [];
+    state[collection] = state[collection].map((record) => ({
+      ...record,
+      organizationId: record.organizationId || state.organization?.id
+    }));
+  }
+  state.notificationAttempts ||= [];
   let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
@@ -5011,6 +5133,150 @@ async function createAppStore(config) {
 
   function quoteById(id) {
     return state.quotes.find((quote) => quote.id === id);
+  }
+
+  function assertCurrentOrganization(record, label = "Registro") {
+    const recordOrganizationId = record?.organizationId || state.organization?.id;
+    if (!record || recordOrganizationId !== state.organization?.id) {
+      throw new Error(`${label} no disponible.`);
+    }
+  }
+
+  function maskDestination(destination = "") {
+    const value = String(destination).trim();
+    if (value.includes("@")) {
+      const [local, domain] = value.split("@", 2);
+      return `${local.slice(0, 2)}•••@${domain}`;
+    }
+    const digits = value.replace(/\D/g, "");
+    return digits ? `•••• ${digits.slice(-4)}` : "••••";
+  }
+
+  const notificationTemplates = {
+    QUOTE_READY: { recipientType: "PATIENT", permission: "quotes:write", preview: "Su cotización está disponible en el portal seguro." },
+    QUOTE_STATUS: { recipientType: "PATIENT", permission: "insurance:write", preview: "Su solicitud tiene una actualización. Consulte el portal seguro." },
+    PAYMENT_RECEIVED: { recipientType: "PATIENT", permission: "payments:write", preview: "Hay una actualización administrativa disponible en el portal seguro." },
+    DOCTOR_STATEMENT: { recipientType: "DOCTOR", permission: "statements:write", preview: "Su estado de cuenta está disponible en el portal profesional seguro." },
+    NURSING_NOTE_AVAILABLE: { recipientType: "DOCTOR", permission: "clinical:write", preview: "Hay un documento disponible en el portal profesional seguro." }
+  };
+
+  function registeredNotificationRecipient(recipientType, recipientId, channel) {
+    const source = recipientType === "PATIENT"
+      ? patientById(recipientId)
+      : state.doctors.find((candidate) => candidate.id === recipientId);
+    if (!source) throw new Error("Destinatario autorizado no encontrado.");
+    assertCurrentOrganization(source, "Destinatario");
+    const destination = channel === "EMAIL" ? source.email : source.phone;
+    if (!destination) throw new Error("El destinatario autorizado no tiene un canal registrado.");
+    return { id: source.id, masked: maskDestination(destination) };
+  }
+
+  function queueNotification(input) {
+    const templateCode = String(input.templateCode || "").toUpperCase();
+    const channel = String(input.channel || "").toUpperCase();
+    const template = notificationTemplates[templateCode];
+    if (!template || !["WHATSAPP", "SMS", "EMAIL"].includes(channel)) throw new Error("Canal o plantilla no permitida.");
+    requirePermission(template.permission);
+    const recipientType = template.recipientType;
+    const recipient = registeredNotificationRecipient(recipientType, input.recipientId, channel);
+    const relatedEntityType = String(input.relatedEntityType || "").toUpperCase();
+    const relatedEntityId = String(input.relatedEntityId || "").trim();
+    if (!relatedEntityType || !relatedEntityId) throw new Error("La notificación requiere una entidad autorizada.");
+    const relatedQuote = state.quotes.find((candidate) => candidate.id === relatedEntityId);
+    const relatedStatement = state.doctorStatements.find((candidate) => candidate.id === relatedEntityId);
+    const relatedNote = state.nursingNotes.find((candidate) => candidate.id === relatedEntityId);
+    const relatedCase = relatedNote && caseById(relatedNote.caseId);
+    const validRelationship = (
+      (["QUOTE_READY", "QUOTE_STATUS"].includes(templateCode)
+        && ["QUOTE", "QUOTE_VERSION"].includes(relatedEntityType) && relatedQuote?.patientId === recipient.id)
+      || (templateCode === "PAYMENT_RECEIVED" && relatedEntityType === "QUOTE" && relatedQuote?.patientId === recipient.id)
+      || (templateCode === "DOCTOR_STATEMENT" && relatedEntityType === "DOCTOR_STATEMENT" && relatedStatement?.doctorId === recipient.id)
+      || (templateCode === "NURSING_NOTE_AVAILABLE" && relatedEntityType === "NURSING_NOTE" && relatedCase?.contractingDoctorId === recipient.id)
+    );
+    if (!validRelationship) throw new Error("El destinatario no está autorizado para la entidad relacionada.");
+    const idempotencyKey = String(input.idempotencyKey || `NOT:${templateCode}:${channel}:${recipient.id}:${relatedEntityType}:${relatedEntityId}`).trim();
+    if (!idempotencyKey || idempotencyKey.length > 160) throw new Error("Clave de idempotencia inválida.");
+    const existing = state.notifications.find((candidate) => candidate.idempotencyKey === idempotencyKey && candidate.organizationId === state.organization?.id);
+    if (existing) return existing;
+
+    const notification = {
+      id: uid("NOT"),
+      organizationId: state.organization?.id,
+      date: nowIso(),
+      channel,
+      provider: config.notificationsMode === "mock" ? "SIMULATED" : "SERVER_QUEUE",
+      templateCode,
+      recipientType,
+      recipientId: recipient.id,
+      relatedEntityType,
+      relatedEntityId,
+      idempotencyKey,
+      target: recipient.masked,
+      subject: templateCode.replaceAll("_", " "),
+      status: config.notificationsMode === "mock" ? "SIMULATED" : "PENDING_SERVER",
+      safePreview: template.preview,
+      retryCount: 0,
+      createdAt: nowIso()
+    };
+    setState((draft) => {
+      draft.notifications.unshift(notification);
+      draft.notificationAttempts.unshift({
+        id: uid("NOTATT"), notificationId: notification.id, provider: notification.provider,
+        state: notification.status, createdAt: notification.createdAt
+      });
+      audit("QUEUE_NOTIFICATION", notification.id, `Notificación ${templateCode} encolada por ${channel}.`, {
+        templateCode, channel, relatedEntityType, relatedEntityId, idempotencyKey
+      });
+    });
+    safeSync("QUEUE_NOTIFICATION", { notification });
+    return notification;
+  }
+
+  function quoteIsImmutable(quote) {
+    return Boolean(quote?.immutable || quote?.sentAt);
+  }
+
+  function quoteRootId(quote) {
+    return quote.quoteId || quote.originalQuoteId || quote.id;
+  }
+
+  function quoteVersions(quote) {
+    const rootId = quoteRootId(quote);
+    return state.quotes
+      .filter((candidate) => quoteRootId(candidate) === rootId)
+      .sort((left, right) => Number(left.version || 0) - Number(right.version || 0));
+  }
+
+  function clinicalRecord(subjectType, id) {
+    if (subjectType === "CLINICAL_DOCUMENT") {
+      return state.clinicalDocuments.find((candidate) => candidate.id === id);
+    }
+    if (subjectType === "NURSING_NOTE") {
+      return state.nursingNotes.find((candidate) => candidate.id === id);
+    }
+    if (subjectType === "MEDICATION_CARD") {
+      return state.medicationCards.find((candidate) => candidate.id === id);
+    }
+    return null;
+  }
+
+  function clinicalRecordStatus(subjectType, id) {
+    const record = clinicalRecord(subjectType, id);
+    if (!record) return null;
+    const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (status === "VOIDED") return status;
+    return state.clinicalCorrections.some((correction) => correction.subjectType === subjectType && correction.subjectId === id)
+      ? "CORRECTED"
+      : status;
+  }
+
+  function clinicalHistory(subjectType, id) {
+    const original = clinicalRecord(subjectType, id);
+    if (!original) return [];
+    const corrections = state.clinicalCorrections
+      .filter((correction) => correction.subjectType === subjectType && correction.subjectId === id)
+      .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+    return [original, ...corrections];
   }
 
   function login(userId, role = null) {
@@ -5156,6 +5422,10 @@ async function createAppStore(config) {
     const sequence = 150 + state.quotes.length;
     const quote = {
       id: `QT-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`,
+      quoteId: null,
+      originalQuoteId: null,
+      previousVersionId: null,
+      organizationId: state.organization?.id,
       caseId: recordCase.id,
       patientId: patient.id,
       status: "DRAFT",
@@ -5173,11 +5443,16 @@ async function createAppStore(config) {
       discount: input.discount || { type: "PERCENT", value: 0, reason: "" },
       ...calculation,
       comments: input.comments || "",
+      revisionReason: "",
+      immutable: false,
+      createdBy: currentUser().id,
       createdAt: nowIso(),
       sentAt: null,
       portalToken: `demo-${uid("portal").toLowerCase()}`,
       expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
     };
+    quote.quoteId = quote.id;
+    quote.originalQuoteId = quote.id;
 
     setState((draft) => {
       draft.quotes.unshift(quote);
@@ -5192,27 +5467,81 @@ async function createAppStore(config) {
     requirePermission("quotes:write");
     const original = quoteById(id);
     if (!original) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(original, "Cotización");
+    const revisionReason = String(input.revisionReason || "").trim();
+    if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
     const calculation = calculateQuote(
       input.items || original.items,
       input.discount || original.discount,
       input.insurerAmount ?? original.insurerAmount
     );
+    const rootId = quoteRootId(original);
+    const nextVersion = quoteVersions(original).reduce((highest, candidate) => Math.max(highest, Number(candidate.version || 0)), 0) + 1;
     let revised;
+    setState((draft) => {
+      const source = draft.quotes.find((candidate) => candidate.id === id);
+      if (!source) throw new Error("Cotización no encontrada.");
+      revised = {
+        ...clone(source),
+        id: uid("QTV"),
+        quoteId: rootId,
+        originalQuoteId: source.originalQuoteId || rootId,
+        previousVersionId: source.id,
+        version: nextVersion,
+        status: "DRAFT",
+        immutable: false,
+        sentAt: null,
+        sentSnapshot: null,
+        revisionReason,
+        createdBy: currentUser().id,
+        createdAt: nowIso(),
+        items: (input.items || source.items).map((item) => ({ ...clone(item), id: uid("QTI") })),
+        discount: clone(input.discount || source.discount),
+        comments: input.comments ?? source.comments,
+        ...calculation,
+        portalToken: `demo-${uid("portal").toLowerCase()}`,
+        expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
+      };
+      draft.quotes.unshift(revised);
+      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${source.id}; motivo: ${revisionReason}.`, {
+        quoteId: rootId,
+        previousVersionId: source.id,
+        version: revised.version
+      });
+    });
+    safeSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id });
+    return revised;
+  }
+
+  function updateQuoteDraft(id, input) {
+    requirePermission("quotes:write");
+    const original = quoteById(id);
+    if (!original) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(original, "Cotización");
+    if (original.status !== "DRAFT" || quoteIsImmutable(original)) {
+      throw new Error("La versión enviada no se puede editar. Cree una nueva versión.");
+    }
+    const calculation = calculateQuote(
+      input.items || original.items,
+      input.discount || original.discount,
+      input.insurerAmount ?? original.insurerAmount
+    );
+    let updated;
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === id);
       if (!quote) throw new Error("Cotización no encontrada.");
-      quote.version += 1;
       quote.items = clone(input.items || quote.items);
       quote.discount = clone(input.discount || quote.discount);
-      Object.assign(quote, calculation);
       quote.comments = input.comments ?? quote.comments;
-      quote.status = "DRAFT";
-      quote.sentAt = null;
-      revised = clone(quote);
-      audit("REVISE_QUOTE", id, `Nueva versión ${quote.version} creada; la versión enviada anterior no se sobrescribe.`);
+      Object.assign(quote, calculation);
+      updated = clone(quote);
+      audit("UPDATE_QUOTE_DRAFT", quote.id, `Borrador v${quote.version} actualizado.`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version
+      });
     });
-    safeSync("CREATE_QUOTE", { quote: revised });
-    return revised;
+    safeSync("UPDATE_QUOTE_DRAFT", { quote: updated });
+    return updated;
   }
 
   function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
@@ -5221,8 +5550,13 @@ async function createAppStore(config) {
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
       if (!quote) throw new Error("Cotización no encontrada.");
+      assertCurrentOrganization(quote, "Cotización");
       if (!canTransitionQuote(quote.status, status)) {
         throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
+      }
+      const previousStatus = quote.status;
+      if (quoteIsImmutable(quote) && approvedAmount !== null && approvedAmount !== "" && Number(approvedAmount) !== Number(quote.insurerAmount)) {
+        throw new Error("La cobertura de una versión enviada es inmutable. Cree una nueva versión.");
       }
       quote.status = status;
       if (approvedAmount !== null && approvedAmount !== "") {
@@ -5249,18 +5583,17 @@ async function createAppStore(config) {
           events: [{ date: nowIso(), status, note }]
         });
       }
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel: "WHATSAPP",
-        target: "•••• " + (patientById(quote.patientId)?.phone || "").slice(-4),
-        subject: `Actualización ${quote.id}`,
-        status: "QUEUED",
-        safePreview: "Su solicitud tiene una actualización. Consulte el portal seguro."
+      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version
       });
-      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado a ${status}. ${note}`);
     });
     safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
+    const quote = quoteById(quoteId);
+    if (quote) queueNotification({
+      templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: quote.patientId,
+      relatedEntityType: "QUOTE", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`
+    });
   }
 
   function sendQuote(quoteId, channel = "WHATSAPP") {
@@ -5268,22 +5601,34 @@ async function createAppStore(config) {
     setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
       if (!quote) throw new Error("Cotización no encontrada.");
+      assertCurrentOrganization(quote, "Cotización");
+      if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
+      if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) {
+        throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
+      }
       if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) {
         throw new Error("No se puede enviar una cotización con precios faltantes.");
       }
       if (quote.status === "DRAFT") quote.status = "SENT_TO_PATIENT";
       quote.sentAt = nowIso();
-      const patient = patientById(quote.patientId);
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel,
-        target: channel === "EMAIL" ? patient?.email : "•••• " + (patient?.phone || "").slice(-4),
-        subject: `Cotización ${quote.id} · v${quote.version}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Su cotización está disponible en el portal seguro."
+      quote.immutable = true;
+      quote.sentSnapshot = clone({
+        ...quote,
+        sentSnapshot: undefined,
+        items: quote.items,
+        discount: quote.discount
       });
-      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel}.`);
+      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
+        quoteId: quoteRootId(quote),
+        version: quote.version,
+        channel
+      });
+    });
+    safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
+    const quote = quoteById(quoteId);
+    if (quote) queueNotification({
+      templateCode: "QUOTE_READY", channel, recipientId: quote.patientId,
+      relatedEntityType: "QUOTE_VERSION", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_READY:${quote.id}:${channel}`
     });
   }
 
@@ -5291,6 +5636,7 @@ async function createAppStore(config) {
     requirePermission("payments:write");
     const quote = quoteById(input.quoteId);
     if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
     const balance = quoteBalance(quote, state.payments);
     const existingReferences = state.payments.map((payment) => payment.reference).filter(Boolean);
     const validation = validatePayment({
@@ -5304,14 +5650,20 @@ async function createAppStore(config) {
     const payment = {
       id: uid("PAY"),
       quoteId: quote.id,
+      quoteVersionId: quote.id,
+      caseId: quote.caseId || "",
       patientId: quote.patientId,
       date: nowIso(),
+      organizationId: state.organization?.id,
+      currency: quote.currency || "USD",
       method: input.method || "TRANSFER",
       payer: input.payer || patientById(quote.patientId)?.contactName || "Paciente",
       reference: validation.reference,
       amount: validation.amount,
       status: "APPLIED",
-      receipt: uid("REC")
+      receipt: uid("REC"),
+      idempotencyKey: String(input.idempotencyKey || `PAY:${quote.id}:${validation.reference}`).slice(0, 160),
+      allocations: [{ quoteId: quote.id, quoteVersionId: quote.id, amount: validation.amount, currency: quote.currency || "USD", status: "APPLIED" }]
     };
 
     setState((draft) => {
@@ -5321,7 +5673,34 @@ async function createAppStore(config) {
       audit("CREATE_PAYMENT", payment.id, `Pago ${payment.amount} aplicado a ${quote.id}.`);
     });
     safeSync("CREATE_PAYMENT", { payment });
+    queueNotification({
+      templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: payment.patientId,
+      relatedEntityType: "QUOTE", relatedEntityId: payment.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${payment.id}`
+    });
     return payment;
+  }
+
+  function reversePayment(paymentId, reason, idempotencyKey = "") {
+    requirePermission("payments:write");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la reversión.");
+    const payment = state.payments.find((candidate) => candidate.id === paymentId);
+    if (!payment) throw new Error("Pago no encontrado.");
+    assertCurrentOrganization(payment, "Pago");
+    if (payment.status !== "APPLIED") throw new Error("Sólo se puede revertir un pago aplicado.");
+    const key = String(idempotencyKey || `REVERSE:${paymentId}:${normalizedReason}`).slice(0, 160);
+    setState((draft) => {
+      const target = draft.payments.find((candidate) => candidate.id === paymentId);
+      target.status = "REVERSED";
+      target.reversedAt = nowIso();
+      target.reversedBy = currentUser().id;
+      target.reversalReason = normalizedReason;
+      target.reversalIdempotencyKey = key;
+      target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
+      audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
+    });
+    safeSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key });
+    return state.payments.find((candidate) => candidate.id === paymentId);
   }
 
   function createClinicalDocument(input) {
@@ -5331,12 +5710,14 @@ async function createAppStore(config) {
       caseId: input.caseId,
       patientId: caseById(input.caseId)?.patientId || input.patientId,
       type: input.type || "HEALTH_REPORT",
+      organizationId: state.organization?.id,
       title: input.title || "Documento clínico",
       status: "DRAFT",
       authorId: currentUser().id,
       authorName: currentUser().name,
       createdAt: nowIso(),
       signedAt: null,
+      signatureMetadata: null,
       version: 1,
       summary: input.summary || "",
       content: input.content || {}
@@ -5354,9 +5735,8 @@ async function createAppStore(config) {
     setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
       if (!document) throw new Error("Documento clínico no encontrado.");
-      if (document.status === "SIGNED" && state.session.role === "NURSE") {
-        throw new Error("Una enfermera no puede editar un documento firmado. Solicite corrección administrativa auditada.");
-      }
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "DRAFT") throw new Error("El documento firmado no puede editarse. Cree una corrección auditada.");
       document.version += 1;
       Object.assign(document, patch);
       audit("UPDATE_CLINICAL_DOCUMENT", id, `Documento actualizado a versión ${document.version}.`);
@@ -5364,27 +5744,169 @@ async function createAppStore(config) {
   }
 
   function signClinicalDocument(id) {
-    if (!roleCan(state.session.role, "clinical:sign") && state.session.role !== "NURSE") {
-      throw new Error("El rol actual no puede firmar este documento.");
-    }
-    setState((draft) => {
-      const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      document.status = "SIGNED";
-      document.signedAt = nowIso();
-      audit("SIGN_CLINICAL_DOCUMENT", id, "Documento firmado y bloqueado para edición ordinaria.");
-    });
-  }
-
-  function voidClinicalDocument(id, reason) {
     requirePermission("clinical:sign");
     setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
       if (!document) throw new Error("Documento clínico no encontrado.");
-      document.status = "VOIDED";
-      document.voidReason = reason;
-      audit("VOID_CLINICAL_DOCUMENT", id, `Documento anulado: ${reason}.`);
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
+      document.status = "SIGNED";
+      document.signedAt = nowIso();
+      document.signedBy = currentUser().id;
+      document.signatureMetadata = {
+        signedAt: document.signedAt,
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      };
+      audit("SIGN_CLINICAL_DOCUMENT", id, "Documento firmado y bloqueado para edición ordinaria.", {
+        version: document.version,
+        signatureMetadata: document.signatureMetadata
+      });
     });
+    safeSync("SIGN_CLINICAL_DOCUMENT", { documentId: id });
+  }
+
+  function voidClinicalDocument(id, reason) {
+    requirePermission("clinical:correct_signed");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
+    setState((draft) => {
+      const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
+      if (!document) throw new Error("Documento clínico no encontrado.");
+      assertCurrentOrganization(document, "Documento clínico");
+      if (document.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
+      document.status = "VOIDED";
+      document.voidReason = normalizedReason;
+      document.voidedAt = nowIso();
+      document.voidedBy = currentUser().id;
+      audit("VOID_CLINICAL_DOCUMENT", id, `Documento anulado: ${normalizedReason}.`, {
+        version: document.version,
+        reason: normalizedReason
+      });
+    });
+    safeSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason });
+    return true;
+  }
+
+  function createClinicalCorrection(subjectType, subjectId, input) {
+    requirePermission("clinical:correct_signed");
+    const record = clinicalRecord(subjectType, subjectId);
+    if (!record) throw new Error("Registro clínico no encontrado.");
+    assertCurrentOrganization(record, "Registro clínico");
+    const sourceStatus = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (sourceStatus !== "SIGNED") throw new Error("Sólo se puede corregir un registro firmado.");
+    const reason = String(input.reason || "").trim();
+    if (!reason) throw new Error("Indique el motivo de la corrección.");
+    const correctionKind = input.kind || "ADDENDUM";
+    if (!["AMENDMENT", "ADDENDUM", "ERRATA"].includes(correctionKind)) {
+      throw new Error("Tipo de corrección no válido.");
+    }
+    let correction;
+    setState((draft) => {
+      const prior = draft.clinicalCorrections
+        .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
+        .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+      correction = {
+        id: uid("COR"),
+        organizationId: state.organization?.id,
+        subjectType,
+        subjectId,
+        originalDocumentId: subjectId,
+        previousVersionId: prior?.id || subjectId,
+        correctionKind,
+        reason,
+        content: clone(input.content || {}),
+        authorId: currentUser().id,
+        authorName: currentUser().name,
+        authorRole: state.session.role,
+        status: "CORRECTED",
+        createdAt: nowIso()
+      };
+      draft.clinicalCorrections.unshift(correction);
+      audit("CREATE_CLINICAL_CORRECTION", correction.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
+        subjectType,
+        subjectId,
+        previousVersionId: correction.previousVersionId,
+        correctionKind
+      });
+    });
+    safeSync("CREATE_CLINICAL_CORRECTION", { correction });
+    return correction;
+  }
+
+  function createMedicationCard(input) {
+    requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    const card = {
+      id: uid("MC"),
+      organizationId: state.organization?.id,
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      status: "ACTIVE",
+      documentStatus: "DRAFT",
+      version: 1,
+      createdAt: nowIso(),
+      createdBy: currentUser().id,
+      signatureMetadata: null,
+      items: clone(input.items || [])
+    };
+    setState((draft) => {
+      draft.medicationCards.unshift(card);
+      audit("CREATE_MEDICATION_CARD", card.id, "Tarjeta de medicamentos creada en borrador.");
+    });
+    safeSync("CREATE_MEDICATION_CARD", { card });
+    return card;
+  }
+
+  function signMedicationCard(id) {
+    requirePermission("clinical:sign");
+    setState((draft) => {
+      const card = draft.medicationCards.find((candidate) => candidate.id === id);
+      if (!card) throw new Error("Tarjeta de medicamentos no encontrada.");
+      assertCurrentOrganization(card, "Tarjeta de medicamentos");
+      if (card.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
+      card.documentStatus = "SIGNED";
+      card.signedAt = nowIso();
+      card.signedBy = currentUser().id;
+      card.signatureMetadata = {
+        signedAt: card.signedAt,
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      };
+      audit("SIGN_MEDICATION_CARD", id, "Tarjeta de medicamentos firmada y bloqueada.");
+    });
+    safeSync("SIGN_MEDICATION_CARD", { cardId: id });
+  }
+
+  function voidClinicalRecord(subjectType, subjectId, reason) {
+    requirePermission("clinical:correct_signed");
+    const record = clinicalRecord(subjectType, subjectId);
+    if (!record) throw new Error("Registro clínico no encontrado.");
+    assertCurrentOrganization(record, "Registro clínico");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
+    const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
+    if (status !== "SIGNED") throw new Error("Sólo se puede anular un registro firmado.");
+    setState((draft) => {
+      const target = clinicalRecord(subjectType, subjectId);
+      if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
+      else target.status = "VOIDED";
+      target.voidReason = normalizedReason;
+      target.voidedAt = nowIso();
+      target.voidedBy = currentUser().id;
+      audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
+        subjectType,
+        version: target.version || 1,
+        reason: normalizedReason
+      });
+    });
+    safeSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason });
+    return true;
   }
 
   function addVitalSigns(input) {
@@ -5412,6 +5934,7 @@ async function createAppStore(config) {
 
   function addNursingNote(input) {
     requirePermission("clinical:write");
+    if (input.sign) requirePermission("clinical:sign");
     const note = {
       id: uid("NOTE"),
       caseId: input.caseId,
@@ -5419,36 +5942,45 @@ async function createAppStore(config) {
       createdAt: nowIso(),
       authorId: currentUser().id,
       authorName: currentUser().name,
+      organizationId: state.organization?.id,
       status: input.sign ? "SIGNED" : "DRAFT",
+      signedAt: input.sign ? nowIso() : null,
+      signatureMetadata: input.sign ? {
+        signedAt: nowIso(),
+        signedBy: currentUser().id,
+        signerRole: state.session.role,
+        method: "APPLICATION_SIGNATURE_METADATA",
+        legalValidation: "NEEDS_CLIENT_CONFIRMATION"
+      } : null,
       text: input.text,
       shareStatus: "NOT_SHARED",
       sharedAt: null
     };
     setState((draft) => {
       draft.nursingNotes.unshift(note);
-      audit("ADD_NURSING_NOTE", note.id, `Nota de enfermería ${note.status === "SIGNED" ? "firmada" : "guardada"}.`);
+      audit("ADD_NURSING_NOTE", note.id, `Nota de enfermería ${note.status === "SIGNED" ? "firmada y bloqueada" : "guardada"}.`);
     });
     return note;
   }
 
   function shareNursingNote(id) {
     requirePermission("clinical:write");
+    const sourceNote = state.nursingNotes.find((candidate) => candidate.id === id);
+    if (!sourceNote) throw new Error("Nota no encontrada.");
+    assertCurrentOrganization(sourceNote, "Nota de enfermería");
+    const sourceCase = caseById(sourceNote.caseId);
+    if (!sourceCase?.contractingDoctorId) throw new Error("No hay profesional autorizado para recibir la notificación.");
     setState((draft) => {
       const note = draft.nursingNotes.find((candidate) => candidate.id === id);
       if (!note) throw new Error("Nota no encontrada.");
       if (note.status !== "SIGNED") throw new Error("La nota debe estar firmada antes de compartirla.");
       note.shareStatus = "SHARED_WITH_DOCTOR";
       note.sharedAt = nowIso();
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel: "WHATSAPP",
-        target: "Médico contratante",
-        subject: `Nota clínica ${note.caseId}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Hay una nota clínica disponible en el portal profesional seguro."
-      });
       audit("SHARE_NURSING_NOTE", id, "Nota compartida con médico mediante enlace seguro.");
+    });
+    queueNotification({
+      templateCode: "NURSING_NOTE_AVAILABLE", channel: "EMAIL", recipientId: sourceCase.contractingDoctorId,
+      relatedEntityType: "NURSING_NOTE", relatedEntityId: id, idempotencyKey: `NOT:NURSING_NOTE_AVAILABLE:${id}`
     });
   }
 
@@ -5505,19 +6037,51 @@ async function createAppStore(config) {
     requirePermission("inventory:write");
     const item = state.inventoryItems.find((candidate) => candidate.id === input.inventoryItemId);
     if (!item) throw new Error("Ítem de inventario no encontrado.");
+    assertCurrentOrganization(item, "Ítem de inventario");
     const quantity = Number(input.quantity);
     if (!(quantity > 0)) throw new Error("La cantidad debe ser mayor que cero.");
+    const type = String(input.type || "").toUpperCase();
+    const supportedTypes = new Set(["PURCHASE_ENTRY", "PATIENT_COMMITMENT", "PATIENT_CONSUMPTION", "RETURN_TO_STOCK", "TRANSFER", "POSITIVE_ADJUSTMENT", "NEGATIVE_ADJUSTMENT", "EXPIRY_DISPOSAL"]);
+    if (!supportedTypes.has(type)) throw new Error("Tipo de movimiento no permitido.");
+    const recordCase = input.caseId ? caseById(input.caseId) : null;
+    if (recordCase) assertCurrentOrganization(recordCase, "Hospitalización");
+    if (["PATIENT_COMMITMENT", "PATIENT_CONSUMPTION"].includes(type) && !recordCase) {
+      throw new Error("El movimiento requiere una hospitalización autorizada.");
+    }
+    const destination = input.warehouseTo ? state.warehouses.find((warehouse) => warehouse.id === input.warehouseTo) : null;
+    if (destination) assertCurrentOrganization(destination, "Bodega destino");
+    if (type === "TRANSFER" && (!destination || destination.id === item.warehouseId)) {
+      throw new Error("Seleccione una bodega destino distinta y autorizada.");
+    }
+    const normalizedReference = String(input.reference || "").trim().toUpperCase();
+    const idempotencyKey = String(input.idempotencyKey || `INV:${item.id}:${type}:${normalizedReference}`).slice(0, 160);
+    if (!normalizedReference || !idempotencyKey) throw new Error("La referencia e idempotencia son obligatorias.");
+    const duplicate = state.inventoryMovements.find((candidate) => candidate.organizationId === state.organization?.id && candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
+    const openReservation = recordCase && state.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
+      && candidate.inventoryItemId === item.id && candidate.status === "OPEN");
+    if (type === "PATIENT_CONSUMPTION" && (!openReservation || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
+      throw new Error("El consumo supera la reserva disponible.");
+    }
+    if (type === "RETURN_TO_STOCK" && recordCase && (!openReservation || item.committed < quantity || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
+      throw new Error("La devolución supera la reserva disponible.");
+    }
 
     const movement = {
       id: uid("MOV"),
+      organizationId: state.organization?.id,
       inventoryItemId: item.id,
       caseId: input.caseId || "",
-      type: input.type,
+      type,
       quantity,
       date: nowIso(),
       warehouseFrom: input.warehouseFrom || item.warehouseId,
       warehouseTo: input.warehouseTo || "",
-      reference: input.reference || "",
+      lotId: input.lotId || "",
+      lotNumber: input.lotNumber || "",
+      lotExpiresAt: input.lotExpiresAt || "",
+      reference: normalizedReference,
+      idempotencyKey,
       authorName: currentUser().name,
       note: input.note || ""
     };
@@ -5527,8 +6091,10 @@ async function createAppStore(config) {
       switch (movement.type) {
         case "PURCHASE_ENTRY":
         case "POSITIVE_ADJUSTMENT":
-        case "RETURN_TO_STOCK":
           target.stock += quantity;
+          break;
+        case "RETURN_TO_STOCK":
+          if (!recordCase) target.stock += quantity;
           break;
         case "PATIENT_COMMITMENT":
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
@@ -5544,12 +6110,36 @@ async function createAppStore(config) {
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
           target.stock -= quantity;
           break;
-        case "TRANSFER":
-          // En el demo se conserva el total y se audita la ubicación.
-          if (movement.warehouseTo) target.warehouseId = movement.warehouseTo;
+        case "TRANSFER": {
+          if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
+          const targetAtDestination = draft.inventoryItems.find((candidate) => candidate.organizationId === state.organization?.id
+            && candidate.warehouseId === movement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
+          if (!targetAtDestination) throw new Error("La bodega destino no tiene un registro autorizado para este ítem.");
+          target.stock -= quantity;
+          targetAtDestination.stock += quantity;
           break;
+        }
         default:
           break;
+      }
+      const reservation = recordCase && draft.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
+        && candidate.inventoryItemId === target.id && candidate.status === "OPEN");
+      if (movement.type === "PATIENT_COMMITMENT") {
+        if (reservation) reservation.quantity += quantity;
+        else draft.inventoryReservations.unshift({
+          id: uid("RES"), organizationId: state.organization?.id, caseId: recordCase.id, inventoryItemId: target.id,
+          quantity, delivered: 0, consumed: 0, returned: 0, status: "OPEN", createdAt: nowIso()
+        });
+      }
+      if (movement.type === "PATIENT_CONSUMPTION") {
+        reservation.consumed += quantity;
+        reservation.delivered += quantity;
+      }
+      if (movement.type === "RETURN_TO_STOCK" && reservation) {
+        // A return from an open reservation releases a commitment; stock never
+        // left the warehouse, so increasing it here would create phantom stock.
+        target.committed -= quantity;
+        reservation.returned += quantity;
       }
       draft.inventoryMovements.unshift(movement);
       audit("CREATE_INVENTORY_MOVEMENT", movement.id, `${movement.type}: ${quantity} ${item.unit} de ${item.name}.`);
@@ -5668,29 +6258,17 @@ async function createAppStore(config) {
       const doctor = draft.doctors.find((candidate) => candidate.id === statement.doctorId);
       statement.status = "SENT";
       statement.sentAt = nowIso();
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel,
-        target: doctor?.email || doctor?.name,
-        subject: `Estado de cuenta ${statement.periodStart} a ${statement.periodEnd}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Su estado de cuenta está disponible en el portal profesional."
-      });
       audit("SEND_DOCTOR_STATEMENT", id, `Estado de cuenta enviado por ${channel}.`);
+    });
+    const statement = state.doctorStatements.find((candidate) => candidate.id === id);
+    if (statement) queueNotification({
+      templateCode: "DOCTOR_STATEMENT", channel, recipientId: statement.doctorId,
+      relatedEntityType: "DOCTOR_STATEMENT", relatedEntityId: statement.id, idempotencyKey: `NOT:DOCTOR_STATEMENT:${statement.id}:${channel}`
     });
   }
 
   function addNotification(input) {
-    setState((draft) => {
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        ...input
-      });
-      audit("CREATE_NOTIFICATION", input.subject || "Notificación", `Notificación creada por ${input.channel}.`);
-    });
+    return queueNotification(input);
   }
 
   function updateRuntimeMeta(patch) {
@@ -5720,13 +6298,22 @@ async function createAppStore(config) {
     updateCase,
     createQuote,
     reviseQuote,
+    updateQuoteDraft,
+    quoteVersions,
     updateQuoteStatus,
     sendQuote,
     createPayment,
+    reversePayment,
     createClinicalDocument,
     updateClinicalDocument,
     signClinicalDocument,
     voidClinicalDocument,
+    createClinicalCorrection,
+    clinicalHistory,
+    clinicalRecordStatus,
+    createMedicationCard,
+    signMedicationCard,
+    voidClinicalRecord,
     addVitalSigns,
     addNursingNote,
     shareNursingNote,
@@ -5741,6 +6328,7 @@ async function createAppStore(config) {
     generateDoctorStatements,
     sendDoctorStatement,
     addNotification,
+    queueNotification,
     statementBalance,
     updateRuntimeMeta
   };
@@ -5818,6 +6406,24 @@ function patientGrid(patient, recordCase = null) {
   `;
 }
 
+function clinicalRecordMetadata(record, corrections = []) {
+  const signature = record.signatureMetadata;
+  const status = record.documentStatus || record.status || "DRAFT";
+  const displayStatus = status === "VOIDED" ? status : corrections.length ? "CORRECTED" : status;
+  const correctionRows = corrections.map((correction) => `<li><strong>${safeText(correction.correctionKind)}</strong> · ${safeText(correction.reason)}<br><small>${safeText(correction.authorName)} · ${safeText(correction.authorRole)} · ${formatDate(correction.createdAt, true)}</small><br>${safeText(correction.content?.text || "")}</li>`).join("");
+  return `
+    <div class="section"><h2>Estado y trazabilidad</h2>
+      <div class="grid">
+        <div class="field"><small>Estado</small><strong>${safeText(displayStatus)}</strong></div>
+        <div class="field"><small>Versión</small><strong>v${safeText(record.version || 1)}</strong></div>
+        <div class="field"><small>Firma</small><strong>${signature ? `${safeText(signature.signerRole)} · ${formatDate(signature.signedAt, true)}` : "Sin firma"}</strong></div>
+        <div class="field"><small>Validación legal</small><strong>${safeText(signature?.legalValidation || "NEEDS_CLIENT_CONFIRMATION")}</strong></div>
+      </div>
+      ${record.voidReason ? `<div class="notice"><strong>ANULADO.</strong> Motivo: ${safeText(record.voidReason)} · ${formatDate(record.voidedAt, true)}</div>` : ""}
+      ${correctionRows ? `<div class="notice"><strong>Enmiendas y addenda</strong><ol>${correctionRows}</ol></div>` : ""}
+    </div>`;
+}
+
 function quoteDocument({ quote, patient, recordCase, insurer }) {
   const rows = quote.items.map((item) => `
     <tr>
@@ -5853,12 +6459,13 @@ function quoteDocument({ quote, patient, recordCase, insurer }) {
   </body></html>`;
 }
 
-function healthReportDocument({ document, patient, recordCase, vitalSigns = [], notes = [] }) {
+function healthReportDocument({ document, patient, recordCase, vitalSigns = [], notes = [], corrections = [] }) {
   const latest = vitalSigns[0];
   const content = document.content || {};
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Diagnóstico / motivo de atención</h2><p>${safeText(content.diagnosis || recordCase?.diagnosisSummary || "Pendiente de documentar.")}</p></div>
     <div class="section"><h2>Antecedentes</h2><p>${safeText((content.background || []).join(", ") || "Sin antecedentes registrados.")}</p></div>
     <div class="section"><h2>Alergias</h2><p>${safeText((content.allergies || []).join(", ") || "Sin alergias registradas.")}</p></div>
@@ -5882,10 +6489,11 @@ function healthReportDocument({ document, patient, recordCase, vitalSigns = [], 
   </body></html>`;
 }
 
-function medicalOrderDocument({ document, patient, recordCase }) {
+function medicalOrderDocument({ document, patient, recordCase, corrections = [] }) {
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>
     <div class="section"><h2>Vigencia</h2><p>Desde ${formatDate(document.createdAt)} hasta nueva indicación o cierre del caso.</p></div>
     <div class="signature-grid"><div class="signature">${safeText(document.authorName)}<br>Médico responsable</div><div class="signature">Firma y sello</div></div>
@@ -5893,7 +6501,7 @@ function medicalOrderDocument({ document, patient, recordCase }) {
   </body></html>`;
 }
 
-function medicationCardDocument({ card, patient, recordCase }) {
+function medicationCardDocument({ card, patient, recordCase, corrections = [] }) {
   const rows = card.items.map((item) => `
     <tr>
       <td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td>
@@ -5902,20 +6510,22 @@ function medicationCardDocument({ card, patient, recordCase }) {
     </tr>
   `).join("");
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Tarjeta de medicamentos</title><style>${printCss}</style></head><body>
-    ${baseHeader("Tarjeta de medicamentos", card.id, 1)}
+    ${baseHeader("Tarjeta de medicamentos", card.id, card.version || 1)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(card, corrections)}
     <table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Inicio</th><th>Fin</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="notice">La administración real debe documentar fecha, hora, responsable, omisión y motivo. Esta plantilla es de validación.</div>
     ${footer()}
   </body></html>`;
 }
 
-function carePlanDocument({ document, patient, recordCase }) {
+function carePlanDocument({ document, patient, recordCase, corrections = [] }) {
   const objectives = document.content?.objectives || [];
   const interventions = document.content?.interventions || [];
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Objetivos</h2><ol>${objectives.map((item) => `<li>${safeText(item)}</li>`).join("") || "<li>Pendiente de documentar.</li>"}</ol></div>
     <div class="section"><h2>Intervenciones</h2><ol>${interventions.map((item) => `<li>${safeText(item)}</li>`).join("") || "<li>Pendiente de documentar.</li>"}</ol></div>
     <div class="section"><h2>Frecuencia</h2><p>${safeText(document.content?.frequency || "Pendiente")}</p></div>
@@ -6553,9 +7163,10 @@ function renderQuotes(state, store, ui) {
 function renderQuoteDetail(state, store, ui, id) {
   const quote=state.quotes.find((item)=>item.id===id);
   if(!quote) return notFound("Cotización");
+  const draftEditable=quote.status==="DRAFT"&&!quote.immutable;
   return `
     ${pageHeader(`${quote.id} · versión ${quote.version}`, `${patientName(state,quote.patientId)} · ${quote.caseId}`,
-      `${actionButton("Revisar / nueva versión","revise-quote",{iconName:"edit",data:`data-id="${quote.id}"`})}${actionButton("Imprimir","print-quote",{iconName:"print",data:`data-id="${quote.id}"`})}${actionButton("Enviar","send-quote",{kind:"primary",iconName:"send",data:`data-id="${quote.id}"`})}`)}
+      `${draftEditable?actionButton("Editar borrador","edit-quote-draft",{iconName:"edit",data:`data-id="${quote.id}"`}):actionButton("Revisar / nueva versión","revise-quote",{iconName:"edit",data:`data-id="${quote.id}"`})}${actionButton("Imprimir","print-quote",{iconName:"print",data:`data-id="${quote.id}"`})}${!quote.immutable?actionButton("Enviar","send-quote",{kind:"primary",iconName:"send",data:`data-id="${quote.id}"`}):""}`)}
     ${renderQuoteDetailContent(state,store,ui,quote)}
   `;
 }
@@ -6564,6 +7175,9 @@ function renderQuoteDetailContent(state, store, ui, quote) {
   const patient=state.patients.find((item)=>item.id===quote.patientId);
   const request=state.insuranceRequests.find((item)=>item.quoteId===quote.id);
   const payments=state.payments.filter((item)=>item.quoteId===quote.id);
+  const versions=state.quotes
+    .filter((candidate)=>(candidate.quoteId||candidate.originalQuoteId||candidate.id)===(quote.quoteId||quote.originalQuoteId||quote.id))
+    .sort((left,right)=>Number(left.version||0)-Number(right.version||0));
   const grouped={};
   quote.items.forEach((item)=>{(grouped[item.category] ||= []).push(item);});
   return `
@@ -6580,6 +7194,7 @@ function renderQuoteDetailContent(state, store, ui, quote) {
             ${table(["Concepto","Cantidad","Precio","Descuento","Subtotal"],items.map((item)=>`<tr><td>${esc(item.name)}</td><td>${item.quantity}</td><td>${money(item.unitPrice)}</td><td>${money(item.discountAmount||0)}</td><td>${money(item.quantity*item.unitPrice-(item.discountAmount||0))}</td></tr>`),{compact:true})}
           </div>`).join("")}
         ${request ? card("Historial con aseguradora", `<div class="vertical-timeline">${request.events.map((event)=>`<article><span></span><div><strong>${esc(QUOTE_ADMIN_LABELS[event.status]||event.status)}</strong><small>${formatDate(event.date,true)}</small><p>${esc(event.note)}</p></div></article>`).join("")}</div>`,{className:"nested-card"}) : ""}
+        ${card("Historial de versiones", table(["Versión","Estado","Creación","Motivo","Total",""], versions.map((version)=>`<tr><td>v${version.version}</td><td>${badge(version.immutable?"SENT_TO_PATIENT":version.status)}</td><td>${formatDate(version.createdAt,true)}</td><td>${esc(version.revisionReason||"Versión inicial")}</td><td>${money(version.total)}</td><td><a class="row-action" href="#/cotizaciones/${version.id}">Consultar</a></td></tr>`)),{className:"nested-card"})}
       </section>
       <aside class="quote-summary-panel">
         <div class="summary-line"><span>Subtotal</span><strong>${money(quote.subtotal)}</strong></div>
@@ -6682,11 +7297,19 @@ function renderClinicalDocuments(state, store, ui, type) {
   const title=DOC_TYPE_LABELS[type] || "Documentos clínicos";
   if(type==="MEDICATION_CARD") return renderMedicationCards(state,store,ui);
   const docs=state.clinicalDocuments.filter((d)=>d.type===type);
+  const rows = docs.map((doc) => {
+    const status = store.clinicalRecordStatus("CLINICAL_DOCUMENT", doc.id);
+    const correctionCount = store.clinicalHistory("CLINICAL_DOCUMENT", doc.id).length - 1;
+    const actions = `<button data-action="view-document" data-id="${doc.id}" title="Ver">${icon("view")}</button>`
+      + (doc.status === "DRAFT" ? `<button data-action="sign-document" data-id="${doc.id}" title="Firmar">${icon("check")}</button>` : "")
+      + (doc.status === "SIGNED" ? `<button data-action="open-clinical-correction" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}" title="Corregir">${icon("edit")}</button><button data-action="open-clinical-void" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}" title="Anular">×</button>` : "");
+    return `<tr><td><strong>${esc(doc.title)}</strong><small>${esc(doc.summary)}</small></td><td><a href="#/hospitalizaciones/${doc.caseId}">${esc(doc.caseId)}</a><small>${esc(patientName(state,doc.patientId))}</small></td><td>${esc(doc.authorName)}</td><td>${formatDate(doc.createdAt,true)}</td><td>${doc.signedAt?formatDate(doc.signedAt,true):"—"}</td><td>v${doc.version}<small>${correctionCount?`${correctionCount} corrección(es)`:""}</small></td><td>${badge(status)}</td><td><div class="row-actions">${actions}</div></td></tr>`;
+  });
   return `
     ${pageHeader(title, clinicalDescription(type),
       `${actionButton(`Nuevo ${title.toLowerCase()}`,"open-clinical-document",{kind:"primary",iconName:"plus",data:`data-doc-type="${type}"`})}`)}
     ${card(title,table(["Documento","Caso / paciente","Autor","Creación","Firma","Versión","Estado",""],
-      docs.map((doc)=>`<tr><td><strong>${esc(doc.title)}</strong><small>${esc(doc.summary)}</small></td><td><a href="#/hospitalizaciones/${doc.caseId}">${esc(doc.caseId)}</a><small>${esc(patientName(state,doc.patientId))}</small></td><td>${esc(doc.authorName)}</td><td>${formatDate(doc.createdAt,true)}</td><td>${doc.signedAt?formatDate(doc.signedAt,true):"—"}</td><td>v${doc.version}</td><td>${badge(doc.status)}</td><td><div class="row-actions"><button data-action="view-document" data-id="${doc.id}" title="Ver">${icon("view")}</button>${doc.status==="DRAFT"?`<button data-action="sign-document" data-id="${doc.id}" title="Firmar">${icon("check")}</button>`:""}</div></td></tr>`)))}
+      rows))}
   `;
 }
 
@@ -6708,12 +7331,12 @@ function renderMedicationCards(state, store, ui){
     <div class="medication-grid">
       ${state.medicationCards.map((cardData)=>`
         <article class="card medication-card">
-          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)}</p></div>${badge(cardData.status)}</header>
+          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
           <div class="card-body">
             ${table(["Medicamento","Dosis / vía","Frecuencia","Horario","Última administración","Estado"],
               cardData.items.map((item)=>`<tr><td><strong>${esc(item.medication)}</strong><small>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</small></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${item.schedule.map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("")}</td><td>${item.lastAdministration?formatDate(item.lastAdministration,true):"—"}</td><td>${badge(item.administrationStatus)}</td></tr>`),{compact:true})}
           </div>
-          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
+          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
         </article>`).join("")}
     </div>`;
 }
@@ -6727,7 +7350,7 @@ function renderEvolutions(state, store, ui) {
       ${card("Evoluciones clínicas", evolutions.length?evolutions.map((doc)=>`<article class="note-card"><header><div><strong>${esc(patientName(state,doc.patientId))}</strong><small>${formatDate(doc.createdAt,true)} · ${esc(doc.authorName)}</small></div>${badge(doc.status)}</header><h3>${esc(doc.title)}</h3><p>${esc(doc.summary)}</p><footer><button class="row-action" data-action="view-document" data-id="${doc.id}">Abrir / imprimir</button></footer></article>`).join(""):emptyState("Sin evoluciones","Crea la primera evolución clínica."),{className:"span-2"})}
       ${card("Últimos controles", state.vitalSigns.map((v)=>`<article class="vitals-card"><strong>${esc(patientName(state,v.patientId))}</strong><small>${formatDate(v.recordedAt,true)}</small><div><span>TA ${v.systolic}/${v.diastolic}</span><span>FC ${v.heartRate}</span><span>FR ${v.respiratoryRate}</span><span>SpO₂ ${v.spo2}%</span><span>T° ${v.temperature}</span><span>Dolor ${v.pain}/10</span></div></article>`).join(""))}
     </div>
-    ${card("Notas de enfermería",state.nursingNotes.map((note)=>`<article class="note-card"><header><div><strong>${esc(note.authorName)}</strong><small>${esc(patientName(state,note.patientId))} · ${formatDate(note.createdAt,true)}</small></div>${badge(note.status)}</header><p>${esc(note.text)}</p><footer>${badge(note.shareStatus,note.shareStatus==="SHARED_WITH_DOCTOR"?"Compartida con médico":"Pendiente de compartir")}${note.status==="SIGNED"&&note.shareStatus!=="SHARED_WITH_DOCTOR"?actionButton("Compartir con médico","share-note",{kind:"ghost",iconName:"send",data:`data-id="${note.id}"`}):""}</footer></article>`).join(""))}
+    ${card("Notas de enfermería",state.nursingNotes.map((note)=>`<article class="note-card"><header><div><strong>${esc(note.authorName)}</strong><small>${esc(patientName(state,note.patientId))} · ${formatDate(note.createdAt,true)}</small></div>${badge(store.clinicalRecordStatus("NURSING_NOTE",note.id)||note.status)}</header><p>${esc(note.text)}</p><footer>${badge(note.shareStatus,note.shareStatus==="SHARED_WITH_DOCTOR"?"Compartida con médico":"Pendiente de compartir")}${note.status==="SIGNED"&&note.shareStatus!=="SHARED_WITH_DOCTOR"?actionButton("Compartir con médico","share-note",{kind:"ghost",iconName:"send",data:`data-id="${note.id}"`}):""}${note.status==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="NURSING_NOTE" data-id="${note.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="NURSING_NOTE" data-id="${note.id}"`})}`:""}</footer></article>`).join(""))}
   `;
 }
 
@@ -7507,13 +8130,14 @@ function openCaseForm(id = null, patientId = "") {
   });
 }
 
-function openQuoteForm(caseId = "", quoteId = null, revise = false) {
+function openQuoteForm(caseId = "", quoteId = null, revise = false, editDraft = false) {
   const state = store.getState();
   const existing = quoteId ? state.quotes.find((q) => q.id === quoteId) : null;
   const selectedCase = state.cases.find((c) => c.id === (caseId || existing?.caseId)) || state.cases[0];
   ui.quoteDraft = {
     quoteId: existing?.id || null,
     revise,
+    editDraft: Boolean(existing && editDraft),
     caseId: selectedCase?.id || "",
     patientId: selectedCase?.patientId || "",
     items: existing ? structuredClone(existing.items) : [],
@@ -7532,7 +8156,7 @@ function renderQuoteModal() {
   if (record) draft.patientId = record.patientId;
   const result = calculateQuote(draft.items, draft.discount, draft.insurerAmount);
   openModal({
-    title: draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización",
+    title: draft.editDraft ? `Editar borrador ${draft.quoteId}` : draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización",
     subtitle: "Agrega servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.",
     size: "xl",
     body: `
@@ -7545,6 +8169,7 @@ function renderQuoteModal() {
             <label>Monto del seguro<input type="number" name="insurerAmount" min="0" step=".01" value="${draft.insurerAmount || 0}" data-action="quote-calc-change"></label>
             <label class="full">Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" data-action="quote-calc-change"></label>
             <label class="full">Comentarios<textarea name="comments" rows="2" data-action="quote-calc-change">${safeText(draft.comments || "")}</textarea></label>
+            ${draft.revise ? `<label class="full">Motivo de la nueva versión<textarea name="revisionReason" rows="2" required data-action="quote-calc-change">${safeText(draft.revisionReason || "")}</textarea></label>` : ""}
           </form>
           <div class="quote-add-row">
             <select id="quote-item-select">${catalogOptions()}</select>
@@ -7565,7 +8190,7 @@ function renderQuoteModal() {
           <p>${draft.items.length} conceptos · ${new Set(draft.items.map(i=>i.category)).size} categorías</p>
         </aside>
       </div>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${draft.revise ? "Crear nueva versión" : "Guardar cotización"}</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${draft.editDraft ? "Guardar borrador" : draft.revise ? "Crear nueva versión" : "Guardar cotización"}</button>`
   });
 }
 
@@ -7579,6 +8204,7 @@ function syncQuoteHead() {
   ui.quoteDraft.discount = { type: "PERCENT", value: Number(data.get("discountValue") || 0), reason: data.get("discountReason") || "" };
   ui.quoteDraft.insurerAmount = Number(data.get("insurerAmount") || 0);
   ui.quoteDraft.comments = data.get("comments") || "";
+  ui.quoteDraft.revisionReason = data.get("revisionReason") || "";
 }
 
 function openInsuranceStatus(quoteId = "") {
@@ -7643,6 +8269,41 @@ function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId
       <label class="full"><input type="checkbox" name="signNow"> Firmar al guardar</label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-document">Guardar documento</button>`
+  });
+}
+
+function openClinicalCorrectionForm(subjectType, subjectId) {
+  const state = store.getState();
+  const record = subjectType === "CLINICAL_DOCUMENT"
+    ? state.clinicalDocuments.find((item) => item.id === subjectId)
+    : subjectType === "NURSING_NOTE"
+      ? state.nursingNotes.find((item) => item.id === subjectId)
+      : state.medicationCards.find((item) => item.id === subjectId);
+  if (!record) return showToast("Registro clínico no encontrado.", "danger");
+  openModal({
+    title: "Corrección clínica auditada",
+    subtitle: "Crea un addendum, enmienda o fe de erratas. El registro firmado original no se modifica.",
+    size: "lg",
+    body: `<form id="clinical-correction-form" class="form-grid">
+      <input type="hidden" name="subjectType" value="${subjectType}"><input type="hidden" name="subjectId" value="${subjectId}">
+      <label>Tipo<select name="kind"><option value="ADDENDUM">Addendum</option><option value="AMENDMENT">Enmienda</option><option value="ERRATA">Fe de erratas</option></select></label>
+      <label class="full">Motivo<textarea name="reason" rows="3" required placeholder="Motivo verificable de la corrección"></textarea></label>
+      <label class="full">Contenido corregido o complementario<textarea name="content" rows="6" required placeholder="Información corregida o complementaria"></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-correction">Registrar corrección</button>`
+  });
+}
+
+function openClinicalVoidForm(subjectType, subjectId) {
+  openModal({
+    title: "Anular registro clínico",
+    subtitle: "La anulación conserva el registro, exige permiso específico y deja auditoría.",
+    size: "md",
+    body: `<form id="clinical-void-form" class="form-grid">
+      <input type="hidden" name="subjectType" value="${subjectType}"><input type="hidden" name="subjectId" value="${subjectId}">
+      <label class="full">Motivo de la anulación<textarea name="reason" rows="4" required></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-danger" data-action="save-clinical-void">Anular y conservar historial</button>`
   });
 }
 
@@ -7741,6 +8402,7 @@ function openPurchaseForm() {
 function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
   const state = store.getState();
   const item = state.inventoryItems.find((i) => i.id === itemId) || state.inventoryItems[0];
+  const lots = (state.inventoryLots || []).filter((lot) => lot.inventoryItemId === item?.id && lot.status === "AVAILABLE");
   openModal({
     title: "Movimiento de inventario",
     subtitle: "Todos los movimientos modifican existencias o comprometidos y quedan auditados.",
@@ -7752,6 +8414,9 @@ function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
       <label>Hospitalización<select name="caseId"><option value="">Sin caso</option>${caseOptions(caseId)}</select></label>
       <label>Bodega origen<select name="warehouseFrom">${warehouseOptions(item?.warehouseId)}</select></label>
       <label>Bodega destino<select name="warehouseTo"><option value="">No aplica</option>${warehouseOptions()}</select></label>
+      <label>Lote/serie<select name="lotId"><option value="">Sin lote configurado</option>${lots.map((lot) => `<option value="${lot.id}">${safeText(lot.lotNumber || lot.serialNumber || lot.id)}${lot.expiresAt ? ` · vence ${lot.expiresAt}` : ""}</option>`).join("")}</select></label>
+      <label>Lote nuevo<input name="lotNumber" placeholder="Sólo para entrada configurada"></label>
+      <label>Vencimiento<input type="date" name="lotExpiresAt"></label>
       <label>Referencia<input name="reference" value="MOV-DEMO-${Date.now()}"></label>
       <label class="full">Nota<textarea name="note" rows="3"></textarea></label>
     </form>`,
@@ -7835,7 +8500,7 @@ function openMedicationCardForm() {
   const record=state.cases[0];
   openModal({
     title:"Nueva tarjeta de medicamentos",
-    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. El prototipo agrega una tarjeta demo.",
+    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. La firma bloquea el contenido y las correcciones quedan auditadas.",
     size:"lg",
     body:`<form id="medication-card-form" class="form-grid">
       <label class="full">Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
@@ -7846,6 +8511,7 @@ function openMedicationCardForm() {
       <label>Horarios<input name="schedule" value="06:00, 14:00, 22:00"></label>
       <label>Inicio<input type="date" name="startDate" value="${new Date().toISOString().slice(0,10)}"></label>
       <label>Fin<input type="date" name="endDate" value="${new Date(Date.now()+7*86400000).toISOString().slice(0,10)}"></label>
+      <label class="full"><input type="checkbox" name="signNow"> Firmar y bloquear al guardar</label>
     </form>`,
     footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-medication-card">Crear tarjeta</button>`
   });
@@ -7875,17 +8541,19 @@ function openDocumentPreview(id) {
   const recordCase = store.caseById(doc.caseId);
   const vitals = state.vitalSigns.filter((v) => v.caseId === doc.caseId);
   const notes = state.nursingNotes.filter((n) => n.caseId === doc.caseId);
+  const corrections = state.clinicalCorrections.filter((item) => item.subjectType === "CLINICAL_DOCUMENT" && item.subjectId === doc.id);
+  const displayStatus = store.clinicalRecordStatus("CLINICAL_DOCUMENT", doc.id);
   let html;
-  if (doc.type === "HEALTH_REPORT" || doc.type === "CLINICAL_EVOLUTION") html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes });
-  else if (doc.type === "MEDICAL_ORDER" || doc.type === "LAB_REQUEST") html = medicalOrderDocument({ document: doc, patient, recordCase });
-  else if (doc.type === "CARE_PLAN") html = carePlanDocument({ document: doc, patient, recordCase });
-  else html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes });
+  if (doc.type === "HEALTH_REPORT" || doc.type === "CLINICAL_EVOLUTION") html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes, corrections });
+  else if (doc.type === "MEDICAL_ORDER" || doc.type === "LAB_REQUEST") html = medicalOrderDocument({ document: doc, patient, recordCase, corrections });
+  else if (doc.type === "CARE_PLAN") html = carePlanDocument({ document: doc, patient, recordCase, corrections });
+  else html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes, corrections });
   openModal({
     title: doc.title,
-    subtitle: `${doc.status} · versión ${doc.version} · ${doc.authorName}`,
+    subtitle: `${displayStatus} · versión ${doc.version} · ${doc.authorName}`,
     size: "xl",
     body: `<iframe class="document-frame" title="${safeText(doc.title)}"></iframe>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>${doc.status==="DRAFT"?`<button class="btn btn-secondary" data-action="sign-document" data-id="${doc.id}">Firmar y bloquear</button>`:""}<button class="btn btn-primary" data-action="print-document" data-id="${doc.id}">Imprimir / PDF</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>${doc.status==="DRAFT"?`<button class="btn btn-secondary" data-action="sign-document" data-id="${doc.id}">Firmar y bloquear</button>`:""}${doc.status==="SIGNED"?`<button class="btn btn-secondary" data-action="open-clinical-correction" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}">Corregir</button><button class="btn btn-danger" data-action="open-clinical-void" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}">Anular</button>`:""}<button class="btn btn-primary" data-action="print-document" data-id="${doc.id}">Imprimir / PDF</button>`
   });
   const frame = modalRoot.querySelector("iframe");
   frame.srcdoc = html;
@@ -7910,10 +8578,11 @@ function printClinicalDocument(id) {
   const recordCase=store.caseById(doc.caseId);
   const vitals=state.vitalSigns.filter(v=>v.caseId===doc.caseId);
   const notes=state.nursingNotes.filter(n=>n.caseId===doc.caseId);
+  const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="CLINICAL_DOCUMENT"&&item.subjectId===doc.id);
   let html;
-  if(doc.type==="MEDICAL_ORDER"||doc.type==="LAB_REQUEST") html=medicalOrderDocument({document:doc,patient,recordCase});
-  else if(doc.type==="CARE_PLAN") html=carePlanDocument({document:doc,patient,recordCase});
-  else html=healthReportDocument({document:doc,patient,recordCase,vitalSigns:vitals,notes});
+  if(doc.type==="MEDICAL_ORDER"||doc.type==="LAB_REQUEST") html=medicalOrderDocument({document:doc,patient,recordCase,corrections});
+  else if(doc.type==="CARE_PLAN") html=carePlanDocument({document:doc,patient,recordCase,corrections});
+  else html=healthReportDocument({document:doc,patient,recordCase,vitalSigns:vitals,notes,corrections});
   openPrintWindow(html,doc.title);
 }
 
@@ -7921,7 +8590,8 @@ function printMedicationCard(id){
   const state=store.getState();
   const card=state.medicationCards.find(c=>c.id===id);
   if(!card) throw new Error("Tarjeta no encontrada.");
-  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId)}),`Tarjeta ${card.id}`);
+  const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="MEDICATION_CARD"&&item.subjectId===card.id);
+  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections}),`Tarjeta ${card.id}`);
 }
 
 function printStatement(id){
@@ -8069,6 +8739,7 @@ document.addEventListener("click", (event) => {
     case "edit-case": openCaseForm(data.id); break;
     case "open-quote-form": openQuoteForm(data.caseId || ""); break;
     case "revise-quote": openQuoteForm("", data.id, true); break;
+    case "edit-quote-draft": openQuoteForm("", data.id, false, true); break;
     case "quote-add-item": {
       syncQuoteHead();
       const select=document.querySelector("#quote-item-select");
@@ -8091,6 +8762,8 @@ document.addEventListener("click", (event) => {
     case "view-document": openDocumentPreview(data.id); break;
     case "print-document": runSafely(()=>printClinicalDocument(data.id)); break;
     case "sign-document": runSafely(()=>store.signClinicalDocument(data.id),"Documento firmado y bloqueado."); closeModal(); break;
+    case "open-clinical-correction": openClinicalCorrectionForm(data.subjectType, data.id); break;
+    case "open-clinical-void": openClinicalVoidForm(data.subjectType, data.id); break;
     case "open-vitals-form": openVitalsForm(data.caseId||""); break;
     case "open-nursing-note": openNursingNoteForm(data.caseId||""); break;
     case "share-note": runSafely(()=>store.shareNursingNote(data.id),"Nota compartida mediante enlace seguro."); break;
@@ -8113,6 +8786,7 @@ document.addEventListener("click", (event) => {
     case "open-discount-form": openDiscountForm(); break;
     case "open-medication-card": openMedicationCardForm(); break;
     case "print-medication-card": runSafely(()=>printMedicationCard(data.id)); break;
+    case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
     case "administer-medication": showToast("Administración registrada en modo demo."); break;
     case "open-doctor-form": openDoctorForm(); break;
     case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
@@ -8229,7 +8903,7 @@ document.addEventListener("click", (event) => {
     syncQuoteHead();
     if(!ui.quoteDraft?.items.length) return showToast("Agrega al menos un concepto.","danger");
     const draft=structuredClone(ui.quoteDraft);
-    const result=runSafely(()=>draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.revise?"Nueva versión creada.":"Cotización guardada.");
+    const result=runSafely(()=>draft.editDraft?store.updateQuoteDraft(draft.quoteId,draft):draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.editDraft?"Borrador actualizado.":draft.revise?"Nueva versión creada.":"Cotización guardada.");
     if(result){closeModal(); location.hash=`#/cotizaciones/${result.id}`;}
   }
 
@@ -8256,6 +8930,22 @@ document.addEventListener("click", (event) => {
     const document=runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan}}),"Documento clínico creado.");
     if(document&&formBool(form,"signNow")) runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
     if(document){closeModal(); location.hash=`#/hospitalizaciones/${data.caseId}`; ui.tab="clinical";}
+  }
+
+  if(action==="save-clinical-correction"){
+    const form=document.querySelector("#clinical-correction-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
+    if(result) closeModal();
+  }
+
+  if(action==="save-clinical-void"){
+    const form=document.querySelector("#clinical-void-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
+    if(result!==undefined) closeModal();
   }
 
   if(action==="save-vitals"){
@@ -8347,11 +9037,9 @@ document.addEventListener("click", (event) => {
     const form=document.querySelector("#medication-card-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const record=store.caseById(data.caseId);
-    const state=store.getState();
-    state.medicationCards.unshift({id:uid("MC"),caseId:data.caseId,patientId:record.patientId,status:"ACTIVE",createdAt:new Date().toISOString(),items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]});
-    store.save();
-    showToast("Tarjeta de medicamentos creada.");closeModal();render();
+    const card=runSafely(()=>store.createMedicationCard({caseId:data.caseId,items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()).filter(Boolean),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]}),"Tarjeta de medicamentos creada como borrador.");
+    if(card&&formBool(form,"signNow")) runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
+    if(card){closeModal();render();}
   }
 
   if(action==="save-doctor"){

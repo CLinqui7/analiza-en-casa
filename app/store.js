@@ -58,6 +58,14 @@ export async function createAppStore(config) {
     signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
     signatureMetadata: note.signatureMetadata || null
   }));
+  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications"]) {
+    state[collection] ||= [];
+    state[collection] = state[collection].map((record) => ({
+      ...record,
+      organizationId: record.organizationId || state.organization?.id
+    }));
+  }
+  state.notificationAttempts ||= [];
   let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
@@ -139,6 +147,96 @@ export async function createAppStore(config) {
     if (!record || recordOrganizationId !== state.organization?.id) {
       throw new Error(`${label} no disponible.`);
     }
+  }
+
+  function maskDestination(destination = "") {
+    const value = String(destination).trim();
+    if (value.includes("@")) {
+      const [local, domain] = value.split("@", 2);
+      return `${local.slice(0, 2)}•••@${domain}`;
+    }
+    const digits = value.replace(/\D/g, "");
+    return digits ? `•••• ${digits.slice(-4)}` : "••••";
+  }
+
+  const notificationTemplates = {
+    QUOTE_READY: { recipientType: "PATIENT", permission: "quotes:write", preview: "Su cotización está disponible en el portal seguro." },
+    QUOTE_STATUS: { recipientType: "PATIENT", permission: "insurance:write", preview: "Su solicitud tiene una actualización. Consulte el portal seguro." },
+    PAYMENT_RECEIVED: { recipientType: "PATIENT", permission: "payments:write", preview: "Hay una actualización administrativa disponible en el portal seguro." },
+    DOCTOR_STATEMENT: { recipientType: "DOCTOR", permission: "statements:write", preview: "Su estado de cuenta está disponible en el portal profesional seguro." },
+    NURSING_NOTE_AVAILABLE: { recipientType: "DOCTOR", permission: "clinical:write", preview: "Hay un documento disponible en el portal profesional seguro." }
+  };
+
+  function registeredNotificationRecipient(recipientType, recipientId, channel) {
+    const source = recipientType === "PATIENT"
+      ? patientById(recipientId)
+      : state.doctors.find((candidate) => candidate.id === recipientId);
+    if (!source) throw new Error("Destinatario autorizado no encontrado.");
+    assertCurrentOrganization(source, "Destinatario");
+    const destination = channel === "EMAIL" ? source.email : source.phone;
+    if (!destination) throw new Error("El destinatario autorizado no tiene un canal registrado.");
+    return { id: source.id, masked: maskDestination(destination) };
+  }
+
+  function queueNotification(input) {
+    const templateCode = String(input.templateCode || "").toUpperCase();
+    const channel = String(input.channel || "").toUpperCase();
+    const template = notificationTemplates[templateCode];
+    if (!template || !["WHATSAPP", "SMS", "EMAIL"].includes(channel)) throw new Error("Canal o plantilla no permitida.");
+    requirePermission(template.permission);
+    const recipientType = template.recipientType;
+    const recipient = registeredNotificationRecipient(recipientType, input.recipientId, channel);
+    const relatedEntityType = String(input.relatedEntityType || "").toUpperCase();
+    const relatedEntityId = String(input.relatedEntityId || "").trim();
+    if (!relatedEntityType || !relatedEntityId) throw new Error("La notificación requiere una entidad autorizada.");
+    const relatedQuote = state.quotes.find((candidate) => candidate.id === relatedEntityId);
+    const relatedStatement = state.doctorStatements.find((candidate) => candidate.id === relatedEntityId);
+    const relatedNote = state.nursingNotes.find((candidate) => candidate.id === relatedEntityId);
+    const relatedCase = relatedNote && caseById(relatedNote.caseId);
+    const validRelationship = (
+      (["QUOTE_READY", "QUOTE_STATUS"].includes(templateCode)
+        && ["QUOTE", "QUOTE_VERSION"].includes(relatedEntityType) && relatedQuote?.patientId === recipient.id)
+      || (templateCode === "PAYMENT_RECEIVED" && relatedEntityType === "QUOTE" && relatedQuote?.patientId === recipient.id)
+      || (templateCode === "DOCTOR_STATEMENT" && relatedEntityType === "DOCTOR_STATEMENT" && relatedStatement?.doctorId === recipient.id)
+      || (templateCode === "NURSING_NOTE_AVAILABLE" && relatedEntityType === "NURSING_NOTE" && relatedCase?.contractingDoctorId === recipient.id)
+    );
+    if (!validRelationship) throw new Error("El destinatario no está autorizado para la entidad relacionada.");
+    const idempotencyKey = String(input.idempotencyKey || `NOT:${templateCode}:${channel}:${recipient.id}:${relatedEntityType}:${relatedEntityId}`).trim();
+    if (!idempotencyKey || idempotencyKey.length > 160) throw new Error("Clave de idempotencia inválida.");
+    const existing = state.notifications.find((candidate) => candidate.idempotencyKey === idempotencyKey && candidate.organizationId === state.organization?.id);
+    if (existing) return existing;
+
+    const notification = {
+      id: uid("NOT"),
+      organizationId: state.organization?.id,
+      date: nowIso(),
+      channel,
+      provider: config.notificationsMode === "mock" ? "SIMULATED" : "SERVER_QUEUE",
+      templateCode,
+      recipientType,
+      recipientId: recipient.id,
+      relatedEntityType,
+      relatedEntityId,
+      idempotencyKey,
+      target: recipient.masked,
+      subject: templateCode.replaceAll("_", " "),
+      status: config.notificationsMode === "mock" ? "SIMULATED" : "PENDING_SERVER",
+      safePreview: template.preview,
+      retryCount: 0,
+      createdAt: nowIso()
+    };
+    setState((draft) => {
+      draft.notifications.unshift(notification);
+      draft.notificationAttempts.unshift({
+        id: uid("NOTATT"), notificationId: notification.id, provider: notification.provider,
+        state: notification.status, createdAt: notification.createdAt
+      });
+      audit("QUEUE_NOTIFICATION", notification.id, `Notificación ${templateCode} encolada por ${channel}.`, {
+        templateCode, channel, relatedEntityType, relatedEntityId, idempotencyKey
+      });
+    });
+    safeSync("QUEUE_NOTIFICATION", { notification });
+    return notification;
   }
 
   function quoteIsImmutable(quote) {
@@ -492,21 +590,17 @@ export async function createAppStore(config) {
           events: [{ date: nowIso(), status, note }]
         });
       }
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel: "WHATSAPP",
-        target: "•••• " + (patientById(quote.patientId)?.phone || "").slice(-4),
-        subject: `Actualización ${quote.id}`,
-        status: "QUEUED",
-        safePreview: "Su solicitud tiene una actualización. Consulte el portal seguro."
-      });
       audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
         quoteId: quoteRootId(quote),
         version: quote.version
       });
     });
     safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
+    const quote = quoteById(quoteId);
+    if (quote) queueNotification({
+      templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: quote.patientId,
+      relatedEntityType: "QUOTE", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`
+    });
   }
 
   function sendQuote(quoteId, channel = "WHATSAPP") {
@@ -531,16 +625,6 @@ export async function createAppStore(config) {
         items: quote.items,
         discount: quote.discount
       });
-      const patient = patientById(quote.patientId);
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel,
-        target: channel === "EMAIL" ? patient?.email : "•••• " + (patient?.phone || "").slice(-4),
-        subject: `Cotización ${quote.id} · v${quote.version}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Su cotización está disponible en el portal seguro."
-      });
       audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
         quoteId: quoteRootId(quote),
         version: quote.version,
@@ -548,12 +632,18 @@ export async function createAppStore(config) {
       });
     });
     safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
+    const quote = quoteById(quoteId);
+    if (quote) queueNotification({
+      templateCode: "QUOTE_READY", channel, recipientId: quote.patientId,
+      relatedEntityType: "QUOTE_VERSION", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_READY:${quote.id}:${channel}`
+    });
   }
 
   function createPayment(input) {
     requirePermission("payments:write");
     const quote = quoteById(input.quoteId);
     if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
     const balance = quoteBalance(quote, state.payments);
     const existingReferences = state.payments.map((payment) => payment.reference).filter(Boolean);
     const validation = validatePayment({
@@ -567,14 +657,20 @@ export async function createAppStore(config) {
     const payment = {
       id: uid("PAY"),
       quoteId: quote.id,
+      quoteVersionId: quote.id,
+      caseId: quote.caseId || "",
       patientId: quote.patientId,
       date: nowIso(),
+      organizationId: state.organization?.id,
+      currency: quote.currency || "USD",
       method: input.method || "TRANSFER",
       payer: input.payer || patientById(quote.patientId)?.contactName || "Paciente",
       reference: validation.reference,
       amount: validation.amount,
       status: "APPLIED",
-      receipt: uid("REC")
+      receipt: uid("REC"),
+      idempotencyKey: String(input.idempotencyKey || `PAY:${quote.id}:${validation.reference}`).slice(0, 160),
+      allocations: [{ quoteId: quote.id, quoteVersionId: quote.id, amount: validation.amount, currency: quote.currency || "USD", status: "APPLIED" }]
     };
 
     setState((draft) => {
@@ -584,7 +680,34 @@ export async function createAppStore(config) {
       audit("CREATE_PAYMENT", payment.id, `Pago ${payment.amount} aplicado a ${quote.id}.`);
     });
     safeSync("CREATE_PAYMENT", { payment });
+    queueNotification({
+      templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: payment.patientId,
+      relatedEntityType: "QUOTE", relatedEntityId: payment.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${payment.id}`
+    });
     return payment;
+  }
+
+  function reversePayment(paymentId, reason, idempotencyKey = "") {
+    requirePermission("payments:write");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de la reversión.");
+    const payment = state.payments.find((candidate) => candidate.id === paymentId);
+    if (!payment) throw new Error("Pago no encontrado.");
+    assertCurrentOrganization(payment, "Pago");
+    if (payment.status !== "APPLIED") throw new Error("Sólo se puede revertir un pago aplicado.");
+    const key = String(idempotencyKey || `REVERSE:${paymentId}:${normalizedReason}`).slice(0, 160);
+    setState((draft) => {
+      const target = draft.payments.find((candidate) => candidate.id === paymentId);
+      target.status = "REVERSED";
+      target.reversedAt = nowIso();
+      target.reversedBy = currentUser().id;
+      target.reversalReason = normalizedReason;
+      target.reversalIdempotencyKey = key;
+      target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
+      audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
+    });
+    safeSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key });
+    return state.payments.find((candidate) => candidate.id === paymentId);
   }
 
   function createClinicalDocument(input) {
@@ -849,22 +972,22 @@ export async function createAppStore(config) {
 
   function shareNursingNote(id) {
     requirePermission("clinical:write");
+    const sourceNote = state.nursingNotes.find((candidate) => candidate.id === id);
+    if (!sourceNote) throw new Error("Nota no encontrada.");
+    assertCurrentOrganization(sourceNote, "Nota de enfermería");
+    const sourceCase = caseById(sourceNote.caseId);
+    if (!sourceCase?.contractingDoctorId) throw new Error("No hay profesional autorizado para recibir la notificación.");
     setState((draft) => {
       const note = draft.nursingNotes.find((candidate) => candidate.id === id);
       if (!note) throw new Error("Nota no encontrada.");
       if (note.status !== "SIGNED") throw new Error("La nota debe estar firmada antes de compartirla.");
       note.shareStatus = "SHARED_WITH_DOCTOR";
       note.sharedAt = nowIso();
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel: "WHATSAPP",
-        target: "Médico contratante",
-        subject: `Nota clínica ${note.caseId}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Hay una nota clínica disponible en el portal profesional seguro."
-      });
       audit("SHARE_NURSING_NOTE", id, "Nota compartida con médico mediante enlace seguro.");
+    });
+    queueNotification({
+      templateCode: "NURSING_NOTE_AVAILABLE", channel: "EMAIL", recipientId: sourceCase.contractingDoctorId,
+      relatedEntityType: "NURSING_NOTE", relatedEntityId: id, idempotencyKey: `NOT:NURSING_NOTE_AVAILABLE:${id}`
     });
   }
 
@@ -921,19 +1044,51 @@ export async function createAppStore(config) {
     requirePermission("inventory:write");
     const item = state.inventoryItems.find((candidate) => candidate.id === input.inventoryItemId);
     if (!item) throw new Error("Ítem de inventario no encontrado.");
+    assertCurrentOrganization(item, "Ítem de inventario");
     const quantity = Number(input.quantity);
     if (!(quantity > 0)) throw new Error("La cantidad debe ser mayor que cero.");
+    const type = String(input.type || "").toUpperCase();
+    const supportedTypes = new Set(["PURCHASE_ENTRY", "PATIENT_COMMITMENT", "PATIENT_CONSUMPTION", "RETURN_TO_STOCK", "TRANSFER", "POSITIVE_ADJUSTMENT", "NEGATIVE_ADJUSTMENT", "EXPIRY_DISPOSAL"]);
+    if (!supportedTypes.has(type)) throw new Error("Tipo de movimiento no permitido.");
+    const recordCase = input.caseId ? caseById(input.caseId) : null;
+    if (recordCase) assertCurrentOrganization(recordCase, "Hospitalización");
+    if (["PATIENT_COMMITMENT", "PATIENT_CONSUMPTION"].includes(type) && !recordCase) {
+      throw new Error("El movimiento requiere una hospitalización autorizada.");
+    }
+    const destination = input.warehouseTo ? state.warehouses.find((warehouse) => warehouse.id === input.warehouseTo) : null;
+    if (destination) assertCurrentOrganization(destination, "Bodega destino");
+    if (type === "TRANSFER" && (!destination || destination.id === item.warehouseId)) {
+      throw new Error("Seleccione una bodega destino distinta y autorizada.");
+    }
+    const normalizedReference = String(input.reference || "").trim().toUpperCase();
+    const idempotencyKey = String(input.idempotencyKey || `INV:${item.id}:${type}:${normalizedReference}`).slice(0, 160);
+    if (!normalizedReference || !idempotencyKey) throw new Error("La referencia e idempotencia son obligatorias.");
+    const duplicate = state.inventoryMovements.find((candidate) => candidate.organizationId === state.organization?.id && candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
+    const openReservation = recordCase && state.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
+      && candidate.inventoryItemId === item.id && candidate.status === "OPEN");
+    if (type === "PATIENT_CONSUMPTION" && (!openReservation || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
+      throw new Error("El consumo supera la reserva disponible.");
+    }
+    if (type === "RETURN_TO_STOCK" && recordCase && (!openReservation || item.committed < quantity || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
+      throw new Error("La devolución supera la reserva disponible.");
+    }
 
     const movement = {
       id: uid("MOV"),
+      organizationId: state.organization?.id,
       inventoryItemId: item.id,
       caseId: input.caseId || "",
-      type: input.type,
+      type,
       quantity,
       date: nowIso(),
       warehouseFrom: input.warehouseFrom || item.warehouseId,
       warehouseTo: input.warehouseTo || "",
-      reference: input.reference || "",
+      lotId: input.lotId || "",
+      lotNumber: input.lotNumber || "",
+      lotExpiresAt: input.lotExpiresAt || "",
+      reference: normalizedReference,
+      idempotencyKey,
       authorName: currentUser().name,
       note: input.note || ""
     };
@@ -943,8 +1098,10 @@ export async function createAppStore(config) {
       switch (movement.type) {
         case "PURCHASE_ENTRY":
         case "POSITIVE_ADJUSTMENT":
-        case "RETURN_TO_STOCK":
           target.stock += quantity;
+          break;
+        case "RETURN_TO_STOCK":
+          if (!recordCase) target.stock += quantity;
           break;
         case "PATIENT_COMMITMENT":
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
@@ -960,12 +1117,36 @@ export async function createAppStore(config) {
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
           target.stock -= quantity;
           break;
-        case "TRANSFER":
-          // En el demo se conserva el total y se audita la ubicación.
-          if (movement.warehouseTo) target.warehouseId = movement.warehouseTo;
+        case "TRANSFER": {
+          if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
+          const targetAtDestination = draft.inventoryItems.find((candidate) => candidate.organizationId === state.organization?.id
+            && candidate.warehouseId === movement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
+          if (!targetAtDestination) throw new Error("La bodega destino no tiene un registro autorizado para este ítem.");
+          target.stock -= quantity;
+          targetAtDestination.stock += quantity;
           break;
+        }
         default:
           break;
+      }
+      const reservation = recordCase && draft.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
+        && candidate.inventoryItemId === target.id && candidate.status === "OPEN");
+      if (movement.type === "PATIENT_COMMITMENT") {
+        if (reservation) reservation.quantity += quantity;
+        else draft.inventoryReservations.unshift({
+          id: uid("RES"), organizationId: state.organization?.id, caseId: recordCase.id, inventoryItemId: target.id,
+          quantity, delivered: 0, consumed: 0, returned: 0, status: "OPEN", createdAt: nowIso()
+        });
+      }
+      if (movement.type === "PATIENT_CONSUMPTION") {
+        reservation.consumed += quantity;
+        reservation.delivered += quantity;
+      }
+      if (movement.type === "RETURN_TO_STOCK" && reservation) {
+        // A return from an open reservation releases a commitment; stock never
+        // left the warehouse, so increasing it here would create phantom stock.
+        target.committed -= quantity;
+        reservation.returned += quantity;
       }
       draft.inventoryMovements.unshift(movement);
       audit("CREATE_INVENTORY_MOVEMENT", movement.id, `${movement.type}: ${quantity} ${item.unit} de ${item.name}.`);
@@ -1084,29 +1265,17 @@ export async function createAppStore(config) {
       const doctor = draft.doctors.find((candidate) => candidate.id === statement.doctorId);
       statement.status = "SENT";
       statement.sentAt = nowIso();
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        channel,
-        target: doctor?.email || doctor?.name,
-        subject: `Estado de cuenta ${statement.periodStart} a ${statement.periodEnd}`,
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        safePreview: "Su estado de cuenta está disponible en el portal profesional."
-      });
       audit("SEND_DOCTOR_STATEMENT", id, `Estado de cuenta enviado por ${channel}.`);
+    });
+    const statement = state.doctorStatements.find((candidate) => candidate.id === id);
+    if (statement) queueNotification({
+      templateCode: "DOCTOR_STATEMENT", channel, recipientId: statement.doctorId,
+      relatedEntityType: "DOCTOR_STATEMENT", relatedEntityId: statement.id, idempotencyKey: `NOT:DOCTOR_STATEMENT:${statement.id}:${channel}`
     });
   }
 
   function addNotification(input) {
-    setState((draft) => {
-      draft.notifications.unshift({
-        id: uid("NOT"),
-        date: nowIso(),
-        status: config.notificationsMode === "mock" ? "DELIVERED" : "QUEUED",
-        ...input
-      });
-      audit("CREATE_NOTIFICATION", input.subject || "Notificación", `Notificación creada por ${input.channel}.`);
-    });
+    return queueNotification(input);
   }
 
   function updateRuntimeMeta(patch) {
@@ -1141,6 +1310,7 @@ export async function createAppStore(config) {
     updateQuoteStatus,
     sendQuote,
     createPayment,
+    reversePayment,
     createClinicalDocument,
     updateClinicalDocument,
     signClinicalDocument,
@@ -1165,6 +1335,7 @@ export async function createAppStore(config) {
     generateDoctorStatements,
     sendDoctorStatement,
     addNotification,
+    queueNotification,
     statementBalance,
     updateRuntimeMeta
   };

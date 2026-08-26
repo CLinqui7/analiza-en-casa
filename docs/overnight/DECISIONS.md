@@ -1,5 +1,14 @@
 # Decisions
 
+## 2026-08-26 · P0 lot 3 secure delivery and financial/inventory persistence
+
+- The later autonomous execution instruction supersedes the earlier checkpoint restriction and authorizes SAFE-P0-004 and SAFE-P0-006 without reopening the video audit.
+- Notification requests accept only an allowlisted template, registered recipient ID, related entity and idempotency key. Organization, permission and contact channel are derived inside `queue_notification`; raw contact details, clinical content, portal URLs and service-role credentials are rejected at the API boundary.
+- `SIMULATED` records a provider simulation only, never a real delivery. Live provider adapters remain intentionally unconfigured until the client supplies credentials and approved templates.
+- Payments are applied through an org-scoped, row-locked RPC with exact two-decimal validation, reference/idempotency uniqueness, allocation and receipt evidence. A reversal preserves the payment, allocation and receipt history; deletion is blocked.
+- Inventory uses `available = stock - committed`. `apply_inventory_movement_v2` serializes by idempotency key, locks stock/reservation rows, blocks negative stock, supports lot-aware operations and records append-only movement/audit evidence. Transfer requires an existing destination item record rather than inventing stock configuration.
+- SAFE-P0-004 and SAFE-P0-006 remain `IMPLEMENTED_PARTIAL` until a real Supabase environment validates RLS, security-definer behavior, concurrency and provider integration.
+
 ## 2026-08-26 · P0 lot 2 integrity boundary
 
 - `SAFE-P0-002` and `SAFE-P0-003` are implemented as `IMPLEMENTED_PARTIAL`: application behavior, an ordered migration and focused contract tests exist, but no Supabase runtime is available to execute persisted RLS, trigger and RPC paths.
