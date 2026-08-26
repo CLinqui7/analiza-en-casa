@@ -1,4 +1,89 @@
 {
   "chapter": "CH07_preautorizacion_seguro_y_reclamo",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH07-F01",
+      "name": "Listado de cotizaciones de hospitalización",
+      "description": "Hospitalización separa Activos, Cotizaciones y PIC Ejecución. Cotizaciones dispone de Estado, Fecha de creación, Aplicar, Limpiar, Nuevo, paginación, registros y búsqueda.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0013","timestamp":"00:15:48.600","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0013_00h15m48s600ms_stable_change.jpg"}]
+    },
+    {
+      "id": "CH07-F02",
+      "name": "Estados de cotización, preautorización y reclamo",
+      "description": "La tabla muestra Paciente, DUI/NIT, Nro., Estado, Envío preautorización, Respuesta seguro, Envío de reclamo, Creación y Total; se observan Pendiente, No Enviado y No aplica.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0007","timestamp":"00:14:33.000","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0007_00h14m33s000ms_abrupt_change.jpg"}]
+    },
+    {
+      "id": "CH07-F03",
+      "name": "Búsqueda de cotización",
+      "description": "El buscador global filtra el total de 26 registros hasta una fila del paciente consultado.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0008","timestamp":"00:14:44.400","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0008_00h14m44s400ms_abrupt_change.jpg"}]
+    },
+    {
+      "id": "CH07-F04",
+      "name": "Menú contextual y documentos",
+      "description": "La fila expone Editar, Duplicar, Versiones, Imprimir, Enviar, Envíos al seguro, Historial de envíos y Eliminar. Imprimir abre Excel, Detalle de servicio, Cotización, Factura y cotizaciones internacionales.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0010","timestamp":"00:14:49.600","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0010_00h14m49s600ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH07-F05",
+      "name": "Envío por correo o WhatsApp",
+      "description": "El submenú Enviar ofrece E-mail y Whatsapp. No se ejecuta el envío ni se evidencia su contenido.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0014","timestamp":"00:16:02.600","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH07-F06",
+      "name": "Generación y envío directo de PDF",
+      "description": "La conversación propone que el sistema cree el PDF y lo envíe por WhatsApp sin descarga manual; la evidencia visual sólo confirma el menú Whatsapp, no la automatización.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0014","timestamp":"00:16:02.600","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg"}],
+      "transcript_evidence": "00:15:23.000–00:15:45.000: se solicita crear el PDF y enviarlo por WhatsApp desde el sistema."
+    },
+    {
+      "id": "CH07-F07",
+      "name": "Transiciones de estado",
+      "description": "El control Estado abre Pre aprobación, Poner en ejecución, Rechazar y No aplica.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0018","timestamp":"00:16:08.200","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH07-F08",
+      "name": "Cotización guardada pero no activada",
+      "description": "El narrador distingue una cotización guardada de una activada; la fila sigue Pendiente y No Enviado.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0007","timestamp":"00:14:33.000","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0007_00h14m33s000ms_abrupt_change.jpg"}],
+      "transcript_evidence": "00:14:30.000–00:14:36.000: ‘guardado pero todavía no activado’."
+    },
+    {
+      "id": "CH07-F09",
+      "name": "Resultado de una transición de estado",
+      "description": "El menú de estados es visible, pero este corte no confirma persistencia, validaciones ni efectos en preautorización/reclamo después de seleccionar una opción.",
+      "classification": "UNCERTAIN",
+      "confidence": "LOW",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH07","chapter_event_id":"CH07-E0018","timestamp":"00:16:08.200","path":"references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg"}]
+    }
+  ]
 }

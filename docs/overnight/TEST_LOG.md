@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH07 forensic audit
+
+- Python and npm verifiers: PASS (18/18 events, 11/11 crops, all event/safety sheets, 9 valid feature evidence paths).
+- Independent visual review returned E0004 and E0012–E0013 for correction because their first notes did not match the referenced frames.
+- Corrected ledger and inventory now cite the closed-menu states accurately and use E0014_DETAIL for E-mail/Whatsapp.
+
 ## 2026-08-26 · CH06 forensic audit
 
 - Python and npm verifiers: PASS after correcting seven initially invalid inventory evidence paths.

@@ -1,15 +1,66 @@
 {
   "chapter": "CH07_preautorizacion_seguro_y_reclamo",
-  "reviewed_event_ids": [],
-  "reviewed_event_contact_sheets": [],
-  "reviewed_safety_contact_sheets": [],
-  "reviewed_detail_crops": [],
-  "read_readme": false,
-  "read_coverage": false,
-  "read_event_manifest": false,
-  "read_transcript": false,
-  "checked_exact_clip_for_uncertainties": false,
-  "reviewer": "",
-  "completed_at": "",
-  "notes": ""
+  "reviewed_event_ids": [
+    "CH07-E0001",
+    "CH07-E0002",
+    "CH07-E0003",
+    "CH07-E0004",
+    "CH07-E0005",
+    "CH07-E0006",
+    "CH07-E0007",
+    "CH07-E0008",
+    "CH07-E0009",
+    "CH07-E0010",
+    "CH07-E0011",
+    "CH07-E0012",
+    "CH07-E0013",
+    "CH07-E0014",
+    "CH07-E0015",
+    "CH07-E0016",
+    "CH07-E0017",
+    "CH07-E0018"
+  ],
+  "reviewed_event_contact_sheets": [
+    "events_001.jpg",
+    "events_002.jpg"
+  ],
+  "reviewed_safety_contact_sheets": [
+    "safety_001.jpg",
+    "safety_002.jpg",
+    "safety_003.jpg",
+    "safety_004.jpg",
+    "safety_005.jpg",
+    "safety_006.jpg",
+    "safety_007.jpg"
+  ],
+  "reviewed_detail_crops": [
+    "CH07-E0001_00h14m26s600ms_DETAIL.jpg",
+    "CH07-E0005_00h14m32s000ms_DETAIL.jpg",
+    "CH07-E0006_00h14m32s400ms_DETAIL.jpg",
+    "CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+    "CH07-E0010_00h14m49s600ms_DETAIL.jpg",
+    "CH07-E0011_00h14m52s000ms_DETAIL.jpg",
+    "CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+    "CH07-E0015_00h16m04s800ms_DETAIL.jpg",
+    "CH07-E0016_00h16m05s400ms_DETAIL.jpg",
+    "CH07-E0017_00h16m06s400ms_DETAIL.jpg",
+    "CH07-E0018_00h16m08s200ms_DETAIL.jpg"
+  ],
+  "read_readme": true,
+  "read_coverage": true,
+  "read_event_manifest": true,
+  "read_event_manifest_json": true,
+  "read_transcript": true,
+  "read_transcript_srt": true,
+  "read_codex_analyze_this_chapter": true,
+  "read_codex_image_batches": true,
+  "checked_exact_clip_for_uncertainties": true,
+  "reviewed_exact_clip_checks": [
+    "video-audit-reviews/CH07_preautorizacion_seguro_y_reclamo/exact_clip_checks/clip_offset_0024s4.jpg",
+    "video-audit-reviews/CH07_preautorizacion_seguro_y_reclamo/exact_clip_checks/clip_offset_0088s0.jpg",
+    "video-audit-reviews/CH07_preautorizacion_seguro_y_reclamo/exact_clip_checks/clip_offset_0104s8.jpg"
+  ],
+  "reviewer": "Codex Auditor B /root/auditor_b_ch06_ch09",
+  "completed_at": "2026-08-26T06:15:17.706Z",
+  "notes": "Receipt emitido sólo después de abrir individualmente todos los event frames, detail crops y hojas de contacto requeridos. Los fotogramas de exact_clip_checks fueron extraídos del MP4 exacto con ffmpeg y abiertos con view_image para resolver secuencias ambiguas."
 }
