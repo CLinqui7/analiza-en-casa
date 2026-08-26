@@ -1,4 +1,98 @@
 {
   "chapter": "CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH06-F01",
+      "name": "Categorías de ítems de cotización",
+      "description": "La nueva cotización presenta pestañas Servicios, Estudios Dx, Medicamentos, Insumos, Equipos, Honorarios y Extras, además de Solo disponibles en inventario.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0007","timestamp":"00:11:34.600","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0007_00h11m34s600ms_motion_progress.jpg"}]
+    },
+    {
+      "id": "CH06-F02",
+      "name": "Catálogo por socio de negocios",
+      "description": "Cada categoría explorada solicita Socio de negocios y ofrece un selector buscable; las opciones visibles cambian entre socios como VITAE, SURA, MAPFRE, Socio 2021 y OMNIA.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0053","timestamp":"00:12:34.800","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/detail_crops/CH06-E0053_00h12m34s800ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH06-F03",
+      "name": "Selección de insumos con existencia",
+      "description": "El catálogo de Insumos muestra código, descripción, fabricante y existencia entre paréntesis; admite búsqueda, estado Sin resultados, precio autocompletado, cantidad y Añadir.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0025","timestamp":"00:11:58.200","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0025_00h11m58s200ms_stable_change.jpg"},{"chapter_id":"CH06","chapter_event_id":"CH06-E0030","timestamp":"00:12:02.000","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/detail_crops/CH06-E0030_00h12m02s000ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH06-F04",
+      "name": "Selección de estudios diagnósticos",
+      "description": "Estudios Dx usa socio, catálogo buscable, precio, cantidad y Añadir; el video filtra y selecciona un estudio de hemoglobina.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0060","timestamp":"00:12:43.000","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0060_00h12m43s000ms_settled.jpg"}],
+      "transcript_evidence": "00:12:00.000–00:12:17.760: se menciona explícitamente la opción de selección de estudios."
+    },
+    {
+      "id": "CH06-F05",
+      "name": "Honorarios por profesional o servicio",
+      "description": "Honorarios permite elegir socio y un servicio de seguimiento asociado a médico, con precio y cantidad antes de añadirlo.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0083","timestamp":"00:13:15.800","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0083_00h13m15s800ms_abrupt_change.jpg"}]
+    },
+    {
+      "id": "CH06-F06",
+      "name": "Tabla agrupada y cálculo por renglón",
+      "description": "La tabla agrupa categorías y muestra Tipo, Código, Item, Precio, Cantidad editable, Subtotal, Desc %, Desc $, Impuesto y Total; cada fila tiene acción de retiro.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0069","timestamp":"00:12:57.800","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0069_00h12m57s800ms_abrupt_change.jpg"}]
+    },
+    {
+      "id": "CH06-F07",
+      "name": "Descuentos, impuesto y totales",
+      "description": "Grupo de descuento y selección de paciente producen recálculo visible de descuentos por línea, impuesto y resumen Subtotal/Descuentos/Impuestos/Total.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0109","timestamp":"00:14:14.200","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0109_00h14m14s200ms_abrupt_change.jpg"},{"chapter_id":"CH06","chapter_event_id":"CH06-E0115","timestamp":"00:14:24.200","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/detail_crops/CH06-E0115_00h14m24s200ms_DETAIL.jpg"}]
+    },
+    {
+      "id": "CH06-F08",
+      "name": "Autocompletado por paciente",
+      "description": "Al cambiar Paciente se actualizan DUI/NIT, teléfono, correo, referido por y grupo de descuento visibles en la cabecera de la cotización.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0103","timestamp":"00:14:06.400","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0103_00h14m06s400ms_stable_change.jpg"}]
+    },
+    {
+      "id": "CH06-F09",
+      "name": "Persistencia y retroceso",
+      "description": "El formulario ofrece Atrás y Guardar; el narrador afirma que Guardar persiste la cotización y luego usa Atrás.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0115","timestamp":"00:14:24.200","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0115_00h14m24s200ms_settled.jpg"}],
+      "transcript_evidence": "00:14:20.000–00:14:30.000: ‘le doy guardar, me lo guarda… me voy atrás’."
+    },
+    {
+      "id": "CH06-F10",
+      "name": "Contenido de Equipos y Extras",
+      "description": "Las pestañas Equipos y Extras son visibles, pero este capítulo no demuestra sus formularios ni reglas internas.",
+      "classification": "UNCERTAIN",
+      "confidence": "LOW",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [{"chapter_id":"CH06","chapter_event_id":"CH06-E0085","timestamp":"00:13:50.600","path":"references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0085_00h13m50s600ms_abrupt_change.jpg"}]
+    }
+  ]
 }

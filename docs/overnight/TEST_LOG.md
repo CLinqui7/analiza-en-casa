@@ -1,5 +1,19 @@
 # Test log
 
+## 2026-08-26 · CH06 forensic audit
+
+- Python and npm verifiers: PASS after correcting seven initially invalid inventory evidence paths.
+- Coverage: 115/115 events, 75/75 crops, 13/13 event sheets and 12/12 safety sheets.
+- Independent visual sample: CH06-E0025, E0069, E0103 and E0109 matched their ledger/inventory observations.
+- Structured inventory: 10 features, 12 valid evidence references, zero missing evidence paths after correction.
+
+## 2026-08-26 · CH01 forensic audit
+
+- `python tools/video-audit/scripts/verify_chapter_review.py <CH01 source>`: PASS (24/24 events, 11/11 crops, all contact sheets, complete ledger).
+- `npm run audit:status`: CH01 fully receipted and fully noted; remaining chapters pending.
+- Independent visual sample: CH01-E0009, E0011, E0018 and E0023 matched their ledger observations.
+- Structured inventory: 14 features, 14 valid evidence references, zero missing evidence paths.
+
 ## 2026-08-25 · Baseline antes de cambios
 
 | Prueba | Resultado | Detalle |
