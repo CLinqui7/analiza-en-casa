@@ -19,6 +19,13 @@ function parseCSV(text){
   return rows.filter(r=>r.some(x=>x!=="")).map(r=>Object.fromEntries(header.map((h,i)=>[h,r[i]??""])));
 }
 function jpgNames(dir){return fs.existsSync(dir)?new Set(fs.readdirSync(dir).filter(x=>x.toLowerCase().endsWith('.jpg'))):new Set()}
+function evidencePathExists(value,source){
+  if(!value)return false;
+  const candidate=path.isAbsolute(value)?value:path.join(root,value);
+  const sourceCandidate=path.join(source,value);
+  return (fs.existsSync(candidate)&&fs.statSync(candidate).isFile()) ||
+    (fs.existsSync(sourceCandidate)&&fs.statSync(sourceCandidate).isFile());
+}
 const chapters=fs.readdirSync(chaptersRoot).filter(x=>x.startsWith("CH")&&fs.statSync(path.join(chaptersRoot,x)).isDirectory()).sort();
 const results=[];
 let failed=false;
@@ -26,6 +33,7 @@ for(const ch of chapters){
   const source=path.join(chaptersRoot,ch), review=path.join(reviewsRoot,ch);
   const events=parseCSV(fs.readFileSync(path.join(source,"event_manifest.csv"),"utf8"));
   const requiredIds=new Set(events.map(r=>r.chapter_event_id));
+  const eventsById=new Map(events.map(r=>[r.chapter_event_id,r]));
   let receipt={}; try{receipt=JSON.parse(fs.readFileSync(path.join(review,"chapter_review_receipt.json"),"utf8"))}catch{}
   const reviewedIds=new Set(receipt.reviewed_event_ids||[]);
   const notes=fs.existsSync(path.join(review,"event_review_notes.csv"))?parseCSV(fs.readFileSync(path.join(review,"event_review_notes.csv"),"utf8")):[];
@@ -43,6 +51,42 @@ for(const ch of chapters){
   const extra=(a,b)=>[...a].filter(x=>!b.has(x));
   const acknowledgements={read_readme:receipt.read_readme,read_coverage:receipt.read_coverage,read_event_manifest:receipt.read_event_manifest,read_transcript:receipt.read_transcript,checked_exact_clip_for_uncertainties:receipt.checked_exact_clip_for_uncertainties};
   const missingAck=Object.entries(acknowledgements).filter(([,v])=>!v).map(([k])=>k);
+  const inventoryErrors=[];
+  let inventory={};
+  try{inventory=JSON.parse(fs.readFileSync(path.join(review,"chapter_feature_inventory.json"),"utf8"))}
+  catch(error){inventoryErrors.push(`inventory:invalid:${error.code||error.name}`)}
+  const features=Array.isArray(inventory.features)?inventory.features:[];
+  if(features.length===0)inventoryErrors.push("features:empty");
+  const expectedChapterId=ch.slice(0,4);
+  if(inventory.chapter_id&&inventory.chapter_id!==expectedChapterId)inventoryErrors.push(`chapter_id:${inventory.chapter_id}`);
+  if(inventory.chapter&&inventory.chapter!==ch)inventoryErrors.push(`chapter:${inventory.chapter}`);
+  if(!inventory.chapter_id&&!inventory.chapter)inventoryErrors.push("chapter:missing");
+  const allowedClassifications=new Set(["VISIBLE","VERBAL","INFERRED","UNCERTAIN"]);
+  const featureIds=[];
+  for(const feature of features){
+    const featureId=String(feature.id||"").trim()||"<missing-id>";
+    featureIds.push(featureId);
+    for(const field of ["id","name","description","classification","confidence"]){
+      if(!String(feature[field]||"").trim())inventoryErrors.push(`${featureId}:${field}:missing`);
+    }
+    if(!allowedClassifications.has(feature.classification))inventoryErrors.push(`${featureId}:classification:${feature.classification||"missing"}`);
+    const evidenceItems=Array.isArray(feature.evidence)?feature.evidence:[];
+    if(evidenceItems.length===0)inventoryErrors.push(`${featureId}:evidence:empty`);
+    for(const [index,evidence] of evidenceItems.entries()){
+      const prefix=`${featureId}:evidence:${index+1}`;
+      const eventId=String(evidence.chapter_event_id||"").trim();
+      if(!requiredIds.has(eventId))inventoryErrors.push(`${prefix}:event:${eventId||"missing"}`);
+      else if(evidence.timestamp!==eventsById.get(eventId).timestamp)inventoryErrors.push(`${prefix}:timestamp:${evidence.timestamp||"missing"}`);
+      const primaryPath=String(evidence.path||evidence.image||"").trim();
+      if(!primaryPath)inventoryErrors.push(`${prefix}:path:missing`);
+      else if(!evidencePathExists(primaryPath,source))inventoryErrors.push(`${prefix}:path:not-found:${primaryPath}`);
+      const detailCrop=String(evidence.detail_crop||"").trim();
+      if(detailCrop&&!evidencePathExists(detailCrop,source))inventoryErrors.push(`${prefix}:detail-crop:not-found:${detailCrop}`);
+    }
+  }
+  const featureIdCounts=new Map();
+  for(const featureId of featureIds)featureIdCounts.set(featureId,(featureIdCounts.get(featureId)||0)+1);
+  for(const [featureId,count] of featureIdCounts)if(count>1)inventoryErrors.push(`feature-id:duplicate:${featureId}`);
   const problems={
     missing_reviewed_event_ids:missing(requiredIds,reviewedIds),
     unknown_reviewed_event_ids:extra(reviewedIds,requiredIds),
@@ -53,7 +97,8 @@ for(const ch of chapters){
     unknown_safety_sheets:extra(set(receipt.reviewed_safety_contact_sheets),reqSafetySheets),
     missing_detail_crops:missing(reqDetails,set(receipt.reviewed_detail_crops)),
     unknown_detail_crops:extra(set(receipt.reviewed_detail_crops),reqDetails),
-    missing_acknowledgements:missingAck
+    missing_acknowledgements:missingAck,
+    feature_inventory_errors:inventoryErrors.sort()
   };
   const hasProblems=Object.values(problems).some(a=>a.length);
   const pending=(receipt.reviewed_event_ids||[]).length===0 && missingNotes.length===requiredIds.size;
