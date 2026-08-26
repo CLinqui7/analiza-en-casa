@@ -106,10 +106,13 @@
   "read_codex_image_batches": true,
   "checked_exact_clip_for_uncertainties": true,
   "reviewed_exact_clip_checks": [
+    "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0000s.jpg",
     "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0030s.jpg",
     "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0060s.jpg",
     "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0090s.jpg",
     "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0120s.jpg",
+    "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0150s.jpg",
+    "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0180s.jpg",
     "video-audit-reviews/CH17_reporte_de_salud_detallado_e_impresion/exact_clip_checks/scan_media_0210s.jpg"
   ],
   "reviewer": "Codex Auditor D /root/auditor_d_ch14_ch17",

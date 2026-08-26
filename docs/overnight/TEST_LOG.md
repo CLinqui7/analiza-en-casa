@@ -1,5 +1,14 @@
 # Test log
 
+## 2026-08-26 · Final audit checkpoint
+
+- Global video audit gate: PASS (17 verified, 0 pending, 0 failed); `audit:status` reports 17/17 fully receipted and 17/17 fully noted, covering 1,359 events.
+- Canonical generation: PASS (210 requirements, 73 open questions and 6 P0 safety/integrity findings). A second render produced identical SHA-256 hashes for all five outputs.
+- Spreadsheet artifact validation: PASS. `MASTER_FEATURE_MATRIX.csv` imported as A1:M211 (210 data rows); `VIDEO_VS_PLATFORM_GAP_MATRIX.csv` imported as A1:Q217 (216 data rows: 210 requirements plus 6 guardrails).
+- `npm run codex:preflight`: PASS (17 chapters, 1,359 events, 730 crops, 17 exact clips, 158 event sheets, 212 safety sheets, no errors or warnings).
+- `npm run check`: PASS (9/9 domain tests, 75/75 QA checks and 365,878-byte standalone build).
+- `references/video-audit/` remains unchanged. Supabase/RLS was not executed against a real/local database because no CLI/database runtime is available.
+
 ## 2026-08-26 · CH05 forensic audit
 
 - Per-chapter Python verifier: PASS (87/87 events, 71/71 crops, 10 event sheets, 15 safety sheets and 15 traceable features).

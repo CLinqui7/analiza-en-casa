@@ -14,7 +14,9 @@
     "codex:preflight": "node scripts/codex-preflight.mjs",
     "github:preflight": "node scripts/github-preflight.mjs",
     "audit:status": "node scripts/audit-status.mjs",
-    "audit:verify": "node scripts/verify-video-audit.mjs"
+    "audit:verify": "node scripts/verify-video-audit.mjs",
+    "audit:master": "node scripts/generate-master-video-requirements.mjs",
+    "audit:master:bootstrap": "node scripts/generate-master-video-requirements.mjs --bootstrap"
   },
   "engines": {
     "node": ">=20"
