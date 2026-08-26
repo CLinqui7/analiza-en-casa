@@ -38,11 +38,20 @@ for(const ch of chapters){
   const reviewedIds=new Set(receipt.reviewed_event_ids||[]);
   const notes=fs.existsSync(path.join(review,"event_review_notes.csv"))?parseCSV(fs.readFileSync(path.join(review,"event_review_notes.csv"),"utf8")):[];
   const noteMap=new Map(notes.map(r=>[r.chapter_event_id,r]));
+  const noteIdCounts=new Map();
+  for(const note of notes)noteIdCounts.set(note.chapter_event_id,(noteIdCounts.get(note.chapter_event_id)||0)+1);
+  const allowedClassifications=new Set(["VISIBLE","VERBAL","INFERRED","UNCERTAIN"]);
   const missingNotes=[];
   for(const id of requiredIds){
     const r=noteMap.get(id);
     if(!r || !r.visible_change?.trim() || !r.classification?.trim() || !r.confidence?.trim()) missingNotes.push(id);
   }
+  const unknownNotes=[...noteMap.keys()].filter(id=>!requiredIds.has(id)).sort();
+  const duplicateNotes=[...noteIdCounts].filter(([,count])=>count>1).map(([id])=>id).sort();
+  const invalidNoteClassifications=notes
+    .filter(note=>!allowedClassifications.has(note.classification?.trim()))
+    .map(note=>note.chapter_event_id||"<missing-id>")
+    .sort();
   const reqEventSheets=jpgNames(path.join(source,"contact_sheets_events"));
   const reqSafetySheets=jpgNames(path.join(source,"contact_sheets_safety"));
   const reqDetails=jpgNames(path.join(source,"detail_crops"));
@@ -61,7 +70,6 @@ for(const ch of chapters){
   if(inventory.chapter_id&&inventory.chapter_id!==expectedChapterId)inventoryErrors.push(`chapter_id:${inventory.chapter_id}`);
   if(inventory.chapter&&inventory.chapter!==ch)inventoryErrors.push(`chapter:${inventory.chapter}`);
   if(!inventory.chapter_id&&!inventory.chapter)inventoryErrors.push("chapter:missing");
-  const allowedClassifications=new Set(["VISIBLE","VERBAL","INFERRED","UNCERTAIN"]);
   const featureIds=[];
   for(const feature of features){
     const featureId=String(feature.id||"").trim()||"<missing-id>";
@@ -91,6 +99,9 @@ for(const ch of chapters){
     missing_reviewed_event_ids:missing(requiredIds,reviewedIds),
     unknown_reviewed_event_ids:extra(reviewedIds,requiredIds),
     missing_event_notes:missingNotes,
+    unknown_event_notes:unknownNotes,
+    duplicate_event_notes:duplicateNotes,
+    invalid_event_note_classifications:invalidNoteClassifications,
     missing_event_sheets:missing(reqEventSheets,set(receipt.reviewed_event_contact_sheets)),
     unknown_event_sheets:extra(set(receipt.reviewed_event_contact_sheets),reqEventSheets),
     missing_safety_sheets:missing(reqSafetySheets,set(receipt.reviewed_safety_contact_sheets)),
