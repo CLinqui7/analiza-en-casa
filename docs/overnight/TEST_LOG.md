@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH14 forensic audit
+
+- Per-chapter Python verifier: PASS (152/152 events, 76/76 crops, 17 event sheets, 22 safety sheets and 16 traceable features).
+- Ledger review confirmed 152 concrete observations across movements, committed stock, receipts, closures, suppliers, warehouses, lots and kits.
+- Inventory-to-quote handling for missing items remains UNCERTAIN; the audit does not infer stock, valuation or approval rules.
+
 ## 2026-08-26 · CH04 forensic audit
 
 - Per-chapter Python verifier: PASS (35/35 events, 30/30 crops, all contact sheets and 11 traceable features).
