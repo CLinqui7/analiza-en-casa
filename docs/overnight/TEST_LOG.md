@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH03 forensic audit
+
+- Python/npm verifiers: PASS (46/46 events, 10/10 crops, all contact sheets and 13 traceable features).
+- Independent visual sample: CH03-E0007, E0030, E0042 and E0046 matched the transient Preadmisión tab, inactive-patient listing, quote/preauthorization tracking columns and initial invoice fields.
+- Preadmisión remains UNCERTAIN because it appears only during loading; financial values and state transitions remain evidence-bound open questions.
+
 ## 2026-08-26 · CH09 forensic audit
 
 - Python/npm verifiers: PASS (137/137 events, 61/61 crops, 16/16 event sheets, 24/24 safety sheets and 14 traceable features).
