@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH17 forensic audit
+
+- Per-chapter Python verifier: PASS (48/48 events, 21/21 crops, 6 event sheets, 13 safety sheets and 17 traceable features).
+- Ledger review confirmed 48 concrete observations across detailed clinical reporting, date range, patient data, allergies, vital signs and nursing notes.
+- Printable output, role restrictions and WhatsApp sharing remain UNCERTAIN/VERBAL where the recording does not prove their result or security boundary.
+
 ## 2026-08-26 · CH16 forensic audit
 
 - Per-chapter Python verifier: PASS (44/44 events, 19/19 crops, 5 event sheets, 6 safety sheets and 9 traceable features).
