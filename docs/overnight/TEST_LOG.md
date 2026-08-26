@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH04 forensic audit
+
+- Per-chapter Python verifier: PASS (35/35 events, 30/30 crops, all contact sheets and 11 traceable features).
+- Ledger review confirmed 35 concrete event observations with distinct patient, referral, invoice and first item-category states.
+- Patient-result labels and the heterogeneous referral catalog remain UNCERTAIN; no save, pricing or discount rule is inferred.
+
 ## 2026-08-26 · CH10–CH13 forensic audit
 
 - Per-chapter Python verifiers: PASS for CH10, CH11, CH12 and CH13 (328/328 events, 185/185 crops, 38 event sheets, 49 safety sheets and 58 traceable feature evidence references).

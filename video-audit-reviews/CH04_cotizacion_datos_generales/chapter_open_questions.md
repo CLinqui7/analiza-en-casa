@@ -1,3 +1,13 @@
-# Open questions · CH04_cotizacion_datos_generales
+# Preguntas abiertas · CH04
 
-Pending review.
+1. **CH04-Q001 · UNCERTAIN** — ¿Qué representa una entrada de Paciente rotulada Cotización, en especial la que usa una identificación compuesta solo por ceros? ¿Es el mecanismo de cotización abierta mencionado de forma ruidosa por la narración, y qué controles de anti-enumeración/organización aplica? Evidencia: CH04-E0003, 00:06:18.800, `detail_crops/CH04-E0003_00h06m18s800ms_DETAIL.jpg`.
+2. **CH04-Q002 · UNCERTAIN** — ¿La selección de Paciente fija DUI/NIT, teléfono y correo como snapshot de la cotización o como referencias vivas, y quién puede editarlos? Evidencia: CH04-E0005, 00:06:21.800, `detail_crops/CH04-E0005_00h06m21s800ms_DETAIL.jpg`.
+3. **CH04-Q003 · UNCERTAIN** — ¿Qué zona horaria, fecha predeterminada y rangos pasados/futuros admite Fecha? La fecha grabada no debe codificarse. Evidencia: CH04-E0007, 00:06:30.600, `detail_crops/CH04-E0007_00h06m30s600ms_DETAIL.jpg`.
+4. **CH04-Q004 · UNCERTAIN** — ¿Cuál es el catálogo, elegibilidad, precedencia, autorización y fórmula de Grupo de descuento? La evidencia solo muestra Regular y no autoriza porcentajes. Evidencia: CH04-E0008, 00:06:33.000, `event_frames/CH04-E0008_00h06m33s000ms_settled.jpg`.
+5. **CH04-Q005 · UNCERTAIN** — ¿Por qué Referido por mezcla canales, aseguradora, paciente recurrente y personas; cuál es el tipo de cada entidad, alcance organizacional, máximo de tags y efecto de VACIO? Evidencia: CH04-E0014, 00:06:42.000, `detail_crops/CH04-E0014_00h06m42s000ms_DETAIL.jpg`; CH04-E0032, 00:06:59.600, `detail_crops/CH04-E0032_00h06m59s600ms_DETAIL.jpg`.
+6. **CH04-Q006 · UNCERTAIN** — ¿Qué crea el botón + de Referido por, qué permisos requiere y cómo se evita duplicar o contaminar el catálogo? Evidencia: CH04-E0009, 00:06:34.800, `event_frames/CH04-E0009_00h06m34s800ms_abrupt_change.jpg`.
+7. **CH04-Q007 · UNCERTAIN** — ¿Cómo se valida y aplica Giftcard, y qué controles de unicidad, expiración, saldo, idempotencia y auditoría requiere? Evidencia: CH04-E0034, 00:07:01.000, `event_frames/CH04-E0034_00h07m01s000ms_abrupt_change.jpg`.
+8. **CH04-Q008 · UNCERTAIN** — ¿Qué contenido mínimo y finalidad tiene Comentarios, quién puede leerlo y cómo se evita introducir información clínica sensible en documentos o notificaciones no seguras? Evidencia: CH04-E0034, 00:07:01.000, `event_frames/CH04-E0034_00h07m01s000ms_abrupt_change.jpg`.
+9. **CH04-Q009 · UNCERTAIN** — ¿Cuándo se guarda una nueva cotización, qué hace que una versión enviada sea inmutable y qué validación relaciona paciente, factura e ítems? El capítulo no muestra ninguna acción final. Evidencia: CH04-E0035, 00:07:01.600, `event_frames/CH04-E0035_00h07m01s600ms_stable_change.jpg`.
+
+La transcripción TXT/SRT es ruidosa y no resuelve estas reglas.

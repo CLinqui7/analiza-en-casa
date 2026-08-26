@@ -1,4 +1,118 @@
 {
   "chapter": "CH04_cotizacion_datos_generales",
-  "features": []
+  "chapter_id": "CH04",
+  "title": "Cotización: datos generales",
+  "transcript_summary": "La narración, con ASR ruidoso, menciona una posible cotización abierta, la fecha actual, distintas fuentes de referencia y comentarios operativos. La evidencia visual confirma selección de paciente, autocompletado, fecha, grupo de descuento, referido por multiselección, giftcard, comentarios y categorías de ítems; no confirma reglas financieras, guardado o envío.",
+  "features": [
+    {
+      "id": "CH04-F001",
+      "category": "pantallas",
+      "name": "Nueva cotización por secciones",
+      "description": "El formulario separa Datos del paciente y Datos de la factura, seguido por categorías de ítems.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El capítulo no muestra guardado, envío, versión ni resultado final.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0006","timestamp":"00:06:27.600","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0006_00h06m27s600ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración explica que se completan datos generales de la cotización.","observation":"Paciente, factura y pestañas de ítems aparecen dentro de la misma pantalla."}]
+    },
+    {
+      "id": "CH04-F002",
+      "category": "busquedas_filtros",
+      "name": "Selector buscable de paciente",
+      "description": "Paciente es obligatorio y abre un catálogo buscable cuyos resultados combinan documento y nombre/etiqueta.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueban alcance por organización, anti-enumeración, permisos, reglas de coincidencia o creación de paciente.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0002","timestamp":"00:06:18.200","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0002_00h06m18s200ms_motion_progress.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0002_00h06m18s200ms_DETAIL.jpg","transcript":"El ASR alude a contar con los datos para iniciar una cotización.","observation":"Al escribir un término parcial, el desplegable filtra resultados."}]
+    },
+    {
+      "id": "CH04-F003",
+      "category": "calidad_datos",
+      "name": "Resultados de paciente con etiquetas de cotización",
+      "description": "La búsqueda de Paciente devuelve entradas sintéticas rotuladas como Cotización, incluida una identificación compuesta solo por ceros.",
+      "classification": "UNCERTAIN",
+      "confidence": "alta",
+      "rule": "No se puede determinar si representa cotización abierta, paciente genérico o contaminación de datos.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0003","timestamp":"00:06:18.800","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0003_00h06m18s800ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0003_00h06m18s800ms_DETAIL.jpg","transcript":"00:06:19–00:06:25 contiene una frase ruidosa sobre poder hacer una cotización abierta.","observation":"Tres resultados visibles usan la etiqueta Cotización; la relación con la frase verbal requiere confirmación."}]
+    },
+    {
+      "id": "CH04-F004",
+      "category": "formularios_campos",
+      "name": "Autocompletado de datos del paciente",
+      "description": "Al seleccionar Paciente se llenan DUI/NIT, Teléfono y Correo asociados.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra si son editables, cómo se versionan o qué validaciones y controles de privacidad aplican.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0005","timestamp":"00:06:21.800","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0005_00h06m21s800ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0005_00h06m21s800ms_DETAIL.jpg","transcript":"La narración continúa con los datos generales requeridos.","observation":"Los tres campos pasan de vacíos a poblados inmediatamente tras confirmar Paciente."}]
+    },
+    {
+      "id": "CH04-F005",
+      "category": "formularios_campos",
+      "name": "Fecha requerida con calendario",
+      "description": "Fecha tiene asterisco y un selector con navegación de mes/año, Cancelar y Seleccionar.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La fecha visible pertenece a la grabación; no demuestra valor predeterminado, zona horaria, fechas permitidas o regla de fecha actual.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0007","timestamp":"00:06:30.600","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0007_00h06m30s600ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0007_00h06m30s600ms_DETAIL.jpg","transcript":"00:06:25–00:06:32 parece indicar seleccionar la fecha actual, con ASR imperfecto.","observation":"El calendario y sus acciones están abiertos; no se cambia el día."}]
+    },
+    {
+      "id": "CH04-F006",
+      "category": "descuentos",
+      "name": "Grupo de descuento obligatorio",
+      "description": "Grupo de descuento tiene asterisco y muestra Regular en el capítulo.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se abre el catálogo ni se demuestran porcentajes, elegibilidad, cálculo, precedencia o autorización.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0008","timestamp":"00:06:33.000","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0008_00h06m33s000ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0008_00h06m33s000ms_DETAIL.jpg","transcript":"La transcripción no explica reglas de descuento.","observation":"La etiqueta requerida y el valor Regular son visibles después de cerrar el calendario."}]
+    },
+    {
+      "id": "CH04-F007",
+      "category": "referencias",
+      "name": "Referido por como multiselección buscable",
+      "description": "Referido por es obligatorio, permite buscar, desplazar el catálogo, elegir más de un valor y retirar tags mediante x.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El capítulo no define máximo, duplicados, obligatoriedad semántica o efecto de cada referencia.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0032","timestamp":"00:06:59.600","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0032_00h06m59s600ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0032_00h06m59s600ms_DETAIL.jpg","transcript":"00:06:32–00:06:58 enumera de forma ruidosa distintas procedencias de referencia.","observation":"Quedan simultáneamente dos tags, uno de canal y otro de persona; el clip exacto confirma la secuencia."}]
+    },
+    {
+      "id": "CH04-F008",
+      "category": "calidad_datos",
+      "name": "Catálogo heterogéneo de referidos",
+      "description": "La misma lista mezcla VACIO, canales de marketing, aseguradora, condición de paciente recurrente y nombres de personas.",
+      "classification": "UNCERTAIN",
+      "confidence": "alta",
+      "rule": "Se requiere confirmar si son tipos distintos combinados deliberadamente o entidades sin normalización.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0014","timestamp":"00:06:42.000","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0014_00h06m42s000ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0014_00h06m42s000ms_DETAIL.jpg","transcript":"La narración menciona referencias por personas y redes, pero no un modelo de datos.","observation":"Canales, paciente recurrente, aseguradora y personas aparecen consecutivamente en el mismo desplegable."}]
+    },
+    {
+      "id": "CH04-F009",
+      "category": "acciones",
+      "name": "Acción auxiliar para Referido por",
+      "description": "Un botón circular verde con + aparece junto a Referido por.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se pulsa; no se puede afirmar si crea referente, tipo, persona o relación.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0009","timestamp":"00:06:34.800","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0009_00h06m34s800ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH04_cotizacion_datos_generales/detail_crops/CH04-E0009_00h06m34s800ms_DETAIL.jpg","transcript":"La narración no explica el botón +.","observation":"El control + está separado del desplegable y permanece visible."}]
+    },
+    {
+      "id": "CH04-F010",
+      "category": "formularios_campos",
+      "name": "Giftcard y Comentarios",
+      "description": "Giftcard aparece sin asterisco y con icono de borrado; Comentarios tiene asterisco y área multilínea.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueban validación de giftcard, aplicación financiera, contenido mínimo, privacidad o persistencia de comentarios.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0034","timestamp":"00:07:01.000","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0034_00h07m01s000ms_abrupt_change.jpg","detail_crop":null,"transcript":"00:07:04–00:07:18 parece indicar colocar un comentario operativo; el ASR es ruidoso.","observation":"Giftcard permanece vacío y Comentarios no recibe texto en los event frames; el clip exacto muestra foco sin contenido legible."}]
+    },
+    {
+      "id": "CH04-F011",
+      "category": "cotizacion_items",
+      "name": "Categorías de ítems y filtro de inventario",
+      "description": "La cotización organiza Servicios, Estudios Dx, Medicamentos, Insumos, Equipos, Honorarios y Extras; incluye Solo disponibles en inventario y, en Servicios, Socio de negocios, Servicios, Precio y Cantidad.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El capítulo no añade ítems ni demuestra precios, existencias, cantidades, cálculo o validaciones; CH05 continúa el flujo.",
+      "evidence": [{"chapter_id":"CH04","chapter_event_id":"CH04-E0035","timestamp":"00:07:01.600","image":"references/video-audit/chapters/CH04_cotizacion_datos_generales/event_frames/CH04-E0035_00h07m01s600ms_stable_change.jpg","detail_crop":null,"transcript":"El cierre empieza a hablar de servicios pero queda truncado.","observation":"Las siete pestañas, el checkbox y los primeros campos de Servicios son visibles."}]
+    }
+  ]
 }
