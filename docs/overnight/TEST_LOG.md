@@ -1,5 +1,12 @@
 # Test log
 
+## 2026-08-26 · Final handoff gate
+
+- `npm run check`: PASS (29/29 tests, 75/75 QA checks, standalone build 407,920 bytes).
+- `npm run audit:verify`: PASS (17/17 chapters, 1,359/1,359 observations, 0 verifier failures).
+- `npm run codex:preflight`: PASS (17 chapters, 730 detail crops, 17 exact clips, 0 errors, 0 warnings).
+- Diff review: completed against `main`; no unresolved P0/P1 issue was found within the implemented P0 scope. Live database/provider acceptance remains excluded rather than inferred.
+
 ## 2026-08-26 · P0 lot 3 notifications, payments and inventory
 
 - `node --test tests/p0-notifications-payments-inventory.test.mjs`: PASS (4/4). Covers template-only notification API/JWT forwarding, rejection of client destination/content, payment reference/overpay/reversal evidence, inventory entry/reservation/consumption/return/idempotency/org boundary, and static RLS/RPC/trigger contracts.

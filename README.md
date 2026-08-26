@@ -1,73 +1,75 @@
-# Analiza en Casa · Production QA
-## Entrega nocturna para Codex
+# Analiza en Casa
 
-Este paquete incluye la evidencia completa de los 17 capítulos, ledgers verificables, instrucciones `AGENTS.md`, CI y un prompt maestro. Empieza en `CODEX_AND_GITHUB_START_HERE.md` y usa `codex/PROMPT_OVERNIGHT_MASTER.md`.
+Analiza en Casa es una aplicación web de demostración para la operación de atención domiciliar. Reconstruye los flujos visibles de 17 capítulos de referencia y añade controles de seguridad, trazabilidad e integridad para una evolución productiva.
 
-Antes de subir a GitHub ejecuta `UPLOAD_TO_GITHUB.bat`.
+> Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
 
+## Objetivo y módulos
 
-Plataforma integral de atención domiciliar reconstruida a partir del video funcional de referencia y las mejoras solicitadas. Este repositorio incluye una aplicación interactiva, datos ficticios, preparación para Supabase, configuración para Vercel, migraciones SQL, RLS, pruebas y una matriz de cobertura de los 17 capítulos del video.
+El sistema concentra pacientes, responsables, hospitalizaciones, cotizaciones versionadas, preautorizaciones, cobros, portal del paciente, documentos clínicos, agenda, compras, inventario, kits, cuentas por pagar, catálogos, auditoría y QA de paridad del video.
 
-> **Clasificación del entorno:** `SYNTHETIC_DEMO`. No contiene datos reales de pacientes.
+Los seis controles P0 están implementados a nivel de aplicación, contrato SQL y prueba estática/focalizada. Su estado es `IMPLEMENTED_PARTIAL` hasta ejecutar las migraciones y pruebas de RLS/RPC contra un proyecto Supabase real. La matriz trazable está en [docs/VIDEO_VS_PLATFORM_GAP_MATRIX.csv](docs/VIDEO_VS_PLATFORM_GAP_MATRIX.csv).
 
-## Qué incluye
+## Arquitectura actual
 
-- Dashboard operativo.
-- Pacientes, responsables, direcciones, seguro y notificaciones.
-- Hospitalizaciones como expediente central.
-- Cotizaciones por servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.
-- Versionado, descuentos, cobertura, monto del paciente, impresión y mensajería.
-- Preautorizaciones, solicitudes de información, aprobación, rechazo y reclamo.
-- Cuentas por cobrar, pagos, referencias únicas y comprobantes.
-- Portal seguro del paciente con línea de tiempo, resumen financiero y QR demostrativo.
-- Reporte de salud, orden médica, plan de cuidados, evolución, signos vitales y notas.
-- Tarjeta de medicamentos y administración.
-- Agenda y turnos.
-- Compras, proveedores, factura, IVA y recepción.
-- Inventario, lotes, series, comprometidos, acuses, movimientos, cierres, bodegas y kits.
-- Cuentas por pagar y estados de cuenta médicos.
-- Catálogos, tarifas y descuentos por categoría.
-- Auditoría y QA de cobertura video vs. plataforma.
+- `index.html` y `app/`: SPA estática con modo mock persistente en el navegador.
+- `api/`: funciones server-side para portal y cola segura de notificaciones.
+- `supabase/migrations/`: esquema incremental, RLS, RPCs y auditoría.
+- `supabase/seed.sql`: datos exclusivamente sintéticos.
+- `tests/` y `scripts/`: pruebas de dominio, contratos P0, QA, build y verificadores.
+- `Analiza_en_Casa_Demo_QA.html`: build autónomo para una demo offline.
 
-## Inicio inmediato
+## Requisitos
 
-### Sin instalar nada
+- Node.js 20 o posterior (`node --version`).
+- Git.
+- Opcional para validación persistente: Supabase CLI y Docker Desktop en ejecución.
+- Opcional para preview: Vercel CLI autenticado o importación desde el panel de Vercel.
 
-Abre directamente:
+## Descargar e iniciar en Windows PowerShell
 
-```text
-Analiza_en_Casa_Demo_QA.html
-```
-
-Ese archivo autónomo contiene CSS, JavaScript y datos ficticios en una sola pieza. Funciona con doble clic y también sirve como demo para validación funcional.
-
-
-### Windows
-
-1. Extrae el ZIP.
-2. Abre la carpeta.
-3. Ejecuta `START_WINDOWS.bat`.
-4. Abre `http://localhost:4173`.
-
-### macOS o Linux
-
-```bash
-chmod +x START_MAC_LINUX.sh
-./START_MAC_LINUX.sh
-```
-
-También puedes ejecutar:
-
-```bash
+```powershell
+git clone https://github.com/CLinqui7/analiza-en-casa.git
+Set-Location analiza-en-casa
+git switch codex/overnight-audit-hardening
+npm install
+npm run check
 npm start
 ```
 
-El proyecto no requiere instalar paquetes externos para funcionar en modo QA.
+Abra `http://localhost:4173`. Para detener el servidor, presione `Ctrl+C` en la misma consola. También puede abrir `Analiza_en_Casa_Demo_QA.html` con doble clic para la demo autónoma.
 
-## Credenciales de demostración
+Si aparece `EADDRINUSE`, el puerto 4173 ya está ocupado. Identifique el proceso con `Get-NetTCPConnection -LocalPort 4173`, detenga únicamente el proceso que corresponda o ejecute la app en otro puerto si el script admite su variable de puerto. No finalice procesos desconocidos.
 
-| Perfil | Correo | Contraseña |
-|---|---|---|
+## Variables de entorno
+
+Copie `.env.example` a `.env.local`; nunca suba ese archivo ni secretos al repositorio.
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Para modo local basta `DATA_MODE=mock`. Para Supabase configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y los equivalentes `NEXT_PUBLIC_*` necesarios para el navegador. Sólo las claves publicables/anon pueden ir al cliente. `SUPABASE_SERVICE_ROLE_KEY`, tokens de WhatsApp/SMS/email y `CRON_SECRET` son exclusivamente server-side en Vercel/Supabase.
+
+## Comandos frecuentes
+
+```powershell
+npm start                 # servidor local
+npm test                  # 29 pruebas unitarias y de contrato
+npm run qa                # 75 comprobaciones de QA
+npm run check             # test + QA + demo autónoma
+npm run audit:verify      # integridad de los 17 capítulos
+npm run audit:master      # regenera matrices desde el JSON canónico
+npm run codex:preflight   # preflight del repositorio/evidencia
+git status --short --branch
+```
+
+Los resultados de QA se escriben en `docs/QA_AUTOMATED_RESULTS.*`; las capturas y resultados de navegador de baseline están en `docs/QA_BROWSER_RESULTS.*`.
+
+## Usuarios demo y roles
+
+| Rol | Correo | Contraseña demo |
+| --- | --- | --- |
 | Administración | `admin@analiza.demo` | `Demo2026!` |
 | Médico | `medico@analiza.demo` | `Demo2026!` |
 | Enfermería | `enfermeria@analiza.demo` | `Demo2026!` |
@@ -75,138 +77,33 @@ El proyecto no requiere instalar paquetes externos para funcionar en modo QA.
 | Finanzas | `finanzas@analiza.demo` | `Demo2026!` |
 | Auditoría | `auditoria@analiza.demo` | `Demo2026!` |
 
-En el modo local la contraseña es ilustrativa. La autenticación productiva se realiza con Supabase Auth.
+Estas credenciales sólo existen en la demo mock. En producción, Supabase Auth, invitaciones verificadas, RLS y permisos reemplazan ese mecanismo.
 
-## Pruebas
+## Seguridad y límites
 
-```bash
-npm test
-npm run qa
-npm run check
-```
+- Organización, permiso y destinatario se validan en servidor/RPC; el navegador no envía `organization_id`, teléfono, correo, contenido clínico ni service-role.
+- El portal requiere token hasheado, expiración, OTP y respuestas anti-enumeración.
+- Cotizaciones enviadas, pagos, movimientos y documentos firmados conservan historial y auditoría; una corrección/reversión es una nueva evidencia, no un borrado.
+- Mensajería usa plantillas administrativas genéricas y proveedor simulado hasta recibir credenciales. `SIMULATED` nunca significa entrega real.
+- La firma clínica actual es metadato de aplicación, no una firma electrónica legal.
 
-Los resultados se guardan en:
+Faltan confirmaciones del cliente sobre firmas legales, reglas clínicas, precios, seguros, impuestos, retención, consentimiento, proveedores y reglas de operación. Consulte [docs/MASTER_OPEN_QUESTIONS.md](docs/MASTER_OPEN_QUESTIONS.md) y [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md).
 
-- `docs/QA_AUTOMATED_RESULTS.json`
-- `docs/QA_AUTOMATED_RESULTS.md`
-- `docs/QA_BROWSER_RESULTS.json`
-- `docs/QA_BROWSER_RESULTS.md`
+## Supabase y Vercel
+
+Use [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) para aplicar las seis migraciones, cargar el seed sintético y ejecutar la matriz RLS. Use [docs/VERCEL_SETUP.md](docs/VERCEL_SETUP.md) y [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) para el preview. El estado actual está en [docs/overnight/DEPLOYMENT_STATUS.md](docs/overnight/DEPLOYMENT_STATUS.md).
 
 ## Estructura
 
 ```text
-.
-├── index.html
-├── app/
-│   ├── main.js
-│   ├── views.js
-│   ├── store.js
-│   ├── domain.js
-│   ├── mock-data.js
-│   ├── supabase-adapter.js
-│   ├── templates.js
-│   └── styles.css
-├── api/
-│   ├── runtime-config.js
-│   ├── health.js
-│   ├── notifications.js
-│   ├── portal-status.js
-│   └── cron-retries.js
-├── supabase/
-│   ├── migrations/
-│   └── seed.sql
-├── scripts/
-├── tests/
-├── docs/
-├── vercel.json
-└── .env.example
+app/                 interfaz y lógica de demo
+api/                 endpoints server-side
+supabase/            migraciones, RLS, seed sintético
+tests/               pruebas de dominio y P0
+scripts/             QA, build y auditoría
+docs/                runbooks, matrices y handoff
+references/          evidencia inmutable de video
+video-audit-reviews/ ledgers de revisión
 ```
 
-## Activar Supabase
-
-1. Crea un proyecto vacío de Supabase.
-2. Ejecuta, en orden:
-   - `supabase/migrations/202608260001_initial_schema.sql`
-   - `supabase/migrations/202608260002_security_rls_functions.sql`
-   - `supabase/migrations/202608260003_indexes_permissions_storage.sql`
-   - `supabase/seed.sql`
-3. Crea un usuario en Supabase Auth con metadata:
-
-```json
-{
-  "full_name": "Nombre del usuario",
-  "organization_id": "00000000-0000-0000-0000-000000000001"
-}
-```
-
-4. Asigna el rol usando la instrucción al final de `supabase/seed.sql`.
-5. Copia `.env.example` a `.env.local`.
-6. Configura:
-
-```env
-NEXT_PUBLIC_DATA_MODE=supabase
-NEXT_PUBLIC_SUPABASE_URL=https://TU-PROYECTO.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-```
-
-7. Reinicia el servidor.
-
-La aplicación conserva un fallback local cuando Supabase no está disponible. En producción se recomienda bloquear el fallback con una política de despliegue una vez terminada la migración.
-
-## Desplegar en Vercel
-
-1. Sube la carpeta a un repositorio Git.
-2. Importa el repositorio en Vercel.
-3. Framework preset: **Other**.
-4. Build command: dejar vacío.
-5. Output directory: dejar vacío.
-6. Agrega las variables de `.env.example`.
-7. Define `CRON_SECRET`.
-8. Despliega.
-
-`vercel.json` incluye encabezados de seguridad y el job de reintentos de mensajería.
-
-## Seguridad implementada en la preparación
-
-- RLS por organización.
-- Roles y permisos.
-- Buckets privados.
-- Portal con token hash, vencimiento, código adicional y anti-enumeración.
-- Pagos, movimientos y notificaciones con llaves de idempotencia.
-- Versiones de cotización inmutables después de envío.
-- Documentos clínicos firmados protegidos.
-- Notas de enfermería bloqueadas después de firma.
-- Auditoría append-only.
-- Mensajes externos sin diagnóstico ni contenido clínico.
-- Service role limitado a funciones server-side.
-
-## Límites que deben cerrarse antes de pacientes reales
-
-El sistema está listo para prueba funcional y desarrollo productivo, pero no debe operar con información real hasta completar:
-
-1. Validación legal y de privacidad aplicable.
-2. Plantillas oficiales de todos los documentos impresos.
-3. Catálogos, precios y fórmulas reales.
-4. Reglas de seguro y aprobación.
-5. Firma clínica y política de correcciones.
-6. Retención, respaldo, recuperación y continuidad.
-7. Pruebas de penetración y revisión de RLS.
-8. UAT formal con usuarios autorizados.
-9. Configuración de proveedores de mensajería.
-10. Consentimientos y política de envío de información.
-
-Consulta `docs/QA_PRE_CODEX.md`, `docs/QA_BROWSER_RESULTS.md` y `docs/OPEN_GAPS.md`.
-
-## Uso de Codex después de esta prueba
-
-Este proyecto ya sirve como baseline. Codex debe trabajar sobre tareas pequeñas, siempre con:
-
-- Objetivo.
-- Archivos permitidos.
-- Reglas de negocio.
-- Criterios de aceptación.
-- Pruebas obligatorias.
-- Prohibición de inventar datos o reglas.
-- Revisión del diff antes de merge.
-
-El prompt recomendado está en `docs/PROMPT_CODEX_NEXT_PHASE.md`.
+Para operación, recuperación y rollback consulte [docs/RUNBOOK.md](docs/RUNBOOK.md). Para la entrega completa consulte [docs/FINAL_HANDOFF.md](docs/FINAL_HANDOFF.md).
