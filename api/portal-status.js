@@ -1,31 +1,34 @@
+import {
+  PORTAL_ACCESS_ERROR,
+  callServiceRpc,
+  createFixedWindowRateLimiter,
+  requestFingerprint,
+  serverSupabaseConfig
+} from "./_portal-security.js";
+
+const verificationLimiter = createFixedWindowRateLimiter();
+
 export default async function handler(request, response) {
   if (request.method !== "POST") return response.status(405).json({ error: "Method not allowed" });
-  const { token, document, verificationCode } = request.body || {};
-  if (!token || !document || !verificationCode) {
-    // Respuesta deliberadamente genérica para evitar enumeración.
-    return response.status(400).json({ error: "No fue posible validar el acceso." });
+  const token = typeof request.body?.token === "string" ? request.body.token.trim() : "";
+  const verificationCode = typeof request.body?.verificationCode === "string" ? request.body.verificationCode.trim() : "";
+  const fingerprint = requestFingerprint(request);
+  const rateKey = `portal-verify:${fingerprint.ipHash || "unknown"}`;
+  if (!token || !verificationCode || token.length > 1024 || verificationCode.length > 128 || !verificationLimiter.allow(rateKey)) {
+    return response.status(401).json({ error: PORTAL_ACCESS_ERROR });
   }
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return response.status(503).json({ error: "Portal productivo no configurado.", mode: "mock-only" });
-  }
+  const config = serverSupabaseConfig();
+  if (!config) return response.status(503).json({ error: "Servicio temporalmente no disponible." });
 
   try {
-    const rpc = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/portal_quote_snapshot`, {
-      method: "POST",
-      headers: {
-        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        p_token: token,
-        p_document: document,
-        p_verification_code: verificationCode
-      })
+    const data = await callServiceRpc(fetch, config, "portal_quote_snapshot", {
+      p_token: token,
+      p_verification_code: verificationCode,
+      p_ip_hash: fingerprint.ipHash,
+      p_user_agent_hash: fingerprint.userAgentHash
     });
-    if (!rpc.ok) return response.status(401).json({ error: "No fue posible validar el acceso." });
-    const data = await rpc.json();
+    if (!data) return response.status(401).json({ error: PORTAL_ACCESS_ERROR });
     response.setHeader("Cache-Control", "no-store");
     response.status(200).json(data);
   } catch {

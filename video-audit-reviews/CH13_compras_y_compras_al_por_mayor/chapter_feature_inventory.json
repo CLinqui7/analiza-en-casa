@@ -1,4 +1,65 @@
 {
-  "chapter": "CH13_compras_y_compras_al_por_mayor",
-  "features": []
+  "chapter_id":"CH13",
+  "chapter":"CH13_compras_y_compras_al_por_mayor",
+  "summary":"Registro y consulta de compras por orden o caja chica, carga de factura, desglose de totales y opciones de exportación/anulación. La relación con inventario se menciona verbalmente, no se demuestra en pantalla.",
+  "features":[
+    {
+      "id":"CH13-F01","name":"Listado de compras","description":"Tabla con Acciones, Tipo, Número, Proveedor, Total, # Factura, Fecha, Estado y Registro PT; búsqueda, paginación y exportación Excel.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0004","timestamp":"00:36:46.400","path":"event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg","detail_crop":"detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg","transcript":"00:36:42–00:37:10"}]
+    },
+    {
+      "id":"CH13-F02","name":"Estados visibles de compra","description":"Se observan Compra Recibida y Pendiente, además de Registro PT Sin Registro o Pendiente.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0004","timestamp":"00:36:46.400","path":"event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg","detail_crop":"detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg","transcript":"00:36:42–00:37:10"}]
+    },
+    {
+      "id":"CH13-F03","name":"Elección de modalidad de compra","description":"Nuevo permite escoger Orden de compra o Caja chica.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0006","timestamp":"00:36:50.400","path":"event_frames/CH13-E0006_00h36m50s400ms_abrupt_change.jpg","transcript":"00:36:45–00:37:00"},
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0035","timestamp":"00:37:37.800","path":"event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg","transcript":"00:37:30–00:37:45"}
+      ]
+    },
+    {
+      "id":"CH13-F04","name":"Formulario de orden de compra","description":"Fecha, número de factura, observaciones, ítem, proveedor, presentación, costo y cantidad; permite agregar presentación/ítem y guardar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0007","timestamp":"00:36:54.400","path":"event_frames/CH13-E0007_00h36m54s400ms_abrupt_change.jpg","transcript":"00:36:50–00:37:25"}]
+    },
+    {
+      "id":"CH13-F05","name":"Tabla de ítems de orden","description":"Tabla Proveedor, Ítem, Costo, Cantidad, Presentación y Total con acciones Atrás y Guardar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0027","timestamp":"00:37:23.000","path":"event_frames/CH13-E0027_00h37m23s000ms_motion_progress.jpg","detail_crop":"detail_crops/CH13-E0027_00h37m23s000ms_DETAIL.jpg","transcript":"00:37:10–00:37:30"},
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0029","timestamp":"00:37:24.000","path":"event_frames/CH13-E0029_00h37m24s000ms_stable_change.jpg","transcript":"00:37:10–00:37:30"}
+      ]
+    },
+    {
+      "id":"CH13-F06","name":"Formulario de compra por caja chica","description":"Fecha, proveedor, factura, archivo de factura con Buscar, observaciones, ítem, presentación, costo, cantidad, impuesto y descuento.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0052","timestamp":"00:38:22.400","path":"event_frames/CH13-E0052_00h38m22s400ms_settled.jpg","detail_crop":"detail_crops/CH13-E0052_00h38m22s400ms_DETAIL.jpg","transcript":"00:38:00–00:38:35"}]
+    },
+    {
+      "id":"CH13-F07","name":"Desglose de totales de caja chica","description":"Tabla Ítem, Costo, Cantidad, Presentación, Impuesto, Descuento y Total; resumen Subtotal, Descuentos, Extra, Impuesto y Total. Los valores son datos del ejemplo, no reglas de cálculo confirmadas.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0065","timestamp":"00:38:52.400","path":"event_frames/CH13-E0065_00h38m52s400ms_abrupt_change.jpg","transcript":"00:38:45–00:39:10"},
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0069","timestamp":"00:38:58.600","path":"event_frames/CH13-E0069_00h38m58s600ms_stable_change.jpg","transcript":"00:38:45–00:39:10"}
+      ]
+    },
+    {
+      "id":"CH13-F08","name":"Detalle de compra y adjuntos","description":"Modal con fecha, orden, factura, estado, categoría, proveedor, observaciones, adjuntos con Ver archivo, tabla de ítems y totales.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0083","timestamp":"00:39:33.000","path":"event_frames/CH13-E0083_00h39m33s000ms_abrupt_change.jpg","transcript":"00:39:25–00:39:45"},
+        {"chapter_id":"CH13","chapter_event_id":"CH13-E0084","timestamp":"00:39:33.400","path":"event_frames/CH13-E0084_00h39m33s400ms_abrupt_change.jpg","transcript":"00:39:25–00:39:45"}
+      ]
+    },
+    {
+      "id":"CH13-F09","name":"Acciones sobre compra","description":"Menú con Ver, Editar detalles, Copiar, Imprimir PDF, Imprimir con montos, Imprimir a Excel y Anular.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0091","timestamp":"00:39:40.800","path":"event_frames/CH13-E0091_00h39m40s800ms_settled.jpg","detail_crop":"detail_crops/CH13-E0091_00h39m40s800ms_DETAIL.jpg","transcript":"00:39:25–00:39:45"}]
+    },
+    {
+      "id":"CH13-F10","name":"Relación de compras con inventario","description":"La narración dice que compras sirve para alimentar el inventario; no se observa recepción ni movimiento de inventario en pantalla.","classification":"VERBAL","confidence":"MEDIUM",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0092","timestamp":"00:39:43.000","path":"event_frames/CH13-E0092_00h39m43s000ms_settled.jpg","detail_crop":"detail_crops/CH13-E0092_00h39m43s000ms_DETAIL.jpg","transcript":"00:39:51–00:39:58"}]
+    },
+    {
+      "id":"CH13-F11","name":"Reglas fiscales, de anulación y autorización","description":"No se demuestran cálculo fiscal, reglas de redondeo, permisos para editar/anular, efecto de anulación ni control de archivos adjuntos.","classification":"UNCERTAIN","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0092","timestamp":"00:39:43.000","path":"event_frames/CH13-E0092_00h39m43s000ms_settled.jpg","detail_crop":"detail_crops/CH13-E0092_00h39m43s000ms_DETAIL.jpg","transcript":"00:39:25–00:39:58"}]
+    }
+  ],
+  "entities":["Compra","Orden de compra","Caja chica","Proveedor","Ítem","Presentación","Factura/adjunto","Impuesto","Descuento","Movimiento de inventario (solo verbal)"],
+  "open_questions":["Fórmulas fiscales y redondeo", "Estados, recepción, anulación y efecto en inventario", "Permisos y auditoría", "Validación/retención/seguridad de factura adjunta"]
 }

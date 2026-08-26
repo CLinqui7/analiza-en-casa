@@ -1,4 +1,138 @@
 {
   "chapter": "CH03_hospitalizacion_y_navegacion_de_preautorizaciones",
-  "features": []
+  "chapter_id": "CH03",
+  "title": "Hospitalización y navegación de preautorizaciones",
+  "transcript_summary": "La narración, con ASR ruidoso, contrasta pacientes con procesos o servicios actuales frente a quienes tuvieron servicios anteriormente, recorre Hospitalización y presenta Cotizaciones como vía de seguimiento. La evidencia visual muestra filtros, tablas, estados de preautorización/seguro/reclamo y el inicio de Nueva cotización; no demuestra reglas de transición, precios ni envío.",
+  "features": [
+    {
+      "id": "CH03-F001",
+      "category": "navegacion",
+      "name": "Menú financiero desde Pacientes",
+      "description": "El icono financiero despliega Hospitalización, Cuentas por cobrar y Preautorizaciones & Reclamos; se elige Hospitalización.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La presencia del menú no demuestra permisos por rol ni alcance organizacional.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0005","timestamp":"00:04:48.200","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0005_00h04m48s200ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0005_00h04m48s200ms_DETAIL.jpg","transcript":"La narración introduce los procesos de hospitalización y servicios vigentes.","observation":"El menú expandido contiene las tres entradas y la siguiente transición abre Hospitalización."}]
+    },
+    {
+      "id": "CH03-F002",
+      "category": "pantallas",
+      "name": "Panel y pestañas de Hospitalización Administrativa",
+      "description": "La vista estable contiene Relación de pacientes por empresa, Activos, Cotizaciones y PIC Ejecución.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Los badges 8 y 67 son valores observados; su cálculo, alcance y frecuencia de actualización no se demuestran.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0040","timestamp":"00:05:39.200","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0040_00h05m39s200ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0040_00h05m39s200ms_DETAIL.jpg","transcript":"El narrador alude de manera imprecisa a procesos en ejecución y cantidades actuales.","observation":"Panel, badges, pestañas, filtros y tabla están visibles en una vista estable."}]
+    },
+    {
+      "id": "CH03-F003",
+      "category": "calidad_ui",
+      "name": "Pestaña Preadmisión transitoria",
+      "description": "Preadmisión aparece durante dos cargas de Hospitalización y desaparece cuando se estabiliza la pantalla.",
+      "classification": "UNCERTAIN",
+      "confidence": "alta",
+      "rule": "No se puede afirmar que sea una pestaña disponible, una bandera de funcionalidad o un residuo de renderizado.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0036","timestamp":"00:05:37.000","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0036_00h05m37s000ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración no explica Preadmisión.","observation":"Preadmisión vuelve a aparecer en la segunda carga y desaparece en CH03-E0038."}]
+    },
+    {
+      "id": "CH03-F004",
+      "category": "busquedas_filtros",
+      "name": "Filtros de hospitalizaciones activas",
+      "description": "Activos ofrece Estado Administrativo, Fecha de inicio y Tipo de cuenta, con Aplicar y Limpiar.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueban operadores de fecha, combinaciones, catálogos, persistencia ni alcance por organización.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0009","timestamp":"00:04:53.200","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0009_00h04m53s200ms_stable_change.jpg","detail_crop":null,"transcript":"El narrador está describiendo el conjunto de pacientes/procesos activos.","observation":"Los tres filtros y las acciones Aplicar/Limpiar son legibles."}]
+    },
+    {
+      "id": "CH03-F005",
+      "category": "tablas_listados",
+      "name": "Tabla de hospitalizaciones activas",
+      "description": "La tabla muestra acción por elipsis, Hospitalización, DUI/NIT, Paciente, Empresa, Tipo Cuenta, Administrativo y Duración, además de búsqueda, orden y paginación.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se abre una fila ni se validan acciones, permisos, orden, búsqueda o paginación.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0010","timestamp":"00:04:57.600","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0010_00h04m57s600ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0010_00h04m57s600ms_DETAIL.jpg","transcript":"La narración describe los pacientes con procesos actuales.","observation":"Las columnas, registros y badges Activo son legibles."}]
+    },
+    {
+      "id": "CH03-F006",
+      "category": "reglas_estado",
+      "name": "Interpretación verbal de hospitalización activa",
+      "description": "La narración asocia Activos con pacientes que mantienen un proceso o servicio actual.",
+      "classification": "VERBAL",
+      "confidence": "media",
+      "rule": "El ASR es ruidoso y no define qué evento crea, suspende o cierra el estado.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0017","timestamp":"00:05:06.400","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0017_00h05m06s400ms_abrupt_change.jpg","detail_crop":null,"transcript":"Aproximadamente 00:05:06–00:05:15: se explica que los activos tienen un proceso/servicios en curso.","observation":"La explicación ocurre mientras se recorren registros administrativos Activo."}]
+    },
+    {
+      "id": "CH03-F007",
+      "category": "pacientes",
+      "name": "Vista de pacientes inactivos",
+      "description": "Pacientes > Inactivos conserva búsqueda, paginación y columnas operativas, y muestra estado Inactivo y triage No Asignado.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La narración sugiere servicios previos, pero no define transición, reactivación, retención o notificaciones.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0030","timestamp":"00:05:27.200","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0030_00h05m27s200ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0030_00h05m27s200ms_DETAIL.jpg","transcript":"Aproximadamente 00:05:16–00:05:34: se contrasta con pacientes que tuvieron servicios anteriormente.","observation":"La pestaña Inactivos y los badges amarillos Inactivo son visibles."}]
+    },
+    {
+      "id": "CH03-F008",
+      "category": "calidad_ui",
+      "name": "Carga y estado vacío simultáneos",
+      "description": "Durante la carga de Hospitalización aparecen a la vez Cargando y No hay registros disponibles antes de que se llenen las filas.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Debe tratarse como estado transitorio observado, no como prueba de que la consulta devolvió cero registros.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0008","timestamp":"00:04:52.600","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0008_00h04m52s600ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración continúa sin comentar el estado de carga.","observation":"Los dos mensajes coexisten y las filas aparecen en CH03-E0010."}]
+    },
+    {
+      "id": "CH03-F009",
+      "category": "cotizaciones",
+      "name": "Filtros y alta desde Cotizaciones",
+      "description": "La pestaña Cotizaciones muestra Estado, Fecha de creación, Aplicar, Limpiar, búsqueda, paginación y + Nuevo.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se ejecutan filtros, búsqueda o paginación; no se conoce el catálogo de estados.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0041","timestamp":"00:05:55.200","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0041_00h05m55s200ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0041_00h05m55s200ms_DETAIL.jpg","transcript":"La narración presenta la opción de cotización.","observation":"Al cambiar de pestaña aparecen filtros específicos y + Nuevo."}]
+    },
+    {
+      "id": "CH03-F010",
+      "category": "preautorizaciones_reclamos",
+      "name": "Seguimiento de cotización, preautorización, seguro y reclamo",
+      "description": "La tabla relaciona Estado, Envío preautorización, Respuesta seguro y Envío de reclamo con cada cotización.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Pendiente, No Enviado y No aplica son estados visibles, pero la evidencia no define transiciones, reintentos, idempotencia ni auditoría.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0042","timestamp":"00:05:55.800","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0042_00h05m55s800ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0042_00h05m55s800ms_DETAIL.jpg","transcript":"El ASR menciona cotización/preautorización o reclamo de forma incompleta.","observation":"Las columnas y los tres estados son claramente legibles."}]
+    },
+    {
+      "id": "CH03-F011",
+      "category": "finanzas",
+      "name": "Fecha de creación y total por cotización",
+      "description": "Cada fila expone Creación y Total.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Los importes del video son datos de ejemplo; no se infieren moneda contractual, precios, impuestos, descuentos o redondeo.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0043","timestamp":"00:05:59.000","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0043_00h05m59s000ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración no define cálculo financiero.","observation":"Las columnas de fecha y total permanecen visibles al desplazar la tabla."}]
+    },
+    {
+      "id": "CH03-F012",
+      "category": "formularios_campos",
+      "name": "Nueva cotización y datos del paciente",
+      "description": "+ Nuevo abre Nueva cotización con Paciente obligatorio y campos DUI/NIT, Teléfono y Correo.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra búsqueda/creación del paciente, validación, anti-enumeración ni guardado.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0045","timestamp":"00:06:08.600","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0045_00h06m08s600ms_abrupt_change.jpg","detail_crop":null,"transcript":"El cierre ruidoso alude a crear o elegir paciente para una cotización.","observation":"El título Nueva cotización y la sección Datos del paciente aparecen tras pulsar + Nuevo."}]
+    },
+    {
+      "id": "CH03-F013",
+      "category": "formularios_campos",
+      "name": "Datos iniciales de factura",
+      "description": "Datos de factura muestra Fecha, Grupo de descuento, Referido por y Comentarios con asterisco, además de Giftcard y acciones auxiliares.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Los valores y fecha visibles no se convierten en reglas; no se prueban catálogos, descuentos, giftcards ni obligatoriedad del backend.",
+      "evidence": [{"chapter_id":"CH03","chapter_event_id":"CH03-E0046","timestamp":"00:06:09.600","image":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/event_frames/CH03-E0046_00h06m09s600ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH03_hospitalizacion_y_navegacion_de_preautorizaciones/detail_crops/CH03-E0046_00h06m09s600ms_DETAIL.jpg","transcript":"La transcripción termina antes de explicar la factura.","observation":"Las etiquetas y asteriscos se leen; el formulario no se envía en este capítulo."}]
+    }
+  ]
 }

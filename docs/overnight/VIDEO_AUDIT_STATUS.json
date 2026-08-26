@@ -1,127 +1,127 @@
 {
-  "generated_at": "2026-08-26T04:54:05.918Z",
+  "generated_at": "2026-08-26T07:21:18.764Z",
   "chapters": [
     {
       "chapter": "CH01_contexto_inicial_acceso_dashboard_y_listado_de_pacientes",
       "required_events": 24,
-      "reviewed_ids": 0,
+      "reviewed_ids": 24,
       "ledger_rows": 24,
-      "completed_notes": 0
+      "completed_notes": 24
     },
     {
       "chapter": "CH02_alta_y_edicion_de_pacientes",
       "required_events": 82,
-      "reviewed_ids": 0,
+      "reviewed_ids": 82,
       "ledger_rows": 82,
-      "completed_notes": 0
+      "completed_notes": 82
     },
     {
       "chapter": "CH03_hospitalizacion_y_navegacion_de_preautorizaciones",
       "required_events": 46,
-      "reviewed_ids": 0,
+      "reviewed_ids": 46,
       "ledger_rows": 46,
-      "completed_notes": 0
+      "completed_notes": 46
     },
     {
       "chapter": "CH04_cotizacion_datos_generales",
       "required_events": 35,
-      "reviewed_ids": 0,
+      "reviewed_ids": 35,
       "ledger_rows": 35,
-      "completed_notes": 0
+      "completed_notes": 35
     },
     {
       "chapter": "CH05_cotizacion_servicios_estudios_y_medicamentos",
       "required_events": 87,
-      "reviewed_ids": 0,
+      "reviewed_ids": 87,
       "ledger_rows": 87,
-      "completed_notes": 0
+      "completed_notes": 87
     },
     {
       "chapter": "CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales",
       "required_events": 115,
-      "reviewed_ids": 0,
+      "reviewed_ids": 115,
       "ledger_rows": 115,
-      "completed_notes": 0
+      "completed_notes": 115
     },
     {
       "chapter": "CH07_preautorizacion_seguro_y_reclamo",
       "required_events": 18,
-      "reviewed_ids": 0,
+      "reviewed_ids": 18,
       "ledger_rows": 18,
-      "completed_notes": 0
+      "completed_notes": 18
     },
     {
       "chapter": "CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos",
       "required_events": 95,
-      "reviewed_ids": 0,
+      "reviewed_ids": 95,
       "ledger_rows": 95,
-      "completed_notes": 0
+      "completed_notes": 95
     },
     {
       "chapter": "CH09_hospitalizacion_clinica_y_reporte_de_salud",
       "required_events": 137,
-      "reviewed_ids": 0,
+      "reviewed_ids": 137,
       "ledger_rows": 137,
-      "completed_notes": 0
+      "completed_notes": 137
     },
     {
       "chapter": "CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos",
       "required_events": 114,
-      "reviewed_ids": 0,
+      "reviewed_ids": 114,
       "ledger_rows": 114,
-      "completed_notes": 0
+      "completed_notes": 114
     },
     {
       "chapter": "CH11_agenda_y_turnos",
       "required_events": 71,
-      "reviewed_ids": 0,
+      "reviewed_ids": 71,
       "ledger_rows": 71,
-      "completed_notes": 0
+      "completed_notes": 71
     },
     {
       "chapter": "CH12_cuentas_por_pagar_y_pagos_de_servicios",
       "required_events": 51,
-      "reviewed_ids": 0,
+      "reviewed_ids": 51,
       "ledger_rows": 51,
-      "completed_notes": 0
+      "completed_notes": 51
     },
     {
       "chapter": "CH13_compras_y_compras_al_por_mayor",
       "required_events": 92,
-      "reviewed_ids": 0,
+      "reviewed_ids": 92,
       "ledger_rows": 92,
-      "completed_notes": 0
+      "completed_notes": 92
     },
     {
       "chapter": "CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits",
       "required_events": 152,
-      "reviewed_ids": 0,
+      "reviewed_ids": 152,
       "ledger_rows": 152,
-      "completed_notes": 0
+      "completed_notes": 152
     },
     {
       "chapter": "CH15_acuse_de_inventario_y_catalogos_de_items",
       "required_events": 148,
-      "reviewed_ids": 0,
+      "reviewed_ids": 148,
       "ledger_rows": 148,
-      "completed_notes": 0
+      "completed_notes": 148
     },
     {
       "chapter": "CH16_descuentos_y_reglas_por_categoria",
       "required_events": 44,
-      "reviewed_ids": 0,
+      "reviewed_ids": 44,
       "ledger_rows": 44,
-      "completed_notes": 0
+      "completed_notes": 44
     },
     {
       "chapter": "CH17_reporte_de_salud_detallado_e_impresion",
       "required_events": 48,
-      "reviewed_ids": 0,
+      "reviewed_ids": 48,
       "ledger_rows": 48,
-      "completed_notes": 0
+      "completed_notes": 48
     }
   ],
   "total_chapters": 17,
-  "fully_receipted": 0,
-  "fully_noted": 0
+  "fully_receipted": 17,
+  "fully_noted": 17
 }

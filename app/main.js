@@ -44,6 +44,8 @@ const ui = {
   notificationsOpen: false,
   commandOpen: false,
   quoteDraft: null,
+  portalSnapshot: null,
+  portalMessage: "",
   currentRoute: ""
 };
 
@@ -68,6 +70,10 @@ function render() {
     ui.search = "";
     ui.tab = "overview";
     ui.currentRoute = route;
+    if (!isPortalRoute(route)) {
+      ui.portalSnapshot = null;
+      ui.portalMessage = "";
+    }
   }
 
   document.body.classList.toggle("portal-mode", isPortalRoute(route));
@@ -295,13 +301,14 @@ function openCaseForm(id = null, patientId = "") {
   });
 }
 
-function openQuoteForm(caseId = "", quoteId = null, revise = false) {
+function openQuoteForm(caseId = "", quoteId = null, revise = false, editDraft = false) {
   const state = store.getState();
   const existing = quoteId ? state.quotes.find((q) => q.id === quoteId) : null;
   const selectedCase = state.cases.find((c) => c.id === (caseId || existing?.caseId)) || state.cases[0];
   ui.quoteDraft = {
     quoteId: existing?.id || null,
     revise,
+    editDraft: Boolean(existing && editDraft),
     caseId: selectedCase?.id || "",
     patientId: selectedCase?.patientId || "",
     items: existing ? structuredClone(existing.items) : [],
@@ -320,7 +327,7 @@ function renderQuoteModal() {
   if (record) draft.patientId = record.patientId;
   const result = calculateQuote(draft.items, draft.discount, draft.insurerAmount);
   openModal({
-    title: draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización",
+    title: draft.editDraft ? `Editar borrador ${draft.quoteId}` : draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización",
     subtitle: "Agrega servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.",
     size: "xl",
     body: `
@@ -333,6 +340,7 @@ function renderQuoteModal() {
             <label>Monto del seguro<input type="number" name="insurerAmount" min="0" step=".01" value="${draft.insurerAmount || 0}" data-action="quote-calc-change"></label>
             <label class="full">Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" data-action="quote-calc-change"></label>
             <label class="full">Comentarios<textarea name="comments" rows="2" data-action="quote-calc-change">${safeText(draft.comments || "")}</textarea></label>
+            ${draft.revise ? `<label class="full">Motivo de la nueva versión<textarea name="revisionReason" rows="2" required data-action="quote-calc-change">${safeText(draft.revisionReason || "")}</textarea></label>` : ""}
           </form>
           <div class="quote-add-row">
             <select id="quote-item-select">${catalogOptions()}</select>
@@ -353,7 +361,7 @@ function renderQuoteModal() {
           <p>${draft.items.length} conceptos · ${new Set(draft.items.map(i=>i.category)).size} categorías</p>
         </aside>
       </div>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${draft.revise ? "Crear nueva versión" : "Guardar cotización"}</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${draft.editDraft ? "Guardar borrador" : draft.revise ? "Crear nueva versión" : "Guardar cotización"}</button>`
   });
 }
 
@@ -367,6 +375,7 @@ function syncQuoteHead() {
   ui.quoteDraft.discount = { type: "PERCENT", value: Number(data.get("discountValue") || 0), reason: data.get("discountReason") || "" };
   ui.quoteDraft.insurerAmount = Number(data.get("insurerAmount") || 0);
   ui.quoteDraft.comments = data.get("comments") || "";
+  ui.quoteDraft.revisionReason = data.get("revisionReason") || "";
 }
 
 function openInsuranceStatus(quoteId = "") {
@@ -431,6 +440,41 @@ function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId
       <label class="full"><input type="checkbox" name="signNow"> Firmar al guardar</label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-document">Guardar documento</button>`
+  });
+}
+
+function openClinicalCorrectionForm(subjectType, subjectId) {
+  const state = store.getState();
+  const record = subjectType === "CLINICAL_DOCUMENT"
+    ? state.clinicalDocuments.find((item) => item.id === subjectId)
+    : subjectType === "NURSING_NOTE"
+      ? state.nursingNotes.find((item) => item.id === subjectId)
+      : state.medicationCards.find((item) => item.id === subjectId);
+  if (!record) return showToast("Registro clínico no encontrado.", "danger");
+  openModal({
+    title: "Corrección clínica auditada",
+    subtitle: "Crea un addendum, enmienda o fe de erratas. El registro firmado original no se modifica.",
+    size: "lg",
+    body: `<form id="clinical-correction-form" class="form-grid">
+      <input type="hidden" name="subjectType" value="${subjectType}"><input type="hidden" name="subjectId" value="${subjectId}">
+      <label>Tipo<select name="kind"><option value="ADDENDUM">Addendum</option><option value="AMENDMENT">Enmienda</option><option value="ERRATA">Fe de erratas</option></select></label>
+      <label class="full">Motivo<textarea name="reason" rows="3" required placeholder="Motivo verificable de la corrección"></textarea></label>
+      <label class="full">Contenido corregido o complementario<textarea name="content" rows="6" required placeholder="Información corregida o complementaria"></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-correction">Registrar corrección</button>`
+  });
+}
+
+function openClinicalVoidForm(subjectType, subjectId) {
+  openModal({
+    title: "Anular registro clínico",
+    subtitle: "La anulación conserva el registro, exige permiso específico y deja auditoría.",
+    size: "md",
+    body: `<form id="clinical-void-form" class="form-grid">
+      <input type="hidden" name="subjectType" value="${subjectType}"><input type="hidden" name="subjectId" value="${subjectId}">
+      <label class="full">Motivo de la anulación<textarea name="reason" rows="4" required></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-danger" data-action="save-clinical-void">Anular y conservar historial</button>`
   });
 }
 
@@ -529,6 +573,7 @@ function openPurchaseForm() {
 function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
   const state = store.getState();
   const item = state.inventoryItems.find((i) => i.id === itemId) || state.inventoryItems[0];
+  const lots = (state.inventoryLots || []).filter((lot) => lot.inventoryItemId === item?.id && lot.status === "AVAILABLE");
   openModal({
     title: "Movimiento de inventario",
     subtitle: "Todos los movimientos modifican existencias o comprometidos y quedan auditados.",
@@ -540,6 +585,9 @@ function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
       <label>Hospitalización<select name="caseId"><option value="">Sin caso</option>${caseOptions(caseId)}</select></label>
       <label>Bodega origen<select name="warehouseFrom">${warehouseOptions(item?.warehouseId)}</select></label>
       <label>Bodega destino<select name="warehouseTo"><option value="">No aplica</option>${warehouseOptions()}</select></label>
+      <label>Lote/serie<select name="lotId"><option value="">Sin lote configurado</option>${lots.map((lot) => `<option value="${lot.id}">${safeText(lot.lotNumber || lot.serialNumber || lot.id)}${lot.expiresAt ? ` · vence ${lot.expiresAt}` : ""}</option>`).join("")}</select></label>
+      <label>Lote nuevo<input name="lotNumber" placeholder="Sólo para entrada configurada"></label>
+      <label>Vencimiento<input type="date" name="lotExpiresAt"></label>
       <label>Referencia<input name="reference" value="MOV-DEMO-${Date.now()}"></label>
       <label class="full">Nota<textarea name="note" rows="3"></textarea></label>
     </form>`,
@@ -623,7 +671,7 @@ function openMedicationCardForm() {
   const record=state.cases[0];
   openModal({
     title:"Nueva tarjeta de medicamentos",
-    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. El prototipo agrega una tarjeta demo.",
+    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. La firma bloquea el contenido y las correcciones quedan auditadas.",
     size:"lg",
     body:`<form id="medication-card-form" class="form-grid">
       <label class="full">Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
@@ -634,6 +682,7 @@ function openMedicationCardForm() {
       <label>Horarios<input name="schedule" value="06:00, 14:00, 22:00"></label>
       <label>Inicio<input type="date" name="startDate" value="${new Date().toISOString().slice(0,10)}"></label>
       <label>Fin<input type="date" name="endDate" value="${new Date(Date.now()+7*86400000).toISOString().slice(0,10)}"></label>
+      <label class="full"><input type="checkbox" name="signNow"> Firmar y bloquear al guardar</label>
     </form>`,
     footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-medication-card">Crear tarjeta</button>`
   });
@@ -663,17 +712,19 @@ function openDocumentPreview(id) {
   const recordCase = store.caseById(doc.caseId);
   const vitals = state.vitalSigns.filter((v) => v.caseId === doc.caseId);
   const notes = state.nursingNotes.filter((n) => n.caseId === doc.caseId);
+  const corrections = state.clinicalCorrections.filter((item) => item.subjectType === "CLINICAL_DOCUMENT" && item.subjectId === doc.id);
+  const displayStatus = store.clinicalRecordStatus("CLINICAL_DOCUMENT", doc.id);
   let html;
-  if (doc.type === "HEALTH_REPORT" || doc.type === "CLINICAL_EVOLUTION") html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes });
-  else if (doc.type === "MEDICAL_ORDER" || doc.type === "LAB_REQUEST") html = medicalOrderDocument({ document: doc, patient, recordCase });
-  else if (doc.type === "CARE_PLAN") html = carePlanDocument({ document: doc, patient, recordCase });
-  else html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes });
+  if (doc.type === "HEALTH_REPORT" || doc.type === "CLINICAL_EVOLUTION") html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes, corrections });
+  else if (doc.type === "MEDICAL_ORDER" || doc.type === "LAB_REQUEST") html = medicalOrderDocument({ document: doc, patient, recordCase, corrections });
+  else if (doc.type === "CARE_PLAN") html = carePlanDocument({ document: doc, patient, recordCase, corrections });
+  else html = healthReportDocument({ document: doc, patient, recordCase, vitalSigns: vitals, notes, corrections });
   openModal({
     title: doc.title,
-    subtitle: `${doc.status} · versión ${doc.version} · ${doc.authorName}`,
+    subtitle: `${displayStatus} · versión ${doc.version} · ${doc.authorName}`,
     size: "xl",
     body: `<iframe class="document-frame" title="${safeText(doc.title)}"></iframe>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>${doc.status==="DRAFT"?`<button class="btn btn-secondary" data-action="sign-document" data-id="${doc.id}">Firmar y bloquear</button>`:""}<button class="btn btn-primary" data-action="print-document" data-id="${doc.id}">Imprimir / PDF</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>${doc.status==="DRAFT"?`<button class="btn btn-secondary" data-action="sign-document" data-id="${doc.id}">Firmar y bloquear</button>`:""}${doc.status==="SIGNED"?`<button class="btn btn-secondary" data-action="open-clinical-correction" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}">Corregir</button><button class="btn btn-danger" data-action="open-clinical-void" data-subject-type="CLINICAL_DOCUMENT" data-id="${doc.id}">Anular</button>`:""}<button class="btn btn-primary" data-action="print-document" data-id="${doc.id}">Imprimir / PDF</button>`
   });
   const frame = modalRoot.querySelector("iframe");
   frame.srcdoc = html;
@@ -698,10 +749,11 @@ function printClinicalDocument(id) {
   const recordCase=store.caseById(doc.caseId);
   const vitals=state.vitalSigns.filter(v=>v.caseId===doc.caseId);
   const notes=state.nursingNotes.filter(n=>n.caseId===doc.caseId);
+  const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="CLINICAL_DOCUMENT"&&item.subjectId===doc.id);
   let html;
-  if(doc.type==="MEDICAL_ORDER"||doc.type==="LAB_REQUEST") html=medicalOrderDocument({document:doc,patient,recordCase});
-  else if(doc.type==="CARE_PLAN") html=carePlanDocument({document:doc,patient,recordCase});
-  else html=healthReportDocument({document:doc,patient,recordCase,vitalSigns:vitals,notes});
+  if(doc.type==="MEDICAL_ORDER"||doc.type==="LAB_REQUEST") html=medicalOrderDocument({document:doc,patient,recordCase,corrections});
+  else if(doc.type==="CARE_PLAN") html=carePlanDocument({document:doc,patient,recordCase,corrections});
+  else html=healthReportDocument({document:doc,patient,recordCase,vitalSigns:vitals,notes,corrections});
   openPrintWindow(html,doc.title);
 }
 
@@ -709,7 +761,8 @@ function printMedicationCard(id){
   const state=store.getState();
   const card=state.medicationCards.find(c=>c.id===id);
   if(!card) throw new Error("Tarjeta no encontrada.");
-  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId)}),`Tarjeta ${card.id}`);
+  const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="MEDICATION_CARD"&&item.subjectId===card.id);
+  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections}),`Tarjeta ${card.id}`);
 }
 
 function printStatement(id){
@@ -771,6 +824,51 @@ function copyPortalLink(token) {
   });
 }
 
+function portalTokenFromRoute() {
+  const route = routeFromHash();
+  return isPortalRoute(route) ? route.slice("portal/".length) : "";
+}
+
+async function requestPortalCode() {
+  const token = portalTokenFromRoute();
+  if (!token) return;
+  try {
+    const response = await fetch("/api/portal-request-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token })
+    });
+    const payload = await response.json().catch(() => ({}));
+    ui.portalMessage = response.ok
+      ? (payload.message || "Si el enlace es válido, enviamos un código al canal registrado.")
+      : "No fue posible completar la solicitud. Intenta más tarde.";
+  } catch {
+    ui.portalMessage = "No fue posible completar la solicitud. Intenta más tarde.";
+  }
+  render();
+}
+
+async function verifyPortalAccess(form) {
+  const data = new FormData(form);
+  const token = String(data.get("token") || "");
+  const verificationCode = String(data.get("verificationCode") || "").trim();
+  try {
+    const response = await fetch("/api/portal-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ token, verificationCode })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.quote_id) throw new Error("invalid");
+    ui.portalSnapshot = { token, data: payload };
+    ui.portalMessage = "";
+  } catch {
+    ui.portalSnapshot = null;
+    ui.portalMessage = "No fue posible validar el acceso.";
+  }
+  render();
+}
+
 async function runInternalQa() {
   showToast("Ejecutando controles internos…", "info");
   const response = await fetch("/api/health").catch(() => null);
@@ -812,6 +910,7 @@ document.addEventListener("click", (event) => {
     case "edit-case": openCaseForm(data.id); break;
     case "open-quote-form": openQuoteForm(data.caseId || ""); break;
     case "revise-quote": openQuoteForm("", data.id, true); break;
+    case "edit-quote-draft": openQuoteForm("", data.id, false, true); break;
     case "quote-add-item": {
       syncQuoteHead();
       const select=document.querySelector("#quote-item-select");
@@ -834,6 +933,8 @@ document.addEventListener("click", (event) => {
     case "view-document": openDocumentPreview(data.id); break;
     case "print-document": runSafely(()=>printClinicalDocument(data.id)); break;
     case "sign-document": runSafely(()=>store.signClinicalDocument(data.id),"Documento firmado y bloqueado."); closeModal(); break;
+    case "open-clinical-correction": openClinicalCorrectionForm(data.subjectType, data.id); break;
+    case "open-clinical-void": openClinicalVoidForm(data.subjectType, data.id); break;
     case "open-vitals-form": openVitalsForm(data.caseId||""); break;
     case "open-nursing-note": openNursingNoteForm(data.caseId||""); break;
     case "share-note": runSafely(()=>store.shareNursingNote(data.id),"Nota compartida mediante enlace seguro."); break;
@@ -856,6 +957,7 @@ document.addEventListener("click", (event) => {
     case "open-discount-form": openDiscountForm(); break;
     case "open-medication-card": openMedicationCardForm(); break;
     case "print-medication-card": runSafely(()=>printMedicationCard(data.id)); break;
+    case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
     case "administer-medication": showToast("Administración registrada en modo demo."); break;
     case "open-doctor-form": openDoctorForm(); break;
     case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
@@ -870,6 +972,7 @@ document.addEventListener("click", (event) => {
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
     case "portal-support": showToast("Solicitud enviada a administración en modo simulado."); break;
+    case "request-portal-code": requestPortalCode(); break;
     case "save-settings": document.querySelector("#settings-form")?.requestSubmit(); break;
     default: showToast(`Acción ${action} registrada para QA.`, "info");
   }
@@ -928,6 +1031,11 @@ document.addEventListener("submit", (event) => {
     return;
   }
 
+  if (form.id === "portal-verification-form") {
+    verifyPortalAccess(form);
+    return;
+  }
+
   if(form.id==="settings-form"){
     const data=new FormData(form);
     saveRuntimeConfigOverride({dataMode:data.get("dataMode"),notificationsMode:data.get("notificationsMode"),supabaseUrl:data.get("supabaseUrl"),supabasePublishableKey:data.get("supabasePublishableKey")});
@@ -966,7 +1074,7 @@ document.addEventListener("click", (event) => {
     syncQuoteHead();
     if(!ui.quoteDraft?.items.length) return showToast("Agrega al menos un concepto.","danger");
     const draft=structuredClone(ui.quoteDraft);
-    const result=runSafely(()=>draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.revise?"Nueva versión creada.":"Cotización guardada.");
+    const result=runSafely(()=>draft.editDraft?store.updateQuoteDraft(draft.quoteId,draft):draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.editDraft?"Borrador actualizado.":draft.revise?"Nueva versión creada.":"Cotización guardada.");
     if(result){closeModal(); location.hash=`#/cotizaciones/${result.id}`;}
   }
 
@@ -993,6 +1101,22 @@ document.addEventListener("click", (event) => {
     const document=runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan}}),"Documento clínico creado.");
     if(document&&formBool(form,"signNow")) runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
     if(document){closeModal(); location.hash=`#/hospitalizaciones/${data.caseId}`; ui.tab="clinical";}
+  }
+
+  if(action==="save-clinical-correction"){
+    const form=document.querySelector("#clinical-correction-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
+    if(result) closeModal();
+  }
+
+  if(action==="save-clinical-void"){
+    const form=document.querySelector("#clinical-void-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
+    if(result!==undefined) closeModal();
   }
 
   if(action==="save-vitals"){
@@ -1084,11 +1208,9 @@ document.addEventListener("click", (event) => {
     const form=document.querySelector("#medication-card-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const record=store.caseById(data.caseId);
-    const state=store.getState();
-    state.medicationCards.unshift({id:uid("MC"),caseId:data.caseId,patientId:record.patientId,status:"ACTIVE",createdAt:new Date().toISOString(),items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]});
-    store.save();
-    showToast("Tarjeta de medicamentos creada.");closeModal();render();
+    const card=runSafely(()=>store.createMedicationCard({caseId:data.caseId,items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()).filter(Boolean),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]}),"Tarjeta de medicamentos creada como borrador.");
+    if(card&&formBool(form,"signNow")) runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
+    if(card){closeModal();render();}
   }
 
   if(action==="save-doctor"){

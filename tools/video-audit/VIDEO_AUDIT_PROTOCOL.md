@@ -69,7 +69,11 @@ Genera `chapter_feature_inventory.json`, `chapter_feature_inventory.md` y `chapt
 
 ### Etapa 3 · Verificación de cobertura
 
-Se ejecuta `scripts/verify_chapter_review.py`. La auditoría falla cuando falta un evento o una hoja de contacto.
+Se ejecuta `scripts/verify_chapter_review.py` pasando el directorio inmutable del capítulo. El script lee el recibo y el
+ledger desde `video-audit-reviews/<capítulo>/`; nunca escribe ni exige artefactos de revisión dentro de
+`references/video-audit/`. También valida que cada función inventariada cite un evento y timestamp reales y una ruta de
+evidencia existente. La auditoría falla cuando falta un evento, una observación completa, una hoja de contacto, un
+recorte obligatorio o una referencia funcional trazable.
 
 ### Etapa 4 · Consolidación
 

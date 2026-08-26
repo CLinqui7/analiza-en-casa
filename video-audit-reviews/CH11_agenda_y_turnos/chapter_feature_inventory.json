@@ -1,4 +1,57 @@
 {
+  "chapter_id": "CH11",
   "chapter": "CH11_agenda_y_turnos",
-  "features": []
+  "summary": "Agenda por paciente, creación de visitas/turnos y liquidación de una visita finalizada.",
+  "features": [
+    {
+      "id":"CH11-F01","name":"Agenda filtrable por paciente","description":"Criterio Paciente con selector buscable y ficha/filtro del paciente; calendario con eventos coloreados.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0010","timestamp":"00:31:50.200","path":"event_frames/CH11-E0010_00h31m50s200ms_abrupt_change.jpg","detail_crop":"detail_crops/CH11-E0010_00h31m50s200ms_DETAIL.jpg","transcript":"00:31:45–00:32:05"},
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0015","timestamp":"00:31:55.600","path":"event_frames/CH11-E0015_00h31m55s600ms_stable_change.jpg","transcript":"00:31:45–00:32:05"}
+      ]
+    },
+    {
+      "id":"CH11-F02","name":"Navegación y vistas de calendario","description":"Controles anterior/hoy/siguiente y vistas Mes, Semana, Lista por semana y Lista por día; aparecen acciones Eliminar visitas y Crear.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH11","chapter_event_id":"CH11-E0010","timestamp":"00:31:50.200","path":"event_frames/CH11-E0010_00h31m50s200ms_abrupt_change.jpg","detail_crop":"detail_crops/CH11-E0010_00h31m50s200ms_DETAIL.jpg","transcript":"00:31:39–00:32:05"}]
+    },
+    {
+      "id":"CH11-F03","name":"Formulario de creación de visita","description":"Paciente, DUI, empresa, inicio/fin, frecuencia/cantidad, clasificación, tipo y descuento; botones Cerrar y Guardar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0022","timestamp":"00:32:03.600","path":"event_frames/CH11-E0022_00h32m03s600ms_abrupt_change.jpg","detail_crop":"detail_crops/CH11-E0022_00h32m03s600ms_DETAIL.jpg","transcript":"00:32:00–00:32:45"},
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0023","timestamp":"00:32:08.400","path":"event_frames/CH11-E0023_00h32m08s400ms_motion_progress.jpg","detail_crop":"detail_crops/CH11-E0023_00h32m08s400ms_DETAIL.jpg","transcript":"00:32:00–00:32:45"}
+      ]
+    },
+    {
+      "id":"CH11-F04","name":"Clasificación puntual o turno","description":"El formulario expone las opciones Puntual y Turno para clasificar la visita.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0026","timestamp":"00:32:28.600","path":"event_frames/CH11-E0026_00h32m28s600ms_settled.jpg","detail_crop":"detail_crops/CH11-E0026_00h32m28s600ms_DETAIL.jpg","transcript":"00:32:20–00:32:35"},
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0027","timestamp":"00:32:29.200","path":"event_frames/CH11-E0027_00h32m29s200ms_stable_change.jpg","detail_crop":"detail_crops/CH11-E0027_00h32m29s200ms_DETAIL.jpg","transcript":"00:32:20–00:32:35"}
+      ]
+    },
+    {
+      "id":"CH11-F05","name":"Catálogo de tipos de visita","description":"Lista visible de servicios de enfermería, supervisión, medicina, terapias, nutrición, cuidador, psicología, trabajo social, visita espiritual, laboratorio y otras especialidades.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH11","chapter_event_id":"CH11-E0040","timestamp":"00:32:44.200","path":"event_frames/CH11-E0040_00h32m44s200ms_stable_change.jpg","detail_crop":"detail_crops/CH11-E0040_00h32m44s200ms_DETAIL.jpg","transcript":"00:32:35–00:32:50"}]
+    },
+    {
+      "id":"CH11-F06","name":"Detalle de visita finalizada","description":"Modal de visita con pestañas Agenda y Actualizaciones, datos del paciente/agenda, recurso asignado, observaciones y estado finalizado.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH11","chapter_event_id":"CH11-E0050","timestamp":"00:32:51.800","path":"event_frames/CH11-E0050_00h32m51s800ms_abrupt_change.jpg","transcript":"00:32:50–00:33:20"}]
+    },
+    {
+      "id":"CH11-F07","name":"Tipo de atención en liquidación","description":"Opciones primera visita, seguimiento y última visita dentro del detalle; se muestra una tarifa asociada al servicio.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH11","chapter_event_id":"CH11-E0060","timestamp":"00:33:10.600","path":"event_frames/CH11-E0060_00h33m10s600ms_abrupt_change.jpg","transcript":"00:33:00–00:33:20"}]
+    },
+    {
+      "id":"CH11-F08","name":"Ajustes al pago de servicio profesional","description":"Tabla y controles para motivo, monto y comentario de descuento/pago del servicio; Guardar y Cerrar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0055","timestamp":"00:33:00.600","path":"event_frames/CH11-E0055_00h33m00s600ms_abrupt_change.jpg","transcript":"00:32:50–00:33:15"},
+        {"chapter_id":"CH11","chapter_event_id":"CH11-E0060","timestamp":"00:33:10.600","path":"event_frames/CH11-E0060_00h33m10s600ms_abrupt_change.jpg","transcript":"00:33:00–00:33:20"}
+      ]
+    },
+    {
+      "id":"CH11-F09","name":"Reglas de liquidación y permisos","description":"La visita muestra controles de tarifa, descuento, edición de pago, guardar y cerrar, pero no prueba qué roles pueden usarlos ni las reglas contables de la liquidación.","classification":"UNCERTAIN","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH11","chapter_event_id":"CH11-E0055","timestamp":"00:33:00.600","path":"event_frames/CH11-E0055_00h33m00s600ms_abrupt_change.jpg","transcript":"00:32:50–00:33:15"}]
+    }
+  ],
+  "entities":["Paciente","Empresa","Agenda","Visita","Turno","Tipo de servicio","Recurso profesional","Tarifa","Ajuste de pago"],
+  "open_questions":["Significado de botones solo-icono", "Reglas de recurrencia y eliminación masiva", "Origen y vigencia de tarifa", "Roles autorizados y auditoría de liquidación"]
 }

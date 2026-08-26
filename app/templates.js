@@ -69,6 +69,24 @@ function patientGrid(patient, recordCase = null) {
   `;
 }
 
+function clinicalRecordMetadata(record, corrections = []) {
+  const signature = record.signatureMetadata;
+  const status = record.documentStatus || record.status || "DRAFT";
+  const displayStatus = status === "VOIDED" ? status : corrections.length ? "CORRECTED" : status;
+  const correctionRows = corrections.map((correction) => `<li><strong>${safeText(correction.correctionKind)}</strong> · ${safeText(correction.reason)}<br><small>${safeText(correction.authorName)} · ${safeText(correction.authorRole)} · ${formatDate(correction.createdAt, true)}</small><br>${safeText(correction.content?.text || "")}</li>`).join("");
+  return `
+    <div class="section"><h2>Estado y trazabilidad</h2>
+      <div class="grid">
+        <div class="field"><small>Estado</small><strong>${safeText(displayStatus)}</strong></div>
+        <div class="field"><small>Versión</small><strong>v${safeText(record.version || 1)}</strong></div>
+        <div class="field"><small>Firma</small><strong>${signature ? `${safeText(signature.signerRole)} · ${formatDate(signature.signedAt, true)}` : "Sin firma"}</strong></div>
+        <div class="field"><small>Validación legal</small><strong>${safeText(signature?.legalValidation || "NEEDS_CLIENT_CONFIRMATION")}</strong></div>
+      </div>
+      ${record.voidReason ? `<div class="notice"><strong>ANULADO.</strong> Motivo: ${safeText(record.voidReason)} · ${formatDate(record.voidedAt, true)}</div>` : ""}
+      ${correctionRows ? `<div class="notice"><strong>Enmiendas y addenda</strong><ol>${correctionRows}</ol></div>` : ""}
+    </div>`;
+}
+
 export function quoteDocument({ quote, patient, recordCase, insurer }) {
   const rows = quote.items.map((item) => `
     <tr>
@@ -104,12 +122,13 @@ export function quoteDocument({ quote, patient, recordCase, insurer }) {
   </body></html>`;
 }
 
-export function healthReportDocument({ document, patient, recordCase, vitalSigns = [], notes = [] }) {
+export function healthReportDocument({ document, patient, recordCase, vitalSigns = [], notes = [], corrections = [] }) {
   const latest = vitalSigns[0];
   const content = document.content || {};
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Diagnóstico / motivo de atención</h2><p>${safeText(content.diagnosis || recordCase?.diagnosisSummary || "Pendiente de documentar.")}</p></div>
     <div class="section"><h2>Antecedentes</h2><p>${safeText((content.background || []).join(", ") || "Sin antecedentes registrados.")}</p></div>
     <div class="section"><h2>Alergias</h2><p>${safeText((content.allergies || []).join(", ") || "Sin alergias registradas.")}</p></div>
@@ -133,10 +152,11 @@ export function healthReportDocument({ document, patient, recordCase, vitalSigns
   </body></html>`;
 }
 
-export function medicalOrderDocument({ document, patient, recordCase }) {
+export function medicalOrderDocument({ document, patient, recordCase, corrections = [] }) {
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>
     <div class="section"><h2>Vigencia</h2><p>Desde ${formatDate(document.createdAt)} hasta nueva indicación o cierre del caso.</p></div>
     <div class="signature-grid"><div class="signature">${safeText(document.authorName)}<br>Médico responsable</div><div class="signature">Firma y sello</div></div>
@@ -144,7 +164,7 @@ export function medicalOrderDocument({ document, patient, recordCase }) {
   </body></html>`;
 }
 
-export function medicationCardDocument({ card, patient, recordCase }) {
+export function medicationCardDocument({ card, patient, recordCase, corrections = [] }) {
   const rows = card.items.map((item) => `
     <tr>
       <td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td>
@@ -153,20 +173,22 @@ export function medicationCardDocument({ card, patient, recordCase }) {
     </tr>
   `).join("");
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Tarjeta de medicamentos</title><style>${printCss}</style></head><body>
-    ${baseHeader("Tarjeta de medicamentos", card.id, 1)}
+    ${baseHeader("Tarjeta de medicamentos", card.id, card.version || 1)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(card, corrections)}
     <table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Inicio</th><th>Fin</th></tr></thead><tbody>${rows}</tbody></table>
     <div class="notice">La administración real debe documentar fecha, hora, responsable, omisión y motivo. Esta plantilla es de validación.</div>
     ${footer()}
   </body></html>`;
 }
 
-export function carePlanDocument({ document, patient, recordCase }) {
+export function carePlanDocument({ document, patient, recordCase, corrections = [] }) {
   const objectives = document.content?.objectives || [];
   const interventions = document.content?.interventions || [];
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
+    ${clinicalRecordMetadata(document, corrections)}
     <div class="section"><h2>Objetivos</h2><ol>${objectives.map((item) => `<li>${safeText(item)}</li>`).join("") || "<li>Pendiente de documentar.</li>"}</ol></div>
     <div class="section"><h2>Intervenciones</h2><ol>${interventions.map((item) => `<li>${safeText(item)}</li>`).join("") || "<li>Pendiente de documentar.</li>"}</ol></div>
     <div class="section"><h2>Frecuencia</h2><p>${safeText(document.content?.frequency || "Pendiente")}</p></div>

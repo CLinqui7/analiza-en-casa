@@ -1,4 +1,310 @@
 {
   "chapter": "CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH14-F01",
+      "name": "Existencias disponibles, comprometidas y totales",
+      "description": "Gestión de inventario lista items por bodega y separa disponible, comprometido y total; ofrece búsqueda, paginación, Excel y Traslados.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: filtrar item y comprobar que Total reconcilia las cantidades mostradas sin cruzar bodegas."
+    },
+    {
+      "id": "CH14-F02",
+      "name": "Historial de movimientos por item",
+      "description": "Ver movimientos abre un historial con rango de fechas, lote/serie, origen, destino, cantidad, Entrada/Salida y estado Disponible/Gastado.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0016",
+          "timestamp": "00:40:37.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0016_00h40m37s800ms_stable_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: abrir Ver movimientos y validar columnas, filtro de fecha y estados de entrada/salida."
+    },
+    {
+      "id": "CH14-F03",
+      "name": "Inventario comprometido como estado temporal",
+      "description": "La conversación explica que lo enviado al domicilio queda comprometido en la cuenta del paciente hasta cerrar o contabilizar el servicio; no demuestra la fórmula de reserva.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:40:45.000–00:41:30.000: los acuses son descargas y los insumos permanecen comprometidos en la cuenta como inventario temporal.",
+      "test_path": "Integración: acuse a paciente incrementa comprometido; cierre aprobado aplica la transición configurada una sola vez."
+    },
+    {
+      "id": "CH14-F04",
+      "name": "Panel de acuses por pacientes y recursos",
+      "description": "Acuses separa Pacientes, Recursos, No disponible, Solicitudes y Tareas, con selector de área y tabla de identificación, empresa y estado.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0029",
+          "timestamp": "00:40:51.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0029_00h40m51s600ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: cambiar pestañas y área; validar conteos, filtros y aislamiento por rol/organización."
+    },
+    {
+      "id": "CH14-F05",
+      "name": "Gestión y exportación de acuses",
+      "description": "La fila permite Nuevo, Ver acuses, Descargar Excel y Registro XPO; un acuse permite Duplicar, Editar, Asignar hospitalización, Imprimir, consultar items faltantes y Eliminar.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0032",
+          "timestamp": "00:40:53.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0032_00h40m53s200ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0035",
+          "timestamp": "00:41:00.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0035_00h41m00s800ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: comprobar permisos e idempotencia de cada acción; exportar y abrir el archivo resultante."
+    },
+    {
+      "id": "CH14-F06",
+      "name": "Cierres pendientes, totales y cerrados",
+      "description": "Cierres separa Pendientes, Cierres totales, Cerrados y Recursos; Pendientes lista pacientes activos con estado y fecha de inicio.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0041",
+          "timestamp": "00:41:38.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: recorrer las cuatro pestañas y validar que un paciente sólo aparezca en el estado correspondiente."
+    },
+    {
+      "id": "CH14-F07",
+      "name": "Advertencia de cierre ya abierto",
+      "description": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0046",
+          "timestamp": "00:41:47.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: intentar crear un segundo cierre y verificar advertencia, cancelación sin pérdida y aceptación auditada."
+    },
+    {
+      "id": "CH14-F08",
+      "name": "Aprobación de cierre total",
+      "description": "Un cierre total ofrece Editar, Imprimir, Aprobar y Cancelar. Verbalmente se explica una etapa editable antes de la aprobación/cierre definitivo.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0050",
+          "timestamp": "00:42:16.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0050_00h42m16s400ms_DETAIL.jpg"
+        }
+      ],
+      "transcript_evidence": "00:42:11.500–00:43:18.500: se describe nuevo cierre, cierre total, aprobación y posibilidad de editar antes de cerrar.",
+      "test_path": "Integración: validar máquina de estados, bloqueo posterior a aprobación, auditoría e impresión reproducible."
+    },
+    {
+      "id": "CH14-F09",
+      "name": "Catálogo de proveedores",
+      "description": "Proveedores muestra código, empresa, contacto, teléfono, correo y dirección, con búsqueda, paginación y alta.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0061",
+          "timestamp": "00:43:24.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0061_00h43m24s400ms_abrupt_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:43:18.500–00:43:33.500: se menciona la creación de proveedores y sus registros.",
+      "test_path": "E2E: crear proveedor sintético, validar campos y encontrarlo con búsqueda bajo el rol autorizado."
+    },
+    {
+      "id": "CH14-F10",
+      "name": "Catálogo de bodegas y traslados",
+      "description": "Bodegas filtra por Activo y lista nombre, descripción y fecha; la conversación menciona traslados entre ubicaciones.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0068",
+          "timestamp": "00:43:28.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0068_00h43m28s600ms_settled.jpg"
+        }
+      ],
+      "transcript_evidence": "00:43:26.500–00:43:57.500: se describen bodegas y traslados cuando un recurso no está en la ubicación esperada.",
+      "test_path": "Integración: traslado transaccional conserva suma de existencias y genera dos movimientos auditados."
+    },
+    {
+      "id": "CH14-F11",
+      "name": "Lotes, números de serie y vencimiento",
+      "description": "El módulo separa Lotes y Nros de serie; la tabla enlaza lote con item, fechas y estado, y resalta varias Fecha inválida en rojo.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0075",
+          "timestamp": "00:43:37.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0075_00h43m37s200ms_stable_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:44:07.560–00:44:24.040: se exige manejar vencimientos de medicamentos, lotes de insumos y series de equipos.",
+      "test_path": "E2E: crear lote/serie, validar fechas y alertas; impedir asignaciones que violen la política configurada."
+    },
+    {
+      "id": "CH14-F12",
+      "name": "Catálogo de kits de insumos",
+      "description": "Kit de insumos ofrece Excel, Nuevo, búsqueda, paginación y acciones Editar, Duplicar y Eliminar.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0084",
+          "timestamp": "00:44:13.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0089",
+          "timestamp": "00:44:23.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: crear, duplicar, editar, exportar y eliminar un kit sintético con control de permisos."
+    },
+    {
+      "id": "CH14-F13",
+      "name": "Composición cuantificada del kit",
+      "description": "El editor permite nombrar el kit, seleccionar item y cantidad, añadir componentes, modificar cantidades y quitarlos; el relato indica descarga automática al usar un kit.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0091",
+          "timestamp": "00:44:23.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0117",
+          "timestamp": "00:44:44.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0117_00h44m44s800ms_abrupt_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:44:25.720–00:45:02.720: se describe el contenido de un kit y la descarga automática de sus componentes.",
+      "test_path": "Integración: consumir kit descuenta cada componente de forma atómica e idempotente o revierte toda la operación."
+    },
+    {
+      "id": "CH14-F14",
+      "name": "Creación de acuse para hospitalización",
+      "description": "Acuse nuevo captura paciente, fecha, hospitalización, bodega, item, cantidad disponible y cantidad a asignar, con Vaciar, Plantilla y Añadir.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0151",
+          "timestamp": "00:45:27.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: crear acuse con item disponible; validar cantidades, hospitalización y prevención de doble envío."
+    },
+    {
+      "id": "CH14-F15",
+      "name": "Detección de items faltantes",
+      "description": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "classification": "VISIBLE",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
+          "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
+        }
+      ],
+      "test_path": "E2E: solicitar cantidad insuficiente y comprobar modal, totales correctos y ausencia de stock negativo."
+    },
+    {
+      "id": "CH14-F16",
+      "name": "Vínculo de faltantes con cotización",
+      "description": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "classification": "UNCERTAIN",
+      "confidence": "LOW",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:45:10.320–00:45:13.320: 'También tenía una opción de faltar una cotización'.",
+      "test_path": "Pendiente de definición del cliente; no habilitar automatización hasta acordar significado y estado objetivo."
+    }
+  ]
 }

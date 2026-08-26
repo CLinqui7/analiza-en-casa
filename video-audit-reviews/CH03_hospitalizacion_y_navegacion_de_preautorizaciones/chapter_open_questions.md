@@ -1,3 +1,12 @@
-# Open questions · CH03_hospitalizacion_y_navegacion_de_preautorizaciones
+# Preguntas abiertas · CH03
 
-Pending review.
+1. **CH03-Q001 · UNCERTAIN** — ¿Preadmisión es una función habilitable, depende del rol/organización o es un residuo de renderizado? Aparece en CH03-E0007, 00:04:52.200, `event_frames/CH03-E0007_00h04m52s200ms_abrupt_change.jpg`, desaparece en CH03-E0008 y repite el patrón en CH03-E0036–CH03-E0038.
+2. **CH03-Q002 · UNCERTAIN** — ¿Qué evento crea/cierra Hospitalización Activa y qué relación exacta tiene con Paciente Activo/Inactivo? Se requieren transiciones autorizadas y auditables. Evidencia: CH03-E0017, 00:05:06.400, `event_frames/CH03-E0017_00h05m06s400ms_abrupt_change.jpg`; CH03-E0030, 00:05:27.200, `detail_crops/CH03-E0030_00h05m27s200ms_DETAIL.jpg`.
+3. **CH03-Q003 · UNCERTAIN** — ¿Qué calculan los badges 8 de Relación de pacientes por empresa y 67 de PIC Ejecución, cuál es su alcance organizacional y cómo se actualizan? Evidencia: CH03-E0040, 00:05:39.200, `detail_crops/CH03-E0040_00h05m39s200ms_DETAIL.jpg`.
+4. **CH03-Q004 · UNCERTAIN** — ¿Cuáles son los valores y operadores de Estado Administrativo, Fecha de inicio y Tipo de cuenta, y cómo deben combinarse Aplicar/Limpiar? Evidencia: CH03-E0009, 00:04:53.200, `event_frames/CH03-E0009_00h04m53s200ms_stable_change.jpg`.
+5. **CH03-Q005 · UNCERTAIN** — ¿Cuál es la máquina de estados completa de cotización, envío de preautorización, respuesta de seguro y reclamo; qué permisos, reintentos, idempotencia y auditoría requiere cada transición? Evidencia: CH03-E0042, 00:05:55.800, `detail_crops/CH03-E0042_00h05m55s800ms_DETAIL.jpg`.
+6. **CH03-Q006 · UNCERTAIN** — ¿Cómo se calculan moneda, total, descuentos, impuestos y redondeo, y cuándo una cotización enviada pasa a ser una versión inmutable? La evidencia no autoriza precios. Evidencia: CH03-E0043, 00:05:59.000, `event_frames/CH03-E0043_00h05m59s000ms_abrupt_change.jpg`.
+7. **CH03-Q007 · UNCERTAIN** — ¿Qué validaciones y catálogos aplican a Paciente, Fecha, Grupo de descuento, Referido por, Giftcard y Comentarios, y qué significa el icono + de referido? Evidencia: CH03-E0046, 00:06:09.600, `detail_crops/CH03-E0046_00h06m09s600ms_DETAIL.jpg`.
+8. **CH03-Q008 · UNCERTAIN** — ¿Qué acciones ofrece la elipsis en hospitalizaciones, pacientes y cotizaciones y qué autorizaciones/auditoría protegen cada una? Evidencia: CH03-E0010, 00:04:57.600, `detail_crops/CH03-E0010_00h04m57s600ms_DETAIL.jpg`; CH03-E0042, 00:05:55.800, `detail_crops/CH03-E0042_00h05m55s800ms_DETAIL.jpg`.
+
+La transcripción TXT/SRT es ruidosa y no resuelve estas reglas de negocio.

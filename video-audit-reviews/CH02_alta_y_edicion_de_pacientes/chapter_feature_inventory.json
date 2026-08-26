@@ -1,4 +1,182 @@
 {
   "chapter": "CH02_alta_y_edicion_de_pacientes",
-  "features": []
+  "chapter_id": "CH02",
+  "title": "Alta y edición de pacientes",
+  "transcript_summary": "La narración describe la navegación a Pacientes, las vistas Activos/Inactivos, el alta de datos personales, seguro, titularidad, contactos y dirección. El ASR tiene fragmentos ruidosos; las reglas de obligatoriedad se sostienen solo donde hay asteriscos legibles en pantalla.",
+  "features": [
+    {
+      "id": "CH02-F001",
+      "category": "navegacion",
+      "name": "Ruta autenticada hasta Pacientes",
+      "description": "El capítulo muestra login, dashboard y entrada al listado de pacientes antes de iniciar un alta.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La secuencia visible no demuestra política de sesión, bloqueo o matriz de permisos.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0005","timestamp":"00:02:05.200","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0005_00h02m05s200ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración sitúa el flujo en la gestión de pacientes.","observation":"La pantalla Pacientes está visible con navegación lateral y acciones de cabecera."}]
+    },
+    {
+      "id": "CH02-F002",
+      "category": "pantallas",
+      "name": "Listado de pacientes con vistas y acciones",
+      "description": "Incluye Activos, Inactivos, Carga masiva, Excel, + Nuevo, búsqueda, paginación y tabla con datos operativos.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se ejecutan exportación, búsqueda, paginación ni vistas alternativas en este capítulo.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0008","timestamp":"00:02:07.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0008_00h02m07s000ms_stable_change.jpg","detail_crop":null,"transcript":"Se describen las vistas de pacientes activos e inactivos.","observation":"Los controles y columnas del listado son visibles antes de pulsar + Nuevo."}]
+    },
+    {
+      "id": "CH02-F003",
+      "category": "formularios_campos",
+      "name": "Formulario de alta por secciones",
+      "description": "La pantalla Paciente nuevo organiza Datos generales, Información del seguro, Contactos y Dirección.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La evidencia muestra alta; no se abre un paciente existente para comprobar diferencias de edición.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0009","timestamp":"00:02:17.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0009_00h02m17s000ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración introduce la captura de datos personales del paciente.","observation":"Se ve el título Paciente nuevo y el inicio de Datos generales."}]
+    },
+    {
+      "id": "CH02-F004",
+      "category": "formularios_campos",
+      "name": "Datos personales obligatorios y opcionales",
+      "description": "Tipo de documento, Documento, Nombre completo, Fecha de nacimiento, Sexo, Teléfono celular y Empresa muestran asterisco; teléfono de casa, correo, jubilado, tipo de sangre, estado civil, nacionalidad y ocupación no lo muestran.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El asterisco comunica obligatoriedad visual, pero el capítulo no envía el formulario ni demuestra mensajes de validación.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0011","timestamp":"00:02:17.800","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0011_00h02m17s800ms_abrupt_change.jpg","detail_crop":null,"transcript":"El narrador enumera información personal, con ASR impreciso en algunos campos.","observation":"Los asteriscos y etiquetas son legibles en el formulario vacío."}]
+    },
+    {
+      "id": "CH02-F005",
+      "category": "catalogos_selectores",
+      "name": "Documento y fecha de nacimiento",
+      "description": "Tipo de documento ofrece Cédula o Pasaporte y la fecha utiliza selector de calendario con representación YYYY-MM-DD.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se observan reglas de formato, unicidad, fechas futuras ni edad mínima/máxima.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0012","timestamp":"00:02:23.400","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0012_00h02m23s400ms_motion_progress.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0012_00h02m23s400ms_DETAIL.jpg","transcript":"Se menciona la identificación del paciente.","observation":"El selector abierto contiene exactamente Cédula y Pasaporte."}]
+    },
+    {
+      "id": "CH02-F006",
+      "category": "catalogos_selectores",
+      "name": "Selectores demográficos y organizacionales",
+      "description": "El formulario incluye Sexo, Tipo de sangre, Estado civil, Nacionalidad buscable y Empresa.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Los catálogos maestros, valores válidos y alcance por organización no se demuestran.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0024","timestamp":"00:03:00.400","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0024_00h03m00s400ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0024_00h03m00s400ms_DETAIL.jpg","transcript":"La narración continúa con datos generales del paciente.","observation":"El selector de nacionalidad permite búsqueda y se ven otros campos demográficos alrededor."}]
+    },
+    {
+      "id": "CH02-F007",
+      "category": "notificaciones",
+      "name": "Consentimiento visible para notificaciones Botmaker/WhatsApp",
+      "description": "Una casilla marcada por defecto autoriza notificaciones automáticas por WhatsApp mediante Botmaker; el texto advierte que desmarcarla impide notificaciones al asignar visitas o recursos.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La evidencia no autoriza incluir diagnóstico, tratamiento, medicamentos u otro contenido clínico sensible en mensajes.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0022","timestamp":"00:02:57.200","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0022_00h02m57s200ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0022_00h02m57s200ms_DETAIL.jpg","transcript":"La narración explica el uso de notificaciones automáticas en el contexto del alta.","observation":"La casilla está marcada y la consecuencia de desmarcarla aparece escrita en pantalla."}]
+    },
+    {
+      "id": "CH02-F008",
+      "category": "seguros",
+      "name": "Paciente regular frente a paciente asegurado",
+      "description": "La narración distingue el valor inicial Paciente regular de la selección de una aseguradora para un paciente cubierto.",
+      "classification": "VERBAL",
+      "confidence": "media",
+      "rule": "El ASR es ruidoso; la distinción general coincide con la transición visible del formulario.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0031","timestamp":"00:03:26.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0031_00h03m26s000ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0031_00h03m26s000ms_DETAIL.jpg","transcript":"El narrador explica que un paciente puede permanecer como regular o asociarse a un seguro.","observation":"Paciente regular aparece como valor inicial antes de abrir el catálogo."}]
+    },
+    {
+      "id": "CH02-F009",
+      "category": "busquedas_filtros",
+      "name": "Catálogo buscable de seguros",
+      "description": "El selector de Seguro permite explorar una lista extensa y filtrar por texto.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra fuente autoritativa, actualización, alcance por empresa u organización ni criterios de orden.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0032","timestamp":"00:03:30.400","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0032_00h03m30s400ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0032_00h03m30s400ms_DETAIL.jpg","transcript":"Se describe la elección de aseguradora.","observation":"El catálogo está abierto con campo de búsqueda y múltiples opciones."}]
+    },
+    {
+      "id": "CH02-F010",
+      "category": "calidad_datos",
+      "name": "Resultados anómalos en el catálogo de seguros",
+      "description": "Una búsqueda de texto devuelve una aseguradora junto con entradas cuya forma aparente es la de nombres de personas.",
+      "classification": "UNCERTAIN",
+      "confidence": "alta",
+      "rule": "Se registra como posible contaminación de datos; no se reproducen los nombres ni se infiere su origen.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0058","timestamp":"00:03:46.600","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0058_00h03m46s600ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0058_00h03m46s600ms_DETAIL.jpg","transcript":"La narración no explica los resultados heterogéneos.","observation":"La mezcla visual de tipos de entrada requiere confirmación del catálogo correcto."}]
+    },
+    {
+      "id": "CH02-F011",
+      "category": "seguros",
+      "name": "Decisión de titularidad del seguro",
+      "description": "Tras elegir aseguradora aparece el modal ¿Paciente es el asegurado titular? con respuestas No y Sí.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El capítulo solo muestra la rama Sí; la rama No permanece sin evidencia funcional.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0062","timestamp":"00:03:49.800","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0062_00h03m49s800ms_stable_change.jpg","detail_crop":null,"transcript":"El narrador plantea si el paciente es el titular.","observation":"Pregunta modal y dos decisiones legibles; el clip exacto confirma la secuencia."}]
+    },
+    {
+      "id": "CH02-F012",
+      "category": "formularios_campos",
+      "name": "Datos condicionales de cobertura",
+      "description": "La rama Sí despliega póliza, certificado/unidad, DUI/NIT, nombre y nacimiento del asegurado, fecha efectiva y acción Agregar.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Póliza y DUI/NIT, nombre y nacimiento del asegurado tienen asterisco; certificado/unidad y fecha efectiva no. Agregar no se ejecuta.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0066","timestamp":"00:04:10.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0066_00h04m10s000ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0066_00h04m10s000ms_DETAIL.jpg","transcript":"La narración enumera información del seguro y del titular.","observation":"Los campos condicionales y sus asteriscos son legibles en la vista ampliada."}]
+    },
+    {
+      "id": "CH02-F013",
+      "category": "formularios_campos",
+      "name": "Contactos asociados al paciente",
+      "description": "La sección Contactos incluye nombre completo, teléfono, correo, parentesco, rol y país de residencia.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se muestran asteriscos, guardado, múltiples contactos, catálogos ni permisos de acceso.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0068","timestamp":"00:04:11.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0068_00h04m11s000ms_stable_change.jpg","detail_crop":null,"transcript":"La narración introduce datos de contacto y relación con el paciente.","observation":"El bloque de contactos aparece vacío con seis campos visibles."}]
+    },
+    {
+      "id": "CH02-F014",
+      "category": "ubicacion",
+      "name": "Dirección con importación y limpieza",
+      "description": "La sección permite Pegar enlace, consultar información, Limpiar y capturar Dirección, Comentarios relevantes y Ubicación geográfica.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Dirección y Comentarios relevantes tienen asterisco; no se identifica proveedor admitido ni precedencia entre texto, enlace y mapa.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0071","timestamp":"00:04:19.600","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0071_00h04m19s600ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración explica la captura de dirección del paciente.","observation":"Acciones y campos del domicilio, incluidos los asteriscos, están visibles."}]
+    },
+    {
+      "id": "CH02-F015",
+      "category": "ubicacion",
+      "name": "Mapa embebido para ubicación geográfica",
+      "description": "El formulario incluye mapa con marcador, capas Mapa/Satélite, pantalla completa, control de cámara y ayuda Ctrl+desplazar para zoom.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra geocodificación, precisión, arrastre del marcador, almacenamiento de foto o permisos del dispositivo.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0076","timestamp":"00:04:35.800","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0076_00h04m35s800ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0076_00h04m35s800ms_DETAIL.jpg","transcript":"La narración se refiere a la ubicación dentro de la dirección.","observation":"Mapa, marcador, controles y ayuda de zoom quedan visibles en el crop."}]
+    },
+    {
+      "id": "CH02-F016",
+      "category": "acciones",
+      "name": "Acciones Atrás y Guardar sin resultado observado",
+      "description": "El final del formulario presenta Atrás y Guardar.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El capítulo termina sin clic confirmado; no prueba validación, persistencia, mensaje de éxito, idempotencia ni auditoría.",
+      "evidence": [{"chapter_id":"CH02","chapter_event_id":"CH02-E0082","timestamp":"00:04:39.000","image":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0082_00h04m39s000ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0082_00h04m39s000ms_DETAIL.jpg","transcript":"La narración concluye el recorrido del formulario.","observation":"Atrás y Guardar siguen visibles; el clip exacto termina sin confirmación de guardado."}]
+    }
+  ],
+  "explicit_rules": [
+    "Los campos marcados con asterisco en pantalla se presentan como obligatorios; no se infiere su validación de servidor.",
+    "Desmarcar la casilla Botmaker/WhatsApp implica no recibir notificaciones automáticas cuando se asignen visitas o recursos.",
+    "Seleccionar una aseguradora abre la decisión de si el paciente es el asegurado titular."
+  ],
+  "inferred_rules": [
+    "La información adicional de cobertura depende de la selección de aseguradora y de la decisión de titularidad.",
+    "La acción Agregar parece preparar una cobertura asociada, pero su resultado no se observa."
+  ],
+  "documents_printing": [],
+  "entities": ["usuario","organización","paciente","empresa","aseguradora","cobertura","asegurado titular","contacto","dirección","ubicación geográfica"],
+  "apparent_permissions": ["El usuario observado puede ver Pacientes y abrir Paciente nuevo; el capítulo no permite generalizarlo a otros roles."],
+  "errors": ["Durante el listado pueden coexistir Cargando... y No hay registros disponibles.","El catálogo de seguros devuelve entradas de apariencia heterogénea que requieren depuración o aclaración."],
+  "open_question_ids": ["CH02-Q001","CH02-Q002","CH02-Q003","CH02-Q004","CH02-Q005","CH02-Q006","CH02-Q007","CH02-Q008"]
 }

@@ -1,4 +1,352 @@
 {
   "chapter": "CH15_acuse_de_inventario_y_catalogos_de_items",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH15-F01",
+      "name": "Reconciliación de items faltantes",
+      "description": "Items faltantes disponibles compara Disponible y Requerido por acuse y bodega, identifica si existe Acuse creado y permite Agregar al acuse.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0003",
+          "timestamp": "00:45:29.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0003_00h45m29s400ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0009",
+          "timestamp": "00:45:32.200",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0009_00h45m32s200ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: provocar faltante sintético, verificar comparación por bodega y añadirlo una sola vez sin stock negativo."
+    },
+    {
+      "id": "CH15-F02",
+      "name": "Solicitudes desde la casa del paciente",
+      "description": "El modal permite elegir la bodega de descarga y prevé Tipo, Código, Nombre, Disponibilidad, Cantidad y Faltante para acusar solicitudes domiciliarias.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0013",
+          "timestamp": "00:45:35.200",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0013_00h45m35s200ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0017",
+          "timestamp": "00:45:38.200",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0017_00h45m38s200ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: seleccionar una bodega autorizada, cargar solicitudes y comprobar que Acusar sea idempotente y auditable."
+    },
+    {
+      "id": "CH15-F03",
+      "name": "Alta manual de items en un acuse",
+      "description": "Acuse nuevo captura paciente, fecha, hospitalización, bodega, item, disponibilidad y cantidad a asignar, con Vaciar, Plantilla y Añadir.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0020",
+          "timestamp": "00:45:45.000",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0020_00h45m45s000ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: añadir un item con cantidad válida y rechazar cero, negativos o cantidades mayores a la disponible."
+    },
+    {
+      "id": "CH15-F04",
+      "name": "Carga de acuse desde plantilla o cotización",
+      "description": "Añadir plantilla acepta origen Plantilla o Cotización, bodega y referencia; una cotización carga tipo, código, descripción y cantidad de sus items.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0023",
+          "timestamp": "00:45:48.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0023_00h45m48s400ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0032",
+          "timestamp": "00:45:57.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0032_00h45m57s400ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: seleccionar ambos orígenes y comprobar copia de items, cantidades y bodega sin mutar la fuente."
+    },
+    {
+      "id": "CH15-F05",
+      "name": "Estados seleccionables de cotización",
+      "description": "El selector muestra cotizaciones En ejecución y Finalizado; no se demuestra si ambos estados pueden aplicarse ni qué validaciones posteriores existen.",
+      "classification": "UNCERTAIN",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0029",
+          "timestamp": "00:45:54.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0029_00h45m54s400ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "Pendiente de definición del cliente; probar la matriz de estados autorizados antes de habilitar la selección."
+    },
+    {
+      "id": "CH15-F06",
+      "name": "Catálogo y alta de medicamentos",
+      "description": "Medicamentos lista impuesto, descuento, lotes y estado; el alta incluye identidad farmacéutica, presentación, fabricante, vía y banderas comerciales y logísticas.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0046",
+          "timestamp": "00:46:24.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0046_00h46m24s600ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0047",
+          "timestamp": "00:46:28.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0047_00h46m28s400ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: crear medicamento sintético, validar campos requeridos y comprobar cada bandera en listado y edición."
+    },
+    {
+      "id": "CH15-F07",
+      "name": "Advertencia por cambios no guardados",
+      "description": "Los formularios de medicamento, insumo y honorario presentan Salir con Cancelar y Aceptar cuando se intenta abandonar cambios.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0052",
+          "timestamp": "00:46:35.800",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0052_00h46m35s800ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0071",
+          "timestamp": "00:47:09.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0071_00h47m09s600ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0114",
+          "timestamp": "00:48:57.200",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0114_00h48m57s200ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: modificar cada formulario; Cancelar conserva datos y Aceptar descarta sólo el borrador no guardado."
+    },
+    {
+      "id": "CH15-F08",
+      "name": "Catálogo y alta de insumos",
+      "description": "Insumos lista tipo, impuesto, descuento, lotes y estado; el alta captura tipo, fabricante y descripción con banderas Facturable, Descuento, Impuesto, Lotes y Giftcard.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0067",
+          "timestamp": "00:46:48.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0067_00h46m48s400ms_stable_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0068",
+          "timestamp": "00:46:51.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0068_00h46m51s600ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: crear insumo sintético y verificar validaciones, persistencia, filtros y aislamiento de organización."
+    },
+    {
+      "id": "CH15-F09",
+      "name": "Catálogo de estudios diagnósticos",
+      "description": "Estudios Dx presenta código, nombre, descripción, impuesto, descuento y estado, con búsqueda, paginación, Excel y alta.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0084",
+          "timestamp": "00:47:20.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0084_00h47m20s600ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: buscar un estudio, recorrer páginas, exportar y comprobar acceso al alta según rol."
+    },
+    {
+      "id": "CH15-F10",
+      "name": "Catálogo y alta de honorarios",
+      "description": "Honorarios lista código, nombre, impuesto, descuento y estado; el alta asocia un Recurso y permite Descuento, Impuesto y Giftcard.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0094",
+          "timestamp": "00:47:31.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0094_00h47m31s600ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0097",
+          "timestamp": "00:47:42.000",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: crear honorario asociado a un recurso sintético y validar unicidad, permisos y visibilidad de banderas."
+    },
+    {
+      "id": "CH15-F11",
+      "name": "Confirmación de guardado de honorario",
+      "description": "Guardar pasa por Procesando y muestra Honorario médico guardado exitosamente.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0100",
+          "timestamp": "00:48:10.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0100_00h48m10s400ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0101",
+          "timestamp": "00:48:11.000",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0101_00h48m11s000ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "Integración: doble clic o reintento crea un único registro y la confirmación aparece sólo después del commit."
+    },
+    {
+      "id": "CH15-F12",
+      "name": "Acciones y edición de honorarios",
+      "description": "Un honorario puede Editar, consultar costos de compra, precios de venta y cuentas, o Inactivar; la edición conserva recurso y banderas.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0110",
+          "timestamp": "00:48:27.800",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0110_00h48m27s800ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0113",
+          "timestamp": "00:48:56.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0113_00h48m56s600ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: verificar autorización y auditoría de cada acción; Inactivar no borra históricos ni relaciones financieras."
+    },
+    {
+      "id": "CH15-F13",
+      "name": "Catálogo de servicios",
+      "description": "Servicios lista código, nombre, tipo de producto, categoría, impuesto, descuento y estado; se observan categorías de atención, transporte, alquiler y terapias.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0122",
+          "timestamp": "00:49:05.800",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0122_00h49m05s800ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0128",
+          "timestamp": "00:49:09.000",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0128_00h49m09s000ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: filtrar y paginar servicios; validar que tipo y categoría sean catálogos configurables y no texto libre inconsistente."
+    },
+    {
+      "id": "CH15-F14",
+      "name": "Matriz de perfiles de descuento",
+      "description": "Descuentos distribuye valores por Servicios, Laboratorios, Medicamentos, Equipos, Insumos y Honorarios; el capítulo sólo demuestra el listado inicial.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0144",
+          "timestamp": "00:49:33.200",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0144_00h49m33s200ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0148",
+          "timestamp": "00:49:41.400",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0148_00h49m41s400ms_DETAIL.jpg"
+        }
+      ],
+      "test_path": "E2E: comprobar que cada porcentaje se aplica únicamente a su familia y respeta límites y redondeo configurados."
+    },
+    {
+      "id": "CH15-F15",
+      "name": "Regla de lotes para consumos internos",
+      "description": "La conversación plantea que algunos insumos podrían requerir lote al usarse internamente, pero no muestra la decisión ni el flujo de selección.",
+      "classification": "VERBAL",
+      "confidence": "LOW",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0068",
+          "timestamp": "00:46:51.600",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0068_00h46m51s600ms_abrupt_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:46:58.000–00:47:10.000: se discute si marcar Lotes y el uso interno del insumo, sin una regla concluyente.",
+      "test_path": "Pendiente de definición del cliente; validar obligatoriedad de lote por familia y transición de inventario."
+    },
+    {
+      "id": "CH15-F16",
+      "name": "Honorario vinculado a profesional",
+      "description": "La narración indica que el honorario se crea y se asigna al médico; el formulario demuestra el selector Recurso, no el cálculo o liquidación posterior.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH15",
+          "chapter_event_id": "CH15-E0097",
+          "timestamp": "00:47:42.000",
+          "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg"
+        }
+      ],
+      "transcript_evidence": "00:47:28.000–00:48:17.000: se describe crear el honorario y asignarlo al médico correspondiente.",
+      "test_path": "Integración: vincular recurso autorizado y verificar que facturación y liquidación usen versiones auditables de la tarifa."
+    }
+  ]
 }

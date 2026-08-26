@@ -1,3 +1,13 @@
-# Open questions · CH05_cotizacion_servicios_estudios_y_medicamentos
+# Preguntas abiertas · CH05
 
-Pending review.
+1. **CH05-Q001 · UNCERTAIN** — ¿Qué determina qué Socio de negocios/lista de precios puede elegir cada organización, su vigencia, prioridad y moneda? Evidencia: CH05-E0003, 00:07:49.400, `detail_crops/CH05-E0003_00h07m49s400ms_DETAIL.jpg`.
+2. **CH05-Q002 · UNCERTAIN** — ¿Cuál es la taxonomía autorizada entre Servicios y Equipos? El catálogo de Servicios incluye alquileres y `Atril metálico + Bomba de infusión` aunque existe una pestaña Equipos. Evidencia: CH05-E0065, 00:09:50.400, `detail_crops/CH05-E0065_00h09m50s400ms_DETAIL.jpg`.
+3. **CH05-Q003 · UNCERTAIN** — ¿Qué unidad representa Cantidad para hospitalizaciones por horas/días, alquileres y medicamentos; admite decimales, límites o validación contra duración? Evidencia: CH05-E0052, 00:09:30.400, `event_frames/CH05-E0052_00h09m30s400ms_abrupt_change.jpg`.
+4. **CH05-Q004 · UNCERTAIN** — ¿Cuáles son moneda, tasa, base, exenciones, redondeo y precedencia de descuentos/impuesto? Los valores observados no autorizan inferir una tasa. Evidencia: CH05-E0067, 00:09:56.400, `event_frames/CH05-E0067_00h09m56s400ms_abrupt_change.jpg`.
+5. **CH05-Q005 · UNCERTAIN** — ¿Qué significa el conteo entre paréntesis en Medicamentos y cómo se relaciona con `Solo disponibles en inventario`, reservas, lotes, bodegas y concurrencia? Evidencia: CH05-E0075, 00:10:46.800, `detail_crops/CH05-E0075_00h10m46s800ms_DETAIL.jpg`.
+6. **CH05-Q006 · UNCERTAIN** — ¿Qué controles clínicos/autorizaciones determinan medicamento, presentación y cantidad? El ASR menciona ejemplos de administración, pero no debe transformarse en una regla de dosificación. Evidencia: CH05-E0080, 00:11:04.400, `detail_crops/CH05-E0080_00h11m04s400ms_DETAIL.jpg`.
+7. **CH05-Q007 · UNCERTAIN** — ¿El procesamiento de Invanz insertó una línea? El clip confirma clic, overlay y restablecimiento, pero la fila de Medicamentos queda fuera del encuadre y no se muestra un total posterior. Evidencia: CH05-E0080, 00:11:04.400, `event_frames/CH05-E0080_00h11m04s400ms_abrupt_change.jpg`; CH05-E0082, 00:11:05.600, `detail_crops/CH05-E0082_00h11m05s600ms_DETAIL.jpg`.
+8. **CH05-Q008 · UNCERTAIN** — ¿Qué validaciones, versionado inmutable de cotización enviada, auditoría e idempotencia aplica Guardar? El capítulo nunca pulsa Guardar. Evidencia: CH05-E0067, 00:09:56.400, `event_frames/CH05-E0067_00h09m56s400ms_abrupt_change.jpg`.
+9. **CH05-Q009 · UNCERTAIN** — ¿Quién puede eliminar líneas, editar cantidades o cambiar el checkbox de impuesto, y cómo se auditan/recalculan esos cambios? Evidencia: CH05-E0054, 00:09:31.400, `event_frames/CH05-E0054_00h09m31s400ms_abrupt_change.jpg`.
+
+La transcripción TXT/SRT es ruidosa y no resuelve estas reglas financieras, de inventario o clínicas.

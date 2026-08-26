@@ -1,4 +1,197 @@
 {
   "chapter": "CH16_descuentos_y_reglas_por_categoria",
-  "features": []
+  "review_scope": "Auditoría funcional y visual de evidencia fuente; no incluye ejecución comparativa de la plataforma actual.",
+  "features": [
+    {
+      "id": "CH16-F01",
+      "name": "Matriz de descuentos por familia",
+      "description": "Cada perfil contiene Nombre, Descripción y porcentajes independientes para Servicios, Laboratorios, Medicamentos, Equipos, Insumos y Honorarios.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0001",
+          "timestamp": "00:49:45.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0001_00h49m45s000ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0018",
+          "timestamp": "00:50:18.200",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0018_00h50m18s200ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "Integración: aplicar un perfil sintético y comprobar que cada porcentaje afecte sólo su familia, con redondeo y total reproducibles."
+    },
+    {
+      "id": "CH16-F02",
+      "name": "Catálogo paginado y exportable",
+      "description": "Descuentos ofrece selección de registros, búsqueda, tres páginas, navegación Anterior/Siguiente, acciones por fila y Excel.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0013",
+          "timestamp": "00:50:13.800",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0013_00h50m13s800ms_settled.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0030",
+          "timestamp": "00:50:38.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0030_00h50m38s000ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: buscar, cambiar tamaño y página, exportar Excel y verificar que el archivo refleje filtros y permisos."
+    },
+    {
+      "id": "CH16-F03",
+      "name": "Perfiles con categorías excluidas",
+      "description": "Los ejemplos visibles usan cero en categorías no cubiertas y porcentajes distintos en las incluidas; esos valores son datos de configuración, no reglas universales.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0003",
+          "timestamp": "00:49:58.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0024",
+          "timestamp": "00:50:25.800",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0024_00h50m25s800ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "Integración: un cero no aplica descuento y no se interpreta como dato ausente; validar categorías no configuradas."
+    },
+    {
+      "id": "CH16-F04",
+      "name": "Alta de perfil de descuento",
+      "description": "Nuevo Descuento captura nombre obligatorio, descripción y porcentajes de las seis familias, con Atrás y Guardar.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: crear perfil sintético, validar nombre requerido y rango de cada porcentaje, y comprobar persistencia por organización."
+    },
+    {
+      "id": "CH16-F05",
+      "name": "Marca de jubilado",
+      "description": "El formulario incluye la casilla Es Jubilado, pero no demuestra asignación automática, elegibilidad ni efecto sobre los porcentajes.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0034",
+          "timestamp": "00:50:41.800",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0034_00h50m41s800ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "Pendiente de definición del cliente; verificar elegibilidad, autorización y aplicación sólo cuando exista regla aprobada."
+    },
+    {
+      "id": "CH16-F06",
+      "name": "Perfiles negociados por categoría",
+      "description": "La conversación explica perfiles con un porcentaje para servicios y exclusión de medicamentos, y menciona porcentajes pactados distintos por cliente; no define precedencia ni elegibilidad.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0003",
+          "timestamp": "00:49:58.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg"
+        }
+      ],
+      "transcript_evidence": "00:49:37.000–00:50:42.000: se describen perfiles con descuentos específicos por familia y acuerdos con porcentajes distintos.",
+      "test_path": "Integración: asignar un perfil versionado a una entidad sintética y validar la matriz pactada sin combinar reglas no autorizadas."
+    },
+    {
+      "id": "CH16-F07",
+      "name": "Recarga del catálogo después del alta",
+      "description": "Al volver de Nuevo Descuento, el listado atraviesa estado vacío y Cargando antes de recuperar la matriz.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0036",
+          "timestamp": "00:50:48.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0036_00h50m48s000ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0039",
+          "timestamp": "00:50:49.400",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg"
+        }
+      ],
+      "test_path": "E2E: volver sin guardar y después de guardar; validar que el listado no duplique ni muestre datos obsoletos."
+    },
+    {
+      "id": "CH16-F08",
+      "name": "Acceso al reporte de salud",
+      "description": "Desde Clínica se abre Reporte de salud, que empieza a listar hospitalizaciones con periodo, auditoría, triage y estatus.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0041",
+          "timestamp": "00:50:54.000",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0041_00h50m54s000ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0044",
+          "timestamp": "00:51:07.200",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg"
+        }
+      ],
+      "test_path": "E2E: abrir Reporte de salud con rol autorizado y verificar columnas, carga e aislamiento de organización."
+    },
+    {
+      "id": "CH16-F09",
+      "name": "Bloqueo de edición clínica tras guardar",
+      "description": "La narración afirma que enfermería no podía volver a editar después de guardar por motivos legales, mientras otro rol sí corregía errores ortográficos; no se muestra el flujo ni la preservación de versiones.",
+      "classification": "VERBAL",
+      "confidence": "MEDIUM",
+      "current_platform_status": "NOT_TESTABLE",
+      "evidence": [
+        {
+          "chapter_id": "CH16",
+          "chapter_event_id": "CH16-E0040",
+          "timestamp": "00:50:52.200",
+          "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0040_00h50m52s200ms_settled.jpg"
+        }
+      ],
+      "transcript_evidence": "00:50:48.000–00:51:19.000: se describe bloqueo de edición para enfermería y capacidad de corrección de otro rol.",
+      "test_path": "Autorización: bloquear edición de documento firmado y exigir corrección con motivo, nueva evidencia de auditoría y preservación del original."
+    }
+  ]
 }

@@ -1,4 +1,158 @@
 {
   "chapter": "CH05_cotizacion_servicios_estudios_y_medicamentos",
-  "features": []
+  "chapter_id": "CH05",
+  "title": "Cotización: servicios, estudios y medicamentos",
+  "transcript_summary": "La narración acompaña la selección de servicios y medicamentos, pero el ASR es ruidoso y mezcla ejemplos de duración, cantidades y administración clínica. La evidencia visual confirma catálogos por socio de negocios, búsqueda incremental, precios visibles, cantidades, adición de dos servicios, ledger con descuentos/impuesto/totales y búsqueda de medicamentos con conteos entre paréntesis. No confirma fórmulas financieras, semántica de inventario, reglas de dosificación, guardado ni persistencia del medicamento.",
+  "features": [
+    {
+      "id": "CH05-F001",
+      "category": "cotizacion_items",
+      "name": "Categorías de conceptos en Nueva cotización",
+      "description": "La cotización expone Servicios, Estudios Dx, Medicamentos, Insumos, Equipos, Honorarios y Extras, con un compositor que cambia de tipo.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Solo Servicios y Medicamentos se recorren; las demás pestañas no se prueban.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0001","timestamp":"00:07:32.200","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0001_00h07m32s200ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración continúa la construcción de los conceptos de una cotización.","observation":"Las siete categorías y el compositor de Servicios son visibles en una misma pantalla."}]
+    },
+    {
+      "id": "CH05-F002",
+      "category": "precios_catalogos",
+      "name": "Socio de negocios selecciona catálogo de precios",
+      "description": "Socio de negocios es obligatorio y abre una lista buscable con VITAE (precio regular), aseguradoras y otras listas.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra elegibilidad, prioridad, vigencia, organización o fórmula de cada lista.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0003","timestamp":"00:07:49.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0003_00h07m49s400ms_motion_progress.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0003_00h07m49s400ms_DETAIL.jpg","transcript":"La transcripción no define reglas contractuales del socio de negocios.","observation":"El desplegable contiene listas heterogéneas; finalmente se usa VITAE (precio regular)."}]
+    },
+    {
+      "id": "CH05-F003",
+      "category": "estados_async",
+      "name": "Bloqueo visual Procesando durante cargas y adiciones",
+      "description": "Un overlay gris con Procesando... aparece al cargar el catálogo y al añadir conceptos.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se observan timeout, error, reintento, cancelación ni protección explícita contra doble clic.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0021","timestamp":"00:08:14.600","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0021_00h08m14s600ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración espera mientras se prepara la selección.","observation":"La pantalla completa queda atenuada y muestra Procesando... después de escoger VITAE."}]
+    },
+    {
+      "id": "CH05-F004",
+      "category": "busquedas_filtros",
+      "name": "Catálogo de Servicios con búsqueda incremental",
+      "description": "El selector permite escribir texto parcial y filtra códigos y descripciones extensas de servicios.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se determinan normalización, ranking, alcance organizacional ni manejo de duplicados.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0025","timestamp":"00:08:27.200","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0025_00h08m27s200ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0025_00h08m27s200ms_DETAIL.jpg","transcript":"La narración busca una hospitalización y compara variantes por horas.","observation":"El término hospit reduce el catálogo a hospitalización, cama y variantes relacionadas."}]
+    },
+    {
+      "id": "CH05-F005",
+      "category": "precios_catalogos",
+      "name": "Selección de servicio autocompleta precio",
+      "description": "Al seleccionar V50111 Hospitalización en casa 24 Horas se muestra el precio unitario 137.17.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "El valor pertenece a la grabación y no autoriza codificar un precio fijo ni su vigencia.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0050","timestamp":"00:09:16.200","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0050_00h09m16s200ms_stable_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0050_00h09m16s200ms_DETAIL.jpg","transcript":"La narración confirma verbalmente la elección del servicio, sin fijar precio contractual.","observation":"Código, nombre y precio aparecen juntos tras confirmar la opción."}]
+    },
+    {
+      "id": "CH05-F006",
+      "category": "acciones",
+      "name": "Cantidad requerida y acción Añadir",
+      "description": "El compositor exige Cantidad y permite añadir el concepto seleccionado.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueban límites, decimales, unidades, validación de cero o idempotencia.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0052","timestamp":"00:09:30.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0052_00h09m30s400ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración usa cinco como ejemplo operativo, no como regla general.","observation":"V50111 tiene cantidad 5 y el clic en Añadir activa Procesando...."}]
+    },
+    {
+      "id": "CH05-F007",
+      "category": "ledger",
+      "name": "Ledger de conceptos agrupado por tipo",
+      "description": "Después de añadir, aparece una sección Servicios con fila removible y columnas Tipo, Código, Item, Precio, Cantidad, Subtotal, descuentos, Impuesto y Total.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueba eliminación, autorización, auditoría ni persistencia del ledger.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0054","timestamp":"00:09:31.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0054_00h09m31s400ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración continúa con el resultado de agregar el servicio.","observation":"La primera fila conserva código V50111, cantidad editable 5 y un control de remoción."}]
+    },
+    {
+      "id": "CH05-F008",
+      "category": "totales",
+      "name": "Resumen de subtotal, descuentos, impuesto y total",
+      "description": "La pantalla presenta importes por línea y un resumen global que se recalcula al añadir conceptos.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se infiere tasa, redondeo, base imponible, moneda, exención ni precedencia de descuentos.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0067","timestamp":"00:09:56.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0067_00h09m56s400ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración no especifica una fórmula tributaria.","observation":"Dos servicios muestran subtotal global 805.85, descuentos 0.00, impuesto 104.76 y total 910.61."}]
+    },
+    {
+      "id": "CH05-F009",
+      "category": "cotizacion_items",
+      "name": "Múltiples líneas de Servicios",
+      "description": "Se añade Atril metálico + Bomba de infusión como segunda línea, manteniendo la hospitalización previa.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "La clasificación del atril/bomba como Servicio frente a Equipo queda sin confirmar.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0065","timestamp":"00:09:50.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0065_00h09m50s400ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0065_00h09m50s400ms_DETAIL.jpg","transcript":"La narración busca una bomba adicional y discute su inclusión.","observation":"V23SC02 queda seleccionado con precio 24.00 antes de añadir cantidad 5."}]
+    },
+    {
+      "id": "CH05-F010",
+      "category": "medicamentos",
+      "name": "Compositor específico de Medicamentos",
+      "description": "Al cambiar a Medicamentos se reinician Socio de negocios, selector, Precio y Cantidad para ese tipo.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se demuestra si cada categoría conserva un socio independiente o comparte una regla global.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0071","timestamp":"00:10:42.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0071_00h10m42s400ms_settled.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0071_00h10m42s400ms_DETAIL.jpg","transcript":"La narración cambia al ejemplo de medicamentos.","observation":"Medicamentos queda activo y el socio vuelve a Seleccione con cantidad 0."}]
+    },
+    {
+      "id": "CH05-F011",
+      "category": "inventario",
+      "name": "Catálogo de medicamentos muestra conteos entre paréntesis",
+      "description": "Las opciones combinan código, producto, principio activo, presentación, fabricante y un conteo visible.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se confirma si el conteo es existencia física, disponible, reservado, lote agregado o alcance por bodega.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0075","timestamp":"00:10:46.800","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0075_00h10m46s800ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0075_00h10m46s800ms_DETAIL.jpg","transcript":"La narración alude a disponibilidad, pero no define el dato.","observation":"Invanz (5), Nexium (11) y Vanaurus (2) aparecen en el catálogo."}]
+    },
+    {
+      "id": "CH05-F012",
+      "category": "busquedas_filtros",
+      "name": "Estado sin resultados en búsqueda",
+      "description": "Una búsqueda que no coincide muestra el mensaje No results found y se recupera al corregir el término.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "No se prueban tildes, sinónimos, errores de red ni catálogo vacío.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0077","timestamp":"00:10:48.800","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0077_00h10m48s800ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0077_00h10m48s800ms_DETAIL.jpg","transcript":"La narración corrige el término de búsqueda.","observation":"invas produce No results found; inva vuelve a mostrar Invanz."}]
+    },
+    {
+      "id": "CH05-F013",
+      "category": "medicamentos",
+      "name": "Selección de medicamento autocompleta precio",
+      "description": "Invanz se selecciona con precio visible 64.10 y CEFAXONA con 10.97.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Los valores son evidencia de la grabación, no precios vigentes ni reglas clínicas.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0079","timestamp":"00:10:54.800","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0079_00h10m54s800ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0079_00h10m54s800ms_DETAIL.jpg","transcript":"La narración usa medicamentos como ejemplo; no define tarifario.","observation":"Invanz seleccionado rellena Precio con 64.10."},{"chapter_id":"CH05","chapter_event_id":"CH05-E0087","timestamp":"00:11:11.000","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0087_00h11m11s000ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0087_00h11m11s000ms_DETAIL.jpg","transcript":"La narración continúa con ceftriaxona sin fijar tratamiento.","observation":"CEFAXONA seleccionada rellena Precio con 10.97; no se añade."}]
+    },
+    {
+      "id": "CH05-F014",
+      "category": "acciones",
+      "name": "Intento de añadir Invanz restablece el compositor",
+      "description": "Con Invanz, precio 64.10 y cantidad 5 se pulsa Añadir, aparece Procesando... y luego el selector queda vacío.",
+      "classification": "UNCERTAIN",
+      "confidence": "alta",
+      "rule": "El clip exacto no encuadra una fila de Medicamentos; no se puede afirmar inserción, persistencia ni total resultante.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0080","timestamp":"00:11:04.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0080_00h11m04s400ms_abrupt_change.jpg","detail_crop":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/detail_crops/CH05-E0080_00h11m04s400ms_DETAIL.jpg","transcript":"La narración menciona cantidades de medicación con ASR ruidoso; no se toma como regla de dosis.","observation":"El overlay confirma la acción; el clip exacto local ~00:04:10-00:04:14 confirma el restablecimiento, pero la fila queda fuera de vista."}]
+    },
+    {
+      "id": "CH05-F015",
+      "category": "acciones",
+      "name": "Filtro de inventario y acciones finales visibles",
+      "description": "Solo disponibles en inventario permanece desmarcado; Atrás y Guardar aparecen debajo del resumen.",
+      "classification": "VISIBLE",
+      "confidence": "alta",
+      "rule": "Ninguno se activa; filtrado, validación, guardado, versionado y navegación son NOT_TESTABLE en este capítulo.",
+      "evidence": [{"chapter_id":"CH05","chapter_event_id":"CH05-E0067","timestamp":"00:09:56.400","image":"references/video-audit/chapters/CH05_cotizacion_servicios_estudios_y_medicamentos/event_frames/CH05-E0067_00h09m56s400ms_abrupt_change.jpg","detail_crop":null,"transcript":"La narración no ejecuta el guardado ni explica el filtro.","observation":"El checkbox permanece vacío y los botones Atrás/Guardar están visibles con dos líneas en el ledger."}]
+    }
+  ]
 }

@@ -1,4 +1,105 @@
 {
+  "chapter_id": "CH10",
   "chapter": "CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos",
-  "features": []
+  "summary": "Órdenes médicas, tratamientos y tarjetas de medicamentos. El clip muestra la configuración, pero no confirma la persistencia del tratamiento cerrado sin guardar.",
+  "features": [
+    {
+      "id": "CH10-F01",
+      "name": "Listado de pacientes de Orden Médica",
+      "description": "Pestañas Activos, Inactivos, Tratamientos con cambios y Actualizaciones; búsqueda, paginación, columnas Nombre, Cédula, Fecha Nac., Triage, Hospitalización y Estatus; acciones Nuevo, Ver Órdenes y Registro XPO.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0008","timestamp":"00:27:37.600","path":"event_frames/CH10-E0008_00h27m37s600ms_stable_change.jpg","transcript":"00:27:20–00:28:00"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0009","timestamp":"00:27:42.200","path":"event_frames/CH10-E0009_00h27m42s200ms_settled.jpg","detail_crop":"detail_crops/CH10-E0009_00h27m42s200ms_DETAIL.jpg","transcript":"00:27:20–00:28:00"}
+      ]
+    },
+    {
+      "id": "CH10-F02",
+      "name": "Elección de tipo de documento",
+      "description": "La acción Nuevo permite escoger Orden Médica o Tarjeta de medicamentos.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0011","timestamp":"00:27:43.800","path":"event_frames/CH10-E0011_00h27m43s800ms_abrupt_change.jpg","transcript":"00:27:40–00:28:00"}]
+    },
+    {
+      "id": "CH10-F03",
+      "name": "Encabezado y tratamientos de tarjeta",
+      "description": "Formulario con paciente, cédula, hospitalización, triage, médicos y diagnósticos; pestañas y tabla de tratamientos; Agregar tratamiento, Guardar y Atrás.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0013","timestamp":"00:27:55.600","path":"event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg","transcript":"00:27:50–00:28:10"}]
+    },
+    {
+      "id": "CH10-F04",
+      "name": "Editor detallado de tratamiento",
+      "description": "Modal con medicamento, médico, vía, dosis, frecuencia, duración, fechas, crónico, horarios, indicaciones enriquecidas y control Mostrar diluciones.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0020","timestamp":"00:27:59.800","path":"event_frames/CH10-E0020_00h27m59s800ms_abrupt_change.jpg","transcript":"00:27:55–00:29:25"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0050","timestamp":"00:29:08.800","path":"event_frames/CH10-E0050_00h29m08s800ms_abrupt_change.jpg","detail_crop":"detail_crops/CH10-E0050_00h29m08s800ms_DETAIL.jpg","transcript":"00:28:20–00:29:25"}
+      ]
+    },
+    {
+      "id": "CH10-F05",
+      "name": "Catálogos visibles de pauta y horarios",
+      "description": "Se observan vías IV/VO/SC/IM, frecuencias cada 4/6/8/12 horas, cada día, BID y TID, duraciones de 1 a 5 días, horarios de 30 minutos y PRN.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0021","timestamp":"00:28:00.400","path":"event_frames/CH10-E0021_00h28m00s400ms_stable_change.jpg","detail_crop":"detail_crops/CH10-E0021_00h28m00s400ms_DETAIL.jpg","transcript":"00:27:55–00:28:10"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0028","timestamp":"00:28:14.000","path":"event_frames/CH10-E0028_00h28m14s000ms_motion_progress.jpg","detail_crop":"detail_crops/CH10-E0028_00h28m14s000ms_DETAIL.jpg","transcript":"00:28:10–00:28:30"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0031","timestamp":"00:28:22.800","path":"event_frames/CH10-E0031_00h28m22s800ms_motion_progress.jpg","detail_crop":"detail_crops/CH10-E0031_00h28m22s800ms_DETAIL.jpg","transcript":"00:28:15–00:28:35"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0034","timestamp":"00:28:26.200","path":"event_frames/CH10-E0034_00h28m26s200ms_stable_change.jpg","detail_crop":"detail_crops/CH10-E0034_00h28m26s200ms_DETAIL.jpg","transcript":"00:28:20–00:28:40"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0042","timestamp":"00:28:42.400","path":"event_frames/CH10-E0042_00h28m42s400ms_abrupt_change.jpg","detail_crop":"detail_crops/CH10-E0042_00h28m42s400ms_DETAIL.jpg","transcript":"00:28:35–00:29:00"}
+      ]
+    },
+    {
+      "id": "CH10-F06",
+      "name": "Derivación aparente de fecha final",
+      "description": "Al escoger cinco días se muestra un intervalo del 16 al 20 de junio; parece derivarse de inicio y duración, pero el clip no prueba la fórmula general.",
+      "classification": "INFERRED",
+      "confidence": "MEDIUM",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0035","timestamp":"00:28:27.200","path":"event_frames/CH10-E0035_00h28m27s200ms_motion_progress.jpg","detail_crop":"detail_crops/CH10-E0035_00h28m27s200ms_DETAIL.jpg","transcript":"00:28:20–00:28:40"}]
+    },
+    {
+      "id": "CH10-F07",
+      "name": "Composición de orden por etiquetas",
+      "description": "Agregar Orden abre un panel arrastrable con etiquetas clínicas, Nueva Etiqueta, Guardar y Cerrar; al agregar secciones aparecen editores enriquecidos y eliminación.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0072","timestamp":"00:29:30.800","path":"event_frames/CH10-E0072_00h29m30s800ms_abrupt_change.jpg","transcript":"00:29:25–00:30:00"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0073","timestamp":"00:29:31.400","path":"event_frames/CH10-E0073_00h29m31s400ms_stable_change.jpg","transcript":"00:29:25–00:30:00"},
+        {"chapter_id":"CH10","chapter_event_id":"CH10-E0091","timestamp":"00:29:52.400","path":"event_frames/CH10-E0091_00h29m52s400ms_abrupt_change.jpg","transcript":"00:29:40–00:30:00"}
+      ]
+    },
+    {
+      "id": "CH10-F08",
+      "name": "Consulta de órdenes, tarjetas e historial",
+      "description": "Modal con pestañas Órdenes médicas, Tarjetas de medicamentos e Historial de tratamientos; tabla de código, estatus, actualización y estatus PMC.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0109","timestamp":"00:30:13.200","path":"event_frames/CH10-E0109_00h30m13s200ms_settled.jpg","detail_crop":"detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg","transcript":"00:30:00–00:30:20"}]
+    },
+    {
+      "id": "CH10-F09",
+      "name": "Impresiones de tarjeta de medicamentos",
+      "description": "El menú abierto de una tarjeta ofrece Imprimir tarjeta completa, Imprimir tarjeta simple e Imprimir conteo presencial. El frame no prueba las acciones del menú de una orden médica.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0109","timestamp":"00:30:13.200","path":"event_frames/CH10-E0109_00h30m13s200ms_settled.jpg","detail_crop":"detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg","transcript":"00:30:00–00:30:20"}]
+    },
+    {
+      "id": "CH10-F10",
+      "name": "Permisos y corrección clínica",
+      "description": "No se evidencia qué roles pueden crear, finalizar, modificar, eliminar o imprimir, ni la política de corrección de documentos clínicos firmados.",
+      "classification": "UNCERTAIN",
+      "confidence": "HIGH",
+      "evidence": [{"chapter_id":"CH10","chapter_event_id":"CH10-E0112","timestamp":"00:31:12.200","path":"event_frames/CH10-E0112_00h31m12s200ms_abrupt_change.jpg","detail_crop":"detail_crops/CH10-E0112_00h31m12s200ms_DETAIL.jpg","transcript":"00:30:55–00:31:13"}]
+    }
+  ],
+  "entities": ["Paciente","Hospitalización","Médico","Diagnóstico","Medicamento","Tratamiento","Orden médica","Tarjeta de medicamentos","Etiqueta/sección"],
+  "open_questions": ["Roles y transiciones autorizadas", "Significado y transición de PMC Revisar/Listo", "Validaciones clínicas y auditoría de correcciones", "Comportamiento exacto de Mostrar diluciones"]
 }

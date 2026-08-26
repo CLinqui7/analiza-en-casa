@@ -1,3 +1,12 @@
-# Open questions · CH02_alta_y_edicion_de_pacientes
+# Preguntas abiertas · CH02
 
-Pending review.
+1. **CH02-Q001 · UNCERTAIN** — ¿Qué normalización, formato, unicidad, anti-duplicación y validación aplica a Cédula/Pasaporte, y cómo se evita revelar si un paciente ya existe? Evidencia: CH02-E0012, 00:02:23.400, `event_frames/CH02-E0012_00h02m23s400ms_motion_progress.jpg` y su detail crop.
+2. **CH02-Q002 · UNCERTAIN** — ¿Qué reglas válidas de teléfono, correo, fecha de nacimiento, edad y campos demográficos deben aplicarse, y cuáles varían por organización? Evidencia: CH02-E0011, 00:02:17.800, `event_frames/CH02-E0011_00h02m17s800ms_abrupt_change.jpg`.
+3. **CH02-Q003 · UNCERTAIN** — ¿Cuál es la base de consentimiento, historial de cambios y mecanismo de revocación para Botmaker/WhatsApp? Los mensajes no deben incluir datos clínicos sensibles. Evidencia: CH02-E0022, 00:02:57.200, `detail_crops/CH02-E0022_00h02m57s200ms_DETAIL.jpg`.
+4. **CH02-Q004 · UNCERTAIN** — ¿Cuáles son las fuentes y alcances autoritativos de Empresa y Seguro, y por qué el filtro de seguro muestra entradas con apariencia de persona? Evidencia: CH02-E0058, 00:03:46.600, `detail_crops/CH02-E0058_00h03m46s600ms_DETAIL.jpg`.
+5. **CH02-Q005 · UNCERTAIN** — ¿Qué sucede al responder No en titularidad, cuántas coberturas se permiten, qué hace Agregar y qué validaciones tienen póliza, certificado y fecha efectiva? Evidencia: CH02-E0062, 00:03:49.800, `event_frames/CH02-E0062_00h03m49s800ms_stable_change.jpg`; CH02-E0066, 00:04:10.000, `detail_crops/CH02-E0066_00h04m10s000ms_DETAIL.jpg`.
+6. **CH02-Q006 · UNCERTAIN** — ¿Se permiten múltiples contactos, cuáles son los catálogos de parentesco/rol/país y qué controles protegen sus datos? Evidencia: CH02-E0068, 00:04:11.000, `event_frames/CH02-E0068_00h04m11s000ms_stable_change.jpg`.
+7. **CH02-Q007 · UNCERTAIN** — ¿Qué proveedores y formatos acepta Pegar enlace, cuál es la precedencia entre dirección, enlace y marcador, y qué finalidad/retención tiene el control de cámara? Evidencia: CH02-E0071, 00:04:19.600, `event_frames/CH02-E0071_00h04m19s600ms_abrupt_change.jpg`; CH02-E0076, 00:04:35.800, `detail_crops/CH02-E0076_00h04m35s800ms_DETAIL.jpg`.
+8. **CH02-Q008 · UNCERTAIN** — ¿Qué validaciones, errores, idempotencia y evidencia de auditoría produce Guardar, y qué comportamiento exacto tiene Atrás ante cambios? Evidencia: CH02-E0082, 00:04:39.000, `detail_crops/CH02-E0082_00h04m39s000ms_DETAIL.jpg`. El clip termina sin pulsar ninguno.
+
+La transcripción TXT/SRT es ruidosa y no resuelve estas reglas de negocio.
