@@ -52,6 +52,15 @@ for(const ch of chapters){
     .filter(note=>!allowedClassifications.has(note.classification?.trim()))
     .map(note=>note.chapter_event_id||"<missing-id>")
     .sort();
+  const noteTraceErrors=[];
+  for(const note of notes){
+    const event=eventsById.get(note.chapter_event_id);
+    if(!event)continue;
+    if(note.timestamp!==event.timestamp)noteTraceErrors.push(`${note.chapter_event_id}:timestamp:${note.timestamp||"missing"}`);
+    if(!note.frame_path)noteTraceErrors.push(`${note.chapter_event_id}:frame-path:missing`);
+    else if(!evidencePathExists(note.frame_path,source))noteTraceErrors.push(`${note.chapter_event_id}:frame-path:not-found:${note.frame_path}`);
+    if(note.detail_crop_path&&!evidencePathExists(note.detail_crop_path,source))noteTraceErrors.push(`${note.chapter_event_id}:detail-crop:not-found:${note.detail_crop_path}`);
+  }
   const reqEventSheets=jpgNames(path.join(source,"contact_sheets_events"));
   const reqSafetySheets=jpgNames(path.join(source,"contact_sheets_safety"));
   const reqDetails=jpgNames(path.join(source,"detail_crops"));
@@ -60,6 +69,7 @@ for(const ch of chapters){
   const extra=(a,b)=>[...a].filter(x=>!b.has(x));
   const acknowledgements={read_readme:receipt.read_readme,read_coverage:receipt.read_coverage,read_event_manifest:receipt.read_event_manifest,read_transcript:receipt.read_transcript,checked_exact_clip_for_uncertainties:receipt.checked_exact_clip_for_uncertainties};
   const missingAck=Object.entries(acknowledgements).filter(([,v])=>!v).map(([k])=>k);
+  const receiptErrors=receipt.chapter===ch?[]:[`chapter:${receipt.chapter||"missing"}`];
   const inventoryErrors=[];
   let inventory={};
   try{inventory=JSON.parse(fs.readFileSync(path.join(review,"chapter_feature_inventory.json"),"utf8"))}
@@ -83,6 +93,7 @@ for(const ch of chapters){
     for(const [index,evidence] of evidenceItems.entries()){
       const prefix=`${featureId}:evidence:${index+1}`;
       const eventId=String(evidence.chapter_event_id||"").trim();
+      if(evidence.chapter_id!==expectedChapterId)inventoryErrors.push(`${prefix}:chapter-id:${evidence.chapter_id||"missing"}`);
       if(!requiredIds.has(eventId))inventoryErrors.push(`${prefix}:event:${eventId||"missing"}`);
       else if(evidence.timestamp!==eventsById.get(eventId).timestamp)inventoryErrors.push(`${prefix}:timestamp:${evidence.timestamp||"missing"}`);
       const primaryPath=String(evidence.path||evidence.image||"").trim();
@@ -102,6 +113,7 @@ for(const ch of chapters){
     unknown_event_notes:unknownNotes,
     duplicate_event_notes:duplicateNotes,
     invalid_event_note_classifications:invalidNoteClassifications,
+    event_review_note_trace_errors:noteTraceErrors.sort(),
     missing_event_sheets:missing(reqEventSheets,set(receipt.reviewed_event_contact_sheets)),
     unknown_event_sheets:extra(set(receipt.reviewed_event_contact_sheets),reqEventSheets),
     missing_safety_sheets:missing(reqSafetySheets,set(receipt.reviewed_safety_contact_sheets)),
@@ -109,6 +121,7 @@ for(const ch of chapters){
     missing_detail_crops:missing(reqDetails,set(receipt.reviewed_detail_crops)),
     unknown_detail_crops:extra(set(receipt.reviewed_detail_crops),reqDetails),
     missing_acknowledgements:missingAck,
+    receipt_errors:receiptErrors,
     feature_inventory_errors:inventoryErrors.sort()
   };
   const hasProblems=Object.values(problems).some(a=>a.length);

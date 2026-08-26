@@ -55,6 +55,9 @@ def main() -> None:
 
     required_events = {r['chapter_event_id'] for r in events}
     events_by_id = {r['chapter_event_id']: r for r in events}
+    receipt_errors: list[str] = []
+    if data.get('chapter') != root.name:
+        receipt_errors.append(f'chapter:{data.get("chapter", "missing")}')
     reviewed_events = set(data.get('reviewed_event_ids', []))
 
     required_event_sheets = names(root, 'contact_sheets_events')
@@ -94,6 +97,21 @@ def main() -> None:
         for row in notes
         if row.get('classification', '').strip() not in allowed_classifications
     )
+    note_trace_errors: list[str] = []
+    for row in notes:
+        event_id = row.get('chapter_event_id', '').strip()
+        if event_id not in required_events:
+            continue
+        if row.get('timestamp') != events_by_id[event_id].get('timestamp'):
+            note_trace_errors.append(f'{event_id}:timestamp:{row.get("timestamp", "missing")}')
+        frame_path = row.get('frame_path', '').strip()
+        if not frame_path:
+            note_trace_errors.append(f'{event_id}:frame-path:missing')
+        elif not evidence_path_exists(repo_root, root, frame_path):
+            note_trace_errors.append(f'{event_id}:frame-path:not-found:{frame_path}')
+        detail_crop_path = row.get('detail_crop_path', '').strip()
+        if detail_crop_path and not evidence_path_exists(repo_root, root, detail_crop_path):
+            note_trace_errors.append(f'{event_id}:detail-crop:not-found:{detail_crop_path}')
 
     features = inventory.get('features', [])
     inventory_errors: list[str] = []
@@ -123,6 +141,8 @@ def main() -> None:
         for index, evidence in enumerate(evidence_items, start=1):
             prefix = f'{feature_id}:evidence:{index}'
             event_id = str(evidence.get('chapter_event_id', '')).strip()
+            if evidence.get('chapter_id') != expected_chapter_id:
+                inventory_errors.append(f'{prefix}:chapter-id:{evidence.get("chapter_id", "missing")}')
             if event_id not in required_events:
                 inventory_errors.append(f'{prefix}:event:{event_id or "missing"}')
             elif evidence.get('timestamp') != events_by_id[event_id].get('timestamp'):
@@ -169,13 +189,15 @@ def main() -> None:
         'duplicate_event_review_notes': duplicate_note_ids,
         'incomplete_event_review_notes': incomplete_notes,
         'invalid_event_review_note_classifications': invalid_classifications,
+        'event_review_note_trace_errors': sorted(note_trace_errors),
+        'receipt_errors': receipt_errors,
         'feature_inventory_errors': sorted(inventory_errors),
     }
     error_lists = [
         missing_events, missing_details, missing_event_sheets, missing_safety_sheets,
         missing_ack, unknown_events, unknown_event_sheets, unknown_safety_sheets, unknown_details,
         missing_note_ids, unknown_note_ids, duplicate_note_ids, incomplete_notes, invalid_classifications,
-        inventory_errors,
+        note_trace_errors, receipt_errors, inventory_errors,
     ]
     result['passed'] = not any(error_lists)
     print(json.dumps(result, ensure_ascii=False, indent=2))
