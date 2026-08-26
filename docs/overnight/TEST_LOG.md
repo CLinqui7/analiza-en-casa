@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH05 forensic audit
+
+- Per-chapter Python verifier: PASS (87/87 events, 71/71 crops, 10 event sheets, 15 safety sheets and 15 traceable features).
+- Ledger review confirmed 87 concrete observations across service search, item selection, pricing fields, line items, totals and medication lookup.
+- The Invanz action remains UNCERTAIN because processing/reset is visible but the resulting row is outside the recorded evidence; pricing, stock and tax values are not promoted to rules.
+
 ## 2026-08-26 · CH17 forensic audit
 
 - Per-chapter Python verifier: PASS (48/48 events, 21/21 crops, 6 event sheets, 13 safety sheets and 17 traceable features).
