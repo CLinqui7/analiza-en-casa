@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH07",
+  "title": "Preautorización, seguro y reclamo",
+  "description": "Estados de cotización, envío a seguro, respuesta, reclamo y seguimiento.",
+  "start_seconds": 865,
+  "end_seconds": 970,
+  "clip_start_with_overlap": 864,
+  "clip_end_with_overlap": 971,
+  "duration_seconds": 105,
+  "event_frames": 18,
+  "detail_crops": 11,
+  "safety_frames_1fps": 106,
+  "expected_safety_frames": 106,
+  "event_contact_sheets": 2,
+  "safety_contact_sheets": 7
+}

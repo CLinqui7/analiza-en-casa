@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "errors": [],
+  "warnings": [],
+  "info": {
+    "source_sha256": "7f559db533e0c09f6c6d01f740abd5bd2cc005b837fcceb39f3223998533c97d",
+    "chapters": 17,
+    "master_events": 1359,
+    "chapter_events_total": 1359,
+    "safety_source_frames": 3271
+  }
+}

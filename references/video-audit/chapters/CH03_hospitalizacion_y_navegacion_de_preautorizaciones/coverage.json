@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH03",
+  "title": "Hospitalización y navegación de preautorizaciones",
+  "description": "Listado de hospitalizaciones, filtros, pestañas y entrada al flujo de cotización/seguro.",
+  "start_seconds": 282,
+  "end_seconds": 370,
+  "clip_start_with_overlap": 281,
+  "clip_end_with_overlap": 371,
+  "duration_seconds": 88,
+  "event_frames": 46,
+  "detail_crops": 10,
+  "safety_frames_1fps": 89,
+  "expected_safety_frames": 89,
+  "event_contact_sheets": 6,
+  "safety_contact_sheets": 6
+}

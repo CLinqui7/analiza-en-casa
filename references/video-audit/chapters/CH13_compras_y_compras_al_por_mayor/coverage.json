@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH13",
+  "title": "Compras y compras al por mayor",
+  "description": "Nueva compra, proveedor, factura, ítems, cantidades, impuestos, descuentos y detalle.",
+  "start_seconds": 2203,
+  "end_seconds": 2392,
+  "clip_start_with_overlap": 2202,
+  "clip_end_with_overlap": 2393,
+  "duration_seconds": 189,
+  "event_frames": 92,
+  "detail_crops": 44,
+  "safety_frames_1fps": 190,
+  "expected_safety_frames": 190,
+  "event_contact_sheets": 11,
+  "safety_contact_sheets": 12
+}

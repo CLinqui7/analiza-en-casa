@@ -1,0 +1,50 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00306,audio_013,1640000,1642000,00:27:20.000,00:27:22.000,0.9904,,(Pausa),0,2000
+T00307,audio_013,1642000,1644000,00:27:22.000,00:27:24.000,0.9888,,(Pausa),2000,4000
+T00308,audio_013,1644000,1646000,00:27:24.000,00:27:26.000,0.994,,(Pausa),4000,6000
+T00309,audio_013,1646000,1648000,00:27:26.000,00:27:28.000,0.987,,(Pausa),6000,8000
+T00310,audio_013,1648000,1650000,00:27:28.000,00:27:30.000,0.9937,,(Pausa),8000,10000
+T00311,audio_013,1650000,1652000,00:27:30.000,00:27:32.000,0.9836,,(Pausa),10000,12000
+T00312,audio_013,1652000,1654000,00:27:32.000,00:27:34.000,0.9963,,(Pausa),12000,14000
+T00313,audio_013,1654000,1656000,00:27:34.000,00:27:36.000,0.9963,,(Pausa),14000,16000
+T00314,audio_013,1656000,1658000,00:27:36.000,00:27:38.000,0.9964,,(Pausa),16000,18000
+T00315,audio_013,1658000,1660000,00:27:38.000,00:27:40.000,0.9971,,(Pausa),18000,20000
+T00316,audio_013,1660000,1662000,00:27:40.000,00:27:42.000,0.9964,,(Pausa),20000,22000
+T00317,audio_013,1662000,1664000,00:27:42.000,00:27:44.000,0.9937,,(Pausa),22000,24000
+T00318,audio_013,1664000,1666000,00:27:44.000,00:27:46.000,0.9678,,(Pausa),24000,26000
+T00319,audio_013,1666000,1668000,00:27:46.000,00:27:48.000,0.9867,,(Pausa),26000,28000
+T00320,audio_013,1668000,1670000,00:27:48.000,00:27:50.000,0.9924,,(Pausa),28000,30000
+T00321,audio_013,1670000,1672000,00:27:50.000,00:27:52.000,0.9893,,(Pausa),30000,32000
+T00322,audio_013,1672000,1674000,00:27:52.000,00:27:54.000,0.9835,,(Pausa),32000,34000
+T00323,audio_013,1674000,1676000,00:27:54.000,00:27:56.000,0.9927,,(Pausa),34000,36000
+T00324,audio_013,1676000,1678000,00:27:56.000,00:27:58.000,0.9931,,(Pausa),36000,38000
+T00325,audio_013,1678000,1680000,00:27:58.000,00:28:00.000,0.9912,,(Pausa),38000,40000
+T00326,audio_014,1680000,1687000,00:28:00.000,00:28:07.000,0.584,MEDIUM_CONFIDENCE,"Aquí podía que pase, como estaba venido anterior, que habían puesto que íbamos a prisión inbans,",40000,47000
+T00327,audio_014,1687000,1699000,00:28:07.000,00:28:19.000,0.5802,MEDIUM_CONFIDENCE,"el medico tratante, la vida de la administración, si en el domenó, el zorazo, el calentra, el cura, la dosis,",47000,59000
+T00328,audio_014,1699000,1717000,00:28:19.000,00:28:37.000,0.8033,,"la frecuencia, la duración, la pecha, al poner la duración ya me tiraba automático la pecha de inicio de la fin.",59000,77000
+T00329,audio_014,1717000,1725000,00:28:37.000,00:28:45.000,0.7658,,"Y también si son medicamentos crónicos, podía seleccionarlo. Aquí los herablistados estaban predeterminados",77000,85000
+T00330,audio_014,1725000,1734000,00:28:45.000,00:28:54.000,0.8255,,"para seleccionar a qué hora quería. Y aquí en indicación dijera prácticamente de transcribir la indicación médica,",85000,94000
+T00331,audio_014,1734000,1738000,00:28:54.000,00:28:58.000,0.6188,MEDIUM_CONFIDENCE,"por ejemplo, el militar, un gramo de inmaps.",94000,98000
+T00332,audio_014,1749000,1761000,00:29:09.000,00:29:21.000,0.635,MEDIUM_CONFIDENCE,Y al tenerlo ya le daba igualdad. También es el enocio de la tarea.,109000,121000
+T00333,audio_014,1765000,1772000,00:29:25.000,00:29:32.000,0.7014,,"La parte que aparece como ordemén y que no se proja aquí en el país, remanejamos como plan de cuidados.",125000,132000
+T00334,audio_014,1773000,1781000,00:29:33.000,00:29:41.000,0.8798,,"Aquí yo puedo seleccionar los dietas que va a tener el paciente, los cuidados de enfermería, los médicos que usted tiene,",133000,141000
+T00335,audio_014,1781000,1789000,00:29:41.000,00:29:49.000,0.785,,"si está con oxígeno, si ya va balance. Y aquí yo le doy este guardar.",141000,149000
+T00336,audio_014,1789000,1796000,00:29:49.000,00:29:56.000,0.9117,,"Y aquí ya puedo decidir el tipo de dieta que el médico ha dejado, los cuidados de enfermería.",149000,156000
+T00337,audio_014,1796000,1799000,00:29:56.000,00:29:59.000,0.8965,,Y ya le doy este guardar.,156000,159000
+T00338,audio_015,1800000,1818860,00:30:00.000,00:30:18.860,0.8151,,"En este caso, para ver tarjetas de medicamentos, de cómo quedó.",160000,178860
+T00339,audio_015,1818860,1827360,00:30:18.860,00:30:27.360,0.8949,,"Aquí está, me ponía los en nombre del paciente, la fecha de nacimiento, la edad, tendría que",178860,187360
+T00340,audio_015,1827360,1832720,00:30:27.360,00:30:32.720,0.7537,,"haberme hablado automaticamente diagnóstico, en este caso también ponía la deducción y",187360,192720
+T00341,audio_015,1832720,1834760,00:30:32.720,00:30:34.760,0.747,,quién había creado la...,192720,194760
+T00342,audio_015,1834760,1835760,00:30:34.760,00:30:35.760,0.6171,MEDIUM_CONFIDENCE,La corte.,194760,195760
+T00343,audio_015,1835760,1841120,00:30:35.760,00:30:41.120,0.7165,,"La corte de la infección, ya me ponía el medicamento, la dosis, la vía, la frecuencia,",195760,201120
+T00344,audio_015,1841120,1844880,00:30:41.120,00:30:44.880,0.9051,,"el oral y la fecha de inicio, la fecha de fin y las observaciones.",201120,204880
+T00345,audio_015,1844880,1850480,00:30:44.880,00:30:50.480,0.922,,Esta tarjeta yo se las compartía a las enfermeras que estaban en el domicilio para que se les,204880,210480
+T00346,audio_015,1850480,1856520,00:30:50.480,00:30:56.520,0.8167,,hiciera más fácil llevar el control de los medicamentos y orales y gente que estaba,210480,216520
+T00347,audio_015,1856520,1857520,00:30:56.520,00:30:57.520,0.6108,MEDIUM_CONFIDENCE,en el domicilio.,216520,217520
+T00348,audio_015,1857520,1859680,00:30:57.520,00:30:59.680,0.6723,MEDIUM_CONFIDENCE,"Y también, no estar viendo siempre la hoja del médico que a veces es bien difícil",217520,219680
+T00349,audio_015,1859680,1860680,00:30:59.680,00:31:00.680,0.9177,,comprender.,219680,220680
+T00350,audio_015,1860680,1861680,00:31:00.680,00:31:01.680,0.6283,MEDIUM_CONFIDENCE,Ok.,220680,221680
+T00351,audio_015,1861680,1862680,00:31:01.680,00:31:02.680,0.4697,LOW_CONFIDENCE,Néscares con él.,221680,222680
+T00352,audio_015,1862680,1874800,00:31:02.680,00:31:14.800,0.7328,,"Sí, bueno, también la orden médica que para nosotros es el plan de cuidados.",222680,234800
+T00353,audio_015,1874800,1886600,00:31:14.800,00:31:26.600,0.8331,,"Aquí va la dieta que le coloquía al paciente, todos los cuidados que se le va la enfermera",234800,246600
+T00354,audio_015,1886600,1896480,00:31:26.600,00:31:36.480,0.7431,,"de realizar, medicamentos más que todos se agregan, por aparte cuando son cómicos y",246600,256480

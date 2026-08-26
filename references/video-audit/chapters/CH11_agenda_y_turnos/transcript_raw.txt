@@ -1,0 +1,43 @@
+[00:31:26.600 --> 00:31:36.480] [conf=0.7431] de realizar, medicamentos más que todos se agregan, por aparte cuando son cómicos y
+
+[00:31:36.480 --> 00:31:37.480] [conf=0.6196] así.
+
+[00:31:37.480 --> 00:31:41.600] [conf=0.6124] Eso en cuanto a la del paciente.
+
+[00:31:41.600 --> 00:31:48.600] [conf=0.7404] De ahí esa misma plataforma me permitía llevar a la enfermera que se le va a decir.
+
+[00:31:48.600 --> 00:31:57.600] [conf=0.8949] Aquí ponía el nombre del paciente.
+
+[00:31:57.600 --> 00:31:59.600] [conf=0.6866] Le daba el creato.
+
+[00:32:00.000 --> 00:32:14.440] [conf=0.8015] Ponía la fecha en que iba sin más, digamos que en este caso va a ir mañana a la enfermera,
+
+[00:32:14.440 --> 00:32:19.280] [conf=0.872] que va a entrar así de la mañana, va a estar el día de mañana solo por un turno de dos
+
+[00:32:19.280 --> 00:32:26.400] [conf=0.7045] horas, inicia la CIPN, finaliza la CIPN.
+
+[00:32:26.400 --> 00:32:32.280] [conf=0.8006] Y ahí le daba en este caso un turno, pero también podría ser oculto, ya le seleccionaba
+
+[00:32:32.280 --> 00:32:38.160] [conf=0.8309] sin cuidado a la enfermería, sin supervisión, si va a llegar, si es un terapista el que va
+
+[00:32:38.160 --> 00:32:43.840] [conf=0.7978] a ir, sin preso y terapia, si es un médico, si es un cuidadora que puede seleccionar a
+
+[00:32:43.840 --> 00:32:47.560] [conf=0.6615] la persona que yo quería en Dan y ahí le daba guardar.
+
+[00:32:47.560 --> 00:32:51.520] [conf=0.7468] Y me parecía este capo.
+
+[00:32:51.520 --> 00:33:02.600] [conf=0.7895] Y aquí yo seleccionaba a la, se selecciona la enfermera que va a ir a Durin.
+
+[00:33:02.600 --> 00:33:07.560] [conf=0.716] También permite en este caso allá, porque eran por servicios profesionales que cuando
+
+[00:33:07.560 --> 00:33:12.320] [conf=0.7216] se le iba a pagar, en este caso como van a impidiar, están por...
+
+[00:33:12.320 --> 00:33:13.320] [conf=0.5742] - ¿Lanín?
+
+[00:33:13.320 --> 00:33:14.320] [conf=0.8227] - ¡Lanín!
+
+[00:33:14.320 --> 00:33:16.040] [conf=0.9717] No tendría que llevar esta opción.
+
+[00:33:16.040 --> 00:33:27.360] [conf=0.9252] Algo más que me permitía esto era realizar la planía de enfermería.
+
+[00:33:27.360 --> 00:33:28.360] [conf=0.6029] - ¿La planía?

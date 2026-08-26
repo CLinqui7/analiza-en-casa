@@ -1,0 +1,99 @@
+1
+00:01:50,000 --> 00:01:52,000
+[MÚSICA]
+
+2
+00:01:52,000 --> 00:01:54,000
+[MÚSICA]
+
+3
+00:01:54,000 --> 00:01:56,000
+[MÚSICA]
+
+4
+00:01:56,000 --> 00:02:00,000
+[Murmullos]
+
+5
+00:02:00,000 --> 00:02:10,960
+El va a parecer la pestaña de pacientes para crear nuevos pacientes que tienen la perspectiva
+
+6
+00:02:10,960 --> 00:02:13,960
+y la inactiva.
+
+7
+00:02:13,960 --> 00:02:23,080
+Para crear uno paciente lleno de nuevo y nos muestra los datos a solicitar que aquí
+
+8
+00:02:23,080 --> 00:02:30,080
+está bien el dúo, puede ser el paso por favor, puede ser el dúo.
+
+9
+00:02:30,080 --> 00:02:39,080
+Te ponen el número el dúo, el nombre completo, la fecha de enciimiento, que es con la entrevistación,
+
+10
+00:02:39,080 --> 00:02:48,080
+se ligue la opción cierre a menino masculino, el número de teléfono, tiene de en casa,
+
+11
+00:02:48,080 --> 00:03:03,080
+el color electrónico, el enganción del tipo de sangre, Estados Unidos, nacionalidad, acá
+
+12
+00:03:03,080 --> 00:03:09,080
+está el número de elevaciones, ocupación.
+
+13
+00:03:09,080 --> 00:03:16,080
+Igual a estos, solamente esta está como preciosa, sujeta, tiene que ser temada también el número
+
+14
+00:03:16,080 --> 00:03:20,080
+de duits y el del instelebre.
+
+15
+00:03:20,080 --> 00:03:28,080
+En esta parte también aparece la opción seleccional porque es aseguradora, es como
+
+16
+00:03:28,080 --> 00:03:36,080
+es aseguradora que va a empezar, aquí aparecen todas las aseguradoras, seleccionan sin el
+
+17
+00:03:36,080 --> 00:03:39,080
+caso de que fuera de como es aseguradoras.
+
+18
+00:03:39,080 --> 00:03:48,080
+Si hay como un asegurador, más con el.
+
+19
+00:03:48,080 --> 00:03:54,080
+¿El paciente es asegurada? Sí.
+
+20
+00:03:54,080 --> 00:03:59,080
+Y ya me despliegan las opciones para poder llenar con repólizas,
+
+21
+00:03:59,080 --> 00:04:01,080
+[MÚSICA]
+
+22
+00:04:00,000 --> 00:04:11,000
+La fecha de, la fecha rectil, fecha de sinistro asegurado, etc.
+
+23
+00:04:11,000 --> 00:04:24,000
+Y aparte, apareciendo el nombre, el nombre de contacto, o la cual sabe, paciente, trata, se agrega, y aquí es donde va la dirección, paciente.
+
+24
+00:04:24,000 --> 00:04:36,000
+Aquí solicita ubicación si es necesario la dirección o comentario de una referencia.
+
+25
+00:04:36,000 --> 00:04:43,000
+La evaluación y le dan water y medicas supeas del paciente.

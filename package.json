@@ -1,0 +1,22 @@
+{
+  "name": "analiza-en-casa-production-qa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Sistema operativo de atención domiciliaria, preparado para Supabase y Vercel, con modo demo local.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "qa": "node scripts/qa-check.mjs",
+    "check": "npm test && npm run qa && npm run build:standalone",
+    "build:standalone": "node scripts/build-standalone.mjs",
+    "codex:preflight": "node scripts/codex-preflight.mjs",
+    "github:preflight": "node scripts/github-preflight.mjs",
+    "audit:status": "node scripts/audit-status.mjs",
+    "audit:verify": "node scripts/verify-video-audit.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

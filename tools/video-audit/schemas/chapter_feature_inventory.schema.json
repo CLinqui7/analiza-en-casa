@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Analiza en Casa chapter feature inventory",
+  "type": "object",
+  "required": ["chapter_id", "summary", "screens", "flows", "open_questions"],
+  "properties": {
+    "chapter_id": {"type": "string", "pattern": "^CH[0-9]{2}$"},
+    "summary": {"type": "string"},
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "evidence"],
+        "properties": {
+          "name": {"type": "string"},
+          "purpose": {"type": "string"},
+          "navigation": {"type": "array"},
+          "tabs": {"type": "array"},
+          "fields": {"type": "array"},
+          "tables": {"type": "array"},
+          "actions": {"type": "array"},
+          "states": {"type": "array"},
+          "documents": {"type": "array"},
+          "evidence": {"type": "array", "minItems": 1}
+        }
+      }
+    },
+    "flows": {"type": "array"},
+    "business_rules_explicit": {"type": "array"},
+    "business_rules_inferred": {"type": "array"},
+    "data_entities": {"type": "array"},
+    "integrations": {"type": "array"},
+    "permissions_apparent": {"type": "array"},
+    "open_questions": {"type": "array"}
+  }
+}

@@ -1,0 +1,26 @@
+.env
+.env.local
+.DS_Store
+node_modules/
+.vercel/
+coverage/
+*.log
+
+# Local and Codex runtime
+.env
+.env.*
+!.env.example
+node_modules/
+.vercel/
+.next/
+dist/
+coverage/
+playwright-report/
+test-results/
+.codex-log/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local review scratch, keep committed review ledgers/results only
+video-audit-reviews/**/scratch/

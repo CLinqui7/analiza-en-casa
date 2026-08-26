@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH17",
+  "title": "Reporte de salud detallado e impresión",
+  "description": "Secciones clínicas, antecedentes, evoluciones, alergias, configuración y salida imprimible.",
+  "start_seconds": 3070,
+  "end_seconds": 3270.96,
+  "clip_start_with_overlap": 3069,
+  "clip_end_with_overlap": 3270.96,
+  "duration_seconds": 200.96,
+  "event_frames": 48,
+  "detail_crops": 21,
+  "safety_frames_1fps": 201,
+  "expected_safety_frames": 201,
+  "event_contact_sheets": 6,
+  "safety_contact_sheets": 13
+}

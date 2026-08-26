@@ -1,0 +1,27 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00052,audio_002,276000,283000,00:04:36.000,00:04:43.000,0.5393,LOW_CONFIDENCE,La evaluación y le dan water y medicas supeas del paciente.,0,1000
+T00053,audio_002,283000,294000,00:04:43.000,00:04:54.000,0.6771,MEDIUM_CONFIDENCE,"Si ya está el paciente, la otra parte de ficalización.",1000,12000
+T00054,audio_002,294000,301000,00:04:54.000,00:05:01.000,0.8875,,Acá es lo que les mencionaron que aparecen todos los pacientes activos.,12000,19000
+T00055,audio_002,301000,303000,00:05:01.000,00:05:03.000,0.8501,,Todos los que han creado.,19000,21000
+T00056,audio_002,303000,306000,00:05:03.000,00:05:06.000,0.5659,MEDIUM_CONFIDENCE,Creado y no es que hubo fitalizados en ese momento.,21000,24000
+T00057,audio_002,306000,311000,00:05:06.000,00:05:11.000,0.8446,,"Ah, ok. Tanto lo que están activos, activos significa que tienen un proceso.",24000,29000
+T00058,audio_002,311000,315000,00:05:11.000,00:05:15.000,0.6712,MEDIUM_CONFIDENCE,"Que ahorita están, que otros están con servicios comunes.",29000,33000
+T00059,audio_002,315000,316000,00:05:15.000,00:05:16.000,0.7208,,Ok.,33000,34000
+T00060,audio_002,316000,325000,00:05:16.000,00:05:25.000,0.6555,MEDIUM_CONFIDENCE,"Digamos si en el lado caso quise el nombre del que pacientes estuvieron, pues están en activos, se van a que los que están en el paciente.",34000,43000
+T00061,audio_002,325000,327000,00:05:25.000,00:05:27.000,0.6723,MEDIUM_CONFIDENCE,Y aquí están los que están activos.,43000,45000
+T00062,audio_002,327000,329000,00:05:27.000,00:05:29.000,0.4281,LOW_CONFIDENCE,Todo esto.,45000,47000
+T00063,audio_002,329000,334000,00:05:29.000,00:05:34.000,0.6633,MEDIUM_CONFIDENCE,"Están malistras, pero si tuvieron un servicio con ustedes antes.",47000,52000
+T00064,audio_002,334000,335000,00:05:34.000,00:05:35.000,0.7054,,¿Sí?,52000,53000
+T00065,audio_002,335000,336000,00:05:35.000,00:05:36.000,0.6038,MEDIUM_CONFIDENCE,Sí.,53000,54000
+T00066,audio_002,336000,342000,00:05:36.000,00:05:42.000,0.7305,,"Entonces, no podemos dar parte de la ficalización que van a aparecer todos los servicios actuales en este momento.",54000,60000
+T00067,audio_002,342000,343000,00:05:42.000,00:05:43.000,0.8712,,Ok.,60000,61000
+T00068,audio_002,343000,344000,00:05:43.000,00:05:44.000,0.4367,LOW_CONFIDENCE,Y?,61000,62000
+T00069,audio_002,344000,347000,00:05:44.000,00:05:47.000,0.6619,MEDIUM_CONFIDENCE,Ese pique es el pico de ejecución sin evitarnos a un paciente.,62000,65000
+T00070,audio_002,347000,348000,00:05:47.000,00:05:48.000,0.4025,LOW_CONFIDENCE,Sí.,65000,66000
+T00071,audio_002,348000,349000,00:05:48.000,00:05:49.000,0.7113,,Ajá.,66000,67000
+T00072,audio_002,349000,352000,00:05:49.000,00:05:52.000,0.9095,,Es los números que están en ejecución en este momento.,67000,70000
+T00073,audio_002,352000,354000,00:05:52.000,00:05:54.000,0.6234,MEDIUM_CONFIDENCE,La potización.,70000,72000
+T00074,audio_002,354000,357000,00:05:54.000,00:05:57.000,0.8803,,Acá está la opción de potización.,72000,75000
+T00075,audio_002,357000,360000,00:05:57.000,00:06:00.000,0.6557,MEDIUM_CONFIDENCE,Que es donde ya...,75000,78000
+T00076,audio_003,360000,366060,00:06:00.000,00:06:06.060,0.532,LOW_CONFIDENCE,"Si no tiene un nuevo paciente o ya tenemos un reclamo paciente, formación o cotización.",78000,84060
+T00077,audio_003,366060,379220,00:06:06.060,00:06:19.220,0.553,MEDIUM_CONFIDENCE,"Lo que mencionamos antes de tener algo enérico, es que no tiene cotización uno, sino tienen",84060,97220

@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH04",
+  "title": "Cotización: datos generales",
+  "description": "Paciente, factura, empresa, foco, descuento, seguro y comentarios.",
+  "start_seconds": 370,
+  "end_seconds": 445,
+  "clip_start_with_overlap": 369,
+  "clip_end_with_overlap": 446,
+  "duration_seconds": 75,
+  "event_frames": 35,
+  "detail_crops": 30,
+  "safety_frames_1fps": 76,
+  "expected_safety_frames": 76,
+  "event_contact_sheets": 4,
+  "safety_contact_sheets": 5
+}

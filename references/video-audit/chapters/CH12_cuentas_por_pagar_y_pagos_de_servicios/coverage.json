@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH12",
+  "title": "Cuentas por pagar y pagos de servicios",
+  "description": "Recursos, visitas, montos, estados, filtros y pago a proveedores o personal.",
+  "start_seconds": 2008,
+  "end_seconds": 2203,
+  "clip_start_with_overlap": 2007,
+  "clip_end_with_overlap": 2204,
+  "duration_seconds": 195,
+  "event_frames": 51,
+  "detail_crops": 36,
+  "safety_frames_1fps": 196,
+  "expected_safety_frames": 196,
+  "event_contact_sheets": 6,
+  "safety_contact_sheets": 13
+}

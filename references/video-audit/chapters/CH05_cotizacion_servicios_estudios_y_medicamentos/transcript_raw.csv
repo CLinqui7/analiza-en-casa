@@ -1,0 +1,46 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00085,audio_003,438080,447080,00:07:18.080,00:07:27.080,0.6002,MEDIUM_CONFIDENCE,"Y el caso se pone el servicio a base de siete días, comandario de comandario de inicio",0,2080
+T00086,audio_003,447080,453080,00:07:27.080,00:07:33.080,0.5484,LOW_CONFIDENCE,"a tal día, para financiar tal día, así que es que es de útil.",2080,8080
+T00087,audio_003,453080,464080,00:07:33.080,00:07:44.080,0.7139,,"O que también va a tener exámenes tal fecha posterior, haciendo en fascín que va a tener",8080,19080
+T00088,audio_003,464080,466080,00:07:44.080,00:07:46.080,0.8303,,posteriormente exámenes.,19080,21080
+T00089,audio_003,466080,470080,00:07:46.080,00:07:50.080,0.6269,MEDIUM_CONFIDENCE,Y ya está dentro de la propización inicial.,21080,25080
+T00090,audio_003,470080,477080,00:07:50.080,00:07:57.080,0.7268,,"Acá se selecciona, en este caso, es que tiene una opción de precios, distinto precios.",25080,32080
+T00091,audio_003,477080,480080,00:07:57.080,00:08:00.080,0.8338,,Eso son los precios de asegurador.,32080,35080
+T00092,audio_004,480000,487000,00:08:00.000,00:08:07.000,0.6516,MEDIUM_CONFIDENCE,"Quiere decir que son las relaciones que tienen, si yo digo un asegurador, no hay salida el precio que tengo asebrado con él.",35000,42000
+T00093,audio_004,487000,490000,00:08:07.000,00:08:10.000,0.8212,,"Ah, tenés un catálogo de precios por aseguradora.",42000,45000
+T00094,audio_004,490000,492000,00:08:10.000,00:08:12.000,0.7339,,Sí.,45000,47000
+T00095,audio_004,492000,503000,00:08:12.000,00:08:23.000,0.7514,,"Entonces, tenemos el precio regular, que es prácticamente el normal del estándar.",47000,58000
+T00096,audio_004,503000,508000,00:08:23.000,00:08:28.000,0.8436,,Si pongo que voy a necesitar servicio de fiscalización.,58000,63000
+T00097,audio_004,508000,518000,00:08:28.000,00:08:38.000,0.5931,MEDIUM_CONFIDENCE,"Ya cuando ustedes están en el otro lado, es el precio que hay que tener el precio.",63000,73000
+T00098,audio_004,518000,531000,00:08:38.000,00:08:51.000,0.5685,MEDIUM_CONFIDENCE,"Exacto, aquí ya están los servicios de los precios, solamente para que el visual de cotiza suelo, él pueda solamente calar.",73000,86000
+T00099,audio_004,531000,538000,00:08:51.000,00:08:58.000,0.4399,LOW_CONFIDENCE,"Entonces, médica calo, 24.",86000,93000
+T00100,audio_004,538000,543000,00:08:58.000,00:09:03.000,0.4994,LOW_CONFIDENCE,Sí.,93000,98000
+T00101,audio_004,543000,546000,00:09:03.000,00:09:06.000,0.4653,LOW_CONFIDENCE,Ficalización.,98000,101000
+T00102,audio_004,546000,550000,00:09:06.000,00:09:10.000,0.356,LOW_CONFIDENCE,"Y por tráedigo, maestro estado.",101000,105000
+T00103,audio_004,550000,553000,00:09:10.000,00:09:13.000,0.5936,MEDIUM_CONFIDENCE,No le he aprobado.,105000,108000
+T00104,audio_004,553000,555000,00:09:13.000,00:09:15.000,0.423,LOW_CONFIDENCE,Gracias.,108000,110000
+T00105,audio_004,555000,562000,00:09:15.000,00:09:22.000,0.4648,LOW_CONFIDENCE,"Sí, me iba, para ese expreso.",110000,117000
+T00106,audio_004,562000,570000,00:09:22.000,00:09:30.000,0.7825,,"El que le dice el médico, que dice que el paciente va a estar por 5 días, entonces por 4 de 5 días, por 24 horas.",117000,125000
+T00107,audio_004,570000,573000,00:09:30.000,00:09:33.000,0.5663,MEDIUM_CONFIDENCE,"Entonces, esto cae exacto.",125000,128000
+T00108,audio_004,573000,576000,00:09:33.000,00:09:36.000,0.4457,LOW_CONFIDENCE,Que mata a llevar a que él lleva un va.,128000,131000
+T00109,audio_004,576000,578000,00:09:36.000,00:09:38.000,0.6324,MEDIUM_CONFIDENCE,"Entonces, me voy a dar para...",131000,133000
+T00110,audio_004,578000,581000,00:09:38.000,00:09:41.000,0.5773,MEDIUM_CONFIDENCE,"Ellos no tienen como categorizaros, ¿vale?",133000,136000
+T00111,audio_004,581000,585000,00:09:41.000,00:09:45.000,0.7032,,Pero es la parte de servicio de un va.,136000,140000
+T00112,audio_004,585000,589000,00:09:45.000,00:09:49.000,0.6057,MEDIUM_CONFIDENCE,Un servicio de la fuerza.,140000,144000
+T00113,audio_004,589000,593000,00:09:49.000,00:09:53.000,0.8118,,"Puede ser extracción, que tiene un cojo.",144000,148000
+T00114,audio_004,593000,597000,00:09:53.000,00:09:57.000,0.8935,,"Y como son 5 días de servicio, son 5 días de agua.",148000,152000
+T00115,audio_004,597000,599000,00:09:57.000,00:09:59.000,0.8231,,Se va agregando.,152000,154000
+T00116,audio_005,600000,602880,00:10:00.000,00:10:02.880,0.6372,MEDIUM_CONFIDENCE,"- Ah, pero eso no te lo tenías como servicios de bombas. - Sí.",155000,157880
+T00117,audio_005,602880,609440,00:10:02.880,00:10:09.440,0.8013,,"- Debería estar con un equipo. - Exacto, pero como en realidad es como una garganta,",157880,164440
+T00118,audio_005,609440,614120,00:10:09.440,00:10:14.120,0.8886,,no es como un equipo en sí de inventariado.,164440,169120
+T00119,audio_005,614120,618000,00:10:14.120,00:10:18.000,0.8546,,"Ok, ahí solo tenés entonces los equipos los que vas a vender.",169120,173000
+T00120,audio_005,618000,624400,00:10:18.000,00:10:24.400,0.7941,,"Aquí tengo un equipo que voy a vender, aquí, que tengo como...",173000,179400
+T00121,audio_005,624400,630280,00:10:24.400,00:10:30.280,0.7985,,"ya registrados, como un cuadro de mi inventario de equipo.",179400,185280
+T00122,audio_005,630280,638800,00:10:30.280,00:10:38.800,0.6456,MEDIUM_CONFIDENCE,"Entonces, en un día se coloca días, días, por 24 horas, día completo.",185280,193800
+T00123,audio_005,638800,646960,00:10:38.800,00:10:46.960,0.7187,,"Entonces, digamos, quieren medicamentos, puede ser regular.",193800,201960
+T00124,audio_005,646960,655040,00:10:46.960,00:10:55.040,0.5622,MEDIUM_CONFIDENCE,"- ¿Qué es el medicamento? - Los medicamentos usan dos veces, dos veces en un día y son tres días, por tres a seis.",201960,210040
+T00125,audio_005,655040,659080,00:10:55.040,00:10:59.080,0.5025,LOW_CONFIDENCE,"- ¿Eres la verdad? - Sí, la verdad.",210040,214080
+T00126,audio_005,659080,663720,00:10:59.080,00:11:03.720,0.5882,MEDIUM_CONFIDENCE,"- ¿Qué es lo que vas? - Normalmente es a poner una tía, entonces es entre 5.",214080,218720
+T00127,audio_005,663720,668400,00:11:03.720,00:11:08.400,0.7665,,Pero digamos que vamos a hacer un ensalad y tienen 7 personas.,218720,223400
+T00128,audio_005,668400,676040,00:11:08.400,00:11:16.040,0.5348,LOW_CONFIDENCE,"Entonces, la 7 personas, los puedes sacar a los cerobras, ¿verdad?",223400,231040
+T00129,audio_005,676040,682760,00:11:16.040,00:11:22.760,0.7218,,"Si es lo que dices, estarían dos, por cada día por cinco, entonces estarían diez.",231040,237760

@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH06",
+  "title": "Cotización: insumos, equipos, honorarios, extras y totales",
+  "description": "Resto de categorías, resumen, descuentos, cobertura y totalización.",
+  "start_seconds": 680,
+  "end_seconds": 865,
+  "clip_start_with_overlap": 679,
+  "clip_end_with_overlap": 866,
+  "duration_seconds": 185,
+  "event_frames": 115,
+  "detail_crops": 75,
+  "safety_frames_1fps": 186,
+  "expected_safety_frames": 186,
+  "event_contact_sheets": 13,
+  "safety_contact_sheets": 12
+}

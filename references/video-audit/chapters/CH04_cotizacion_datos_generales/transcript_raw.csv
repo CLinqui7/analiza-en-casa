@@ -1,0 +1,10 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00077,audio_003,366060,379220,00:06:06.060,00:06:19.220,0.553,MEDIUM_CONFIDENCE,"Lo que mencionamos antes de tener algo enérico, es que no tiene cotización uno, sino tienen",0,9220
+T00078,audio_003,379220,385080,00:06:19.220,00:06:25.080,0.768,,"todo el dato AUS para llenar, entonces se puede hacer una cotización abierta.",9220,15080
+T00079,audio_003,385080,392080,00:06:25.080,00:06:32.080,0.574,MEDIUM_CONFIDENCE,Entonces se selecciona la fecha de ahora y está a través de la final.,15080,22080
+T00080,audio_003,392080,402080,00:06:32.080,00:06:42.080,0.504,LOW_CONFIDENCE,"Y es referido por el inérico, cierto, preven, unicilante, etc.",22080,32080
+T00081,audio_003,402080,409080,00:06:42.080,00:06:49.080,0.3631,LOW_CONFIDENCE,"Entonces, si hay un paciente o un paciente, si hay algo en esto, lo referido.",32080,39080
+T00082,audio_003,409080,418080,00:06:49.080,00:06:58.080,0.5551,MEDIUM_CONFIDENCE,"O también puede ser referido por el reclamo de las redes, pero también por las redes.",39080,48080
+T00083,audio_003,418080,424080,00:06:58.080,00:07:04.080,0.4653,LOW_CONFIDENCE,"Entonces, ¿no está en conversa?",48080,54080
+T00084,audio_003,424080,438080,00:07:04.080,00:07:18.080,0.6471,MEDIUM_CONFIDENCE,Se coloca algún tipo de comentario en el que le distirma la operación.,54080,68080
+T00085,audio_003,438080,447080,00:07:18.080,00:07:27.080,0.6002,MEDIUM_CONFIDENCE,"Y el caso se pone el servicio a base de siete días, comandario de comandario de inicio",68080,77080

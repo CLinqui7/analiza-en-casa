@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH05",
+  "title": "Cotización: servicios, estudios y medicamentos",
+  "description": "Selección, búsqueda, precios, cantidades, disponibilidad y adición de conceptos.",
+  "start_seconds": 445,
+  "end_seconds": 680,
+  "clip_start_with_overlap": 444,
+  "clip_end_with_overlap": 681,
+  "duration_seconds": 235,
+  "event_frames": 87,
+  "detail_crops": 71,
+  "safety_frames_1fps": 236,
+  "expected_safety_frames": 236,
+  "event_contact_sheets": 10,
+  "safety_contact_sheets": 15
+}

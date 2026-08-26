@@ -1,0 +1,67 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00438,audio_019,2391000,2398000,00:39:51.000,00:39:58.000,0.8259,,"Entonces, cuando ya se ingresa la compra, esto hay que la sumar a la parte de inventario.",0,6000
+T00439,audio_020,2400000,2405000,00:40:00.000,00:40:05.000,0.2844,LOW_CONFIDENCE,"Vamos a la primera pos, ¿tienes boxe?",8000,13000
+T00440,audio_020,2410000,2410000,00:40:10.000,00:40:10.000,0.9094,POSSIBLE_REPETITION,"No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,",18000,18000
+T00441,audio_020,2410000,2427000,00:40:10.000,00:40:27.000,0.7064,,"Esta es una de las unidades donde están los comprometidos, ¿cuántos tienen pacientes?",18000,35000
+T00442,audio_020,2427000,2429000,00:40:27.000,00:40:29.000,0.7454,,"Ok, tienen reservado.",35000,37000
+T00443,audio_020,2429000,2435000,00:40:29.000,00:40:35.000,0.6394,MEDIUM_CONFIDENCE,"Ah, que están los exigiles, mayor ya mandé y quedó con el paciente.",37000,43000
+T00444,audio_020,2435000,2445000,00:40:35.000,00:40:45.000,0.6659,MEDIUM_CONFIDENCE,"Acasaron los movimientos, salidas, entradas, la revolución.",43000,53000
+T00445,audio_020,2445000,2457000,00:40:45.000,00:40:57.000,0.8582,,"Los acusos que le llaman acá son descargas, que pasan a ser en el domicilio como los comprometidos.",53000,65000
+T00446,audio_020,2457000,2469000,00:40:57.000,00:41:09.000,0.3918,LOW_CONFIDENCE,"Entonces, una broma, aquí me caí, los exigiles, ahí se le han oído los dos,",65000,77000
+T00447,audio_020,2469000,2477000,00:41:09.000,00:41:17.000,0.686,MEDIUM_CONFIDENCE,"y le ha hecho estar descarga, aquí es donde se van como estos insumos de medicamentos para la cuenta de pacientes,",77000,85000
+T00448,audio_020,2477000,2488000,00:41:17.000,00:41:28.000,0.7808,,"la carga del inventario. Mientras están como cerradas la cuenta, están como comprometidos en la cuenta de pacientes.",85000,96000
+T00449,audio_020,2488000,2490000,00:41:28.000,00:41:30.000,0.8191,,Como inventario temporal.,96000,98000
+T00450,audio_020,2490000,2492000,00:41:30.000,00:41:32.000,0.786,,Exacto.,98000,100000
+T00451,audio_020,2492000,2494000,00:41:32.000,00:41:34.000,0.3631,LOW_CONFIDENCE,Contráncio.,100000,102000
+T00452,audio_020,2494000,2508000,00:41:34.000,00:41:48.000,0.6465,MEDIUM_CONFIDENCE,"Entonces, si yo ya termino el servicio con el paciente, me voy a decirles. Acá encierras, o no, para nada.",102000,116000
+T00453,audio_020,2508000,2517000,00:41:48.000,00:41:57.000,0.5539,MEDIUM_CONFIDENCE,"Y en la transacción. Están perdientes, ya son los comprometidos serrestuctables y también ser parciales.",116000,125000
+T00454,audio_020,2517000,2519000,00:41:57.000,00:41:59.000,0.6799,MEDIUM_CONFIDENCE,los cielos faciales cuando,125000,127000
+T00455,audio_021,2520000,2526420,00:42:00.000,00:42:06.420,0.7615,,"Estamos haciendo un conteo de enletal, pero que no está totalmente cerrada, sino que solamente",128000,134420
+T00456,audio_021,2526420,2530500,00:42:06.420,00:42:10.500,0.8127,,controliza cuánto tienen paciente para agregarlo.,134420,138500
+T00457,audio_021,2530500,2531500,00:42:10.500,00:42:11.500,0.6499,MEDIUM_CONFIDENCE,Ok.,138500,139500
+T00458,audio_021,2531500,2540500,00:42:11.500,00:42:20.500,0.4732,LOW_CONFIDENCE,"Entonces acá deshamos el nuevo cierre, y ahí se viene, va a estar ahí.",139500,148500
+T00459,audio_021,2540500,2546500,00:42:20.500,00:42:26.500,0.6269,MEDIUM_CONFIDENCE,"Entonces acá pasa mi obra, ya pasó a cierre total.",148500,154500
+T00460,audio_021,2546500,2551500,00:42:26.500,00:42:31.500,0.7938,,"Si yo le doy aprobación, ¿quién pasa cerrado?",154500,159500
+T00461,audio_021,2551500,2554500,00:42:31.500,00:42:34.500,0.7861,,Es como un paso.,159500,162500
+T00462,audio_021,2554500,2555500,00:42:34.500,00:42:35.500,0.582,MEDIUM_CONFIDENCE,Sí.,162500,163500
+T00463,audio_021,2555500,2562500,00:42:35.500,00:42:42.500,0.6939,MEDIUM_CONFIDENCE,"Porque antes, lo hicieron porque antes teníamos el conflicto de que decían para la infección",163500,170500
+T00464,audio_021,2562500,2564500,00:42:42.500,00:42:44.500,0.7714,,"paciente, pero queremos la cuenta ya.",170500,172500
+T00465,audio_021,2564500,2569500,00:42:44.500,00:42:49.500,0.6934,MEDIUM_CONFIDENCE,"Entonces enfermerías hacia el pago al reportar, lo tenían ahí, nos pasaron el dato, acompañaron",172500,177500
+T00466,audio_021,2569500,2572500,00:42:49.500,00:42:52.500,0.6829,MEDIUM_CONFIDENCE,"los mentiras, todo, todo, todo, quedan como dos.",177500,180500
+T00467,audio_021,2572500,2578500,00:42:52.500,00:42:58.500,0.7166,,"Y se encerraba, y nos olé a ver, y cuando regresaban ya las cosas, vemos que venía",180500,186500
+T00468,audio_021,2578500,2581500,00:42:58.500,00:43:01.500,0.6749,MEDIUM_CONFIDENCE,"algo de mal, que no se contabilizó.",186500,189500
+T00469,audio_021,2581500,2587500,00:43:01.500,00:43:07.500,0.7964,,"Entonces, y los pacientes, los familiares de pacientes, decían, mira, pero ahí iba a",189500,195500
+T00470,audio_021,2587500,2588500,00:43:07.500,00:43:08.500,0.8396,,hacer cosas.,195500,196500
+T00471,audio_021,2588500,2592500,00:43:08.500,00:43:12.500,0.7514,,"Entonces, y ya no había vuelta atrás, que pudiera hacer.",196500,200500
+T00472,audio_021,2592500,2597500,00:43:12.500,00:43:17.500,0.7757,,"Entonces por eso se quedaron como en este en pausa, y este sí puede ser editado, antes",200500,205500
+T00473,audio_021,2597500,2598500,00:43:17.500,00:43:18.500,0.8732,,de cerrar.,205500,206500
+T00474,audio_021,2598500,2606500,00:43:18.500,00:43:26.500,0.5633,MEDIUM_CONFIDENCE,"Entonces, y, lo voy a recarcar más, acá, está la creación de proveedores, todo lo",206500,214500
+T00475,audio_021,2606500,2613500,00:43:26.500,00:43:33.500,0.6943,MEDIUM_CONFIDENCE,"registro, verdad, sultatos, etcétera, las bodegas que teníamos, de algo así como la",214500,221500
+T00476,audio_021,2613500,2615500,00:43:33.500,00:43:35.500,0.6168,MEDIUM_CONFIDENCE,diserción que teníamos.,221500,223500
+T00477,audio_021,2615500,2620500,00:43:35.500,00:43:40.500,0.656,MEDIUM_CONFIDENCE,"Y, digamos, yo manejaba también su mamá en el pan, porque a veces este, la repente",223500,228500
+T00478,audio_021,2620500,2625500,00:43:40.500,00:43:45.500,0.5933,MEDIUM_CONFIDENCE,"enfermería se me quedó hasta pero esta cosa, entonces, para reir, si no reiros algo",228500,233500
+T00479,audio_021,2625500,2632500,00:43:45.500,00:43:52.500,0.8491,,"tan mal, veíamos si era algo que estaba dentro del pan, ya se le hacía el traslado.",233500,240500
+T00480,audio_021,2632500,2637500,00:43:52.500,00:43:57.500,0.5568,MEDIUM_CONFIDENCE,"También su perpisión, manejaba como aquí, ¿ok?",240500,245500
+T00481,audio_021,2637500,2639500,00:43:57.500,00:43:59.500,0.6298,MEDIUM_CONFIDENCE,Siempre yo mantenía de él.,245500,247500
+T00482,audio_022,2640000,2642000,00:44:00.000,00:44:02.000,0.5846,MEDIUM_CONFIDENCE,Quiere salir a la emergencia.,248000,250000
+T00483,audio_022,2643280,2646560,00:44:03.280,00:44:06.560,0.6772,MEDIUM_CONFIDENCE,Ahí llevaba hasta las muestras de la naturaleza.,251280,254560
+T00484,audio_022,2647560,2650760,00:44:07.560,00:44:10.760,0.8698,,Los lotes y las series.,255560,258760
+T00485,audio_022,2651960,2658760,00:44:11.960,00:44:18.760,0.8498,,"Porque se maneja lo que es la parte del envencimiento de medicamentos,",259960,266760
+T00486,audio_022,2659240,2664040,00:44:19.240,00:44:24.040,0.7574,,"igual los lotes de insumo, coyequipos, las series.",267240,272040
+T00487,audio_022,2665720,2669480,00:44:25.720,00:44:29.480,0.826,,"Y acá, en kit de insumo.",273720,277480
+T00488,audio_022,2670000,2673000,00:44:30.000,00:44:33.000,0.7507,,"Teníamos lo que llamábamos, ¿por qué?",278000,281000
+T00489,audio_022,2673400,2675640,00:44:33.400,00:44:35.640,0.6618,MEDIUM_CONFIDENCE,"Entonces aquí damos, ¿qué lleva a esto?",281400,283640
+T00490,audio_022,2678600,2680920,00:44:38.600,00:44:40.920,0.5397,LOW_CONFIDENCE,"Aquí lo voy a dar en el parque, entonces aquí va.",286600,288920
+T00491,audio_022,2681080,2682600,00:44:41.080,00:44:42.600,0.6587,MEDIUM_CONFIDENCE,Esto lleva a este parque.,289080,290600
+T00492,audio_022,2683840,2687200,00:44:43.840,00:44:47.200,0.6486,MEDIUM_CONFIDENCE,¿Qué es lo que hace a la hora de descartar?,291840,295200
+T00493,audio_022,2687560,2691120,00:44:47.560,00:44:51.120,0.7698,,"Decían, voy a llevar un kit de eso.",295560,299120
+T00494,audio_022,2691400,2695240,00:44:51.400,00:44:55.240,0.8246,,Entonces el muchacho solamente lo hablaba y ya se descargaba automáticamente,299400,303240
+T00495,audio_022,2695280,2696920,00:44:55.280,00:44:56.920,0.6466,MEDIUM_CONFIDENCE,si me estaba calado un poco.,303280,304920
+T00496,audio_022,2697080,2698080,00:44:57.080,00:44:58.080,0.963,,Sí.,305080,306080
+T00497,audio_022,2699480,2702720,00:44:59.480,00:45:02.720,0.5888,MEDIUM_CONFIDENCE,"Decuraciones, kit de curación, por eso.",307480,310720
+T00498,audio_022,2703040,2704040,00:45:03.040,00:45:04.040,0.5224,LOW_CONFIDENCE,Ya.,311040,312040
+T00499,audio_022,2704200,2705680,00:45:04.200,00:45:05.680,0.5232,LOW_CONFIDENCE,Te daba lo que haces.,312200,313680
+T00500,audio_022,2706640,2709960,00:45:06.640,00:45:09.960,0.5867,MEDIUM_CONFIDENCE,Esa vez acá tiene un parque de acusas.,314640,317960
+T00501,audio_022,2710320,2713320,00:45:10.320,00:45:13.320,0.786,,También tenía una opción de faltar una cotización.,318320,321320
+T00502,audio_022,2723800,2724800,00:45:23.800,00:45:24.800,0.4825,LOW_CONFIDENCE,Bueno.,331800,332800
+T00503,audio_022,2726400,2727400,00:45:26.400,00:45:27.400,0.4144,LOW_CONFIDENCE,Lo da igual.,334400,335400

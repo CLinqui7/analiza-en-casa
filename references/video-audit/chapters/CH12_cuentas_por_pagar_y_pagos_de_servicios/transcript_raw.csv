@@ -1,0 +1,25 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00375,audio_016,2007360,2008360,00:33:27.360,00:33:28.360,0.6029,MEDIUM_CONFIDENCE,- ¿La planía?,0,360
+T00376,audio_016,2008360,2017760,00:33:28.360,00:33:37.760,0.7254,,"- Ya también la enfermería, yo le iba a dar la planía de enfermería.",360,9760
+T00377,audio_016,2017760,2023040,00:33:37.760,00:33:43.040,0.805,,- A ver cuánto le iba a pagarse un... porque no tenía enfermeras de tiempo completo.,9760,15040
+T00378,audio_016,2023040,2026920,00:33:43.040,00:33:46.920,0.5904,MEDIUM_CONFIDENCE,"Tenía, combinados, tenía tres y los más...",15040,18920
+T00379,audio_016,2026920,2029040,00:33:46.920,00:33:49.040,0.501,LOW_CONFIDENCE,"- Tres, y el resto, por servicio.",18920,21040
+T00380,audio_016,2029040,2038800,00:33:49.040,00:33:58.800,0.8235,,- Entonces aquí seleccionaba la fecha de cuando a cuando iba a dar esa... gracias.,21040,30800
+T00381,audio_016,2038800,2039960,00:33:58.800,00:33:59.960,0.7304,,La niña digamos en este caso.,30800,31960
+T00382,audio_017,2040000,2042000,00:34:00.000,00:34:02.000,0.4925,LOW_CONFIDENCE,"En este caso, podí haber una fía.",32000,34000
+T00383,audio_017,2046000,2056000,00:34:06.000,00:34:16.000,0.8027,,"De 15 al 30 de mayo le daba seleccionada, le daba...",38000,48000
+T00384,audio_017,2059000,2076000,00:34:19.000,00:34:36.000,0.6639,MEDIUM_CONFIDENCE,"Y aquí ahora terminaba que iba... tenía que corrobar en este caso, digamos, teniendo mis híbares, tenía... se ven unos unos 24 horas, se me iban a pagar 77 horas, pero tenía que estar teniente de ir haciendo los cambios.",51000,68000
+T00385,audio_017,2076000,2086000,00:34:36.000,00:34:46.000,0.8265,,"Si digamos que ese enfermero, el paciente falleció, el paciente fue trasladado al hospital, entonces yo aquí podía cambiarle el mundo.",68000,78000
+T00386,audio_017,2086000,2108000,00:34:46.000,00:35:08.000,0.8169,,"El caso me daba a crear, le daba así bañar, pero el caso de que tuvo que hacer dos, tres horas extras, aquí le daba a añadir, le ponía que era tiempo extra, el mundo que le iba a pagar, o guardar, o en el caso de que fuera descuento, le ponía el porqué, si fue de plazo, si el paciente falleció, si el paciente fue trasladado.",78000,100000
+T00387,audio_017,2110000,2124000,00:35:10.000,00:35:24.000,0.7684,,"Ya ahí al darle guarda, ya yo haber revisado uno por el, me generaba un reporte global y me lo descartaba en el set.",102000,116000
+T00388,audio_017,2140000,2170000,00:35:40.000,00:36:10.000,0.8705,POSSIBLE_REPETITION,"Bueno, ya ahí me aparecía este, ya ahí vayó corroborando de que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que",132000,162000
+T00389,audio_018,2160000,2162000,00:36:00.000,00:36:02.000,0.2721,LOW_CONFIDENCE,"Y también, el que estuviera con…",152000,154000
+T00390,audio_018,2162000,2165000,00:36:02.000,00:36:05.000,0.5955,MEDIUM_CONFIDENCE,En los servicios.,154000,157000
+T00391,audio_018,2165000,2167000,00:36:05.000,00:36:07.000,0.844,,Exacto.,157000,159000
+T00392,audio_018,2167000,2175000,00:36:07.000,00:36:15.000,0.7145,,"Ya eso ya le trabajaba, lo algo muy puntual que me pedí el constado para hacer unas razones, pero no apareciera como…",159000,167000
+T00393,audio_018,2175000,2180000,00:36:15.000,00:36:20.000,0.8553,,"Al final, no aparecía solo una vez el nombre de cada enfermer.",167000,172000
+T00394,audio_018,2180000,2182000,00:36:20.000,00:36:22.000,0.7127,,Con el total a pagar.,172000,174000
+T00395,audio_018,2182000,2184000,00:36:22.000,00:36:24.000,0.9589,,Y el total a pagar.,174000,176000
+T00396,audio_018,2188000,2192000,00:36:28.000,00:36:32.000,0.6307,MEDIUM_CONFIDENCE,Eso era la parte de un enfermerino.,180000,184000
+T00397,audio_018,2192000,2199000,00:36:32.000,00:36:39.000,0.634,MEDIUM_CONFIDENCE,"Y este mi ahí mismo tiene la parte de inventario, la quesición.",184000,191000
+T00398,audio_018,2199000,2201000,00:36:39.000,00:36:41.000,0.525,LOW_CONFIDENCE,Ya ya estamos.,191000,193000

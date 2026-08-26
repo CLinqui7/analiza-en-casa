@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH02",
+  "title": "Alta y edición de pacientes",
+  "description": "Datos personales, seguro, contactos, dirección, ubicación y confirmaciones.",
+  "start_seconds": 110,
+  "end_seconds": 282,
+  "clip_start_with_overlap": 109,
+  "clip_end_with_overlap": 283,
+  "duration_seconds": 172,
+  "event_frames": 82,
+  "detail_crops": 48,
+  "safety_frames_1fps": 173,
+  "expected_safety_frames": 173,
+  "event_contact_sheets": 10,
+  "safety_contact_sheets": 11
+}

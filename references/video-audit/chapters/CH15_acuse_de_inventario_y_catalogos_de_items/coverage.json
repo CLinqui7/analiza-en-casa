@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH15",
+  "title": "Acuse de inventario y catálogos de ítems",
+  "description": "Entrega/acuse e ítems maestros de medicamentos, insumos, estudios, honorarios y servicios.",
+  "start_seconds": 2728,
+  "end_seconds": 2983,
+  "clip_start_with_overlap": 2727,
+  "clip_end_with_overlap": 2984,
+  "duration_seconds": 255,
+  "event_frames": 148,
+  "detail_crops": 56,
+  "safety_frames_1fps": 256,
+  "expected_safety_frames": 256,
+  "event_contact_sheets": 17,
+  "safety_contact_sheets": 16
+}

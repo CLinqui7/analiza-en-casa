@@ -1,0 +1,131 @@
+[00:39:51.000 --> 00:39:58.000] [conf=0.8259] Entonces, cuando ya se ingresa la compra, esto hay que la sumar a la parte de inventario.
+
+[00:40:00.000 --> 00:40:05.000] [conf=0.2844] Vamos a la primera pos, ¿tienes boxe?
+
+[00:40:10.000 --> 00:40:10.000] [conf=0.9094] No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,
+
+[00:40:10.000 --> 00:40:27.000] [conf=0.7064] Esta es una de las unidades donde están los comprometidos, ¿cuántos tienen pacientes?
+
+[00:40:27.000 --> 00:40:29.000] [conf=0.7454] Ok, tienen reservado.
+
+[00:40:29.000 --> 00:40:35.000] [conf=0.6394] Ah, que están los exigiles, mayor ya mandé y quedó con el paciente.
+
+[00:40:35.000 --> 00:40:45.000] [conf=0.6659] Acasaron los movimientos, salidas, entradas, la revolución.
+
+[00:40:45.000 --> 00:40:57.000] [conf=0.8582] Los acusos que le llaman acá son descargas, que pasan a ser en el domicilio como los comprometidos.
+
+[00:40:57.000 --> 00:41:09.000] [conf=0.3918] Entonces, una broma, aquí me caí, los exigiles, ahí se le han oído los dos,
+
+[00:41:09.000 --> 00:41:17.000] [conf=0.686] y le ha hecho estar descarga, aquí es donde se van como estos insumos de medicamentos para la cuenta de pacientes,
+
+[00:41:17.000 --> 00:41:28.000] [conf=0.7808] la carga del inventario. Mientras están como cerradas la cuenta, están como comprometidos en la cuenta de pacientes.
+
+[00:41:28.000 --> 00:41:30.000] [conf=0.8191] Como inventario temporal.
+
+[00:41:30.000 --> 00:41:32.000] [conf=0.786] Exacto.
+
+[00:41:32.000 --> 00:41:34.000] [conf=0.3631] Contráncio.
+
+[00:41:34.000 --> 00:41:48.000] [conf=0.6465] Entonces, si yo ya termino el servicio con el paciente, me voy a decirles. Acá encierras, o no, para nada.
+
+[00:41:48.000 --> 00:41:57.000] [conf=0.5539] Y en la transacción. Están perdientes, ya son los comprometidos serrestuctables y también ser parciales.
+
+[00:41:57.000 --> 00:41:59.000] [conf=0.6799] los cielos faciales cuando
+
+[00:42:00.000 --> 00:42:06.420] [conf=0.7615] Estamos haciendo un conteo de enletal, pero que no está totalmente cerrada, sino que solamente
+
+[00:42:06.420 --> 00:42:10.500] [conf=0.8127] controliza cuánto tienen paciente para agregarlo.
+
+[00:42:10.500 --> 00:42:11.500] [conf=0.6499] Ok.
+
+[00:42:11.500 --> 00:42:20.500] [conf=0.4732] Entonces acá deshamos el nuevo cierre, y ahí se viene, va a estar ahí.
+
+[00:42:20.500 --> 00:42:26.500] [conf=0.6269] Entonces acá pasa mi obra, ya pasó a cierre total.
+
+[00:42:26.500 --> 00:42:31.500] [conf=0.7938] Si yo le doy aprobación, ¿quién pasa cerrado?
+
+[00:42:31.500 --> 00:42:34.500] [conf=0.7861] Es como un paso.
+
+[00:42:34.500 --> 00:42:35.500] [conf=0.582] Sí.
+
+[00:42:35.500 --> 00:42:42.500] [conf=0.6939] Porque antes, lo hicieron porque antes teníamos el conflicto de que decían para la infección
+
+[00:42:42.500 --> 00:42:44.500] [conf=0.7714] paciente, pero queremos la cuenta ya.
+
+[00:42:44.500 --> 00:42:49.500] [conf=0.6934] Entonces enfermerías hacia el pago al reportar, lo tenían ahí, nos pasaron el dato, acompañaron
+
+[00:42:49.500 --> 00:42:52.500] [conf=0.6829] los mentiras, todo, todo, todo, quedan como dos.
+
+[00:42:52.500 --> 00:42:58.500] [conf=0.7166] Y se encerraba, y nos olé a ver, y cuando regresaban ya las cosas, vemos que venía
+
+[00:42:58.500 --> 00:43:01.500] [conf=0.6749] algo de mal, que no se contabilizó.
+
+[00:43:01.500 --> 00:43:07.500] [conf=0.7964] Entonces, y los pacientes, los familiares de pacientes, decían, mira, pero ahí iba a
+
+[00:43:07.500 --> 00:43:08.500] [conf=0.8396] hacer cosas.
+
+[00:43:08.500 --> 00:43:12.500] [conf=0.7514] Entonces, y ya no había vuelta atrás, que pudiera hacer.
+
+[00:43:12.500 --> 00:43:17.500] [conf=0.7757] Entonces por eso se quedaron como en este en pausa, y este sí puede ser editado, antes
+
+[00:43:17.500 --> 00:43:18.500] [conf=0.8732] de cerrar.
+
+[00:43:18.500 --> 00:43:26.500] [conf=0.5633] Entonces, y, lo voy a recarcar más, acá, está la creación de proveedores, todo lo
+
+[00:43:26.500 --> 00:43:33.500] [conf=0.6943] registro, verdad, sultatos, etcétera, las bodegas que teníamos, de algo así como la
+
+[00:43:33.500 --> 00:43:35.500] [conf=0.6168] diserción que teníamos.
+
+[00:43:35.500 --> 00:43:40.500] [conf=0.656] Y, digamos, yo manejaba también su mamá en el pan, porque a veces este, la repente
+
+[00:43:40.500 --> 00:43:45.500] [conf=0.5933] enfermería se me quedó hasta pero esta cosa, entonces, para reir, si no reiros algo
+
+[00:43:45.500 --> 00:43:52.500] [conf=0.8491] tan mal, veíamos si era algo que estaba dentro del pan, ya se le hacía el traslado.
+
+[00:43:52.500 --> 00:43:57.500] [conf=0.5568] También su perpisión, manejaba como aquí, ¿ok?
+
+[00:43:57.500 --> 00:43:59.500] [conf=0.6298] Siempre yo mantenía de él.
+
+[00:44:00.000 --> 00:44:02.000] [conf=0.5846] Quiere salir a la emergencia.
+
+[00:44:03.280 --> 00:44:06.560] [conf=0.6772] Ahí llevaba hasta las muestras de la naturaleza.
+
+[00:44:07.560 --> 00:44:10.760] [conf=0.8698] Los lotes y las series.
+
+[00:44:11.960 --> 00:44:18.760] [conf=0.8498] Porque se maneja lo que es la parte del envencimiento de medicamentos,
+
+[00:44:19.240 --> 00:44:24.040] [conf=0.7574] igual los lotes de insumo, coyequipos, las series.
+
+[00:44:25.720 --> 00:44:29.480] [conf=0.826] Y acá, en kit de insumo.
+
+[00:44:30.000 --> 00:44:33.000] [conf=0.7507] Teníamos lo que llamábamos, ¿por qué?
+
+[00:44:33.400 --> 00:44:35.640] [conf=0.6618] Entonces aquí damos, ¿qué lleva a esto?
+
+[00:44:38.600 --> 00:44:40.920] [conf=0.5397] Aquí lo voy a dar en el parque, entonces aquí va.
+
+[00:44:41.080 --> 00:44:42.600] [conf=0.6587] Esto lleva a este parque.
+
+[00:44:43.840 --> 00:44:47.200] [conf=0.6486] ¿Qué es lo que hace a la hora de descartar?
+
+[00:44:47.560 --> 00:44:51.120] [conf=0.7698] Decían, voy a llevar un kit de eso.
+
+[00:44:51.400 --> 00:44:55.240] [conf=0.8246] Entonces el muchacho solamente lo hablaba y ya se descargaba automáticamente
+
+[00:44:55.280 --> 00:44:56.920] [conf=0.6466] si me estaba calado un poco.
+
+[00:44:57.080 --> 00:44:58.080] [conf=0.963] Sí.
+
+[00:44:59.480 --> 00:45:02.720] [conf=0.5888] Decuraciones, kit de curación, por eso.
+
+[00:45:03.040 --> 00:45:04.040] [conf=0.5224] Ya.
+
+[00:45:04.200 --> 00:45:05.680] [conf=0.5232] Te daba lo que haces.
+
+[00:45:06.640 --> 00:45:09.960] [conf=0.5867] Esa vez acá tiene un parque de acusas.
+
+[00:45:10.320 --> 00:45:13.320] [conf=0.786] También tenía una opción de faltar una cotización.
+
+[00:45:23.800 --> 00:45:24.800] [conf=0.4825] Bueno.
+
+[00:45:26.400 --> 00:45:27.400] [conf=0.4144] Lo da igual.

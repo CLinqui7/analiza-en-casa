@@ -1,0 +1,385 @@
+{
+  "project": "Analiza en Casa · Production QA",
+  "generatedAt": "2026-08-26T05:11:43.066Z",
+  "total": 75,
+  "passed": 75,
+  "failed": 0,
+  "status": "PASSED",
+  "checks": [
+    {
+      "name": "required:index.html",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/main.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/views.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/store.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/domain.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/mock-data.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/supabase-adapter.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/templates.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:app/styles.css",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:api/runtime-config.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:api/health.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:api/notifications.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:api/portal-status.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:api/cron-retries.js",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:supabase/migrations/202608260001_initial_schema.sql",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:supabase/migrations/202608260002_security_rls_functions.sql",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:supabase/migrations/202608260003_indexes_permissions_storage.sql",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:supabase/seed.sql",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:vercel.json",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:.env.example",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "required:README.md",
+      "passed": true,
+      "detail": "Archivo presente"
+    },
+    {
+      "name": "security:no-service-role-in-client",
+      "passed": true,
+      "detail": "La clave de servicio solo aparece como nombre de variable, nunca con valor."
+    },
+    {
+      "name": "security:no-hardcoded-provider-secret",
+      "passed": true,
+      "detail": "No hay secretos de proveedor en el cliente."
+    },
+    {
+      "name": "seed:synthetic-classification",
+      "passed": true,
+      "detail": "SYNTHETIC_DEMO"
+    },
+    {
+      "name": "seed:17-video-chapters",
+      "passed": true,
+      "detail": "17 capítulos"
+    },
+    {
+      "name": "seed:patients",
+      "passed": true,
+      "detail": "8 pacientes"
+    },
+    {
+      "name": "seed:cases",
+      "passed": true,
+      "detail": "6 hospitalizaciones"
+    },
+    {
+      "name": "seed:quotes",
+      "passed": true,
+      "detail": "6 cotizaciones"
+    },
+    {
+      "name": "seed:all-patient-documents-marked-demo",
+      "passed": true,
+      "detail": "Identificadores sintéticos"
+    },
+    {
+      "name": "integrity:unique-patient-documents",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "integrity:unique-payment-references",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "integrity:quotes-have-items",
+      "passed": true,
+      "detail": "Todas las cotizaciones tienen conceptos"
+    },
+    {
+      "name": "integrity:quote-totals",
+      "passed": true,
+      "detail": "Total = subtotal - descuento"
+    },
+    {
+      "name": "integrity:coverage-sum",
+      "passed": true,
+      "detail": "Total = seguro + paciente"
+    },
+    {
+      "name": "integrity:committed-not-over-stock",
+      "passed": true,
+      "detail": "Comprometido no supera existencia"
+    },
+    {
+      "name": "integrity:closure-review-step",
+      "passed": true,
+      "detail": "Los cierres no saltan revisión"
+    },
+    {
+      "name": "ui:actions-have-handlers",
+      "passed": true,
+      "detail": "14 acciones cubiertas"
+    },
+    {
+      "name": "ui:route-permission-enforcement",
+      "passed": true,
+      "detail": "Rutas directas validan permisos"
+    },
+    {
+      "name": "ui:quote-labels-normalized",
+      "passed": true,
+      "detail": "Estados no renderizan objetos"
+    },
+    {
+      "name": "ui:save-actions-no-generic-toast",
+      "passed": true,
+      "detail": "Guardar no dispara aviso duplicado"
+    },
+    {
+      "name": "ui:modal-backdrop-stack",
+      "passed": true,
+      "detail": "Backdrop debajo del diálogo"
+    },
+    {
+      "name": "ui:portal-full-responsive-canvas",
+      "passed": true,
+      "detail": "Portal responsive"
+    },
+    {
+      "name": "ui:quote-summary-contrast",
+      "passed": true,
+      "detail": "Importes legibles"
+    },
+    {
+      "name": "config:save-runtime-export",
+      "passed": true,
+      "detail": "Formulario de configuración conectado"
+    },
+    {
+      "name": "config:publishable-key-consistent",
+      "passed": true,
+      "detail": "Nombre de clave consistente"
+    },
+    {
+      "name": "sql:table:patients",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:patients",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:hospitalizations",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:hospitalizations",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:quotes",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:quotes",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:quote_versions",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:quote_versions",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:payments",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:payments",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:clinical_documents",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:clinical_documents",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:nursing_notes",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:nursing_notes",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:inventory_movements",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:inventory_movements",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:inventory_closures",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:inventory_closures",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:doctor_statements",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:doctor_statements",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:notifications",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:notifications",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:patient_portal_links",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:patient_portal_links",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:table:audit_logs",
+      "passed": true,
+      "detail": "Tabla incluida"
+    },
+    {
+      "name": "sql:rls:audit_logs",
+      "passed": true,
+      "detail": "RLS o política incluida"
+    },
+    {
+      "name": "sql:portal-security-definer",
+      "passed": true,
+      "detail": "RPC del portal"
+    },
+    {
+      "name": "sql:atomic-inventory",
+      "passed": true,
+      "detail": "Movimiento transaccional"
+    },
+    {
+      "name": "sql:signed-document-protection",
+      "passed": true,
+      "detail": "Bloqueo de documentos firmados"
+    },
+    {
+      "name": "sql:idempotency",
+      "passed": true,
+      "detail": "Pagos, inventario y notificaciones"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH08",
+  "title": "Perfil administrativo, cuentas por cobrar y pagos",
+  "description": "Perfil de ejecución, facturas, pagos, ajustes, impresión y estado de cuenta.",
+  "start_seconds": 970,
+  "end_seconds": 1260,
+  "clip_start_with_overlap": 969,
+  "clip_end_with_overlap": 1261,
+  "duration_seconds": 290,
+  "event_frames": 95,
+  "detail_crops": 56,
+  "safety_frames_1fps": 291,
+  "expected_safety_frames": 291,
+  "event_contact_sheets": 11,
+  "safety_contact_sheets": 19
+}

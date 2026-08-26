@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH14",
+  "title": "Inventario, movimientos, acuses, cierres, bodegas y kits",
+  "description": "Existencias, movimientos, lotes/acuses, pacientes activos, cierres, bodegas y kits.",
+  "start_seconds": 2392,
+  "end_seconds": 2728,
+  "clip_start_with_overlap": 2391,
+  "clip_end_with_overlap": 2729,
+  "duration_seconds": 336,
+  "event_frames": 152,
+  "detail_crops": 76,
+  "safety_frames_1fps": 337,
+  "expected_safety_frames": 337,
+  "event_contact_sheets": 17,
+  "safety_contact_sheets": 22
+}

@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH11",
+  "title": "Agenda y turnos",
+  "description": "Calendario, creación de turno, selección de paciente, recurso, fecha y tipo.",
+  "start_seconds": 1895,
+  "end_seconds": 2008,
+  "clip_start_with_overlap": 1894,
+  "clip_end_with_overlap": 2009,
+  "duration_seconds": 113,
+  "event_frames": 71,
+  "detail_crops": 38,
+  "safety_frames_1fps": 114,
+  "expected_safety_frames": 114,
+  "event_contact_sheets": 8,
+  "safety_contact_sheets": 8
+}

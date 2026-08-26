@@ -1,0 +1,41 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00166,audio_008,969000,976000,00:16:09.000,00:16:16.000,0.7045,,"Entonces, ya está aprobada, ya no es fría, aprobada, se lo pongo en la reducción porque está aprobada.",0,6000
+T00167,audio_008,976000,985000,00:16:16.000,00:16:25.000,0.6816,MEDIUM_CONFIDENCE,"Entonces, cuando le pongo en la reducción, es donde metida, que, si es cuando queda sobradora, le selecciona,",6000,15000
+T00168,audio_008,985000,991000,00:16:25.000,00:16:31.000,0.3949,LOW_CONFIDENCE,"ya es que, ahora le le gusta, ya no, y la venta de salud, la auto-matrizada, si, es solo, es solo.",15000,21000
+T00169,audio_008,991000,1001000,00:16:31.000,00:16:41.000,0.724,,"Aquí es el día de servicio, para confirmar que son cinco, entonces, y aquí le doy cuartas.",21000,31000
+T00170,audio_008,1003000,1010000,00:16:43.000,00:16:50.000,0.6356,MEDIUM_CONFIDENCE,"Han cambiado el papel, no, le doy cuartas, no me doy cuartas porque me activa.",33000,40000
+T00171,audio_008,1010000,1017000,00:16:50.000,00:16:57.000,0.52,LOW_CONFIDENCE,"Sí, te voy a ver que tú estás ahí. Sí, porque está el nombre de usuario, con la enganada y el nombre de cuchara.",40000,47000
+T00172,audio_008,1017000,1027000,00:16:57.000,00:17:07.000,0.7082,,"Esa es una parte de la democratización y está en la parte de cuentas por cobra,",47000,57000
+T00173,audio_008,1027000,1031000,00:17:07.000,00:17:11.000,0.5863,MEDIUM_CONFIDENCE,"que es todo lo de los pacientes que ahora están activos, puede decir.",57000,61000
+T00174,audio_008,1031000,1034000,00:17:11.000,00:17:14.000,0.6815,MEDIUM_CONFIDENCE,¿Qué tienen al proceso pendiente de Pablo?,61000,64000
+T00175,audio_008,1034000,1044000,00:17:14.000,00:17:24.000,0.7257,,"Es activo que todavía están parados o que ya cancelan, pero tal vez aquí no hay un puesto finalizado.",64000,74000
+T00176,audio_008,1044000,1049000,00:17:24.000,00:17:29.000,0.631,MEDIUM_CONFIDENCE,"Tendría que ser rellotado, para que ya se termine de culminar.",74000,79000
+T00177,audio_008,1049000,1053000,00:17:29.000,00:17:33.000,0.4248,LOW_CONFIDENCE,"Pero acá, ya vamos a...",79000,83000
+T00178,audio_008,1053000,1059000,00:17:33.000,00:17:39.000,0.6038,MEDIUM_CONFIDENCE,"Ahorita lleva 36.000, por curado.",83000,89000
+T00179,audio_008,1059000,1064000,00:17:39.000,00:17:44.000,0.5965,MEDIUM_CONFIDENCE,¿Ven un instado de cuenta?,89000,94000
+T00180,audio_008,1064000,1066000,00:17:44.000,00:17:46.000,0.3796,LOW_CONFIDENCE,No.,94000,96000
+T00181,audio_008,1066000,1069000,00:17:46.000,00:17:49.000,0.7192,,¿Qué está pasando?,96000,99000
+T00182,audio_008,1069000,1075000,00:17:49.000,00:17:55.000,0.5873,MEDIUM_CONFIDENCE,"No, no, esta está en cuanto a esta acción, no nos funcionaba, pero aquí está la data del Pablo.",99000,105000
+T00183,audio_008,1075000,1077000,00:17:55.000,00:17:57.000,0.9715,,¿Quién ha estado pagando?,105000,107000
+T00184,audio_008,1077000,1080000,00:17:57.000,00:18:00.000,0.6675,MEDIUM_CONFIDENCE,"Entonces, esta es la parte más percibida.",107000,110000
+T00185,audio_009,1080000,1110000,00:18:00.000,00:18:30.000,0.9232,POSSIBLE_REPETITION,La vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna,110000,140000
+T00186,audio_009,1110000,1117000,00:18:30.000,00:18:37.000,0.6232,MEDIUM_CONFIDENCE,"- Ya creo que sea normal, quizás hasta demanar automática. - Exacto, porque tienen eso de que, ""¿Cómo va la persona?""",140000,147000
+T00187,audio_009,1117000,1122500,00:18:37.000,00:18:42.500,0.616,MEDIUM_CONFIDENCE,"Miren cuánto lleva, entonces hasta ahora nosotros también hay tres pacientes y los mismos pacientes están pidiendo,",147000,152500
+T00188,audio_009,1122500,1130000,00:18:42.500,00:18:50.000,0.4956,LOW_CONFIDENCE,"y a la de capturación por la medicina, ellos dicen, ""¿Andan las armas?"" y para la medicina se lo hacen ya.",152500,160000
+T00189,audio_009,1130000,1137000,00:18:50.000,00:18:57.000,0.6358,MEDIUM_CONFIDENCE,"- ¿Sí? - Entonces, para ver el estado de cuenta, aquí en el cuerpo, porque no tiene que ser real.",160000,167000
+T00190,audio_009,1137000,1142000,00:18:57.000,00:19:02.000,0.6243,MEDIUM_CONFIDENCE,"- Ah, gracias, me lo puedo dejar en mortería. - Sí, por el tiempo que me ha hecho.",167000,172000
+T00191,audio_009,1142000,1144000,00:19:02.000,00:19:04.000,0.6099,MEDIUM_CONFIDENCE,- Gracias. - Sí.,172000,174000
+T00192,audio_009,1148000,1159000,00:19:08.000,00:19:19.000,0.6967,MEDIUM_CONFIDENCE,"Entonces, él está de forma particular, porque está trabajando, bueno, así lo regresa, no cree que debe ser de amistad,",178000,189000
+T00193,audio_009,1159000,1167000,00:19:19.000,00:19:27.000,0.6788,MEDIUM_CONFIDENCE,"aquí se pone la fecha de cuándo, cuándo hubiera estado de cuenta. - Tiene un diplomático o un mech,",189000,197000
+T00194,audio_009,1167000,1174000,00:19:27.000,00:19:34.000,0.6969,MEDIUM_CONFIDENCE,"pero la lista es previa, y aquí está, usted selecciona si quiere ver todo.",197000,204000
+T00195,audio_009,1174000,1181000,00:19:34.000,00:19:41.000,0.5991,MEDIUM_CONFIDENCE,"Como ahí solamente mostrae que de un mech solamente muestra el tiempo que usted se hará más,",204000,211000
+T00196,audio_009,1181000,1190000,00:19:41.000,00:19:50.000,0.5651,MEDIUM_CONFIDENCE,y me muestra lo que no sirve en el plan de fecha.,211000,220000
+T00197,audio_009,1190000,1193000,00:19:50.000,00:19:53.000,0.6623,MEDIUM_CONFIDENCE,Y ya le doy la persona.,220000,223000
+T00198,audio_009,1193000,1199000,00:19:53.000,00:19:59.000,0.5479,LOW_CONFIDENCE,"- Y la medicina. - Ahora, diga esto, lo que hace falta,",223000,229000
+T00199,audio_009,1199000,1201000,00:19:59.000,00:20:01.000,0.3339,LOW_CONFIDENCE,"hacer un ""intriming"",",229000,231000
+T00200,audio_010,1200000,1215760,00:20:00.000,00:20:15.760,0.5212,LOW_CONFIDENCE,"Y en esa parte, el lado de cuenta y se acuntan las corporizaciones que se le dan, ok, perfectamente",230000,245760
+T00201,audio_010,1215760,1226480,00:20:15.760,00:20:26.480,0.5527,MEDIUM_CONFIDENCE,"el detalle del insumo que está aquí, no es mi cuenta, pero lo cheques y lo doblamos",245760,256480
+T00202,audio_010,1226480,1233480,00:20:26.480,00:20:33.480,0.6454,MEDIUM_CONFIDENCE,"creo que se quedó a cuidar las pantallas. Sí, gracias.",256480,263480
+T00203,audio_010,1233480,1247480,00:20:33.480,00:20:47.480,0.4964,LOW_CONFIDENCE,"Este que doy, ahi. Este es un cuadro de ""exactado de cuenta"". Ahora vamos por...",263480,277480
+T00204,audio_010,1247480,1254480,00:20:47.480,00:20:54.480,0.5382,LOW_CONFIDENCE,"Este de preautorización se lo voy a utilizar, no sé, no lo sé, ahora vamos por la parte de Mellis.",277480,284480
+T00205,audio_010,1254480,1265480,00:20:54.480,00:21:05.480,0.709,,"Ya tenían separado como la parte administrativa, todas las...",284480,295480

@@ -1,0 +1,498 @@
+{
+  "generatedAt": "2026-08-26T01:26:27.068299+00:00",
+  "environment": {
+    "browser": "Chromium headless",
+    "viewportDesktop": "1440x900/1000",
+    "viewportMobile": "390x844",
+    "dataClassification": "SYNTHETIC_DEMO"
+  },
+  "automatedProjectChecks": {
+    "npmRunCheck": "PASSED",
+    "domainTests": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0
+    },
+    "staticQa": {
+      "total": 75,
+      "passed": 75,
+      "failed": 0
+    }
+  },
+  "browserRouteCoverage": {
+    "total": 33,
+    "passed": 33,
+    "failed": 0,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "routes": [
+      {
+        "route": "dashboard",
+        "h1": "Centro operativo",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 3120
+      },
+      {
+        "route": "pacientes",
+        "h1": "Pacientes",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 2216
+      },
+      {
+        "route": "pacientes/PAT-001",
+        "h1": "Elena Morales",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1823
+      },
+      {
+        "route": "hospitalizaciones",
+        "h1": "Hospitalizaciones",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1892
+      },
+      {
+        "route": "hospitalizaciones/HOS-2026-0190",
+        "h1": "HOS-2026-0190",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1499
+      },
+      {
+        "route": "cotizaciones",
+        "h1": "Cotizaciones",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1708
+      },
+      {
+        "route": "cotizaciones/QT-2026-0148",
+        "h1": "QT-2026-0148 · versión 3",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1903
+      },
+      {
+        "route": "preautorizaciones",
+        "h1": "Preautorizaciones y seguros",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1575
+      },
+      {
+        "route": "cuentas-por-cobrar",
+        "h1": "Cuentas por cobrar",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1947
+      },
+      {
+        "route": "clinica",
+        "h1": "Expediente clínico",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1504
+      },
+      {
+        "route": "clinica/reportes",
+        "h1": "Reporte de salud",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1310
+      },
+      {
+        "route": "clinica/ordenes",
+        "h1": "Orden médica",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1050
+      },
+      {
+        "route": "clinica/medicamentos",
+        "h1": "Tarjeta de medicamentos",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1505
+      },
+      {
+        "route": "clinica/planes-de-cuidado",
+        "h1": "Plan de cuidados",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1063
+      },
+      {
+        "route": "clinica/evoluciones",
+        "h1": "Evoluciones, signos vitales y notas",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1672
+      },
+      {
+        "route": "agenda",
+        "h1": "Agenda y turnos",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1346
+      },
+      {
+        "route": "cuentas-por-pagar",
+        "h1": "Cuentas por pagar",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1593
+      },
+      {
+        "route": "estados-de-cuenta",
+        "h1": "Estados de cuenta médicos",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1529
+      },
+      {
+        "route": "compras",
+        "h1": "Compras",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1325
+      },
+      {
+        "route": "inventario",
+        "h1": "Inventario",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1881
+      },
+      {
+        "route": "inventario/movimientos",
+        "h1": "Movimientos de inventario",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1445
+      },
+      {
+        "route": "inventario/comprometidos",
+        "h1": "Comprometidos y acuses",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1152
+      },
+      {
+        "route": "inventario/cierres",
+        "h1": "Cierres de inventario",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1233
+      },
+      {
+        "route": "inventario/bodegas",
+        "h1": "Bodegas y transferencias",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1035
+      },
+      {
+        "route": "inventario/kits",
+        "h1": "Kits de insumos",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1098
+      },
+      {
+        "route": "catalogos",
+        "h1": "Catálogos y tarifas",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 2558
+      },
+      {
+        "route": "catalogos/descuentos",
+        "h1": "Descuentos y convenios",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1316
+      },
+      {
+        "route": "medicos",
+        "h1": "Médicos y recursos",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1377
+      },
+      {
+        "route": "reportes",
+        "h1": "Reportes",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1648
+      },
+      {
+        "route": "auditoria",
+        "h1": "Auditoría",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1646
+      },
+      {
+        "route": "qa-cobertura",
+        "h1": "QA de cobertura del video",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 2807
+      },
+      {
+        "route": "configuracion",
+        "h1": "Configuración",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 2168
+      },
+      {
+        "route": "portal/demo-qt-2026-0148",
+        "h1": "Hola, Elena",
+        "h1Count": 1,
+        "badTokens": [],
+        "bodyLength": 1148
+      }
+    ]
+  },
+  "criticalEndToEnd": {
+    "initial": {
+      "patients": 8,
+      "cases": 6,
+      "quotes": 6,
+      "payments": 3,
+      "audit": 6
+    },
+    "patientId": "PAT-MT9ETA1A-54AX8",
+    "caseId": "HOS-2026-0202",
+    "quoteInitial": {
+      "id": "QT-2026-0156",
+      "total": 384.18,
+      "patientAmount": 84.18,
+      "insurerAmount": 300,
+      "status": "DRAFT",
+      "items": 2
+    },
+    "operations": {
+      "ids": {
+        "payment": "PAY-MT9ETBP9-9NIGI",
+        "document": "DOC-MT9ETBPD-I2SVM",
+        "vitals": "VS-MT9ETBPJ-XICQV",
+        "note": "NOTE-MT9ETBPL-EKZY6",
+        "shift": "SHIFT-MT9ETBPR-8OZ9X",
+        "purchase": "PUR-2026-0085",
+        "movement": "MOV-MT9ETBPW-YKWCC",
+        "closure": "CLOSE-MT9ETBPZ-IX8FK",
+        "kit": "KIT-MT9ETBQ5-MM2SN",
+        "catalog": "CAT-MT9ETBQ7-NH59V",
+        "discount": "DISC-MT9ETBQA-OK9TD",
+        "statement": "STM-2026-08-001"
+      },
+      "flags": {
+        "duplicateBlocked": true,
+        "nurseEditBlocked": true,
+        "noteShared": true,
+        "closureApproved": true,
+        "statementSent": true
+      },
+      "counts": {
+        "patients": 9,
+        "cases": 7,
+        "quotes": 7,
+        "payments": 4,
+        "docs": 5,
+        "vitals": 4,
+        "notes": 3,
+        "shifts": 4,
+        "purchases": 3,
+        "movements": 5,
+        "closures": 3,
+        "kits": 3,
+        "catalog": 17,
+        "discounts": 4,
+        "audit": 32,
+        "notifications": 9
+      },
+      "quote": {
+        "id": "QT-2026-0156",
+        "caseId": "HOS-2026-0202",
+        "patientId": "PAT-MT9ETA1A-54AX8",
+        "status": "PARTIALLY_APPROVED",
+        "version": 1,
+        "currency": "USD",
+        "items": [
+          {
+            "id": "QTI-MT9ETAWG-CUU7V",
+            "catalogItemId": "CAT-SRV-001",
+            "category": "SERVICES",
+            "name": "Enfermería domiciliar 12 horas",
+            "quantity": 2,
+            "unitPrice": 180,
+            "discountAmount": 0
+          },
+          {
+            "id": "QTI-MT9ETB23-E0U7L",
+            "catalogItemId": "CAT-MED-001",
+            "category": "MEDICATIONS",
+            "name": "Ceftriaxona 1 g vial",
+            "quantity": 3,
+            "unitPrice": 14.8,
+            "discountAmount": 0
+          }
+        ],
+        "discount": {
+          "type": "PERCENT",
+          "value": 5,
+          "reason": ""
+        },
+        "subtotal": 404.4,
+        "discountAmount": 20.22,
+        "total": 384.18,
+        "insurerAmount": 300,
+        "patientAmount": 84.18,
+        "categoryTotals": {
+          "SERVICES": 360,
+          "STUDIES": 0,
+          "MEDICATIONS": 44.4,
+          "SUPPLIES": 0,
+          "EQUIPMENT": 0,
+          "FEES": 0,
+          "EXTRAS": 0
+        },
+        "comments": "",
+        "createdAt": "2026-08-26T01:22:55.973Z",
+        "sentAt": "2026-08-26T01:22:56.243Z",
+        "portalToken": "demo-portal-mt9etbhh-8si4l",
+        "expiresAt": "2026-08-29T01:22:55.973Z"
+      }
+    },
+    "quoteDetailH1": "QT-2026-0156 · versión 1",
+    "quoteDetailContainsPartial": true,
+    "pageErrors": [],
+    "consoleErrors": []
+  },
+  "roleAccess": {
+    "cases": [
+      {
+        "role": "DOCTOR",
+        "route": "cuentas-por-cobrar",
+        "expectedDenied": true,
+        "denied": true,
+        "h1": "Acceso restringido",
+        "passed": true
+      },
+      {
+        "role": "NURSE",
+        "route": "compras",
+        "expectedDenied": true,
+        "denied": true,
+        "h1": "Acceso restringido",
+        "passed": true
+      },
+      {
+        "role": "INVENTORY",
+        "route": "clinica",
+        "expectedDenied": true,
+        "denied": true,
+        "h1": "Acceso restringido",
+        "passed": true
+      },
+      {
+        "role": "FINANCE",
+        "route": "clinica",
+        "expectedDenied": true,
+        "denied": true,
+        "h1": "Acceso restringido",
+        "passed": true
+      },
+      {
+        "role": "AUDITOR",
+        "route": "auditoria",
+        "expectedDenied": false,
+        "denied": false,
+        "h1": "Auditoría",
+        "passed": true
+      },
+      {
+        "role": "AUDITOR",
+        "route": "configuracion",
+        "expectedDenied": false,
+        "denied": false,
+        "h1": "Configuración",
+        "passed": true
+      }
+    ],
+    "errors": []
+  },
+  "responsive": {
+    "dashboard": {
+      "inner": 390,
+      "scroll": 390,
+      "sidebar": "matrix(1, 0, 0, 1, -303, 0)",
+      "h1": "Centro operativo"
+    },
+    "portal": {
+      "inner": 390,
+      "scroll": 390,
+      "h1": "Hola, Elena"
+    },
+    "errors": []
+  },
+  "fixesDiscoveredDuringQa": [
+    "Se normalizaron las etiquetas de estado para evitar [object Object].",
+    "Se corrigió el apilamiento del modal para que el fondo no intercepte clics.",
+    "Se corrigió el layout de próximos turnos y las cuadrículas del dashboard.",
+    "Se corrigió el contraste de los totales en el panel de cotización.",
+    "Se amplió y volvió responsive el portal del paciente.",
+    "Se eliminó la notificación genérica duplicada de los botones Guardar.",
+    "Se agregó control de permisos también al acceso directo por URL/hash, no solo al menú.",
+    "Se validó almacenamiento seguro de respaldo cuando localStorage no está disponible."
+  ],
+  "releaseDecision": {
+    "status": "BASELINE_APPROVED_FOR_CODEX_AND_CLIENT_UAT",
+    "realPatientDataAllowed": false,
+    "reason": "La aplicación y la infraestructura están preparadas, pero faltan reglas, plantillas, credenciales y aprobaciones del cliente descritas en OPEN_GAPS.md."
+  },
+  "apiAndRuntime": {
+    "health": {
+      "status": 200
+    },
+    "runtimeConfig": {
+      "status": 200
+    },
+    "notificationValid": {
+      "status": 202,
+      "maskedDestination": "•••• 1234"
+    },
+    "notificationInvalidTemplate": {
+      "status": 400,
+      "error": "Canal o plantilla no permitida."
+    },
+    "portalGenericMissingData": {
+      "status": 400,
+      "error": "No fue posible validar el acceso."
+    },
+    "portalNoProductionConfig": {
+      "status": 503,
+      "mode": "mock-only"
+    },
+    "root": {
+      "status": 200
+    },
+    "manifest": {
+      "status": 200
+    }
+  },
+  "settingsForm": {
+    "toasts": [
+      "✓\nSesión iniciada como ADMIN.\n×",
+      "✓\nConfiguración guardada. Recarga para aplicar el modo de datos.\n×"
+    ],
+    "errors": [],
+    "console": []
+  }
+}

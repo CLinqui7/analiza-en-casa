@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH16",
+  "title": "Descuentos y reglas por categoría",
+  "description": "Catálogo de descuentos y aplicación a servicios, medicamentos, equipos, insumos y honorarios.",
+  "start_seconds": 2983,
+  "end_seconds": 3070,
+  "clip_start_with_overlap": 2982,
+  "clip_end_with_overlap": 3071,
+  "duration_seconds": 87,
+  "event_frames": 44,
+  "detail_crops": 19,
+  "safety_frames_1fps": 88,
+  "expected_safety_frames": 88,
+  "event_contact_sheets": 5,
+  "safety_contact_sheets": 6
+}

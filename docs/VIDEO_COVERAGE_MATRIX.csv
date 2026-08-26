@@ -1,0 +1,18 @@
+chapter,area,features,implemented,partial,missing,status,notes
+CH01,"Acceso, dashboard y pacientes",12,12,0,0,PASS,Cubierto en modo QA.
+CH02,Alta y edición de pacientes,24,22,2,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH03,Hospitalización y preautorizaciones,14,14,0,0,PASS,Cubierto en modo QA.
+CH04,Cotización: datos generales,12,12,0,0,PASS,Cubierto en modo QA.
+CH05,"Cotización: servicios, estudios y medicamentos",18,17,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH06,"Insumos, equipos, honorarios, extras y totales",19,18,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH07,Seguro y reclamo,13,12,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH08,Cuentas por cobrar y pagos,20,19,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH09,Hospitalización clínica y reporte de salud,23,21,2,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH10,Orden médica y tarjeta de medicamentos,21,20,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH11,Agenda y turnos,13,13,0,0,PASS,Cubierto en modo QA.
+CH12,Cuentas por pagar y pagos de servicios,16,15,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH13,Compras,18,17,1,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH14,"Inventario, cierres, bodegas y kits",27,25,2,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH15,Acuse y catálogos,20,18,2,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."
+CH16,Descuentos por categoría,11,11,0,0,PASS,Cubierto en modo QA.
+CH17,Reporte clínico detallado e impresión,22,19,3,0,PASS_WITH_NOTES,"Funciones parciales dependen de documentos, reglas o integraciones del cliente."

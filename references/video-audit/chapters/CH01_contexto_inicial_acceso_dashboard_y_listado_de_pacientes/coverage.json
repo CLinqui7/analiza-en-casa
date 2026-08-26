@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH01",
+  "title": "Contexto inicial, acceso, dashboard y listado de pacientes",
+  "description": "Referencias iniciales, inicio de sesión, dashboard y navegación al catálogo de pacientes.",
+  "start_seconds": 0,
+  "end_seconds": 110,
+  "clip_start_with_overlap": 0,
+  "clip_end_with_overlap": 111,
+  "duration_seconds": 110,
+  "event_frames": 24,
+  "detail_crops": 11,
+  "safety_frames_1fps": 111,
+  "expected_safety_frames": 111,
+  "event_contact_sheets": 3,
+  "safety_contact_sheets": 7
+}

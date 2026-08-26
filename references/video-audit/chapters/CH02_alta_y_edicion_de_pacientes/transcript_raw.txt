@@ -1,0 +1,49 @@
+[00:01:50.000 --> 00:01:52.000] [conf=0.9982] [MÚSICA]
+
+[00:01:52.000 --> 00:01:54.000] [conf=0.998] [MÚSICA]
+
+[00:01:54.000 --> 00:01:56.000] [conf=0.9971] [MÚSICA]
+
+[00:01:56.000 --> 00:02:00.000] [conf=0.4561] [Murmullos]
+
+[00:02:00.000 --> 00:02:10.960] [conf=0.7198] El va a parecer la pestaña de pacientes para crear nuevos pacientes que tienen la perspectiva
+
+[00:02:10.960 --> 00:02:13.960] [conf=0.8906] y la inactiva.
+
+[00:02:13.960 --> 00:02:23.080] [conf=0.885] Para crear uno paciente lleno de nuevo y nos muestra los datos a solicitar que aquí
+
+[00:02:23.080 --> 00:02:30.080] [conf=0.6759] está bien el dúo, puede ser el paso por favor, puede ser el dúo.
+
+[00:02:30.080 --> 00:02:39.080] [conf=0.6938] Te ponen el número el dúo, el nombre completo, la fecha de enciimiento, que es con la entrevistación,
+
+[00:02:39.080 --> 00:02:48.080] [conf=0.6663] se ligue la opción cierre a menino masculino, el número de teléfono, tiene de en casa,
+
+[00:02:48.080 --> 00:03:03.080] [conf=0.6801] el color electrónico, el enganción del tipo de sangre, Estados Unidos, nacionalidad, acá
+
+[00:03:03.080 --> 00:03:09.080] [conf=0.4553] está el número de elevaciones, ocupación.
+
+[00:03:09.080 --> 00:03:16.080] [conf=0.5974] Igual a estos, solamente esta está como preciosa, sujeta, tiene que ser temada también el número
+
+[00:03:16.080 --> 00:03:20.080] [conf=0.488] de duits y el del instelebre.
+
+[00:03:20.080 --> 00:03:28.080] [conf=0.7919] En esta parte también aparece la opción seleccional porque es aseguradora, es como
+
+[00:03:28.080 --> 00:03:36.080] [conf=0.6755] es aseguradora que va a empezar, aquí aparecen todas las aseguradoras, seleccionan sin el
+
+[00:03:36.080 --> 00:03:39.080] [conf=0.7292] caso de que fuera de como es aseguradoras.
+
+[00:03:39.080 --> 00:03:48.080] [conf=0.4416] Si hay como un asegurador, más con el.
+
+[00:03:48.080 --> 00:03:54.080] [conf=0.5781] ¿El paciente es asegurada? Sí.
+
+[00:03:54.080 --> 00:03:59.080] [conf=0.7111] Y ya me despliegan las opciones para poder llenar con repólizas,
+
+[00:03:59.080 --> 00:04:01.080] [conf=0.5026] [MÚSICA]
+
+[00:04:00.000 --> 00:04:11.000] [conf=0.6181] La fecha de, la fecha rectil, fecha de sinistro asegurado, etc.
+
+[00:04:11.000 --> 00:04:24.000] [conf=0.6779] Y aparte, apareciendo el nombre, el nombre de contacto, o la cual sabe, paciente, trata, se agrega, y aquí es donde va la dirección, paciente.
+
+[00:04:24.000 --> 00:04:36.000] [conf=0.7772] Aquí solicita ubicación si es necesario la dirección o comentario de una referencia.
+
+[00:04:36.000 --> 00:04:43.000] [conf=0.5393] La evaluación y le dan water y medicas supeas del paciente.

@@ -1,0 +1,23 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00354,audio_015,1886600,1896480,00:31:26.600,00:31:36.480,0.7431,,"de realizar, medicamentos más que todos se agregan, por aparte cuando son cómicos y",0,1480
+T00355,audio_015,1896480,1897480,00:31:36.480,00:31:37.480,0.6196,MEDIUM_CONFIDENCE,así.,1480,2480
+T00356,audio_015,1897480,1901600,00:31:37.480,00:31:41.600,0.6124,MEDIUM_CONFIDENCE,Eso en cuanto a la del paciente.,2480,6600
+T00357,audio_015,1901600,1908600,00:31:41.600,00:31:48.600,0.7404,,De ahí esa misma plataforma me permitía llevar a la enfermera que se le va a decir.,6600,13600
+T00358,audio_015,1908600,1917600,00:31:48.600,00:31:57.600,0.8949,,Aquí ponía el nombre del paciente.,13600,22600
+T00359,audio_015,1917600,1919600,00:31:57.600,00:31:59.600,0.6866,MEDIUM_CONFIDENCE,Le daba el creato.,22600,24600
+T00360,audio_016,1920000,1934440,00:32:00.000,00:32:14.440,0.8015,,"Ponía la fecha en que iba sin más, digamos que en este caso va a ir mañana a la enfermera,",25000,39440
+T00361,audio_016,1934440,1939280,00:32:14.440,00:32:19.280,0.872,,"que va a entrar así de la mañana, va a estar el día de mañana solo por un turno de dos",39440,44280
+T00362,audio_016,1939280,1946400,00:32:19.280,00:32:26.400,0.7045,,"horas, inicia la CIPN, finaliza la CIPN.",44280,51400
+T00363,audio_016,1946400,1952280,00:32:26.400,00:32:32.280,0.8006,,"Y ahí le daba en este caso un turno, pero también podría ser oculto, ya le seleccionaba",51400,57280
+T00364,audio_016,1952280,1958160,00:32:32.280,00:32:38.160,0.8309,,"sin cuidado a la enfermería, sin supervisión, si va a llegar, si es un terapista el que va",57280,63160
+T00365,audio_016,1958160,1963840,00:32:38.160,00:32:43.840,0.7978,,"a ir, sin preso y terapia, si es un médico, si es un cuidadora que puede seleccionar a",63160,68840
+T00366,audio_016,1963840,1967560,00:32:43.840,00:32:47.560,0.6615,MEDIUM_CONFIDENCE,la persona que yo quería en Dan y ahí le daba guardar.,68840,72560
+T00367,audio_016,1967560,1971520,00:32:47.560,00:32:51.520,0.7468,,Y me parecía este capo.,72560,76520
+T00368,audio_016,1971520,1982600,00:32:51.520,00:33:02.600,0.7895,,"Y aquí yo seleccionaba a la, se selecciona la enfermera que va a ir a Durin.",76520,87600
+T00369,audio_016,1982600,1987560,00:33:02.600,00:33:07.560,0.716,,"También permite en este caso allá, porque eran por servicios profesionales que cuando",87600,92560
+T00370,audio_016,1987560,1992320,00:33:07.560,00:33:12.320,0.7216,,"se le iba a pagar, en este caso como van a impidiar, están por...",92560,97320
+T00371,audio_016,1992320,1993320,00:33:12.320,00:33:13.320,0.5742,MEDIUM_CONFIDENCE,- ¿Lanín?,97320,98320
+T00372,audio_016,1993320,1994320,00:33:13.320,00:33:14.320,0.8227,,- ¡Lanín!,98320,99320
+T00373,audio_016,1994320,1996040,00:33:14.320,00:33:16.040,0.9717,,No tendría que llevar esta opción.,99320,101040
+T00374,audio_016,1996040,2007360,00:33:16.040,00:33:27.360,0.9252,,Algo más que me permitía esto era realizar la planía de enfermería.,101040,112360
+T00375,audio_016,2007360,2008360,00:33:27.360,00:33:28.360,0.6029,MEDIUM_CONFIDENCE,- ¿La planía?,112360,113360

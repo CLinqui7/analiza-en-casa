@@ -1,0 +1,560 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text
+T00001,audio_000,0,2000,00:00:00.000,00:00:02.000,0.6028,MEDIUM_CONFIDENCE|NON_SPEECH,[MÚSICA]
+T00002,audio_000,30000,32000,00:00:30.000,00:00:32.000,0.8795,NON_SPEECH,[MÚSICA]
+T00003,audio_000,60000,62000,00:01:00.000,00:01:02.000,0.9592,NON_SPEECH,[MÚSICA]
+T00004,audio_000,62000,64000,00:01:02.000,00:01:04.000,0.9559,NON_SPEECH,[MÚSICA]
+T00005,audio_000,64000,66000,00:01:04.000,00:01:06.000,0.9539,NON_SPEECH,[MÚSICA]
+T00006,audio_000,66000,68000,00:01:06.000,00:01:08.000,0.9294,NON_SPEECH,[MÚSICA]
+T00007,audio_000,68000,70000,00:01:08.000,00:01:10.000,0.9644,NON_SPEECH,[MÚSICA]
+T00008,audio_000,70000,72000,00:01:10.000,00:01:12.000,0.9696,NON_SPEECH,[MÚSICA]
+T00009,audio_000,72000,74000,00:01:12.000,00:01:14.000,0.9858,NON_SPEECH,[MÚSICA]
+T00010,audio_000,74000,76000,00:01:14.000,00:01:16.000,0.9886,NON_SPEECH,[MÚSICA]
+T00011,audio_000,76000,78000,00:01:16.000,00:01:18.000,0.9894,NON_SPEECH,[MÚSICA]
+T00012,audio_000,78000,80000,00:01:18.000,00:01:20.000,0.9892,NON_SPEECH,[MÚSICA]
+T00013,audio_000,80000,82000,00:01:20.000,00:01:22.000,0.9867,NON_SPEECH,[MÚSICA]
+T00014,audio_000,82000,84000,00:01:22.000,00:01:24.000,0.9922,NON_SPEECH,[MÚSICA]
+T00015,audio_000,84000,86000,00:01:24.000,00:01:26.000,0.9907,NON_SPEECH,[MÚSICA]
+T00016,audio_000,86000,88000,00:01:26.000,00:01:28.000,0.988,NON_SPEECH,[MÚSICA]
+T00017,audio_000,88000,90000,00:01:28.000,00:01:30.000,0.9949,NON_SPEECH,[MÚSICA]
+T00018,audio_000,90000,92000,00:01:30.000,00:01:32.000,0.9947,NON_SPEECH,[MÚSICA]
+T00019,audio_000,92000,94000,00:01:32.000,00:01:34.000,0.9863,NON_SPEECH,[MÚSICA]
+T00020,audio_000,94000,96000,00:01:34.000,00:01:36.000,0.9951,NON_SPEECH,[MÚSICA]
+T00021,audio_000,96000,98000,00:01:36.000,00:01:38.000,0.9928,NON_SPEECH,[MÚSICA]
+T00022,audio_000,98000,100000,00:01:38.000,00:01:40.000,0.9964,NON_SPEECH,[MÚSICA]
+T00023,audio_000,100000,102000,00:01:40.000,00:01:42.000,0.9931,NON_SPEECH,[MÚSICA]
+T00024,audio_000,102000,104000,00:01:42.000,00:01:44.000,0.9971,NON_SPEECH,[MÚSICA]
+T00025,audio_000,104000,106000,00:01:44.000,00:01:46.000,0.9974,NON_SPEECH,[MÚSICA]
+T00026,audio_000,106000,108000,00:01:46.000,00:01:48.000,0.998,NON_SPEECH,[MÚSICA]
+T00027,audio_000,108000,110000,00:01:48.000,00:01:50.000,0.9981,NON_SPEECH,[MÚSICA]
+T00028,audio_000,110000,112000,00:01:50.000,00:01:52.000,0.9982,NON_SPEECH,[MÚSICA]
+T00029,audio_000,112000,114000,00:01:52.000,00:01:54.000,0.998,NON_SPEECH,[MÚSICA]
+T00030,audio_000,114000,116000,00:01:54.000,00:01:56.000,0.9971,NON_SPEECH,[MÚSICA]
+T00031,audio_000,116000,120000,00:01:56.000,00:02:00.000,0.4561,LOW_CONFIDENCE|NON_SPEECH,[Murmullos]
+T00032,audio_001,120000,130960,00:02:00.000,00:02:10.960,0.7198,,El va a parecer la pestaña de pacientes para crear nuevos pacientes que tienen la perspectiva
+T00033,audio_001,130960,133960,00:02:10.960,00:02:13.960,0.8906,,y la inactiva.
+T00034,audio_001,133960,143080,00:02:13.960,00:02:23.080,0.885,,Para crear uno paciente lleno de nuevo y nos muestra los datos a solicitar que aquí
+T00035,audio_001,143080,150080,00:02:23.080,00:02:30.080,0.6759,MEDIUM_CONFIDENCE,"está bien el dúo, puede ser el paso por favor, puede ser el dúo."
+T00036,audio_001,150080,159080,00:02:30.080,00:02:39.080,0.6938,MEDIUM_CONFIDENCE,"Te ponen el número el dúo, el nombre completo, la fecha de enciimiento, que es con la entrevistación,"
+T00037,audio_001,159080,168080,00:02:39.080,00:02:48.080,0.6663,MEDIUM_CONFIDENCE,"se ligue la opción cierre a menino masculino, el número de teléfono, tiene de en casa,"
+T00038,audio_001,168080,183080,00:02:48.080,00:03:03.080,0.6801,MEDIUM_CONFIDENCE,"el color electrónico, el enganción del tipo de sangre, Estados Unidos, nacionalidad, acá"
+T00039,audio_001,183080,189080,00:03:03.080,00:03:09.080,0.4553,LOW_CONFIDENCE,"está el número de elevaciones, ocupación."
+T00040,audio_001,189080,196080,00:03:09.080,00:03:16.080,0.5974,MEDIUM_CONFIDENCE,"Igual a estos, solamente esta está como preciosa, sujeta, tiene que ser temada también el número"
+T00041,audio_001,196080,200080,00:03:16.080,00:03:20.080,0.488,LOW_CONFIDENCE,de duits y el del instelebre.
+T00042,audio_001,200080,208080,00:03:20.080,00:03:28.080,0.7919,,"En esta parte también aparece la opción seleccional porque es aseguradora, es como"
+T00043,audio_001,208080,216080,00:03:28.080,00:03:36.080,0.6755,MEDIUM_CONFIDENCE,"es aseguradora que va a empezar, aquí aparecen todas las aseguradoras, seleccionan sin el"
+T00044,audio_001,216080,219080,00:03:36.080,00:03:39.080,0.7292,,caso de que fuera de como es aseguradoras.
+T00045,audio_001,219080,228080,00:03:39.080,00:03:48.080,0.4416,LOW_CONFIDENCE,"Si hay como un asegurador, más con el."
+T00046,audio_001,228080,234080,00:03:48.080,00:03:54.080,0.5781,MEDIUM_CONFIDENCE,¿El paciente es asegurada? Sí.
+T00047,audio_001,234080,239080,00:03:54.080,00:03:59.080,0.7111,,"Y ya me despliegan las opciones para poder llenar con repólizas,"
+T00048,audio_001,239080,241080,00:03:59.080,00:04:01.080,0.5026,LOW_CONFIDENCE|NON_SPEECH,[MÚSICA]
+T00049,audio_002,240000,251000,00:04:00.000,00:04:11.000,0.6181,MEDIUM_CONFIDENCE,"La fecha de, la fecha rectil, fecha de sinistro asegurado, etc."
+T00050,audio_002,251000,264000,00:04:11.000,00:04:24.000,0.6779,MEDIUM_CONFIDENCE,"Y aparte, apareciendo el nombre, el nombre de contacto, o la cual sabe, paciente, trata, se agrega, y aquí es donde va la dirección, paciente."
+T00051,audio_002,264000,276000,00:04:24.000,00:04:36.000,0.7772,,Aquí solicita ubicación si es necesario la dirección o comentario de una referencia.
+T00052,audio_002,276000,283000,00:04:36.000,00:04:43.000,0.5393,LOW_CONFIDENCE,La evaluación y le dan water y medicas supeas del paciente.
+T00053,audio_002,283000,294000,00:04:43.000,00:04:54.000,0.6771,MEDIUM_CONFIDENCE,"Si ya está el paciente, la otra parte de ficalización."
+T00054,audio_002,294000,301000,00:04:54.000,00:05:01.000,0.8875,,Acá es lo que les mencionaron que aparecen todos los pacientes activos.
+T00055,audio_002,301000,303000,00:05:01.000,00:05:03.000,0.8501,,Todos los que han creado.
+T00056,audio_002,303000,306000,00:05:03.000,00:05:06.000,0.5659,MEDIUM_CONFIDENCE,Creado y no es que hubo fitalizados en ese momento.
+T00057,audio_002,306000,311000,00:05:06.000,00:05:11.000,0.8446,,"Ah, ok. Tanto lo que están activos, activos significa que tienen un proceso."
+T00058,audio_002,311000,315000,00:05:11.000,00:05:15.000,0.6712,MEDIUM_CONFIDENCE,"Que ahorita están, que otros están con servicios comunes."
+T00059,audio_002,315000,316000,00:05:15.000,00:05:16.000,0.7208,,Ok.
+T00060,audio_002,316000,325000,00:05:16.000,00:05:25.000,0.6555,MEDIUM_CONFIDENCE,"Digamos si en el lado caso quise el nombre del que pacientes estuvieron, pues están en activos, se van a que los que están en el paciente."
+T00061,audio_002,325000,327000,00:05:25.000,00:05:27.000,0.6723,MEDIUM_CONFIDENCE,Y aquí están los que están activos.
+T00062,audio_002,327000,329000,00:05:27.000,00:05:29.000,0.4281,LOW_CONFIDENCE,Todo esto.
+T00063,audio_002,329000,334000,00:05:29.000,00:05:34.000,0.6633,MEDIUM_CONFIDENCE,"Están malistras, pero si tuvieron un servicio con ustedes antes."
+T00064,audio_002,334000,335000,00:05:34.000,00:05:35.000,0.7054,,¿Sí?
+T00065,audio_002,335000,336000,00:05:35.000,00:05:36.000,0.6038,MEDIUM_CONFIDENCE,Sí.
+T00066,audio_002,336000,342000,00:05:36.000,00:05:42.000,0.7305,,"Entonces, no podemos dar parte de la ficalización que van a aparecer todos los servicios actuales en este momento."
+T00067,audio_002,342000,343000,00:05:42.000,00:05:43.000,0.8712,,Ok.
+T00068,audio_002,343000,344000,00:05:43.000,00:05:44.000,0.4367,LOW_CONFIDENCE,Y?
+T00069,audio_002,344000,347000,00:05:44.000,00:05:47.000,0.6619,MEDIUM_CONFIDENCE,Ese pique es el pico de ejecución sin evitarnos a un paciente.
+T00070,audio_002,347000,348000,00:05:47.000,00:05:48.000,0.4025,LOW_CONFIDENCE,Sí.
+T00071,audio_002,348000,349000,00:05:48.000,00:05:49.000,0.7113,,Ajá.
+T00072,audio_002,349000,352000,00:05:49.000,00:05:52.000,0.9095,,Es los números que están en ejecución en este momento.
+T00073,audio_002,352000,354000,00:05:52.000,00:05:54.000,0.6234,MEDIUM_CONFIDENCE,La potización.
+T00074,audio_002,354000,357000,00:05:54.000,00:05:57.000,0.8803,,Acá está la opción de potización.
+T00075,audio_002,357000,360000,00:05:57.000,00:06:00.000,0.6557,MEDIUM_CONFIDENCE,Que es donde ya...
+T00076,audio_003,360000,366060,00:06:00.000,00:06:06.060,0.532,LOW_CONFIDENCE,"Si no tiene un nuevo paciente o ya tenemos un reclamo paciente, formación o cotización."
+T00077,audio_003,366060,379220,00:06:06.060,00:06:19.220,0.553,MEDIUM_CONFIDENCE,"Lo que mencionamos antes de tener algo enérico, es que no tiene cotización uno, sino tienen"
+T00078,audio_003,379220,385080,00:06:19.220,00:06:25.080,0.768,,"todo el dato AUS para llenar, entonces se puede hacer una cotización abierta."
+T00079,audio_003,385080,392080,00:06:25.080,00:06:32.080,0.574,MEDIUM_CONFIDENCE,Entonces se selecciona la fecha de ahora y está a través de la final.
+T00080,audio_003,392080,402080,00:06:32.080,00:06:42.080,0.504,LOW_CONFIDENCE,"Y es referido por el inérico, cierto, preven, unicilante, etc."
+T00081,audio_003,402080,409080,00:06:42.080,00:06:49.080,0.3631,LOW_CONFIDENCE,"Entonces, si hay un paciente o un paciente, si hay algo en esto, lo referido."
+T00082,audio_003,409080,418080,00:06:49.080,00:06:58.080,0.5551,MEDIUM_CONFIDENCE,"O también puede ser referido por el reclamo de las redes, pero también por las redes."
+T00083,audio_003,418080,424080,00:06:58.080,00:07:04.080,0.4653,LOW_CONFIDENCE,"Entonces, ¿no está en conversa?"
+T00084,audio_003,424080,438080,00:07:04.080,00:07:18.080,0.6471,MEDIUM_CONFIDENCE,Se coloca algún tipo de comentario en el que le distirma la operación.
+T00085,audio_003,438080,447080,00:07:18.080,00:07:27.080,0.6002,MEDIUM_CONFIDENCE,"Y el caso se pone el servicio a base de siete días, comandario de comandario de inicio"
+T00086,audio_003,447080,453080,00:07:27.080,00:07:33.080,0.5484,LOW_CONFIDENCE,"a tal día, para financiar tal día, así que es que es de útil."
+T00087,audio_003,453080,464080,00:07:33.080,00:07:44.080,0.7139,,"O que también va a tener exámenes tal fecha posterior, haciendo en fascín que va a tener"
+T00088,audio_003,464080,466080,00:07:44.080,00:07:46.080,0.8303,,posteriormente exámenes.
+T00089,audio_003,466080,470080,00:07:46.080,00:07:50.080,0.6269,MEDIUM_CONFIDENCE,Y ya está dentro de la propización inicial.
+T00090,audio_003,470080,477080,00:07:50.080,00:07:57.080,0.7268,,"Acá se selecciona, en este caso, es que tiene una opción de precios, distinto precios."
+T00091,audio_003,477080,480080,00:07:57.080,00:08:00.080,0.8338,,Eso son los precios de asegurador.
+T00092,audio_004,480000,487000,00:08:00.000,00:08:07.000,0.6516,MEDIUM_CONFIDENCE,"Quiere decir que son las relaciones que tienen, si yo digo un asegurador, no hay salida el precio que tengo asebrado con él."
+T00093,audio_004,487000,490000,00:08:07.000,00:08:10.000,0.8212,,"Ah, tenés un catálogo de precios por aseguradora."
+T00094,audio_004,490000,492000,00:08:10.000,00:08:12.000,0.7339,,Sí.
+T00095,audio_004,492000,503000,00:08:12.000,00:08:23.000,0.7514,,"Entonces, tenemos el precio regular, que es prácticamente el normal del estándar."
+T00096,audio_004,503000,508000,00:08:23.000,00:08:28.000,0.8436,,Si pongo que voy a necesitar servicio de fiscalización.
+T00097,audio_004,508000,518000,00:08:28.000,00:08:38.000,0.5931,MEDIUM_CONFIDENCE,"Ya cuando ustedes están en el otro lado, es el precio que hay que tener el precio."
+T00098,audio_004,518000,531000,00:08:38.000,00:08:51.000,0.5685,MEDIUM_CONFIDENCE,"Exacto, aquí ya están los servicios de los precios, solamente para que el visual de cotiza suelo, él pueda solamente calar."
+T00099,audio_004,531000,538000,00:08:51.000,00:08:58.000,0.4399,LOW_CONFIDENCE,"Entonces, médica calo, 24."
+T00100,audio_004,538000,543000,00:08:58.000,00:09:03.000,0.4994,LOW_CONFIDENCE,Sí.
+T00101,audio_004,543000,546000,00:09:03.000,00:09:06.000,0.4653,LOW_CONFIDENCE,Ficalización.
+T00102,audio_004,546000,550000,00:09:06.000,00:09:10.000,0.356,LOW_CONFIDENCE,"Y por tráedigo, maestro estado."
+T00103,audio_004,550000,553000,00:09:10.000,00:09:13.000,0.5936,MEDIUM_CONFIDENCE,No le he aprobado.
+T00104,audio_004,553000,555000,00:09:13.000,00:09:15.000,0.423,LOW_CONFIDENCE,Gracias.
+T00105,audio_004,555000,562000,00:09:15.000,00:09:22.000,0.4648,LOW_CONFIDENCE,"Sí, me iba, para ese expreso."
+T00106,audio_004,562000,570000,00:09:22.000,00:09:30.000,0.7825,,"El que le dice el médico, que dice que el paciente va a estar por 5 días, entonces por 4 de 5 días, por 24 horas."
+T00107,audio_004,570000,573000,00:09:30.000,00:09:33.000,0.5663,MEDIUM_CONFIDENCE,"Entonces, esto cae exacto."
+T00108,audio_004,573000,576000,00:09:33.000,00:09:36.000,0.4457,LOW_CONFIDENCE,Que mata a llevar a que él lleva un va.
+T00109,audio_004,576000,578000,00:09:36.000,00:09:38.000,0.6324,MEDIUM_CONFIDENCE,"Entonces, me voy a dar para..."
+T00110,audio_004,578000,581000,00:09:38.000,00:09:41.000,0.5773,MEDIUM_CONFIDENCE,"Ellos no tienen como categorizaros, ¿vale?"
+T00111,audio_004,581000,585000,00:09:41.000,00:09:45.000,0.7032,,Pero es la parte de servicio de un va.
+T00112,audio_004,585000,589000,00:09:45.000,00:09:49.000,0.6057,MEDIUM_CONFIDENCE,Un servicio de la fuerza.
+T00113,audio_004,589000,593000,00:09:49.000,00:09:53.000,0.8118,,"Puede ser extracción, que tiene un cojo."
+T00114,audio_004,593000,597000,00:09:53.000,00:09:57.000,0.8935,,"Y como son 5 días de servicio, son 5 días de agua."
+T00115,audio_004,597000,599000,00:09:57.000,00:09:59.000,0.8231,,Se va agregando.
+T00116,audio_005,600000,602880,00:10:00.000,00:10:02.880,0.6372,MEDIUM_CONFIDENCE,"- Ah, pero eso no te lo tenías como servicios de bombas. - Sí."
+T00117,audio_005,602880,609440,00:10:02.880,00:10:09.440,0.8013,,"- Debería estar con un equipo. - Exacto, pero como en realidad es como una garganta,"
+T00118,audio_005,609440,614120,00:10:09.440,00:10:14.120,0.8886,,no es como un equipo en sí de inventariado.
+T00119,audio_005,614120,618000,00:10:14.120,00:10:18.000,0.8546,,"Ok, ahí solo tenés entonces los equipos los que vas a vender."
+T00120,audio_005,618000,624400,00:10:18.000,00:10:24.400,0.7941,,"Aquí tengo un equipo que voy a vender, aquí, que tengo como..."
+T00121,audio_005,624400,630280,00:10:24.400,00:10:30.280,0.7985,,"ya registrados, como un cuadro de mi inventario de equipo."
+T00122,audio_005,630280,638800,00:10:30.280,00:10:38.800,0.6456,MEDIUM_CONFIDENCE,"Entonces, en un día se coloca días, días, por 24 horas, día completo."
+T00123,audio_005,638800,646960,00:10:38.800,00:10:46.960,0.7187,,"Entonces, digamos, quieren medicamentos, puede ser regular."
+T00124,audio_005,646960,655040,00:10:46.960,00:10:55.040,0.5622,MEDIUM_CONFIDENCE,"- ¿Qué es el medicamento? - Los medicamentos usan dos veces, dos veces en un día y son tres días, por tres a seis."
+T00125,audio_005,655040,659080,00:10:55.040,00:10:59.080,0.5025,LOW_CONFIDENCE,"- ¿Eres la verdad? - Sí, la verdad."
+T00126,audio_005,659080,663720,00:10:59.080,00:11:03.720,0.5882,MEDIUM_CONFIDENCE,"- ¿Qué es lo que vas? - Normalmente es a poner una tía, entonces es entre 5."
+T00127,audio_005,663720,668400,00:11:03.720,00:11:08.400,0.7665,,Pero digamos que vamos a hacer un ensalad y tienen 7 personas.
+T00128,audio_005,668400,676040,00:11:08.400,00:11:16.040,0.5348,LOW_CONFIDENCE,"Entonces, la 7 personas, los puedes sacar a los cerobras, ¿verdad?"
+T00129,audio_005,676040,682760,00:11:16.040,00:11:22.760,0.7218,,"Si es lo que dices, estarían dos, por cada día por cinco, entonces estarían diez."
+T00130,audio_005,682760,684160,00:11:22.760,00:11:24.160,0.479,LOW_CONFIDENCE,Pero es importante que lo hagan.
+T00131,audio_005,684160,686720,00:11:24.160,00:11:26.720,0.4434,LOW_CONFIDENCE,- ¿La conversación con el que daban por seis días para hacer el sistema?
+T00132,audio_005,686720,692080,00:11:26.720,00:11:32.080,0.5813,MEDIUM_CONFIDENCE,"¿Le hicieron los días? - No, aquí van los regalos."
+T00133,audio_005,692080,695600,00:11:32.080,00:11:35.600,0.7669,,¿Qué pasa? Dice que van a tener sumas.
+T00134,audio_005,695600,699280,00:11:35.600,00:11:39.280,0.7281,,"Entonces, le damos una categoría de sumas."
+T00135,audio_005,699280,701880,00:11:39.280,00:11:41.880,0.6052,MEDIUM_CONFIDENCE,"Quiero ocupar, ¿qué vas a ocupar?"
+T00136,audio_005,701880,704440,00:11:41.880,00:11:44.440,0.5248,LOW_CONFIDENCE,- Sería un buscador. - Gracias.
+T00137,audio_005,707000,709320,00:11:47.000,00:11:49.320,0.455,LOW_CONFIDENCE,- ¿Dónde están los días? - En el salino.
+T00138,audio_005,709320,711320,00:11:49.320,00:11:51.320,0.6551,MEDIUM_CONFIDENCE,- ¿En el salino? - Sí.
+T00139,audio_005,715320,718320,00:11:55.320,00:11:58.320,0.4272,LOW_CONFIDENCE,- Y me he tratado de ser de tu.
+T00140,audio_006,720000,737760,00:12:00.000,00:12:17.760,0.7335,,"Si hay estudios, también tienen la opción de selección de estudios."
+T00141,audio_006,737760,753680,00:12:17.760,00:12:33.680,0.3839,LOW_CONFIDENCE,"En el canal de Isis, está como un bicarbonidad, porque con él fue como un primer, cortarte,"
+T00142,audio_006,753680,771440,00:12:33.680,00:12:51.440,0.423,LOW_CONFIDENCE,"para que vean aquí, las cosas, y todo eso."
+T00143,audio_006,771440,792880,00:12:51.440,00:13:12.880,0.5665,MEDIUM_CONFIDENCE,"En el canal de Isis, hay una opción de selección de estudios, para que vean aquí, la opción"
+T00144,audio_006,792880,817880,00:13:12.880,00:13:37.880,0.678,MEDIUM_CONFIDENCE,"de selección de estudios, para que vean aquí, la opción de selección de estudios, para"
+T00145,audio_006,817880,832280,00:13:37.880,00:13:52.280,0.8421,,"que vean aquí, la opción de selección de estudios, para que vean aquí, la opción"
+T00146,audio_006,832280,839360,00:13:52.280,00:13:59.360,0.8788,,"de selección de estudios, para que vean aquí, la opción de selección de estudios, para"
+T00147,audio_006,839360,840360,00:13:59.360,00:14:00.360,0.8783,,"que vean aquí, la opción de selección de estudios, para que vean aquí, la opción"
+T00148,audio_007,840000,852000,00:14:00.000,00:14:12.000,0.532,LOW_CONFIDENCE,"Pero también está el caso que yo le puedo reivindicar aquí el nombre, lo que quería hacer, personalista."
+T00149,audio_007,852000,860000,00:14:12.000,00:14:20.000,0.5248,LOW_CONFIDENCE,"Entonces acá ya está, me lo jala, que por los datos y aquí, serviste."
+T00150,audio_007,860000,870000,00:14:20.000,00:14:30.000,0.7621,,"Entonces aquí le doy guardar, me lo guarda, entonces me voy atrás por efectos de..."
+T00151,audio_007,870000,876000,00:14:30.000,00:14:36.000,0.8094,,"y acá quedaría guardado, guardado pero todavía no activado."
+T00152,audio_007,876000,884000,00:14:36.000,00:14:44.000,0.5255,LOW_CONFIDENCE,"Entonces qué pasa, si yo lo busco acá, habrá algo, ahora se te lo..."
+T00153,audio_007,884000,892000,00:14:44.000,00:14:52.000,0.6161,MEDIUM_CONFIDENCE,"va, esta es la cotización de él, esa es la peliéndola de la idea de imprimir."
+T00154,audio_007,892000,899000,00:14:52.000,00:14:59.000,0.3872,LOW_CONFIDENCE,"Y como se lo escribimos, vaya, me lo imprimí."
+T00155,audio_007,899000,902000,00:14:59.000,00:15:02.000,0.6172,MEDIUM_CONFIDENCE,Esto se lo puedo calgar mejor.
+T00156,audio_007,902000,905000,00:15:02.000,00:15:05.000,0.6497,MEDIUM_CONFIDENCE,Para mandarle al cliente.
+T00157,audio_007,905000,911000,00:15:05.000,00:15:11.000,0.8156,,"Ah, exacto, se lo manda al cliente para que sea aprobada."
+T00158,audio_007,911000,923000,00:15:11.000,00:15:23.000,0.7593,,"Que vaya, voy, lo podría extender ahí, por ejemplo, en lugar de eso, una vez se cree que el mismo sistema se le viera."
+T00159,audio_007,923000,934000,00:15:23.000,00:15:34.000,0.7048,,"Y él cree el PDF en lugar de que lo descargue, lo va a desnaccer a la PDF y buscas en WhatsApp."
+T00160,audio_007,934000,942000,00:15:34.000,00:15:42.000,0.7498,,Y esa vaina y después tendrás que juntar la cosa y si lo envías mejor lo picas y te cree el PDF y te envías.
+T00161,audio_007,942000,945000,00:15:42.000,00:15:45.000,0.7851,,Eso debería ser.
+T00162,audio_007,945000,951000,00:15:45.000,00:15:51.000,0.625,MEDIUM_CONFIDENCE,"Vale, entonces, ahí tenemos la parte de cotización."
+T00163,audio_007,951000,953000,00:15:51.000,00:15:53.000,0.5399,LOW_CONFIDENCE,"Qué pasa, si..."
+T00164,audio_007,953000,960000,00:15:53.000,00:16:00.000,0.6805,MEDIUM_CONFIDENCE,"Ahí te predigues, entonces deberías parecer pendiente, no enviado, enviar por WhatsApp, para que ya es una vez."
+T00165,audio_008,960000,969000,00:16:00.000,00:16:09.000,0.6285,MEDIUM_CONFIDENCE,"Acá, ¿qué pasa? Si yo sigo autorización sin promoción, me doy aquí, en clandestado."
+T00166,audio_008,969000,976000,00:16:09.000,00:16:16.000,0.7045,,"Entonces, ya está aprobada, ya no es fría, aprobada, se lo pongo en la reducción porque está aprobada."
+T00167,audio_008,976000,985000,00:16:16.000,00:16:25.000,0.6816,MEDIUM_CONFIDENCE,"Entonces, cuando le pongo en la reducción, es donde metida, que, si es cuando queda sobradora, le selecciona,"
+T00168,audio_008,985000,991000,00:16:25.000,00:16:31.000,0.3949,LOW_CONFIDENCE,"ya es que, ahora le le gusta, ya no, y la venta de salud, la auto-matrizada, si, es solo, es solo."
+T00169,audio_008,991000,1001000,00:16:31.000,00:16:41.000,0.724,,"Aquí es el día de servicio, para confirmar que son cinco, entonces, y aquí le doy cuartas."
+T00170,audio_008,1003000,1010000,00:16:43.000,00:16:50.000,0.6356,MEDIUM_CONFIDENCE,"Han cambiado el papel, no, le doy cuartas, no me doy cuartas porque me activa."
+T00171,audio_008,1010000,1017000,00:16:50.000,00:16:57.000,0.52,LOW_CONFIDENCE,"Sí, te voy a ver que tú estás ahí. Sí, porque está el nombre de usuario, con la enganada y el nombre de cuchara."
+T00172,audio_008,1017000,1027000,00:16:57.000,00:17:07.000,0.7082,,"Esa es una parte de la democratización y está en la parte de cuentas por cobra,"
+T00173,audio_008,1027000,1031000,00:17:07.000,00:17:11.000,0.5863,MEDIUM_CONFIDENCE,"que es todo lo de los pacientes que ahora están activos, puede decir."
+T00174,audio_008,1031000,1034000,00:17:11.000,00:17:14.000,0.6815,MEDIUM_CONFIDENCE,¿Qué tienen al proceso pendiente de Pablo?
+T00175,audio_008,1034000,1044000,00:17:14.000,00:17:24.000,0.7257,,"Es activo que todavía están parados o que ya cancelan, pero tal vez aquí no hay un puesto finalizado."
+T00176,audio_008,1044000,1049000,00:17:24.000,00:17:29.000,0.631,MEDIUM_CONFIDENCE,"Tendría que ser rellotado, para que ya se termine de culminar."
+T00177,audio_008,1049000,1053000,00:17:29.000,00:17:33.000,0.4248,LOW_CONFIDENCE,"Pero acá, ya vamos a..."
+T00178,audio_008,1053000,1059000,00:17:33.000,00:17:39.000,0.6038,MEDIUM_CONFIDENCE,"Ahorita lleva 36.000, por curado."
+T00179,audio_008,1059000,1064000,00:17:39.000,00:17:44.000,0.5965,MEDIUM_CONFIDENCE,¿Ven un instado de cuenta?
+T00180,audio_008,1064000,1066000,00:17:44.000,00:17:46.000,0.3796,LOW_CONFIDENCE,No.
+T00181,audio_008,1066000,1069000,00:17:46.000,00:17:49.000,0.7192,,¿Qué está pasando?
+T00182,audio_008,1069000,1075000,00:17:49.000,00:17:55.000,0.5873,MEDIUM_CONFIDENCE,"No, no, esta está en cuanto a esta acción, no nos funcionaba, pero aquí está la data del Pablo."
+T00183,audio_008,1075000,1077000,00:17:55.000,00:17:57.000,0.9715,,¿Quién ha estado pagando?
+T00184,audio_008,1077000,1080000,00:17:57.000,00:18:00.000,0.6675,MEDIUM_CONFIDENCE,"Entonces, esta es la parte más percibida."
+T00185,audio_009,1080000,1110000,00:18:00.000,00:18:30.000,0.9232,POSSIBLE_REPETITION,La vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna de la vacuna
+T00186,audio_009,1110000,1117000,00:18:30.000,00:18:37.000,0.6232,MEDIUM_CONFIDENCE,"- Ya creo que sea normal, quizás hasta demanar automática. - Exacto, porque tienen eso de que, ""¿Cómo va la persona?"""
+T00187,audio_009,1117000,1122500,00:18:37.000,00:18:42.500,0.616,MEDIUM_CONFIDENCE,"Miren cuánto lleva, entonces hasta ahora nosotros también hay tres pacientes y los mismos pacientes están pidiendo,"
+T00188,audio_009,1122500,1130000,00:18:42.500,00:18:50.000,0.4956,LOW_CONFIDENCE,"y a la de capturación por la medicina, ellos dicen, ""¿Andan las armas?"" y para la medicina se lo hacen ya."
+T00189,audio_009,1130000,1137000,00:18:50.000,00:18:57.000,0.6358,MEDIUM_CONFIDENCE,"- ¿Sí? - Entonces, para ver el estado de cuenta, aquí en el cuerpo, porque no tiene que ser real."
+T00190,audio_009,1137000,1142000,00:18:57.000,00:19:02.000,0.6243,MEDIUM_CONFIDENCE,"- Ah, gracias, me lo puedo dejar en mortería. - Sí, por el tiempo que me ha hecho."
+T00191,audio_009,1142000,1144000,00:19:02.000,00:19:04.000,0.6099,MEDIUM_CONFIDENCE,- Gracias. - Sí.
+T00192,audio_009,1148000,1159000,00:19:08.000,00:19:19.000,0.6967,MEDIUM_CONFIDENCE,"Entonces, él está de forma particular, porque está trabajando, bueno, así lo regresa, no cree que debe ser de amistad,"
+T00193,audio_009,1159000,1167000,00:19:19.000,00:19:27.000,0.6788,MEDIUM_CONFIDENCE,"aquí se pone la fecha de cuándo, cuándo hubiera estado de cuenta. - Tiene un diplomático o un mech,"
+T00194,audio_009,1167000,1174000,00:19:27.000,00:19:34.000,0.6969,MEDIUM_CONFIDENCE,"pero la lista es previa, y aquí está, usted selecciona si quiere ver todo."
+T00195,audio_009,1174000,1181000,00:19:34.000,00:19:41.000,0.5991,MEDIUM_CONFIDENCE,"Como ahí solamente mostrae que de un mech solamente muestra el tiempo que usted se hará más,"
+T00196,audio_009,1181000,1190000,00:19:41.000,00:19:50.000,0.5651,MEDIUM_CONFIDENCE,y me muestra lo que no sirve en el plan de fecha.
+T00197,audio_009,1190000,1193000,00:19:50.000,00:19:53.000,0.6623,MEDIUM_CONFIDENCE,Y ya le doy la persona.
+T00198,audio_009,1193000,1199000,00:19:53.000,00:19:59.000,0.5479,LOW_CONFIDENCE,"- Y la medicina. - Ahora, diga esto, lo que hace falta,"
+T00199,audio_009,1199000,1201000,00:19:59.000,00:20:01.000,0.3339,LOW_CONFIDENCE,"hacer un ""intriming"","
+T00200,audio_010,1200000,1215760,00:20:00.000,00:20:15.760,0.5212,LOW_CONFIDENCE,"Y en esa parte, el lado de cuenta y se acuntan las corporizaciones que se le dan, ok, perfectamente"
+T00201,audio_010,1215760,1226480,00:20:15.760,00:20:26.480,0.5527,MEDIUM_CONFIDENCE,"el detalle del insumo que está aquí, no es mi cuenta, pero lo cheques y lo doblamos"
+T00202,audio_010,1226480,1233480,00:20:26.480,00:20:33.480,0.6454,MEDIUM_CONFIDENCE,"creo que se quedó a cuidar las pantallas. Sí, gracias."
+T00203,audio_010,1233480,1247480,00:20:33.480,00:20:47.480,0.4964,LOW_CONFIDENCE,"Este que doy, ahi. Este es un cuadro de ""exactado de cuenta"". Ahora vamos por..."
+T00204,audio_010,1247480,1254480,00:20:47.480,00:20:54.480,0.5382,LOW_CONFIDENCE,"Este de preautorización se lo voy a utilizar, no sé, no lo sé, ahora vamos por la parte de Mellis."
+T00205,audio_010,1254480,1265480,00:20:54.480,00:21:05.480,0.709,,"Ya tenían separado como la parte administrativa, todas las..."
+T00206,audio_010,1265480,1270480,00:21:05.480,00:21:10.480,0.8221,,los datos que necesitaba la parte de la administración y también todos los datos clínicos que se
+T00207,audio_010,1270480,1280480,00:21:10.480,00:21:20.480,0.7051,,lo llevaban a parte de hospitalización. En este caso están todos los pacientes que...
+T00208,audio_010,1280480,1290480,00:21:20.480,00:21:30.480,0.7875,,"Cuando la parte administrativa ingresaba el paciente, aquí aparecía el pendiente, aquí yo ya lo voy a activar"
+T00209,audio_010,1290480,1296480,00:21:30.480,00:21:36.480,0.6941,MEDIUM_CONFIDENCE,"y ya le activa, ya me deja."
+T00210,audio_010,1296480,1310480,00:21:36.480,00:21:50.480,0.7882,,Ya me deja crear como la parte tímida donde me va a pedir el diagnóstico que en este caso
+T00211,audio_010,1310480,1319480,00:21:50.480,00:21:59.480,0.8129,,"ahí ocupa lo que es el SIE 10, que son los diagnósticos estándares que utilizamos todos,"
+T00212,audio_010,1319480,1322480,00:21:59.480,00:22:02.480,0.5243,LOW_CONFIDENCE,ya están en el SIE 10.
+T00213,audio_011,1320000,1325000,00:22:00.000,00:22:05.000,0.5283,LOW_CONFIDENCE,Y es un listado que me estaba desengadado para que ya MCE11.
+T00214,audio_011,1325000,1327000,00:22:05.000,00:22:07.000,0.6376,MEDIUM_CONFIDENCE,"Ok, el actualizado."
+T00215,audio_011,1327000,1329000,00:22:07.000,00:22:09.000,0.8676,,El actualizado es el último.
+T00216,audio_011,1329000,1337000,00:22:09.000,00:22:17.000,0.7616,,"Entonces poníamos el diagnóstico del paciente, el grupo diagnóstico, el VIH,"
+T00217,audio_011,1337000,1344000,00:22:17.000,00:22:24.000,0.7852,,"y el perfil del paciente, que es prácticamente lo que vamos a hacer,"
+T00218,audio_011,1344000,1350000,00:22:24.000,00:22:30.000,0.5416,LOW_CONFIDENCE,"si vamos a ver el instalamento de un tramecular, si vamos a ver el atal, si van a ver el labericio clínico,"
+T00219,audio_011,1350000,1352000,00:22:30.000,00:22:32.000,0.707,,es como ya su categoría.
+T00220,audio_011,1352000,1354000,00:22:32.000,00:22:34.000,0.8596,,Como ya su categoría.
+T00221,audio_011,1354000,1359000,00:22:34.000,00:22:39.000,0.607,MEDIUM_CONFIDENCE,"De ahí estos datos no eran así como los de adelante, pero ahí los pedimos."
+T00222,audio_011,1359000,1367000,00:22:39.000,00:22:47.000,0.8187,,"Ya yo guardarlo para que me servía esto, esto me servía ya para el expediente clínico,"
+T00223,audio_011,1367000,1371000,00:22:47.000,00:22:51.000,0.9112,,que aquí lo ponen como reporte de salud.
+T00224,audio_011,1375000,1377000,00:22:55.000,00:22:57.000,0.297,LOW_CONFIDENCE,Eso.
+T00225,audio_011,1377000,1379000,00:22:57.000,00:22:59.000,0.6607,MEDIUM_CONFIDENCE,Como no hay más datos.
+T00226,audio_011,1379000,1381000,00:22:59.000,00:23:01.000,0.5129,LOW_CONFIDENCE,No hay más datos.
+T00227,audio_011,1381000,1383000,00:23:01.000,00:23:03.000,0.6211,MEDIUM_CONFIDENCE,No hay más datos.
+T00228,audio_011,1383000,1385000,00:23:03.000,00:23:05.000,0.6994,MEDIUM_CONFIDENCE,No hay más datos.
+T00229,audio_011,1385000,1387000,00:23:05.000,00:23:07.000,0.7418,,No hay más datos.
+T00230,audio_011,1387000,1389000,00:23:07.000,00:23:09.000,0.7856,,No hay más datos.
+T00231,audio_011,1389000,1391000,00:23:09.000,00:23:11.000,0.7944,,No hay más datos.
+T00232,audio_011,1391000,1398000,00:23:11.000,00:23:18.000,0.7079,,"Aquí para poder destacar yo el expediente clínico, el PDF podía seleccionar para que se echara el ferir."
+T00233,audio_011,1398000,1400000,00:23:18.000,00:23:20.000,0.5647,MEDIUM_CONFIDENCE,Quiero que lo quiera.
+T00234,audio_011,1400000,1404000,00:23:20.000,00:23:24.000,0.5464,LOW_CONFIDENCE,"Si, ya le daba más que ya entendí que se llama."
+T00235,audio_011,1404000,1406000,00:23:24.000,00:23:26.000,0.6969,MEDIUM_CONFIDENCE,Si.
+T00236,audio_011,1406000,1411000,00:23:26.000,00:23:31.000,0.5846,MEDIUM_CONFIDENCE,"Ok, por neáctite que usted quiera, ahí vas a saber el expediente."
+T00237,audio_011,1411000,1413000,00:23:31.000,00:23:33.000,0.4089,LOW_CONFIDENCE,Vale.
+T00238,audio_011,1413000,1415000,00:23:33.000,00:23:35.000,0.5655,MEDIUM_CONFIDENCE,Quiero que lo dupate el expediente.
+T00239,audio_011,1420000,1424000,00:23:40.000,00:23:44.000,0.5415,LOW_CONFIDENCE,"Los más que lo daban más, vamos a ver el clínico."
+T00240,audio_011,1424000,1426000,00:23:44.000,00:23:46.000,0.4068,LOW_CONFIDENCE,"Lo voy a ver, no te hable de efecto."
+T00241,audio_011,1430000,1432000,00:23:50.000,00:23:52.000,0.6428,MEDIUM_CONFIDENCE,No te hable de efecto.
+T00242,audio_011,1432000,1434000,00:23:52.000,00:23:54.000,0.7571,,No te hable de efecto.
+T00243,audio_011,1434000,1436000,00:23:54.000,00:23:56.000,0.7785,,No te hable de efecto.
+T00244,audio_011,1436000,1438000,00:23:56.000,00:23:58.000,0.7793,,No te hable de efecto.
+T00245,audio_011,1438000,1440000,00:23:58.000,00:24:00.000,0.8135,,No te hable de efecto.
+T00246,audio_012,1440000,1445460,00:24:00.000,00:24:05.460,0.6986,MEDIUM_CONFIDENCE,"Al 15, selecciono las pechas, lo de seleccionar, lo de cada."
+T00247,audio_012,1450440,1457680,00:24:10.440,00:24:17.680,0.7201,,"Imprimir y en esta parte yo puedo seleccionar cómo quiero, yo que me aparezca el expediente a recagarlo."
+T00248,audio_012,1459160,1464680,00:24:19.160,00:24:24.680,0.766,,"En este caso le han puesto como sin evitar tarjeta de medicamentos gráficos, la tarjeta de enfermería."
+T00249,audio_012,1467240,1468440,00:24:27.240,00:24:28.440,0.8266,,Y al darle imprimir.
+T00250,audio_012,1470000,1472000,00:24:30.000,00:24:32.000,0.5697,MEDIUM_CONFIDENCE,"Seguro que desea saber, pues."
+T00251,audio_012,1474000,1478000,00:24:34.000,00:24:38.000,0.6704,MEDIUM_CONFIDENCE,"A me aparece otra cosa, como está seguro que desea saber, de granada."
+T00252,audio_012,1485360,1489360,00:24:45.360,00:24:49.360,0.5778,MEDIUM_CONFIDENCE,"No me apareces. Pero, ah, y eso te aparece en case."
+T00253,audio_012,1490360,1496000,00:24:50.360,00:24:56.000,0.6728,MEDIUM_CONFIDENCE,"Este ya es el expediente clínico, solo que es, hay una manera como reportar, que es,"
+T00254,audio_012,1496000,1501000,00:24:56.000,00:25:01.000,0.5983,MEDIUM_CONFIDENCE,aquí van y me dejaré los datos del paciente.
+T00255,audio_012,1501000,1508000,00:25:01.000,00:25:08.000,0.79,,"En el dato del paciente va el historial clínico, la duración de la hospitalización, en medio de contratante,"
+T00256,audio_012,1508000,1514000,00:25:08.000,00:25:14.000,0.8141,,"si hay otros médicos, el diagnóstico, signos vitales."
+T00257,audio_012,1519000,1524000,00:25:19.000,00:25:24.000,0.3419,LOW_CONFIDENCE,"Pero, pues, el cogejo frappistán, el que se llama el cogejo, el cogejo de la vida,"
+T00258,audio_012,1524000,1526000,00:25:24.000,00:25:26.000,0.8241,,es el cogejo frappistán.
+T00259,audio_012,1527000,1530000,00:25:27.000,00:25:30.000,0.5162,LOW_CONFIDENCE,"Pero, pues, eso es lo que preferir, porque es otra pestaña esta."
+T00260,audio_012,1530000,1533000,00:25:30.000,00:25:33.000,0.586,MEDIUM_CONFIDENCE,"O sea, como le tiene un pendejo, pero le pones a la boca."
+T00261,audio_012,1533000,1536000,00:25:33.000,00:25:36.000,0.3144,LOW_CONFIDENCE,No me aparezca un poco.
+T00262,audio_012,1539000,1542000,00:25:39.000,00:25:42.000,0.4616,LOW_CONFIDENCE,"No, sí, no, sí, para vos, eso es lo que me parece."
+T00263,audio_012,1542000,1544000,00:25:42.000,00:25:44.000,0.3917,LOW_CONFIDENCE,Están los medicamentos.
+T00264,audio_012,1547000,1549000,00:25:47.000,00:25:49.000,0.9009,,Notas de enfermería.
+T00265,audio_012,1552000,1582000,00:25:52.000,00:26:22.000,0.9145,POSSIBLE_REPETITION,"No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no"
+T00266,audio_013,1560000,1562000,00:26:00.000,00:26:02.000,0.3715,LOW_CONFIDENCE,(Pausa)
+T00267,audio_013,1562000,1564000,00:26:02.000,00:26:04.000,0.8545,,(Pausa)
+T00268,audio_013,1564000,1566000,00:26:04.000,00:26:06.000,0.9565,,(Pausa)
+T00269,audio_013,1566000,1568000,00:26:06.000,00:26:08.000,0.9584,,(Pausa)
+T00270,audio_013,1568000,1570000,00:26:08.000,00:26:10.000,0.9838,,(Pausa)
+T00271,audio_013,1570000,1572000,00:26:10.000,00:26:12.000,0.9877,,(Pausa)
+T00272,audio_013,1572000,1574000,00:26:12.000,00:26:14.000,0.9902,,(Pausa)
+T00273,audio_013,1574000,1576000,00:26:14.000,00:26:16.000,0.9931,,(Pausa)
+T00274,audio_013,1576000,1578000,00:26:16.000,00:26:18.000,0.9927,,(Pausa)
+T00275,audio_013,1578000,1580000,00:26:18.000,00:26:20.000,0.9934,,(Pausa)
+T00276,audio_013,1580000,1582000,00:26:20.000,00:26:22.000,0.9916,,(Pausa)
+T00277,audio_013,1582000,1584000,00:26:22.000,00:26:24.000,0.9927,,(Pausa)
+T00278,audio_013,1584000,1586000,00:26:24.000,00:26:26.000,0.9936,,(Pausa)
+T00279,audio_013,1586000,1588000,00:26:26.000,00:26:28.000,0.9887,,(Pausa)
+T00280,audio_013,1588000,1590000,00:26:28.000,00:26:30.000,0.9918,,(Pausa)
+T00281,audio_013,1590000,1592000,00:26:30.000,00:26:32.000,0.9708,,(Pausa)
+T00282,audio_013,1592000,1594000,00:26:32.000,00:26:34.000,0.9878,,(Pausa)
+T00283,audio_013,1594000,1596000,00:26:34.000,00:26:36.000,0.9932,,(Pausa)
+T00284,audio_013,1596000,1598000,00:26:36.000,00:26:38.000,0.9938,,(Pausa)
+T00285,audio_013,1598000,1600000,00:26:38.000,00:26:40.000,0.9952,,(Pausa)
+T00286,audio_013,1600000,1602000,00:26:40.000,00:26:42.000,0.9949,,(Pausa)
+T00287,audio_013,1602000,1604000,00:26:42.000,00:26:44.000,0.9953,,(Pausa)
+T00288,audio_013,1604000,1606000,00:26:44.000,00:26:46.000,0.9878,,(Pausa)
+T00289,audio_013,1606000,1608000,00:26:46.000,00:26:48.000,0.9933,,(Pausa)
+T00290,audio_013,1608000,1610000,00:26:48.000,00:26:50.000,0.9882,,(Pausa)
+T00291,audio_013,1610000,1612000,00:26:50.000,00:26:52.000,0.9919,,(Pausa)
+T00292,audio_013,1612000,1614000,00:26:52.000,00:26:54.000,0.9895,,(Pausa)
+T00293,audio_013,1614000,1616000,00:26:54.000,00:26:56.000,0.9552,,(Pausa)
+T00294,audio_013,1616000,1618000,00:26:56.000,00:26:58.000,0.9932,,(Pausa)
+T00295,audio_013,1618000,1620000,00:26:58.000,00:27:00.000,0.9955,,(Pausa)
+T00296,audio_013,1620000,1622000,00:27:00.000,00:27:02.000,0.9966,,(Pausa)
+T00297,audio_013,1622000,1624000,00:27:02.000,00:27:04.000,0.9969,,(Pausa)
+T00298,audio_013,1624000,1626000,00:27:04.000,00:27:06.000,0.9968,,(Pausa)
+T00299,audio_013,1626000,1628000,00:27:06.000,00:27:08.000,0.9967,,(Pausa)
+T00300,audio_013,1628000,1630000,00:27:08.000,00:27:10.000,0.9931,,(Pausa)
+T00301,audio_013,1630000,1632000,00:27:10.000,00:27:12.000,0.9899,,(Pausa)
+T00302,audio_013,1632000,1634000,00:27:12.000,00:27:14.000,0.9909,,(Pausa)
+T00303,audio_013,1634000,1636000,00:27:14.000,00:27:16.000,0.9538,,(Pausa)
+T00304,audio_013,1636000,1638000,00:27:16.000,00:27:18.000,0.9905,,(Pausa)
+T00305,audio_013,1638000,1640000,00:27:18.000,00:27:20.000,0.9949,,(Pausa)
+T00306,audio_013,1640000,1642000,00:27:20.000,00:27:22.000,0.9904,,(Pausa)
+T00307,audio_013,1642000,1644000,00:27:22.000,00:27:24.000,0.9888,,(Pausa)
+T00308,audio_013,1644000,1646000,00:27:24.000,00:27:26.000,0.994,,(Pausa)
+T00309,audio_013,1646000,1648000,00:27:26.000,00:27:28.000,0.987,,(Pausa)
+T00310,audio_013,1648000,1650000,00:27:28.000,00:27:30.000,0.9937,,(Pausa)
+T00311,audio_013,1650000,1652000,00:27:30.000,00:27:32.000,0.9836,,(Pausa)
+T00312,audio_013,1652000,1654000,00:27:32.000,00:27:34.000,0.9963,,(Pausa)
+T00313,audio_013,1654000,1656000,00:27:34.000,00:27:36.000,0.9963,,(Pausa)
+T00314,audio_013,1656000,1658000,00:27:36.000,00:27:38.000,0.9964,,(Pausa)
+T00315,audio_013,1658000,1660000,00:27:38.000,00:27:40.000,0.9971,,(Pausa)
+T00316,audio_013,1660000,1662000,00:27:40.000,00:27:42.000,0.9964,,(Pausa)
+T00317,audio_013,1662000,1664000,00:27:42.000,00:27:44.000,0.9937,,(Pausa)
+T00318,audio_013,1664000,1666000,00:27:44.000,00:27:46.000,0.9678,,(Pausa)
+T00319,audio_013,1666000,1668000,00:27:46.000,00:27:48.000,0.9867,,(Pausa)
+T00320,audio_013,1668000,1670000,00:27:48.000,00:27:50.000,0.9924,,(Pausa)
+T00321,audio_013,1670000,1672000,00:27:50.000,00:27:52.000,0.9893,,(Pausa)
+T00322,audio_013,1672000,1674000,00:27:52.000,00:27:54.000,0.9835,,(Pausa)
+T00323,audio_013,1674000,1676000,00:27:54.000,00:27:56.000,0.9927,,(Pausa)
+T00324,audio_013,1676000,1678000,00:27:56.000,00:27:58.000,0.9931,,(Pausa)
+T00325,audio_013,1678000,1680000,00:27:58.000,00:28:00.000,0.9912,,(Pausa)
+T00326,audio_014,1680000,1687000,00:28:00.000,00:28:07.000,0.584,MEDIUM_CONFIDENCE,"Aquí podía que pase, como estaba venido anterior, que habían puesto que íbamos a prisión inbans,"
+T00327,audio_014,1687000,1699000,00:28:07.000,00:28:19.000,0.5802,MEDIUM_CONFIDENCE,"el medico tratante, la vida de la administración, si en el domenó, el zorazo, el calentra, el cura, la dosis,"
+T00328,audio_014,1699000,1717000,00:28:19.000,00:28:37.000,0.8033,,"la frecuencia, la duración, la pecha, al poner la duración ya me tiraba automático la pecha de inicio de la fin."
+T00329,audio_014,1717000,1725000,00:28:37.000,00:28:45.000,0.7658,,"Y también si son medicamentos crónicos, podía seleccionarlo. Aquí los herablistados estaban predeterminados"
+T00330,audio_014,1725000,1734000,00:28:45.000,00:28:54.000,0.8255,,"para seleccionar a qué hora quería. Y aquí en indicación dijera prácticamente de transcribir la indicación médica,"
+T00331,audio_014,1734000,1738000,00:28:54.000,00:28:58.000,0.6188,MEDIUM_CONFIDENCE,"por ejemplo, el militar, un gramo de inmaps."
+T00332,audio_014,1749000,1761000,00:29:09.000,00:29:21.000,0.635,MEDIUM_CONFIDENCE,Y al tenerlo ya le daba igualdad. También es el enocio de la tarea.
+T00333,audio_014,1765000,1772000,00:29:25.000,00:29:32.000,0.7014,,"La parte que aparece como ordemén y que no se proja aquí en el país, remanejamos como plan de cuidados."
+T00334,audio_014,1773000,1781000,00:29:33.000,00:29:41.000,0.8798,,"Aquí yo puedo seleccionar los dietas que va a tener el paciente, los cuidados de enfermería, los médicos que usted tiene,"
+T00335,audio_014,1781000,1789000,00:29:41.000,00:29:49.000,0.785,,"si está con oxígeno, si ya va balance. Y aquí yo le doy este guardar."
+T00336,audio_014,1789000,1796000,00:29:49.000,00:29:56.000,0.9117,,"Y aquí ya puedo decidir el tipo de dieta que el médico ha dejado, los cuidados de enfermería."
+T00337,audio_014,1796000,1799000,00:29:56.000,00:29:59.000,0.8965,,Y ya le doy este guardar.
+T00338,audio_015,1800000,1818860,00:30:00.000,00:30:18.860,0.8151,,"En este caso, para ver tarjetas de medicamentos, de cómo quedó."
+T00339,audio_015,1818860,1827360,00:30:18.860,00:30:27.360,0.8949,,"Aquí está, me ponía los en nombre del paciente, la fecha de nacimiento, la edad, tendría que"
+T00340,audio_015,1827360,1832720,00:30:27.360,00:30:32.720,0.7537,,"haberme hablado automaticamente diagnóstico, en este caso también ponía la deducción y"
+T00341,audio_015,1832720,1834760,00:30:32.720,00:30:34.760,0.747,,quién había creado la...
+T00342,audio_015,1834760,1835760,00:30:34.760,00:30:35.760,0.6171,MEDIUM_CONFIDENCE,La corte.
+T00343,audio_015,1835760,1841120,00:30:35.760,00:30:41.120,0.7165,,"La corte de la infección, ya me ponía el medicamento, la dosis, la vía, la frecuencia,"
+T00344,audio_015,1841120,1844880,00:30:41.120,00:30:44.880,0.9051,,"el oral y la fecha de inicio, la fecha de fin y las observaciones."
+T00345,audio_015,1844880,1850480,00:30:44.880,00:30:50.480,0.922,,Esta tarjeta yo se las compartía a las enfermeras que estaban en el domicilio para que se les
+T00346,audio_015,1850480,1856520,00:30:50.480,00:30:56.520,0.8167,,hiciera más fácil llevar el control de los medicamentos y orales y gente que estaba
+T00347,audio_015,1856520,1857520,00:30:56.520,00:30:57.520,0.6108,MEDIUM_CONFIDENCE,en el domicilio.
+T00348,audio_015,1857520,1859680,00:30:57.520,00:30:59.680,0.6723,MEDIUM_CONFIDENCE,"Y también, no estar viendo siempre la hoja del médico que a veces es bien difícil"
+T00349,audio_015,1859680,1860680,00:30:59.680,00:31:00.680,0.9177,,comprender.
+T00350,audio_015,1860680,1861680,00:31:00.680,00:31:01.680,0.6283,MEDIUM_CONFIDENCE,Ok.
+T00351,audio_015,1861680,1862680,00:31:01.680,00:31:02.680,0.4697,LOW_CONFIDENCE,Néscares con él.
+T00352,audio_015,1862680,1874800,00:31:02.680,00:31:14.800,0.7328,,"Sí, bueno, también la orden médica que para nosotros es el plan de cuidados."
+T00353,audio_015,1874800,1886600,00:31:14.800,00:31:26.600,0.8331,,"Aquí va la dieta que le coloquía al paciente, todos los cuidados que se le va la enfermera"
+T00354,audio_015,1886600,1896480,00:31:26.600,00:31:36.480,0.7431,,"de realizar, medicamentos más que todos se agregan, por aparte cuando son cómicos y"
+T00355,audio_015,1896480,1897480,00:31:36.480,00:31:37.480,0.6196,MEDIUM_CONFIDENCE,así.
+T00356,audio_015,1897480,1901600,00:31:37.480,00:31:41.600,0.6124,MEDIUM_CONFIDENCE,Eso en cuanto a la del paciente.
+T00357,audio_015,1901600,1908600,00:31:41.600,00:31:48.600,0.7404,,De ahí esa misma plataforma me permitía llevar a la enfermera que se le va a decir.
+T00358,audio_015,1908600,1917600,00:31:48.600,00:31:57.600,0.8949,,Aquí ponía el nombre del paciente.
+T00359,audio_015,1917600,1919600,00:31:57.600,00:31:59.600,0.6866,MEDIUM_CONFIDENCE,Le daba el creato.
+T00360,audio_016,1920000,1934440,00:32:00.000,00:32:14.440,0.8015,,"Ponía la fecha en que iba sin más, digamos que en este caso va a ir mañana a la enfermera,"
+T00361,audio_016,1934440,1939280,00:32:14.440,00:32:19.280,0.872,,"que va a entrar así de la mañana, va a estar el día de mañana solo por un turno de dos"
+T00362,audio_016,1939280,1946400,00:32:19.280,00:32:26.400,0.7045,,"horas, inicia la CIPN, finaliza la CIPN."
+T00363,audio_016,1946400,1952280,00:32:26.400,00:32:32.280,0.8006,,"Y ahí le daba en este caso un turno, pero también podría ser oculto, ya le seleccionaba"
+T00364,audio_016,1952280,1958160,00:32:32.280,00:32:38.160,0.8309,,"sin cuidado a la enfermería, sin supervisión, si va a llegar, si es un terapista el que va"
+T00365,audio_016,1958160,1963840,00:32:38.160,00:32:43.840,0.7978,,"a ir, sin preso y terapia, si es un médico, si es un cuidadora que puede seleccionar a"
+T00366,audio_016,1963840,1967560,00:32:43.840,00:32:47.560,0.6615,MEDIUM_CONFIDENCE,la persona que yo quería en Dan y ahí le daba guardar.
+T00367,audio_016,1967560,1971520,00:32:47.560,00:32:51.520,0.7468,,Y me parecía este capo.
+T00368,audio_016,1971520,1982600,00:32:51.520,00:33:02.600,0.7895,,"Y aquí yo seleccionaba a la, se selecciona la enfermera que va a ir a Durin."
+T00369,audio_016,1982600,1987560,00:33:02.600,00:33:07.560,0.716,,"También permite en este caso allá, porque eran por servicios profesionales que cuando"
+T00370,audio_016,1987560,1992320,00:33:07.560,00:33:12.320,0.7216,,"se le iba a pagar, en este caso como van a impidiar, están por..."
+T00371,audio_016,1992320,1993320,00:33:12.320,00:33:13.320,0.5742,MEDIUM_CONFIDENCE,- ¿Lanín?
+T00372,audio_016,1993320,1994320,00:33:13.320,00:33:14.320,0.8227,,- ¡Lanín!
+T00373,audio_016,1994320,1996040,00:33:14.320,00:33:16.040,0.9717,,No tendría que llevar esta opción.
+T00374,audio_016,1996040,2007360,00:33:16.040,00:33:27.360,0.9252,,Algo más que me permitía esto era realizar la planía de enfermería.
+T00375,audio_016,2007360,2008360,00:33:27.360,00:33:28.360,0.6029,MEDIUM_CONFIDENCE,- ¿La planía?
+T00376,audio_016,2008360,2017760,00:33:28.360,00:33:37.760,0.7254,,"- Ya también la enfermería, yo le iba a dar la planía de enfermería."
+T00377,audio_016,2017760,2023040,00:33:37.760,00:33:43.040,0.805,,- A ver cuánto le iba a pagarse un... porque no tenía enfermeras de tiempo completo.
+T00378,audio_016,2023040,2026920,00:33:43.040,00:33:46.920,0.5904,MEDIUM_CONFIDENCE,"Tenía, combinados, tenía tres y los más..."
+T00379,audio_016,2026920,2029040,00:33:46.920,00:33:49.040,0.501,LOW_CONFIDENCE,"- Tres, y el resto, por servicio."
+T00380,audio_016,2029040,2038800,00:33:49.040,00:33:58.800,0.8235,,- Entonces aquí seleccionaba la fecha de cuando a cuando iba a dar esa... gracias.
+T00381,audio_016,2038800,2039960,00:33:58.800,00:33:59.960,0.7304,,La niña digamos en este caso.
+T00382,audio_017,2040000,2042000,00:34:00.000,00:34:02.000,0.4925,LOW_CONFIDENCE,"En este caso, podí haber una fía."
+T00383,audio_017,2046000,2056000,00:34:06.000,00:34:16.000,0.8027,,"De 15 al 30 de mayo le daba seleccionada, le daba..."
+T00384,audio_017,2059000,2076000,00:34:19.000,00:34:36.000,0.6639,MEDIUM_CONFIDENCE,"Y aquí ahora terminaba que iba... tenía que corrobar en este caso, digamos, teniendo mis híbares, tenía... se ven unos unos 24 horas, se me iban a pagar 77 horas, pero tenía que estar teniente de ir haciendo los cambios."
+T00385,audio_017,2076000,2086000,00:34:36.000,00:34:46.000,0.8265,,"Si digamos que ese enfermero, el paciente falleció, el paciente fue trasladado al hospital, entonces yo aquí podía cambiarle el mundo."
+T00386,audio_017,2086000,2108000,00:34:46.000,00:35:08.000,0.8169,,"El caso me daba a crear, le daba así bañar, pero el caso de que tuvo que hacer dos, tres horas extras, aquí le daba a añadir, le ponía que era tiempo extra, el mundo que le iba a pagar, o guardar, o en el caso de que fuera descuento, le ponía el porqué, si fue de plazo, si el paciente falleció, si el paciente fue trasladado."
+T00387,audio_017,2110000,2124000,00:35:10.000,00:35:24.000,0.7684,,"Ya ahí al darle guarda, ya yo haber revisado uno por el, me generaba un reporte global y me lo descartaba en el set."
+T00388,audio_017,2140000,2170000,00:35:40.000,00:36:10.000,0.8705,POSSIBLE_REPETITION,"Bueno, ya ahí me aparecía este, ya ahí vayó corroborando de que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que sí, es que"
+T00389,audio_018,2160000,2162000,00:36:00.000,00:36:02.000,0.2721,LOW_CONFIDENCE,"Y también, el que estuviera con…"
+T00390,audio_018,2162000,2165000,00:36:02.000,00:36:05.000,0.5955,MEDIUM_CONFIDENCE,En los servicios.
+T00391,audio_018,2165000,2167000,00:36:05.000,00:36:07.000,0.844,,Exacto.
+T00392,audio_018,2167000,2175000,00:36:07.000,00:36:15.000,0.7145,,"Ya eso ya le trabajaba, lo algo muy puntual que me pedí el constado para hacer unas razones, pero no apareciera como…"
+T00393,audio_018,2175000,2180000,00:36:15.000,00:36:20.000,0.8553,,"Al final, no aparecía solo una vez el nombre de cada enfermer."
+T00394,audio_018,2180000,2182000,00:36:20.000,00:36:22.000,0.7127,,Con el total a pagar.
+T00395,audio_018,2182000,2184000,00:36:22.000,00:36:24.000,0.9589,,Y el total a pagar.
+T00396,audio_018,2188000,2192000,00:36:28.000,00:36:32.000,0.6307,MEDIUM_CONFIDENCE,Eso era la parte de un enfermerino.
+T00397,audio_018,2192000,2199000,00:36:32.000,00:36:39.000,0.634,MEDIUM_CONFIDENCE,"Y este mi ahí mismo tiene la parte de inventario, la quesición."
+T00398,audio_018,2199000,2201000,00:36:39.000,00:36:41.000,0.525,LOW_CONFIDENCE,Ya ya estamos.
+T00399,audio_018,2203000,2207000,00:36:43.000,00:36:47.000,0.645,MEDIUM_CONFIDENCE,¿Es la promesa de las compras?
+T00400,audio_018,2207000,2209000,00:36:47.000,00:36:49.000,0.4503,LOW_CONFIDENCE,"Sí, puede."
+T00401,audio_018,2209000,2211000,00:36:49.000,00:36:51.000,0.5232,LOW_CONFIDENCE,Se puede agregar una nueva compra.
+T00402,audio_018,2211000,2222000,00:36:51.000,00:37:02.000,0.6795,MEDIUM_CONFIDENCE,Se puede agregar una nueva compra para solicitar autorización o si ya no hemos visto con este proveedor.
+T00403,audio_018,2222000,2225000,00:37:02.000,00:37:05.000,0.4255,LOW_CONFIDENCE,Aquí le puedo hacer el que le da.
+T00404,audio_018,2231000,2233000,00:37:11.000,00:37:13.000,0.5819,MEDIUM_CONFIDENCE,Y eso.
+T00405,audio_018,2233000,2235000,00:37:13.000,00:37:15.000,0.3112,LOW_CONFIDENCE,El número de la picha.
+T00406,audio_018,2235000,2237000,00:37:15.000,00:37:17.000,0.323,LOW_CONFIDENCE,Presente el piso.
+T00407,audio_018,2239000,2241000,00:37:19.000,00:37:21.000,0.4737,LOW_CONFIDENCE,Ya me quiero 10.
+T00408,audio_018,2241000,2243000,00:37:21.000,00:37:23.000,0.4601,LOW_CONFIDENCE,Le da a Javier.
+T00409,audio_018,2243000,2245000,00:37:23.000,00:37:25.000,0.8377,,Y aquí está.
+T00410,audio_018,2245000,2249000,00:37:25.000,00:37:29.000,0.8399,,Y se genera la orden de compras.
+T00411,audio_018,2249000,2253000,00:37:29.000,00:37:33.000,0.5559,MEDIUM_CONFIDENCE,Ya le cuesta como una compra en esa lecida.
+T00412,audio_018,2255000,2259000,00:37:35.000,00:37:39.000,0.9132,,Y está la opción de que yo ya tengo la compra.
+T00413,audio_018,2259000,2263000,00:37:39.000,00:37:43.000,0.6308,MEDIUM_CONFIDENCE,Y le da un encaje menor de la taja chica.
+T00414,audio_018,2263000,2265000,00:37:43.000,00:37:45.000,0.5317,LOW_CONFIDENCE,Pero en sí la compra.
+T00415,audio_018,2265000,2270000,00:37:45.000,00:37:50.000,0.789,,Entonces selecciono el proveedor.
+T00416,audio_018,2270000,2272000,00:37:50.000,00:37:52.000,0.3568,LOW_CONFIDENCE,Y el pasado.
+T00417,audio_018,2272000,2276000,00:37:52.000,00:37:56.000,0.6662,MEDIUM_CONFIDENCE,Aquí tiene que subir.
+T00418,audio_018,2276000,2280000,00:37:56.000,00:38:00.000,0.6974,MEDIUM_CONFIDENCE,Esto no está bueno pero sí tiene que subir la factura.
+T00419,audio_019,2280000,2287000,00:38:00.000,00:38:07.000,0.3775,LOW_CONFIDENCE,"Es por cobra, entonces, la tiente subir, van a estar abajo."
+T00420,audio_019,2293000,2298000,00:38:13.000,00:38:18.000,0.4285,LOW_CONFIDENCE,"Y, por la exigencia."
+T00421,audio_019,2301000,2309000,00:38:21.000,00:38:29.000,0.5708,MEDIUM_CONFIDENCE,"Aquí están las precios por los que se han estado comprando, como el historial de Cocteau."
+T00422,audio_019,2310000,2317000,00:38:30.000,00:38:37.000,0.6758,MEDIUM_CONFIDENCE,"Aquí se puede poner el puesto, ese es algo que le añadero, que no me funciona para mí."
+T00423,audio_019,2320000,2326000,00:38:40.000,00:38:46.000,0.703,,Aquí le ponen extras y esto no servía como para la percepción.
+T00424,audio_019,2326000,2331000,00:38:46.000,00:38:51.000,0.7895,,Aquí le tenía que poner el IVA.
+T00425,audio_019,2331000,2337000,00:38:51.000,00:38:57.000,0.7225,,"En un principio, ni un solo me calculaba el IVA, pero después tenía que ponerla."
+T00426,audio_019,2337000,2340000,00:38:57.000,00:39:00.000,0.7473,,Porque hicieron unos cámaras.
+T00427,audio_019,2340000,2346000,00:39:00.000,00:39:06.000,0.6644,MEDIUM_CONFIDENCE,"Entonces, acá ya sabes lo que se va a pagar y de suma ya, un solo."
+T00428,audio_019,2346000,2348000,00:39:06.000,00:39:08.000,0.4055,LOW_CONFIDENCE,Si yo le doy como dos.
+T00429,audio_019,2348000,2349000,00:39:08.000,00:39:09.000,0.4803,LOW_CONFIDENCE,No lo doy.
+T00430,audio_019,2349000,2351000,00:39:09.000,00:39:11.000,0.6566,MEDIUM_CONFIDENCE,No hay suma.
+T00431,audio_019,2351000,2356000,00:39:11.000,00:39:16.000,0.7543,,"Acá si yo le doy el puesto de IVA, te suma."
+T00432,audio_019,2356000,2362000,00:39:16.000,00:39:22.000,0.688,MEDIUM_CONFIDENCE,"Entonces, le doy agua tal y me sale la factura."
+T00433,audio_019,2367000,2371000,00:39:27.000,00:39:31.000,0.5151,LOW_CONFIDENCE,"Y aquí hay como esta que está acá, de un mesca."
+T00434,audio_019,2371000,2372000,00:39:31.000,00:39:32.000,0.5974,MEDIUM_CONFIDENCE,Ver.
+T00435,audio_019,2377000,2380000,00:39:37.000,00:39:40.000,0.6278,MEDIUM_CONFIDENCE,La compra del cielo.
+T00436,audio_019,2380000,2382000,00:39:40.000,00:39:42.000,0.3534,LOW_CONFIDENCE,Y la suma.
+T00437,audio_019,2389000,2391000,00:39:49.000,00:39:51.000,0.8132,,Eso es de compra.
+T00438,audio_019,2391000,2398000,00:39:51.000,00:39:58.000,0.8259,,"Entonces, cuando ya se ingresa la compra, esto hay que la sumar a la parte de inventario."
+T00439,audio_020,2400000,2405000,00:40:00.000,00:40:05.000,0.2844,LOW_CONFIDENCE,"Vamos a la primera pos, ¿tienes boxe?"
+T00440,audio_020,2410000,2410000,00:40:10.000,00:40:10.000,0.9094,POSSIBLE_REPETITION,"No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,"
+T00441,audio_020,2410000,2427000,00:40:10.000,00:40:27.000,0.7064,,"Esta es una de las unidades donde están los comprometidos, ¿cuántos tienen pacientes?"
+T00442,audio_020,2427000,2429000,00:40:27.000,00:40:29.000,0.7454,,"Ok, tienen reservado."
+T00443,audio_020,2429000,2435000,00:40:29.000,00:40:35.000,0.6394,MEDIUM_CONFIDENCE,"Ah, que están los exigiles, mayor ya mandé y quedó con el paciente."
+T00444,audio_020,2435000,2445000,00:40:35.000,00:40:45.000,0.6659,MEDIUM_CONFIDENCE,"Acasaron los movimientos, salidas, entradas, la revolución."
+T00445,audio_020,2445000,2457000,00:40:45.000,00:40:57.000,0.8582,,"Los acusos que le llaman acá son descargas, que pasan a ser en el domicilio como los comprometidos."
+T00446,audio_020,2457000,2469000,00:40:57.000,00:41:09.000,0.3918,LOW_CONFIDENCE,"Entonces, una broma, aquí me caí, los exigiles, ahí se le han oído los dos,"
+T00447,audio_020,2469000,2477000,00:41:09.000,00:41:17.000,0.686,MEDIUM_CONFIDENCE,"y le ha hecho estar descarga, aquí es donde se van como estos insumos de medicamentos para la cuenta de pacientes,"
+T00448,audio_020,2477000,2488000,00:41:17.000,00:41:28.000,0.7808,,"la carga del inventario. Mientras están como cerradas la cuenta, están como comprometidos en la cuenta de pacientes."
+T00449,audio_020,2488000,2490000,00:41:28.000,00:41:30.000,0.8191,,Como inventario temporal.
+T00450,audio_020,2490000,2492000,00:41:30.000,00:41:32.000,0.786,,Exacto.
+T00451,audio_020,2492000,2494000,00:41:32.000,00:41:34.000,0.3631,LOW_CONFIDENCE,Contráncio.
+T00452,audio_020,2494000,2508000,00:41:34.000,00:41:48.000,0.6465,MEDIUM_CONFIDENCE,"Entonces, si yo ya termino el servicio con el paciente, me voy a decirles. Acá encierras, o no, para nada."
+T00453,audio_020,2508000,2517000,00:41:48.000,00:41:57.000,0.5539,MEDIUM_CONFIDENCE,"Y en la transacción. Están perdientes, ya son los comprometidos serrestuctables y también ser parciales."
+T00454,audio_020,2517000,2519000,00:41:57.000,00:41:59.000,0.6799,MEDIUM_CONFIDENCE,los cielos faciales cuando
+T00455,audio_021,2520000,2526420,00:42:00.000,00:42:06.420,0.7615,,"Estamos haciendo un conteo de enletal, pero que no está totalmente cerrada, sino que solamente"
+T00456,audio_021,2526420,2530500,00:42:06.420,00:42:10.500,0.8127,,controliza cuánto tienen paciente para agregarlo.
+T00457,audio_021,2530500,2531500,00:42:10.500,00:42:11.500,0.6499,MEDIUM_CONFIDENCE,Ok.
+T00458,audio_021,2531500,2540500,00:42:11.500,00:42:20.500,0.4732,LOW_CONFIDENCE,"Entonces acá deshamos el nuevo cierre, y ahí se viene, va a estar ahí."
+T00459,audio_021,2540500,2546500,00:42:20.500,00:42:26.500,0.6269,MEDIUM_CONFIDENCE,"Entonces acá pasa mi obra, ya pasó a cierre total."
+T00460,audio_021,2546500,2551500,00:42:26.500,00:42:31.500,0.7938,,"Si yo le doy aprobación, ¿quién pasa cerrado?"
+T00461,audio_021,2551500,2554500,00:42:31.500,00:42:34.500,0.7861,,Es como un paso.
+T00462,audio_021,2554500,2555500,00:42:34.500,00:42:35.500,0.582,MEDIUM_CONFIDENCE,Sí.
+T00463,audio_021,2555500,2562500,00:42:35.500,00:42:42.500,0.6939,MEDIUM_CONFIDENCE,"Porque antes, lo hicieron porque antes teníamos el conflicto de que decían para la infección"
+T00464,audio_021,2562500,2564500,00:42:42.500,00:42:44.500,0.7714,,"paciente, pero queremos la cuenta ya."
+T00465,audio_021,2564500,2569500,00:42:44.500,00:42:49.500,0.6934,MEDIUM_CONFIDENCE,"Entonces enfermerías hacia el pago al reportar, lo tenían ahí, nos pasaron el dato, acompañaron"
+T00466,audio_021,2569500,2572500,00:42:49.500,00:42:52.500,0.6829,MEDIUM_CONFIDENCE,"los mentiras, todo, todo, todo, quedan como dos."
+T00467,audio_021,2572500,2578500,00:42:52.500,00:42:58.500,0.7166,,"Y se encerraba, y nos olé a ver, y cuando regresaban ya las cosas, vemos que venía"
+T00468,audio_021,2578500,2581500,00:42:58.500,00:43:01.500,0.6749,MEDIUM_CONFIDENCE,"algo de mal, que no se contabilizó."
+T00469,audio_021,2581500,2587500,00:43:01.500,00:43:07.500,0.7964,,"Entonces, y los pacientes, los familiares de pacientes, decían, mira, pero ahí iba a"
+T00470,audio_021,2587500,2588500,00:43:07.500,00:43:08.500,0.8396,,hacer cosas.
+T00471,audio_021,2588500,2592500,00:43:08.500,00:43:12.500,0.7514,,"Entonces, y ya no había vuelta atrás, que pudiera hacer."
+T00472,audio_021,2592500,2597500,00:43:12.500,00:43:17.500,0.7757,,"Entonces por eso se quedaron como en este en pausa, y este sí puede ser editado, antes"
+T00473,audio_021,2597500,2598500,00:43:17.500,00:43:18.500,0.8732,,de cerrar.
+T00474,audio_021,2598500,2606500,00:43:18.500,00:43:26.500,0.5633,MEDIUM_CONFIDENCE,"Entonces, y, lo voy a recarcar más, acá, está la creación de proveedores, todo lo"
+T00475,audio_021,2606500,2613500,00:43:26.500,00:43:33.500,0.6943,MEDIUM_CONFIDENCE,"registro, verdad, sultatos, etcétera, las bodegas que teníamos, de algo así como la"
+T00476,audio_021,2613500,2615500,00:43:33.500,00:43:35.500,0.6168,MEDIUM_CONFIDENCE,diserción que teníamos.
+T00477,audio_021,2615500,2620500,00:43:35.500,00:43:40.500,0.656,MEDIUM_CONFIDENCE,"Y, digamos, yo manejaba también su mamá en el pan, porque a veces este, la repente"
+T00478,audio_021,2620500,2625500,00:43:40.500,00:43:45.500,0.5933,MEDIUM_CONFIDENCE,"enfermería se me quedó hasta pero esta cosa, entonces, para reir, si no reiros algo"
+T00479,audio_021,2625500,2632500,00:43:45.500,00:43:52.500,0.8491,,"tan mal, veíamos si era algo que estaba dentro del pan, ya se le hacía el traslado."
+T00480,audio_021,2632500,2637500,00:43:52.500,00:43:57.500,0.5568,MEDIUM_CONFIDENCE,"También su perpisión, manejaba como aquí, ¿ok?"
+T00481,audio_021,2637500,2639500,00:43:57.500,00:43:59.500,0.6298,MEDIUM_CONFIDENCE,Siempre yo mantenía de él.
+T00482,audio_022,2640000,2642000,00:44:00.000,00:44:02.000,0.5846,MEDIUM_CONFIDENCE,Quiere salir a la emergencia.
+T00483,audio_022,2643280,2646560,00:44:03.280,00:44:06.560,0.6772,MEDIUM_CONFIDENCE,Ahí llevaba hasta las muestras de la naturaleza.
+T00484,audio_022,2647560,2650760,00:44:07.560,00:44:10.760,0.8698,,Los lotes y las series.
+T00485,audio_022,2651960,2658760,00:44:11.960,00:44:18.760,0.8498,,"Porque se maneja lo que es la parte del envencimiento de medicamentos,"
+T00486,audio_022,2659240,2664040,00:44:19.240,00:44:24.040,0.7574,,"igual los lotes de insumo, coyequipos, las series."
+T00487,audio_022,2665720,2669480,00:44:25.720,00:44:29.480,0.826,,"Y acá, en kit de insumo."
+T00488,audio_022,2670000,2673000,00:44:30.000,00:44:33.000,0.7507,,"Teníamos lo que llamábamos, ¿por qué?"
+T00489,audio_022,2673400,2675640,00:44:33.400,00:44:35.640,0.6618,MEDIUM_CONFIDENCE,"Entonces aquí damos, ¿qué lleva a esto?"
+T00490,audio_022,2678600,2680920,00:44:38.600,00:44:40.920,0.5397,LOW_CONFIDENCE,"Aquí lo voy a dar en el parque, entonces aquí va."
+T00491,audio_022,2681080,2682600,00:44:41.080,00:44:42.600,0.6587,MEDIUM_CONFIDENCE,Esto lleva a este parque.
+T00492,audio_022,2683840,2687200,00:44:43.840,00:44:47.200,0.6486,MEDIUM_CONFIDENCE,¿Qué es lo que hace a la hora de descartar?
+T00493,audio_022,2687560,2691120,00:44:47.560,00:44:51.120,0.7698,,"Decían, voy a llevar un kit de eso."
+T00494,audio_022,2691400,2695240,00:44:51.400,00:44:55.240,0.8246,,Entonces el muchacho solamente lo hablaba y ya se descargaba automáticamente
+T00495,audio_022,2695280,2696920,00:44:55.280,00:44:56.920,0.6466,MEDIUM_CONFIDENCE,si me estaba calado un poco.
+T00496,audio_022,2697080,2698080,00:44:57.080,00:44:58.080,0.963,,Sí.
+T00497,audio_022,2699480,2702720,00:44:59.480,00:45:02.720,0.5888,MEDIUM_CONFIDENCE,"Decuraciones, kit de curación, por eso."
+T00498,audio_022,2703040,2704040,00:45:03.040,00:45:04.040,0.5224,LOW_CONFIDENCE,Ya.
+T00499,audio_022,2704200,2705680,00:45:04.200,00:45:05.680,0.5232,LOW_CONFIDENCE,Te daba lo que haces.
+T00500,audio_022,2706640,2709960,00:45:06.640,00:45:09.960,0.5867,MEDIUM_CONFIDENCE,Esa vez acá tiene un parque de acusas.
+T00501,audio_022,2710320,2713320,00:45:10.320,00:45:13.320,0.786,,También tenía una opción de faltar una cotización.
+T00502,audio_022,2723800,2724800,00:45:23.800,00:45:24.800,0.4825,LOW_CONFIDENCE,Bueno.
+T00503,audio_022,2726400,2727400,00:45:26.400,00:45:27.400,0.4144,LOW_CONFIDENCE,Lo da igual.
+T00504,audio_022,2728360,2732880,00:45:28.360,00:45:32.880,0.4859,LOW_CONFIDENCE,"Me dirán, lo que ha habido envenimiento."
+T00505,audio_022,2735080,2738560,00:45:35.080,00:45:38.560,0.863,,"Y acá me da la opción de dónde voy a descartar,"
+T00506,audio_022,2738600,2742080,00:45:38.600,00:45:42.080,0.5943,MEDIUM_CONFIDENCE,a hacer la descartada de alimentaria general.
+T00507,audio_022,2745160,2747400,00:45:45.160,00:45:47.400,0.8276,,"También me da la opción de la plantilla,"
+T00508,audio_022,2747440,2750400,00:45:47.440,00:45:50.400,0.729,,"es que es lo que le mencionaste, puedo hablar de la cotización."
+T00509,audio_022,2752600,2755520,00:45:52.600,00:45:55.520,0.9144,,Y que va a salir de la alimentaria general.
+T00510,audio_022,2755920,2760000,00:45:55.920,00:46:00.000,0.588,MEDIUM_CONFIDENCE,Veamos que quiero esta cotización. Me jala el texto y lo que está cotización.
+T00511,audio_023,2760000,2764000,00:46:00.000,00:46:04.000,0.5915,MEDIUM_CONFIDENCE,Y le desolucionara y me le da la destaca.
+T00512,audio_023,2764000,2766000,00:46:04.000,00:46:06.000,0.7055,,Ok.
+T00513,audio_023,2766000,2790000,00:46:06.000,00:46:30.000,0.4865,LOW_CONFIDENCE,Y me da la destaca.
+T00514,audio_023,2790000,2818000,00:46:30.000,00:46:58.000,0.5951,MEDIUM_CONFIDENCE,Y le da la destaca.
+T00515,audio_023,2818000,2830000,00:46:58.000,00:47:10.000,0.6266,MEDIUM_CONFIDENCE,"Acá se pide lotes, si es parturada o no, porque hay unos mísumos que son para uso interro."
+T00516,audio_023,2830000,2848000,00:47:10.000,00:47:28.000,0.6782,MEDIUM_CONFIDENCE,"Acá tenemos los estudios, nosotros ya tenemos un estado de estudios, que es lo que nos sale allá, solo para hablar."
+T00517,audio_023,2848000,2862000,00:47:28.000,00:47:42.000,0.7156,,"En honorarios, aquí está la opción donde tenemos la creación del médico con sus laborales, y que solamente los tira una localización para poder asalar el médico."
+T00518,audio_023,2862000,2878000,00:47:42.000,00:47:58.000,0.5924,MEDIUM_CONFIDENCE,Aquí le puedo dar seguimiento.
+T00519,audio_024,2880000,2887000,00:48:00.000,00:48:07.000,0.631,MEDIUM_CONFIDENCE,"- ¿Estás creando un horario? - Ajá, en un horario de seguimiento, esta no soy buena."
+T00520,audio_024,2887000,2891000,00:48:07.000,00:48:11.000,0.6839,MEDIUM_CONFIDENCE,- ¿Qué le va a tener en el puesto? - Sí.
+T00521,audio_024,2891000,2897000,00:48:11.000,00:48:17.000,0.436,LOW_CONFIDENCE,"- Ah, acá. - No lo sé, quiero que te quiera en la chica."
+T00522,audio_024,2908000,2938000,00:48:28.000,00:48:58.000,0.878,POSSIBLE_REPETITION,"- No me parece el horario, no me parece lo que daron. - No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no,"
+T00523,audio_024,2938000,2949000,00:48:58.000,00:49:09.000,0.4659,LOW_CONFIDENCE,"- ¿Qué es el servicio? - Esa es una de servicios que ya vimos, hospitalización,"
+T00524,audio_024,2949000,2958000,00:49:09.000,00:49:18.000,0.6215,MEDIUM_CONFIDENCE,"lo de ratrilles, el servicio de bomba, un dual, depuración o lo que se llama."
+T00525,audio_024,2958000,2962000,00:49:18.000,00:49:22.000,0.6008,MEDIUM_CONFIDENCE,"En cuanto a tarifas, eso es lo que va a tener."
+T00526,audio_024,2962000,2969000,00:49:22.000,00:49:29.000,0.5065,LOW_CONFIDENCE,"- ¿Tengan aquí los usuarios? ¿Permisos usar? Esto no es buena. - No, pero eso es..."
+T00527,audio_024,2969000,2977000,00:49:29.000,00:49:37.000,0.6379,MEDIUM_CONFIDENCE,"- Aquí tienen la parte de descuentos, que es el momento que hagan las creaciones de descuentos,"
+T00528,audio_024,2977000,2988000,00:49:37.000,00:49:48.000,0.7415,,"que me decían, ""Va, necesito que tenga un perfil de descuento, que sólo tenga 10% para los servicios,"
+T00529,audio_024,2988000,2994000,00:49:48.000,00:49:54.000,0.6486,MEDIUM_CONFIDENCE,"para los que no tenga descuento, medicamentos no pueden tener descuento, aquí se va a jugar la vez""."
+T00530,audio_024,2994000,3000000,00:49:54.000,00:50:00.000,0.6283,MEDIUM_CONFIDENCE,"Y si uno se entra, o también, ""Tengo que tener descuento de 15%""."
+T00531,audio_025,3000000,3012000,00:50:00.000,00:50:12.000,0.5303,LOW_CONFIDENCE,"A estos son los acuantos ya propiedad, departados con el accedorado, con el accedorado de la aguja solamente se pactan el 15% en servicios,"
+T00532,audio_025,3012000,3032000,00:50:12.000,00:50:32.000,0.5453,LOW_CONFIDENCE,"y se refieren al verlo de no, en actres que han pactado el 15% de un resellama de insumos y en nuestras plantas, en ASA tienen el 20% y el 15% tienen el 20% de servicio,"
+T00533,audio_025,3032000,3042000,00:50:32.000,00:50:42.000,0.5836,MEDIUM_CONFIDENCE,el 25% y insumos 15%. Pero siguiente para creación de...
+T00534,audio_025,3042000,3048000,00:50:42.000,00:50:48.000,0.5639,MEDIUM_CONFIDENCE,"-¿Quién te parece para que lo despliega? -Ajá, sí."
+T00535,audio_025,3048000,3063000,00:50:48.000,00:51:03.000,0.8075,,"Lo que se me olvidó, señor Amina, en la parte del excluente clínico era que a las enfermeras en aplicación al darle guarda ya no les permitía volver a editar por cuestiones legales,"
+T00536,audio_025,3063000,3079000,00:51:03.000,00:51:19.000,0.87,,pero yo sí podía evitarlo por cualquier error ortográfico y eso sí siempre tenía que estar revisando.
+T00537,audio_025,3094000,3107000,00:51:34.000,00:51:47.000,0.8673,,"Podía verlo como en la categoría en la parque de evolución clínica, aquí permitía tanto al médico como a enfermería poder seleccionar los antecedentes."
+T00538,audio_025,3107000,3122000,00:51:47.000,00:52:02.000,0.8637,,"En el caso de las alergias, igual ya estaba con el predeterminado todo, los antecedentes patológicos, las hábitas personales, la evolución clínica,"
+T00539,audio_026,3120000,3132000,00:52:00.000,00:52:12.000,0.7162,,"La primera me permitía ver los signos vitales y quiero ver las notas de enfermería, igual me permitía editar aceras."
+T00540,audio_026,3135000,3141000,00:52:15.000,00:52:21.000,0.8288,,"Puedo entrar, editarles y darle guarda eso más que todo era por cuestiones ortográficas."
+T00541,audio_026,3142000,3147000,00:52:22.000,00:52:27.000,0.7,MEDIUM_CONFIDENCE,"De ahí, pues, esa parte de la medida medicinal que yo podía editar."
+T00542,audio_026,3148000,3151000,00:52:28.000,00:52:31.000,0.3993,LOW_CONFIDENCE,Eso era ya en todos en una plataforma.
+T00543,audio_026,3154000,3164000,00:52:34.000,00:52:44.000,0.6491,MEDIUM_CONFIDENCE,"Hay una aplicación que cuando yo llegué a la enfermera, ahí apareció aquí, en Cuba."
+T00544,audio_026,3165000,3173000,00:52:45.000,00:52:53.000,0.7277,,"En el servicio profesional podía ver a un paciente seleccionado, eso estaba de cuenta, en este caso, en un paciente."
+T00545,audio_026,3176000,3182000,00:52:56.000,00:53:02.000,0.7114,,"Al entrar, ya aparecía. El nombre del paciente, como que estaba asignado, la hora."
+T00546,audio_026,3183000,3194000,00:53:03.000,00:53:14.000,0.8326,,"Y ella podía ver información general del paciente, podía ver el nombre, el diagnóstico, el médico contratante, los supervisores del turno."
+T00547,audio_026,3195000,3215000,00:53:15.000,00:53:35.000,0.6917,MEDIUM_CONFIDENCE,"Ella le permitía hacer este caso, poner los signos vitales. Evaluaciones en este caso son las escalas en el paciente porque no tenían dispositivos y contaban con cantetas de menacentral, todo eso."
+T00548,audio_026,3216000,3218000,00:53:36.000,00:53:38.000,0.797,,Permitía que...
+T00549,audio_026,3219000,3221000,00:53:39.000,00:53:41.000,0.9569,,Y la nota de enfermería.
+T00550,audio_026,3222000,3224000,00:53:42.000,00:53:44.000,0.7374,,¿Qué te parecía sincronizada aquí?
+T00551,audio_026,3224000,3254000,00:53:44.000,00:54:14.000,0.9237,POSSIBLE_REPETITION,"No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no"
+T00552,audio_027,3240000,3252420,00:54:00.000,00:54:12.420,0.6673,MEDIUM_CONFIDENCE,Me permitía compartirla y la podía mandar a Wasap.
+T00553,audio_027,3252420,3257840,00:54:12.420,00:54:17.840,0.7611,,"Esto con el fin de que como el médico no siempre puede estar como pendiente, entrar al"
+T00554,audio_027,3257840,3262560,00:54:17.840,00:54:22.560,0.8442,,"estudiante clínico, yo le podía compartir la nota que había generado el enfermero."
+T00555,audio_027,3262560,3263560,00:54:22.560,00:54:23.560,0.8053,,Al doctor.
+T00556,audio_027,3263560,3264560,00:54:23.560,00:54:24.560,0.3428,LOW_CONFIDENCE,"O sea, cosas."
+T00557,audio_027,3264560,3265560,00:54:24.560,00:54:25.560,0.5501,MEDIUM_CONFIDENCE,Ok.
+T00558,audio_027,3265560,3268560,00:54:25.560,00:54:28.560,0.8116,,De aquí ya lo paro de grabar.
+T00559,audio_027,3268560,3270720,00:54:28.560,00:54:30.720,0.6336,MEDIUM_CONFIDENCE|NON_SPEECH,[MÚSICA]

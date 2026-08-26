@@ -1,0 +1,25 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00536,audio_025,3063000,3079000,00:51:03.000,00:51:19.000,0.87,,pero yo sí podía evitarlo por cualquier error ortográfico y eso sí siempre tenía que estar revisando.,0,9000
+T00537,audio_025,3094000,3107000,00:51:34.000,00:51:47.000,0.8673,,"Podía verlo como en la categoría en la parque de evolución clínica, aquí permitía tanto al médico como a enfermería poder seleccionar los antecedentes.",24000,37000
+T00538,audio_025,3107000,3122000,00:51:47.000,00:52:02.000,0.8637,,"En el caso de las alergias, igual ya estaba con el predeterminado todo, los antecedentes patológicos, las hábitas personales, la evolución clínica,",37000,52000
+T00539,audio_026,3120000,3132000,00:52:00.000,00:52:12.000,0.7162,,"La primera me permitía ver los signos vitales y quiero ver las notas de enfermería, igual me permitía editar aceras.",50000,62000
+T00540,audio_026,3135000,3141000,00:52:15.000,00:52:21.000,0.8288,,"Puedo entrar, editarles y darle guarda eso más que todo era por cuestiones ortográficas.",65000,71000
+T00541,audio_026,3142000,3147000,00:52:22.000,00:52:27.000,0.7,MEDIUM_CONFIDENCE,"De ahí, pues, esa parte de la medida medicinal que yo podía editar.",72000,77000
+T00542,audio_026,3148000,3151000,00:52:28.000,00:52:31.000,0.3993,LOW_CONFIDENCE,Eso era ya en todos en una plataforma.,78000,81000
+T00543,audio_026,3154000,3164000,00:52:34.000,00:52:44.000,0.6491,MEDIUM_CONFIDENCE,"Hay una aplicación que cuando yo llegué a la enfermera, ahí apareció aquí, en Cuba.",84000,94000
+T00544,audio_026,3165000,3173000,00:52:45.000,00:52:53.000,0.7277,,"En el servicio profesional podía ver a un paciente seleccionado, eso estaba de cuenta, en este caso, en un paciente.",95000,103000
+T00545,audio_026,3176000,3182000,00:52:56.000,00:53:02.000,0.7114,,"Al entrar, ya aparecía. El nombre del paciente, como que estaba asignado, la hora.",106000,112000
+T00546,audio_026,3183000,3194000,00:53:03.000,00:53:14.000,0.8326,,"Y ella podía ver información general del paciente, podía ver el nombre, el diagnóstico, el médico contratante, los supervisores del turno.",113000,124000
+T00547,audio_026,3195000,3215000,00:53:15.000,00:53:35.000,0.6917,MEDIUM_CONFIDENCE,"Ella le permitía hacer este caso, poner los signos vitales. Evaluaciones en este caso son las escalas en el paciente porque no tenían dispositivos y contaban con cantetas de menacentral, todo eso.",125000,145000
+T00548,audio_026,3216000,3218000,00:53:36.000,00:53:38.000,0.797,,Permitía que...,146000,148000
+T00549,audio_026,3219000,3221000,00:53:39.000,00:53:41.000,0.9569,,Y la nota de enfermería.,149000,151000
+T00550,audio_026,3222000,3224000,00:53:42.000,00:53:44.000,0.7374,,¿Qué te parecía sincronizada aquí?,152000,154000
+T00551,audio_026,3224000,3254000,00:53:44.000,00:54:14.000,0.9237,POSSIBLE_REPETITION,"No, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no, no",154000,184000
+T00552,audio_027,3240000,3252420,00:54:00.000,00:54:12.420,0.6673,MEDIUM_CONFIDENCE,Me permitía compartirla y la podía mandar a Wasap.,170000,182420
+T00553,audio_027,3252420,3257840,00:54:12.420,00:54:17.840,0.7611,,"Esto con el fin de que como el médico no siempre puede estar como pendiente, entrar al",182420,187840
+T00554,audio_027,3257840,3262560,00:54:17.840,00:54:22.560,0.8442,,"estudiante clínico, yo le podía compartir la nota que había generado el enfermero.",187840,192560
+T00555,audio_027,3262560,3263560,00:54:22.560,00:54:23.560,0.8053,,Al doctor.,192560,193560
+T00556,audio_027,3263560,3264560,00:54:23.560,00:54:24.560,0.3428,LOW_CONFIDENCE,"O sea, cosas.",193560,194560
+T00557,audio_027,3264560,3265560,00:54:24.560,00:54:25.560,0.5501,MEDIUM_CONFIDENCE,Ok.,194560,195560
+T00558,audio_027,3265560,3268560,00:54:25.560,00:54:28.560,0.8116,,De aquí ya lo paro de grabar.,195560,198560
+T00559,audio_027,3268560,3270720,00:54:28.560,00:54:30.720,0.6336,MEDIUM_CONFIDENCE|NON_SPEECH,[MÚSICA],198560,200720

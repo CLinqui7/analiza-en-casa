@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH09",
+  "title": "Hospitalización clínica y reporte de salud",
+  "description": "Perfil clínico, diagnósticos, dispositivos, reportes y configuración del documento.",
+  "start_seconds": 1260,
+  "end_seconds": 1640,
+  "clip_start_with_overlap": 1259,
+  "clip_end_with_overlap": 1641,
+  "duration_seconds": 380,
+  "event_frames": 137,
+  "detail_crops": 61,
+  "safety_frames_1fps": 381,
+  "expected_safety_frames": 381,
+  "event_contact_sheets": 16,
+  "safety_contact_sheets": 24
+}

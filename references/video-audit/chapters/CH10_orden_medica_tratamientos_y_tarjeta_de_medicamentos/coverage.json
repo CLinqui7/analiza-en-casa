@@ -1,0 +1,16 @@
+{
+  "chapter_id": "CH10",
+  "title": "Orden médica, tratamientos y tarjeta de medicamentos",
+  "description": "Creación de órdenes, tratamientos, indicaciones, tarjeta e historial de tratamientos.",
+  "start_seconds": 1640,
+  "end_seconds": 1895,
+  "clip_start_with_overlap": 1639,
+  "clip_end_with_overlap": 1896,
+  "duration_seconds": 255,
+  "event_frames": 114,
+  "detail_crops": 67,
+  "safety_frames_1fps": 256,
+  "expected_safety_frames": 256,
+  "event_contact_sheets": 13,
+  "safety_contact_sheets": 16
+}

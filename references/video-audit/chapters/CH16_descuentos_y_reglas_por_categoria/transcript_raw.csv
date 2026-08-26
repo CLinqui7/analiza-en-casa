@@ -1,0 +1,10 @@
+﻿segment_id,source_audio_segment,start_ms,end_ms,start,end,confidence_avg,quality_flags,text,chapter_local_start_ms,chapter_local_end_ms
+T00528,audio_024,2977000,2988000,00:49:37.000,00:49:48.000,0.7415,,"que me decían, ""Va, necesito que tenga un perfil de descuento, que sólo tenga 10% para los servicios,",0,5000
+T00529,audio_024,2988000,2994000,00:49:48.000,00:49:54.000,0.6486,MEDIUM_CONFIDENCE,"para los que no tenga descuento, medicamentos no pueden tener descuento, aquí se va a jugar la vez"".",5000,11000
+T00530,audio_024,2994000,3000000,00:49:54.000,00:50:00.000,0.6283,MEDIUM_CONFIDENCE,"Y si uno se entra, o también, ""Tengo que tener descuento de 15%"".",11000,17000
+T00531,audio_025,3000000,3012000,00:50:00.000,00:50:12.000,0.5303,LOW_CONFIDENCE,"A estos son los acuantos ya propiedad, departados con el accedorado, con el accedorado de la aguja solamente se pactan el 15% en servicios,",17000,29000
+T00532,audio_025,3012000,3032000,00:50:12.000,00:50:32.000,0.5453,LOW_CONFIDENCE,"y se refieren al verlo de no, en actres que han pactado el 15% de un resellama de insumos y en nuestras plantas, en ASA tienen el 20% y el 15% tienen el 20% de servicio,",29000,49000
+T00533,audio_025,3032000,3042000,00:50:32.000,00:50:42.000,0.5836,MEDIUM_CONFIDENCE,el 25% y insumos 15%. Pero siguiente para creación de...,49000,59000
+T00534,audio_025,3042000,3048000,00:50:42.000,00:50:48.000,0.5639,MEDIUM_CONFIDENCE,"-¿Quién te parece para que lo despliega? -Ajá, sí.",59000,65000
+T00535,audio_025,3048000,3063000,00:50:48.000,00:51:03.000,0.8075,,"Lo que se me olvidó, señor Amina, en la parte del excluente clínico era que a las enfermeras en aplicación al darle guarda ya no les permitía volver a editar por cuestiones legales,",65000,80000
+T00536,audio_025,3063000,3079000,00:51:03.000,00:51:19.000,0.87,,pero yo sí podía evitarlo por cualquier error ortográfico y eso sí siempre tenía que estar revisando.,80000,96000
