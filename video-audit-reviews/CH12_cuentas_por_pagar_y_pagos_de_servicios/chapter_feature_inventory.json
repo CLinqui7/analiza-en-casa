@@ -1,4 +1,51 @@
 {
-  "chapter": "CH12_cuentas_por_pagar_y_pagos_de_servicios",
-  "features": []
+  "chapter_id":"CH12",
+  "chapter":"CH12_cuentas_por_pagar_y_pagos_de_servicios",
+  "summary":"Resumen de cuentas por pagar y revisión de pagos de servicios profesionales con filtros y conceptos de adición o descuento.",
+  "features":[
+    {
+      "id":"CH12-F01","name":"Resumen de cuentas por pagar","description":"Pestañas Resumen y Pagos; en Resumen aparecen Facturas y Reclamos, tabla, búsqueda y acciones Generar planilla, Restricciones, Descargar y Limpiar Tabla.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH12","chapter_event_id":"CH12-E0004","timestamp":"00:33:30.600","path":"event_frames/CH12-E0004_00h33m30s600ms_abrupt_change.jpg","detail_crop":"detail_crops/CH12-E0004_00h33m30s600ms_DETAIL.jpg","transcript":"00:33:28–00:34:05"}]
+    },
+    {
+      "id":"CH12-F02","name":"Listado de pagos de servicios","description":"Registros con selección, búsqueda, paginación y columnas Recurso, Fecha Visita, Paciente, Monto, Estatus y Est. Visita; se ven Pendiente de pago y Finalizada.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH12","chapter_event_id":"CH12-E0016","timestamp":"00:34:17.000","path":"event_frames/CH12-E0016_00h34m17s000ms_abrupt_change.jpg","detail_crop":"detail_crops/CH12-E0016_00h34m17s000ms_DETAIL.jpg","transcript":"00:34:10–00:34:30"}]
+    },
+    {
+      "id":"CH12-F03","name":"Acciones de pagos y reportes","description":"Acciones visibles Editar Grupo, Reporte Por Recurso y un segundo reporte cuyo rótulo queda parcialmente oculto.","classification":"VISIBLE","confidence":"MEDIUM",
+      "evidence":[{"chapter_id":"CH12","chapter_event_id":"CH12-E0016","timestamp":"00:34:17.000","path":"event_frames/CH12-E0016_00h34m17s000ms_abrupt_change.jpg","detail_crop":"detail_crops/CH12-E0016_00h34m17s000ms_DETAIL.jpg","transcript":"00:34:10–00:34:30"}]
+    },
+    {
+      "id":"CH12-F04","name":"Filtro de pagos","description":"Filtro por rango de fechas, recurso y estado con acciones Cerrar, Limpiar y Aplicar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH12","chapter_event_id":"CH12-E0010","timestamp":"00:34:02.200","path":"event_frames/CH12-E0010_00h34m02s200ms_settled.jpg","detail_crop":"detail_crops/CH12-E0010_00h34m02s200ms_DETAIL.jpg","transcript":"00:33:55–00:34:15"}]
+    },
+    {
+      "id":"CH12-F05","name":"Edición de pago de servicio profesional","description":"Modal con fecha, hospitalización, recurso, paciente, tarifa, monto, estatus, comentarios y tabla de conceptos con Agregar.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0022","timestamp":"00:34:42.800","path":"event_frames/CH12-E0022_00h34m42s800ms_stable_change.jpg","detail_crop":"detail_crops/CH12-E0022_00h34m42s800ms_DETAIL.jpg","transcript":"00:34:35–00:35:00"},
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0024","timestamp":"00:34:44.600","path":"event_frames/CH12-E0024_00h34m44s600ms_stable_change.jpg","detail_crop":"detail_crops/CH12-E0024_00h34m44s600ms_DETAIL.jpg","transcript":"00:34:35–00:35:00"}
+      ]
+    },
+    {
+      "id":"CH12-F06","name":"Conceptos de adición o descuento","description":"Agregar concepto permite tipo Añadidura o Descuento, motivo requerido, monto y comentario.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0025","timestamp":"00:34:47.600","path":"event_frames/CH12-E0025_00h34m47s600ms_abrupt_change.jpg","transcript":"00:34:40–00:35:10"},
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0027","timestamp":"00:34:49.800","path":"event_frames/CH12-E0027_00h34m49s800ms_motion_progress.jpg","detail_crop":"detail_crops/CH12-E0027_00h34m49s800ms_DETAIL.jpg","transcript":"00:34:40–00:35:10"}
+      ]
+    },
+    {
+      "id":"CH12-F07","name":"Catálogo visible de motivos","description":"Se observan motivos de añadidura como Tiempo extra, Excelencia, Mal agendado, Paciente especial y Transporte, y diversos motivos de descuento por retraso, inasistencia, cambio de turno, cierre tardío, transporte y cumplimiento.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0029","timestamp":"00:34:55.800","path":"event_frames/CH12-E0029_00h34m55s800ms_motion_progress.jpg","detail_crop":"detail_crops/CH12-E0029_00h34m55s800ms_DETAIL.jpg","transcript":"00:34:50–00:35:05"},
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0034","timestamp":"00:35:02.000","path":"event_frames/CH12-E0034_00h35m02s000ms_abrupt_change.jpg","detail_crop":"detail_crops/CH12-E0034_00h35m02s000ms_DETAIL.jpg","transcript":"00:35:00–00:35:15"},
+        {"chapter_id":"CH12","chapter_event_id":"CH12-E0040","timestamp":"00:35:07.600","path":"event_frames/CH12-E0040_00h35m07s600ms_stable_change.jpg","detail_crop":"detail_crops/CH12-E0040_00h35m07s600ms_DETAIL.jpg","transcript":"00:35:00–00:35:20"}
+      ]
+    },
+    {
+      "id":"CH12-F08","name":"Reglas financieras de montos y aprobación","description":"Los montos y estados son datos observados; el capítulo no demuestra fórmulas, tratamiento contable/fiscal, permisos de aprobación ni inmutabilidad posterior a planilla.","classification":"UNCERTAIN","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH12","chapter_event_id":"CH12-E0022","timestamp":"00:34:42.800","path":"event_frames/CH12-E0022_00h34m42s800ms_stable_change.jpg","detail_crop":"detail_crops/CH12-E0022_00h34m42s800ms_DETAIL.jpg","transcript":"00:34:35–00:35:00"}]
+    }
+  ],
+  "entities":["Factura","Reclamo","Planilla","Pago de servicio","Visita","Recurso profesional","Tarifa","Concepto de ajuste"],
+  "open_questions":["Nombre y contenido del reporte parcialmente oculto", "Reglas de estados y generación de planilla", "Motivos vigentes y efecto contable/fiscal", "Permisos, aprobación, auditoría e idempotencia"]
 }

@@ -1,5 +1,11 @@
 # Test log
 
+## 2026-08-26 · CH10–CH13 forensic audit
+
+- Per-chapter Python verifiers: PASS for CH10, CH11, CH12 and CH13 (328/328 events, 185/185 crops, 38 event sheets, 49 safety sheets and 58 traceable feature evidence references).
+- A final semantic cleanup produced readable, normalized observations for all 328 ledger rows; targeted ledger checks confirmed the previously ambiguous treatment, agenda, payment and purchase states.
+- Financial, clinical-permission, tax and inventory effects not demonstrated by the recording remain explicit open questions; CH13's inventory relationship remains VERBAL.
+
 ## 2026-08-26 · CH03 forensic audit
 
 - Python/npm verifiers: PASS (46/46 events, 10/10 crops, all contact sheets and 13 traceable features).
