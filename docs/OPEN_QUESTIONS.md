@@ -109,6 +109,22 @@
 - `CH09-Q009`: aprobar plantilla oficial de PDF, numeración, encabezado, firmas, sello, tamaño de papel y validez legal de la firma. El video no demuestra un PDF final. Evidencia: CH09-E0127–CH09-E0130.
 - `CH09-Q010`: definir versionado y corrección para perfiles en borrador, activos, finalizados y documentos firmados, incluidas autorización, motivo y preservación. La base actual conserva perfiles append-only y mantiene intacto el flujo de correcciones de documentos firmados. Evidencia: CH09-E0065–CH09-E0067.
 
+## CH10 · decisiones pendientes trazadas
+
+- `CH10-Q001`: definir roles para crear, modificar, finalizar, anular e imprimir órdenes y tarjetas. Evidencia: CH10-E0112.
+- `CH10-Q002`: definir PMC, responsables y transiciones Revisar/Listo respecto de firma/finalización. La UI muestra `Regla PMC pendiente`. Evidencia: CH10-E0102, CH10-E0105 y CH10-E0113.
+- `CH10-Q003`: aprobar catálogos oficiales y relaciones de vía, frecuencia, duración, horarios y PRN. Los valores observados se tratan sólo como captura configurable, no como regla terapéutica. Evidencia: CH10-E0028, CH10-E0031 y CH10-E0042.
+- `CH10-Q004`: confirmar aritmética inclusiva/exclusiva inicio–duración–fin, zona horaria y comportamiento crónico. La UI ofrece una sugerencia editable que reproduce el único ejemplo, sin imponerla como regla clínica. Evidencia: CH10-E0035 y CH10-E0038.
+- `CH10-Q005`: definir fuente maestra, deduplicación y permisos de alta inline para medicamentos y prescriptores. Evidencia: CH10-E0021–CH10-E0026.
+- `CH10-Q006`: definir el efecto de Crónico y si Mostrar diluciones sólo captura texto o ejecuta una regla. No se calcula ninguna dilución. Evidencia: CH10-E0039 y CH10-E0050.
+- `CH10-Q007`: entregar catálogo oficial de etiquetas y permisos para crear, quitar y reordenar. La implementación conserva secciones observadas configurables. Evidencia: CH10-E0075–CH10-E0086.
+- `CH10-Q008`: definir sanitización, obligatoriedad, firma y política de secciones clínicas vacías. Evidencia: CH10-E0088–CH10-E0093.
+- `CH10-Q009`: aprobar contenido, encabezados, firmas, papel y validez de tarjeta completa, simple y conteo presencial. Conteo se marca expresamente provisional. Evidencia: CH10-E0109.
+- `CH10-Q010`: definir canal seguro, destinatarios, expiración, revocación, auditoría y retención para acceso de enfermería domiciliaria. Nunca se enviará contenido clínico en una vista previa de WhatsApp/SMS/email. Evidencia verbal: CH10-E0109–CH10-E0110.
+- `CH10-Q011`: definir qué constituye Actualización, Tratamiento con cambios e Historial y la unidad de versionado. Evidencia: CH10-E0008, CH10-E0018 y CH10-E0101.
+- `CH10-Q012`: definir contrato, permisos y auditoría de Registro XPO; permanece sin mutación. Evidencia: CH10-E0065 y CH10-E0099.
+- `CH10-Q013`: definir campos mínimos, estados, responsable, omisión/motivo, idempotencia y correcciones para administración real. El antiguo toast de éxito simulado fue sustituido por un bloqueo explícito. Evidencia verbal: CH10-E0109–CH10-E0110.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

@@ -59,10 +59,15 @@ function footer() {
 }
 
 function patientGrid(patient, recordCase = null) {
+  const birthDate = patient?.birthDate;
+  const age = birthDate ? Math.max(0, new Date().getUTCFullYear() - Number(String(birthDate).slice(0,4))
+    - (new Date().toISOString().slice(5,10) < String(birthDate).slice(5,10) ? 1 : 0)) : null;
   return `
     <div class="grid">
       <div class="field"><small>Paciente</small><strong>${safeText(patient?.fullName || "—")}</strong></div>
       <div class="field"><small>Documento</small><strong>${safeText(patient?.document || "—")}</strong></div>
+      <div class="field"><small>Fecha de nacimiento</small><strong>${formatDate(birthDate)}</strong></div>
+      <div class="field"><small>Edad calculada al generar</small><strong>${age == null ? "—" : `${safeText(age)} años`}</strong></div>
       <div class="field"><small>Hospitalización</small><strong>${safeText(recordCase?.id || "—")}</strong></div>
       <div class="field"><small>Fecha de inicio</small><strong>${formatDate(recordCase?.startDate)}</strong></div>
     </div>
@@ -153,30 +158,44 @@ export function healthReportDocument({ document, patient, recordCase, vitalSigns
 }
 
 export function medicalOrderDocument({ document, patient, recordCase, corrections = [] }) {
+  const sections = Array.isArray(document.content?.sections) ? document.content.sections : [];
+  const sectionMarkup = sections.length
+    ? sections.map((section) => `<div class="section"><h2>${safeText(section.label || section.key || "Sección")}</h2><p style="white-space:pre-line">${safeText(section.content || "Sin contenido documentado.")}</p></div>`).join("")
+    : `<div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>`;
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
     ${clinicalRecordMetadata(document, corrections)}
-    <div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>
-    <div class="section"><h2>Vigencia</h2><p>Desde ${formatDate(document.createdAt)} hasta nueva indicación o cierre del caso.</p></div>
+    <div class="section"><h2>Diagnóstico documentado</h2><p>${safeText(document.content?.diagnosis || recordCase?.diagnosisSummary || "No documentado.")}</p></div>
+    ${sectionMarkup}
     <div class="signature-grid"><div class="signature">${safeText(document.authorName)}<br>Médico responsable</div><div class="signature">Firma y sello</div></div>
     ${footer()}
   </body></html>`;
 }
 
-export function medicationCardDocument({ card, patient, recordCase, corrections = [] }) {
-  const rows = card.items.map((item) => `
+export function medicationCardDocument({ card, patient, recordCase, corrections = [], variant = "complete" }) {
+  const items = card.items || [];
+  const title = variant === "simple" ? "Tarjeta de medicamentos simple" : variant === "count" ? "Conteo presencial" : "Tarjeta de medicamentos completa";
+  const completeRows = items.map((item) => `
     <tr>
       <td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td>
-      <td>${safeText(item.frequency)}</td><td>${safeText(item.schedule.join(", "))}</td>
-      <td>${formatDate(item.startDate)}</td><td>${formatDate(item.endDate)}</td>
+      <td>${safeText(item.frequency)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td>
+      <td>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</td><td>${safeText(item.indications || "—")}</td>
     </tr>
   `).join("");
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Tarjeta de medicamentos</title><style>${printCss}</style></head><body>
-    ${baseHeader("Tarjeta de medicamentos", card.id, card.version || 1)}
+  const simpleRows = items.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>${safeText(item.frequency)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td></tr>`).join("");
+  const countRows = items.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>&nbsp;</td><td>&nbsp;</td></tr>`).join("");
+  const table = variant === "simple"
+    ? `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th></tr></thead><tbody>${simpleRows}</tbody></table>`
+    : variant === "count"
+      ? `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Control</th><th>Observación</th></tr></thead><tbody>${countRows}</tbody></table><div class="notice"><strong>Formato provisional.</strong> El significado operativo, responsables y firmas del conteo presencial requieren confirmación del cliente.</div>`
+      : `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Vigencia</th><th>Indicaciones</th></tr></thead><tbody>${completeRows}</tbody></table>`;
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(title)}</title><style>${printCss}</style></head><body>
+    ${baseHeader(title, card.id, card.version || 1)}
     ${patientGrid(patient, recordCase)}
     ${clinicalRecordMetadata(card, corrections)}
-    <table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Inicio</th><th>Fin</th></tr></thead><tbody>${rows}</tbody></table>
+    ${variant === "complete" ? `<div class="grid"><div class="field"><small>Diagnóstico documentado</small><strong>${safeText(card.diagnosis || recordCase?.diagnosisSummary || "—")}</strong></div><div class="field"><small>Creado por</small><strong>${safeText(card.createdByName || card.createdBy || "—")}</strong></div></div>` : ""}
+    ${table}
     <div class="notice">La administración real debe documentar fecha, hora, responsable, omisión y motivo. Esta plantilla es de validación.</div>
     ${footer()}
   </body></html>`;

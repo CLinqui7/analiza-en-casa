@@ -17,6 +17,7 @@
     "test:browser:ch07": "playwright test tests/e2e/ch07.spec.mjs",
     "test:browser:ch08": "playwright test tests/e2e/ch08.spec.mjs",
     "test:browser:ch09": "playwright test tests/e2e/ch09.spec.mjs",
+    "test:browser:ch10": "playwright test tests/e2e/ch10.spec.mjs",
     "qa": "node scripts/qa-check.mjs",
     "check": "npm test && npm run qa && npm run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",

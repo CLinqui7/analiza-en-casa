@@ -55,6 +55,10 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       organizationId: record.organizationId
     };
   });
+  collections.doctors = (rawCollections.doctors || []).map((raw) => {
+    const doctor = camelCaseObject(raw);
+    return { ...doctor, name: doctor.fullName || doctor.name || "" };
+  });
 
   collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
     const root = camelCaseObject(rawQuote);
@@ -138,6 +142,33 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       otherDoctorIds: profile.otherDoctorIds || [],
       devices: profile.devices || [],
       attachmentMetadata: profile.attachmentMetadata || []
+    };
+  });
+  collections.clinicalDocuments = (rawCollections.clinicalDocuments || []).map((raw) => {
+    const document = camelCaseObject(raw);
+    return {
+      ...document,
+      caseId: document.hospitalizationId,
+      type: document.documentType,
+      version: Number(document.versionNumber || 1),
+      content: document.content || {}
+    };
+  });
+  collections.medicationCards = (rawCollections.medicationCards || []).map((raw) => {
+    const card = camelCaseObject(raw);
+    return {
+      ...card,
+      caseId: card.hospitalizationId,
+      version: Number(card.versionNumber || 1),
+      documentStatus: card.documentStatus || "DRAFT",
+      otherDoctorIds: card.otherDoctorIds || [],
+      items: (card.medicationCardItems || card.items || []).map((item) => ({
+        ...item,
+        medication: item.medicationName || item.medication,
+        doctorId: item.prescribingDoctorId || item.doctorId,
+        schedule: item.schedule || [],
+        administrationStatus: item.administrationStatus || "PENDING"
+      }))
     };
   });
   collections.payments = (rawCollections.payments || []).map((raw) => {
@@ -295,6 +326,7 @@ export async function createSupabaseAdapter(config) {
       ["quotes", "quotes", "*, quote_versions(*, quote_items(*))"],
       ["payments", "payments", "*, payment_allocations(*), payment_receipts(*)"],
       ["clinicalDocuments", "clinical_documents", "*"],
+      ["medicationCards", "medication_cards", "*, medication_card_items(*)"],
       ["shifts", "shifts", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
       ["inventoryItems", "inventory_items", "*"],
@@ -409,22 +441,37 @@ export async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok: true, ...data };
       }
-      case "SIGN_CLINICAL_DOCUMENT":
-        return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
-      case "SIGN_MEDICATION_CARD":
-        return client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
-      case "VOID_CLINICAL_DOCUMENT":
-        return client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
-      case "VOID_CLINICAL_RECORD":
-        return client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
-      case "CREATE_CLINICAL_CORRECTION":
-        return client.rpc("create_clinical_record_correction", {
+      case "SIGN_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "SIGN_MEDICATION_CARD": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
+        if (error) throw error;
+        return { ok: true, card: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_RECORD": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, record: camelCaseObject(data) };
+      }
+      case "CREATE_CLINICAL_CORRECTION": {
+        const { data, error } = await client.rpc("create_clinical_record_correction", {
           p_subject_type: payload.correction.subjectType,
           p_subject_id: payload.correction.subjectId,
           p_correction_kind: payload.correction.correctionKind,
           p_reason: payload.correction.reason,
           p_content: snakeCaseObject(payload.correction.content || {})
         });
+        if (error) throw error;
+        return { ok: true, correction: typeof data === "string" ? { id: data } : camelCaseObject(data) };
+      }
       case "CREATE_PAYMENT": {
         const { data, error } = await client.rpc("apply_payment", {
           p_quote_id: payload.payment.rootQuoteId || payload.payment.quoteId,
@@ -497,19 +544,45 @@ export async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok: Boolean(data) };
       }
-      case "CREATE_CLINICAL_DOCUMENT":
-        return insert("clinical_documents", {
-          id: payload.document.id,
-          hospitalization_id: payload.document.caseId,
-          patient_id: payload.document.patientId,
-          document_type: payload.document.type,
-          title: payload.document.title,
-          status: payload.document.status,
-          author_id: payload.document.authorId || null,
-          version_number: payload.document.version || 1,
-          summary: payload.document.summary || null,
-          content: payload.document.content || {}
+      case "CREATE_CLINICAL_DOCUMENT": {
+        const document = payload.document;
+        const { data, error } = await client.rpc("create_clinical_document_draft", {
+          p_hospitalization_id: document.caseId,
+          p_document_type: document.type,
+          p_title: document.title,
+          p_summary: document.summary || null,
+          p_content: snakeCaseObject(document.content || {}),
+          p_idempotency_key: document.idempotencyKey
         });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "CREATE_MEDICATION_CARD": {
+        const card = payload.card;
+        const { data, error } = await client.rpc("create_medication_card_draft", {
+          p_hospitalization_id: card.caseId,
+          p_header: snakeCaseObject({
+            treatingDoctorId: card.treatingDoctorId,
+            otherDoctorIds: card.otherDoctorIds || [],
+            diagnosis: card.diagnosis || ""
+          }),
+          p_items: snakeCaseObject(card.items || []),
+          p_idempotency_key: card.idempotencyKey
+        });
+        if (error) throw error;
+        const normalized = camelCaseObject(data);
+        return { ok: true, card: {
+          ...normalized,
+          caseId: normalized.hospitalizationId,
+          version: Number(normalized.versionNumber || 1),
+          items: (normalized.items || []).map((item) => ({
+            ...item,
+            medication: item.medicationName || item.medication,
+            doctorId: item.prescribingDoctorId || item.doctorId,
+            schedule: item.schedule || []
+          }))
+        } };
+      }
       case "CREATE_SHIFT":
         return insert("shifts", {
           id: payload.shift.id,

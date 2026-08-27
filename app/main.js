@@ -74,6 +74,11 @@ const ui = {
   healthReportTab: "main",
   healthReportRange: null,
   healthReportConfig: null,
+  medicalOrderTab: "active",
+  medicalOrderSearch: "",
+  medicalOrderPage: 1,
+  medicalOrderPageSize: 10,
+  medicationDraft: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -1022,6 +1027,7 @@ function currentQuotesForExport(state) {
 }
 
 function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId = "") {
+  if (type === "MEDICAL_ORDER") return openMedicalOrderForm(caseId, patientId);
   const state = store.getState();
   const record = state.cases.find((c) => c.id === caseId) || state.cases.find((c) => !patientId || c.patientId === patientId) || state.cases[0];
   openModal({
@@ -1042,6 +1048,82 @@ function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-document">Guardar documento</button>`
   });
+}
+
+const MEDICAL_ORDER_SECTIONS = [
+  ["diet", "Dieta"],
+  ["nursingCare", "Cuidados de Enfermería"],
+  ["venoclysis", "Venoclisis"],
+  ["medications", "Medicamentos"],
+  ["therapies", "Terapias"],
+  ["laboratories", "Laboratorios"],
+  ["other", "Otros"],
+  ["oxygen", "Oxígeno"],
+  ["fluidBalance", "Balance Hídrico + Diuresis"],
+  ["support", "Respaldo"],
+  ["vitalSigns", "Signos Vitales"]
+];
+
+function openClinicalCreationChoice(caseId = "") {
+  openModal({
+    title: "¿Qué quieres crear?",
+    subtitle: "Selecciona el documento clínico para la hospitalización autorizada.",
+    size: "md",
+    body: `<div class="choice-stack"><button class="btn btn-primary" data-action="choose-medical-order" data-case-id="${safeText(caseId)}">Orden Médica</button><button class="btn btn-secondary" data-action="choose-medication-card" data-case-id="${safeText(caseId)}">Tarjeta de medicamentos</button></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function orderPatientSummary(record) {
+  const state = store.getState();
+  const patient = record ? store.patientById(record.patientId) : null;
+  const profile = state.clinicalProfiles.find((item) => item.caseId === record?.id);
+  return `<div class="details-grid full"><div><span>Paciente</span><strong>${safeText(patient?.fullName || "—")}</strong></div><div><span>Cédula</span><strong>${safeText(patient?.document || "—")}</strong></div><div><span>Hospitalización</span><strong>${safeText(record?.id || "—")}</strong></div><div><span>Triage</span><strong>${safeText(profile?.triage || "No asignado")}</strong></div></div>`;
+}
+
+function openMedicalOrderForm(caseId = "", patientId = "") {
+  const state = store.getState();
+  const record = state.cases.find((item) => item.id === caseId) || state.cases.find((item) => !patientId || item.patientId === patientId) || state.cases[0];
+  openModal({
+    title: "Orden médica nueva",
+    subtitle: "Borrador clínico versionado. Las secciones sólo guardan lo documentado por el profesional autorizado.",
+    size: "xl",
+    body: `<form id="medical-order-form" class="form-grid">
+      <label class="full">Hospitalización<select name="caseId" data-action="medical-order-case-change">${caseOptions(record?.id)}</select></label>
+      ${orderPatientSummary(record)}
+      <label>Médico tratante<select name="treatingDoctorId" required><option value="">Seleccione</option>${doctorOptions(record?.contractingDoctorId)}</select></label>
+      <label>Otros médicos tratantes<select name="otherDoctorIds" multiple>${doctorOptions()}</select></label>
+      <label class="full">Diagnósticos documentados<textarea name="diagnosis" maxlength="2000" rows="2"></textarea></label>
+      <fieldset class="full"><legend>Orden médica · plan de cuidados</legend><p class="field-hint">Selecciona únicamente las secciones indicadas. No se calculan indicaciones clínicas.</p>
+        <div class="order-section-picker">${MEDICAL_ORDER_SECTIONS.map(([key,label],index) => `<label><input type="checkbox" name="section-${key}" ${index < 2 ? "checked" : ""}> ${safeText(label)}</label><textarea name="content-${key}" rows="3" maxlength="5000" placeholder="Contenido documentado para ${safeText(label)}"></textarea>`).join("")}</div>
+      </fieldset>
+      <input type="hidden" name="idempotencyKey" value="${uid("MEDICAL-ORDER")}">
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Atrás</button><button class="btn btn-primary" data-action="save-medical-order">Guardar borrador</button>`
+  });
+}
+
+function openPatientOrders(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((item) => item.id === caseId);
+  if (!record) return showToast("Hospitalización no encontrada.", "danger");
+  const documents = state.clinicalDocuments.filter((item) => item.caseId === caseId && item.type === "MEDICAL_ORDER");
+  const cards = state.medicationCards.filter((item) => item.caseId === caseId);
+  const treatments = cards.flatMap((cardData) => (cardData.items || []).map((item) => ({...item, cardId: cardData.id, documentStatus: cardData.documentStatus})));
+  const docRows = documents.map((item) => `<tr><td><button class="row-action" data-action="view-document" data-id="${safeText(item.id)}">Ver</button></td><td>${safeText(item.id)}</td><td>${safeText(item.status)}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.updatedAt || item.createdAt)}</td><td>Regla PMC pendiente</td></tr>`);
+  const cardRows = cards.map((item) => `<tr><td><button class="row-action" data-action="print-medication-card" data-id="${safeText(item.id)}" data-variant="complete">Imprimir</button></td><td>${safeText(item.id)}</td><td>${safeText(item.documentStatus)}</td><td>${safeText(item.createdByName || item.createdBy || "—")}</td><td>${safeText(item.updatedAt || item.createdAt)}</td><td>Regla PMC pendiente</td></tr>`);
+  const treatmentRows = treatments.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>${safeText(item.frequency)}</td><td>${safeText(item.startDate)} → ${safeText(item.endDate || "—")}</td><td>${safeText(item.documentStatus)}</td></tr>`);
+  openModal({
+    title: "Órdenes",
+    subtitle: `${record.id} · ${store.patientById(record.patientId)?.fullName || "Paciente"}`,
+    size: "xl",
+    body: `${orderPatientSummary(record)}<div class="tabs" aria-label="Consulta de documentos"><span class="tab active">Órdenes médicas (${documents.length})</span><span class="tab">Tarjetas de medicamentos (${cards.length})</span><span class="tab">Historial de tratamientos (${treatments.length})</span></div><section><h3>Órdenes médicas</h3>${simpleTable(["Acciones","Código","Estatus","Actualizado por","Última actualización","Estatus PMC"],docRows)}</section><section><h3>Tarjetas de medicamentos</h3>${simpleTable(["Acciones","Código","Estatus","Actualizado por","Última actualización","Estatus PMC"],cardRows)}</section><section><h3>Historial de tratamientos</h3>${simpleTable(["Tratamiento","Dosis","Vía","Frecuencia","Vigencia","Documento"],treatmentRows)}</section>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="open-clinical-creation-choice" data-case-id="${safeText(caseId)}">+ Nuevo</button>`
+  });
+}
+
+function simpleTable(headers, rows) {
+  return `<div class="table-wrap"><table><thead><tr>${headers.map((header) => `<th>${safeText(header)}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="${headers.length}">No hay registros disponibles.</td></tr>`}</tbody></table></div>`;
 }
 
 function openClinicalCorrectionForm(subjectType, subjectId) {
@@ -1267,25 +1349,79 @@ function openDiscountForm() {
   });
 }
 
-function openMedicationCardForm() {
+function openMedicationCardForm(caseId = "", preserveDraft = false) {
   const state = store.getState();
-  const record=state.cases[0];
+  const record = state.cases.find((item) => item.id === (caseId || ui.medicationDraft?.caseId)) || state.cases[0];
+  if (!preserveDraft || !ui.medicationDraft) {
+    ui.medicationDraft = {
+      caseId: record?.id || "",
+      treatingDoctorId: record?.contractingDoctorId || "",
+      otherDoctorIds: [],
+      diagnosis: record?.diagnosisSummary || "",
+      items: [],
+      signNow: false,
+      idempotencyKey: uid("MEDICATION-CARD")
+    };
+  }
+  const draft = ui.medicationDraft;
+  const selectedCase = state.cases.find((item) => item.id === draft.caseId) || record;
+  const selected = (value, expected) => value === expected ? "selected" : "";
   openModal({
-    title:"Nueva tarjeta de medicamentos",
-    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. La firma bloquea el contenido y las correcciones quedan auditadas.",
-    size:"lg",
+    title:"Tarjeta de medicamentos nueva",
+    subtitle:"Borrador con encabezado clínico y tratamientos documentados. No genera ni recomienda dosis.",
+    size:"xl",
     body:`<form id="medication-card-form" class="form-grid">
-      <label class="full">Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
-      <label class="full">Medicamento<input name="medication" required value="Medicamento demo 500 mg"></label>
-      <label>Dosis<input name="dose" value="1 tableta"></label>
-      <label>Vía<select name="route"><option>VO</option><option>IV</option><option>IM</option><option>SC</option><option>INHALADA</option></select></label>
-      <label>Frecuencia<input name="frequency" value="Cada 8 horas"></label>
-      <label>Horarios<input name="schedule" value="06:00, 14:00, 22:00"></label>
-      <label>Inicio<input type="date" name="startDate" value="${new Date().toISOString().slice(0,10)}"></label>
-      <label>Fin<input type="date" name="endDate" value="${new Date(Date.now()+7*86400000).toISOString().slice(0,10)}"></label>
-      <label class="full"><input type="checkbox" name="signNow"> Firmar y bloquear al guardar</label>
+      <label class="full">Hospitalización<select name="caseId" data-action="medication-card-case-change">${caseOptions(selectedCase?.id)}</select></label>
+      ${orderPatientSummary(selectedCase)}
+      <label>Médico tratante<select name="treatingDoctorId" required><option value="">Seleccione</option>${doctorOptions(draft.treatingDoctorId)}</select></label>
+      <label>Otros médicos tratantes<select name="otherDoctorIds" multiple>${state.doctors.map((doctor) => `<option value="${doctor.id}" ${draft.otherDoctorIds.includes(doctor.id) ? "selected" : ""}>${safeText(doctor.name)} · ${safeText(doctor.specialty)}</option>`).join("")}</select></label>
+      <label class="full">Diagnósticos documentados<textarea name="diagnosis" rows="2" maxlength="2000">${safeText(draft.diagnosis)}</textarea></label>
+      <section class="full form-section"><header class="card-header"><div><h3>Tabla de tratamientos</h3><p>Tratamientos del paciente · Actualizaciones</p></div><button type="button" class="btn btn-secondary" data-action="open-treatment-draft">+ Agregar tratamiento</button></header>
+        ${simpleTable(["Tratamiento","Dosis","Horarios","Inicio","Duración","Crónico","Indicaciones"], draft.items.map((item,index) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)} · ${safeText(item.route)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td><td>${safeText(item.startDate)}</td><td>${safeText(item.durationDays ? `${item.durationDays} días` : item.endDate || "—")}</td><td>${item.chronic ? "Sí" : "No"}</td><td>${safeText(item.indications || "—")}<button type="button" class="row-action" data-action="remove-treatment-draft" data-index="${index}" aria-label="Quitar tratamiento">×</button></td></tr>`))}
+      </section>
+      <label class="full"><input type="checkbox" name="signNow" ${draft.signNow ? "checked" : ""}> Firmar y bloquear al guardar</label>
     </form>`,
-    footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-medication-card">Crear tarjeta</button>`
+    footer:`<button class="btn btn-secondary" data-action="cancel-medication-draft">Atrás</button><button class="btn btn-primary" data-action="save-medication-card">Guardar tarjeta</button>`
+  });
+}
+
+function syncMedicationDraft() {
+  const form = document.querySelector("#medication-card-form");
+  if (!form || !ui.medicationDraft) return;
+  const data = new FormData(form);
+  ui.medicationDraft.caseId = String(data.get("caseId") || "");
+  ui.medicationDraft.treatingDoctorId = String(data.get("treatingDoctorId") || "");
+  ui.medicationDraft.otherDoctorIds = data.getAll("otherDoctorIds").map(String);
+  ui.medicationDraft.diagnosis = String(data.get("diagnosis") || "");
+  ui.medicationDraft.signNow = data.has("signNow");
+}
+
+function openTreatmentDraftForm() {
+  syncMedicationDraft();
+  const state = store.getState();
+  const medicationNames = state.catalogItems.filter((item) => item.category === "MEDICATIONS").map((item) => item.name);
+  const today = new Date().toISOString().slice(0,10);
+  openModal({
+    title: "Configuración de tratamientos",
+    subtitle: "Captura fiel de una indicación existente; no ofrece recomendación clínica.",
+    size: "lg",
+    body: `<form id="treatment-draft-form" class="form-grid">
+      <label class="full">Paciente<input value="${safeText(store.patientById(store.caseById(ui.medicationDraft.caseId)?.patientId)?.fullName || "—")}" disabled></label>
+      <label>Medicamento<input name="medication" list="medication-catalog" required maxlength="300"><datalist id="medication-catalog">${medicationNames.map((name) => `<option value="${safeText(name)}"></option>`).join("")}</datalist></label>
+      <label>Médico<select name="doctorId" required><option value="">Seleccione</option>${doctorOptions(ui.medicationDraft.treatingDoctorId)}</select></label>
+      <label>Vía de administración<select name="route" required><option value="">Seleccione</option><option>IV</option><option>VO</option><option>SC</option><option>IM</option><option value="OTHER">Otra documentada</option></select></label>
+      <label>Dosis<input name="dose" required maxlength="160" autocomplete="off"></label>
+      <label>Frecuencia<select name="frequency" required><option value="">Seleccione</option><option>Cada 4 horas</option><option>Cada 6 horas</option><option>Cada 8 horas</option><option>Cada 12 horas</option><option>Cada día</option><option>BID</option><option>TID</option><option value="OTHER">Otra documentada</option></select></label>
+      <label>Duración (días)<input type="number" name="durationDays" min="1" max="3660" step="1"></label>
+      <label>Fecha inicio<input type="date" name="startDate" value="${today}" required></label>
+      <label>Fecha fin<input type="date" name="endDate" min="${today}" required></label>
+      <label class="full"><input type="checkbox" name="chronic"> Medicamento crónico (marca documentada)</label>
+      <label class="full">Horarios<input name="schedule" placeholder="08:00, 20:00 o PRN" maxlength="500"></label>
+      <label class="full">Indicaciones<textarea name="indications" rows="4" maxlength="5000"></textarea></label>
+      <label class="full"><input type="checkbox" name="showDilutions"> Mostrar diluciones documentadas</label>
+      <label class="full">Diluciones<textarea name="dilutions" rows="2" maxlength="2000" disabled placeholder="Se habilita al marcar Mostrar diluciones"></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="return-to-medication-draft">Cerrar</button><button class="btn btn-primary" data-action="save-treatment-draft">Guardar tratamiento</button>`
   });
 }
 
@@ -1358,12 +1494,12 @@ function printClinicalDocument(id) {
   openPrintWindow(html,doc.title);
 }
 
-function printMedicationCard(id){
+function printMedicationCard(id, variant = "complete"){
   const state=store.getState();
   const card=state.medicationCards.find(c=>c.id===id);
   if(!card) throw new Error("Tarjeta no encontrada.");
   const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="MEDICATION_CARD"&&item.subjectId===card.id);
-  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections}),`Tarjeta ${card.id}`);
+  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections,variant}),`Tarjeta ${card.id}`);
 }
 
 function printStatement(id){
@@ -1702,6 +1838,16 @@ document.addEventListener("click", async (event) => {
     }
     case "set-health-report-tab": ui.healthReportTab = data.tab || "main"; render(); break;
     case "health-report-page": ui.healthReportPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "set-medical-order-tab": ui.medicalOrderTab = data.tab || "active"; ui.medicalOrderPage = 1; render(); break;
+    case "medical-order-page": ui.medicalOrderPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "open-clinical-creation-choice": openClinicalCreationChoice(data.caseId || ""); break;
+    case "choose-medical-order": openMedicalOrderForm(data.caseId || ""); break;
+    case "choose-medication-card": openMedicationCardForm(data.caseId || ""); break;
+    case "view-patient-orders": openPatientOrders(data.caseId || ""); break;
+    case "open-treatment-draft": openTreatmentDraftForm(); break;
+    case "return-to-medication-draft": openMedicationCardForm("", true); break;
+    case "remove-treatment-draft": if (ui.medicationDraft) { syncMedicationDraft(); ui.medicationDraft.items.splice(Number(data.index),1); openMedicationCardForm("",true); } break;
+    case "cancel-medication-draft": ui.medicationDraft = null; closeModal(); break;
     case "change-health-report-range": openHealthReportRange(data.caseId || ""); break;
     case "open-health-report-config": renderHealthReportConfigModal(data.caseId || ""); break;
     case "health-report-config-add": {
@@ -1781,10 +1927,10 @@ document.addEventListener("click", async (event) => {
     case "open-catalog-form": openCatalogForm(data.category||""); break;
     case "edit-catalog-item": openCatalogForm("",data.id); break;
     case "open-discount-form": openDiscountForm(); break;
-    case "open-medication-card": openMedicationCardForm(); break;
-    case "print-medication-card": runSafely(()=>printMedicationCard(data.id)); break;
+    case "open-medication-card": openMedicationCardForm(data.caseId || ""); break;
+    case "print-medication-card": runSafely(()=>printMedicationCard(data.id,data.variant || "complete")); break;
     case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
-    case "administer-medication": showToast("Administración registrada en modo demo."); break;
+    case "administer-medication": showToast("Registro de administración deshabilitado hasta confirmar campos, permisos y correcciones.", "info"); break;
     case "open-doctor-form": openDoctorForm(); break;
     case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
     case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id),"Estado de cuenta enviado en modo simulado."); break;
@@ -1885,6 +2031,37 @@ document.addEventListener("change", (event) => {
       form.elements.namedItem("insuredBirthDate").value = form.elements.namedItem("birthDate").value;
     }
   }
+  if (action === "medication-card-case-change" && ui.medicationDraft) {
+    syncMedicationDraft();
+    openMedicationCardForm(target.value, true);
+    return;
+  }
+  if (action === "medical-order-case-change") {
+    const record = store.caseById(target.value);
+    const summary = target.form?.querySelector(".details-grid");
+    if (record && summary) summary.outerHTML = orderPatientSummary(record);
+    const doctor = target.form?.elements.namedItem("treatingDoctorId");
+    const diagnosis = target.form?.elements.namedItem("diagnosis");
+    if (doctor && !doctor.value) doctor.value = record?.contractingDoctorId || "";
+    if (diagnosis && !diagnosis.value) diagnosis.value = record?.diagnosisSummary || "";
+    return;
+  }
+  if (target.matches('#treatment-draft-form [name="showDilutions"]')) {
+    const dilutions = target.form?.elements.namedItem("dilutions");
+    if (dilutions) { dilutions.disabled = !target.checked; if (!target.checked) dilutions.value = ""; }
+  }
+  if (target.matches('#treatment-draft-form [name="startDate"], #treatment-draft-form [name="durationDays"]')) {
+    const form = target.form;
+    const start = String(form?.elements.namedItem("startDate")?.value || "");
+    const days = Number(form?.elements.namedItem("durationDays")?.value || 0);
+    const end = form?.elements.namedItem("endDate");
+    if (end && /^\d{4}-\d{2}-\d{2}$/.test(start) && Number.isInteger(days) && days > 0) {
+      const date = new Date(`${start}T12:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days - 1);
+      end.value = date.toISOString().slice(0,10);
+      end.min = start;
+    }
+  }
   if (target.matches('[data-ui-filter="patientPageSize"]')) {
     ui.patientPageSize = Math.max(1, Math.min(100, Number(target.value || 10)));
     ui.patientPage = 1;
@@ -1942,6 +2119,11 @@ document.addEventListener("change", (event) => {
     ui.healthReportPage = 1;
     render();
   }
+  if (target.matches('[data-ui-filter="medicalOrderPageSize"]')) {
+    ui.medicalOrderPageSize = Math.max(1, Math.min(50, Number(target.value || 10)));
+    ui.medicalOrderPage = 1;
+    render();
+  }
   if (target.id === "patient-import-file") {
     const file = target.files?.[0];
     if (!file) return;
@@ -1986,6 +2168,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="health-report-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="medical-order-search"]')) {
+    ui.medicalOrderSearch = target.value;
+    ui.medicalOrderPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="medical-order-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }
@@ -2220,16 +2411,42 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#clinical-document-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const document=runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan}}),"Documento clínico creado.");
-    if(document&&formBool(form,"signNow")) runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
+    const document=await runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan},idempotencyKey:uid("CLINICAL-DOCUMENT")}),"Documento clínico creado.");
+    if(document&&formBool(form,"signNow")) await runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
     if(document){closeModal(); location.hash=`#/hospitalizaciones/${data.caseId}`; ui.tab="clinical";}
+  }
+
+  if(action==="save-medical-order"){
+    const form=document.querySelector("#medical-order-form");
+    if(!form?.reportValidity()) return;
+    const fd=new FormData(form);
+    const sections=MEDICAL_ORDER_SECTIONS.filter(([key])=>fd.has(`section-${key}`)).map(([key,label])=>({key,label,content:String(fd.get(`content-${key}`)||"").trim()}));
+    if(!sections.length){showToast("Seleccione al menos una sección de la orden.","danger");return;}
+    const result=await runSafely(()=>store.createClinicalDocument({
+      caseId:String(fd.get("caseId")),type:"MEDICAL_ORDER",title:`Orden médica · ${String(fd.get("caseId"))}`,
+      summary:sections.map((section)=>section.label).join(", "),
+      content:{treatingDoctorId:String(fd.get("treatingDoctorId")||""),otherDoctorIds:fd.getAll("otherDoctorIds").map(String),diagnosis:String(fd.get("diagnosis")||"").trim(),sections},
+      idempotencyKey:String(fd.get("idempotencyKey")||uid("MEDICAL-ORDER"))
+    }),"Orden médica guardada como borrador.");
+    if(result){closeModal();location.hash="#/clinica/ordenes";}
+  }
+
+  if(action==="save-treatment-draft"){
+    const form=document.querySelector("#treatment-draft-form");
+    if(!form?.reportValidity()||!ui.medicationDraft) return;
+    const data=Object.fromEntries(new FormData(form));
+    if(data.endDate < data.startDate){showToast("La fecha de fin no puede ser anterior al inicio.","danger");return;}
+    const durationDays=data.durationDays?Number(data.durationDays):null;
+    if(durationDays!==null&&(!Number.isInteger(durationDays)||durationDays<1||durationDays>3660)){showToast("La duración documentada no es válida.","danger");return;}
+    ui.medicationDraft.items.push({id:uid("MCI"),medication:String(data.medication).trim(),doctorId:data.doctorId,route:data.route,dose:String(data.dose).trim(),frequency:data.frequency,durationDays,startDate:data.startDate,endDate:data.endDate,chronic:formBool(form,"chronic"),schedule:String(data.schedule||"").split(",").map(value=>value.trim()).filter(Boolean),indications:String(data.indications||"").trim(),dilutions:formBool(form,"showDilutions")?String(data.dilutions||"").trim():"",lastAdministration:null,administrationStatus:"PENDING"});
+    openMedicationCardForm("",true);
   }
 
   if(action==="save-clinical-correction"){
     const form=document.querySelector("#clinical-correction-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
+    const result=await runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
     if(result) closeModal();
   }
 
@@ -2237,7 +2454,7 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#clinical-void-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
+    const result=await runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
     if(result!==undefined) closeModal();
   }
 
@@ -2329,10 +2546,12 @@ document.addEventListener("click", async (event) => {
   if(action==="save-medication-card"){
     const form=document.querySelector("#medication-card-form");
     if(!form?.reportValidity()) return;
-    const data=Object.fromEntries(new FormData(form));
-    const card=runSafely(()=>store.createMedicationCard({caseId:data.caseId,items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()).filter(Boolean),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]}),"Tarjeta de medicamentos creada como borrador.");
-    if(card&&formBool(form,"signNow")) runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
-    if(card){closeModal();render();}
+    syncMedicationDraft();
+    if(!ui.medicationDraft?.items.length){showToast("Agregue al menos un tratamiento documentado.","danger");return;}
+    const signNow=ui.medicationDraft.signNow;
+    const card=await runSafely(()=>store.createMedicationCard(ui.medicationDraft),"Tarjeta de medicamentos creada como borrador.");
+    if(card&&signNow) await runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
+    if(card){ui.medicationDraft=null;closeModal();location.hash="#/clinica/medicamentos";render();}
   }
 
   if(action==="save-doctor"){

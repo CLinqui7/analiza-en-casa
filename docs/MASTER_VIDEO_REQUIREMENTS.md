@@ -5,9 +5,9 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 73
-- Estados de gap: IMPLEMENTED_EXACT=0, IMPLEMENTED_PARTIAL=176, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=27
-- Prioridades: P0=0, P1=176, P2=34, P3=0
+- Preguntas abiertas: 86
+- Estados de gap: IMPLEMENTED_EXACT=2, IMPLEMENTED_PARTIAL=171, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=30
+- Prioridades: P0=2, P1=174, P2=34, P3=0
 
 ## Gaps P0 de seguridad e integridad
 
@@ -204,14 +204,14 @@ Eventos: 114/114. Requisitos: 10.
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
 | CH10-F01 | Listado de pacientes de Orden Médica | CH10-E0008 @ 00:27:37.600; CH10-E0009 @ 00:27:42.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F02 | Elección de tipo de documento | CH10-E0011 @ 00:27:43.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F03 | Encabezado y tratamientos de tarjeta | CH10-E0013 @ 00:27:55.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F04 | Editor detallado de tratamiento | CH10-E0020 @ 00:27:59.800; CH10-E0050 @ 00:29:08.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F05 | Catálogos visibles de pauta y horarios | CH10-E0021 @ 00:28:00.400; CH10-E0028 @ 00:28:14.000; CH10-E0031 @ 00:28:22.800; CH10-E0034 @ 00:28:26.200; CH10-E0042 @ 00:28:42.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F06 | Derivación aparente de fecha final | CH10-E0035 @ 00:28:27.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH10-F02 | Elección de tipo de documento | CH10-E0011 @ 00:27:43.800 | IMPLEMENTED_EXACT | P1 |
+| CH10-F03 | Encabezado y tratamientos de tarjeta | CH10-E0013 @ 00:27:55.600 | IMPLEMENTED_EXACT | P1 |
+| CH10-F04 | Editor detallado de tratamiento | CH10-E0020 @ 00:27:59.800; CH10-E0050 @ 00:29:08.800 | IMPLEMENTED_PARTIAL | P0 |
+| CH10-F05 | Catálogos visibles de pauta y horarios | CH10-E0021 @ 00:28:00.400; CH10-E0028 @ 00:28:14.000; CH10-E0031 @ 00:28:22.800; CH10-E0034 @ 00:28:26.200; CH10-E0042 @ 00:28:42.400 | NEEDS_CLIENT_CONFIRMATION | P1 |
+| CH10-F06 | Derivación aparente de fecha final | CH10-E0035 @ 00:28:27.200 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH10-F07 | Composición de orden por etiquetas | CH10-E0072 @ 00:29:30.800; CH10-E0073 @ 00:29:31.400; CH10-E0091 @ 00:29:52.400 | IMPLEMENTED_PARTIAL | P1 |
 | CH10-F08 | Consulta de órdenes, tarjetas e historial | CH10-E0109 @ 00:30:13.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F09 | Impresiones de tarjeta de medicamentos | CH10-E0109 @ 00:30:13.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH10-F09 | Impresiones de tarjeta de medicamentos | CH10-E0109 @ 00:30:13.200 | NEEDS_CLIENT_CONFIRMATION | P1 |
 | CH10-F10 | Permisos y corrección clínica | CH10-E0112 @ 00:31:12.200 | NOT_TESTABLE | P2 |
 
 ## CH11 · Agenda y turnos

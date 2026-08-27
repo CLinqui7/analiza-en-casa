@@ -153,7 +153,9 @@ export async function createAppStore(config) {
 
   async function requiredSync(action, payload) {
     try {
-      return await adapter.sync(action, payload);
+      const result = await adapter.sync(action, payload);
+      if (result?.error) throw result.error;
+      return result;
     } catch (error) {
       setState((draft) => {
         draft.meta.remoteError = error.message;
@@ -1103,13 +1105,27 @@ export async function createAppStore(config) {
 
   function createClinicalDocument(input) {
     requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const type = String(input.type || "HEALTH_REPORT").trim().toUpperCase();
+    if (!["HEALTH_REPORT","MEDICAL_ORDER","CARE_PLAN","CLINICAL_EVOLUTION","LAB_REQUEST","NURSING_NOTE"].includes(type)) throw new Error("Tipo de documento clínico no válido.");
+    const title = String(input.title || "Documento clínico").trim();
+    const summary = String(input.summary || "").trim();
+    if (!title || title.length > 300 || summary.length > 5000 || JSON.stringify(input.content || {}).length > 100000) throw new Error("Revise el contenido del documento clínico.");
+    const doctorIds = [input.content?.treatingDoctorId, ...(input.content?.otherDoctorIds || [])].filter(Boolean);
+    if (type === "MEDICAL_ORDER" && !input.content?.treatingDoctorId) throw new Error("Seleccione el médico tratante de la orden.");
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId && doctor.status === "ACTIVE" && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    const idempotencyKey = String(input.idempotencyKey || uid("CLINICAL-DOCUMENT")).trim().slice(0,160);
+    const duplicate = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const document = {
       id: uid("DOC"),
-      caseId: input.caseId,
-      patientId: caseById(input.caseId)?.patientId || input.patientId,
-      type: input.type || "HEALTH_REPORT",
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      type,
       organizationId: state.organization?.id,
-      title: input.title || "Documento clínico",
+      title,
       status: "DRAFT",
       authorId: currentUser().id,
       authorName: currentUser().name,
@@ -1117,15 +1133,23 @@ export async function createAppStore(config) {
       signedAt: null,
       signatureMetadata: null,
       version: 1,
-      summary: input.summary || "",
-      content: input.content || {}
+      summary,
+      content: clone(input.content || {}),
+      idempotencyKey
     };
-    setState((draft) => {
-      draft.clinicalDocuments.unshift(document);
-      audit("CREATE_CLINICAL_DOCUMENT", document.id, `${document.title} creado en borrador.`);
-    });
-    safeSync("CREATE_CLINICAL_DOCUMENT", { document });
-    return document;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.document || {};
+      const committed = adapter.mode === "supabase" ? {...document,...remote,id:remote.id||document.id,caseId:remote.hospitalizationId||document.caseId,patientId:remote.patientId||document.patientId,type:remote.documentType||document.type} : document;
+      const existing = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey || candidate.id === committed.id);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.clinicalDocuments.unshift(committed);
+        audit("CREATE_CLINICAL_DOCUMENT", committed.id, `${committed.title} creado en borrador.`, {idempotencyKey});
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_DOCUMENT", { document }).then(commit);
+    return commit();
   }
 
   function createClinicalProfile(input) {
@@ -1235,11 +1259,13 @@ export async function createAppStore(config) {
 
   function signClinicalDocument(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
+    const document = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!document) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(document, "Documento clínico");
+    if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
       document.status = "SIGNED";
       document.signedAt = nowIso();
       document.signedBy = currentUser().id;
@@ -1254,19 +1280,24 @@ export async function createAppStore(config) {
         version: document.version,
         signatureMetadata: document.signatureMetadata
       });
-    });
-    safeSync("SIGN_CLINICAL_DOCUMENT", { documentId: id });
+      });
+      return document;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_CLINICAL_DOCUMENT", { documentId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalDocument(id, reason) {
     requirePermission("clinical:correct_signed");
     const normalizedReason = String(reason || "").trim();
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
-    setState((draft) => {
+    const source = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(source, "Documento clínico");
+    if (source.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
       document.status = "VOIDED";
       document.voidReason = normalizedReason;
       document.voidedAt = nowIso();
@@ -1275,9 +1306,11 @@ export async function createAppStore(config) {
         version: document.version,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function createClinicalCorrection(subjectType, subjectId, input) {
@@ -1293,43 +1326,93 @@ export async function createAppStore(config) {
     if (!["AMENDMENT", "ADDENDUM", "ERRATA"].includes(correctionKind)) {
       throw new Error("Tipo de corrección no válido.");
     }
-    let correction;
-    setState((draft) => {
-      const prior = draft.clinicalCorrections
-        .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
-        .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
-      correction = {
-        id: uid("COR"),
-        organizationId: state.organization?.id,
-        subjectType,
-        subjectId,
-        originalDocumentId: subjectId,
-        previousVersionId: prior?.id || subjectId,
-        correctionKind,
-        reason,
-        content: clone(input.content || {}),
-        authorId: currentUser().id,
-        authorName: currentUser().name,
-        authorRole: state.session.role,
-        status: "CORRECTED",
-        createdAt: nowIso()
-      };
-      draft.clinicalCorrections.unshift(correction);
-      audit("CREATE_CLINICAL_CORRECTION", correction.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
-        subjectType,
-        subjectId,
-        previousVersionId: correction.previousVersionId,
-        correctionKind
+    const prior = state.clinicalCorrections
+      .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
+      .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+    const correction = {
+      id: uid("COR"),
+      organizationId: state.organization?.id,
+      subjectType,
+      subjectId,
+      originalDocumentId: subjectId,
+      previousVersionId: prior?.id || subjectId,
+      correctionKind,
+      reason,
+      content: clone(input.content || {}),
+      authorId: currentUser().id,
+      authorName: currentUser().name,
+      authorRole: state.session.role,
+      status: "CORRECTED",
+      createdAt: nowIso()
+    };
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.correction || {};
+      const committed = adapter.mode === "supabase" ? {...correction,...remote,id:remote.id||correction.id} : correction;
+      if (state.clinicalCorrections.some((candidate) => candidate.id === committed.id)) return committed;
+      setState((draft) => {
+        draft.clinicalCorrections.unshift(committed);
+        audit("CREATE_CLINICAL_CORRECTION", committed.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
+          subjectType,
+          subjectId,
+          previousVersionId: committed.previousVersionId,
+          correctionKind
+        });
       });
-    });
-    safeSync("CREATE_CLINICAL_CORRECTION", { correction });
-    return correction;
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_CORRECTION", { correction }).then(commit);
+    return commit();
   }
 
   function createMedicationCard(input) {
     requirePermission("clinical:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const treatingDoctorId = String(input.treatingDoctorId || "").trim();
+    if (!treatingDoctorId) throw new Error("Seleccione el médico tratante de la tarjeta.");
+    const otherDoctorIds = [...new Set((Array.isArray(input.otherDoctorIds) ? input.otherDoctorIds : []).filter(Boolean))];
+    const rawItems = Array.isArray(input.items) ? input.items : [];
+    if (!rawItems.length || rawItems.length > 100) throw new Error("Agregue entre 1 y 100 tratamientos documentados.");
+    const doctorIds = [treatingDoctorId, ...otherDoctorIds, ...rawItems.map((item) => item.doctorId)].filter(Boolean);
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId
+      && doctor.status === "ACTIVE"
+      && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) {
+      throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    }
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+    const items = rawItems.map((rawItem) => {
+      const item = {
+        id: rawItem.id || uid("MCI"),
+        medication: String(rawItem.medication || "").trim(),
+        doctorId: String(rawItem.doctorId || treatingDoctorId || "").trim() || null,
+        route: String(rawItem.route || "").trim(),
+        dose: String(rawItem.dose || "").trim(),
+        frequency: String(rawItem.frequency || "").trim(),
+        durationDays: rawItem.durationDays === "" || rawItem.durationDays == null ? null : Number(rawItem.durationDays),
+        startDate: String(rawItem.startDate || "").trim(),
+        endDate: String(rawItem.endDate || "").trim(),
+        chronic: Boolean(rawItem.chronic),
+        schedule: [...new Set((Array.isArray(rawItem.schedule) ? rawItem.schedule : []).map((value) => String(value).trim()).filter(Boolean))],
+        indications: String(rawItem.indications || "").trim(),
+        dilutions: String(rawItem.dilutions || "").trim(),
+        administrationStatus: String(rawItem.administrationStatus || "PENDING").trim()
+      };
+      if (![item.medication,item.route,item.dose,item.frequency].every(Boolean)
+        || [item.medication,item.route,item.dose,item.frequency].some((value) => value.length > 500)
+        || item.indications.length > 5000 || item.dilutions.length > 5000
+        || Boolean(item.startDate) !== Boolean(item.endDate)
+        || (item.startDate && (!isoDate.test(item.startDate) || !isoDate.test(item.endDate) || item.endDate < item.startDate))
+        || (item.durationDays != null && !item.startDate)
+        || (item.durationDays != null && (!Number.isInteger(item.durationDays) || item.durationDays < 1 || item.durationDays > 3660))
+        || item.schedule.length > 96 || item.schedule.some((value) => value.length > 20)) {
+        throw new Error("Revise medicamento, prescriptor, vía, dosis, frecuencia, calendario y detalles del tratamiento.");
+      }
+      return item;
+    });
+    const idempotencyKey = String(input.idempotencyKey || uid("MEDICATION-CARD")).trim().slice(0,160);
+    const duplicate = state.medicationCards.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const card = {
       id: uid("MC"),
       organizationId: state.organization?.id,
@@ -1340,28 +1423,46 @@ export async function createAppStore(config) {
       version: 1,
       createdAt: nowIso(),
       createdBy: currentUser().id,
+      createdByName: currentUser().name,
+      treatingDoctorId: treatingDoctorId || null,
+      otherDoctorIds,
+      diagnosis: String(input.diagnosis || "").trim().slice(0, 5000),
+      idempotencyKey,
       signatureMetadata: null,
-      items: clone(input.items || [])
+      items
     };
-    setState((draft) => {
-      draft.medicationCards.unshift(card);
-      audit("CREATE_MEDICATION_CARD", card.id, "Tarjeta de medicamentos creada en borrador.");
-    });
-    safeSync("CREATE_MEDICATION_CARD", { card });
-    return card;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.card || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...card, ...remote, id: remote.id || card.id, caseId: remote.hospitalizationId || card.caseId,
+        documentStatus: remote.documentStatus || card.documentStatus,
+        items: remote.items || card.items
+      } : card;
+      const existing = state.medicationCards.find((candidate) => candidate.id === committed.id || candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.medicationCards.unshift(committed);
+        audit("CREATE_MEDICATION_CARD", committed.id, "Tarjeta de medicamentos creada en borrador.", { idempotencyKey });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_MEDICATION_CARD", { card }).then(commit);
+    return commit();
   }
 
   function signMedicationCard(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
-      const card = draft.medicationCards.find((candidate) => candidate.id === id);
-      if (!card) throw new Error("Tarjeta de medicamentos no encontrada.");
-      assertCurrentOrganization(card, "Tarjeta de medicamentos");
-      if (card.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
-      card.documentStatus = "SIGNED";
-      card.signedAt = nowIso();
-      card.signedBy = currentUser().id;
-      card.signatureMetadata = {
+    const source = state.medicationCards.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Tarjeta de medicamentos no encontrada.");
+    assertCurrentOrganization(source, "Tarjeta de medicamentos");
+    if (source.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
+    const commit = () => {
+      setState((draft) => {
+        const card = draft.medicationCards.find((candidate) => candidate.id === id);
+        card.documentStatus = "SIGNED";
+        card.signedAt = nowIso();
+        card.signedBy = currentUser().id;
+        card.signatureMetadata = {
         signedAt: card.signedAt,
         signedBy: currentUser().id,
         signerRole: state.session.role,
@@ -1369,8 +1470,11 @@ export async function createAppStore(config) {
         legalValidation: "NEEDS_CLIENT_CONFIRMATION"
       };
       audit("SIGN_MEDICATION_CARD", id, "Tarjeta de medicamentos firmada y bloqueada.");
-    });
-    safeSync("SIGN_MEDICATION_CARD", { cardId: id });
+      });
+      return state.medicationCards.find((candidate) => candidate.id === id);
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_MEDICATION_CARD", { cardId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalRecord(subjectType, subjectId, reason) {
@@ -1382,21 +1486,24 @@ export async function createAppStore(config) {
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
     const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
     if (status !== "SIGNED") throw new Error("Sólo se puede anular un registro firmado.");
-    setState((draft) => {
-      const target = clinicalRecord(subjectType, subjectId);
-      if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
-      else target.status = "VOIDED";
-      target.voidReason = normalizedReason;
-      target.voidedAt = nowIso();
-      target.voidedBy = currentUser().id;
-      audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
+    const commit = () => {
+      setState(() => {
+        const target = clinicalRecord(subjectType, subjectId);
+        if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
+        else target.status = "VOIDED";
+        target.voidReason = normalizedReason;
+        target.voidedAt = nowIso();
+        target.voidedBy = currentUser().id;
+        audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
         subjectType,
         version: target.version || 1,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function addVitalSigns(input) {

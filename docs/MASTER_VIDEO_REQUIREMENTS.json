@@ -386,7 +386,21 @@
         "CH10-F09",
         "CH10-F10"
       ],
-      "open_question_ids": []
+      "open_question_ids": [
+        "CH10-Q001",
+        "CH10-Q002",
+        "CH10-Q003",
+        "CH10-Q004",
+        "CH10-Q005",
+        "CH10-Q006",
+        "CH10-Q007",
+        "CH10-Q008",
+        "CH10-Q009",
+        "CH10-Q010",
+        "CH10-Q011",
+        "CH10-Q012",
+        "CH10-Q013"
+      ]
     },
     {
       "chapter_id": "CH11",
@@ -4697,17 +4711,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q011"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Registro XPO no muta estado hasta contar con contrato y permisos; las demás acciones derivan la hospitalización autorizada.",
+        "financial_impact": "Sin impacto financiero directo demostrado.",
+        "current_platform_evidence": "app/views.js renderMedicalOrders; app/main.js openClinicalCreationChoice/openPatientOrders",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Confirmar el contrato de Registro XPO; conservar visible sin éxito aparente.",
+        "blocked_by_client_information": true,
+        "notes": "Tabs, búsqueda, paginación y Nuevo/Ver Órdenes están implementados; Registro XPO requiere CH10-Q012."
       }
     },
     {
@@ -4733,15 +4749,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "La elección conserva el caso autorizado y no crea datos antes de guardar.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js openClinicalCreationChoice",
+        "test_path": "tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Conservar prueba de navegador.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Modal bifurcado exacto para Orden Médica o Tarjeta de medicamentos."
       }
     },
     {
@@ -4767,15 +4783,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "Identidad deriva de hospitalización autorizada y profesionales activos del tenant.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js orderPatientSummary/openMedicationCardForm; app/store.js createMedicationCard",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Conservar validación organizacional y datos sintéticos.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Encabezado, tabla multi-tratamiento y acciones Guardar/Atrás implementados."
       }
     },
     {
@@ -4808,17 +4824,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q006"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "Todos los campos observados se conservan estructurados; no se recomienda dosis ni se calcula dilución.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js openTreatmentDraftForm; app/store.js createMedicationCard; migration 202608270006",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Confirmar catálogos y política de rich text antes de sustituir capturas configurables.",
+        "blocked_by_client_information": true,
+        "notes": "Medicamento, médico, vía, dosis, frecuencia, duración, fechas, crónico, horarios, indicaciones y diluciones están implementados; CH10-Q003/Q005/Q006 bloquean catálogo oficial."
       }
     },
     {
@@ -4878,17 +4896,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q003",
+        "CH10-Q005"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Copiar relaciones terapéuticas no aprobadas podría convertir ejemplos en reglas clínicas.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js openTreatmentDraftForm usa valores observados y alternativa Otra documentada; horarios permanecen documentales.",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Aprobar fuentes y relaciones de catálogos antes de endurecer selección.",
+        "blocked_by_client_information": true,
+        "notes": "CH10-Q003 y CH10-Q005."
       }
     },
     {
@@ -4912,17 +4933,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q004"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "La plataforma rechaza rangos invertidos y muestra una sugerencia editable, pero no impone fórmula clínica no aprobada.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js calcula el único ejemplo como inicio + días - 1 en UTC; app/store.js y RPC validan calendario.",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Confirmar fórmula, zona horaria y crónicos antes de considerarla regla productiva.",
+        "blocked_by_client_information": true,
+        "notes": "CH10-Q004; sugerencia inclusiva provisional y editable."
       }
     },
     {
@@ -4968,13 +4991,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Secciones sólo persisten texto documentado; no se infieren indicaciones.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js MEDICAL_ORDER_SECTIONS/openMedicalOrderForm; app/templates.js medicalOrderDocument",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Confirmar catálogo, etiquetas nuevas, orden y sanitización de rich text.",
+        "blocked_by_client_information": true,
+        "notes": "Selección, eliminación por desmarcado y contenido por sección implementados; CH10-Q007/Q008 bloquean el constructor oficial."
       }
     },
     {
@@ -4998,17 +5021,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q009",
+        "CH10-Q010",
+        "CH10-Q013"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Consulta autorizada por hospitalización; PMC no cambia estado sin regla.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/main.js openPatientOrders muestra órdenes, tarjetas e historial con actor/fecha y PMC pendiente.",
+        "test_path": "tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Definir PMC y unidad de historial antes de activar transiciones.",
+        "blocked_by_client_information": true,
+        "notes": "CH10-Q002 y CH10-Q011."
       }
     },
     {
@@ -5032,17 +5059,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q009",
+        "CH10-Q010",
+        "CH10-Q013"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Las tres salidas están separadas; conteo se marca provisional para evitar atribuir validez clínica.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/views.js renderMedicationCards; app/templates.js medicationCardDocument variants complete/simple/count",
+        "test_path": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+        "recommended_action": "Aprobar campos, firmas, papel y distribución segura.",
+        "blocked_by_client_information": true,
+        "notes": "CH10-Q009 y CH10-Q010; la composición exacta no aparece visualmente en el video."
       }
     },
     {
@@ -5066,14 +5097,16 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q001"
+      ],
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/ordenes; #/clinica/medicamentos; app/store.js; supabase/migrations/202608260005_p0_quote_clinical_immutability.sql",
-        "test_path": "#/clinica/ordenes; #/clinica/medicamentos; node --test tests/p0-immutable-records.test.mjs",
+        "patient_safety_impact": "La plataforma conserva el original firmado, exige autorización/motivo y crea evidencia append-only.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/store.js; migrations 202608260005 y 202608270006",
+        "test_path": "tests/p0-immutable-records.test.mjs; tests/ch10-medical-orders-cards.test.mjs",
         "recommended_action": "Conservar la incertidumbre de paridad del video; mantener la protección implementada de borradores, firma, corrección append-only y anulación auditada.",
         "blocked_by_client_information": false,
         "notes": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección."
@@ -9102,6 +9135,150 @@
       "question": "¿Cuáles son exactamente los campos obligatorios y el orden del PDF/expediente final? El contenido detallado sólo se describe verbalmente y no se ve el documento generado.",
       "evidence_event_ids": [],
       "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q001",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué roles pueden crear, modificar, finalizar, anular e imprimir órdenes o tarjetas? Evidencia: CH10-E0112, 00:31:12.200.",
+      "evidence_event_ids": [
+        "CH10-E0112"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q002",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué significa PMC, quién lo actualiza y qué transiciones conectan Revisar/Listo con firma o finalización? Evidencia: CH10-E0102, CH10-E0105 y CH10-E0113.",
+      "evidence_event_ids": [
+        "CH10-E0102",
+        "CH10-E0105",
+        "CH10-E0113"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q003",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuáles son los catálogos oficiales de vía, frecuencia, duración y horarios, sus relaciones y las reglas de PRN? Evidencia: CH10-E0028, CH10-E0031 y CH10-E0042.",
+      "evidence_event_ids": [
+        "CH10-E0028",
+        "CH10-E0031",
+        "CH10-E0042"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q004",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "INFERRED — ¿La fecha final se calcula inclusiva o exclusivamente desde inicio y duración, qué zona horaria aplica y cómo se comporta un tratamiento crónico? Sólo se observa un caso. Evidencia: CH10-E0035 y CH10-E0038.",
+      "evidence_event_ids": [
+        "CH10-E0035",
+        "CH10-E0038"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q005",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es la fuente maestra, deduplicación y permiso de alta inline para medicamentos y prescriptores? Evidencia: CH10-E0021–CH10-E0026.",
+      "evidence_event_ids": [
+        "CH10-E0021",
+        "CH10-E0026"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q006",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿“Mostrar diluciones” sólo despliega captura documentada o aplica una regla clínica, y qué obligatoriedad tiene Crónico? Evidencia: CH10-E0039 y CH10-E0050.",
+      "evidence_event_ids": [
+        "CH10-E0039",
+        "CH10-E0050"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q007",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuáles son las etiquetas oficiales, cuáles son configurables y quién puede crearlas, quitarlas y reordenarlas? Evidencia: CH10-E0075–CH10-E0086.",
+      "evidence_event_ids": [
+        "CH10-E0075",
+        "CH10-E0086"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q008",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué sanitización, obligatoriedad, firma y reglas de borradores vacíos aplican a los editores por sección? Evidencia: CH10-E0088–CH10-E0093.",
+      "evidence_event_ids": [
+        "CH10-E0088",
+        "CH10-E0093"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q009",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué contenido, encabezado, firma, papel y validez corresponden a tarjeta completa, tarjeta simple y conteo presencial? Evidencia: CH10-E0109.",
+      "evidence_event_ids": [
+        "CH10-E0109"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q010",
+      "chapter_id": "CH10",
+      "classification": "VERBAL",
+      "question": "¿Cómo se entrega una tarjeta a enfermería domiciliaria mediante un enlace seguro, autenticado, revocable, auditable y con expiración, sin incluir contenido clínico en WhatsApp/SMS/email? Evidencia verbal: CH10-E0109–CH10-E0110.",
+      "evidence_event_ids": [
+        "CH10-E0109",
+        "CH10-E0110"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q011",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué constituye una Actualización, un Tratamiento con cambios y una entrada del Historial, y cuál es la unidad de versionado? Evidencia: CH10-E0008, CH10-E0018 y CH10-E0101.",
+      "evidence_event_ids": [
+        "CH10-E0008",
+        "CH10-E0018",
+        "CH10-E0101"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q012",
+      "chapter_id": "CH10",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué contrato de datos, permisos y auditoría tiene Registro XPO? Evidencia: CH10-E0065 y CH10-E0099.",
+      "evidence_event_ids": [
+        "CH10-E0065",
+        "CH10-E0099"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH10-Q013",
+      "chapter_id": "CH10",
+      "classification": "VERBAL",
+      "question": "¿Cuáles son los campos mínimos, estados, responsables, omisión/motivo, idempotencia y correcciones del registro real de administración? Hasta confirmarlo no se simula éxito. Evidencia verbal asociada a CH10-E0109–CH10-E0110.",
+      "evidence_event_ids": [
+        "CH10-E0109",
+        "CH10-E0110"
+      ],
+      "status": "OPEN"
     }
   ],
   "platform_safety_findings": [
@@ -9238,19 +9415,19 @@
   ],
   "summary": {
     "requirements": 210,
-    "open_questions": 73,
+    "open_questions": 86,
     "safety_findings": 6,
     "gap_status_counts": {
-      "IMPLEMENTED_EXACT": 0,
+      "IMPLEMENTED_EXACT": 2,
       "IMPLEMENTED_PARTIAL": 177,
-      "MISSING": 2,
-      "CONFLICTS_WITH_VIDEO": 3,
+      "MISSING": 0,
+      "CONFLICTS_WITH_VIDEO": 0,
       "NOT_TESTABLE": 7,
-      "NEEDS_CLIENT_CONFIRMATION": 27
+      "NEEDS_CLIENT_CONFIRMATION": 30
     },
     "priority_counts": {
-      "P0": 6,
-      "P1": 176,
+      "P0": 8,
+      "P1": 174,
       "P2": 34,
       "P3": 0
     }

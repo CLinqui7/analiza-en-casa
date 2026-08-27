@@ -2,6 +2,6 @@
 "PH-001","Pacientes","Importar CSV","import-patients","Importación demo atómica y validada; producción exige importador transaccional","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","IMPLEMENTED_PARTIAL"
 "PH-002","Catálogos","Importar catálogo","import-catalog","Toast informativo; no importa archivo","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","OPEN"
 "PH-003","Inventario","Aplicar kit","apply-kit","Navega y muestra mensaje; no expande ni reserva","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","OPEN"
-"PH-004","Clínica","Administrar medicamento","administer-medication","Toast de éxito sin persistencia demostrada","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","OPEN"
+"PH-004","Clínica","Administrar medicamento","administer-medication","Bloqueo explícito; no registra ni afirma administración hasta aprobar el flujo clínico","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","CLOSED"
 "PH-005","Portal","Solicitar soporte","portal-support","Toast simulado sin cola persistente","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","OPEN"
 "PH-006","Global","Acción sin handler","default","Error explícito: la acción no está disponible; no muta estado","Implementar o deshabilitar explícitamente sin éxito aparente","BASE-P0-017","CLOSED"

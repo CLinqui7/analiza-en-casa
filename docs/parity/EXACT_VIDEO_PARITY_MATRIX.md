@@ -1,21 +1,21 @@
 # Matriz exacta de paridad de video
 
-Alcance actual: **CH01–CH09 cerrados con bloqueos del cliente registrados**. La matriz continúa secuencialmente; no se abre un capítulo posterior mientras el actual tenga faltantes no bloqueados.
+Alcance actual: **CH01–CH10 cerrados con bloqueos del cliente registrados**. La matriz continúa secuencialmente; no se abre un capítulo posterior mientras el actual tenga faltantes no bloqueados.
 
 ## Conteos
 
 | Estado | Cantidad |
 | --- | ---: |
-| IMPLEMENTED_EXACT | 96 |
-| IMPLEMENTED_PARTIAL | 83 |
+| IMPLEMENTED_EXACT | 101 |
+| IMPLEMENTED_PARTIAL | 87 |
 | MISSING | 0 |
 | CONFLICTS_WITH_VIDEO | 0 |
-| NOT_TESTABLE | 16 |
-| NEEDS_CLIENT_CONFIRMATION | 40 |
+| NOT_TESTABLE | 17 |
+| NEEDS_CLIENT_CONFIRMATION | 44 |
 
 Los requisitos IMPLEMENTED_EXACT cuentan con prueba automatizada específica y evidencia de navegador cuando corresponde. Los parciales conservan trazabilidad de la limitación pendiente.
 
-## Faltantes no bloqueados de CH01–CH09
+## Faltantes no bloqueados de CH01–CH10
 
 | Requisito | Página | Control | Estado |
 | --- | --- | --- | --- |

@@ -1543,6 +1543,12 @@ body.portal-mode #app { min-height: 100vh; }
 .medication-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px; }
 .medication-card { min-width:0; }
 .medication-card .table-wrap table { min-width:650px; }
+.medication-card .card-footer { flex-wrap:wrap; justify-content:flex-start; }
+.choice-stack { display:grid; gap:12px; }
+.choice-stack .btn { min-height:52px; justify-content:flex-start; text-align:left; }
+.order-section-picker { display:grid; grid-template-columns:minmax(190px,.35fr) minmax(0,1fr); gap:10px 14px; align-items:start; }
+.order-section-picker > label { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface-soft); }
+.order-section-picker > textarea { min-width:0; resize:vertical; }
 
 .agenda-layout { display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start; }
 .calendar-sidebar { padding:15px; }
@@ -1963,6 +1969,9 @@ body.portal-mode #app { min-height: 100vh; }
 }
 
 @media (max-width:860px) {
+  .order-section-picker { grid-template-columns:1fr; }
+  .order-section-picker > textarea { margin-bottom:10px; }
+  .medication-card .card-footer .btn { flex:1 1 150px; justify-content:center; }
   .metrics-grid-six { grid-template-columns:1fr; }
   .pagination { justify-content:center; }
 }

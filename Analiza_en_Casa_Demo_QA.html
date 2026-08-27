@@ -1551,6 +1551,12 @@ body.portal-mode #app { min-height: 100vh; }
 .medication-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px; }
 .medication-card { min-width:0; }
 .medication-card .table-wrap table { min-width:650px; }
+.medication-card .card-footer { flex-wrap:wrap; justify-content:flex-start; }
+.choice-stack { display:grid; gap:12px; }
+.choice-stack .btn { min-height:52px; justify-content:flex-start; text-align:left; }
+.order-section-picker { display:grid; grid-template-columns:minmax(190px,.35fr) minmax(0,1fr); gap:10px 14px; align-items:start; }
+.order-section-picker > label { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface-soft); }
+.order-section-picker > textarea { min-width:0; resize:vertical; }
 
 .agenda-layout { display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start; }
 .calendar-sidebar { padding:15px; }
@@ -1971,6 +1977,9 @@ body.portal-mode #app { min-height: 100vh; }
 }
 
 @media (max-width:860px) {
+  .order-section-picker { grid-template-columns:1fr; }
+  .order-section-picker > textarea { margin-bottom:10px; }
+  .medication-card .card-footer .btn { flex:1 1 150px; justify-content:center; }
   .metrics-grid-six { grid-template-columns:1fr; }
   .pagination { justify-content:center; }
 }
@@ -4945,6 +4954,10 @@ function mapSupabaseBootstrap(rawCollections = {}) {
       organizationId: record.organizationId
     };
   });
+  collections.doctors = (rawCollections.doctors || []).map((raw) => {
+    const doctor = camelCaseObject(raw);
+    return { ...doctor, name: doctor.fullName || doctor.name || "" };
+  });
 
   collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
     const root = camelCaseObject(rawQuote);
@@ -5028,6 +5041,33 @@ function mapSupabaseBootstrap(rawCollections = {}) {
       otherDoctorIds: profile.otherDoctorIds || [],
       devices: profile.devices || [],
       attachmentMetadata: profile.attachmentMetadata || []
+    };
+  });
+  collections.clinicalDocuments = (rawCollections.clinicalDocuments || []).map((raw) => {
+    const document = camelCaseObject(raw);
+    return {
+      ...document,
+      caseId: document.hospitalizationId,
+      type: document.documentType,
+      version: Number(document.versionNumber || 1),
+      content: document.content || {}
+    };
+  });
+  collections.medicationCards = (rawCollections.medicationCards || []).map((raw) => {
+    const card = camelCaseObject(raw);
+    return {
+      ...card,
+      caseId: card.hospitalizationId,
+      version: Number(card.versionNumber || 1),
+      documentStatus: card.documentStatus || "DRAFT",
+      otherDoctorIds: card.otherDoctorIds || [],
+      items: (card.medicationCardItems || card.items || []).map((item) => ({
+        ...item,
+        medication: item.medicationName || item.medication,
+        doctorId: item.prescribingDoctorId || item.doctorId,
+        schedule: item.schedule || [],
+        administrationStatus: item.administrationStatus || "PENDING"
+      }))
     };
   });
   collections.payments = (rawCollections.payments || []).map((raw) => {
@@ -5185,6 +5225,7 @@ async function createSupabaseAdapter(config) {
       ["quotes", "quotes", "*, quote_versions(*, quote_items(*))"],
       ["payments", "payments", "*, payment_allocations(*), payment_receipts(*)"],
       ["clinicalDocuments", "clinical_documents", "*"],
+      ["medicationCards", "medication_cards", "*, medication_card_items(*)"],
       ["shifts", "shifts", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
       ["inventoryItems", "inventory_items", "*"],
@@ -5299,22 +5340,37 @@ async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok: true, ...data };
       }
-      case "SIGN_CLINICAL_DOCUMENT":
-        return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
-      case "SIGN_MEDICATION_CARD":
-        return client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
-      case "VOID_CLINICAL_DOCUMENT":
-        return client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
-      case "VOID_CLINICAL_RECORD":
-        return client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
-      case "CREATE_CLINICAL_CORRECTION":
-        return client.rpc("create_clinical_record_correction", {
+      case "SIGN_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "SIGN_MEDICATION_CARD": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
+        if (error) throw error;
+        return { ok: true, card: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_RECORD": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, record: camelCaseObject(data) };
+      }
+      case "CREATE_CLINICAL_CORRECTION": {
+        const { data, error } = await client.rpc("create_clinical_record_correction", {
           p_subject_type: payload.correction.subjectType,
           p_subject_id: payload.correction.subjectId,
           p_correction_kind: payload.correction.correctionKind,
           p_reason: payload.correction.reason,
           p_content: snakeCaseObject(payload.correction.content || {})
         });
+        if (error) throw error;
+        return { ok: true, correction: typeof data === "string" ? { id: data } : camelCaseObject(data) };
+      }
       case "CREATE_PAYMENT": {
         const { data, error } = await client.rpc("apply_payment", {
           p_quote_id: payload.payment.rootQuoteId || payload.payment.quoteId,
@@ -5387,19 +5443,45 @@ async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok: Boolean(data) };
       }
-      case "CREATE_CLINICAL_DOCUMENT":
-        return insert("clinical_documents", {
-          id: payload.document.id,
-          hospitalization_id: payload.document.caseId,
-          patient_id: payload.document.patientId,
-          document_type: payload.document.type,
-          title: payload.document.title,
-          status: payload.document.status,
-          author_id: payload.document.authorId || null,
-          version_number: payload.document.version || 1,
-          summary: payload.document.summary || null,
-          content: payload.document.content || {}
+      case "CREATE_CLINICAL_DOCUMENT": {
+        const document = payload.document;
+        const { data, error } = await client.rpc("create_clinical_document_draft", {
+          p_hospitalization_id: document.caseId,
+          p_document_type: document.type,
+          p_title: document.title,
+          p_summary: document.summary || null,
+          p_content: snakeCaseObject(document.content || {}),
+          p_idempotency_key: document.idempotencyKey
         });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "CREATE_MEDICATION_CARD": {
+        const card = payload.card;
+        const { data, error } = await client.rpc("create_medication_card_draft", {
+          p_hospitalization_id: card.caseId,
+          p_header: snakeCaseObject({
+            treatingDoctorId: card.treatingDoctorId,
+            otherDoctorIds: card.otherDoctorIds || [],
+            diagnosis: card.diagnosis || ""
+          }),
+          p_items: snakeCaseObject(card.items || []),
+          p_idempotency_key: card.idempotencyKey
+        });
+        if (error) throw error;
+        const normalized = camelCaseObject(data);
+        return { ok: true, card: {
+          ...normalized,
+          caseId: normalized.hospitalizationId,
+          version: Number(normalized.versionNumber || 1),
+          items: (normalized.items || []).map((item) => ({
+            ...item,
+            medication: item.medicationName || item.medication,
+            doctorId: item.prescribingDoctorId || item.doctorId,
+            schedule: item.schedule || []
+          }))
+        } };
+      }
       case "CREATE_SHIFT":
         return insert("shifts", {
           id: payload.shift.id,
@@ -5613,7 +5695,9 @@ async function createAppStore(config) {
 
   async function requiredSync(action, payload) {
     try {
-      return await adapter.sync(action, payload);
+      const result = await adapter.sync(action, payload);
+      if (result?.error) throw result.error;
+      return result;
     } catch (error) {
       setState((draft) => {
         draft.meta.remoteError = error.message;
@@ -6563,13 +6647,27 @@ async function createAppStore(config) {
 
   function createClinicalDocument(input) {
     requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const type = String(input.type || "HEALTH_REPORT").trim().toUpperCase();
+    if (!["HEALTH_REPORT","MEDICAL_ORDER","CARE_PLAN","CLINICAL_EVOLUTION","LAB_REQUEST","NURSING_NOTE"].includes(type)) throw new Error("Tipo de documento clínico no válido.");
+    const title = String(input.title || "Documento clínico").trim();
+    const summary = String(input.summary || "").trim();
+    if (!title || title.length > 300 || summary.length > 5000 || JSON.stringify(input.content || {}).length > 100000) throw new Error("Revise el contenido del documento clínico.");
+    const doctorIds = [input.content?.treatingDoctorId, ...(input.content?.otherDoctorIds || [])].filter(Boolean);
+    if (type === "MEDICAL_ORDER" && !input.content?.treatingDoctorId) throw new Error("Seleccione el médico tratante de la orden.");
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId && doctor.status === "ACTIVE" && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    const idempotencyKey = String(input.idempotencyKey || uid("CLINICAL-DOCUMENT")).trim().slice(0,160);
+    const duplicate = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const document = {
       id: uid("DOC"),
-      caseId: input.caseId,
-      patientId: caseById(input.caseId)?.patientId || input.patientId,
-      type: input.type || "HEALTH_REPORT",
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      type,
       organizationId: state.organization?.id,
-      title: input.title || "Documento clínico",
+      title,
       status: "DRAFT",
       authorId: currentUser().id,
       authorName: currentUser().name,
@@ -6577,15 +6675,23 @@ async function createAppStore(config) {
       signedAt: null,
       signatureMetadata: null,
       version: 1,
-      summary: input.summary || "",
-      content: input.content || {}
+      summary,
+      content: clone(input.content || {}),
+      idempotencyKey
     };
-    setState((draft) => {
-      draft.clinicalDocuments.unshift(document);
-      audit("CREATE_CLINICAL_DOCUMENT", document.id, `${document.title} creado en borrador.`);
-    });
-    safeSync("CREATE_CLINICAL_DOCUMENT", { document });
-    return document;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.document || {};
+      const committed = adapter.mode === "supabase" ? {...document,...remote,id:remote.id||document.id,caseId:remote.hospitalizationId||document.caseId,patientId:remote.patientId||document.patientId,type:remote.documentType||document.type} : document;
+      const existing = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey || candidate.id === committed.id);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.clinicalDocuments.unshift(committed);
+        audit("CREATE_CLINICAL_DOCUMENT", committed.id, `${committed.title} creado en borrador.`, {idempotencyKey});
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_DOCUMENT", { document }).then(commit);
+    return commit();
   }
 
   function createClinicalProfile(input) {
@@ -6695,11 +6801,13 @@ async function createAppStore(config) {
 
   function signClinicalDocument(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
+    const document = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!document) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(document, "Documento clínico");
+    if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
       document.status = "SIGNED";
       document.signedAt = nowIso();
       document.signedBy = currentUser().id;
@@ -6714,19 +6822,24 @@ async function createAppStore(config) {
         version: document.version,
         signatureMetadata: document.signatureMetadata
       });
-    });
-    safeSync("SIGN_CLINICAL_DOCUMENT", { documentId: id });
+      });
+      return document;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_CLINICAL_DOCUMENT", { documentId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalDocument(id, reason) {
     requirePermission("clinical:correct_signed");
     const normalizedReason = String(reason || "").trim();
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
-    setState((draft) => {
+    const source = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(source, "Documento clínico");
+    if (source.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
       document.status = "VOIDED";
       document.voidReason = normalizedReason;
       document.voidedAt = nowIso();
@@ -6735,9 +6848,11 @@ async function createAppStore(config) {
         version: document.version,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function createClinicalCorrection(subjectType, subjectId, input) {
@@ -6753,43 +6868,93 @@ async function createAppStore(config) {
     if (!["AMENDMENT", "ADDENDUM", "ERRATA"].includes(correctionKind)) {
       throw new Error("Tipo de corrección no válido.");
     }
-    let correction;
-    setState((draft) => {
-      const prior = draft.clinicalCorrections
-        .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
-        .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
-      correction = {
-        id: uid("COR"),
-        organizationId: state.organization?.id,
-        subjectType,
-        subjectId,
-        originalDocumentId: subjectId,
-        previousVersionId: prior?.id || subjectId,
-        correctionKind,
-        reason,
-        content: clone(input.content || {}),
-        authorId: currentUser().id,
-        authorName: currentUser().name,
-        authorRole: state.session.role,
-        status: "CORRECTED",
-        createdAt: nowIso()
-      };
-      draft.clinicalCorrections.unshift(correction);
-      audit("CREATE_CLINICAL_CORRECTION", correction.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
-        subjectType,
-        subjectId,
-        previousVersionId: correction.previousVersionId,
-        correctionKind
+    const prior = state.clinicalCorrections
+      .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
+      .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+    const correction = {
+      id: uid("COR"),
+      organizationId: state.organization?.id,
+      subjectType,
+      subjectId,
+      originalDocumentId: subjectId,
+      previousVersionId: prior?.id || subjectId,
+      correctionKind,
+      reason,
+      content: clone(input.content || {}),
+      authorId: currentUser().id,
+      authorName: currentUser().name,
+      authorRole: state.session.role,
+      status: "CORRECTED",
+      createdAt: nowIso()
+    };
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.correction || {};
+      const committed = adapter.mode === "supabase" ? {...correction,...remote,id:remote.id||correction.id} : correction;
+      if (state.clinicalCorrections.some((candidate) => candidate.id === committed.id)) return committed;
+      setState((draft) => {
+        draft.clinicalCorrections.unshift(committed);
+        audit("CREATE_CLINICAL_CORRECTION", committed.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
+          subjectType,
+          subjectId,
+          previousVersionId: committed.previousVersionId,
+          correctionKind
+        });
       });
-    });
-    safeSync("CREATE_CLINICAL_CORRECTION", { correction });
-    return correction;
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_CORRECTION", { correction }).then(commit);
+    return commit();
   }
 
   function createMedicationCard(input) {
     requirePermission("clinical:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const treatingDoctorId = String(input.treatingDoctorId || "").trim();
+    if (!treatingDoctorId) throw new Error("Seleccione el médico tratante de la tarjeta.");
+    const otherDoctorIds = [...new Set((Array.isArray(input.otherDoctorIds) ? input.otherDoctorIds : []).filter(Boolean))];
+    const rawItems = Array.isArray(input.items) ? input.items : [];
+    if (!rawItems.length || rawItems.length > 100) throw new Error("Agregue entre 1 y 100 tratamientos documentados.");
+    const doctorIds = [treatingDoctorId, ...otherDoctorIds, ...rawItems.map((item) => item.doctorId)].filter(Boolean);
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId
+      && doctor.status === "ACTIVE"
+      && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) {
+      throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    }
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+    const items = rawItems.map((rawItem) => {
+      const item = {
+        id: rawItem.id || uid("MCI"),
+        medication: String(rawItem.medication || "").trim(),
+        doctorId: String(rawItem.doctorId || treatingDoctorId || "").trim() || null,
+        route: String(rawItem.route || "").trim(),
+        dose: String(rawItem.dose || "").trim(),
+        frequency: String(rawItem.frequency || "").trim(),
+        durationDays: rawItem.durationDays === "" || rawItem.durationDays == null ? null : Number(rawItem.durationDays),
+        startDate: String(rawItem.startDate || "").trim(),
+        endDate: String(rawItem.endDate || "").trim(),
+        chronic: Boolean(rawItem.chronic),
+        schedule: [...new Set((Array.isArray(rawItem.schedule) ? rawItem.schedule : []).map((value) => String(value).trim()).filter(Boolean))],
+        indications: String(rawItem.indications || "").trim(),
+        dilutions: String(rawItem.dilutions || "").trim(),
+        administrationStatus: String(rawItem.administrationStatus || "PENDING").trim()
+      };
+      if (![item.medication,item.route,item.dose,item.frequency].every(Boolean)
+        || [item.medication,item.route,item.dose,item.frequency].some((value) => value.length > 500)
+        || item.indications.length > 5000 || item.dilutions.length > 5000
+        || Boolean(item.startDate) !== Boolean(item.endDate)
+        || (item.startDate && (!isoDate.test(item.startDate) || !isoDate.test(item.endDate) || item.endDate < item.startDate))
+        || (item.durationDays != null && !item.startDate)
+        || (item.durationDays != null && (!Number.isInteger(item.durationDays) || item.durationDays < 1 || item.durationDays > 3660))
+        || item.schedule.length > 96 || item.schedule.some((value) => value.length > 20)) {
+        throw new Error("Revise medicamento, prescriptor, vía, dosis, frecuencia, calendario y detalles del tratamiento.");
+      }
+      return item;
+    });
+    const idempotencyKey = String(input.idempotencyKey || uid("MEDICATION-CARD")).trim().slice(0,160);
+    const duplicate = state.medicationCards.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const card = {
       id: uid("MC"),
       organizationId: state.organization?.id,
@@ -6800,28 +6965,46 @@ async function createAppStore(config) {
       version: 1,
       createdAt: nowIso(),
       createdBy: currentUser().id,
+      createdByName: currentUser().name,
+      treatingDoctorId: treatingDoctorId || null,
+      otherDoctorIds,
+      diagnosis: String(input.diagnosis || "").trim().slice(0, 5000),
+      idempotencyKey,
       signatureMetadata: null,
-      items: clone(input.items || [])
+      items
     };
-    setState((draft) => {
-      draft.medicationCards.unshift(card);
-      audit("CREATE_MEDICATION_CARD", card.id, "Tarjeta de medicamentos creada en borrador.");
-    });
-    safeSync("CREATE_MEDICATION_CARD", { card });
-    return card;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.card || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...card, ...remote, id: remote.id || card.id, caseId: remote.hospitalizationId || card.caseId,
+        documentStatus: remote.documentStatus || card.documentStatus,
+        items: remote.items || card.items
+      } : card;
+      const existing = state.medicationCards.find((candidate) => candidate.id === committed.id || candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.medicationCards.unshift(committed);
+        audit("CREATE_MEDICATION_CARD", committed.id, "Tarjeta de medicamentos creada en borrador.", { idempotencyKey });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_MEDICATION_CARD", { card }).then(commit);
+    return commit();
   }
 
   function signMedicationCard(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
-      const card = draft.medicationCards.find((candidate) => candidate.id === id);
-      if (!card) throw new Error("Tarjeta de medicamentos no encontrada.");
-      assertCurrentOrganization(card, "Tarjeta de medicamentos");
-      if (card.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
-      card.documentStatus = "SIGNED";
-      card.signedAt = nowIso();
-      card.signedBy = currentUser().id;
-      card.signatureMetadata = {
+    const source = state.medicationCards.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Tarjeta de medicamentos no encontrada.");
+    assertCurrentOrganization(source, "Tarjeta de medicamentos");
+    if (source.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
+    const commit = () => {
+      setState((draft) => {
+        const card = draft.medicationCards.find((candidate) => candidate.id === id);
+        card.documentStatus = "SIGNED";
+        card.signedAt = nowIso();
+        card.signedBy = currentUser().id;
+        card.signatureMetadata = {
         signedAt: card.signedAt,
         signedBy: currentUser().id,
         signerRole: state.session.role,
@@ -6829,8 +7012,11 @@ async function createAppStore(config) {
         legalValidation: "NEEDS_CLIENT_CONFIRMATION"
       };
       audit("SIGN_MEDICATION_CARD", id, "Tarjeta de medicamentos firmada y bloqueada.");
-    });
-    safeSync("SIGN_MEDICATION_CARD", { cardId: id });
+      });
+      return state.medicationCards.find((candidate) => candidate.id === id);
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_MEDICATION_CARD", { cardId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalRecord(subjectType, subjectId, reason) {
@@ -6842,21 +7028,24 @@ async function createAppStore(config) {
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
     const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
     if (status !== "SIGNED") throw new Error("Sólo se puede anular un registro firmado.");
-    setState((draft) => {
-      const target = clinicalRecord(subjectType, subjectId);
-      if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
-      else target.status = "VOIDED";
-      target.voidReason = normalizedReason;
-      target.voidedAt = nowIso();
-      target.voidedBy = currentUser().id;
-      audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
+    const commit = () => {
+      setState(() => {
+        const target = clinicalRecord(subjectType, subjectId);
+        if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
+        else target.status = "VOIDED";
+        target.voidReason = normalizedReason;
+        target.voidedAt = nowIso();
+        target.voidedBy = currentUser().id;
+        audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
         subjectType,
         version: target.version || 1,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function addVitalSigns(input) {
@@ -7351,10 +7540,15 @@ function footer() {
 }
 
 function patientGrid(patient, recordCase = null) {
+  const birthDate = patient?.birthDate;
+  const age = birthDate ? Math.max(0, new Date().getUTCFullYear() - Number(String(birthDate).slice(0,4))
+    - (new Date().toISOString().slice(5,10) < String(birthDate).slice(5,10) ? 1 : 0)) : null;
   return `
     <div class="grid">
       <div class="field"><small>Paciente</small><strong>${safeText(patient?.fullName || "—")}</strong></div>
       <div class="field"><small>Documento</small><strong>${safeText(patient?.document || "—")}</strong></div>
+      <div class="field"><small>Fecha de nacimiento</small><strong>${formatDate(birthDate)}</strong></div>
+      <div class="field"><small>Edad calculada al generar</small><strong>${age == null ? "—" : `${safeText(age)} años`}</strong></div>
       <div class="field"><small>Hospitalización</small><strong>${safeText(recordCase?.id || "—")}</strong></div>
       <div class="field"><small>Fecha de inicio</small><strong>${formatDate(recordCase?.startDate)}</strong></div>
     </div>
@@ -7445,30 +7639,44 @@ function healthReportDocument({ document, patient, recordCase, vitalSigns = [], 
 }
 
 function medicalOrderDocument({ document, patient, recordCase, corrections = [] }) {
+  const sections = Array.isArray(document.content?.sections) ? document.content.sections : [];
+  const sectionMarkup = sections.length
+    ? sections.map((section) => `<div class="section"><h2>${safeText(section.label || section.key || "Sección")}</h2><p style="white-space:pre-line">${safeText(section.content || "Sin contenido documentado.")}</p></div>`).join("")
+    : `<div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>`;
   return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(document.title)}</title><style>${printCss}</style></head><body>
     ${baseHeader(document.title, document.id, document.version)}
     ${patientGrid(patient, recordCase)}
     ${clinicalRecordMetadata(document, corrections)}
-    <div class="section"><h2>Indicaciones médicas</h2><p style="white-space:pre-line">${safeText(document.content?.indications || document.summary || "Pendiente de documentar.")}</p></div>
-    <div class="section"><h2>Vigencia</h2><p>Desde ${formatDate(document.createdAt)} hasta nueva indicación o cierre del caso.</p></div>
+    <div class="section"><h2>Diagnóstico documentado</h2><p>${safeText(document.content?.diagnosis || recordCase?.diagnosisSummary || "No documentado.")}</p></div>
+    ${sectionMarkup}
     <div class="signature-grid"><div class="signature">${safeText(document.authorName)}<br>Médico responsable</div><div class="signature">Firma y sello</div></div>
     ${footer()}
   </body></html>`;
 }
 
-function medicationCardDocument({ card, patient, recordCase, corrections = [] }) {
-  const rows = card.items.map((item) => `
+function medicationCardDocument({ card, patient, recordCase, corrections = [], variant = "complete" }) {
+  const items = card.items || [];
+  const title = variant === "simple" ? "Tarjeta de medicamentos simple" : variant === "count" ? "Conteo presencial" : "Tarjeta de medicamentos completa";
+  const completeRows = items.map((item) => `
     <tr>
       <td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td>
-      <td>${safeText(item.frequency)}</td><td>${safeText(item.schedule.join(", "))}</td>
-      <td>${formatDate(item.startDate)}</td><td>${formatDate(item.endDate)}</td>
+      <td>${safeText(item.frequency)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td>
+      <td>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</td><td>${safeText(item.indications || "—")}</td>
     </tr>
   `).join("");
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Tarjeta de medicamentos</title><style>${printCss}</style></head><body>
-    ${baseHeader("Tarjeta de medicamentos", card.id, card.version || 1)}
+  const simpleRows = items.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>${safeText(item.frequency)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td></tr>`).join("");
+  const countRows = items.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>&nbsp;</td><td>&nbsp;</td></tr>`).join("");
+  const table = variant === "simple"
+    ? `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th></tr></thead><tbody>${simpleRows}</tbody></table>`
+    : variant === "count"
+      ? `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Control</th><th>Observación</th></tr></thead><tbody>${countRows}</tbody></table><div class="notice"><strong>Formato provisional.</strong> El significado operativo, responsables y firmas del conteo presencial requieren confirmación del cliente.</div>`
+      : `<table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Vigencia</th><th>Indicaciones</th></tr></thead><tbody>${completeRows}</tbody></table>`;
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${safeText(title)}</title><style>${printCss}</style></head><body>
+    ${baseHeader(title, card.id, card.version || 1)}
     ${patientGrid(patient, recordCase)}
     ${clinicalRecordMetadata(card, corrections)}
-    <table><thead><tr><th>Medicamento</th><th>Dosis</th><th>Vía</th><th>Frecuencia</th><th>Horario</th><th>Inicio</th><th>Fin</th></tr></thead><tbody>${rows}</tbody></table>
+    ${variant === "complete" ? `<div class="grid"><div class="field"><small>Diagnóstico documentado</small><strong>${safeText(card.diagnosis || recordCase?.diagnosisSummary || "—")}</strong></div><div class="field"><small>Creado por</small><strong>${safeText(card.createdByName || card.createdBy || "—")}</strong></div></div>` : ""}
+    ${table}
     <div class="notice">La administración real debe documentar fecha, hora, responsable, omisión y motivo. Esta plantilla es de validación.</div>
     ${footer()}
   </body></html>`;
@@ -8610,6 +8818,46 @@ function clinicalModule(title,description,href,type,state){
   return `<a class="module-card" href="${href}"><span>${icon("clinical")}</span><div><h2>${esc(title)}</h2><p>${esc(description)}</p><strong>${count} registros</strong></div>${icon("view")}</a>`;
 }
 
+function renderMedicalOrders(state, store, ui) {
+  const activeTab = ui.medicalOrderTab || "active";
+  const query = String(ui.medicalOrderSearch || "").trim().toLocaleLowerCase("es");
+  const profilesByCase = new Map((state.clinicalProfiles || []).map((profile) => [profile.caseId, profile]));
+  const hasCorrection = (record) => {
+    const documentIds = state.clinicalDocuments.filter((item) => item.caseId === record.id).map((item) => item.id);
+    const cardIds = state.medicationCards.filter((item) => item.caseId === record.id).map((item) => item.id);
+    return state.clinicalCorrections.some((item) => documentIds.includes(item.subjectId) || cardIds.includes(item.subjectId));
+  };
+  const hasUpdate = (record) => state.medicationCards.some((cardData) => cardData.caseId === record.id
+    && (cardData.items || []).some((item) => item.lastAdministration));
+  const tabCases = state.cases.filter((record) => {
+    if (activeTab === "active") return record.status === "ACTIVE";
+    if (activeTab === "inactive") return record.status !== "ACTIVE";
+    if (activeTab === "changes") return hasCorrection(record);
+    if (activeTab === "updates") return hasUpdate(record);
+    return true;
+  });
+  const entries = tabCases.map((record) => ({record, patient: state.patients.find((item) => item.id === record.patientId)}))
+    .filter(({record,patient}) => !query || [record.id,patient?.document,patient?.fullName].some((value) => String(value || "").toLocaleLowerCase("es").includes(query)));
+  const pageSize = Number(ui.medicalOrderPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.medicalOrderPage || 1)), totalPages);
+  const pageEntries = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="medical-order-page" data-page="${page}" class="${page === currentPage ? "active" : ""}">${page}</button>`).join("");
+  const tabButton = (key, label, count) => `<button class="tab ${key === activeTab ? "active" : ""}" data-action="set-medical-order-tab" data-tab="${key}">${esc(label)} <span>${count}</span></button>`;
+  const activeCount = state.cases.filter((record) => record.status === "ACTIVE").length;
+  const inactiveCount = state.cases.length - activeCount;
+  const changedCount = state.cases.filter(hasCorrection).length;
+  const updatedCount = state.cases.filter(hasUpdate).length;
+  const rows = pageEntries.map(({record,patient}) => {
+    const profile = profilesByCase.get(record.id);
+    return `<tr><td><button class="row-action" data-action="open-clinical-creation-choice" data-case-id="${esc(record.id)}" aria-label="Nuevo documento para ${esc(patient?.fullName || record.id)}">+</button><button class="row-action" data-action="view-patient-orders" data-case-id="${esc(record.id)}" aria-label="Ver órdenes de ${esc(patient?.fullName || record.id)}">${icon("view")}</button></td><td><strong>${esc(patient?.fullName || "—")}</strong></td><td>${esc(patient?.document || "—")}</td><td>${formatDate(patient?.birthDate)}</td><td>${badge(profile?.triage || "UNCLASSIFIED", profile?.triage || "No asignado")}</td><td><a href="#/hospitalizaciones/${esc(record.id)}">${esc(record.id)}</a></td><td>${badge(record.status)}</td></tr>`;
+  });
+  return `${pageHeader("Orden Médica", "Pacientes, órdenes, tratamientos y tarjetas con acceso por hospitalización.", actionButton("Nuevo","open-clinical-creation-choice",{kind:"primary",iconName:"plus"}))}
+    <nav class="tabs" aria-label="Estados de Orden Médica">${tabButton("active","Activos",activeCount)}${tabButton("inactive","Inactivos",inactiveCount)}${tabButton("changes","Tratamientos con cambios",changedCount)}${tabButton("updates","Actualizaciones",updatedCount)}</nav>
+    <div class="filter-bar"><label class="page-size-label">Registros <select data-ui-filter="medicalOrderPageSize">${[10,25,50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select></label><label class="search-field">${icon("search")}<input data-input="medical-order-search" value="${esc(ui.medicalOrderSearch || "")}" placeholder="Paciente, cédula u hospitalización"></label></div>
+    ${card("Pacientes", `${table(["","Nombre","Cédula","Fecha Nac.","Triage","Hospitalización","Estatus"], rows)}<nav class="pagination" aria-label="Paginación de Orden Médica"><button data-action="medical-order-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="medical-order-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)} `;
+}
+
 function renderClinicalDocuments(state, store, ui, type) {
   const title=DOC_TYPE_LABELS[type] || "Documentos clínicos";
   if(type==="MEDICATION_CARD") return renderMedicationCards(state,store,ui);
@@ -8646,15 +8894,15 @@ function renderMedicationCards(state, store, ui){
     ${pageHeader("Tarjeta de medicamentos","Tratamientos activos con medicamento, dosis, vía, frecuencia, horarios y registro de administración.",
       `${actionButton("Nueva tarjeta","open-medication-card",{kind:"primary",iconName:"plus"})}`)}
     <div class="medication-grid">
-      ${state.medicationCards.map((cardData)=>`
+      ${state.medicationCards.length ? state.medicationCards.map((cardData)=>`
         <article class="card medication-card">
-          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
+          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p><small>${esc(cardData.diagnosis || "Diagnóstico no documentado")} · ${esc(doctorName(state,cardData.treatingDoctorId))}</small></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
           <div class="card-body">
-            ${table(["Medicamento","Dosis / vía","Frecuencia","Horario","Última administración","Estado"],
-              cardData.items.map((item)=>`<tr><td><strong>${esc(item.medication)}</strong><small>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</small></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${item.schedule.map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("")}</td><td>${item.lastAdministration?formatDate(item.lastAdministration,true):"—"}</td><td>${badge(item.administrationStatus)}</td></tr>`),{compact:true})}
+            ${table(["Tratamiento","Dosis / vía","Frecuencia","Horarios","Inicio / fin","Crónico","Indicaciones"],
+              (cardData.items || []).map((item)=>`<tr><td><strong>${esc(item.medication)}</strong></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${(item.schedule || []).map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("") || "—"}</td><td>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</td><td>${item.chronic ? "Sí" : "No"}</td><td>${esc(item.indications || "—")}</td></tr>`),{compact:true})}
           </div>
-          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
-        </article>`).join("")}
+          <footer class="card-footer">${actionButton("Tarjeta completa","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="complete"`})}${actionButton("Tarjeta simple","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="simple"`})}${actionButton("Conteo presencial","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="count"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}</footer>
+        </article>`).join("") : emptyState("Sin tarjetas de medicamentos", "Crea una tarjeta desde Orden Médica para una hospitalización autorizada.")}
     </div>`;
 }
 
@@ -9044,7 +9292,7 @@ function renderRoute(route,state,store,ui){
       if(!sub) return renderClinicalHome(state,store,ui);
       if(sub==="hospitalizaciones") return renderClinicalHospitalizations(state,store,ui);
       if(sub==="reportes") return renderHealthReports(state,store,ui,parts[2]);
-      if(sub==="ordenes") return renderClinicalDocuments(state,store,ui,"MEDICAL_ORDER");
+      if(sub==="ordenes") return renderMedicalOrders(state,store,ui);
       if(sub==="medicamentos") return renderMedicationCards(state,store,ui);
       if(sub==="planes-de-cuidado") return renderClinicalDocuments(state,store,ui,"CARE_PLAN");
       if(sub==="evoluciones") return renderEvolutions(state,store,ui);
@@ -9231,6 +9479,11 @@ const ui = {
   healthReportTab: "main",
   healthReportRange: null,
   healthReportConfig: null,
+  medicalOrderTab: "active",
+  medicalOrderSearch: "",
+  medicalOrderPage: 1,
+  medicalOrderPageSize: 10,
+  medicationDraft: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -10179,6 +10432,7 @@ function currentQuotesForExport(state) {
 }
 
 function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId = "") {
+  if (type === "MEDICAL_ORDER") return openMedicalOrderForm(caseId, patientId);
   const state = store.getState();
   const record = state.cases.find((c) => c.id === caseId) || state.cases.find((c) => !patientId || c.patientId === patientId) || state.cases[0];
   openModal({
@@ -10199,6 +10453,82 @@ function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-document">Guardar documento</button>`
   });
+}
+
+const MEDICAL_ORDER_SECTIONS = [
+  ["diet", "Dieta"],
+  ["nursingCare", "Cuidados de Enfermería"],
+  ["venoclysis", "Venoclisis"],
+  ["medications", "Medicamentos"],
+  ["therapies", "Terapias"],
+  ["laboratories", "Laboratorios"],
+  ["other", "Otros"],
+  ["oxygen", "Oxígeno"],
+  ["fluidBalance", "Balance Hídrico + Diuresis"],
+  ["support", "Respaldo"],
+  ["vitalSigns", "Signos Vitales"]
+];
+
+function openClinicalCreationChoice(caseId = "") {
+  openModal({
+    title: "¿Qué quieres crear?",
+    subtitle: "Selecciona el documento clínico para la hospitalización autorizada.",
+    size: "md",
+    body: `<div class="choice-stack"><button class="btn btn-primary" data-action="choose-medical-order" data-case-id="${safeText(caseId)}">Orden Médica</button><button class="btn btn-secondary" data-action="choose-medication-card" data-case-id="${safeText(caseId)}">Tarjeta de medicamentos</button></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function orderPatientSummary(record) {
+  const state = store.getState();
+  const patient = record ? store.patientById(record.patientId) : null;
+  const profile = state.clinicalProfiles.find((item) => item.caseId === record?.id);
+  return `<div class="details-grid full"><div><span>Paciente</span><strong>${safeText(patient?.fullName || "—")}</strong></div><div><span>Cédula</span><strong>${safeText(patient?.document || "—")}</strong></div><div><span>Hospitalización</span><strong>${safeText(record?.id || "—")}</strong></div><div><span>Triage</span><strong>${safeText(profile?.triage || "No asignado")}</strong></div></div>`;
+}
+
+function openMedicalOrderForm(caseId = "", patientId = "") {
+  const state = store.getState();
+  const record = state.cases.find((item) => item.id === caseId) || state.cases.find((item) => !patientId || item.patientId === patientId) || state.cases[0];
+  openModal({
+    title: "Orden médica nueva",
+    subtitle: "Borrador clínico versionado. Las secciones sólo guardan lo documentado por el profesional autorizado.",
+    size: "xl",
+    body: `<form id="medical-order-form" class="form-grid">
+      <label class="full">Hospitalización<select name="caseId" data-action="medical-order-case-change">${caseOptions(record?.id)}</select></label>
+      ${orderPatientSummary(record)}
+      <label>Médico tratante<select name="treatingDoctorId" required><option value="">Seleccione</option>${doctorOptions(record?.contractingDoctorId)}</select></label>
+      <label>Otros médicos tratantes<select name="otherDoctorIds" multiple>${doctorOptions()}</select></label>
+      <label class="full">Diagnósticos documentados<textarea name="diagnosis" maxlength="2000" rows="2"></textarea></label>
+      <fieldset class="full"><legend>Orden médica · plan de cuidados</legend><p class="field-hint">Selecciona únicamente las secciones indicadas. No se calculan indicaciones clínicas.</p>
+        <div class="order-section-picker">${MEDICAL_ORDER_SECTIONS.map(([key,label],index) => `<label><input type="checkbox" name="section-${key}" ${index < 2 ? "checked" : ""}> ${safeText(label)}</label><textarea name="content-${key}" rows="3" maxlength="5000" placeholder="Contenido documentado para ${safeText(label)}"></textarea>`).join("")}</div>
+      </fieldset>
+      <input type="hidden" name="idempotencyKey" value="${uid("MEDICAL-ORDER")}">
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Atrás</button><button class="btn btn-primary" data-action="save-medical-order">Guardar borrador</button>`
+  });
+}
+
+function openPatientOrders(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((item) => item.id === caseId);
+  if (!record) return showToast("Hospitalización no encontrada.", "danger");
+  const documents = state.clinicalDocuments.filter((item) => item.caseId === caseId && item.type === "MEDICAL_ORDER");
+  const cards = state.medicationCards.filter((item) => item.caseId === caseId);
+  const treatments = cards.flatMap((cardData) => (cardData.items || []).map((item) => ({...item, cardId: cardData.id, documentStatus: cardData.documentStatus})));
+  const docRows = documents.map((item) => `<tr><td><button class="row-action" data-action="view-document" data-id="${safeText(item.id)}">Ver</button></td><td>${safeText(item.id)}</td><td>${safeText(item.status)}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.updatedAt || item.createdAt)}</td><td>Regla PMC pendiente</td></tr>`);
+  const cardRows = cards.map((item) => `<tr><td><button class="row-action" data-action="print-medication-card" data-id="${safeText(item.id)}" data-variant="complete">Imprimir</button></td><td>${safeText(item.id)}</td><td>${safeText(item.documentStatus)}</td><td>${safeText(item.createdByName || item.createdBy || "—")}</td><td>${safeText(item.updatedAt || item.createdAt)}</td><td>Regla PMC pendiente</td></tr>`);
+  const treatmentRows = treatments.map((item) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)}</td><td>${safeText(item.route)}</td><td>${safeText(item.frequency)}</td><td>${safeText(item.startDate)} → ${safeText(item.endDate || "—")}</td><td>${safeText(item.documentStatus)}</td></tr>`);
+  openModal({
+    title: "Órdenes",
+    subtitle: `${record.id} · ${store.patientById(record.patientId)?.fullName || "Paciente"}`,
+    size: "xl",
+    body: `${orderPatientSummary(record)}<div class="tabs" aria-label="Consulta de documentos"><span class="tab active">Órdenes médicas (${documents.length})</span><span class="tab">Tarjetas de medicamentos (${cards.length})</span><span class="tab">Historial de tratamientos (${treatments.length})</span></div><section><h3>Órdenes médicas</h3>${simpleTable(["Acciones","Código","Estatus","Actualizado por","Última actualización","Estatus PMC"],docRows)}</section><section><h3>Tarjetas de medicamentos</h3>${simpleTable(["Acciones","Código","Estatus","Actualizado por","Última actualización","Estatus PMC"],cardRows)}</section><section><h3>Historial de tratamientos</h3>${simpleTable(["Tratamiento","Dosis","Vía","Frecuencia","Vigencia","Documento"],treatmentRows)}</section>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="open-clinical-creation-choice" data-case-id="${safeText(caseId)}">+ Nuevo</button>`
+  });
+}
+
+function simpleTable(headers, rows) {
+  return `<div class="table-wrap"><table><thead><tr>${headers.map((header) => `<th>${safeText(header)}</th>`).join("")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="${headers.length}">No hay registros disponibles.</td></tr>`}</tbody></table></div>`;
 }
 
 function openClinicalCorrectionForm(subjectType, subjectId) {
@@ -10424,25 +10754,79 @@ function openDiscountForm() {
   });
 }
 
-function openMedicationCardForm() {
+function openMedicationCardForm(caseId = "", preserveDraft = false) {
   const state = store.getState();
-  const record=state.cases[0];
+  const record = state.cases.find((item) => item.id === (caseId || ui.medicationDraft?.caseId)) || state.cases[0];
+  if (!preserveDraft || !ui.medicationDraft) {
+    ui.medicationDraft = {
+      caseId: record?.id || "",
+      treatingDoctorId: record?.contractingDoctorId || "",
+      otherDoctorIds: [],
+      diagnosis: record?.diagnosisSummary || "",
+      items: [],
+      signNow: false,
+      idempotencyKey: uid("MEDICATION-CARD")
+    };
+  }
+  const draft = ui.medicationDraft;
+  const selectedCase = state.cases.find((item) => item.id === draft.caseId) || record;
+  const selected = (value, expected) => value === expected ? "selected" : "";
   openModal({
-    title:"Nueva tarjeta de medicamentos",
-    subtitle:"Tratamiento, dosis, vía, frecuencia y horarios. La firma bloquea el contenido y las correcciones quedan auditadas.",
-    size:"lg",
+    title:"Tarjeta de medicamentos nueva",
+    subtitle:"Borrador con encabezado clínico y tratamientos documentados. No genera ni recomienda dosis.",
+    size:"xl",
     body:`<form id="medication-card-form" class="form-grid">
-      <label class="full">Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
-      <label class="full">Medicamento<input name="medication" required value="Medicamento demo 500 mg"></label>
-      <label>Dosis<input name="dose" value="1 tableta"></label>
-      <label>Vía<select name="route"><option>VO</option><option>IV</option><option>IM</option><option>SC</option><option>INHALADA</option></select></label>
-      <label>Frecuencia<input name="frequency" value="Cada 8 horas"></label>
-      <label>Horarios<input name="schedule" value="06:00, 14:00, 22:00"></label>
-      <label>Inicio<input type="date" name="startDate" value="${new Date().toISOString().slice(0,10)}"></label>
-      <label>Fin<input type="date" name="endDate" value="${new Date(Date.now()+7*86400000).toISOString().slice(0,10)}"></label>
-      <label class="full"><input type="checkbox" name="signNow"> Firmar y bloquear al guardar</label>
+      <label class="full">Hospitalización<select name="caseId" data-action="medication-card-case-change">${caseOptions(selectedCase?.id)}</select></label>
+      ${orderPatientSummary(selectedCase)}
+      <label>Médico tratante<select name="treatingDoctorId" required><option value="">Seleccione</option>${doctorOptions(draft.treatingDoctorId)}</select></label>
+      <label>Otros médicos tratantes<select name="otherDoctorIds" multiple>${state.doctors.map((doctor) => `<option value="${doctor.id}" ${draft.otherDoctorIds.includes(doctor.id) ? "selected" : ""}>${safeText(doctor.name)} · ${safeText(doctor.specialty)}</option>`).join("")}</select></label>
+      <label class="full">Diagnósticos documentados<textarea name="diagnosis" rows="2" maxlength="2000">${safeText(draft.diagnosis)}</textarea></label>
+      <section class="full form-section"><header class="card-header"><div><h3>Tabla de tratamientos</h3><p>Tratamientos del paciente · Actualizaciones</p></div><button type="button" class="btn btn-secondary" data-action="open-treatment-draft">+ Agregar tratamiento</button></header>
+        ${simpleTable(["Tratamiento","Dosis","Horarios","Inicio","Duración","Crónico","Indicaciones"], draft.items.map((item,index) => `<tr><td>${safeText(item.medication)}</td><td>${safeText(item.dose)} · ${safeText(item.route)}</td><td>${safeText((item.schedule || []).join(", ") || "—")}</td><td>${safeText(item.startDate)}</td><td>${safeText(item.durationDays ? `${item.durationDays} días` : item.endDate || "—")}</td><td>${item.chronic ? "Sí" : "No"}</td><td>${safeText(item.indications || "—")}<button type="button" class="row-action" data-action="remove-treatment-draft" data-index="${index}" aria-label="Quitar tratamiento">×</button></td></tr>`))}
+      </section>
+      <label class="full"><input type="checkbox" name="signNow" ${draft.signNow ? "checked" : ""}> Firmar y bloquear al guardar</label>
     </form>`,
-    footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-medication-card">Crear tarjeta</button>`
+    footer:`<button class="btn btn-secondary" data-action="cancel-medication-draft">Atrás</button><button class="btn btn-primary" data-action="save-medication-card">Guardar tarjeta</button>`
+  });
+}
+
+function syncMedicationDraft() {
+  const form = document.querySelector("#medication-card-form");
+  if (!form || !ui.medicationDraft) return;
+  const data = new FormData(form);
+  ui.medicationDraft.caseId = String(data.get("caseId") || "");
+  ui.medicationDraft.treatingDoctorId = String(data.get("treatingDoctorId") || "");
+  ui.medicationDraft.otherDoctorIds = data.getAll("otherDoctorIds").map(String);
+  ui.medicationDraft.diagnosis = String(data.get("diagnosis") || "");
+  ui.medicationDraft.signNow = data.has("signNow");
+}
+
+function openTreatmentDraftForm() {
+  syncMedicationDraft();
+  const state = store.getState();
+  const medicationNames = state.catalogItems.filter((item) => item.category === "MEDICATIONS").map((item) => item.name);
+  const today = new Date().toISOString().slice(0,10);
+  openModal({
+    title: "Configuración de tratamientos",
+    subtitle: "Captura fiel de una indicación existente; no ofrece recomendación clínica.",
+    size: "lg",
+    body: `<form id="treatment-draft-form" class="form-grid">
+      <label class="full">Paciente<input value="${safeText(store.patientById(store.caseById(ui.medicationDraft.caseId)?.patientId)?.fullName || "—")}" disabled></label>
+      <label>Medicamento<input name="medication" list="medication-catalog" required maxlength="300"><datalist id="medication-catalog">${medicationNames.map((name) => `<option value="${safeText(name)}"></option>`).join("")}</datalist></label>
+      <label>Médico<select name="doctorId" required><option value="">Seleccione</option>${doctorOptions(ui.medicationDraft.treatingDoctorId)}</select></label>
+      <label>Vía de administración<select name="route" required><option value="">Seleccione</option><option>IV</option><option>VO</option><option>SC</option><option>IM</option><option value="OTHER">Otra documentada</option></select></label>
+      <label>Dosis<input name="dose" required maxlength="160" autocomplete="off"></label>
+      <label>Frecuencia<select name="frequency" required><option value="">Seleccione</option><option>Cada 4 horas</option><option>Cada 6 horas</option><option>Cada 8 horas</option><option>Cada 12 horas</option><option>Cada día</option><option>BID</option><option>TID</option><option value="OTHER">Otra documentada</option></select></label>
+      <label>Duración (días)<input type="number" name="durationDays" min="1" max="3660" step="1"></label>
+      <label>Fecha inicio<input type="date" name="startDate" value="${today}" required></label>
+      <label>Fecha fin<input type="date" name="endDate" min="${today}" required></label>
+      <label class="full"><input type="checkbox" name="chronic"> Medicamento crónico (marca documentada)</label>
+      <label class="full">Horarios<input name="schedule" placeholder="08:00, 20:00 o PRN" maxlength="500"></label>
+      <label class="full">Indicaciones<textarea name="indications" rows="4" maxlength="5000"></textarea></label>
+      <label class="full"><input type="checkbox" name="showDilutions"> Mostrar diluciones documentadas</label>
+      <label class="full">Diluciones<textarea name="dilutions" rows="2" maxlength="2000" disabled placeholder="Se habilita al marcar Mostrar diluciones"></textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="return-to-medication-draft">Cerrar</button><button class="btn btn-primary" data-action="save-treatment-draft">Guardar tratamiento</button>`
   });
 }
 
@@ -10515,12 +10899,12 @@ function printClinicalDocument(id) {
   openPrintWindow(html,doc.title);
 }
 
-function printMedicationCard(id){
+function printMedicationCard(id, variant = "complete"){
   const state=store.getState();
   const card=state.medicationCards.find(c=>c.id===id);
   if(!card) throw new Error("Tarjeta no encontrada.");
   const corrections=state.clinicalCorrections.filter(item=>item.subjectType==="MEDICATION_CARD"&&item.subjectId===card.id);
-  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections}),`Tarjeta ${card.id}`);
+  openPrintWindow(medicationCardDocument({card,patient:store.patientById(card.patientId),recordCase:store.caseById(card.caseId),corrections,variant}),`Tarjeta ${card.id}`);
 }
 
 function printStatement(id){
@@ -10859,6 +11243,16 @@ document.addEventListener("click", async (event) => {
     }
     case "set-health-report-tab": ui.healthReportTab = data.tab || "main"; render(); break;
     case "health-report-page": ui.healthReportPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "set-medical-order-tab": ui.medicalOrderTab = data.tab || "active"; ui.medicalOrderPage = 1; render(); break;
+    case "medical-order-page": ui.medicalOrderPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "open-clinical-creation-choice": openClinicalCreationChoice(data.caseId || ""); break;
+    case "choose-medical-order": openMedicalOrderForm(data.caseId || ""); break;
+    case "choose-medication-card": openMedicationCardForm(data.caseId || ""); break;
+    case "view-patient-orders": openPatientOrders(data.caseId || ""); break;
+    case "open-treatment-draft": openTreatmentDraftForm(); break;
+    case "return-to-medication-draft": openMedicationCardForm("", true); break;
+    case "remove-treatment-draft": if (ui.medicationDraft) { syncMedicationDraft(); ui.medicationDraft.items.splice(Number(data.index),1); openMedicationCardForm("",true); } break;
+    case "cancel-medication-draft": ui.medicationDraft = null; closeModal(); break;
     case "change-health-report-range": openHealthReportRange(data.caseId || ""); break;
     case "open-health-report-config": renderHealthReportConfigModal(data.caseId || ""); break;
     case "health-report-config-add": {
@@ -10938,10 +11332,10 @@ document.addEventListener("click", async (event) => {
     case "open-catalog-form": openCatalogForm(data.category||""); break;
     case "edit-catalog-item": openCatalogForm("",data.id); break;
     case "open-discount-form": openDiscountForm(); break;
-    case "open-medication-card": openMedicationCardForm(); break;
-    case "print-medication-card": runSafely(()=>printMedicationCard(data.id)); break;
+    case "open-medication-card": openMedicationCardForm(data.caseId || ""); break;
+    case "print-medication-card": runSafely(()=>printMedicationCard(data.id,data.variant || "complete")); break;
     case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
-    case "administer-medication": showToast("Administración registrada en modo demo."); break;
+    case "administer-medication": showToast("Registro de administración deshabilitado hasta confirmar campos, permisos y correcciones.", "info"); break;
     case "open-doctor-form": openDoctorForm(); break;
     case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
     case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id),"Estado de cuenta enviado en modo simulado."); break;
@@ -11042,6 +11436,37 @@ document.addEventListener("change", (event) => {
       form.elements.namedItem("insuredBirthDate").value = form.elements.namedItem("birthDate").value;
     }
   }
+  if (action === "medication-card-case-change" && ui.medicationDraft) {
+    syncMedicationDraft();
+    openMedicationCardForm(target.value, true);
+    return;
+  }
+  if (action === "medical-order-case-change") {
+    const record = store.caseById(target.value);
+    const summary = target.form?.querySelector(".details-grid");
+    if (record && summary) summary.outerHTML = orderPatientSummary(record);
+    const doctor = target.form?.elements.namedItem("treatingDoctorId");
+    const diagnosis = target.form?.elements.namedItem("diagnosis");
+    if (doctor && !doctor.value) doctor.value = record?.contractingDoctorId || "";
+    if (diagnosis && !diagnosis.value) diagnosis.value = record?.diagnosisSummary || "";
+    return;
+  }
+  if (target.matches('#treatment-draft-form [name="showDilutions"]')) {
+    const dilutions = target.form?.elements.namedItem("dilutions");
+    if (dilutions) { dilutions.disabled = !target.checked; if (!target.checked) dilutions.value = ""; }
+  }
+  if (target.matches('#treatment-draft-form [name="startDate"], #treatment-draft-form [name="durationDays"]')) {
+    const form = target.form;
+    const start = String(form?.elements.namedItem("startDate")?.value || "");
+    const days = Number(form?.elements.namedItem("durationDays")?.value || 0);
+    const end = form?.elements.namedItem("endDate");
+    if (end && /^\d{4}-\d{2}-\d{2}$/.test(start) && Number.isInteger(days) && days > 0) {
+      const date = new Date(`${start}T12:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + days - 1);
+      end.value = date.toISOString().slice(0,10);
+      end.min = start;
+    }
+  }
   if (target.matches('[data-ui-filter="patientPageSize"]')) {
     ui.patientPageSize = Math.max(1, Math.min(100, Number(target.value || 10)));
     ui.patientPage = 1;
@@ -11099,6 +11524,11 @@ document.addEventListener("change", (event) => {
     ui.healthReportPage = 1;
     render();
   }
+  if (target.matches('[data-ui-filter="medicalOrderPageSize"]')) {
+    ui.medicalOrderPageSize = Math.max(1, Math.min(50, Number(target.value || 10)));
+    ui.medicalOrderPage = 1;
+    render();
+  }
   if (target.id === "patient-import-file") {
     const file = target.files?.[0];
     if (!file) return;
@@ -11143,6 +11573,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="health-report-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="medical-order-search"]')) {
+    ui.medicalOrderSearch = target.value;
+    ui.medicalOrderPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="medical-order-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }
@@ -11377,16 +11816,42 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#clinical-document-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const document=runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan}}),"Documento clínico creado.");
-    if(document&&formBool(form,"signNow")) runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
+    const document=await runSafely(()=>store.createClinicalDocument({caseId:data.caseId,type:data.type,title:data.title,summary:data.summary,content:{diagnosis:data.diagnosis,background:(data.background||"").split(",").map(v=>v.trim()).filter(Boolean),allergies:(data.allergies||"").split(",").map(v=>v.trim()).filter(Boolean),devices:(data.devices||"").split(",").map(v=>v.trim()).filter(Boolean),plan:data.plan},idempotencyKey:uid("CLINICAL-DOCUMENT")}),"Documento clínico creado.");
+    if(document&&formBool(form,"signNow")) await runSafely(()=>store.signClinicalDocument(document.id),"Documento firmado.");
     if(document){closeModal(); location.hash=`#/hospitalizaciones/${data.caseId}`; ui.tab="clinical";}
+  }
+
+  if(action==="save-medical-order"){
+    const form=document.querySelector("#medical-order-form");
+    if(!form?.reportValidity()) return;
+    const fd=new FormData(form);
+    const sections=MEDICAL_ORDER_SECTIONS.filter(([key])=>fd.has(`section-${key}`)).map(([key,label])=>({key,label,content:String(fd.get(`content-${key}`)||"").trim()}));
+    if(!sections.length){showToast("Seleccione al menos una sección de la orden.","danger");return;}
+    const result=await runSafely(()=>store.createClinicalDocument({
+      caseId:String(fd.get("caseId")),type:"MEDICAL_ORDER",title:`Orden médica · ${String(fd.get("caseId"))}`,
+      summary:sections.map((section)=>section.label).join(", "),
+      content:{treatingDoctorId:String(fd.get("treatingDoctorId")||""),otherDoctorIds:fd.getAll("otherDoctorIds").map(String),diagnosis:String(fd.get("diagnosis")||"").trim(),sections},
+      idempotencyKey:String(fd.get("idempotencyKey")||uid("MEDICAL-ORDER"))
+    }),"Orden médica guardada como borrador.");
+    if(result){closeModal();location.hash="#/clinica/ordenes";}
+  }
+
+  if(action==="save-treatment-draft"){
+    const form=document.querySelector("#treatment-draft-form");
+    if(!form?.reportValidity()||!ui.medicationDraft) return;
+    const data=Object.fromEntries(new FormData(form));
+    if(data.endDate < data.startDate){showToast("La fecha de fin no puede ser anterior al inicio.","danger");return;}
+    const durationDays=data.durationDays?Number(data.durationDays):null;
+    if(durationDays!==null&&(!Number.isInteger(durationDays)||durationDays<1||durationDays>3660)){showToast("La duración documentada no es válida.","danger");return;}
+    ui.medicationDraft.items.push({id:uid("MCI"),medication:String(data.medication).trim(),doctorId:data.doctorId,route:data.route,dose:String(data.dose).trim(),frequency:data.frequency,durationDays,startDate:data.startDate,endDate:data.endDate,chronic:formBool(form,"chronic"),schedule:String(data.schedule||"").split(",").map(value=>value.trim()).filter(Boolean),indications:String(data.indications||"").trim(),dilutions:formBool(form,"showDilutions")?String(data.dilutions||"").trim():"",lastAdministration:null,administrationStatus:"PENDING"});
+    openMedicationCardForm("",true);
   }
 
   if(action==="save-clinical-correction"){
     const form=document.querySelector("#clinical-correction-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
+    const result=await runSafely(()=>store.createClinicalCorrection(data.subjectType,data.subjectId,{kind:data.kind,reason:data.reason,content:{text:data.content}}),"Corrección auditada registrada.");
     if(result) closeModal();
   }
 
@@ -11394,7 +11859,7 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#clinical-void-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
+    const result=await runSafely(()=>data.subjectType==="CLINICAL_DOCUMENT"?store.voidClinicalDocument(data.subjectId,data.reason):store.voidClinicalRecord(data.subjectType,data.subjectId,data.reason),"Registro anulado y conservado en historial.");
     if(result!==undefined) closeModal();
   }
 
@@ -11486,10 +11951,12 @@ document.addEventListener("click", async (event) => {
   if(action==="save-medication-card"){
     const form=document.querySelector("#medication-card-form");
     if(!form?.reportValidity()) return;
-    const data=Object.fromEntries(new FormData(form));
-    const card=runSafely(()=>store.createMedicationCard({caseId:data.caseId,items:[{id:uid("MCI"),medication:data.medication,dose:data.dose,route:data.route,frequency:data.frequency,schedule:data.schedule.split(",").map(v=>v.trim()).filter(Boolean),startDate:data.startDate,endDate:data.endDate,lastAdministration:null,administrationStatus:"PENDING"}]}),"Tarjeta de medicamentos creada como borrador.");
-    if(card&&formBool(form,"signNow")) runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
-    if(card){closeModal();render();}
+    syncMedicationDraft();
+    if(!ui.medicationDraft?.items.length){showToast("Agregue al menos un tratamiento documentado.","danger");return;}
+    const signNow=ui.medicationDraft.signNow;
+    const card=await runSafely(()=>store.createMedicationCard(ui.medicationDraft),"Tarjeta de medicamentos creada como borrador.");
+    if(card&&signNow) await runSafely(()=>store.signMedicationCard(card.id),"Tarjeta firmada y bloqueada.");
+    if(card){ui.medicationDraft=null;closeModal();location.hash="#/clinica/medicamentos";render();}
   }
 
   if(action==="save-doctor"){

@@ -118,7 +118,8 @@ test("P0 clinical: drafts edit, signature blocks updates, and corrections preser
 
 test("P0 clinical: unauthorized correction, missing void reason, and cross-organization access are blocked", async () => {
   const store = await isolatedStore();
-  const document = store.createClinicalDocument({ caseId: "HOS-2026-0190", type: "MEDICAL_ORDER", title: "Orden sintética", summary: "Prueba" });
+  const treatingDoctorId = store.getState().doctors.find((item) => item.status === "ACTIVE")?.id;
+  const document = store.createClinicalDocument({ caseId: "HOS-2026-0190", type: "MEDICAL_ORDER", title: "Orden sintética", summary: "Prueba", content: { treatingDoctorId } });
   store.signClinicalDocument(document.id);
   await store.authenticate("enfermeria@analiza.demo", DEMO_PASSWORD);
   assert.throws(() => store.createClinicalCorrection("CLINICAL_DOCUMENT", document.id, { reason: "Sin permiso" }), /permiso/i);
@@ -130,12 +131,14 @@ test("P0 clinical: unauthorized correction, missing void reason, and cross-organ
 
 test("P0 clinical: signed nursing notes and medication cards use the same append-only correction flow", async () => {
   const store = await isolatedStore();
+  const treatingDoctorId = store.getState().doctors.find((item) => item.status === "ACTIVE")?.id;
   await store.authenticate("enfermeria@analiza.demo", DEMO_PASSWORD);
   const note = store.addNursingNote({ caseId: "HOS-2026-0190", text: "Nota sintética", sign: true });
   assert.equal(note.status, "SIGNED");
   const card = store.createMedicationCard({
     caseId: "HOS-2026-0190",
-    items: [{ medication: "Medicamento sintético", dose: "Dato QA", route: "VO", frequency: "Dato QA", schedule: ["08:00"] }]
+    treatingDoctorId,
+    items: [{ medication: "Medicamento sintético", doctorId: treatingDoctorId, dose: "Dato QA", route: "VO", frequency: "Dato QA", schedule: ["08:00"] }]
   });
   store.signMedicationCard(card.id);
   await store.authenticate("admin@analiza.demo", DEMO_PASSWORD);

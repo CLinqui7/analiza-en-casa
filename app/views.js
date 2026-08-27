@@ -1061,6 +1061,46 @@ function clinicalModule(title,description,href,type,state){
   return `<a class="module-card" href="${href}"><span>${icon("clinical")}</span><div><h2>${esc(title)}</h2><p>${esc(description)}</p><strong>${count} registros</strong></div>${icon("view")}</a>`;
 }
 
+function renderMedicalOrders(state, store, ui) {
+  const activeTab = ui.medicalOrderTab || "active";
+  const query = String(ui.medicalOrderSearch || "").trim().toLocaleLowerCase("es");
+  const profilesByCase = new Map((state.clinicalProfiles || []).map((profile) => [profile.caseId, profile]));
+  const hasCorrection = (record) => {
+    const documentIds = state.clinicalDocuments.filter((item) => item.caseId === record.id).map((item) => item.id);
+    const cardIds = state.medicationCards.filter((item) => item.caseId === record.id).map((item) => item.id);
+    return state.clinicalCorrections.some((item) => documentIds.includes(item.subjectId) || cardIds.includes(item.subjectId));
+  };
+  const hasUpdate = (record) => state.medicationCards.some((cardData) => cardData.caseId === record.id
+    && (cardData.items || []).some((item) => item.lastAdministration));
+  const tabCases = state.cases.filter((record) => {
+    if (activeTab === "active") return record.status === "ACTIVE";
+    if (activeTab === "inactive") return record.status !== "ACTIVE";
+    if (activeTab === "changes") return hasCorrection(record);
+    if (activeTab === "updates") return hasUpdate(record);
+    return true;
+  });
+  const entries = tabCases.map((record) => ({record, patient: state.patients.find((item) => item.id === record.patientId)}))
+    .filter(({record,patient}) => !query || [record.id,patient?.document,patient?.fullName].some((value) => String(value || "").toLocaleLowerCase("es").includes(query)));
+  const pageSize = Number(ui.medicalOrderPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.medicalOrderPage || 1)), totalPages);
+  const pageEntries = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="medical-order-page" data-page="${page}" class="${page === currentPage ? "active" : ""}">${page}</button>`).join("");
+  const tabButton = (key, label, count) => `<button class="tab ${key === activeTab ? "active" : ""}" data-action="set-medical-order-tab" data-tab="${key}">${esc(label)} <span>${count}</span></button>`;
+  const activeCount = state.cases.filter((record) => record.status === "ACTIVE").length;
+  const inactiveCount = state.cases.length - activeCount;
+  const changedCount = state.cases.filter(hasCorrection).length;
+  const updatedCount = state.cases.filter(hasUpdate).length;
+  const rows = pageEntries.map(({record,patient}) => {
+    const profile = profilesByCase.get(record.id);
+    return `<tr><td><button class="row-action" data-action="open-clinical-creation-choice" data-case-id="${esc(record.id)}" aria-label="Nuevo documento para ${esc(patient?.fullName || record.id)}">+</button><button class="row-action" data-action="view-patient-orders" data-case-id="${esc(record.id)}" aria-label="Ver órdenes de ${esc(patient?.fullName || record.id)}">${icon("view")}</button></td><td><strong>${esc(patient?.fullName || "—")}</strong></td><td>${esc(patient?.document || "—")}</td><td>${formatDate(patient?.birthDate)}</td><td>${badge(profile?.triage || "UNCLASSIFIED", profile?.triage || "No asignado")}</td><td><a href="#/hospitalizaciones/${esc(record.id)}">${esc(record.id)}</a></td><td>${badge(record.status)}</td></tr>`;
+  });
+  return `${pageHeader("Orden Médica", "Pacientes, órdenes, tratamientos y tarjetas con acceso por hospitalización.", actionButton("Nuevo","open-clinical-creation-choice",{kind:"primary",iconName:"plus"}))}
+    <nav class="tabs" aria-label="Estados de Orden Médica">${tabButton("active","Activos",activeCount)}${tabButton("inactive","Inactivos",inactiveCount)}${tabButton("changes","Tratamientos con cambios",changedCount)}${tabButton("updates","Actualizaciones",updatedCount)}</nav>
+    <div class="filter-bar"><label class="page-size-label">Registros <select data-ui-filter="medicalOrderPageSize">${[10,25,50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select></label><label class="search-field">${icon("search")}<input data-input="medical-order-search" value="${esc(ui.medicalOrderSearch || "")}" placeholder="Paciente, cédula u hospitalización"></label></div>
+    ${card("Pacientes", `${table(["","Nombre","Cédula","Fecha Nac.","Triage","Hospitalización","Estatus"], rows)}<nav class="pagination" aria-label="Paginación de Orden Médica"><button data-action="medical-order-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="medical-order-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)} `;
+}
+
 function renderClinicalDocuments(state, store, ui, type) {
   const title=DOC_TYPE_LABELS[type] || "Documentos clínicos";
   if(type==="MEDICATION_CARD") return renderMedicationCards(state,store,ui);
@@ -1097,15 +1137,15 @@ function renderMedicationCards(state, store, ui){
     ${pageHeader("Tarjeta de medicamentos","Tratamientos activos con medicamento, dosis, vía, frecuencia, horarios y registro de administración.",
       `${actionButton("Nueva tarjeta","open-medication-card",{kind:"primary",iconName:"plus"})}`)}
     <div class="medication-grid">
-      ${state.medicationCards.map((cardData)=>`
+      ${state.medicationCards.length ? state.medicationCards.map((cardData)=>`
         <article class="card medication-card">
-          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
+          <header class="card-header"><div><h2>${esc(patientName(state,cardData.patientId))}</h2><p>${esc(cardData.caseId)} · ${formatDate(cardData.createdAt)} · v${cardData.version||1}</p><small>${esc(cardData.diagnosis || "Diagnóstico no documentado")} · ${esc(doctorName(state,cardData.treatingDoctorId))}</small></div>${badge(store.clinicalRecordStatus("MEDICATION_CARD",cardData.id)||cardData.documentStatus||"DRAFT")}</header>
           <div class="card-body">
-            ${table(["Medicamento","Dosis / vía","Frecuencia","Horario","Última administración","Estado"],
-              cardData.items.map((item)=>`<tr><td><strong>${esc(item.medication)}</strong><small>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</small></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${item.schedule.map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("")}</td><td>${item.lastAdministration?formatDate(item.lastAdministration,true):"—"}</td><td>${badge(item.administrationStatus)}</td></tr>`),{compact:true})}
+            ${table(["Tratamiento","Dosis / vía","Frecuencia","Horarios","Inicio / fin","Crónico","Indicaciones"],
+              (cardData.items || []).map((item)=>`<tr><td><strong>${esc(item.medication)}</strong></td><td>${esc(item.dose)} · ${esc(item.route)}</td><td>${esc(item.frequency)}</td><td>${(item.schedule || []).map((t)=>`<span class="time-chip">${esc(t)}</span>`).join("") || "—"}</td><td>${formatDate(item.startDate)} → ${formatDate(item.endDate)}</td><td>${item.chronic ? "Sí" : "No"}</td><td>${esc(item.indications || "—")}</td></tr>`),{compact:true})}
           </div>
-          <footer class="card-footer">${actionButton("Imprimir tarjeta","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}${actionButton("Registrar administración","administer-medication",{kind:"primary",data:`data-id="${cardData.id}"`})}</footer>
-        </article>`).join("")}
+          <footer class="card-footer">${actionButton("Tarjeta completa","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="complete"`})}${actionButton("Tarjeta simple","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="simple"`})}${actionButton("Conteo presencial","print-medication-card",{iconName:"print",data:`data-id="${cardData.id}" data-variant="count"`})}${cardData.documentStatus==="DRAFT"?actionButton("Firmar","sign-medication-card",{kind:"primary",data:`data-id="${cardData.id}"`}):""}${cardData.documentStatus==="SIGNED"?`${actionButton("Corregir","open-clinical-correction",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}${actionButton("Anular","open-clinical-void",{data:`data-subject-type="MEDICATION_CARD" data-id="${cardData.id}"`})}`:""}</footer>
+        </article>`).join("") : emptyState("Sin tarjetas de medicamentos", "Crea una tarjeta desde Orden Médica para una hospitalización autorizada.")}
     </div>`;
 }
 
@@ -1495,7 +1535,7 @@ export function renderRoute(route,state,store,ui){
       if(!sub) return renderClinicalHome(state,store,ui);
       if(sub==="hospitalizaciones") return renderClinicalHospitalizations(state,store,ui);
       if(sub==="reportes") return renderHealthReports(state,store,ui,parts[2]);
-      if(sub==="ordenes") return renderClinicalDocuments(state,store,ui,"MEDICAL_ORDER");
+      if(sub==="ordenes") return renderMedicalOrders(state,store,ui);
       if(sub==="medicamentos") return renderMedicationCards(state,store,ui);
       if(sub==="planes-de-cuidado") return renderClinicalDocuments(state,store,ui,"CARE_PLAN");
       if(sub==="evoluciones") return renderEvolutions(state,store,ui);

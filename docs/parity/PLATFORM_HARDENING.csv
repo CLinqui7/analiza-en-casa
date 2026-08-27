@@ -34,3 +34,7 @@
 "CH09-H003","tenant_references","Hospitalización y profesionales de la organización","Valida organización, permiso, hospitalización, paciente y cada profesional activo dentro del tenant.","IMPLEMENTED_EXACT","",""
 "CH09-H004","temporal_validation","Validación temporal cliente y servidor","Aplica start<=end en HTML, dominio, constraints SQL y RPC sin aceptar el defecto de rango del video.","IMPLEMENTED_EXACT","",""
 "CH09-H005","safe_printing","Impresión sin mutación clínica","La impresión configura una vista derivada, no edita documentos firmados ni convierte el fallo del video en comportamiento productivo.","IMPLEMENTED_EXACT","",""
+"CH10-H001","clinical_transaction","Creación remota-first e idempotente","Confirma RPC antes de reflejar éxito local, serializa idempotencia y audita hospitalización sin contenido clínico en logs.","IMPLEMENTED_EXACT","",""
+"CH10-H002","tenant_integrity","Hospitalización y profesionales del tenant","Valida organización, permiso, hospitalización, paciente y profesionales activos en cliente/store/RPC con RLS.","IMPLEMENTED_EXACT","",""
+"CH10-H003","calendar_integrity","Calendario editable y validado","Evita desplazamiento por zona horaria, rechaza rangos invertidos y conserva la fecha sugerida como editable/configurable.","IMPLEMENTED_EXACT","",""
+"CH10-H004","safe_administration","Administración no simulada","No afirma una administración ni envía contenido clínico; el registro operativo permanece deshabilitado hasta definir campos, permisos y correcciones.","NEEDS_CLIENT_CONFIRMATION","","CH10-Q013"

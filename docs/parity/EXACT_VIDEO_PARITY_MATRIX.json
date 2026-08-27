@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T09:12:45.384Z",
+  "generated_at": "2026-08-27T09:50:16.275Z",
   "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 96,
-    "IMPLEMENTED_PARTIAL": 83,
+    "IMPLEMENTED_EXACT": 101,
+    "IMPLEMENTED_PARTIAL": 87,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 16,
-    "NEEDS_CLIENT_CONFIRMATION": 40
+    "NOT_TESTABLE": 17,
+    "NEEDS_CLIENT_CONFIRMATION": 44
   },
   "requirements": [
     {
@@ -13516,6 +13516,842 @@
       ],
       "acceptance_criteria": [
         "La impresión configura una vista derivada, no edita documentos firmados ni convierte el fallo del video en comportamiento productivo.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderMedicalOrders",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q012"
+      ],
+      "requirement_id": "CH10-R001",
+      "event_ids": [
+        "CH10-E0008",
+        "CH10-E0009",
+        "CH10-E0065"
+      ],
+      "feature_group": "medical_order_list",
+      "page": "Orden Médica",
+      "control_type": "tabs_table",
+      "visible_label": "Activos / Inactivos / Tratamientos con cambios / Actualizaciones",
+      "expected_behavior": "Lista hospitalizaciones autorizadas con búsqueda, paginación, estado, triage y acciones Nuevo/Ver Órdenes; Registro XPO permanece bloqueado hasta definir contrato.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:27:37.600",
+        "00:27:42.200",
+        "00:29:24.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0008",
+          "timestamp": "00:27:37.600",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0008_00h27m37s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0009",
+          "timestamp": "00:27:42.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0009_00h27m42s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0009_00h27m42s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0065",
+          "timestamp": "00:29:24.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0065_00h29m24s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0065_00h29m24s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista hospitalizaciones autorizadas con búsqueda, paginación, estado, triage y acciones Nuevo/Ver Órdenes; Registro XPO permanece bloqueado hasta definir contrato.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openClinicalCreationChoice",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-R002",
+      "event_ids": [
+        "CH10-E0011",
+        "CH10-E0067"
+      ],
+      "feature_group": "creation_choice",
+      "page": "Orden Médica",
+      "control_type": "modal_choice",
+      "visible_label": "Orden Médica / Tarjeta de medicamentos",
+      "expected_behavior": "Nuevo abre una elección bifurcada y deriva la hospitalización autorizada al formulario seleccionado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:27:43.800",
+        "00:29:25.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0011",
+          "timestamp": "00:27:43.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0011_00h27m43s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0067",
+          "timestamp": "00:29:25.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0067_00h29m25s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Nuevo abre una elección bifurcada y deriva la hospitalización autorizada al formulario seleccionado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "orderPatientSummary/openMedicalOrderForm/openMedicationCardForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-R003",
+      "event_ids": [
+        "CH10-E0013",
+        "CH10-E0018",
+        "CH10-E0071"
+      ],
+      "feature_group": "clinical_header",
+      "page": "Orden / Tarjeta",
+      "control_type": "form_header",
+      "visible_label": "Paciente / cédula / hospitalización / triage / médicos / diagnósticos",
+      "expected_behavior": "Autocompleta identidad desde el caso, permite documentar profesionales activos del tenant y diagnóstico sin inventar reglas clínicas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:27:55.600",
+        "00:27:57.800",
+        "00:29:30.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0013",
+          "timestamp": "00:27:55.600",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0018",
+          "timestamp": "00:27:57.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0018_00h27m57s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0071",
+          "timestamp": "00:29:30.000",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0071_00h29m30s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Autocompleta identidad desde el caso, permite documentar profesionales activos del tenant y diagnóstico sin inventar reglas clínicas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270006_ch10_medical_orders_medication_cards.sql",
+      "current_implementation_function": "openTreatmentDraftForm/createMedicationCard/create_medication_card_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q003",
+        "CH10-Q005",
+        "CH10-Q006"
+      ],
+      "requirement_id": "CH10-R004",
+      "event_ids": [
+        "CH10-E0020",
+        "CH10-E0050"
+      ],
+      "feature_group": "treatment_editor",
+      "page": "Configuración de tratamientos",
+      "control_type": "structured_form",
+      "visible_label": "Medicamento / médico / vía / dosis / frecuencia / duración / fechas / crónico / horarios / indicaciones / diluciones",
+      "expected_behavior": "Captura uno o más tratamientos documentados, valida estructura/calendario y no recomienda dosis; el catálogo y editor enriquecido oficiales requieren confirmación.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:27:59.800",
+        "00:29:08.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0020",
+          "timestamp": "00:27:59.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0020_00h27m59s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0050",
+          "timestamp": "00:29:08.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0050_00h29m08s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0050_00h29m08s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura uno o más tratamientos documentados, valida estructura/calendario y no recomienda dosis; el catálogo y editor enriquecido oficiales requieren confirmación.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openTreatmentDraftForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q003",
+        "CH10-Q005"
+      ],
+      "requirement_id": "CH10-R005",
+      "event_ids": [
+        "CH10-E0021",
+        "CH10-E0028",
+        "CH10-E0031",
+        "CH10-E0042"
+      ],
+      "feature_group": "clinical_catalogs",
+      "page": "Configuración de tratamientos",
+      "control_type": "catalog",
+      "visible_label": "Vías / frecuencias / duraciones / horarios / PRN",
+      "expected_behavior": "Mantiene visibles los valores observados sólo como captura configurable; no asume relaciones terapéuticas ni catálogos oficiales.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:28:00.400",
+        "00:28:14.000",
+        "00:28:22.800",
+        "00:28:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0021",
+          "timestamp": "00:28:00.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0021_00h28m00s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0021_00h28m00s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0028",
+          "timestamp": "00:28:14.000",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0028_00h28m14s000ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0028_00h28m14s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0031",
+          "timestamp": "00:28:22.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0031_00h28m22s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0031_00h28m22s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0042",
+          "timestamp": "00:28:42.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0042_00h28m42s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0042_00h28m42s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Mantiene visibles los valores observados sólo como captura configurable; no asume relaciones terapéuticas ni catálogos oficiales.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "treatment date change/createMedicationCard",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q004"
+      ],
+      "requirement_id": "CH10-R006",
+      "event_ids": [
+        "CH10-E0035",
+        "CH10-E0038"
+      ],
+      "feature_group": "treatment_calendar",
+      "page": "Configuración de tratamientos",
+      "control_type": "date_derivation",
+      "visible_label": "Inicio / duración / fin",
+      "expected_behavior": "Ofrece una sugerencia editable inclusiva que reproduce el único ejemplo observado y rechaza fin anterior; la fórmula productiva queda pendiente.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:28:27.200",
+        "00:28:30.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0035",
+          "timestamp": "00:28:27.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0035_00h28m27s200ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0035_00h28m27s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0038",
+          "timestamp": "00:28:30.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0038_00h28m30s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0038_00h28m30s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Ofrece una sugerencia editable inclusiva que reproduce el único ejemplo observado y rechaza fin anterior; la fórmula productiva queda pendiente.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js",
+      "current_implementation_function": "MEDICAL_ORDER_SECTIONS/openMedicalOrderForm/medicalOrderDocument",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q007",
+        "CH10-Q008"
+      ],
+      "requirement_id": "CH10-R007",
+      "event_ids": [
+        "CH10-E0075",
+        "CH10-E0086",
+        "CH10-E0091"
+      ],
+      "feature_group": "order_sections",
+      "page": "Orden médica nueva",
+      "control_type": "section_builder",
+      "visible_label": "Etiquetas para el reporte / editores por sección",
+      "expected_behavior": "Permite seleccionar y quitar las secciones observadas y documentar contenido por sección; catálogo, reordenación, etiquetas nuevas y rich text requieren reglas aprobadas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:29:33.200",
+        "00:29:45.600",
+        "00:29:52.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0075",
+          "timestamp": "00:29:33.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0075_00h29m33s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0075_00h29m33s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0086",
+          "timestamp": "00:29:45.600",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0086_00h29m45s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0086_00h29m45s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0091",
+          "timestamp": "00:29:52.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0091_00h29m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Permite seleccionar y quitar las secciones observadas y documentar contenido por sección; catálogo, reordenación, etiquetas nuevas y rich text requieren reglas aprobadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openPatientOrders",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q002",
+        "CH10-Q011"
+      ],
+      "requirement_id": "CH10-R008",
+      "event_ids": [
+        "CH10-E0101",
+        "CH10-E0105",
+        "CH10-E0114"
+      ],
+      "feature_group": "patient_orders",
+      "page": "Órdenes",
+      "control_type": "modal_tabs",
+      "visible_label": "Órdenes médicas / Tarjetas de medicamentos / Historial de tratamientos",
+      "expected_behavior": "Presenta los tres conjuntos del caso con código, estado, actor y fecha; PMC queda explícitamente pendiente sin transición inventada.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:30:05.400",
+        "00:30:10.400",
+        "00:31:13.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0101",
+          "timestamp": "00:30:05.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0101_00h30m05s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0105",
+          "timestamp": "00:30:10.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0105_00h30m10s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0105_00h30m10s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0114",
+          "timestamp": "00:31:13.400",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0114_00h31m13s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta los tres conjuntos del caso con código, estado, actor y fecha; PMC queda explícitamente pendiente sin transición inventada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/templates.js",
+      "current_implementation_function": "renderMedicationCards/printMedicationCard/medicationCardDocument",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q009",
+        "CH10-Q010"
+      ],
+      "requirement_id": "CH10-R009",
+      "event_ids": [
+        "CH10-E0109"
+      ],
+      "feature_group": "medication_prints",
+      "page": "Tarjeta de medicamentos",
+      "control_type": "print_menu",
+      "visible_label": "Tarjeta completa / Tarjeta simple / Conteo presencial",
+      "expected_behavior": "Expone y genera tres salidas identificadas; completa y simple usan datos autorizados, conteo se marca provisional hasta aprobar contenido y firmas.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:30:13.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0109",
+          "timestamp": "00:30:13.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone y genera tres salidas identificadas; completa y simple usan datos autorizados, conteo se marca provisional hasta aprobar contenido y firmas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608260005_p0_quote_clinical_immutability.sql",
+      "current_implementation_function": "signClinicalDocument/signMedicationCard/createClinicalCorrection/voidClinicalRecord",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/p0-immutable-records.test.mjs; tests/ch10-medical-orders-cards.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-R010",
+      "event_ids": [
+        "CH10-E0112"
+      ],
+      "feature_group": "clinical_permissions",
+      "page": "Orden / Tarjeta",
+      "control_type": "safety_policy",
+      "visible_label": "Firma / corrección / anulación",
+      "expected_behavior": "El video no permite validar permisos; la plataforma conserva firma con metadata, inmutabilidad y correcciones append-only auditadas.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:31:12.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0112",
+          "timestamp": "00:31:12.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0112_00h31m12s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0112_00h31m12s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El video no permite validar permisos; la plataforma conserva firma con metadata, inmutabilidad y correcciones append-only auditadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270006_ch10_medical_orders_medication_cards.sql",
+      "current_implementation_function": "createClinicalDocument/createMedicationCard",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-H001",
+      "event_ids": [
+        "CH10-E0013",
+        "CH10-E0069"
+      ],
+      "feature_group": "clinical_transaction",
+      "page": "Orden / Tarjeta",
+      "control_type": "transaction",
+      "visible_label": "Creación remota-first e idempotente",
+      "expected_behavior": "Confirma RPC antes de reflejar éxito local, serializa idempotencia y audita hospitalización sin contenido clínico en logs.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:27:55.600",
+        "00:29:29.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0013",
+          "timestamp": "00:27:55.600",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0069",
+          "timestamp": "00:29:29.000",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0069_00h29m29s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirma RPC antes de reflejar éxito local, serializa idempotencia y audita hospitalización sin contenido clínico en logs.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270006_ch10_medical_orders_medication_cards.sql",
+      "current_implementation_function": "createClinicalDocument/createMedicationCard",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-H002",
+      "event_ids": [
+        "CH10-E0013",
+        "CH10-E0020"
+      ],
+      "feature_group": "tenant_integrity",
+      "page": "Orden / Tarjeta",
+      "control_type": "authorization",
+      "visible_label": "Hospitalización y profesionales del tenant",
+      "expected_behavior": "Valida organización, permiso, hospitalización, paciente y profesionales activos en cliente/store/RPC con RLS.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:27:55.600",
+        "00:27:59.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0013",
+          "timestamp": "00:27:55.600",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0020",
+          "timestamp": "00:27:59.800",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0020_00h27m59s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida organización, permiso, hospitalización, paciente y profesionales activos en cliente/store/RPC con RLS.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270006_ch10_medical_orders_medication_cards.sql",
+      "current_implementation_function": "treatment date change/createMedicationCard",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs; tests/e2e/ch10.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH10-H003",
+      "event_ids": [
+        "CH10-E0035",
+        "CH10-E0038"
+      ],
+      "feature_group": "calendar_integrity",
+      "page": "Configuración de tratamientos",
+      "control_type": "validation",
+      "visible_label": "Calendario editable y validado",
+      "expected_behavior": "Evita desplazamiento por zona horaria, rechaza rangos invertidos y conserva la fecha sugerida como editable/configurable.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:28:27.200",
+        "00:28:30.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0035",
+          "timestamp": "00:28:27.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0035_00h28m27s200ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0035_00h28m27s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0038",
+          "timestamp": "00:28:30.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0038_00h28m30s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0038_00h28m30s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Evita desplazamiento por zona horaria, rechaza rangos invertidos y conserva la fecha sugerida como editable/configurable.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH10",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "administer-medication",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch10-medical-orders-cards.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH10-Q013"
+      ],
+      "requirement_id": "CH10-H004",
+      "event_ids": [
+        "CH10-E0109"
+      ],
+      "feature_group": "safe_administration",
+      "page": "Tarjeta de medicamentos",
+      "control_type": "safety_guard",
+      "visible_label": "Administración no simulada",
+      "expected_behavior": "No afirma una administración ni envía contenido clínico; el registro operativo permanece deshabilitado hasta definir campos, permisos y correcciones.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:30:13.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH10",
+          "event_id": "CH10-E0109",
+          "timestamp": "00:30:13.200",
+          "image": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No afirma una administración ni envía contenido clínico; el registro operativo permanece deshabilitado hasta definir campos, permisos y correcciones.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
