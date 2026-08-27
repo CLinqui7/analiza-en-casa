@@ -241,6 +241,42 @@ function searchFilter(items, query, fields) {
   return items.filter((item) => fields.some((field) => String(item[field] ?? "").toLowerCase().includes(q)));
 }
 
+function quoteRowMenu(quote) {
+  const canSend = !quote.immutable && ["DRAFT", "READY_TO_SEND"].includes(quote.status);
+  const editAction = quote.status === "DRAFT" && !quote.immutable ? "edit-quote-draft" : "revise-quote";
+  const editLabel = editAction === "edit-quote-draft" ? "Editar" : "Nueva versión";
+  const unavailable = "Pendiente de reglas y formato confirmados por el cliente (CH07).";
+  return `<details class="quote-row-menu">
+    <summary aria-label="Abrir acciones de ${esc(quote.id)}" title="Acciones">⋮</summary>
+    <div class="quote-row-menu-panel" role="menu" aria-label="Acciones de ${esc(quote.id)}">
+      <button type="button" role="menuitem" data-action="${editAction}" data-id="${esc(quote.id)}">${editLabel}</button>
+      <button type="button" role="menuitem" disabled title="${unavailable}">Duplicar</button>
+      <a role="menuitem" href="#/cotizaciones/${esc(quote.id)}#versiones">Versiones</a>
+      <details class="quote-row-submenu">
+        <summary>Imprimir <span>›</span></summary>
+        <div>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Excel</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Detalle de servicio</button>
+          <button type="button" role="menuitem" data-action="print-quote" data-id="${esc(quote.id)}">Cotización</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Factura</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Cotización internacional</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Factura internacional</button>
+        </div>
+      </details>
+      <details class="quote-row-submenu">
+        <summary>Enviar <span>›</span></summary>
+        <div>
+          <button type="button" role="menuitem" data-action="send-quote" data-id="${esc(quote.id)}" ${canSend ? "" : `disabled title="La versión enviada es inmutable; cree una nueva versión."`}>E-mail</button>
+          <button type="button" role="menuitem" data-action="send-quote-whatsapp" data-id="${esc(quote.id)}" ${canSend ? "" : `disabled title="La versión enviada es inmutable; cree una nueva versión."`}>Whatsapp</button>
+        </div>
+      </details>
+      <button type="button" role="menuitem" data-action="open-insurance-status" data-id="${esc(quote.id)}">Envíos al seguro</button>
+      <a role="menuitem" href="#/cotizaciones/${esc(quote.id)}#historial-seguro">Historial de envíos</a>
+      <button type="button" role="menuitem" disabled title="${unavailable}">Eliminar</button>
+    </div>
+  </details>`;
+}
+
 function renderDashboard(state, store, ui) {
   const activePatients = state.patients.filter((patient) => patient.status === "ACTIVE").length;
   const medicationItems = state.medicationCards.flatMap((card) => card.items || []);
@@ -495,7 +531,14 @@ function renderCases(state, store, ui) {
   if (activeTab === "pic") {
     tabBody = `<div class="data-state" role="status"><strong>PIC Ejecución pendiente de reglas del cliente</strong><span>No se muestra un conteo ni se habilitan transiciones hasta resolver CH03-Q001, CH03-Q003 y CH03-Q005.</span></div>`;
   } else if (activeTab === "quotes") {
-    const filteredQuotes = searchFilter(state.quotes, ui.search, ["id", "status", "comments"])
+    const query = String(ui.search || "").trim().toLocaleLowerCase("es");
+    const filteredQuotes = state.quotes
+      .filter((quote) => {
+        if (!query) return true;
+        const patient = state.patients.find((item) => item.id === quote.patientId);
+        return [quote.id, quote.status, quote.comments, patient?.fullName, patient?.document]
+          .some((value) => String(value || "").toLocaleLowerCase("es").includes(query));
+      })
       .filter((quote) => !ui.caseQuoteStatus || quote.status === ui.caseQuoteStatus)
       .filter((quote) => !ui.caseQuoteDate || String(quote.createdAt || "").slice(0, 10) === ui.caseQuoteDate);
     const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / casePageSize));
@@ -505,11 +548,11 @@ function renderCases(state, store, ui) {
       const patient = state.patients.find((item) => item.id === quote.patientId);
       const request = state.insuranceRequests.find((item) => item.quoteId === quote.id);
       return `<tr>
-        <td><a class="row-action" href="#/cotizaciones/${esc(quote.id)}" aria-label="Abrir ${esc(quote.id)}">${icon("view")}</a></td>
+        <td>${quoteRowMenu(quote)}</td>
         <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
         <td>${esc(patient?.document || "—")}</td>
         <td><a class="strong-link" href="#/cotizaciones/${esc(quote.id)}">${esc(quote.id)}</a></td>
-        <td>${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</td>
+        <td><button type="button" class="interactive-badge" data-action="open-insurance-status" data-id="${esc(quote.id)}" aria-label="Actualizar estado de ${esc(quote.id)}">${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</button></td>
         <td>${badge(request?.preauthorizationSentAt ? "SENT" : "PENDING", request?.preauthorizationSentAt ? "Enviado" : "Regla pendiente")}</td>
         <td>${badge(request?.responseStatus || "PENDING", request?.responseStatus ? (QUOTE_ADMIN_LABELS[request.responseStatus] || request.responseStatus) : "Regla pendiente")}</td>
         <td>${badge(request?.claimStatus || "PENDING", request?.claimStatus || "Regla pendiente")}</td>

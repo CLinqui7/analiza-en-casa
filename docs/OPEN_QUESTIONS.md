@@ -67,6 +67,22 @@
 - `CH06-Q009`: confirmar si Atrás advierte por cambios sin guardar y qué ruta exacta debe recuperar. Evidencia: CH06-E0096, 00:14:01.800.
 - `CH06-Q010`: aprobar permisos y auditoría fina para cambios de cantidad, retiro de línea, selección de impuesto, asignación de descuento y cambio de paciente dentro de un borrador.
 
+## CH07 · decisiones pendientes trazadas
+
+- `CH07-Q001`: aprobar la máquina de estados oficial y la relación entre Estado, Envío preautorización, Respuesta seguro y Envío de reclamo. Hasta entonces las columnas sin fuente muestran `Regla pendiente`. Evidencia: CH07-E0007, 00:14:33.000.
+- `CH07-Q002`: definir la semántica, precondiciones y equivalencias internas de `Pre aprobación`, `Poner en ejecución`, `Rechazar` y `No aplica`; el clip abre el selector pero no ejecuta ninguna transición. Evidencia: CH07-E0018, 00:16:08.200.
+- `CH07-Q003`: confirmar qué evento activa una cotización “guardada pero no activada” y cuál debe ser la ruta posterior a Guardar. El clip confirma Atrás, no el resultado de Guardar. Evidencia: CH07-E0001–CH07-E0002.
+- `CH07-Q004`: definir por rol los permisos para editar, duplicar, versionar, imprimir, enviar al paciente, enviar al seguro, cambiar estado, rechazar y eliminar. Duplicar y Eliminar permanecen visibles pero bloqueados. Evidencia: CH07-E0009, 00:14:48.800.
+- `CH07-Q005`: definir documentos exigidos por aseguradora, destinatario autorizado, formato, canal, vigencia y evidencia de recepción. Evidencia: CH07-E0009 y CH07-E0014.
+- `CH07-Q006`: definir formato, obligatoriedad, unicidad, alcance e idempotencia del número de reclamo/autorización. El placeholder actual sólo limita longitud y lo conserva auditablemente. Evidencia verbal asociada a CH07-E0018.
+- `CH07-Q007`: aprobar el tratamiento de aprobación parcial, monto aprobado y responsabilidad del paciente sin reescribir la versión enviada. La plataforma conserva el monto en `insurance_requests`. Evidencia: CH07-E0018.
+- `CH07-Q008`: definir contenido, numeración, validez fiscal/legal y permisos de Excel, Detalle de servicio, Factura y variantes internacionales. Sólo Cotización está habilitada provisionalmente. Evidencia: CH07-E0010 y CH07-E0015.
+- `CH07-Q009`: seleccionar proveedor, consentimiento, reintentos, SLA y confirmaciones de entrega para E-mail y WhatsApp. Ningún dato del video se adopta como contrato productivo. Evidencia: CH07-E0014, 00:16:02.600.
+- `CH07-Q010`: confirmar que mensajería debe enviar siempre una plantilla genérica y enlace seguro, no adjuntar el PDF con servicios, medicamentos o estudios. La solicitud verbal literal entra en conflicto con la regla de privacidad del proyecto. Evidencia: audio 00:15:23–00:15:45 y CH07-E0012.
+- `CH07-Q011`: definir fórmula, alcance y frecuencia del badge `67` de PIC Ejecución. Se conserva `—` para no inventar el indicador. Evidencia: CH07-E0005–CH07-E0006.
+- `CH07-Q012`: identificar la columna final cuyo encabezado sólo deja ver `Co...` en el material y definir su fuente. Evidencia: CH07-E0007.
+- `CH07-Q013`: confirmar si Preadmisión sigue vigente, depende de permiso/feature flag o es un estado transitorio de la interfaz anterior. Evidencia: CH07-E0002–CH07-E0003.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

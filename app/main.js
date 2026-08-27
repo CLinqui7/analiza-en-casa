@@ -624,6 +624,7 @@ function openInsuranceStatus(quoteId = "") {
   const state = store.getState();
   const quote = state.quotes.find((q) => q.id === quoteId) || state.quotes[0];
   if (!quote) return showToast("No hay cotizaciones para actualizar.", "danger");
+  const request = state.insuranceRequests.find((candidate) => candidate.quoteId === quote.id);
   const currentIndex = QUOTE_STATUS_FLOW.indexOf(quote.status);
   const allowed = QUOTE_STATUS_FLOW.slice(Math.max(0, currentIndex)).concat(["INFO_REQUIRED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED"]).filter((v, i, a) => a.indexOf(v) === i);
   openModal({
@@ -632,10 +633,11 @@ function openInsuranceStatus(quoteId = "") {
     size: "md",
     body: `<form id="insurance-form" class="form-grid">
       <input type="hidden" name="quoteId" value="${quote.id}">
+      <input type="hidden" name="eventId" value="${safeText(uid("QSE"))}">
       <label class="full">Nuevo estado<select name="status">${allowed.map((s) => `<option value="${s}" ${s === quote.status ? "selected" : ""}>${safeText(QUOTE_ADMIN_LABELS_MAIN[s] || s)}</option>`).join("")}</select></label>
-      <label class="full">Monto aprobado por aseguradora<input type="number" min="0" max="${quote.total}" step=".01" name="approvedAmount" value="${quote.insurerAmount}"></label>
+      <label class="full">Monto aprobado por aseguradora<input type="number" min="0" max="${quote.total}" step=".01" name="approvedAmount" value="${safeText(request?.approvedAmount ?? "")}"></label>
       <label class="full">Observación / respuesta<textarea name="note" rows="4" required placeholder="Carta recibida, documentos solicitados, motivo del rechazo..."></textarea></label>
-      <label class="full">Número de reclamo o autorización<input name="claimNumber" placeholder="Opcional"></label>
+      <label class="full">Número de reclamo o autorización<input name="claimNumber" maxlength="120" value="${safeText(request?.claimNumber || "")}" placeholder="Opcional"></label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-insurance-status">Guardar y notificar</button>`
   });
@@ -1316,7 +1318,7 @@ document.addEventListener("click", async (event) => {
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
     case "open-payment-form": openPaymentForm(data.quoteId || ""); break;
     case "send-quote":
-    case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Cotización enviada en modo simulado."); break;
+    case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Solicitud de envío confirmada."); break;
     case "copy-portal-link": copyPortalLink(data.token); break;
     case "print-quote": runSafely(()=>printQuote(data.id)); break;
     case "open-clinical-document": openClinicalDocumentForm(data.caseId || "",data.docType || "HEALTH_REPORT",data.patientId||""); break;
@@ -1637,8 +1639,8 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#insurance-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    runSafely(()=>store.updateQuoteStatus(data.quoteId,data.status,data.note,data.approvedAmount),"Estado de seguro actualizado.");
-    closeModal();
+    const result=await runSafely(()=>store.updateQuoteStatus(data.quoteId,data.status,data.note,data.approvedAmount,data.claimNumber,data.eventId),"Estado de seguro actualizado.");
+    if(result) closeModal();
   }
 
   if(action==="save-payment"){

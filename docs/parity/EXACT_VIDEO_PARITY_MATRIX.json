@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T07:26:56.746Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T07:58:03.766Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 46,
-    "IMPLEMENTED_PARTIAL": 64,
+    "IMPLEMENTED_EXACT": 59,
+    "IMPLEMENTED_PARTIAL": 69,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 12,
-    "NEEDS_CLIENT_CONFIRMATION": 32
+    "NOT_TESTABLE": 15,
+    "NEEDS_CLIENT_CONFIRMATION": 35
   },
   "requirements": [
     {
@@ -8764,6 +8764,1441 @@
       ],
       "acceptance_criteria": [
         "El blur/change de un campo no reconstruye el botón antes de su click; un clic físico guarda una sola vez y navega sólo después de éxito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "renderQuoteModal/save-quote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch06.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q003"
+      ],
+      "requirement_id": "CH07-R001",
+      "event_ids": [
+        "CH07-E0001",
+        "CH07-E0002"
+      ],
+      "feature_group": "quote_exit",
+      "page": "Nueva cotización / Hospitalización",
+      "control_type": "navigation",
+      "visible_label": "Atrás / Guardar",
+      "expected_behavior": "Conserva ambas acciones y vuelve a Hospitalización mediante Atrás; el clip no demuestra el resultado de Guardar.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:14:26.600",
+        "00:14:30.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0001",
+          "timestamp": "00:14:26.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0001_00h14m26s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0001_00h14m26s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0002",
+          "timestamp": "00:14:30.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0002_00h14m30s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conserva ambas acciones y vuelve a Hospitalización mediante Atrás; el clip no demuestra el resultado de Guardar.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderCases",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch03.spec.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q011"
+      ],
+      "requirement_id": "CH07-R002",
+      "event_ids": [
+        "CH07-E0002",
+        "CH07-E0003",
+        "CH07-E0005",
+        "CH07-E0006"
+      ],
+      "feature_group": "hospitalization_tabs",
+      "page": "Hospitalización",
+      "control_type": "tabs",
+      "visible_label": "Activos / Cotizaciones / PIC Ejecución",
+      "expected_behavior": "Expone y permite alternar las tres pestañas; el conteo PIC permanece bloqueado hasta conocer su fórmula.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:14:30.000",
+        "00:14:30.600",
+        "00:14:32.000",
+        "00:14:32.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0002",
+          "timestamp": "00:14:30.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0002_00h14m30s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0003",
+          "timestamp": "00:14:30.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0003_00h14m30s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0005",
+          "timestamp": "00:14:32.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0005_00h14m32s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0005_00h14m32s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0006",
+          "timestamp": "00:14:32.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0006_00h14m32s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0006_00h14m32s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone y permite alternar las tres pestañas; el conteo PIC permanece bloqueado hasta conocer su fórmula.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderCases/apply-case-filters/clear-case-filters",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch03.spec.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R003",
+      "event_ids": [
+        "CH07-E0006",
+        "CH07-E0007"
+      ],
+      "feature_group": "quote_filters",
+      "page": "Hospitalización",
+      "control_type": "filters",
+      "visible_label": "Estado / Fecha de creación / Aplicar / Limpiar / Nuevo",
+      "expected_behavior": "Filtra por estado y fecha, limpia criterios y abre una cotización nueva con controles accesibles.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:32.400",
+        "00:14:33.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0006",
+          "timestamp": "00:14:32.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0006_00h14m32s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0006_00h14m32s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0007",
+          "timestamp": "00:14:33.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0007_00h14m33s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Filtra por estado y fecha, limpia criterios y abre una cotización nueva con controles accesibles.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderCases/case-quote-page",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch03.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R004",
+      "event_ids": [
+        "CH07-E0006",
+        "CH07-E0007",
+        "CH07-E0008"
+      ],
+      "feature_group": "quote_pagination",
+      "page": "Hospitalización",
+      "control_type": "pagination",
+      "visible_label": "Mostrar registros / Anterior / páginas / Siguiente",
+      "expected_behavior": "Pagina la colección filtrada, permite elegir tamaño y mantiene límites de página válidos.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:32.400",
+        "00:14:33.000",
+        "00:14:44.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0006",
+          "timestamp": "00:14:32.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0006_00h14m32s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0006_00h14m32s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0007",
+          "timestamp": "00:14:33.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0007_00h14m33s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0008",
+          "timestamp": "00:14:44.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0008_00h14m44s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Pagina la colección filtrada, permite elegir tamaño y mantiene límites de página válidos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderCases",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch03.spec.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q001",
+        "CH07-Q002"
+      ],
+      "requirement_id": "CH07-R005",
+      "event_ids": [
+        "CH07-E0006",
+        "CH07-E0007",
+        "CH07-E0012",
+        "CH07-E0013"
+      ],
+      "feature_group": "quote_tracking_columns",
+      "page": "Hospitalización",
+      "control_type": "table",
+      "visible_label": "Paciente / DUI/NIT / Nro. / Estado / Envío preautorización / Respuesta seguro / Envío de reclamo / Creación / Total",
+      "expected_behavior": "Presenta las columnas observadas; las tres columnas de seguimiento no inventan estados y muestran una regla pendiente hasta aprobar la máquina oficial.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:14:32.400",
+        "00:14:33.000",
+        "00:15:48.000",
+        "00:15:48.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0006",
+          "timestamp": "00:14:32.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0006_00h14m32s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0006_00h14m32s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0007",
+          "timestamp": "00:14:33.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0007_00h14m33s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0012",
+          "timestamp": "00:15:48.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0012_00h15m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0013",
+          "timestamp": "00:15:48.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0013_00h15m48s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta las columnas observadas; las tres columnas de seguimiento no inventan estados y muestran una regla pendiente hasta aprobar la máquina oficial.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderCases/data-ui-search",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R006",
+      "event_ids": [
+        "CH07-E0008",
+        "CH07-E0012",
+        "CH07-E0013"
+      ],
+      "feature_group": "quote_search",
+      "page": "Hospitalización",
+      "control_type": "search",
+      "visible_label": "Buscar cotizaciones",
+      "expected_behavior": "Busca por paciente, DUI/NIT, número, estado o comentario y actualiza el conjunto paginado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:44.400",
+        "00:15:48.000",
+        "00:15:48.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0008",
+          "timestamp": "00:14:44.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0008_00h14m44s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0012",
+          "timestamp": "00:15:48.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0012_00h15m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0013",
+          "timestamp": "00:15:48.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0013_00h15m48s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Busca por paciente, DUI/NIT, número, estado o comentario y actualiza el conjunto paginado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/styles.css",
+      "current_implementation_function": "quoteRowMenu",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R007",
+      "event_ids": [
+        "CH07-E0009",
+        "CH07-E0010",
+        "CH07-E0014",
+        "CH07-E0015",
+        "CH07-E0016"
+      ],
+      "feature_group": "row_context_menu",
+      "page": "Hospitalización",
+      "control_type": "menu",
+      "visible_label": "Editar / Duplicar / Versiones / Imprimir / Enviar / Envíos al seguro / Historial de envíos / Eliminar",
+      "expected_behavior": "Expone el menú y submenús observados; sólo habilita acciones con semántica segura y deja las demás visibles y bloqueadas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:48.800",
+        "00:14:49.600",
+        "00:16:02.600",
+        "00:16:04.800",
+        "00:16:05.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0010",
+          "timestamp": "00:14:49.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0010_00h14m49s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0010_00h14m49s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0015",
+          "timestamp": "00:16:04.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0015_00h16m04s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0015_00h16m04s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0016",
+          "timestamp": "00:16:05.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0016_00h16m05s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0016_00h16m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone el menú y submenús observados; sólo habilita acciones con semántica segura y deja las demás visibles y bloqueadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/store.js",
+      "current_implementation_function": "quoteRowMenu/updateQuoteDraft/reviseQuote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/p0-immutable-records.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q004"
+      ],
+      "requirement_id": "CH07-R008",
+      "event_ids": [
+        "CH07-E0009"
+      ],
+      "feature_group": "quote_mutation_actions",
+      "page": "Hospitalización",
+      "control_type": "menu_actions",
+      "visible_label": "Editar / Duplicar / Versiones / Eliminar",
+      "expected_behavior": "Permite editar sólo borradores o crear una nueva versión y consultar versiones; duplicación y eliminación quedan bloqueadas hasta confirmar permisos y semántica.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:14:48.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Permite editar sólo borradores o crear una nueva versión y consultar versiones; duplicación y eliminación quedan bloqueadas hasta confirmar permisos y semántica.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/templates.js",
+      "current_implementation_function": "quoteRowMenu/printQuote/quoteDocument",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q008"
+      ],
+      "requirement_id": "CH07-R009",
+      "event_ids": [
+        "CH07-E0010",
+        "CH07-E0015"
+      ],
+      "feature_group": "quote_print_menu",
+      "page": "Hospitalización",
+      "control_type": "print_menu",
+      "visible_label": "Excel / Detalle de servicio / Cotización / Factura / Cotización internacional / Factura internacional",
+      "expected_behavior": "Muestra todas las variantes observadas, imprime la cotización provisional y bloquea formatos fiscales o no definidos.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:14:49.600",
+        "00:16:04.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0010",
+          "timestamp": "00:14:49.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0010_00h14m49s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0010_00h14m49s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0015",
+          "timestamp": "00:16:04.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0015_00h16m04s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0015_00h16m04s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra todas las variantes observadas, imprime la cotización provisional y bloquea formatos fiscales o no definidos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "quoteRowMenu/send-quote/sendQuote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R010",
+      "event_ids": [
+        "CH07-E0009",
+        "CH07-E0014"
+      ],
+      "feature_group": "quote_send_menu",
+      "page": "Hospitalización",
+      "control_type": "menu",
+      "visible_label": "Enviar / E-mail / Whatsapp",
+      "expected_behavior": "Ofrece ambos canales a versiones editables y confirma la solicitud sólo después de la operación autoritativa.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:48.800",
+        "00:16:02.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Ofrece ambos canales a versiones editables y confirma la solicitud sólo después de la operación autoritativa.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; api/notifications.js",
+      "current_implementation_function": "sendQuote/queueNotification",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q010"
+      ],
+      "requirement_id": "CH07-R011",
+      "event_ids": [
+        "CH07-E0011",
+        "CH07-E0012"
+      ],
+      "feature_group": "one_click_pdf_whatsapp",
+      "page": "Hospitalización",
+      "control_type": "external_delivery",
+      "visible_label": "Generar PDF y enviar por WhatsApp",
+      "expected_behavior": "Confirmar si producción debe enviar siempre un enlace seguro en vez de adjuntar una cotización con detalle potencialmente clínico.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:14:52.000",
+        "00:15:48.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0011",
+          "timestamp": "00:14:52.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0011_00h14m52s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0011_00h14m52s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0012",
+          "timestamp": "00:15:48.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0012_00h15m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirmar si producción debe enviar siempre un enlace seguro en vez de adjuntar una cotización con detalle potencialmente clínico.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "quoteRowMenu/openInsuranceStatus/renderQuoteDetailContent",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R012",
+      "event_ids": [
+        "CH07-E0009",
+        "CH07-E0014"
+      ],
+      "feature_group": "insurance_history_access",
+      "page": "Hospitalización",
+      "control_type": "menu_actions",
+      "visible_label": "Envíos al seguro / Historial de envíos",
+      "expected_behavior": "Abre la actualización auditada del seguro y enlaza al detalle con historial de seguro y versiones.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:48.800",
+        "00:16:02.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre la actualización auditada del seguro y enlaza al detalle con historial de seguro y versiones.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "interactive-badge/openInsuranceStatus",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q001",
+        "CH07-Q002"
+      ],
+      "requirement_id": "CH07-R013",
+      "event_ids": [
+        "CH07-E0017",
+        "CH07-E0018"
+      ],
+      "feature_group": "inline_status",
+      "page": "Hospitalización",
+      "control_type": "status_button",
+      "visible_label": "Estado interactivo",
+      "expected_behavior": "El estado abre un control accesible para transición; se usa un modal auditado en vez del selector inline mientras no se confirme el catálogo observado.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:16:06.400",
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0017",
+          "timestamp": "00:16:06.400",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0017_00h16m06s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0017_00h16m06s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El estado abre un control accesible para transición; se usa un modal auditado en vez del selector inline mientras no se confirme el catálogo observado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/domain.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "QUOTE_STATUS_FLOW/canTransitionQuote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/domain.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q001",
+        "CH07-Q002"
+      ],
+      "requirement_id": "CH07-R014",
+      "event_ids": [
+        "CH07-E0018"
+      ],
+      "feature_group": "observed_status_catalog",
+      "page": "Hospitalización",
+      "control_type": "status_options",
+      "visible_label": "Pre aprobación / Poner en ejecución / Rechazar / No aplica",
+      "expected_behavior": "No habilita equivalencias ni efectos hasta definir semántica, precondiciones, permisos y correspondencia con estados internos.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No habilita equivalencias ni efectos hasta definir semántica, precondiciones, permisos y correspondencia con estados internos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "openInsuranceStatus/updateQuoteStatus/transition_quote_insurance_status",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R015",
+      "event_ids": [
+        "CH07-E0018"
+      ],
+      "feature_group": "insurance_response_data",
+      "page": "Actualizar seguro",
+      "control_type": "form",
+      "visible_label": "Monto aprobado / Número de reclamo o autorización / Observación",
+      "expected_behavior": "Valida y persiste el monto en rango, referencia acotada y observación obligatoria dentro del expediente de seguro sin alterar la versión cotizada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida y persiste el monto en rango, referencia acotada y observación obligatoria dentro del expediente de seguro sin alterar la versión cotizada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "runSafely/updateQuoteStatus",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R016",
+      "event_ids": [
+        "CH07-E0001",
+        "CH07-E0018"
+      ],
+      "feature_group": "error_behavior",
+      "page": "Cotizaciones / Seguro",
+      "control_type": "error_state",
+      "visible_label": "Validaciones y errores",
+      "expected_behavior": "El capítulo no provoca entradas inválidas, fallos remotos ni mensajes de error; su presentación exacta no es atribuible al video.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:14:26.600",
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0001",
+          "timestamp": "00:14:26.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0001_00h14m26s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0001_00h14m26s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El capítulo no provoca entradas inválidas, fallos remotos ni mensajes de error; su presentación exacta no es atribuible al video.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js",
+      "current_implementation_function": "printQuote/sendQuote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-R017",
+      "event_ids": [
+        "CH07-E0010",
+        "CH07-E0011",
+        "CH07-E0014",
+        "CH07-E0015"
+      ],
+      "feature_group": "external_result",
+      "page": "Hospitalización",
+      "control_type": "external_result",
+      "visible_label": "Resultado de impresión y envío",
+      "expected_behavior": "El clip muestra menús y narración, pero no una salida de impresión ni confirmación de entrega verificable.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:14:49.600",
+        "00:14:52.000",
+        "00:16:02.600",
+        "00:16:04.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0010",
+          "timestamp": "00:14:49.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0010_00h14m49s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0010_00h14m49s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0011",
+          "timestamp": "00:14:52.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0011_00h14m52s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0011_00h14m52s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0015",
+          "timestamp": "00:16:04.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0015_00h16m04s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0015_00h16m04s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El clip muestra menús y narración, pero no una salida de impresión ni confirmación de entrega verificable.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH07",
+      "tab": "Cotizaciones",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/domain.js",
+      "current_implementation_function": "ACTION_PERMISSIONS/roleCan",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/domain.test.mjs; tests/e2e/ch07.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH07-Q004"
+      ],
+      "requirement_id": "CH07-R018",
+      "event_ids": [
+        "CH07-E0009",
+        "CH07-E0014",
+        "CH07-E0018"
+      ],
+      "feature_group": "action_permissions",
+      "page": "Hospitalización",
+      "control_type": "authorization",
+      "visible_label": "Permisos por acción",
+      "expected_behavior": "Confirmar qué roles pueden enviar al paciente/seguro, cambiar estado, rechazar, duplicar o eliminar; la plataforma mantiene separación provisional quotes:write e insurance:write.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:14:48.800",
+        "00:16:02.600",
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirmar qué roles pueden enviar al paciente/seguro, cambiar estado, rechazar, duplicar o eliminar; la plataforma mantiene separación provisional quotes:write e insurance:write.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "sendQuote/send_quote_version_and_queue",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H001",
+      "event_ids": [
+        "CH07-E0009",
+        "CH07-E0014"
+      ],
+      "feature_group": "atomic_quote_send",
+      "page": "Cotizaciones",
+      "control_type": "transaction",
+      "visible_label": "Enviar versión y encolar notificación",
+      "expected_behavior": "Bloquea la versión y crea la notificación segura en una sola transacción autoritativa; el cliente muta su espejo sólo tras confirmación.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:48.800",
+        "00:16:02.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0009",
+          "timestamp": "00:14:48.800",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0009_00h14m48s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0009_00h14m48s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Bloquea la versión y crea la notificación segura en una sola transacción autoritativa; el cliente muta su espejo sólo tras confirmación.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "updateQuoteStatus/transition_quote_insurance_status",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H002",
+      "event_ids": [
+        "CH07-E0018"
+      ],
+      "feature_group": "atomic_insurance_transition",
+      "page": "Actualizar seguro",
+      "control_type": "transaction",
+      "visible_label": "Transición de seguro completa",
+      "expected_behavior": "Bloquea quote y request, valida transición e importe y escribe request, ambos historiales, auditoría y notificación dentro de una transacción.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Bloquea quote y request, valida transición e importe y escribe request, ambos historiales, auditoría y notificación dentro de una transacción.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "insurance_requests_rpc_only/insurance_request_events_rpc_only",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H003",
+      "event_ids": [
+        "CH07-E0018"
+      ],
+      "feature_group": "insurance_rls_boundary",
+      "page": "Persistencia",
+      "control_type": "rls",
+      "visible_label": "Seguro mutable sólo por RPC",
+      "expected_behavior": "Niega INSERT, UPDATE y DELETE directos a roles autenticados sobre solicitudes y eventos de seguro.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Niega INSERT, UPDATE y DELETE directos a roles autenticados sobre solicitudes y eventos de seguro.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "updateQuoteStatus/transition_quote_insurance_status",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H004",
+      "event_ids": [
+        "CH07-E0018"
+      ],
+      "feature_group": "sent_version_integrity",
+      "page": "Cotizaciones / Seguro",
+      "control_type": "financial_integrity",
+      "visible_label": "Respuesta de seguro sin reescribir cotización",
+      "expected_behavior": "Guarda monto aprobado y reclamo en insurance_requests y preserva importes, ítems y snapshot inmutable de la versión enviada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Guarda monto aprobado y reclamo en insurance_requests y preserva importes, ítems y snapshot inmutable de la versión enviada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; api/_notification-contract.js; supabase/migrations/202608260006_p0_notifications_payments_inventory.sql",
+      "current_implementation_function": "queueNotification/validateNotificationRequest",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/p0-notifications-payments-inventory.test.mjs; tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H005",
+      "event_ids": [
+        "CH07-E0011",
+        "CH07-E0012",
+        "CH07-E0014"
+      ],
+      "feature_group": "safe_notification",
+      "page": "Mensajería",
+      "control_type": "privacy_guard",
+      "visible_label": "Preview genérico y enlace seguro",
+      "expected_behavior": "Nunca incluye diagnóstico, tratamiento, medicamentos ni detalle clínico en WhatsApp o email; sólo encola una plantilla genérica para un destinatario registrado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:14:52.000",
+        "00:15:48.000",
+        "00:16:02.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0011",
+          "timestamp": "00:14:52.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0011_00h14m52s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0011_00h14m52s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0012",
+          "timestamp": "00:15:48.000",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0012_00h15m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Nunca incluye diagnóstico, tratamiento, medicamentos ni detalle clínico en WhatsApp o email; sólo encola una plantilla genérica para un destinatario registrado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH07",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270003_ch07_insurance_send_integrity.sql",
+      "current_implementation_function": "sendQuote/updateQuoteStatus",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch07-insurance-send.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH07-H006",
+      "event_ids": [
+        "CH07-E0014",
+        "CH07-E0018"
+      ],
+      "feature_group": "idempotent_operations",
+      "page": "Cotizaciones / Seguro",
+      "control_type": "idempotency",
+      "visible_label": "Doble clic y reintento seguros",
+      "expected_behavior": "Deduplica por organización y clave estable; un reintento idéntico devuelve el resultado previo y reutilizar la clave con otro payload falla.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:16:02.600",
+        "00:16:08.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0014",
+          "timestamp": "00:16:02.600",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0014_00h16m02s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0014_00h16m02s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH07",
+          "event_id": "CH07-E0018",
+          "timestamp": "00:16:08.200",
+          "image": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0018_00h16m08s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/detail_crops/CH07-E0018_00h16m08s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deduplica por organización y clave estable; un reintento idéntico devuelve el resultado previo y reutilizar la clave con otro payload falla.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

@@ -1,6 +1,6 @@
 {
   "project": "Analiza en Casa · Production QA",
-  "generatedAt": "2026-08-27T07:28:30.592Z",
+  "generatedAt": "2026-08-27T07:57:55.979Z",
   "total": 75,
   "passed": 75,
   "failed": 0,
@@ -189,7 +189,7 @@
     {
       "name": "ui:actions-have-handlers",
       "passed": true,
-      "detail": "28 acciones cubiertas"
+      "detail": "32 acciones cubiertas"
     },
     {
       "name": "ui:route-permission-enforcement",

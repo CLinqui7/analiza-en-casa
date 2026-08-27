@@ -19,6 +19,109 @@ function snakeCaseObject(input) {
   ]));
 }
 
+function camelCaseObject(input) {
+  if (Array.isArray(input)) return input.map(camelCaseObject);
+  if (!input || typeof input !== "object") return input;
+  return Object.fromEntries(Object.entries(input).map(([key, value]) => [
+    key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()),
+    camelCaseObject(value)
+  ]));
+}
+
+export function mapSupabaseBootstrap(rawCollections = {}) {
+  const collections = { ...rawCollections };
+  collections.patients = (rawCollections.patients || []).map((raw) => {
+    const patient = camelCaseObject(raw);
+    return {
+      ...patient,
+      document: patient.documentNumber,
+      fullName: `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+      organizationId: patient.organizationId
+    };
+  });
+  collections.cases = (rawCollections.cases || []).map((raw) => {
+    const record = camelCaseObject(raw);
+    return {
+      ...record,
+      patientId: record.patientId,
+      insurerId: record.insurerId,
+      accountType: record.accountType,
+      manager: record.administrativeManagerName || "",
+      contractingDoctorId: record.contractingDoctorId,
+      startDate: record.startDate,
+      endDate: record.endDate,
+      diagnosisSummary: record.diagnosisSummary,
+      nextAction: record.nextAction,
+      organizationId: record.organizationId
+    };
+  });
+
+  collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
+    const root = camelCaseObject(rawQuote);
+    return (root.quoteVersions || []).map((version) => ({
+      id: version.id,
+      displayCode: root.code,
+      quoteId: root.id,
+      originalQuoteId: root.id,
+      caseId: root.hospitalizationId,
+      patientId: root.patientId,
+      organizationId: root.organizationId,
+      status: version.version === root.currentVersion ? root.status : version.statusSnapshot,
+      version: version.version,
+      currency: root.currency,
+      subtotal: Number(version.subtotal),
+      discountAmount: Number(version.discountAmount),
+      total: Number(version.total),
+      insurerAmount: Number(version.insurerAmount),
+      patientAmount: Number(version.patientAmount),
+      discount: version.discountSnapshot || {},
+      comments: version.comments || "",
+      invoiceDate: version.invoiceDate || root.invoiceDate || "",
+      discountGroupId: version.discountGroupId || root.discountGroupId || "REGULAR",
+      referredBy: version.referredBy || root.referredBy || "",
+      giftcard: version.giftcard || root.giftcard || "",
+      priceListId: version.priceListId || null,
+      immutable: Boolean(version.immutable),
+      sentAt: version.sentAt || (version.version === root.currentVersion ? root.sentAt : null),
+      createdAt: version.createdAt,
+      items: (version.quoteItems || []).map((item) => ({
+        id: item.id,
+        catalogItemId: item.catalogItemId,
+        category: item.category,
+        name: item.description,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice),
+        discountAmount: Number(item.discountAmount || 0)
+      }))
+    }));
+  });
+
+  const currentVersionByRoot = new Map(
+    collections.quotes
+      .slice()
+      .sort((left, right) => Number(left.version) - Number(right.version))
+      .map((quote) => [quote.quoteId, quote.id])
+  );
+  collections.insuranceRequests = (rawCollections.insuranceRequests || []).map((raw) => {
+    const request = camelCaseObject(raw);
+    return {
+      ...request,
+      rootQuoteId: request.quoteId,
+      quoteId: currentVersionByRoot.get(request.quoteId) || request.quoteId,
+      requestedAmount: Number(request.requestedAmount || 0),
+      approvedAmount: Number(request.approvedAmount || 0),
+      events: (request.insuranceRequestEvents || [])
+        .map((event) => ({ ...event, date: event.createdAt }))
+        .sort((left, right) => String(left.date).localeCompare(String(right.date)))
+    };
+  });
+  collections.notifications = (rawCollections.notifications || []).map((raw) => {
+    const notification = camelCaseObject(raw);
+    return { ...notification, target: notification.destinationMasked, date: notification.createdAt };
+  });
+  return collections;
+}
+
 function toPatientRow(patient) {
   return {
     id: patient.id,
@@ -143,7 +246,7 @@ export async function createSupabaseAdapter(config) {
   }
 
   async function bootstrap() {
-    const collections = {};
+    const rawCollections = {};
     const queries = [
       ["patients", "patients", "*"],
       ["cases", "hospitalizations", "*"],
@@ -156,6 +259,7 @@ export async function createSupabaseAdapter(config) {
       ["inventoryMovements", "inventory_movements", "*"],
       ["doctors", "doctors", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
+      ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
       ["notifications", "notifications", "*"],
       ["auditLogs", "audit_logs", "*"]
     ];
@@ -163,9 +267,9 @@ export async function createSupabaseAdapter(config) {
     for (const [key, table, select] of queries) {
       const { data, error } = await client.from(table).select(select).limit(500);
       if (error) throw error;
-      collections[key] = data || [];
+      rawCollections[key] = data || [];
     }
-    return collections;
+    return mapSupabaseBootstrap(rawCollections);
   }
 
   async function insert(table, row) {
@@ -238,22 +342,28 @@ export async function createSupabaseAdapter(config) {
         return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_STATUS": {
-        const { error } = await client.rpc("transition_quote_status", {
+        const { data, error } = await client.rpc("transition_quote_insurance_status", {
           p_quote_id: payload.quoteId,
+          p_quote_version_id: payload.quoteVersionId,
           p_to_status: payload.status,
-          p_note: payload.note || null
+          p_note: payload.note,
+          p_approved_amount: payload.approvedAmount,
+          p_claim_number: payload.claimNumber || null,
+          p_idempotency_key: payload.eventId
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
       }
       case "SEND_QUOTE_VERSION": {
         const quote = payload.quote;
-        const { error } = await client.rpc("send_quote_version", {
+        const { data, error } = await client.rpc("send_quote_version_and_queue", {
           p_quote_id: quote.quoteId || quote.id,
-          p_quote_version_id: quote.id
+          p_quote_version_id: quote.id,
+          p_channel: payload.channel,
+          p_idempotency_key: payload.idempotencyKey
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
       }
       case "SIGN_CLINICAL_DOCUMENT":
         return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });

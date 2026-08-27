@@ -271,7 +271,7 @@ export async function createAppStore(config) {
         templateCode, channel, relatedEntityType, relatedEntityId, idempotencyKey
       });
     });
-    safeSync("QUEUE_NOTIFICATION", { notification });
+    if (!input.remoteConfirmed) safeSync("QUEUE_NOTIFICATION", { notification });
     return notification;
   }
 
@@ -814,72 +814,110 @@ export async function createAppStore(config) {
     return commit();
   }
 
-  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
+  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null, claimNumber = "", idempotencyKey = "") {
     requirePermission("insurance:write");
-    const eventId = uid("QSE");
-    setState((draft) => {
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const normalizedNote = String(note || "").trim();
+    const normalizedApprovedAmount = approvedAmount === null || approvedAmount === "" ? null : Number(approvedAmount);
+    if (normalizedApprovedAmount !== null && (!Number.isFinite(normalizedApprovedAmount) || normalizedApprovedAmount < 0 || normalizedApprovedAmount > Number(quote.total))) {
+      throw new Error("El monto aprobado debe ser válido y no superar el total de la cotización.");
+    }
+    const normalizedClaimNumber = String(claimNumber || "").trim();
+    if (normalizedClaimNumber.length > 120) throw new Error("El número de reclamo o autorización es demasiado largo.");
+    const eventId = String(idempotencyKey || uid("QSE")).trim();
+    if (!eventId || eventId.length > 160) throw new Error("La clave de idempotencia de seguro es inválida.");
+    const priorRequest = state.insuranceRequests.find((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+    const priorEvent = priorRequest?.events.find((event) => event.idempotencyKey === eventId);
+    if (priorEvent) {
+      if (priorRequest.quoteId !== quoteId || priorEvent.status !== status || priorEvent.note !== normalizedNote
+        || Number(priorEvent.approvedAmount ?? normalizedApprovedAmount) !== Number(normalizedApprovedAmount)
+        || String(priorEvent.claimNumber ?? normalizedClaimNumber) !== normalizedClaimNumber) {
+        throw new Error("La clave de idempotencia ya pertenece a otra operación.");
+      }
+      return quote;
+    }
+    if (!canTransitionQuote(quote.status, status)) {
+      throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
+    }
+    if (!normalizedNote) throw new Error("La actualización de seguro requiere una observación.");
+    const previousStatus = quote.status;
+
+    const commit = (remote = null) => {
+      const committedEvent = state.insuranceRequests.some((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+      if (committedEvent) return quoteById(quoteId);
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (!canTransitionQuote(quote.status, status)) {
-        throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
-      }
-      const previousStatus = quote.status;
-      if (quoteIsImmutable(quote) && approvedAmount !== null && approvedAmount !== "" && Number(approvedAmount) !== Number(quote.insurerAmount)) {
-        throw new Error("La cobertura de una versión enviada es inmutable. Cree una nueva versión.");
-      }
       quote.status = status;
-      if (approvedAmount !== null && approvedAmount !== "") {
-        quote.insurerAmount = roundMoney(Math.min(Number(approvedAmount), quote.total));
-        quote.patientAmount = roundMoney(Math.max(0, quote.total - quote.insurerAmount));
-      }
       const request = draft.insuranceRequests.find((candidate) => candidate.quoteId === quoteId);
       if (request) {
         request.status = status;
-        request.approvedAmount = quote.insurerAmount;
-        request.lastNote = note || request.lastNote;
-        request.events.push({ date: nowIso(), status, note });
+        if (normalizedApprovedAmount !== null) request.approvedAmount = roundMoney(normalizedApprovedAmount);
+        if (normalizedClaimNumber) request.claimNumber = normalizedClaimNumber;
+        request.lastNote = normalizedNote;
+        if (!request.events.some((event) => event.idempotencyKey === eventId)) request.events.push({
+          date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+          approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+        });
       } else if (["SENT_TO_INSURER", "INSURER_REVIEW", "INFO_REQUIRED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED"].includes(status)) {
         draft.insuranceRequests.unshift({
-          id: uid("PRE"),
+          id: remote?.insurance_request_id || uid("PRE"),
           quoteId,
           insurerId: patientById(quote.patientId)?.insurerId || null,
           status,
           submittedAt: nowIso(),
-          approvedAmount: quote.insurerAmount,
+          approvedAmount: roundMoney(normalizedApprovedAmount || 0),
           requestedDocuments: [],
-          claimNumber: "",
-          lastNote: note,
-          events: [{ date: nowIso(), status, note }]
+          claimNumber: normalizedClaimNumber,
+          lastNote: normalizedNote,
+          events: [{
+            date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+            approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+          }]
         });
       }
-      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
+      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${normalizedNote}`, {
         quoteId: quoteRootId(quote),
-        version: quote.version
+        version: quote.version,
+        eventId
       });
-    });
-    safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: quote.patientId,
-      relatedEntityType: "QUOTE", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE", relatedEntityId: committedQuote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    const payload = { quoteId: quote.quoteId || quote.id, quoteVersionId: quote.id, status, note: normalizedNote, approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, eventId };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_QUOTE_STATUS", payload).then(commit);
+    return commit();
   }
 
   function sendQuote(quoteId, channel = "WHATSAPP") {
     requirePermission("quotes:write");
-    setState((draft) => {
+    const normalizedChannel = String(channel || "").toUpperCase();
+    if (!["WHATSAPP", "EMAIL"].includes(normalizedChannel)) throw new Error("Canal de envío no permitido para cotizaciones.");
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const notificationKey = `NOT:QUOTE_READY:${quote.id}:${normalizedChannel}`;
+    const priorDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+    if (quoteIsImmutable(quote) && priorDelivery) return quote;
+    if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
+    if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
+    if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) throw new Error("No se puede enviar una cotización con precios faltantes.");
+
+    const commit = () => {
+      const current = quoteById(quoteId);
+      const committedDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+      if (quoteIsImmutable(current) && committedDelivery) return current;
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
-      if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) {
-        throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
-      }
-      if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) {
-        throw new Error("No se puede enviar una cotización con precios faltantes.");
-      }
-      if (quote.status === "DRAFT") quote.status = "SENT_TO_PATIENT";
+      quote.status = "SENT_TO_PATIENT";
       quote.sentAt = nowIso();
       quote.immutable = true;
       quote.sentSnapshot = clone({
@@ -888,18 +926,24 @@ export async function createAppStore(config) {
         items: quote.items,
         discount: quote.discount
       });
-      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
+      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${normalizedChannel} y bloqueada.`, {
         quoteId: quoteRootId(quote),
         version: quote.version,
-        channel
+        channel: normalizedChannel,
+        idempotencyKey: notificationKey
       });
-    });
-    safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_READY", channel, recipientId: quote.patientId,
-      relatedEntityType: "QUOTE_VERSION", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_READY:${quote.id}:${channel}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_READY", channel: normalizedChannel, recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE_VERSION", relatedEntityId: committedQuote.id, idempotencyKey: notificationKey,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    if (adapter.mode === "supabase") return requiredSync("SEND_QUOTE_VERSION", { quote, channel: normalizedChannel, idempotencyKey: notificationKey }).then(commit);
+    return commit();
   }
 
   function createPayment(input) {

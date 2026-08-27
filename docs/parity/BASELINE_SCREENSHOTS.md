@@ -57,3 +57,9 @@ La reproducción exacta, resultados automatizados y límites del recorrido está
 | Captura | Propósito |
 | --- | --- |
 | [Categorías y ledger 1440×900](screenshots/ch06-quote-categories-1440x900.png) | Insumos, Estudios Dx y Honorarios, catálogo enriquecido, agrupación y totales con reglas no confirmadas bloqueadas. |
+
+## Evidencia posterior al cierre de CH07
+
+| Captura | Propósito |
+| --- | --- |
+| [Listado y menú contextual 1440×900](screenshots/ch07-quote-row-menu-1440x900.png) | Búsqueda por paciente/documento, menú completo, submenú de impresión y acciones no confirmadas visibles pero bloqueadas. |

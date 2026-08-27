@@ -6,12 +6,12 @@ Alcance actual: **CH01–CH06 cerrados con bloqueos del cliente registrados**. L
 
 | Estado | Cantidad |
 | --- | ---: |
-| IMPLEMENTED_EXACT | 46 |
-| IMPLEMENTED_PARTIAL | 64 |
+| IMPLEMENTED_EXACT | 59 |
+| IMPLEMENTED_PARTIAL | 69 |
 | MISSING | 0 |
 | CONFLICTS_WITH_VIDEO | 0 |
-| NOT_TESTABLE | 12 |
-| NEEDS_CLIENT_CONFIRMATION | 32 |
+| NOT_TESTABLE | 15 |
+| NEEDS_CLIENT_CONFIRMATION | 35 |
 
 Los requisitos IMPLEMENTED_EXACT cuentan con prueba automatizada específica y evidencia de navegador cuando corresponde. Los parciales conservan trazabilidad de la limitación pendiente.
 

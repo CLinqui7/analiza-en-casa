@@ -1900,6 +1900,38 @@ body.portal-mode #app { min-height: 100vh; }
   position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
   overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
 }
+.interactive-badge { border:0;background:transparent;padding:0;cursor:pointer; }
+.interactive-badge:focus-visible,.quote-row-menu summary:focus-visible,.quote-row-menu-panel :focus-visible {
+  outline:3px solid color-mix(in srgb,var(--teal-600) 32%,transparent);
+  outline-offset:2px;
+}
+.quote-row-menu { position:relative;width:max-content; }
+.card:has(.quote-row-menu[open]) { position:relative;z-index:25;overflow:visible; }
+.table-wrap:has(.quote-row-menu[open]) { overflow:visible; }
+.quote-row-menu > summary {
+  width:30px;height:30px;display:grid;place-items:center;list-style:none;cursor:pointer;
+  border:1px solid var(--line);border-radius:8px;background:white;color:var(--teal-800);
+  font-size:18px;font-weight:800;line-height:1;
+}
+.quote-row-menu > summary::-webkit-details-marker,.quote-row-submenu > summary::-webkit-details-marker { display:none; }
+.quote-row-menu-panel {
+  position:absolute;z-index:40;left:34px;bottom:0;width:190px;padding:6px;
+  background:white;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 34px rgba(20,48,58,.18);
+}
+.quote-row-menu-panel > button,.quote-row-menu-panel > a,.quote-row-submenu > summary,.quote-row-submenu > div > button {
+  box-sizing:border-box;width:100%;min-height:32px;display:flex;align-items:center;justify-content:space-between;
+  padding:7px 9px;border:0;border-radius:7px;background:transparent;color:var(--navy-900);
+  font:inherit;font-size:10px;font-weight:700;text-align:left;text-decoration:none;cursor:pointer;
+}
+.quote-row-menu-panel > button:hover,.quote-row-menu-panel > a:hover,.quote-row-submenu > summary:hover,.quote-row-submenu > div > button:hover { background:var(--teal-100); }
+.quote-row-menu-panel button:disabled { color:var(--muted);cursor:not-allowed;opacity:.7; }
+.quote-row-menu-panel button:disabled:hover { background:transparent; }
+.quote-row-submenu { position:relative; }
+.quote-row-submenu > summary { list-style:none;cursor:pointer; }
+.quote-row-submenu > div {
+  position:absolute;left:calc(100% + 7px);top:-6px;width:205px;padding:6px;
+  background:white;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 34px rgba(20,48,58,.18);
+}
 .metrics-grid-six { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .sort-button { border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;text-transform:inherit;letter-spacing:inherit;padding:0;cursor:pointer; }
 .sort-button:focus-visible { outline:2px solid var(--teal-500);outline-offset:3px;border-radius:4px; }
@@ -4874,6 +4906,109 @@ function snakeCaseObject(input) {
   ]));
 }
 
+function camelCaseObject(input) {
+  if (Array.isArray(input)) return input.map(camelCaseObject);
+  if (!input || typeof input !== "object") return input;
+  return Object.fromEntries(Object.entries(input).map(([key, value]) => [
+    key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()),
+    camelCaseObject(value)
+  ]));
+}
+
+function mapSupabaseBootstrap(rawCollections = {}) {
+  const collections = { ...rawCollections };
+  collections.patients = (rawCollections.patients || []).map((raw) => {
+    const patient = camelCaseObject(raw);
+    return {
+      ...patient,
+      document: patient.documentNumber,
+      fullName: `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+      organizationId: patient.organizationId
+    };
+  });
+  collections.cases = (rawCollections.cases || []).map((raw) => {
+    const record = camelCaseObject(raw);
+    return {
+      ...record,
+      patientId: record.patientId,
+      insurerId: record.insurerId,
+      accountType: record.accountType,
+      manager: record.administrativeManagerName || "",
+      contractingDoctorId: record.contractingDoctorId,
+      startDate: record.startDate,
+      endDate: record.endDate,
+      diagnosisSummary: record.diagnosisSummary,
+      nextAction: record.nextAction,
+      organizationId: record.organizationId
+    };
+  });
+
+  collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
+    const root = camelCaseObject(rawQuote);
+    return (root.quoteVersions || []).map((version) => ({
+      id: version.id,
+      displayCode: root.code,
+      quoteId: root.id,
+      originalQuoteId: root.id,
+      caseId: root.hospitalizationId,
+      patientId: root.patientId,
+      organizationId: root.organizationId,
+      status: version.version === root.currentVersion ? root.status : version.statusSnapshot,
+      version: version.version,
+      currency: root.currency,
+      subtotal: Number(version.subtotal),
+      discountAmount: Number(version.discountAmount),
+      total: Number(version.total),
+      insurerAmount: Number(version.insurerAmount),
+      patientAmount: Number(version.patientAmount),
+      discount: version.discountSnapshot || {},
+      comments: version.comments || "",
+      invoiceDate: version.invoiceDate || root.invoiceDate || "",
+      discountGroupId: version.discountGroupId || root.discountGroupId || "REGULAR",
+      referredBy: version.referredBy || root.referredBy || "",
+      giftcard: version.giftcard || root.giftcard || "",
+      priceListId: version.priceListId || null,
+      immutable: Boolean(version.immutable),
+      sentAt: version.sentAt || (version.version === root.currentVersion ? root.sentAt : null),
+      createdAt: version.createdAt,
+      items: (version.quoteItems || []).map((item) => ({
+        id: item.id,
+        catalogItemId: item.catalogItemId,
+        category: item.category,
+        name: item.description,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice),
+        discountAmount: Number(item.discountAmount || 0)
+      }))
+    }));
+  });
+
+  const currentVersionByRoot = new Map(
+    collections.quotes
+      .slice()
+      .sort((left, right) => Number(left.version) - Number(right.version))
+      .map((quote) => [quote.quoteId, quote.id])
+  );
+  collections.insuranceRequests = (rawCollections.insuranceRequests || []).map((raw) => {
+    const request = camelCaseObject(raw);
+    return {
+      ...request,
+      rootQuoteId: request.quoteId,
+      quoteId: currentVersionByRoot.get(request.quoteId) || request.quoteId,
+      requestedAmount: Number(request.requestedAmount || 0),
+      approvedAmount: Number(request.approvedAmount || 0),
+      events: (request.insuranceRequestEvents || [])
+        .map((event) => ({ ...event, date: event.createdAt }))
+        .sort((left, right) => String(left.date).localeCompare(String(right.date)))
+    };
+  });
+  collections.notifications = (rawCollections.notifications || []).map((raw) => {
+    const notification = camelCaseObject(raw);
+    return { ...notification, target: notification.destinationMasked, date: notification.createdAt };
+  });
+  return collections;
+}
+
 function toPatientRow(patient) {
   return {
     id: patient.id,
@@ -4998,7 +5133,7 @@ async function createSupabaseAdapter(config) {
   }
 
   async function bootstrap() {
-    const collections = {};
+    const rawCollections = {};
     const queries = [
       ["patients", "patients", "*"],
       ["cases", "hospitalizations", "*"],
@@ -5011,6 +5146,7 @@ async function createSupabaseAdapter(config) {
       ["inventoryMovements", "inventory_movements", "*"],
       ["doctors", "doctors", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
+      ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
       ["notifications", "notifications", "*"],
       ["auditLogs", "audit_logs", "*"]
     ];
@@ -5018,9 +5154,9 @@ async function createSupabaseAdapter(config) {
     for (const [key, table, select] of queries) {
       const { data, error } = await client.from(table).select(select).limit(500);
       if (error) throw error;
-      collections[key] = data || [];
+      rawCollections[key] = data || [];
     }
-    return collections;
+    return mapSupabaseBootstrap(rawCollections);
   }
 
   async function insert(table, row) {
@@ -5093,22 +5229,28 @@ async function createSupabaseAdapter(config) {
         return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_STATUS": {
-        const { error } = await client.rpc("transition_quote_status", {
+        const { data, error } = await client.rpc("transition_quote_insurance_status", {
           p_quote_id: payload.quoteId,
+          p_quote_version_id: payload.quoteVersionId,
           p_to_status: payload.status,
-          p_note: payload.note || null
+          p_note: payload.note,
+          p_approved_amount: payload.approvedAmount,
+          p_claim_number: payload.claimNumber || null,
+          p_idempotency_key: payload.eventId
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
       }
       case "SEND_QUOTE_VERSION": {
         const quote = payload.quote;
-        const { error } = await client.rpc("send_quote_version", {
+        const { data, error } = await client.rpc("send_quote_version_and_queue", {
           p_quote_id: quote.quoteId || quote.id,
-          p_quote_version_id: quote.id
+          p_quote_version_id: quote.id,
+          p_channel: payload.channel,
+          p_idempotency_key: payload.idempotencyKey
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
       }
       case "SIGN_CLINICAL_DOCUMENT":
         return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
@@ -5489,7 +5631,7 @@ async function createAppStore(config) {
         templateCode, channel, relatedEntityType, relatedEntityId, idempotencyKey
       });
     });
-    safeSync("QUEUE_NOTIFICATION", { notification });
+    if (!input.remoteConfirmed) safeSync("QUEUE_NOTIFICATION", { notification });
     return notification;
   }
 
@@ -6032,72 +6174,110 @@ async function createAppStore(config) {
     return commit();
   }
 
-  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
+  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null, claimNumber = "", idempotencyKey = "") {
     requirePermission("insurance:write");
-    const eventId = uid("QSE");
-    setState((draft) => {
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const normalizedNote = String(note || "").trim();
+    const normalizedApprovedAmount = approvedAmount === null || approvedAmount === "" ? null : Number(approvedAmount);
+    if (normalizedApprovedAmount !== null && (!Number.isFinite(normalizedApprovedAmount) || normalizedApprovedAmount < 0 || normalizedApprovedAmount > Number(quote.total))) {
+      throw new Error("El monto aprobado debe ser válido y no superar el total de la cotización.");
+    }
+    const normalizedClaimNumber = String(claimNumber || "").trim();
+    if (normalizedClaimNumber.length > 120) throw new Error("El número de reclamo o autorización es demasiado largo.");
+    const eventId = String(idempotencyKey || uid("QSE")).trim();
+    if (!eventId || eventId.length > 160) throw new Error("La clave de idempotencia de seguro es inválida.");
+    const priorRequest = state.insuranceRequests.find((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+    const priorEvent = priorRequest?.events.find((event) => event.idempotencyKey === eventId);
+    if (priorEvent) {
+      if (priorRequest.quoteId !== quoteId || priorEvent.status !== status || priorEvent.note !== normalizedNote
+        || Number(priorEvent.approvedAmount ?? normalizedApprovedAmount) !== Number(normalizedApprovedAmount)
+        || String(priorEvent.claimNumber ?? normalizedClaimNumber) !== normalizedClaimNumber) {
+        throw new Error("La clave de idempotencia ya pertenece a otra operación.");
+      }
+      return quote;
+    }
+    if (!canTransitionQuote(quote.status, status)) {
+      throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
+    }
+    if (!normalizedNote) throw new Error("La actualización de seguro requiere una observación.");
+    const previousStatus = quote.status;
+
+    const commit = (remote = null) => {
+      const committedEvent = state.insuranceRequests.some((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+      if (committedEvent) return quoteById(quoteId);
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (!canTransitionQuote(quote.status, status)) {
-        throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
-      }
-      const previousStatus = quote.status;
-      if (quoteIsImmutable(quote) && approvedAmount !== null && approvedAmount !== "" && Number(approvedAmount) !== Number(quote.insurerAmount)) {
-        throw new Error("La cobertura de una versión enviada es inmutable. Cree una nueva versión.");
-      }
       quote.status = status;
-      if (approvedAmount !== null && approvedAmount !== "") {
-        quote.insurerAmount = roundMoney(Math.min(Number(approvedAmount), quote.total));
-        quote.patientAmount = roundMoney(Math.max(0, quote.total - quote.insurerAmount));
-      }
       const request = draft.insuranceRequests.find((candidate) => candidate.quoteId === quoteId);
       if (request) {
         request.status = status;
-        request.approvedAmount = quote.insurerAmount;
-        request.lastNote = note || request.lastNote;
-        request.events.push({ date: nowIso(), status, note });
+        if (normalizedApprovedAmount !== null) request.approvedAmount = roundMoney(normalizedApprovedAmount);
+        if (normalizedClaimNumber) request.claimNumber = normalizedClaimNumber;
+        request.lastNote = normalizedNote;
+        if (!request.events.some((event) => event.idempotencyKey === eventId)) request.events.push({
+          date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+          approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+        });
       } else if (["SENT_TO_INSURER", "INSURER_REVIEW", "INFO_REQUIRED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED"].includes(status)) {
         draft.insuranceRequests.unshift({
-          id: uid("PRE"),
+          id: remote?.insurance_request_id || uid("PRE"),
           quoteId,
           insurerId: patientById(quote.patientId)?.insurerId || null,
           status,
           submittedAt: nowIso(),
-          approvedAmount: quote.insurerAmount,
+          approvedAmount: roundMoney(normalizedApprovedAmount || 0),
           requestedDocuments: [],
-          claimNumber: "",
-          lastNote: note,
-          events: [{ date: nowIso(), status, note }]
+          claimNumber: normalizedClaimNumber,
+          lastNote: normalizedNote,
+          events: [{
+            date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+            approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+          }]
         });
       }
-      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
+      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${normalizedNote}`, {
         quoteId: quoteRootId(quote),
-        version: quote.version
+        version: quote.version,
+        eventId
       });
-    });
-    safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: quote.patientId,
-      relatedEntityType: "QUOTE", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE", relatedEntityId: committedQuote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    const payload = { quoteId: quote.quoteId || quote.id, quoteVersionId: quote.id, status, note: normalizedNote, approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, eventId };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_QUOTE_STATUS", payload).then(commit);
+    return commit();
   }
 
   function sendQuote(quoteId, channel = "WHATSAPP") {
     requirePermission("quotes:write");
-    setState((draft) => {
+    const normalizedChannel = String(channel || "").toUpperCase();
+    if (!["WHATSAPP", "EMAIL"].includes(normalizedChannel)) throw new Error("Canal de envío no permitido para cotizaciones.");
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const notificationKey = `NOT:QUOTE_READY:${quote.id}:${normalizedChannel}`;
+    const priorDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+    if (quoteIsImmutable(quote) && priorDelivery) return quote;
+    if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
+    if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
+    if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) throw new Error("No se puede enviar una cotización con precios faltantes.");
+
+    const commit = () => {
+      const current = quoteById(quoteId);
+      const committedDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+      if (quoteIsImmutable(current) && committedDelivery) return current;
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
-      if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) {
-        throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
-      }
-      if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) {
-        throw new Error("No se puede enviar una cotización con precios faltantes.");
-      }
-      if (quote.status === "DRAFT") quote.status = "SENT_TO_PATIENT";
+      quote.status = "SENT_TO_PATIENT";
       quote.sentAt = nowIso();
       quote.immutable = true;
       quote.sentSnapshot = clone({
@@ -6106,18 +6286,24 @@ async function createAppStore(config) {
         items: quote.items,
         discount: quote.discount
       });
-      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
+      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${normalizedChannel} y bloqueada.`, {
         quoteId: quoteRootId(quote),
         version: quote.version,
-        channel
+        channel: normalizedChannel,
+        idempotencyKey: notificationKey
       });
-    });
-    safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_READY", channel, recipientId: quote.patientId,
-      relatedEntityType: "QUOTE_VERSION", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_READY:${quote.id}:${channel}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_READY", channel: normalizedChannel, recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE_VERSION", relatedEntityId: committedQuote.id, idempotencyKey: notificationKey,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    if (adapter.mode === "supabase") return requiredSync("SEND_QUOTE_VERSION", { quote, channel: normalizedChannel, idempotencyKey: notificationKey }).then(commit);
+    return commit();
   }
 
   function createPayment(input) {
@@ -7325,6 +7511,42 @@ function searchFilter(items, query, fields) {
   return items.filter((item) => fields.some((field) => String(item[field] ?? "").toLowerCase().includes(q)));
 }
 
+function quoteRowMenu(quote) {
+  const canSend = !quote.immutable && ["DRAFT", "READY_TO_SEND"].includes(quote.status);
+  const editAction = quote.status === "DRAFT" && !quote.immutable ? "edit-quote-draft" : "revise-quote";
+  const editLabel = editAction === "edit-quote-draft" ? "Editar" : "Nueva versión";
+  const unavailable = "Pendiente de reglas y formato confirmados por el cliente (CH07).";
+  return `<details class="quote-row-menu">
+    <summary aria-label="Abrir acciones de ${esc(quote.id)}" title="Acciones">⋮</summary>
+    <div class="quote-row-menu-panel" role="menu" aria-label="Acciones de ${esc(quote.id)}">
+      <button type="button" role="menuitem" data-action="${editAction}" data-id="${esc(quote.id)}">${editLabel}</button>
+      <button type="button" role="menuitem" disabled title="${unavailable}">Duplicar</button>
+      <a role="menuitem" href="#/cotizaciones/${esc(quote.id)}#versiones">Versiones</a>
+      <details class="quote-row-submenu">
+        <summary>Imprimir <span>›</span></summary>
+        <div>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Excel</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Detalle de servicio</button>
+          <button type="button" role="menuitem" data-action="print-quote" data-id="${esc(quote.id)}">Cotización</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Factura</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Cotización internacional</button>
+          <button type="button" role="menuitem" disabled title="${unavailable}">Factura internacional</button>
+        </div>
+      </details>
+      <details class="quote-row-submenu">
+        <summary>Enviar <span>›</span></summary>
+        <div>
+          <button type="button" role="menuitem" data-action="send-quote" data-id="${esc(quote.id)}" ${canSend ? "" : `disabled title="La versión enviada es inmutable; cree una nueva versión."`}>E-mail</button>
+          <button type="button" role="menuitem" data-action="send-quote-whatsapp" data-id="${esc(quote.id)}" ${canSend ? "" : `disabled title="La versión enviada es inmutable; cree una nueva versión."`}>Whatsapp</button>
+        </div>
+      </details>
+      <button type="button" role="menuitem" data-action="open-insurance-status" data-id="${esc(quote.id)}">Envíos al seguro</button>
+      <a role="menuitem" href="#/cotizaciones/${esc(quote.id)}#historial-seguro">Historial de envíos</a>
+      <button type="button" role="menuitem" disabled title="${unavailable}">Eliminar</button>
+    </div>
+  </details>`;
+}
+
 function renderDashboard(state, store, ui) {
   const activePatients = state.patients.filter((patient) => patient.status === "ACTIVE").length;
   const medicationItems = state.medicationCards.flatMap((card) => card.items || []);
@@ -7579,7 +7801,14 @@ function renderCases(state, store, ui) {
   if (activeTab === "pic") {
     tabBody = `<div class="data-state" role="status"><strong>PIC Ejecución pendiente de reglas del cliente</strong><span>No se muestra un conteo ni se habilitan transiciones hasta resolver CH03-Q001, CH03-Q003 y CH03-Q005.</span></div>`;
   } else if (activeTab === "quotes") {
-    const filteredQuotes = searchFilter(state.quotes, ui.search, ["id", "status", "comments"])
+    const query = String(ui.search || "").trim().toLocaleLowerCase("es");
+    const filteredQuotes = state.quotes
+      .filter((quote) => {
+        if (!query) return true;
+        const patient = state.patients.find((item) => item.id === quote.patientId);
+        return [quote.id, quote.status, quote.comments, patient?.fullName, patient?.document]
+          .some((value) => String(value || "").toLocaleLowerCase("es").includes(query));
+      })
       .filter((quote) => !ui.caseQuoteStatus || quote.status === ui.caseQuoteStatus)
       .filter((quote) => !ui.caseQuoteDate || String(quote.createdAt || "").slice(0, 10) === ui.caseQuoteDate);
     const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / casePageSize));
@@ -7589,11 +7818,11 @@ function renderCases(state, store, ui) {
       const patient = state.patients.find((item) => item.id === quote.patientId);
       const request = state.insuranceRequests.find((item) => item.quoteId === quote.id);
       return `<tr>
-        <td><a class="row-action" href="#/cotizaciones/${esc(quote.id)}" aria-label="Abrir ${esc(quote.id)}">${icon("view")}</a></td>
+        <td>${quoteRowMenu(quote)}</td>
         <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
         <td>${esc(patient?.document || "—")}</td>
         <td><a class="strong-link" href="#/cotizaciones/${esc(quote.id)}">${esc(quote.id)}</a></td>
-        <td>${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</td>
+        <td><button type="button" class="interactive-badge" data-action="open-insurance-status" data-id="${esc(quote.id)}" aria-label="Actualizar estado de ${esc(quote.id)}">${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</button></td>
         <td>${badge(request?.preauthorizationSentAt ? "SENT" : "PENDING", request?.preauthorizationSentAt ? "Enviado" : "Regla pendiente")}</td>
         <td>${badge(request?.responseStatus || "PENDING", request?.responseStatus ? (QUOTE_ADMIN_LABELS[request.responseStatus] || request.responseStatus) : "Regla pendiente")}</td>
         <td>${badge(request?.claimStatus || "PENDING", request?.claimStatus || "Regla pendiente")}</td>
@@ -9079,6 +9308,7 @@ function openInsuranceStatus(quoteId = "") {
   const state = store.getState();
   const quote = state.quotes.find((q) => q.id === quoteId) || state.quotes[0];
   if (!quote) return showToast("No hay cotizaciones para actualizar.", "danger");
+  const request = state.insuranceRequests.find((candidate) => candidate.quoteId === quote.id);
   const currentIndex = QUOTE_STATUS_FLOW.indexOf(quote.status);
   const allowed = QUOTE_STATUS_FLOW.slice(Math.max(0, currentIndex)).concat(["INFO_REQUIRED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED"]).filter((v, i, a) => a.indexOf(v) === i);
   openModal({
@@ -9087,10 +9317,11 @@ function openInsuranceStatus(quoteId = "") {
     size: "md",
     body: `<form id="insurance-form" class="form-grid">
       <input type="hidden" name="quoteId" value="${quote.id}">
+      <input type="hidden" name="eventId" value="${safeText(uid("QSE"))}">
       <label class="full">Nuevo estado<select name="status">${allowed.map((s) => `<option value="${s}" ${s === quote.status ? "selected" : ""}>${safeText(QUOTE_ADMIN_LABELS_MAIN[s] || s)}</option>`).join("")}</select></label>
-      <label class="full">Monto aprobado por aseguradora<input type="number" min="0" max="${quote.total}" step=".01" name="approvedAmount" value="${quote.insurerAmount}"></label>
+      <label class="full">Monto aprobado por aseguradora<input type="number" min="0" max="${quote.total}" step=".01" name="approvedAmount" value="${safeText(request?.approvedAmount ?? "")}"></label>
       <label class="full">Observación / respuesta<textarea name="note" rows="4" required placeholder="Carta recibida, documentos solicitados, motivo del rechazo..."></textarea></label>
-      <label class="full">Número de reclamo o autorización<input name="claimNumber" placeholder="Opcional"></label>
+      <label class="full">Número de reclamo o autorización<input name="claimNumber" maxlength="120" value="${safeText(request?.claimNumber || "")}" placeholder="Opcional"></label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-insurance-status">Guardar y notificar</button>`
   });
@@ -9771,7 +10002,7 @@ document.addEventListener("click", async (event) => {
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
     case "open-payment-form": openPaymentForm(data.quoteId || ""); break;
     case "send-quote":
-    case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Cotización enviada en modo simulado."); break;
+    case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Solicitud de envío confirmada."); break;
     case "copy-portal-link": copyPortalLink(data.token); break;
     case "print-quote": runSafely(()=>printQuote(data.id)); break;
     case "open-clinical-document": openClinicalDocumentForm(data.caseId || "",data.docType || "HEALTH_REPORT",data.patientId||""); break;
@@ -10092,8 +10323,8 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#insurance-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    runSafely(()=>store.updateQuoteStatus(data.quoteId,data.status,data.note,data.approvedAmount),"Estado de seguro actualizado.");
-    closeModal();
+    const result=await runSafely(()=>store.updateQuoteStatus(data.quoteId,data.status,data.note,data.approvedAmount,data.claimNumber,data.eventId),"Estado de seguro actualizado.");
+    if(result) closeModal();
   }
 
   if(action==="save-payment"){
