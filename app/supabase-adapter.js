@@ -130,6 +130,16 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       durationDays: Number(profile.durationDays || 0)
     };
   });
+  collections.clinicalProfiles = (rawCollections.clinicalProfiles || []).map((raw) => {
+    const profile = camelCaseObject(raw);
+    return {
+      ...profile,
+      caseId: profile.hospitalizationId,
+      otherDoctorIds: profile.otherDoctorIds || [],
+      devices: profile.devices || [],
+      attachmentMetadata: profile.attachmentMetadata || []
+    };
+  });
   collections.payments = (rawCollections.payments || []).map((raw) => {
     const payment = camelCaseObject(raw);
     const quoteVersionId = payment.quoteVersionId || currentVersionByRoot.get(payment.quoteId) || payment.quoteId;
@@ -293,6 +303,7 @@ export async function createSupabaseAdapter(config) {
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
       ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
       ["administrativeExecutionProfiles", "administrative_execution_profiles", "*"],
+      ["clinicalProfiles", "clinical_profiles", "*"],
       ["notifications", "notifications", "*"],
       ["auditLogs", "audit_logs", "*"]
     ];
@@ -466,6 +477,25 @@ export async function createSupabaseAdapter(config) {
         });
         if (error) throw error;
         return { ok: true, profile: camelCaseObject(data) };
+      }
+      case "CREATE_CLINICAL_PROFILE": {
+        const profile = payload.profile;
+        const { data, error } = await client.rpc("create_clinical_profile", {
+          p_hospitalization_id: profile.caseId,
+          p_profile: snakeCaseObject(profile),
+          p_idempotency_key: profile.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok: true, profile: camelCaseObject(data) };
+      }
+      case "VALIDATE_HEALTH_REPORT_RANGE": {
+        const { data, error } = await client.rpc("validate_health_report_range", {
+          p_hospitalization_id: payload.caseId,
+          p_start_date: payload.start,
+          p_end_date: payload.end
+        });
+        if (error) throw error;
+        return { ok: Boolean(data) };
       }
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {

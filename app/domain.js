@@ -115,7 +115,10 @@ export function money(value, currency = "USD", locale = "es-SV") {
 
 export function formatDate(value, withTime = false, locale = "es-SV") {
   if (!value) return "—";
-  const date = new Date(value);
+  const raw = String(value);
+  // A date-only value represents a calendar day, not midnight UTC. Anchoring
+  // it at noon prevents western time zones from rendering the prior day.
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T12:00:00Z` : value);
   if (Number.isNaN(date.getTime())) return String(value);
   const options = withTime
     ? { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }

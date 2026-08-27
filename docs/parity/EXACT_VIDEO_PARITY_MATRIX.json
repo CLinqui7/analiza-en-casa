@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T08:29:39.825Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T09:12:45.384Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 78,
-    "IMPLEMENTED_PARTIAL": 75,
+    "IMPLEMENTED_EXACT": 96,
+    "IMPLEMENTED_PARTIAL": 83,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 15,
-    "NEEDS_CLIENT_CONFIRMATION": 37
+    "NOT_TESTABLE": 16,
+    "NEEDS_CLIENT_CONFIRMATION": 40
   },
   "requirements": [
     {
@@ -11713,6 +11713,1809 @@
       ],
       "acceptance_criteria": [
         "No convierte el saldo negativo del ejemplo en una regla productiva; muestra excedente no asignado y conserva la prohibición de sobrepago.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderNavigation/renderRoute",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R001",
+      "event_ids": [
+        "CH09-E0002",
+        "CH09-E0003",
+        "CH09-E0069"
+      ],
+      "feature_group": "clinical_navigation",
+      "page": "Shell / Hospitalización clínica",
+      "control_type": "navigation",
+      "visible_label": "Clínica / Hospitalización clínica",
+      "expected_behavior": "Navega al listado clínico separado del estado administrativo y respeta clinical:read.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:02.800",
+        "00:21:03.800",
+        "00:22:45.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0002",
+          "timestamp": "00:21:02.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0002_00h21m02s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0002_00h21m02s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0003",
+          "timestamp": "00:21:03.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0003_00h21m03s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0003_00h21m03s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0069",
+          "timestamp": "00:22:45.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0069_00h22m45s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Navega al listado clínico separado del estado administrativo y respeta clinical:read.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderClinicalHospitalizations/apply-clinical-filters",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q002",
+        "CH09-Q003",
+        "CH09-Q004"
+      ],
+      "requirement_id": "CH09-R002",
+      "event_ids": [
+        "CH09-E0004",
+        "CH09-E0011"
+      ],
+      "feature_group": "clinical_filters",
+      "page": "Hospitalización clínica",
+      "control_type": "filters",
+      "visible_label": "Estado / Activado por / Tipo de servicio / Tipo de atención",
+      "expected_behavior": "Filtra por estado clínico, servicio y atención; el actor de activación queda visible y bloqueado hasta definir roles y transición.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:21:09.400",
+        "00:21:14.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0004",
+          "timestamp": "00:21:09.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0004_00h21m09s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0011",
+          "timestamp": "00:21:14.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0011_00h21m14s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Filtra por estado clínico, servicio y atención; el actor de activación queda visible y bloqueado hasta definir roles y transición.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/domain.js",
+      "current_implementation_function": "renderClinicalHospitalizations",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R003",
+      "event_ids": [
+        "CH09-E0012",
+        "CH09-E0015",
+        "CH09-E0069"
+      ],
+      "feature_group": "clinical_table",
+      "page": "Hospitalización clínica",
+      "control_type": "table",
+      "visible_label": "Paciente / DUI/NIT / Hospitalización / Triage / Empresa / Clínico / Inicio / Fin / Duración",
+      "expected_behavior": "Muestra identidad, estado clínico independiente, fechas y duración con búsqueda y paginación 10/25/50.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:15.200",
+        "00:21:18.200",
+        "00:22:45.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0012",
+          "timestamp": "00:21:15.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0012_00h21m15s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0015",
+          "timestamp": "00:21:18.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0015_00h21m18s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0069",
+          "timestamp": "00:22:45.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0069_00h22m45s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra identidad, estado clínico independiente, fechas y duración con búsqueda y paginación 10/25/50.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderClinicalHospitalizations/openClinicalProfiles",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q003",
+        "CH09-Q004",
+        "CH09-Q006"
+      ],
+      "requirement_id": "CH09-R004",
+      "event_ids": [
+        "CH09-E0016"
+      ],
+      "feature_group": "clinical_row_actions",
+      "page": "Hospitalización clínica",
+      "control_type": "menu",
+      "visible_label": "Cotizaciones / Perfil clínico / Relevos / Reingresos / Reinfecciones / Ulceraciones / Near miss",
+      "expected_behavior": "Abre cotizaciones, perfiles y reporte; conserva visibles y deshabilitadas las acciones clínicas sin contrato de datos, reglas o permisos aprobados.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:21:34.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0016",
+          "timestamp": "00:21:34.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0016_00h21m34s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0016_00h21m34s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre cotizaciones, perfiles y reporte; conserva visibles y deshabilitadas las acciones clínicas sin contrato de datos, reglas o permisos aprobados.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openClinicalProfiles/createClinicalProfile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R005",
+      "event_ids": [
+        "CH09-E0017",
+        "CH09-E0021",
+        "CH09-E0067"
+      ],
+      "feature_group": "profile_history",
+      "page": "Perfiles Clínicos",
+      "control_type": "modal_table",
+      "visible_label": "Perfiles Clínicos / Nuevo perfil clínico",
+      "expected_behavior": "Muestra el historial append-only por hospitalización y permite crear un nuevo borrador sin sobrescribir versiones previas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:42.200",
+        "00:21:45.600",
+        "00:22:42.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0017",
+          "timestamp": "00:21:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0017_00h21m42s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0021",
+          "timestamp": "00:21:45.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0021_00h21m45s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0067",
+          "timestamp": "00:22:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0067_00h22m42s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra el historial append-only por hospitalización y permite crear un nuevo borrador sin sobrescribir versiones previas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openClinicalProfileForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R006",
+      "event_ids": [
+        "CH09-E0022",
+        "CH09-E0065"
+      ],
+      "feature_group": "profile_identity",
+      "page": "Detalles de Hospitalización",
+      "control_type": "form",
+      "visible_label": "Paciente / DUI/NIT / Hospitalización / Estatus",
+      "expected_behavior": "Deriva la identidad desde la hospitalización autorizada y la presenta en solo lectura.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:46.000",
+        "00:22:39.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0022",
+          "timestamp": "00:21:46.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0022_00h21m46s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0065",
+          "timestamp": "00:22:39.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0065_00h22m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deriva la identidad desde la hospitalización autorizada y la presenta en solo lectura.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openClinicalProfileForm/createClinicalProfile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q001",
+        "CH09-Q003",
+        "CH09-Q004"
+      ],
+      "requirement_id": "CH09-R007",
+      "event_ids": [
+        "CH09-E0023",
+        "CH09-E0040",
+        "CH09-E0054"
+      ],
+      "feature_group": "profile_fields",
+      "page": "Detalles de Hospitalización",
+      "control_type": "form",
+      "visible_label": "Diagnóstico / grupo / triage / perfil / tipo / responsables / frecuencias / servicio",
+      "expected_behavior": "Captura y valida los campos observados como valores documentados; obligatoriedad y catálogos oficiales permanecen configurables.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:21:46.800",
+        "00:22:18.200",
+        "00:22:33.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0023",
+          "timestamp": "00:21:46.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0023_00h21m46s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0040",
+          "timestamp": "00:22:18.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0040_00h22m18s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0054",
+          "timestamp": "00:22:33.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0054_00h22m33s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura y valida los campos observados como valores documentados; obligatoriedad y catálogos oficiales permanecen configurables.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openClinicalProfileForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q001"
+      ],
+      "requirement_id": "CH09-R008",
+      "event_ids": [
+        "CH09-E0027",
+        "CH09-E0038"
+      ],
+      "feature_group": "diagnosis_catalog",
+      "page": "Detalles de Hospitalización",
+      "control_type": "autocomplete",
+      "visible_label": "Diagnóstico clínico codificado",
+      "expected_behavior": "No copia un catálogo clínico incompleto del video; captura código y descripción documentados hasta confirmar terminología, edición, fuente y actualización.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:21:50.600",
+        "00:22:10.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0027",
+          "timestamp": "00:21:50.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0027_00h21m50s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0027_00h21m50s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0038",
+          "timestamp": "00:22:10.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0038_00h22m10s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0038_00h22m10s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No copia un catálogo clínico incompleto del video; captura código y descripción documentados hasta confirmar terminología, edición, fuente y actualización.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "doctorOptions/createClinicalProfile/create_clinical_profile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R009",
+      "event_ids": [
+        "CH09-E0022",
+        "CH09-E0064"
+      ],
+      "feature_group": "profile_doctors",
+      "page": "Detalles de Hospitalización",
+      "control_type": "select",
+      "visible_label": "Médico tratante / Otros médicos / Coordinador clínico",
+      "expected_behavior": "Limita referencias a profesionales activos de la organización y persiste médicos adicionales sin cruce de tenant.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:46.000",
+        "00:22:38.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0022",
+          "timestamp": "00:21:46.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0022_00h21m46s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0064",
+          "timestamp": "00:22:38.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0064_00h22m38s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Limita referencias a profesionales activos de la organización y persiste médicos adicionales sin cruce de tenant.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "clinicalDeviceRow/createClinicalProfile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R010",
+      "event_ids": [
+        "CH09-E0055",
+        "CH09-E0058"
+      ],
+      "feature_group": "profile_devices",
+      "page": "Detalles de Hospitalización",
+      "control_type": "structured_table",
+      "visible_label": "Dispositivo / Fecha / Calibre / Motivo / Frecuencia / Observaciones",
+      "expected_behavior": "Agrega hasta 50 dispositivos estructurados, valida fechas y los conserva dentro del perfil append-only.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:33.800",
+        "00:22:35.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0055",
+          "timestamp": "00:22:33.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0055_00h22m33s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0058",
+          "timestamp": "00:22:35.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0058_00h22m35s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Agrega hasta 50 dispositivos estructurados, valida fechas y los conserva dentro del perfil append-only.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "save-clinical-profile/createClinicalProfile/create_clinical_profile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R011",
+      "event_ids": [
+        "CH09-E0059",
+        "CH09-E0061"
+      ],
+      "feature_group": "shift_range",
+      "page": "Detalles de Hospitalización",
+      "control_type": "date_range",
+      "visible_label": "Rango de fechas para turnos / frecuencia / atención",
+      "expected_behavior": "Captura planificación sin crear turnos automáticamente y rechaza el rango invertido observado en el video.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:35.800",
+        "00:22:37.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0059",
+          "timestamp": "00:22:35.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0059_00h22m35s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0061",
+          "timestamp": "00:22:37.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0061_00h22m37s000ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0061_00h22m37s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura planificación sin crear turnos automáticamente y rechaza el rango invertido observado en el video.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openClinicalProfileForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q008"
+      ],
+      "requirement_id": "CH09-R012",
+      "event_ids": [
+        "CH09-E0022"
+      ],
+      "feature_group": "profile_attachments",
+      "page": "Detalles de Hospitalización",
+      "control_type": "attachment",
+      "visible_label": "Adjuntos",
+      "expected_behavior": "Mantiene el control visible y bloqueado hasta definir tipos, límites, acceso, almacenamiento y retención.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:21:46.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0022",
+          "timestamp": "00:21:46.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0022_00h21m46s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Mantiene el control visible y bloqueado hasta definir tipos, límites, acceso, almacenamiento y retención.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "createClinicalProfile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q002",
+        "CH09-Q003",
+        "CH09-Q010"
+      ],
+      "requirement_id": "CH09-R013",
+      "event_ids": [
+        "CH09-E0065",
+        "CH09-E0067"
+      ],
+      "feature_group": "profile_activation",
+      "page": "Perfiles Clínicos",
+      "control_type": "state_transition",
+      "visible_label": "Borrador / Activo / Finalizado",
+      "expected_behavior": "Crea únicamente borradores; activación, coexistencia, finalización y corrección requieren roles y transiciones confirmadas.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:22:39.000",
+        "00:22:42.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0065",
+          "timestamp": "00:22:39.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0065_00h22m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0067",
+          "timestamp": "00:22:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0067_00h22m42s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Crea únicamente borradores; activación, coexistencia, finalización y corrección requieren roles y transiciones confirmadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderHealthReports/health-report-page",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R014",
+      "event_ids": [
+        "CH09-E0070",
+        "CH09-E0075",
+        "CH09-E0094"
+      ],
+      "feature_group": "health_report_list",
+      "page": "Reporte de salud",
+      "control_type": "table",
+      "visible_label": "Cédula / Nombre / Empresa / Hospitalización / Período / Auditoría / Triage / Estatus",
+      "expected_behavior": "Lista reportes por hospitalización con búsqueda, paginación 10/25/50 e identidad clínica separada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:54.800",
+        "00:22:58.200",
+        "00:23:39.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0070",
+          "timestamp": "00:22:54.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0070_00h22m54s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0075",
+          "timestamp": "00:22:58.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0075_00h22m58s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0094",
+          "timestamp": "00:23:39.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0094_00h23m39s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0094_00h23m39s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista reportes por hospitalización con búsqueda, paginación 10/25/50 e identidad clínica separada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "healthReportMenu",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q006"
+      ],
+      "requirement_id": "CH09-R015",
+      "event_ids": [
+        "CH09-E0076",
+        "CH09-E0098"
+      ],
+      "feature_group": "health_report_actions",
+      "page": "Reporte de salud",
+      "control_type": "menu",
+      "visible_label": "Historia clínica / Claims / Visitas / Notas de servicio / Reporte de salud / Auditorías / Registro XPO",
+      "expected_behavior": "Abre el reporte de salud e historial disponible; las integraciones sin semántica o permisos confirmados permanecen visibles y bloqueadas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:23:01.600",
+        "00:23:43.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0076",
+          "timestamp": "00:23:01.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0076_00h23m01s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0076_00h23m01s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0098",
+          "timestamp": "00:23:43.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0098_00h23m43s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0098_00h23m43s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre el reporte de salud e historial disponible; las integraciones sin semántica o permisos confirmados permanecen visibles y bloqueadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "renderHealthReportDetail/openHealthReportRange/validateHealthReportRange/validate_health_report_range",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R016",
+      "event_ids": [
+        "CH09-E0078",
+        "CH09-E0085",
+        "CH09-E0104",
+        "CH09-E0113"
+      ],
+      "feature_group": "report_date_range",
+      "page": "Detalle reporte de salud",
+      "control_type": "date_range",
+      "visible_label": "Rango fechas / Cargar / Procesando",
+      "expected_behavior": "Valida inicio menor o igual a fin en cliente y servidor, muestra procesamiento y filtra las colecciones longitudinales al rango seleccionado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:23:08.800",
+        "00:23:31.000",
+        "00:23:47.800",
+        "00:24:06.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0078",
+          "timestamp": "00:23:08.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0078_00h23m08s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0085",
+          "timestamp": "00:23:31.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0085_00h23m31s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0085_00h23m31s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0104",
+          "timestamp": "00:23:47.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0104_00h23m47s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0104_00h23m47s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0113",
+          "timestamp": "00:24:06.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0113_00h24m06s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida inicio menor o igual a fin en cliente y servidor, muestra procesamiento y filtra las colecciones longitudinales al rango seleccionado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderHealthReportDetail/set-health-report-tab",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R017",
+      "event_ids": [
+        "CH09-E0078",
+        "CH09-E0089",
+        "CH09-E0112"
+      ],
+      "feature_group": "report_tabs",
+      "page": "Detalle reporte de salud",
+      "control_type": "tabs",
+      "visible_label": "Main / Evaluation / Medical / Treatments / Events / Evidence",
+      "expected_behavior": "Expone seis secciones equivalentes y conserva la pestaña activa al recalcular el reporte.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:23:08.800",
+        "00:23:34.800",
+        "00:24:06.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0078",
+          "timestamp": "00:23:08.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0078_00h23m08s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0089",
+          "timestamp": "00:23:34.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0089_00h23m34s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0112",
+          "timestamp": "00:24:06.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0112_00h24m06s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone seis secciones equivalentes y conserva la pestaña activa al recalcular el reporte.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "Información Principal",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderHealthReportDetail",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q004",
+        "CH09-Q005"
+      ],
+      "requirement_id": "CH09-R018",
+      "event_ids": [
+        "CH09-E0078",
+        "CH09-E0089"
+      ],
+      "feature_group": "report_main",
+      "page": "Detalle reporte de salud",
+      "control_type": "detail",
+      "visible_label": "Datos paciente / hospitalización / estado / seguro",
+      "expected_behavior": "Muestra datos derivados del caso y seguro autorizado sin fabricar pólizas, certificados o módulos faltantes.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:23:08.800",
+        "00:23:34.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0078",
+          "timestamp": "00:23:08.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0078_00h23m08s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0089",
+          "timestamp": "00:23:34.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0089_00h23m34s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra datos derivados del caso y seguro autorizado sin fabricar pólizas, certificados o módulos faltantes.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderHealthReportDetail",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R019",
+      "event_ids": [
+        "CH09-E0112",
+        "CH09-E0113"
+      ],
+      "feature_group": "report_clinical_sections",
+      "page": "Detalle reporte de salud",
+      "control_type": "longitudinal_sections",
+      "visible_label": "Evaluación / atención / órdenes / eventos / evidencia",
+      "expected_behavior": "Presenta perfil, dispositivos, signos vitales, atención, órdenes, medicamentos, eventos y documentos sólo desde registros existentes del caso y rango.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:24:06.000",
+        "00:24:06.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0112",
+          "timestamp": "00:24:06.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0112_00h24m06s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0113",
+          "timestamp": "00:24:06.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0113_00h24m06s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta perfil, dispositivos, signos vitales, atención, órdenes, medicamentos, eventos y documentos sólo desde registros existentes del caso y rango.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "renderHealthReportConfigModal",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q007",
+        "CH09-Q008"
+      ],
+      "requirement_id": "CH09-R020",
+      "event_ids": [
+        "CH09-E0114",
+        "CH09-E0126"
+      ],
+      "feature_group": "print_configuration",
+      "page": "Configuration report",
+      "control_type": "dual_list_order",
+      "visible_label": "Títulos disponibles / Reporte / Include attached documents",
+      "expected_behavior": "Permite añadir, quitar y reordenar secciones; adjuntos quedan bloqueados hasta confirmar políticas y secciones obligatorias.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:24:09.600",
+        "00:24:26.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0114",
+          "timestamp": "00:24:09.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0114_00h24m09s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0126",
+          "timestamp": "00:24:26.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0126_00h24m26s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0126_00h24m26s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Permite añadir, quitar y reordenar secciones; adjuntos quedan bloqueados hasta confirmar políticas y secciones obligatorias.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "HEALTH_REPORT_DEFAULT_SECTION_KEYS/healthReportSectionHtml",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R021",
+      "event_ids": [
+        "CH09-E0116",
+        "CH09-E0117"
+      ],
+      "feature_group": "print_default_sections",
+      "page": "Configuration report",
+      "control_type": "ordered_selection",
+      "visible_label": "Signos vitales / medicamentos / gráfico / condición / evidencias / recetas",
+      "expected_behavior": "Inicializa las seis secciones observadas en el orden mostrado y genera contenido sólo desde registros autorizados.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:24:10.800",
+        "00:24:11.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0116",
+          "timestamp": "00:24:10.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0116_00h24m10s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0116_00h24m10s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0117",
+          "timestamp": "00:24:11.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0117_00h24m11s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0117_00h24m11s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Inicializa las seis secciones observadas en el orden mostrado y genera contenido sólo desde registros autorizados.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js",
+      "current_implementation_function": "printConfiguredHealthReport/openPrintWindow",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q007",
+        "CH09-Q009"
+      ],
+      "requirement_id": "CH09-R022",
+      "event_ids": [
+        "CH09-E0125",
+        "CH09-E0127"
+      ],
+      "feature_group": "report_print",
+      "page": "Configuration report",
+      "control_type": "print",
+      "visible_label": "Cerrar / Imprimir",
+      "expected_behavior": "Imprime una vista estable en el orden configurado y no muestra la confirmación de salida errónea observada; plantilla, firma y validez legal permanecen pendientes.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:24:25.600",
+        "00:24:28.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0125",
+          "timestamp": "00:24:25.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0125_00h24m25s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0125_00h24m25s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0127",
+          "timestamp": "00:24:28.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0127_00h24m28s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Imprime una vista estable en el orden configurado y no muestra la confirmación de salida errónea observada; plantilla, firma y validez legal permanecen pendientes.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames",
+      "current_implementation_function": "NO_APLICA",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R023",
+      "event_ids": [
+        "CH09-E0127",
+        "CH09-E0130"
+      ],
+      "feature_group": "video_print_result",
+      "page": "Configuration report",
+      "control_type": "external_result",
+      "visible_label": "Resultado PDF del video",
+      "expected_behavior": "El video no demuestra un PDF: queda congelado y vuelve a configuración; el resultado exacto no puede validarse contra evidencia.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:24:28.000",
+        "00:27:13.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0127",
+          "timestamp": "00:24:28.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0127_00h24m28s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0130",
+          "timestamp": "00:27:13.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0130_00h27m13s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El video no demuestra un PDF: queda congelado y vuelve a configuración; el resultado exacto no puede validarse contra evidencia.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/supabase-adapter.js",
+      "current_implementation_function": "table/runSafely/bootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH09-Q005"
+      ],
+      "requirement_id": "CH09-R024",
+      "event_ids": [
+        "CH09-E0071",
+        "CH09-E0074",
+        "CH09-E0091",
+        "CH09-E0094",
+        "CH09-E0136",
+        "CH09-E0137"
+      ],
+      "feature_group": "report_states",
+      "page": "Reporte de salud",
+      "control_type": "state",
+      "visible_label": "Carga / poblado / vacío / error",
+      "expected_behavior": "Las tablas tienen estado vacío estable y la capa de ejecución presenta errores explícitos; la carga autoritativa de producción depende del adaptador.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:22:55.200",
+        "00:22:57.600",
+        "00:23:38.000",
+        "00:23:39.400",
+        "00:27:19.200",
+        "00:27:19.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0071",
+          "timestamp": "00:22:55.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0071_00h22m55s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0074",
+          "timestamp": "00:22:57.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0074_00h22m57s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0091",
+          "timestamp": "00:23:38.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0091_00h23m38s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0094",
+          "timestamp": "00:23:39.400",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0094_00h23m39s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0094_00h23m39s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0136",
+          "timestamp": "00:27:19.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0136_00h27m19s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0137",
+          "timestamp": "00:27:19.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0137_00h27m19s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0137_00h27m19s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Las tablas tienen estado vacío estable y la capa de ejecución presenta errores explícitos; la carga autoritativa de producción depende del adaptador.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/domain.js; app/main.js; app/store.js",
+      "current_implementation_function": "formatDate/createClinicalProfile/save-health-report-range",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/domain.test.mjs; tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-R025",
+      "event_ids": [
+        "CH09-E0059",
+        "CH09-E0109"
+      ],
+      "feature_group": "date_integrity",
+      "page": "Perfil y reporte",
+      "control_type": "validation",
+      "visible_label": "Fechas clínicas de calendario",
+      "expected_behavior": "Rechaza rangos invertidos y muestra el día elegido sin desplazamiento por zona horaria.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:35.800",
+        "00:24:03.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0059",
+          "timestamp": "00:22:35.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0059_00h22m35s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0109",
+          "timestamp": "00:24:03.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0109_00h24m03s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0109_00h24m03s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Rechaza rangos invertidos y muestra el día elegido sin desplazamiento por zona horaria.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "createClinicalProfile/create_clinical_profile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-H001",
+      "event_ids": [
+        "CH09-E0017",
+        "CH09-E0067"
+      ],
+      "feature_group": "profile_persistence",
+      "page": "Perfil clínico",
+      "control_type": "transaction",
+      "visible_label": "Creación remota-first, idempotente y auditable",
+      "expected_behavior": "Confirma la RPC antes de mutar el espejo local, serializa idempotencia y registra actor, organización, hospitalización y paciente.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:42.200",
+        "00:22:42.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0017",
+          "timestamp": "00:21:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0017_00h21m42s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0067",
+          "timestamp": "00:22:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0067_00h22m42s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirma la RPC antes de mutar el espejo local, serializa idempotencia y registra actor, organización, hospitalización y paciente.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "prevent_clinical_profile_mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-H002",
+      "event_ids": [
+        "CH09-E0067"
+      ],
+      "feature_group": "profile_immutability",
+      "page": "Perfil clínico",
+      "control_type": "clinical_integrity",
+      "visible_label": "Perfil append-only",
+      "expected_behavior": "Deniega update/delete directos mediante RLS, grants y trigger; las correcciones futuras deben crear nueva evidencia autorizada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:42.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0067",
+          "timestamp": "00:22:42.200",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0067_00h22m42s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deniega update/delete directos mediante RLS, grants y trigger; las correcciones futuras deben crear nueva evidencia autorizada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "createClinicalProfile/create_clinical_profile",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-H003",
+      "event_ids": [
+        "CH09-E0022",
+        "CH09-E0064"
+      ],
+      "feature_group": "tenant_references",
+      "page": "Perfil clínico",
+      "control_type": "authorization",
+      "visible_label": "Hospitalización y profesionales de la organización",
+      "expected_behavior": "Valida organización, permiso, hospitalización, paciente y cada profesional activo dentro del tenant.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:21:46.000",
+        "00:22:38.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0022",
+          "timestamp": "00:21:46.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0022_00h21m46s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0064",
+          "timestamp": "00:22:38.600",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0064_00h22m38s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida organización, permiso, hospitalización, paciente y cada profesional activo dentro del tenant.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; app/supabase-adapter.js; supabase/migrations/202608270005_ch09_clinical_profile_integrity.sql",
+      "current_implementation_function": "save-clinical-profile/createClinicalProfile/validateHealthReportRange/create_clinical_profile/validate_health_report_range",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs; tests/e2e/ch09.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-H004",
+      "event_ids": [
+        "CH09-E0059",
+        "CH09-E0109"
+      ],
+      "feature_group": "temporal_validation",
+      "page": "Perfil y reporte",
+      "control_type": "validation",
+      "visible_label": "Validación temporal cliente y servidor",
+      "expected_behavior": "Aplica start<=end en HTML, dominio, constraints SQL y RPC sin aceptar el defecto de rango del video.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:22:35.800",
+        "00:24:03.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0059",
+          "timestamp": "00:22:35.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0059_00h22m35s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0109",
+          "timestamp": "00:24:03.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0109_00h24m03s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0109_00h24m03s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Aplica start<=end en HTML, dominio, constraints SQL y RPC sin aceptar el defecto de rango del video.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH09",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js",
+      "current_implementation_function": "printConfiguredHealthReport/openPrintWindow",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch09-clinical-profile-report.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH09-H005",
+      "event_ids": [
+        "CH09-E0127",
+        "CH09-E0130"
+      ],
+      "feature_group": "safe_printing",
+      "page": "Reporte de salud",
+      "control_type": "safety_guard",
+      "visible_label": "Impresión sin mutación clínica",
+      "expected_behavior": "La impresión configura una vista derivada, no edita documentos firmados ni convierte el fallo del video en comportamiento productivo.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:24:28.000",
+        "00:27:13.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0127",
+          "timestamp": "00:24:28.000",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0127_00h24m28s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH09",
+          "event_id": "CH09-E0130",
+          "timestamp": "00:27:13.800",
+          "image": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0130_00h27m13s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "La impresión configura una vista derivada, no edita documentos firmados ni convierte el fallo del video en comportamiento productivo.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

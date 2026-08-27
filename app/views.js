@@ -909,6 +909,132 @@ function renderPaymentsTable(state,payments) {
     </div></details></td><td>${formatDate(payment.date,true)}</td><td>${esc(payment.receipt)}</td><td>${esc(patientName(state,payment.patientId))}</td><td>${esc(payment.method)}</td><td>${esc(payment.payer)}</td><td><code>${esc(payment.reference)}</code></td><td>${money(payment.amount)}</td><td>${badge(payment.status)}</td></tr>`),{compact:true}));
 }
 
+function renderClinicalHospitalizations(state, store, ui) {
+  const profiles = state.clinicalProfiles || [];
+  const query = String(ui.clinicalCaseSearch || "").trim().toLocaleLowerCase("es");
+  const latestByCase = profiles.reduce((map, profile) => {
+    const current = map.get(profile.caseId);
+    if (!current || String(profile.createdAt).localeCompare(String(current.createdAt)) > 0) map.set(profile.caseId, profile);
+    return map;
+  }, new Map());
+  const entries = state.cases.map((record) => ({
+    record,
+    patient: state.patients.find((candidate) => candidate.id === record.patientId),
+    profile: latestByCase.get(record.id)
+  })).filter(({record, patient, profile}) => {
+    const clinicalStatus = profile?.clinicalStatus || "PENDING";
+    return (!ui.clinicalStatus || clinicalStatus === ui.clinicalStatus)
+      && (!ui.clinicalServiceType || profile?.serviceType === ui.clinicalServiceType)
+      && (!ui.clinicalAttentionType || profile?.attentionType === ui.clinicalAttentionType)
+      && (!query || [record.id, patient?.document, patient?.fullName, patient?.company, profile?.triage]
+        .some((value) => String(value || "").toLocaleLowerCase("es").includes(query)));
+  });
+  const pageSize = Number(ui.clinicalPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.clinicalPage || 1)), totalPages);
+  const pageEntries = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const services = [...new Set(profiles.map((profile) => profile.serviceType).filter(Boolean))];
+  const attentionTypes = [...new Set(profiles.map((profile) => profile.attentionType).filter(Boolean))];
+  const clinicalStatusLabel = (status) => ({PENDING:"Pendiente",DRAFT:"Borrador",ACTIVE:"Activo",FINISHED:"Finalizado",VOIDED:"Anulado"})[status] || status;
+  const rows = pageEntries.map(({record, patient, profile}) => `<tr>
+    <td><details class="quote-row-menu"><summary aria-label="Acciones clínicas de ${esc(record.id)}">•••</summary><div class="quote-row-menu-panel">
+      <a href="#/hospitalizaciones/${esc(record.id)}">Ver cotizaciones</a>
+      <button data-action="open-clinical-profiles" data-case-id="${esc(record.id)}">Perfil clínico</button>
+      <a href="#/clinica/reportes/${esc(record.id)}">Documento</a>
+      <button disabled title="Requiere reglas clínicas aprobadas">Relevos</button>
+      <button disabled title="Requiere reglas clínicas aprobadas">Reingresos</button>
+      <button disabled title="Requiere reglas clínicas aprobadas">Reinfecciones</button>
+      <button disabled title="Requiere reglas clínicas aprobadas">Ulceraciones</button>
+      <button disabled title="Requiere reglas clínicas aprobadas">Near miss</button>
+    </div></details></td>
+    <td>${esc(patient?.fullName || "Paciente no encontrado")}</td><td>${esc(patient?.document || "—")}</td>
+    <td><a class="strong-link" href="#/hospitalizaciones/${esc(record.id)}">${esc(record.id)}</a></td>
+    <td>${badge(profile?.triage || "UNCLASSIFIED", profile?.triage || "No asignado")}</td><td>${esc(patient?.company || "Sin empresa")}</td>
+    <td>${badge(profile?.clinicalStatus || "PENDING", clinicalStatusLabel(profile?.clinicalStatus || "PENDING"))}</td>
+    <td>${formatDate(profile?.startDate || record.startDate)}</td><td>${profile?.endDate ? formatDate(profile.endDate) : "—"}</td>
+    <td>${daysBetween(profile?.startDate || record.startDate, profile?.endDate || new Date().toISOString())} días</td></tr>`);
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="clinical-page" data-page="${page}" class="${page === currentPage ? "active" : ""}">${page}</button>`).join("");
+  return `
+    ${pageHeader("Hospitalización clínica", "Activación y perfiles clínicos por hospitalización, sin inferir diagnóstico, triage ni frecuencia de atención.")}
+    <section class="relation-card"><header><strong>Relación de pacientes por empresa</strong><span>${state.cases.length}</span><button type="button" disabled title="La fórmula del agrupamiento requiere confirmación">+</button></header></section>
+    <div class="filter-panel">
+      <label>Estado clínico<select data-ui-filter="clinicalStatus"><option value="">Todos</option><option value="PENDING" ${ui.clinicalStatus === "PENDING" ? "selected" : ""}>Pendiente</option><option value="DRAFT" ${ui.clinicalStatus === "DRAFT" ? "selected" : ""}>Borrador</option><option value="ACTIVE" ${ui.clinicalStatus === "ACTIVE" ? "selected" : ""}>Activos</option><option value="FINISHED" ${ui.clinicalStatus === "FINISHED" ? "selected" : ""}>Finalizados</option></select></label>
+      <label>Activado por<input value="Personal autorizado" disabled title="El filtro por actor requiere catálogo de usuarios productivo"></label>
+      <label>Tipo de servicio<select data-ui-filter="clinicalServiceType"><option value="">Seleccione</option>${services.map((value) => `<option ${ui.clinicalServiceType === value ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
+      <label>Tipo de atención<select data-ui-filter="clinicalAttentionType"><option value="">Seleccione</option>${attentionTypes.map((value) => `<option ${ui.clinicalAttentionType === value ? "selected" : ""}>${esc(value)}</option>`).join("")}</select></label>
+      <div class="filter-actions"><button class="btn btn-primary" data-action="apply-clinical-filters">Aplicar</button><button class="btn btn-secondary" data-action="clear-clinical-filters">Limpiar</button></div>
+    </div>
+    ${card("Activos", `<div class="filter-bar"><label class="page-size-label">Registros <select data-ui-filter="clinicalPageSize">${[10,25,50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select></label><label class="search-field">${icon("search")}<input data-input="clinical-case-search" value="${esc(ui.clinicalCaseSearch || "")}" placeholder="Paciente, documento u hospitalización"></label></div>
+      ${table(["Acciones","Paciente","DUI/NIT","Hospitalización","Triage","Empresa","Clínico","Inicio","Fin","Duración"], rows)}
+      <nav class="pagination" aria-label="Paginación clínica"><button data-action="clinical-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="clinical-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)}
+  `;
+}
+
+function reportEntries(state) {
+  return state.cases.map((record) => {
+    const patient = state.patients.find((candidate) => candidate.id === record.patientId);
+    const profile = (state.clinicalProfiles || []).filter((candidate) => candidate.caseId === record.id)
+      .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)))[0];
+    const documents = state.clinicalDocuments.filter((document) => document.caseId === record.id && document.type === "HEALTH_REPORT");
+    return {record, patient, profile, documents};
+  });
+}
+
+function healthReportMenu(caseId) {
+  const blocked = "Requiere contrato clínico y permisos confirmados por el cliente.";
+  return `<details class="quote-row-menu"><summary aria-label="Acciones del reporte ${esc(caseId)}">•••</summary><div class="quote-row-menu-panel">
+    <a href="#/clinica/reportes/${esc(caseId)}">Historia clínica</a><button disabled title="${blocked}">Claims</button>
+    <button disabled title="${blocked}">Ver visitas</button><button disabled title="${blocked}">Notas de servicio</button>
+    <a href="#/clinica/reportes/${esc(caseId)}">Reporte de salud</a><button disabled title="${blocked}">Auditorías</button><button disabled title="${blocked}">Registro XPO</button>
+  </div></details>`;
+}
+
+function renderHealthReportDetail(state, store, ui, caseId) {
+  const entry = reportEntries(state).find((candidate) => candidate.record.id === caseId);
+  if (!entry) return notFound("Reporte de salud");
+  const {record, patient, profile} = entry;
+  const range = ui.healthReportRange?.caseId === caseId ? ui.healthReportRange : {caseId, start: profile?.startDate || record.startDate, end: profile?.endDate || record.endDate || new Date().toISOString().slice(0,10)};
+  const inRange = (value) => !value || ((!range.start || String(value).slice(0,10) >= range.start) && (!range.end || String(value).slice(0,10) <= range.end));
+  const vitals = state.vitalSigns.filter((item) => item.caseId === caseId && inRange(item.recordedAt));
+  const notes = state.nursingNotes.filter((item) => item.caseId === caseId && inRange(item.createdAt));
+  const documents = state.clinicalDocuments.filter((item) => item.caseId === caseId && inRange(item.createdAt));
+  const cards = state.medicationCards.filter((item) => item.caseId === caseId);
+  const activeTab = ui.healthReportTab || "main";
+  const tabs = [["main","Información Principal"],["assessment","Evaluación Clínica"],["care","Atención Médica"],["treatments","Tratamientos y Órdenes"],["events","Eventos Clínicos"],["evidence","Evidencia y Documentos"]];
+  let body = "";
+  if (activeTab === "assessment") {
+    body = `<div class="details-grid"><div><span>Diagnóstico documentado</span><strong>${esc(profile ? `${profile.diagnosisCode} · ${profile.diagnosisLabel}` : "Sin perfil clínico")}</strong></div><div><span>Grupo diagnóstico</span><strong>${esc(profile?.diagnosisGroup || "—")}</strong></div><div><span>Triage</span><strong>${esc(profile?.triage || "No asignado")}</strong></div><div><span>Grupo / subgrupo</span><strong>${esc([profile?.profileGroup, profile?.profileSubgroup].filter(Boolean).join(" · ") || "—")}</strong></div></div>
+      ${card("Dispositivos", table(["Dispositivo","Fecha","Calibre","Motivo","Frecuencia","Observaciones"], (profile?.devices || []).map((device) => `<tr><td>${esc(device.deviceType)}</td><td>${formatDate(device.date)}</td><td>${esc(device.gauge || "—")}</td><td>${esc(device.reason || "—")}</td><td>${esc(device.changeFrequency || "—")}</td><td>${esc(device.observations || "—")}</td></tr>`), {compact:true}))}
+      ${card("Tabla de signos vitales", table(["Fecha","TA","FC","FR","SpO₂","Temp","Dolor"], vitals.map((vital) => `<tr><td>${formatDate(vital.recordedAt,true)}</td><td>${vital.systolic}/${vital.diastolic}</td><td>${vital.heartRate}</td><td>${vital.respiratoryRate}</td><td>${vital.spo2}%</td><td>${vital.temperature} °C</td><td>${vital.pain}</td></tr>`), {compact:true}))}`;
+  } else if (activeTab === "care") {
+    body = `<div class="details-grid"><div><span>Médico tratante</span><strong>${esc(doctorName(state, profile?.treatingDoctorId))}</strong></div><div><span>Tipo de servicio</span><strong>${esc(profile?.serviceType || "—")}</strong></div><div><span>Frecuencia de supervisión</span><strong>${esc(profile?.supervisionFrequency || "No configurada")}</strong></div><div><span>Reporte al médico</span><strong>${esc(profile?.physicianReportFrequency || "No configurado")}</strong></div><div><span>Rango para turnos</span><strong>${esc(profile?.shiftStartDate || "—")} → ${esc(profile?.shiftEndDate || "—")}</strong></div><div><span>Frecuencia / atención</span><strong>${esc([profile?.shiftFrequency, profile?.attentionType].filter(Boolean).join(" · ") || "No configurada")}</strong></div></div>`;
+  } else if (activeTab === "treatments") {
+    body = `${card("Órdenes", table(["Documento","Autor","Fecha","Estado"], documents.filter((document) => ["MEDICAL_ORDER","LAB_REQUEST"].includes(document.type)).map((document) => `<tr><td>${esc(document.title)}</td><td>${esc(document.authorName)}</td><td>${formatDate(document.createdAt,true)}</td><td>${badge(document.status)}</td></tr>`), {compact:true}))}${card("Tarjeta de medicamentos", table(["Tarjeta","Ítems","Creación","Estado"], cards.map((item) => `<tr><td>${esc(item.id)}</td><td>${item.items?.length || 0}</td><td>${formatDate(item.createdAt,true)}</td><td>${badge(item.documentStatus || item.status)}</td></tr>`), {compact:true}))}`;
+  } else if (activeTab === "events") {
+    const events = [...vitals.map((item) => ({date:item.recordedAt,type:"Signos vitales",author:item.authorName,status:"RECORDED"})), ...notes.map((item) => ({date:item.createdAt,type:"Nota de enfermería",author:item.authorName,status:item.status}))].sort((left,right)=>String(right.date).localeCompare(String(left.date)));
+    body = card("Eventos clínicos", table(["Fecha","Tipo","Autor","Estado"], events.map((item) => `<tr><td>${formatDate(item.date,true)}</td><td>${esc(item.type)}</td><td>${esc(item.author)}</td><td>${badge(item.status)}</td></tr>`), {compact:true}));
+  } else if (activeTab === "evidence") {
+    body = `${card("Evidencia y documentos", table(["Documento","Tipo","Autor","Versión","Estado"], documents.map((document) => `<tr><td><button class="row-action" data-action="view-document" data-id="${esc(document.id)}">${esc(document.title)}</button></td><td>${esc(DOC_TYPE_LABELS[document.type] || document.type)}</td><td>${esc(document.authorName)}</td><td>v${document.version}</td><td>${badge(document.status)}</td></tr>`), {compact:true}))}<div class="info-callout">Los adjuntos permanecen deshabilitados hasta definir almacenamiento, tipos, límites, retención y acceso.</div>`;
+  } else {
+    const insurer = state.insurers.find((candidate) => candidate.id === record.insurerId);
+    body = `<div class="details-grid"><div><span>Paciente</span><strong>${esc(patient?.fullName)}</strong></div><div><span>Cédula</span><strong>${esc(patient?.document)}</strong></div><div><span>Fecha de nacimiento</span><strong>${formatDate(patient?.birthDate)}</strong></div><div><span>Edad</span><strong>${patient?.birthDate ? `${ageFromBirthDate(patient.birthDate)} años` : "—"}</strong></div><div><span>Sexo</span><strong>${esc(patient?.sex || "—")}</strong></div><div><span>Período de hospitalización</span><strong>${formatDate(record.startDate)} → ${record.endDate ? formatDate(record.endDate) : "actual"}</strong></div><div><span>Estado</span><strong>${esc(profile?.clinicalStatus || "Pendiente")}</strong></div><div><span>Tipo de paciente</span><strong>${esc(profile?.patientType || "—")}</strong></div><div><span>Tipo de módulo</span><strong>Catálogo pendiente</strong></div><div><span>Adicional</span><strong>—</strong></div></div>${card("Seguros del paciente", table(["Imprimir","Seguro","Póliza","Certificado","Fecha efectiva","Titular","DUI/NIT"], insurer ? [`<tr><td>—</td><td>${esc(insurer.name)}</td><td>—</td><td>—</td><td>—</td><td>${esc(patient?.isPolicyHolder === true ? patient.fullName : "Titular no confirmado")}</td><td>${esc(patient?.isPolicyHolder === true ? patient.document : "—")}</td></tr>`] : [], {compact:true}))}`;
+  }
+  return `${pageHeader(`Reporte de salud del ${formatDate(range.start)} al ${formatDate(range.end)}`, "Vista longitudinal calculada desde registros autorizados; no modifica documentos firmados.", `${actionButton("Cambiar rango de fechas","change-health-report-range",{iconName:"clock",data:`data-case-id="${esc(caseId)}"`})}${actionButton("Imprimir","open-health-report-config",{kind:"primary",iconName:"print",data:`data-case-id="${esc(caseId)}"`})}${linkButton("Salir","#/clinica/reportes",{kind:"danger"})}`)}<div class="report-selector"><label>Reporte de salud del <select><option>${esc(caseId)} | ${formatDate(record.startDate)}</option></select></label></div><nav class="tabs report-tabs">${tabs.map(([key,label]) => `<button class="tab ${activeTab === key ? "active" : ""}" data-action="set-health-report-tab" data-tab="${key}">${esc(label)}</button>`).join("")}</nav>${body}`;
+}
+
+function renderHealthReports(state, store, ui, caseId = "") {
+  if (caseId) return renderHealthReportDetail(state, store, ui, caseId);
+  const query = String(ui.healthReportSearch || "").trim().toLocaleLowerCase("es");
+  const entries = reportEntries(state).filter(({record,patient}) => !query || [record.id,patient?.document,patient?.fullName,patient?.company].some((value) => String(value || "").toLocaleLowerCase("es").includes(query)));
+  const pageSize = Number(ui.healthReportPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.healthReportPage || 1)), totalPages);
+  const pageEntries = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="health-report-page" data-page="${page}" class="${page === currentPage ? "active" : ""}">${page}</button>`).join("");
+  const statusLabel = (status) => ({PENDING:"Pendiente",DRAFT:"Borrador",ACTIVE:"Activo",FINISHED:"Finalizado",VOIDED:"Anulado"})[status] || status;
+  return `${pageHeader("Reporte de salud", "Expedientes longitudinales por hospitalización con selección de rango y configuración segura de impresión.")}<div class="filter-bar"><label class="page-size-label">Registros <select data-ui-filter="healthReportPageSize">${[10,25,50].map((size) => `<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select></label><label class="search-field">${icon("search")}<input data-input="health-report-search" value="${esc(ui.healthReportSearch || "")}" placeholder="Paciente, cédula u hospitalización"></label></div>${card("Reportes de salud", `${table(["","Cédula","Nombre","Empresa","Hospitalización","Período","Auditoría","Triage","Estatus"], pageEntries.map(({record,patient,profile}) => `<tr><td>${healthReportMenu(record.id)}</td><td>${esc(patient?.document)}</td><td>${esc(patient?.fullName)}</td><td>${esc(patient?.company || "—")}</td><td><a href="#/clinica/reportes/${esc(record.id)}">${esc(record.id)}</a></td><td>${formatDate(profile?.startDate || record.startDate)} al ${profile?.endDate ? formatDate(profile.endDate) : "actual"}</td><td>Sin auditoría</td><td>${badge(profile?.triage || "UNCLASSIFIED", profile?.triage || "No asignado")}</td><td>${badge(profile?.clinicalStatus || "PENDING", statusLabel(profile?.clinicalStatus || "PENDING"))}</td></tr>`))}<nav class="pagination" aria-label="Paginación de reportes"><button data-action="health-report-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="health-report-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)}`;
+}
+
 function renderClinicalHome(state, store, ui) {
   const signed=state.clinicalDocuments.filter((d)=>d.status==="SIGNED").length;
   const openCards=state.medicationCards.filter((c)=>c.status==="ACTIVE").length;
@@ -1367,7 +1493,8 @@ export function renderRoute(route,state,store,ui){
     case "clinica": {
       const sub=parts[1];
       if(!sub) return renderClinicalHome(state,store,ui);
-      if(sub==="reportes") return renderClinicalDocuments(state,store,ui,"HEALTH_REPORT");
+      if(sub==="hospitalizaciones") return renderClinicalHospitalizations(state,store,ui);
+      if(sub==="reportes") return renderHealthReports(state,store,ui,parts[2]);
       if(sub==="ordenes") return renderClinicalDocuments(state,store,ui,"MEDICAL_ORDER");
       if(sub==="medicamentos") return renderMedicationCards(state,store,ui);
       if(sub==="planes-de-cuidado") return renderClinicalDocuments(state,store,ui,"CARE_PLAN");
@@ -1419,8 +1546,8 @@ export const navigation = [
     {href:"#/compras",label:"Compras",icon:"purchases",permission:"purchases:read"}
   ]},
   {section:"Clínica",items:[
-    {href:"#/clinica",label:"Expediente clínico",icon:"clinical",permission:"clinical:read"},
-    {href:"#/clinica/reportes",label:"Reportes de salud",icon:"file",permission:"clinical:read"},
+    {href:"#/clinica/hospitalizaciones",label:"Hospitalización clínica",icon:"clinical",permission:"clinical:read"},
+    {href:"#/clinica/reportes",label:"Reporte de salud",icon:"file",permission:"clinical:read"},
     {href:"#/clinica/ordenes",label:"Órdenes médicas",icon:"file",permission:"clinical:read"},
     {href:"#/clinica/medicamentos",label:"Tarjeta de medicamentos",icon:"clinical",permission:"clinical:read"},
     {href:"#/clinica/planes-de-cuidado",label:"Planes de cuidado",icon:"file",permission:"clinical:read"},

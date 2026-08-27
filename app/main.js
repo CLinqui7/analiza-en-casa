@@ -62,6 +62,18 @@ const ui = {
   receivablesPageSize: 10,
   receivablesSortKey: "startDate",
   receivablesSortDirection: "desc",
+  clinicalCaseSearch: "",
+  clinicalStatus: "",
+  clinicalServiceType: "",
+  clinicalAttentionType: "",
+  clinicalPage: 1,
+  clinicalPageSize: 10,
+  healthReportSearch: "",
+  healthReportPage: 1,
+  healthReportPageSize: 10,
+  healthReportTab: "main",
+  healthReportRange: null,
+  healthReportConfig: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -184,6 +196,8 @@ const ACTION_PERMISSIONS = {
   "save-reverse-payment": "payments:write",
   "open-administrative-execution": "cases:write",
   "save-administrative-execution": "cases:write",
+  "open-clinical-profile-form": "clinical:write",
+  "save-clinical-profile": "clinical:write",
   "send-quote": "quotes:write",
   "send-quote-whatsapp": "quotes:write",
   "quote-add-item": "quotes:write",
@@ -720,6 +734,153 @@ function openAdministrativeExecution(quoteId) {
 
 function paymentRowsForCase(caseId) {
   return store.getState().payments.filter((payment) => payment.caseId === caseId || store.getState().quotes.some((quote) => quote.id === payment.quoteId && quote.caseId === caseId));
+}
+
+function clinicalDeviceRow(index = 0) {
+  return `<fieldset class="form-section full clinical-device-row" data-device-index="${index}"><legend>Dispositivo ${index + 1}</legend><div class="form-grid">
+    <label>Dispositivo<input name="deviceType" placeholder="Catálogo configurable"></label><label>Fecha<input type="date" name="deviceDate"></label>
+    <label>Calibre<input name="deviceGauge"></label><label>Motivo<input name="deviceReason"></label>
+    <label>Frecuencia de cambio<input name="deviceFrequency" placeholder="Valor documentado"></label><label>Observaciones<input name="deviceObservations"></label>
+  </div></fieldset>`;
+}
+
+function openClinicalProfiles(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId);
+  if (!record) return showToast("Hospitalización no encontrada.", "danger");
+  const profiles = (state.clinicalProfiles || []).filter((candidate) => candidate.caseId === caseId)
+    .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)));
+  openModal({
+    title: "Perfiles Clínicos",
+    subtitle: `${caseId} · historial append-only`,
+    size: "xl",
+    body: `<div class="action-strip"><button class="btn btn-primary" data-action="open-clinical-profile-form" data-case-id="${safeText(caseId)}">+ Nuevo perfil clínico</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Acc.</th><th>Fecha de inicio</th><th>Triage</th><th>Médico tratante</th><th>Tipo de servicio</th><th>Estatus</th><th>Fecha fin</th></tr></thead><tbody>${profiles.map((profile) => {
+        const doctor = state.doctors.find((candidate) => candidate.id === profile.treatingDoctorId);
+        return `<tr><td>—</td><td>${new Date(`${profile.startDate}T12:00:00Z`).toLocaleDateString("es-SV")}</td><td>${safeText(profile.triage)}</td><td>${safeText(doctor?.name || "No asignado")}</td><td>${safeText(profile.serviceType)}</td><td>${safeText(profile.clinicalStatus)}</td><td>${profile.endDate ? new Date(`${profile.endDate}T12:00:00Z`).toLocaleDateString("es-SV") : "—"}</td></tr>`;
+      }).join("") || `<tr><td colspan="7">Ningún perfil clínico registrado.</td></tr>`}</tbody></table></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function openClinicalProfileForm(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId);
+  const patient = record && store.patientById(record.patientId);
+  if (!record || !patient) return showToast("No fue posible abrir el perfil clínico.", "danger");
+  const today = new Date().toISOString().slice(0,10);
+  openModal({
+    title: "Detalles de Hospitalización",
+    subtitle: "Nuevo perfil clínico en borrador · la activación requiere política confirmada",
+    size: "xl",
+    body: `<form id="clinical-profile-form" class="form-grid">
+      <input type="hidden" name="caseId" value="${safeText(caseId)}"><input type="hidden" name="idempotencyKey" value="${safeText(uid("CLINICAL-PROFILE"))}">
+      <label>Paciente<input value="${safeText(patient.fullName)}" disabled></label><label>DUI/NIT<input value="${safeText(patient.document)}" disabled></label>
+      <label>Hospitalización<input value="${safeText(caseId)}" disabled></label><label>Estatus<input value="Borrador" disabled></label>
+      <div class="form-section full"><h3>Perfil clínico de Hospitalización</h3><nav class="tabs"><button type="button" class="tab active">Perfil clínico</button><button type="button" class="tab" disabled title="Requiere umbrales clínicos aprobados">Alertas de signos vitales</button></nav></div>
+      <label>Fecha inicio<input type="date" name="startDate" value="${safeText(record.startDate || today)}" required></label><label>Fecha fin<input type="date" name="endDate"></label>
+      <label class="full">Adjuntos<button type="button" class="btn btn-secondary" disabled title="Faltan reglas de almacenamiento, tipos, límites y retención">Adjuntar archivos</button></label>
+      <label>Médico tratante<select name="treatingDoctorId"><option value="">Seleccione</option>${doctorOptions(record.contractingDoctorId)}</select></label>
+      <label>Otros médicos tratantes<select name="otherDoctorIds" multiple>${doctorOptions()}</select></label>
+      <label>Diagnóstico · código<input name="diagnosisCode" placeholder="Catálogo oficial pendiente" maxlength="80" required></label>
+      <label>Diagnóstico · descripción<input name="diagnosisLabel" placeholder="Descripción documentada por el profesional" maxlength="500" required></label>
+      <label>Grupo Diagnóstico<input name="diagnosisGroup" placeholder="Catálogo configurable" required></label><label>Triage<input name="triage" placeholder="Clasificación documentada" required></label>
+      <label>Grupo perfil del paciente<input name="profileGroup" placeholder="Catálogo configurable" required></label><label>Subgrupo perfil paciente<input name="profileSubgroup" placeholder="Catálogo configurable" required></label>
+      <label>Tipo de paciente<input name="patientType" placeholder="Catálogo configurable" required></label><label>Supervisor encargado<input name="supervisorName"></label>
+      <label>Coordinador clínico<select name="coordinatorId"><option value="">Seleccione</option>${doctorOptions()}</select></label><label>Tags de enfermería<input name="nursingTags"></label>
+      <label>Frecuencia de visita de supervisión<input name="supervisionFrequency" placeholder="Valor documentado"></label><label>Frecuencia de reporte al médico<input name="physicianReportFrequency" placeholder="Valor documentado"></label>
+      <label class="full">Tipo de servicio<input name="serviceType" placeholder="Catálogo configurable" required></label>
+      <div class="form-section full"><h3>Dispositivos</h3><p>Se registran como datos suministrados; no se derivan frecuencias ni indicaciones.</p><div id="clinical-device-list">${clinicalDeviceRow(0)}</div><button type="button" class="btn btn-secondary" data-action="add-clinical-device-row">+ Agregar dispositivo a lista</button></div>
+      <div class="form-section full"><h3>Planificación de turnos</h3><p>Guardar estos campos no genera turnos automáticamente.</p></div>
+      <label>Rango de fechas para turnos · inicio<input type="date" name="shiftStartDate"></label><label>Fin<input type="date" name="shiftEndDate"></label>
+      <label>Frecuencia<input name="shiftFrequency" placeholder="Catálogo configurable"></label><label>Tipo de atención<input name="attentionType" placeholder="Catálogo configurable"></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-clinical-profile">Guardar borrador</button>`
+  });
+}
+
+const HEALTH_REPORT_SECTIONS = [
+  ["vitals", "Tabla de Signos Vitales"],
+  ["medication", "Tarjeta de medicamentos"],
+  ["vitals-chart", "Gráfico Signos Vitales"],
+  ["condition-notes", "Notas condición paciente"],
+  ["evidence", "Evidencias"],
+  ["prescriptions", "Recetas Adjuntas/Digitales"],
+  ["handoffs", "Bitácora de Entrega de turno"],
+  ["medical-visits", "Visitas Médicas de Seguimiento Clínico"],
+  ["nursing", "Notas de enfermería con firma y sello"],
+  ["orders", "Órdenes médicas"],
+  ["care", "Registro y cuidados diarios"],
+  ["assessments", "Evaluaciones de enfermería"]
+];
+const HEALTH_REPORT_DEFAULT_SECTION_KEYS = HEALTH_REPORT_SECTIONS.slice(0, 6).map(([key]) => key);
+
+function openHealthReportRange(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId);
+  if (!record) return showToast("Hospitalización no encontrada.", "danger");
+  const profile = (state.clinicalProfiles || []).filter((candidate) => candidate.caseId === caseId)
+    .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)))[0];
+  const current = ui.healthReportRange?.caseId === caseId ? ui.healthReportRange : null;
+  openModal({
+    title: "Rango fechas",
+    subtitle: "El reporte se calcula sólo con registros del período seleccionado.",
+    body: `<form id="health-report-range-form" class="form-grid"><input type="hidden" name="caseId" value="${safeText(caseId)}">
+      <label>Fecha de inicio<input type="date" name="start" value="${safeText(current?.start || profile?.startDate || record.startDate || "")}" required></label>
+      <label>Fecha de fin<input type="date" name="end" value="${safeText(current?.end || profile?.endDate || record.endDate || new Date().toISOString().slice(0,10))}" required></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Salir</button><button class="btn btn-primary" data-action="save-health-report-range">Cargar</button>`
+  });
+}
+
+function ensureHealthReportConfig(caseId) {
+  if (ui.healthReportConfig?.caseId !== caseId) {
+    ui.healthReportConfig = {caseId, selected: [...HEALTH_REPORT_DEFAULT_SECTION_KEYS], includeAttachments: false};
+  }
+  return ui.healthReportConfig;
+}
+
+function renderHealthReportConfigModal(caseId) {
+  const config = ensureHealthReportConfig(caseId);
+  const selected = new Set(config.selected);
+  const titleByKey = Object.fromEntries(HEALTH_REPORT_SECTIONS);
+  openModal({
+    title: "Configuration report",
+    subtitle: "Selecciona y ordena los títulos que aparecerán en el reporte.",
+    size: "xl",
+    body: `<div class="report-config-grid">
+      <section class="card"><header class="card-header"><h3>Títulos disponibles</h3></header><div class="card-body">${HEALTH_REPORT_SECTIONS.filter(([key]) => !selected.has(key)).map(([key, title]) => `<div class="list-row"><span>${safeText(title)}</span><button class="btn btn-secondary" data-action="health-report-config-add" data-case-id="${safeText(caseId)}" data-section="${safeText(key)}">Añadir</button></div>`).join("") || "<p>Todos los títulos están incluidos.</p>"}</div></section>
+      <section class="card"><header class="card-header"><h3>Reporte</h3><p>Orden de impresión</p></header><div class="card-body">${config.selected.map((key, index) => `<div class="list-row"><span>${index + 1}. ${safeText(titleByKey[key] || key)}</span><span><button class="btn btn-secondary" data-action="health-report-config-up" data-case-id="${safeText(caseId)}" data-section="${safeText(key)}" ${index === 0 ? "disabled" : ""} aria-label="Subir ${safeText(titleByKey[key] || key)}">↑</button><button class="btn btn-secondary" data-action="health-report-config-down" data-case-id="${safeText(caseId)}" data-section="${safeText(key)}" ${index === config.selected.length - 1 ? "disabled" : ""} aria-label="Bajar ${safeText(titleByKey[key] || key)}">↓</button><button class="btn btn-secondary" data-action="health-report-config-remove" data-case-id="${safeText(caseId)}" data-section="${safeText(key)}">Quitar</button></span></div>`).join("") || "<p>Selecciona al menos un título.</p>"}</div></section>
+    </div><label class="checkbox-label"><input type="checkbox" disabled title="Faltan políticas de adjuntos, acceso y retención"> Include attached documents <small>pendiente de política del cliente</small></label>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="print-health-report-config" data-case-id="${safeText(caseId)}" ${config.selected.length ? "" : "disabled"}>Imprimir</button>`
+  });
+}
+
+function healthReportSectionHtml(key, context) {
+  const {state, record, patient, profile, range} = context;
+  const inRange = (value) => !value || ((!range.start || String(value).slice(0,10) >= range.start) && (!range.end || String(value).slice(0,10) <= range.end));
+  const rows = (headers, values) => `<table><thead><tr>${headers.map((value) => `<th>${safeText(value)}</th>`).join("")}</tr></thead><tbody>${values.join("") || `<tr><td colspan="${headers.length}">Sin registros en el período seleccionado.</td></tr>`}</tbody></table>`;
+  if (key === "vitals") return rows(["Fecha","TA","FC","FR","SpO₂","Temp","Dolor"], state.vitalSigns.filter((item) => item.caseId === record.id && inRange(item.recordedAt)).map((item) => `<tr><td>${safeText(new Date(item.recordedAt).toLocaleString("es-SV"))}</td><td>${safeText(`${item.systolic}/${item.diastolic}`)}</td><td>${safeText(item.heartRate)}</td><td>${safeText(item.respiratoryRate)}</td><td>${safeText(item.spo2)}%</td><td>${safeText(item.temperature)}</td><td>${safeText(item.pain)}</td></tr>`));
+  if (key === "medication") return rows(["Tarjeta","Medicamentos","Estado"], state.medicationCards.filter((item) => item.caseId === record.id).map((item) => `<tr><td>${safeText(item.id)}</td><td>${safeText((item.items || []).map((entry) => entry.medication).join(", "))}</td><td>${safeText(item.documentStatus || item.status)}</td></tr>`));
+  if (key === "condition-notes" || key === "nursing" || key === "care") return rows(["Fecha","Autor","Estado","Registro"], state.nursingNotes.filter((item) => item.caseId === record.id && inRange(item.createdAt)).map((item) => `<tr><td>${safeText(new Date(item.createdAt).toLocaleString("es-SV"))}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.status)}</td><td>${safeText(item.text)}</td></tr>`));
+  if (["evidence","prescriptions","orders","assessments","medical-visits","handoffs"].includes(key)) return rows(["Documento","Tipo","Autor","Versión","Estado"], state.clinicalDocuments.filter((item) => item.caseId === record.id && inRange(item.createdAt)).map((item) => `<tr><td>${safeText(item.title)}</td><td>${safeText(item.type)}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.version)}</td><td>${safeText(item.status)}</td></tr>`));
+  if (key === "vitals-chart") return `<p>La tabla de signos vitales es la fuente autoritativa. La visualización gráfica no infiere umbrales clínicos.</p>`;
+  return `<p>Sin registros para ${safeText(patient?.fullName || record.id)}.</p>`;
+}
+
+function printConfiguredHealthReport(caseId) {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId);
+  const patient = record && state.patients.find((candidate) => candidate.id === record.patientId);
+  if (!record || !patient) throw new Error("Reporte no disponible.");
+  const profile = (state.clinicalProfiles || []).filter((candidate) => candidate.caseId === caseId)
+    .sort((left, right) => String(right.createdAt).localeCompare(String(left.createdAt)))[0];
+  const range = ui.healthReportRange?.caseId === caseId ? ui.healthReportRange : {start: profile?.startDate || record.startDate, end: profile?.endDate || record.endDate || new Date().toISOString().slice(0,10)};
+  const config = ensureHealthReportConfig(caseId);
+  const titleByKey = Object.fromEntries(HEALTH_REPORT_SECTIONS);
+  const sections = config.selected.map((key) => `<section><h2>${safeText(titleByKey[key] || key)}</h2>${healthReportSectionHtml(key, {state, record, patient, profile, range})}</section>`).join("");
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte de salud ${safeText(caseId)}</title><style>body{font:14px Arial,sans-serif;color:#17202a;margin:32px}header{border-bottom:2px solid #0b6b63;margin-bottom:24px}h1{font-size:24px}h2{font-size:17px;margin-top:28px}table{width:100%;border-collapse:collapse}th,td{padding:7px;border:1px solid #ccd5d9;text-align:left;vertical-align:top}small{color:#52606d}@media print{body{margin:12mm}section{break-inside:avoid}}</style></head><body><header><h1>Reporte de salud</h1><p><strong>${safeText(patient.fullName)}</strong> · ${safeText(caseId)}</p><p>Período: ${safeText(range.start)} al ${safeText(range.end)}</p><small>Documento generado desde registros autorizados. No sustituye documentos clínicos firmados.</small></header>${sections}</body></html>`;
+  openPrintWindow(html, `Reporte de salud ${caseId}`);
 }
 
 function openReceivableQuotes(caseId) {
@@ -1522,6 +1683,51 @@ document.addEventListener("click", async (event) => {
     case "quote-remove-item": syncQuoteHead(); ui.quoteDraft?.items.splice(Number(data.index),1); renderQuoteModal(); break;
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
     case "open-administrative-execution": openAdministrativeExecution(data.id || ""); break;
+    case "open-clinical-profiles": openClinicalProfiles(data.caseId || ""); break;
+    case "open-clinical-profile-form": openClinicalProfileForm(data.caseId || ""); break;
+    case "add-clinical-device-row": {
+      const list = document.querySelector("#clinical-device-list");
+      if (list && list.children.length < 50) list.insertAdjacentHTML("beforeend", clinicalDeviceRow(list.children.length));
+      break;
+    }
+    case "clinical-page": ui.clinicalPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "apply-clinical-filters": ui.clinicalPage = 1; render(); break;
+    case "clear-clinical-filters": {
+      ui.clinicalStatus = "";
+      ui.clinicalServiceType = "";
+      ui.clinicalAttentionType = "";
+      ui.clinicalPage = 1;
+      render();
+      break;
+    }
+    case "set-health-report-tab": ui.healthReportTab = data.tab || "main"; render(); break;
+    case "health-report-page": ui.healthReportPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "change-health-report-range": openHealthReportRange(data.caseId || ""); break;
+    case "open-health-report-config": renderHealthReportConfigModal(data.caseId || ""); break;
+    case "health-report-config-add": {
+      const config = ensureHealthReportConfig(data.caseId || "");
+      if (!config.selected.includes(data.section)) config.selected.push(data.section);
+      renderHealthReportConfigModal(data.caseId || "");
+      break;
+    }
+    case "health-report-config-remove": {
+      const config = ensureHealthReportConfig(data.caseId || "");
+      config.selected = config.selected.filter((key) => key !== data.section);
+      renderHealthReportConfigModal(data.caseId || "");
+      break;
+    }
+    case "health-report-config-up":
+    case "health-report-config-down": {
+      const config = ensureHealthReportConfig(data.caseId || "");
+      const index = config.selected.indexOf(data.section);
+      const nextIndex = action === "health-report-config-up" ? index - 1 : index + 1;
+      if (index >= 0 && nextIndex >= 0 && nextIndex < config.selected.length) {
+        [config.selected[index], config.selected[nextIndex]] = [config.selected[nextIndex], config.selected[index]];
+      }
+      renderHealthReportConfigModal(data.caseId || "");
+      break;
+    }
+    case "print-health-report-config": runSafely(() => printConfiguredHealthReport(data.caseId || "")); break;
     case "open-payment-form": openPaymentForm(data.quoteId || ""); break;
     case "open-receivable-quotes": openReceivableQuotes(data.caseId || ""); break;
     case "open-account-history": openAccountHistory(data.caseId || ""); break;
@@ -1714,6 +1920,28 @@ document.addEventListener("change", (event) => {
     ui.receivablesPage = 1;
     render();
   }
+  if (target.matches('[data-ui-filter="clinicalStatus"]')) {
+    ui.clinicalStatus = target.value;
+    ui.clinicalPage = 1;
+  }
+  if (target.matches('[data-ui-filter="clinicalServiceType"]')) {
+    ui.clinicalServiceType = target.value;
+    ui.clinicalPage = 1;
+  }
+  if (target.matches('[data-ui-filter="clinicalAttentionType"]')) {
+    ui.clinicalAttentionType = target.value;
+    ui.clinicalPage = 1;
+  }
+  if (target.matches('[data-ui-filter="clinicalPageSize"]')) {
+    ui.clinicalPageSize = Math.max(1, Math.min(50, Number(target.value || 10)));
+    ui.clinicalPage = 1;
+    render();
+  }
+  if (target.matches('[data-ui-filter="healthReportPageSize"]')) {
+    ui.healthReportPageSize = Math.max(1, Math.min(50, Number(target.value || 10)));
+    ui.healthReportPage = 1;
+    render();
+  }
   if (target.id === "patient-import-file") {
     const file = target.files?.[0];
     if (!file) return;
@@ -1740,6 +1968,24 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="receivables-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="clinical-case-search"]')) {
+    ui.clinicalCaseSearch = target.value;
+    ui.clinicalPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="clinical-case-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="health-report-search"]')) {
+    ui.healthReportSearch = target.value;
+    ui.healthReportPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="health-report-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }
@@ -1917,6 +2163,49 @@ document.addEventListener("click", async (event) => {
     modalRoot.insertAdjacentHTML("beforeend", `<div class="quote-processing" role="status"><span class="spinner"></span><strong>Procesando...</strong></div>`);
     const result=await runSafely(()=>store.startAdministrativeExecution(data),"Perfil administrativo de ejecución creado y auditado.");
     if(result) closeModal(); else modalRoot.querySelector(".quote-processing")?.remove();
+  }
+
+  if(action==="save-clinical-profile"){
+    const form=document.querySelector("#clinical-profile-form");
+    if(!form) return;
+    const start=form.elements.namedItem("startDate");
+    const end=form.elements.namedItem("endDate");
+    const shiftStart=form.elements.namedItem("shiftStartDate");
+    const shiftEnd=form.elements.namedItem("shiftEndDate");
+    end?.setCustomValidity(end.value && start?.value && end.value < start.value ? "La fecha fin no puede ser anterior al inicio." : "");
+    const invalidShift=Boolean((shiftStart?.value || shiftEnd?.value) && (!shiftStart?.value || !shiftEnd?.value || shiftEnd.value < shiftStart.value));
+    shiftEnd?.setCustomValidity(invalidShift ? "Complete un rango de turnos válido." : "");
+    if(!form.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    data.otherDoctorIds=[...form.querySelectorAll('select[name="otherDoctorIds"] option:checked')].map((option)=>option.value).filter(Boolean);
+    data.devices=[...form.querySelectorAll(".clinical-device-row")].map((row)=>({
+      deviceType:row.querySelector('[name="deviceType"]')?.value.trim() || "",
+      date:row.querySelector('[name="deviceDate"]')?.value || "",
+      gauge:row.querySelector('[name="deviceGauge"]')?.value.trim() || "",
+      reason:row.querySelector('[name="deviceReason"]')?.value.trim() || "",
+      changeFrequency:row.querySelector('[name="deviceFrequency"]')?.value.trim() || "",
+      observations:row.querySelector('[name="deviceObservations"]')?.value.trim() || ""
+    })).filter((device)=>Object.values(device).some(Boolean));
+    modalRoot.insertAdjacentHTML("beforeend", `<div class="quote-processing" role="status"><span class="spinner"></span><strong>Procesando...</strong></div>`);
+    const result=await runSafely(()=>store.createClinicalProfile(data),"Perfil clínico guardado como borrador append-only.");
+    if(result){closeModal(); openClinicalProfiles(data.caseId);} else modalRoot.querySelector(".quote-processing")?.remove();
+  }
+
+  if(action==="save-health-report-range"){
+    const form=document.querySelector("#health-report-range-form");
+    if(!form) return;
+    const start=form.elements.namedItem("start");
+    const end=form.elements.namedItem("end");
+    end?.setCustomValidity(start?.value && end?.value && end.value < start.value ? "La fecha fin no puede ser anterior al inicio." : "");
+    if(!form.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    modalRoot.insertAdjacentHTML("beforeend", `<div class="quote-processing" role="status"><span class="spinner"></span><strong>Procesando...</strong></div>`);
+    const validated=await runSafely(()=>store.validateHealthReportRange(data));
+    if(!validated){modalRoot.querySelector(".quote-processing")?.remove();return;}
+    await new Promise((resolve)=>setTimeout(resolve,250));
+    ui.healthReportRange=validated;
+    closeModal();
+    render();
   }
 
   if(action==="save-reverse-payment"){

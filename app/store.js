@@ -40,6 +40,7 @@ export function normalizeState(rawState = {}) {
   normalized.clinicalCorrections ||= [];
   normalized.notificationAttempts ||= [];
   normalized.administrativeExecutionProfiles ||= [];
+  normalized.clinicalProfiles ||= [];
   return normalized;
 }
 
@@ -1127,6 +1128,98 @@ export async function createAppStore(config) {
     return document;
   }
 
+  function createClinicalProfile(input) {
+    requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const requiredText = ["diagnosisCode", "diagnosisLabel", "diagnosisGroup", "triage", "profileGroup", "profileSubgroup", "patientType", "serviceType"];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(input.startDate || ""))
+      || (input.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(String(input.endDate)))
+      || (input.endDate && input.endDate < input.startDate)
+      || requiredText.some((field) => !String(input[field] || "").trim())) {
+      throw new Error("Complete los campos clínicos obligatorios con valores válidos.");
+    }
+    const devices = Array.isArray(input.devices) ? input.devices.map((device) => ({
+      deviceType: String(device.deviceType || "").trim(),
+      date: String(device.date || "").trim(),
+      gauge: String(device.gauge || "").trim(),
+      reason: String(device.reason || "").trim(),
+      changeFrequency: String(device.changeFrequency || "").trim(),
+      observations: String(device.observations || "").trim()
+    })) : [];
+    if (devices.length > 50 || devices.some((device) => !device.deviceType || (device.date && !/^\d{4}-\d{2}-\d{2}$/.test(device.date)))) {
+      throw new Error("Revise los dispositivos del perfil clínico.");
+    }
+    const shiftStartDate = String(input.shiftStartDate || "").trim();
+    const shiftEndDate = String(input.shiftEndDate || "").trim();
+    if ((shiftStartDate || shiftEndDate) && (!/^\d{4}-\d{2}-\d{2}$/.test(shiftStartDate) || !/^\d{4}-\d{2}-\d{2}$/.test(shiftEndDate) || shiftEndDate < shiftStartDate)) {
+      throw new Error("El rango de planificación de turnos no es válido.");
+    }
+    const otherDoctorIds = Array.isArray(input.otherDoctorIds) ? [...new Set(input.otherDoctorIds.filter(Boolean))] : [];
+    const referencedDoctorIds = [input.treatingDoctorId, input.coordinatorId, ...otherDoctorIds].filter(Boolean);
+    if (referencedDoctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId
+      && doctor.status === "ACTIVE"
+      && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) {
+      throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    }
+    const idempotencyKey = String(input.idempotencyKey || uid("CLINICAL-PROFILE")).trim().slice(0, 160);
+    const profile = {
+      id: uid("CP"), organizationId: state.organization?.id, caseId: recordCase.id, patientId: recordCase.patientId,
+      startDate: input.startDate, endDate: input.endDate || null,
+      treatingDoctorId: input.treatingDoctorId || null,
+      otherDoctorIds,
+      diagnosisCode: String(input.diagnosisCode).trim(), diagnosisLabel: String(input.diagnosisLabel).trim(),
+      diagnosisGroup: String(input.diagnosisGroup).trim(), triage: String(input.triage).trim(),
+      profileGroup: String(input.profileGroup).trim(), profileSubgroup: String(input.profileSubgroup).trim(),
+      patientType: String(input.patientType).trim(), supervisorName: String(input.supervisorName || "").trim(),
+      coordinatorId: input.coordinatorId || null, nursingTags: String(input.nursingTags || "").trim(),
+      supervisionFrequency: String(input.supervisionFrequency || "").trim(),
+      physicianReportFrequency: String(input.physicianReportFrequency || "").trim(), serviceType: String(input.serviceType).trim(),
+      devices, shiftStartDate: shiftStartDate || null, shiftEndDate: shiftEndDate || null,
+      shiftFrequency: String(input.shiftFrequency || "").trim(), attentionType: String(input.attentionType || "").trim(),
+      clinicalStatus: "DRAFT", attachmentMetadata: [], idempotencyKey, createdAt: nowIso(), createdBy: currentUser().id
+    };
+    const existing = state.clinicalProfiles.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (existing) return existing;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.profile || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...profile, ...remote, id: remote.id || profile.id,
+        caseId: remote.hospitalizationId || profile.caseId,
+        otherDoctorIds: remote.otherDoctorIds || profile.otherDoctorIds,
+        devices: remote.devices || profile.devices,
+        attachmentMetadata: remote.attachmentMetadata || profile.attachmentMetadata
+      } : profile;
+      const duplicate = state.clinicalProfiles.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.clinicalProfiles.unshift(committed);
+        audit("CREATE_CLINICAL_PROFILE", committed.id, `Perfil clínico creado para ${recordCase.id}.`, {
+          caseId: recordCase.id, idempotencyKey: committed.idempotencyKey
+        });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_PROFILE", { profile }).then(commit);
+    return commit();
+  }
+
+  function validateHealthReportRange(input) {
+    requirePermission("clinical:read");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const start = String(input.start || "").trim();
+    const end = String(input.end || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) {
+      throw new Error("El rango del reporte de salud no es válido.");
+    }
+    const result = {caseId: recordCase.id, start, end};
+    if (adapter.mode === "supabase") return requiredSync("VALIDATE_HEALTH_REPORT_RANGE", result).then(() => result);
+    return result;
+  }
+
   function updateClinicalDocument(id, patch) {
     requirePermission("clinical:write");
     setState((draft) => {
@@ -1705,6 +1798,8 @@ export async function createAppStore(config) {
     startAdministrativeExecution,
     reversePayment,
     createClinicalDocument,
+    createClinicalProfile,
+    validateHealthReportRange,
     updateClinicalDocument,
     signClinicalDocument,
     voidClinicalDocument,

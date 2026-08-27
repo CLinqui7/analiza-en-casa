@@ -96,6 +96,19 @@
 - `CH08-Q009`: especificar formato, columnas, alcance, permisos y protección de los tres controles de exportación. La implementación entrega CSV sintético utilizable, sin afirmar que sea el Excel oficial. Evidencia: CH08-E0032–CH08-E0036.
 - `CH08-Q010`: confirmar si existe una automatización de recordatorio/cobro, su evento, canal seguro, consentimiento, destinatario, reintentos y SLA; el audio no es concluyente y no se implementó una regla. Evidencia verbal alrededor de CH08-E0061–CH08-E0064.
 
+## CH09 · decisiones pendientes trazadas
+
+- `CH09-Q001`: confirmar terminología diagnóstica oficial (CIE-10, CIE-11 u otra), edición, localización, fuente autoritativa, frecuencia de actualización y política de códigos retirados. El producto no copia el catálogo parcial observado. Evidencia: CH09-E0027–CH09-E0038.
+- `CH09-Q002`: definir roles autorizados para crear, activar, finalizar, anular y corregir perfiles, además de si puede coexistir más de un perfil activo por hospitalización. La implementación crea sólo borradores append-only. Evidencia: CH09-E0017–CH09-E0021 y CH09-E0067.
+- `CH09-Q003`: aprobar la máquina de estados clínicos y de triage, motivos obligatorios, umbrales, doble aprobación y relación con el estado administrativo. Ninguna transición clínica se infiere. Evidencia: CH09-E0012–CH09-E0016 y CH09-E0065–CH09-E0069.
+- `CH09-Q004`: entregar catálogos y dependencias oficiales para grupo diagnóstico, grupo/subgrupo de perfil, tipo de paciente, servicio, atención, frecuencias, dispositivos y grupos operativos. Los campos actuales son configurables. Evidencia: CH09-E0023–CH09-E0064.
+- `CH09-Q005`: definir límites válidos del rango del reporte respecto de la hospitalización, tratamiento de periodos sin datos, zona horaria y comportamiento de carga/error en producción. Evidencia: CH09-E0081–CH09-E0113.
+- `CH09-Q006`: definir semántica, fuente, permisos y auditoría de Claims, Visitas, Notas de servicio, Auditorías, Registro XPO, Relevos, Reingresos, Reinfecciones, Ulceraciones y Near miss. Permanecen visibles y bloqueados cuando no existe contrato seguro. Evidencia: CH09-E0016 y CH09-E0076.
+- `CH09-Q007`: confirmar secciones iniciales, obligatorias y opcionales del reporte, orden permitido, branding y si la configuración se conserva por usuario, organización o documento. Evidencia: CH09-E0115–CH09-E0126.
+- `CH09-Q008`: definir tipos, tamaños, cantidad, malware scanning, acceso, cifrado, retención y eliminación autorizada de adjuntos, además de cuáles pueden incluirse al imprimir. Adjuntar e incluir documentos permanece bloqueado. Evidencia: CH09-E0022 y CH09-E0116.
+- `CH09-Q009`: aprobar plantilla oficial de PDF, numeración, encabezado, firmas, sello, tamaño de papel y validez legal de la firma. El video no demuestra un PDF final. Evidencia: CH09-E0127–CH09-E0130.
+- `CH09-Q010`: definir versionado y corrección para perfiles en borrador, activos, finalizados y documentos firmados, incluidas autorización, motivo y preservación. La base actual conserva perfiles append-only y mantiene intacto el flujo de correcciones de documentos firmados. Evidencia: CH09-E0065–CH09-E0067.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.
