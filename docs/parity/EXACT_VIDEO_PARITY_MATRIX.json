@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T10:41:24.735Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T11:21:21.142Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 117,
-    "IMPLEMENTED_PARTIAL": 94,
+    "IMPLEMENTED_EXACT": 131,
+    "IMPLEMENTED_PARTIAL": 97,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 18,
-    "NEEDS_CLIENT_CONFIRMATION": 48
+    "NOT_TESTABLE": 19,
+    "NEEDS_CLIENT_CONFIRMATION": 53
   },
   "requirements": [
     {
@@ -11713,6 +11713,1602 @@
       ],
       "acceptance_criteria": [
         "No convierte el saldo negativo del ejemplo en una regla productiva; muestra excedente no asignado y conserva la prohibición de sobrepago.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderPurchases",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R001",
+      "event_ids": [
+        "CH13-E0001",
+        "CH13-E0004",
+        "CH13-E0080"
+      ],
+      "feature_group": "purchase_list",
+      "page": "Compras",
+      "control_type": "data_table",
+      "visible_label": "Acciones / Tipo / Número / Proveedor / Total / # Factura / Fecha / Estado / Registro PT",
+      "expected_behavior": "Presenta todas las columnas observadas con datos sintéticos, estados explícitos y acceso autorizado al detalle.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:45.000",
+        "00:36:46.400",
+        "00:39:26.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0001",
+          "timestamp": "00:36:45.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0001_00h36m45s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0004",
+          "timestamp": "00:36:46.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0080",
+          "timestamp": "00:39:26.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0080_00h39m26s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0080_00h39m26s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta todas las columnas observadas con datos sintéticos, estados explícitos y acceso autorizado al detalle.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPurchases/purchase-search/purchase-page/export-purchases",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R002",
+      "event_ids": [
+        "CH13-E0004",
+        "CH13-E0080"
+      ],
+      "feature_group": "purchase_list_controls",
+      "page": "Compras",
+      "control_type": "search_pagination_export",
+      "visible_label": "Excel / Mostrar registros / Buscar / Anterior / páginas / Siguiente",
+      "expected_behavior": "Busca número, proveedor, factura, tipo o estado; pagina el conjunto filtrado y descarga CSV sintético compatible con Excel.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:46.400",
+        "00:39:26.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0004",
+          "timestamp": "00:36:46.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0080",
+          "timestamp": "00:39:26.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0080_00h39m26s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0080_00h39m26s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Busca número, proveedor, factura, tipo o estado; pagina el conjunto filtrado y descarga CSV sintético compatible con Excel.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openPurchaseTypeChooser/openPurchaseForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R003",
+      "event_ids": [
+        "CH13-E0005",
+        "CH13-E0006",
+        "CH13-E0032",
+        "CH13-E0033"
+      ],
+      "feature_group": "purchase_kind",
+      "page": "Compras",
+      "control_type": "modal_choice",
+      "visible_label": "¿Qué quieres crear? / Orden de compra / Caja menuda",
+      "expected_behavior": "Abre el selector de modalidad y navega al compositor correspondiente sin mutar datos.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:50.000",
+        "00:36:50.400",
+        "00:37:35.600",
+        "00:37:36.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0005",
+          "timestamp": "00:36:50.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0005_00h36m50s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0006",
+          "timestamp": "00:36:50.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0006_00h36m50s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0032",
+          "timestamp": "00:37:35.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0032_00h37m35s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0033",
+          "timestamp": "00:37:36.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0033_00h37m36s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0033_00h37m36s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre el selector de modalidad y navega al compositor correspondiente sin mutar datos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openPurchaseForm/createPurchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R004",
+      "event_ids": [
+        "CH13-E0007",
+        "CH13-E0008",
+        "CH13-E0023"
+      ],
+      "feature_group": "order_form",
+      "page": "Nueva compra",
+      "control_type": "form",
+      "visible_label": "Fecha / Número de factura / Observaciones / Ítem / Proveedor / Presentación / Costo / Cantidad",
+      "expected_behavior": "Captura la cabecera y una línea de orden con proveedor, presentación, costo y cantidad; no prellena factura, impuesto, precio ni estado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:54.400",
+        "00:36:54.800",
+        "00:37:14.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0007",
+          "timestamp": "00:36:54.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0007_00h36m54s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0008",
+          "timestamp": "00:36:54.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0008_00h36m54s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0023",
+          "timestamp": "00:37:14.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0023_00h37m14s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0023_00h37m14s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura la cabecera y una línea de orden con proveedor, presentación, costo y cantidad; no prellena factura, impuesto, precio ni estado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/supabase-adapter.js",
+      "current_implementation_function": "purchaseCatalogOptions/purchase-catalog-search",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R005",
+      "event_ids": [
+        "CH13-E0009",
+        "CH13-E0015",
+        "CH13-E0044",
+        "CH13-E0048",
+        "CH13-E0049"
+      ],
+      "feature_group": "catalog_search",
+      "page": "Nueva compra",
+      "control_type": "catalog_search",
+      "visible_label": "Buscar ítem / código / descripción / existencia",
+      "expected_behavior": "Filtra el catálogo activo por el texto visible y muestra código, descripción y existencia organizacional sin revelar otro tenant.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:59.200",
+        "00:37:08.800",
+        "00:38:14.400",
+        "00:38:17.600",
+        "00:38:19.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0009",
+          "timestamp": "00:36:59.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0009_00h36m59s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0009_00h36m59s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0015",
+          "timestamp": "00:37:08.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0015_00h37m08s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0015_00h37m08s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0044",
+          "timestamp": "00:38:14.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0044_00h38m14s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0044_00h38m14s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0048",
+          "timestamp": "00:38:17.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0048_00h38m17s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0048_00h38m17s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0049",
+          "timestamp": "00:38:19.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0049_00h38m19s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0049_00h38m19s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Filtra el catálogo activo por el texto visible y muestra código, descripción y existencia organizacional sin revelar otro tenant.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "purchaseSupplierOptions",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q014"
+      ],
+      "requirement_id": "CH13-R006",
+      "event_ids": [
+        "CH13-E0019",
+        "CH13-E0020",
+        "CH13-E0021",
+        "CH13-E0022"
+      ],
+      "feature_group": "supplier_price_history",
+      "page": "Nueva compra",
+      "control_type": "catalog",
+      "visible_label": "Proveedor y precio histórico",
+      "expected_behavior": "Confirmar fuente, vigencia, organización y significado de precios históricos antes de sugerir un costo; el usuario captura un costo manual mientras tanto.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:37:11.800",
+        "00:37:12.200",
+        "00:37:12.800",
+        "00:37:13.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0019",
+          "timestamp": "00:37:11.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0019_00h37m11s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0019_00h37m11s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0020",
+          "timestamp": "00:37:12.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0020_00h37m12s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0020_00h37m12s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0021",
+          "timestamp": "00:37:12.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0021_00h37m12s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0021_00h37m12s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0022",
+          "timestamp": "00:37:13.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0022_00h37m13s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0022_00h37m13s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirmar fuente, vigencia, organización y significado de precios históricos antes de sugerir un costo; el usuario captura un costo manual mientras tanto.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openPurchaseForm/blocked-purchase-presentation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q014"
+      ],
+      "requirement_id": "CH13-R007",
+      "event_ids": [
+        "CH13-E0024",
+        "CH13-E0025",
+        "CH13-E0052",
+        "CH13-E0055"
+      ],
+      "feature_group": "presentations",
+      "page": "Nueva compra",
+      "control_type": "catalog_action",
+      "visible_label": "Presentación / + Presentación",
+      "expected_behavior": "Captura la presentación como texto del borrador y conserva + Presentación visible y bloqueado hasta definir catálogo, precio, vigencia y autorización.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:37:15.000",
+        "00:37:17.200",
+        "00:38:22.400",
+        "00:38:25.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0024",
+          "timestamp": "00:37:15.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0024_00h37m15s000ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0024_00h37m15s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0025",
+          "timestamp": "00:37:17.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0025_00h37m17s200ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0025_00h37m17s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0052",
+          "timestamp": "00:38:22.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0052_00h38m22s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0052_00h38m22s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0055",
+          "timestamp": "00:38:25.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0055_00h38m25s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0055_00h38m25s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura la presentación como texto del borrador y conserva + Presentación visible y bloqueado hasta definir catálogo, precio, vigencia y autorización.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "add-purchase-item/remove-purchase-item/createPurchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R008",
+      "event_ids": [
+        "CH13-E0027",
+        "CH13-E0028",
+        "CH13-E0029",
+        "CH13-E0058",
+        "CH13-E0059"
+      ],
+      "feature_group": "purchase_lines",
+      "page": "Nueva compra",
+      "control_type": "line_ledger",
+      "visible_label": "Añadir / eliminar / tabla de ítems",
+      "expected_behavior": "Añade y elimina múltiples líneas en el borrador, conserva proveedor cuando aplica y calcula costo por cantidad con ajustes monetarios explícitos.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:37:23.000",
+        "00:37:23.400",
+        "00:37:24.000",
+        "00:38:38.600",
+        "00:38:39.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0027",
+          "timestamp": "00:37:23.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0027_00h37m23s000ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0027_00h37m23s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0028",
+          "timestamp": "00:37:23.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0028_00h37m23s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0029",
+          "timestamp": "00:37:24.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0029_00h37m24s000ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0058",
+          "timestamp": "00:38:38.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0058_00h38m38s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0058_00h38m38s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0059",
+          "timestamp": "00:38:39.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0059_00h38m39s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Añade y elimina múltiples líneas en el borrador, conserva proveedor cuando aplica y calcula costo por cantidad con ajustes monetarios explícitos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openPurchaseForm/createPurchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q007"
+      ],
+      "requirement_id": "CH13-R009",
+      "event_ids": [
+        "CH13-E0034",
+        "CH13-E0035",
+        "CH13-E0040",
+        "CH13-E0041"
+      ],
+      "feature_group": "petty_cash_header",
+      "page": "Nueva compra caja menuda",
+      "control_type": "form",
+      "visible_label": "Fecha / Proveedor / Número de factura / Archivo Factura / Observaciones",
+      "expected_behavior": "Exige proveedor y factura para guardar el borrador; Archivo Factura permanece visible y bloqueado hasta aprobar almacenamiento privado, validación, acceso y retención.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:37:37.400",
+        "00:37:37.800",
+        "00:37:48.400",
+        "00:37:49.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0034",
+          "timestamp": "00:37:37.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0034_00h37m37s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0035",
+          "timestamp": "00:37:37.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0040",
+          "timestamp": "00:37:48.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0040_00h37m48s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0040_00h37m48s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0041",
+          "timestamp": "00:37:49.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0041_00h37m49s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0041_00h37m49s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Exige proveedor y factura para guardar el borrador; Archivo Factura permanece visible y bloqueado hasta aprobar almacenamiento privado, validación, acceso y retención.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270009_ch13_purchase_drafts.sql",
+      "current_implementation_function": "openPurchaseForm/createPurchase/create_purchase_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q004",
+        "CH13-Q006"
+      ],
+      "requirement_id": "CH13-R010",
+      "event_ids": [
+        "CH13-E0056",
+        "CH13-E0057",
+        "CH13-E0064",
+        "CH13-E0072"
+      ],
+      "feature_group": "manual_adjustments",
+      "page": "Nueva compra caja menuda",
+      "control_type": "money_inputs",
+      "visible_label": "Monto impuesto / Monto descuento",
+      "expected_behavior": "Captura importes monetarios manuales no negativos por línea y nunca precarga ni calcula una tasa fiscal implícita.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:38:34.200",
+        "00:38:34.800",
+        "00:38:51.400",
+        "00:39:15.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0056",
+          "timestamp": "00:38:34.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0056_00h38m34s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0056_00h38m34s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0057",
+          "timestamp": "00:38:34.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0057_00h38m34s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0064",
+          "timestamp": "00:38:51.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0064_00h38m51s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0072",
+          "timestamp": "00:39:15.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0072_00h39m15s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Captura importes monetarios manuales no negativos por línea y nunca precarga ni calcula una tasa fiscal implícita.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270009_ch13_purchase_drafts.sql",
+      "current_implementation_function": "purchaseDraftTotals/createPurchase/create_purchase_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q004",
+        "CH13-Q005",
+        "CH13-Q006"
+      ],
+      "requirement_id": "CH13-R011",
+      "event_ids": [
+        "CH13-E0060",
+        "CH13-E0061",
+        "CH13-E0069",
+        "CH13-E0070",
+        "CH13-E0071"
+      ],
+      "feature_group": "purchase_totals",
+      "page": "Nueva compra caja menuda",
+      "control_type": "financial_summary",
+      "visible_label": "Subtotal / Descuentos / Extra / Impuesto / Total",
+      "expected_behavior": "Suma costos y montos explícitos, actualiza Extra en vivo, rechaza totales negativos y recalcula autoritativamente en servidor.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:38:48.000",
+        "00:38:48.600",
+        "00:38:58.600",
+        "00:39:12.600",
+        "00:39:13.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0060",
+          "timestamp": "00:38:48.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0060_00h38m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0061",
+          "timestamp": "00:38:48.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0061_00h38m48s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0069",
+          "timestamp": "00:38:58.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0069_00h38m58s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0070",
+          "timestamp": "00:39:12.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0070_00h39m12s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0071",
+          "timestamp": "00:39:13.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0071_00h39m13s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Suma costos y montos explícitos, actualiza Extra en vivo, rechaza totales negativos y recalcula autoritativamente en servidor.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; app/supabase-adapter.js",
+      "current_implementation_function": "save-purchase/createPurchase/create_purchase_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q001",
+        "CH13-Q002",
+        "CH13-Q007"
+      ],
+      "requirement_id": "CH13-R012",
+      "event_ids": [
+        "CH13-E0029",
+        "CH13-E0030",
+        "CH13-E0077",
+        "CH13-E0078"
+      ],
+      "feature_group": "purchase_save_exit",
+      "page": "Nueva compra",
+      "control_type": "form_actions",
+      "visible_label": "Atrás / Guardar",
+      "expected_behavior": "Atrás abandona sin persistir; Guardar confirma un borrador remoto completo antes de volver al listado, sin inferir aprobación, recepción, archivo o inventario.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:37:24.000",
+        "00:37:34.800",
+        "00:39:24.200",
+        "00:39:25.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0029",
+          "timestamp": "00:37:24.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0029_00h37m24s000ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0030",
+          "timestamp": "00:37:34.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0030_00h37m34s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0077",
+          "timestamp": "00:39:24.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0077_00h39m24s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0078",
+          "timestamp": "00:39:25.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0078_00h39m25s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Atrás abandona sin persistir; Guardar confirma un borrador remoto completo antes de volver al listado, sin inferir aprobación, recepción, archivo o inventario.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "renderPurchases",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q001",
+        "CH13-Q009",
+        "CH13-Q010"
+      ],
+      "requirement_id": "CH13-R013",
+      "event_ids": [
+        "CH13-E0004",
+        "CH13-E0080",
+        "CH13-E0081"
+      ],
+      "feature_group": "purchase_statuses",
+      "page": "Compras",
+      "control_type": "status_badges",
+      "visible_label": "Compra Recibida / Pendiente / Registro PT",
+      "expected_behavior": "Muestra estados existentes sin permitir transición; confirmar catálogo, Registro PT, roles, precondiciones y reversión antes de habilitar cambios.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:36:46.400",
+        "00:39:26.800",
+        "00:39:28.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0004",
+          "timestamp": "00:36:46.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0080",
+          "timestamp": "00:39:26.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0080_00h39m26s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0080_00h39m26s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0081",
+          "timestamp": "00:39:28.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0081_00h39m28s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra estados existentes sin permitir transición; confirmar catálogo, Registro PT, roles, precondiciones y reversión antes de habilitar cambios.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openPurchaseDetail",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R014",
+      "event_ids": [
+        "CH13-E0083",
+        "CH13-E0084",
+        "CH13-E0085",
+        "CH13-E0089"
+      ],
+      "feature_group": "purchase_detail",
+      "page": "Detalles de compra",
+      "control_type": "detail_modal",
+      "visible_label": "Fecha / # Orden / # Factura / Estado / Categoría / Proveedor / Observaciones / Archivos / ítems / totales",
+      "expected_behavior": "Abre una vista de sólo lectura con cabecera, adjunto explícito, líneas y desglose financiero autorizado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:39:33.000",
+        "00:39:33.400",
+        "00:39:34.000",
+        "00:39:37.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0083",
+          "timestamp": "00:39:33.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0083_00h39m33s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0084",
+          "timestamp": "00:39:33.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0084_00h39m33s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0085",
+          "timestamp": "00:39:34.000",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0085_00h39m34s000ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0089",
+          "timestamp": "00:39:37.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0089_00h39m37s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre una vista de sólo lectura con cabecera, adjunto explícito, líneas y desglose financiero autorizado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPurchases/openPurchaseDetail/blocked-purchase-mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q010",
+        "CH13-Q011",
+        "CH13-Q012",
+        "CH13-Q013"
+      ],
+      "requirement_id": "CH13-R015",
+      "event_ids": [
+        "CH13-E0082",
+        "CH13-E0091"
+      ],
+      "feature_group": "purchase_row_menu",
+      "page": "Compras",
+      "control_type": "row_menu",
+      "visible_label": "Ver / Editar detalles / Copiar / Imprimir PDF / Imprimir con montos / Imprimir en Excel / Anular",
+      "expected_behavior": "Expone todas las acciones; Ver y salidas sintéticas seguras funcionan, mientras edición, copia y anulación quedan visibles y bloqueadas hasta definir semántica y permisos.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:39:32.600",
+        "00:39:40.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0082",
+          "timestamp": "00:39:32.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0082_00h39m32s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0091",
+          "timestamp": "00:39:40.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0091_00h39m40s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0091_00h39m40s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone todas las acciones; Ver y salidas sintéticas seguras funcionan, mientras edición, copia y anulación quedan visibles y bloqueadas hasta definir semántica y permisos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "createPurchase/createInventoryMovement",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q002",
+        "CH13-Q003"
+      ],
+      "requirement_id": "CH13-R016",
+      "event_ids": [
+        "CH13-E0078",
+        "CH13-E0080"
+      ],
+      "feature_group": "purchase_inventory",
+      "page": "Compras / Inventario",
+      "control_type": "workflow",
+      "visible_label": "Compra recibida y entrada de inventario",
+      "expected_behavior": "No marca recibida ni mueve inventario hasta aprobar recepción total/parcial, bodegas, lotes, series, idempotencia y vínculo con la compra.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:39:25.800",
+        "00:39:26.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0078",
+          "timestamp": "00:39:25.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0078_00h39m25s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0080",
+          "timestamp": "00:39:26.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0080_00h39m26s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0080_00h39m26s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No marca recibida ni mueve inventario hasta aprobar recepción total/parcial, bodegas, lotes, series, idempotencia y vínculo con la compra.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "runSafely/createPurchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-R017",
+      "event_ids": [
+        "CH13-E0007",
+        "CH13-E0035",
+        "CH13-E0077"
+      ],
+      "feature_group": "error_behavior",
+      "page": "Nueva compra",
+      "control_type": "error_state",
+      "visible_label": "Validaciones y errores",
+      "expected_behavior": "El capítulo no provoca entradas inválidas, fallo remoto, duplicado ni error de archivo; su presentación exacta no es atribuible al video.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:36:54.400",
+        "00:37:37.800",
+        "00:39:24.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0007",
+          "timestamp": "00:36:54.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0007_00h36m54s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0035",
+          "timestamp": "00:37:37.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0077",
+          "timestamp": "00:39:24.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0077_00h39m24s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El capítulo no provoca entradas inválidas, fallo remoto, duplicado ni error de archivo; su presentación exacta no es atribuible al video.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "printPurchase/export-purchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q012"
+      ],
+      "requirement_id": "CH13-R018",
+      "event_ids": [
+        "CH13-E0091"
+      ],
+      "feature_group": "purchase_outputs",
+      "page": "Compras",
+      "control_type": "print_export",
+      "visible_label": "PDF / con montos / Excel",
+      "expected_behavior": "Confirmar contenido, ocultamiento de montos, formato, validez y permisos antes de considerar oficiales las salidas; la plataforma sólo ofrece impresión/CSV sintéticos provisionales.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:39:40.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0091",
+          "timestamp": "00:39:40.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0091_00h39m40s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0091_00h39m40s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Confirmar contenido, ocultamiento de montos, formato, validez y permisos antes de considerar oficiales las salidas; la plataforma sólo ofrece impresión/CSV sintéticos provisionales.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/supabase-adapter.js",
+      "current_implementation_function": "mapSupabaseBootstrap/mapPurchase/bootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-H001",
+      "event_ids": [
+        "CH13-E0004",
+        "CH13-E0084"
+      ],
+      "feature_group": "purchase_bootstrap",
+      "page": "Compras",
+      "control_type": "data_contract",
+      "visible_label": "Bootstrap de proveedores, catálogo, compras y líneas",
+      "expected_behavior": "Carga y normaliza snake_case, purchase_items e importes para que Supabase no vacíe ni rompa el listado o detalle.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:46.400",
+        "00:39:33.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0004",
+          "timestamp": "00:36:46.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0084",
+          "timestamp": "00:39:33.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0084_00h39m33s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Carga y normaliza snake_case, purchase_items e importes para que Supabase no vacíe ni rompa el listado o detalle.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/main.js",
+      "current_implementation_function": "requiredSync/createPurchase/save-purchase",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-H002",
+      "event_ids": [
+        "CH13-E0078"
+      ],
+      "feature_group": "remote_confirmation",
+      "page": "Nueva compra",
+      "control_type": "persistence_boundary",
+      "visible_label": "Sin éxito local-first",
+      "expected_behavior": "En modo Supabase no muta el espejo ni cierra el compositor hasta que la RPC confirma cabecera y líneas; un fallo remoto permanece visible.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:39:25.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0078",
+          "timestamp": "00:39:25.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0078_00h39m25s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "En modo Supabase no muta el espejo ni cierra el compositor hasta que la RPC confirma cabecera y líneas; un fallo remoto permanece visible.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270009_ch13_purchase_drafts.sql; app/supabase-adapter.js",
+      "current_implementation_function": "create_purchase_draft/CREATE_PURCHASE_DRAFT",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-H003",
+      "event_ids": [
+        "CH13-E0028",
+        "CH13-E0059",
+        "CH13-E0078"
+      ],
+      "feature_group": "atomic_purchase_draft",
+      "page": "Persistencia",
+      "control_type": "transaction_idempotency",
+      "visible_label": "Borrador transaccional e idempotente",
+      "expected_behavior": "Valida y escribe cabecera, líneas, evento y auditoría en una transacción, deduplicada por organización y clave estable.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:37:23.400",
+        "00:38:39.200",
+        "00:39:25.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0028",
+          "timestamp": "00:37:23.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0028_00h37m23s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0059",
+          "timestamp": "00:38:39.200",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0059_00h38m39s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0078",
+          "timestamp": "00:39:25.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0078_00h39m25s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida y escribe cabecera, líneas, evento y auditoría en una transacción, deduplicada por organización y clave estable.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270009_ch13_purchase_drafts.sql",
+      "current_implementation_function": "purchases_read/purchase_items_read/create_purchase_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH13-H004",
+      "event_ids": [
+        "CH13-E0004",
+        "CH13-E0028"
+      ],
+      "feature_group": "purchase_tenant_boundary",
+      "page": "Persistencia",
+      "control_type": "rls",
+      "visible_label": "Referencias de compra limitadas al tenant",
+      "expected_behavior": "Deriva organización del actor, valida proveedor y catálogo en el mismo tenant, lee líneas sólo por padre autorizado y revoca DML financiero directo.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:36:46.400",
+        "00:37:23.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0004",
+          "timestamp": "00:36:46.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0028",
+          "timestamp": "00:37:23.400",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0028_00h37m23s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deriva organización del actor, valida proveedor y catálogo en el mismo tenant, lee líneas sólo por padre autorizado y revoca DML financiero directo.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH13",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; supabase/migrations/202608270009_ch13_purchase_drafts.sql",
+      "current_implementation_function": "openPurchaseForm/createPurchase/create_purchase_draft",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH13-Q001",
+        "CH13-Q002",
+        "CH13-Q004",
+        "CH13-Q007",
+        "CH13-Q009",
+        "CH13-Q013"
+      ],
+      "requirement_id": "CH13-H005",
+      "event_ids": [
+        "CH13-E0057",
+        "CH13-E0070",
+        "CH13-E0080"
+      ],
+      "feature_group": "no_inferred_purchase_rules",
+      "page": "Compras",
+      "control_type": "safety_guard",
+      "visible_label": "Sin tasa, estado, recepción ni inventario inferidos",
+      "expected_behavior": "Elimina el IVA 13% inventado y sólo crea DRAFT con importes manuales; aprobación, recepción, Registro PT, archivo, anulación e inventario quedan bloqueados.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:38:34.800",
+        "00:39:12.600",
+        "00:39:26.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0057",
+          "timestamp": "00:38:34.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0057_00h38m34s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0070",
+          "timestamp": "00:39:12.600",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0070_00h39m12s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0080",
+          "timestamp": "00:39:26.800",
+          "image": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0080_00h39m26s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/detail_crops/CH13-E0080_00h39m26s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Elimina el IVA 13% inventado y sólo crea DRAFT con importes manuales; aprobación, recepción, Registro PT, archivo, anulación e inventario quedan bloqueados.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

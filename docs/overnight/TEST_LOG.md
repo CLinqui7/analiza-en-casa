@@ -1,5 +1,17 @@
 # Test log
 
+## 2026-08-27 · Cierre secuencial CH13
+
+- `npm test`: PASS (76/76); incluye 5 contratos CH13 de borrador, idempotencia, importes manuales, tenant scope, bootstrap y SQL/RPC/RLS.
+- `npm run qa`: PASS (75/75).
+- `npm run build:standalone`: PASS (695,512 bytes).
+- `npm run test:browser:ch13`: PASS (2/2); escritorio y móvil sin overflow global.
+- Regresión acumulada CH01–CH13: PASS (36/36) en Chrome headless.
+- `npm run audit:master:bootstrap`: PASS (210 features, 120 preguntas, 7 hallazgos).
+- `npm run parity:generate`: PASS (300 requisitos; 131 exactos, 97 parciales, 19 no verificables, 53 decisiones de cliente, 0 faltantes y 0 conflictos).
+- `npm run audit:verify`: PASS (17/17 capítulos, 1,359/1,359 observaciones, 0 pendientes, 0 fallos).
+- Supabase real: NOT RUN; la migración CH13 y sus rutas de concurrencia/RLS requieren una instancia configurada.
+
 ## 2026-08-26 · Final handoff gate
 
 - `npm run check`: PASS (29/29 tests, 75/75 QA checks, standalone build 407,920 bytes).

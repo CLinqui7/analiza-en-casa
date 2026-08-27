@@ -5,9 +5,9 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 106
-- Estados de gap: IMPLEMENTED_EXACT=8, IMPLEMENTED_PARTIAL=162, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=33
-- Prioridades: P0=3, P1=171, P2=36, P3=0
+- Preguntas abiertas: 120
+- Estados de gap: IMPLEMENTED_EXACT=12, IMPLEMENTED_PARTIAL=157, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=6, NEEDS_CLIENT_CONFIRMATION=35
+- Prioridades: P0=9, P1=167, P2=34, P3=0
 
 ## Gaps P0 de seguridad e integridad
 
@@ -19,6 +19,7 @@
 | SAFE-P0-004 | Mensajería | Autorización organizacional e idempotencia de notificaciones | IMPLEMENTED_PARTIAL |
 | SAFE-P0-005 | Supabase / acceso multi-organización | Asignación de organización confiable y funciones privilegiadas cerradas | IMPLEMENTED_PARTIAL |
 | SAFE-P0-006 | Pagos e inventario | Contratos persistentes e idempotencia alineados con el esquema | IMPLEMENTED_PARTIAL |
+| SAFE-P0-007 | Compras | Borradores financieros transaccionales y referencias tenant-safe | IMPLEMENTED_PARTIAL |
 
 ## CH01 · Contexto inicial, acceso, dashboard y listado de pacientes
 
@@ -251,17 +252,17 @@ Eventos: 92/92. Requisitos: 11.
 
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
-| CH13-F01 | Listado de compras | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F02 | Estados visibles de compra | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F03 | Elección de modalidad de compra | CH13-E0006 @ 00:36:50.400; CH13-E0035 @ 00:37:37.800 | IMPLEMENTED_PARTIAL | P1 |
+| CH13-F01 | Listado de compras | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_EXACT | P1 |
+| CH13-F02 | Estados visibles de compra | CH13-E0004 @ 00:36:46.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH13-F03 | Elección de modalidad de compra | CH13-E0006 @ 00:36:50.400; CH13-E0035 @ 00:37:37.800 | IMPLEMENTED_EXACT | P1 |
 | CH13-F04 | Formulario de orden de compra | CH13-E0007 @ 00:36:54.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F05 | Tabla de ítems de orden | CH13-E0027 @ 00:37:23.000; CH13-E0029 @ 00:37:24.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F06 | Formulario de compra por caja chica | CH13-E0052 @ 00:38:22.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F07 | Desglose de totales de caja chica | CH13-E0065 @ 00:38:52.400; CH13-E0069 @ 00:38:58.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH13-F05 | Tabla de ítems de orden | CH13-E0027 @ 00:37:23.000; CH13-E0029 @ 00:37:24.000 | IMPLEMENTED_EXACT | P1 |
+| CH13-F06 | Formulario de compra por caja menuda | CH13-E0035 @ 00:37:37.800; CH13-E0052 @ 00:38:22.400 | IMPLEMENTED_PARTIAL | P0 |
+| CH13-F07 | Desglose de totales de caja menuda | CH13-E0065 @ 00:38:52.400; CH13-E0069 @ 00:38:58.600 | IMPLEMENTED_EXACT | P0 |
 | CH13-F08 | Detalle de compra y adjuntos | CH13-E0083 @ 00:39:33.000; CH13-E0084 @ 00:39:33.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F09 | Acciones sobre compra | CH13-E0091 @ 00:39:40.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F10 | Relación de compras con inventario | CH13-E0092 @ 00:39:43.000 | NOT_TESTABLE | P2 |
-| CH13-F11 | Reglas fiscales, de anulación y autorización | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH13-F09 | Acciones sobre compra | CH13-E0091 @ 00:39:40.800 | IMPLEMENTED_PARTIAL | P0 |
+| CH13-F10 | Relación de compras con inventario | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH13-F11 | Reglas fiscales, de anulación y autorización | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
 
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 

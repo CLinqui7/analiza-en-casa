@@ -98,6 +98,10 @@ const ui = {
   professionalPaymentServiceId: "",
   professionalConceptType: "ADDITION",
   professionalConceptReason: "",
+  purchaseSearch: "",
+  purchasePage: 1,
+  purchasePageSize: 10,
+  purchaseDraft: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -253,6 +257,14 @@ const ACTION_PERMISSIONS = {
   "sign-medication-card": "clinical:sign",
   "administer-medication": "clinical:write",
   "open-purchase-form": "purchases:write",
+  "choose-purchase-kind": "purchases:write",
+  "add-purchase-item": "purchases:write",
+  "remove-purchase-item": "purchases:write",
+  "save-purchase": "purchases:write",
+  "export-purchases": "purchases:read",
+  "export-purchase": "purchases:read",
+  "view-purchase": "purchases:read",
+  "open-purchase-details": "purchases:read",
   "open-inventory-movement": "inventory:write",
   "open-closure-form": "inventory:write",
   "approve-closure": "inventory:write",
@@ -1397,28 +1409,137 @@ function payablesExportRows() {
   }));
 }
 
-function openPurchaseForm() {
-  const state = store.getState();
+function purchaseDraftTotals(draft = ui.purchaseDraft) {
+  const items = draft?.items || [];
+  const subtotal = items.reduce((sum, item) => sum + Number(item.quantity || 0) * Number(item.unitCost || 0), 0);
+  const tax = items.reduce((sum, item) => sum + Number(item.taxAmount || 0), 0);
+  const discount = items.reduce((sum, item) => sum + Number(item.discountAmount || 0), 0);
+  const extra = Number(draft?.extraAmount || 0);
+  return { subtotal, tax, discount, extra, total: subtotal + tax + extra - discount };
+}
+
+function capturePurchaseDraft(form) {
+  if (!form || !ui.purchaseDraft) return;
+  const values = Object.fromEntries(new FormData(form));
+  ui.purchaseDraft.date = values.date || ui.purchaseDraft.date;
+  ui.purchaseDraft.invoiceNumber = String(values.invoiceNumber || "").trim();
+  ui.purchaseDraft.observations = String(values.observations || "").trim();
+  ui.purchaseDraft.headerSupplierId = String(values.headerSupplierId || ui.purchaseDraft.headerSupplierId || "");
+  ui.purchaseDraft.extraAmount = Number(values.extraAmount || 0);
+}
+
+function openPurchaseTypeChooser() {
+  ui.purchaseDraft = null;
   openModal({
-    title: "Nueva compra",
-    subtitle: "Solicitud o compra ejecutada con proveedor, factura, ítems, IVA y entrada posterior a inventario.",
-    size: "lg",
-    body: `<form id="purchase-form" class="form-grid">
-      <label>Proveedor<select name="supplierId">${state.suppliers.map((s) => `<option value="${s.id}">${safeText(s.name)}</option>`).join("")}</select></label>
-      <label>Fecha<input type="date" name="date" value="${new Date().toISOString().slice(0, 10)}"></label>
-      <label>Número de factura<input name="invoiceNumber" value="FAC-DEMO-${Math.floor(Math.random()*9000+1000)}"></label>
-      <label>Tipo de pago<select name="paymentType"><option>CREDIT</option><option>CASH</option><option>PETTY_CASH</option></select></label>
-      <label>Estado<select name="status"><option>PENDING_APPROVAL</option><option>APPROVED</option><option>RECEIVED</option></select></label>
-      <label>Descuento monetario<input type="number" name="discount" min="0" step=".01" value="0"></label>
-      <div class="form-section full"><h3>Concepto de compra</h3></div>
-      <label class="full">Ítem<select name="catalogItemId">${catalogOptions()}</select></label>
-      <label>Cantidad<input type="number" name="quantity" min=".01" step=".01" value="10"></label>
-      <label>Costo unitario<input type="number" name="unitCost" min="0" step=".01" value="10"></label>
-      <label>IVA %<input type="number" name="taxRate" min="0" step=".01" value="13"></label>
-      <label class="full upload-zone">Factura PDF o imagen<input type="file" name="invoiceFile"><small>Se almacenará en Supabase Storage privado en modo productivo.</small></label>
-    </form>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-purchase">Guardar compra</button>`
+    title: "¿Qué quieres crear?",
+    subtitle: "Selecciona la modalidad observada en CH13.",
+    body: `<div class="purchase-kind-grid">
+      <button class="purchase-kind-card" data-action="choose-purchase-kind" data-kind="ORDER"><strong>Orden de compra</strong><span>Solicitud con proveedor, presentación y líneas múltiples.</span></button>
+      <button class="purchase-kind-card" data-action="choose-purchase-kind" data-kind="PETTY_CASH"><strong>Caja menuda</strong><span>Factura ejecutada con montos manuales de impuesto, descuento y extra.</span></button>
+    </div>`
   });
+}
+
+function purchaseCatalogOptions(selected = "") {
+  const state = store.getState();
+  return state.catalogItems.filter((item) =>
+    item.organizationId === state.organization.id && item.active !== false && item.status !== "INACTIVE"
+  ).map((item) => {
+    const stock = state.inventoryItems.filter((inventory) => inventory.catalogItemId === item.id).reduce((sum, inventory) => sum + Number(inventory.stock || 0), 0);
+    return `<option value="${safeText(item.id)}" ${item.id === selected ? "selected" : ""}>${safeText(item.sku)} · ${safeText(item.name)} · existencia ${stock}</option>`;
+  }).join("");
+}
+
+function purchaseSupplierOptions(selected = "") {
+  const state = store.getState();
+  return state.suppliers.filter((supplier) =>
+    supplier.organizationId === state.organization.id && supplier.status !== "INACTIVE"
+  ).map((supplier) =>
+    `<option value="${safeText(supplier.id)}" ${supplier.id === selected ? "selected" : ""}>${safeText(supplier.name)}</option>`
+  ).join("");
+}
+
+function openPurchaseForm(kind = "ORDER") {
+  const state = store.getState();
+  if (!ui.purchaseDraft || ui.purchaseDraft.kind !== kind) {
+    ui.purchaseDraft = {
+      kind,
+      date: new Date().toISOString().slice(0, 10),
+      invoiceNumber: "",
+      observations: "",
+      headerSupplierId: "",
+      extraAmount: 0,
+      idempotencyKey: uid("PURCHASE-DRAFT"),
+      items: []
+    };
+  }
+  const draft = ui.purchaseDraft;
+  const pettyCash = draft.kind === "PETTY_CASH";
+  const totals = purchaseDraftTotals(draft);
+  const itemRows = draft.items.map((item, index) => `<tr>
+    ${pettyCash ? "" : `<td>${safeText(state.suppliers.find((supplier) => supplier.id === item.supplierId)?.name || "Proveedor no disponible")}</td>`}
+    <td>${safeText(item.name)}</td><td>${money(item.unitCost)}</td><td>${Number(item.quantity)}</td><td>${safeText(item.presentation)}</td>
+    ${pettyCash ? `<td>${money(item.taxAmount)}</td><td>${money(item.discountAmount)}</td>` : ""}
+    <td>${money(Number(item.quantity) * Number(item.unitCost) + Number(item.taxAmount || 0) - Number(item.discountAmount || 0))}</td>
+    <td><button class="icon-button" data-action="remove-purchase-item" data-index="${index}" aria-label="Eliminar ${safeText(item.name)}">×</button></td>
+  </tr>`).join("");
+  openModal({
+    title: pettyCash ? "Nueva compra caja menuda" : "Nueva compra",
+    subtitle: "El guardado crea únicamente un borrador remoto; no aprueba, recibe, anula ni mueve inventario.",
+    size: "xl",
+    body: `<form id="purchase-form" class="form-grid purchase-compose">
+      <input type="hidden" name="kind" value="${safeText(draft.kind)}">
+      <label>Fecha*<input type="date" name="date" value="${safeText(draft.date)}" required></label>
+      ${pettyCash ? `<label>Proveedor*<select name="headerSupplierId" required><option value="">Seleccione</option>${purchaseSupplierOptions(draft.headerSupplierId)}</select></label>` : ""}
+      <label>Número de factura${pettyCash ? "*" : ""}<input name="invoiceNumber" maxlength="160" value="${safeText(draft.invoiceNumber)}" ${pettyCash ? "required" : ""}></label>
+      ${pettyCash ? `<label class="upload-zone">Archivo Factura*<input type="file" disabled aria-describedby="purchase-file-note"><small id="purchase-file-note">Buscar — carga bloqueada hasta confirmar almacenamiento privado, validación y retención. El borrador puede guardarse sin adjunto.</small></label>` : ""}
+      <label class="full">Observaciones<textarea name="observations" rows="3" maxlength="5000">${safeText(draft.observations)}</textarea></label>
+      <div class="form-section full"><h3>Ítem de compra</h3><p>El catálogo muestra código, descripción y existencia. El costo se captura manualmente; no se inventa una tarifa histórica.</p></div>
+      <label class="full">Buscar ítem<input type="search" data-input="purchase-catalog-search" placeholder="Código, descripción o existencia"></label>
+      <label class="full">Ítem*<select name="catalogItemId" required><option value="">Seleccione</option>${purchaseCatalogOptions()}</select></label>
+      ${pettyCash ? "" : `<label>Proveedor*<select name="lineSupplierId" required><option value="">Seleccione</option>${purchaseSupplierOptions()}</select></label>`}
+      <label>Presentación*<input name="presentation" maxlength="160" placeholder="Presentación documentada" required></label>
+      <label>Costo*<input type="number" name="unitCost" min="0" step="0.01" required></label>
+      <label>Cantidad*<input type="number" name="quantity" min="0.001" step="0.001" required></label>
+      ${pettyCash ? `<label>Monto impuesto<input type="number" name="taxAmount" min="0" step="0.01" value="0"></label><label>Monto descuento<input type="number" name="discountAmount" min="0" step="0.01" value="0"></label>` : `<input type="hidden" name="taxAmount" value="0"><input type="hidden" name="discountAmount" value="0">`}
+      <div class="full purchase-line-actions"><button type="button" class="btn btn-secondary" data-action="blocked-purchase-presentation">+ Presentación</button><button type="button" class="btn btn-primary" data-action="add-purchase-item">Añadir</button></div>
+      <div class="full table-wrap"><table><thead><tr>${pettyCash ? "" : "<th>Proveedor</th>"}<th>Ítem</th><th>Costo</th><th>Cantidad</th><th>Presentación</th>${pettyCash ? "<th>Impuesto</th><th>Descuento</th>" : ""}<th>Total</th><th></th></tr></thead><tbody>${itemRows || `<tr><td colspan="${pettyCash ? 8 : 7}">Añade al menos un ítem para guardar el borrador.</td></tr>`}</tbody></table></div>
+      ${pettyCash ? `<div class="full purchase-summary"><label>Extra<input type="number" name="extraAmount" min="0" step="0.01" value="${safeText(draft.extraAmount)}" data-input="purchase-extra"></label><dl><div><dt>Subtotal</dt><dd data-purchase-total="subtotal">${money(totals.subtotal)}</dd></div><div><dt>Descuentos</dt><dd data-purchase-total="discount">${money(totals.discount)}</dd></div><div><dt>Extra</dt><dd data-purchase-total="extra">${money(totals.extra)}</dd></div><div><dt>Impuesto</dt><dd data-purchase-total="tax">${money(totals.tax)}</dd></div><div><dt>Total</dt><dd data-purchase-total="total">${money(totals.total)}</dd></div></dl></div>` : ""}
+      <p class="full blocked-note">Aprobación, recepción, Registro PT, adjuntos, edición, copia, anulación e inventario permanecen bloqueados hasta confirmar sus reglas.</p>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="back-purchase-kind">Atrás</button><button class="btn btn-primary" data-action="save-purchase">Guardar borrador</button>`
+  });
+}
+
+function openPurchaseDetail(id) {
+  const state = store.getState();
+  const purchase = state.purchases.find((candidate) => candidate.id === id);
+  if (!purchase) return showToast("Compra no encontrada.", "danger");
+  const supplier = state.suppliers.find((candidate) => candidate.id === purchase.supplierId);
+  const items = purchase.items || [];
+  openModal({
+    title: "Detalles de compra",
+    subtitle: "Vista de cabecera, líneas y totales; no cambia el estado financiero.",
+    size: "xl",
+    body: `<dl class="detail-list purchase-detail-grid"><div><dt>Fecha</dt><dd>${safeText(purchase.date || "—")}</dd></div><div><dt># Orden</dt><dd>${safeText(purchase.code || purchase.id)}</dd></div><div><dt># Factura</dt><dd>${safeText(purchase.invoiceNumber || "Sin factura")}</dd></div><div><dt>Estado</dt><dd>${safeText(purchase.status || "DRAFT")}</dd></div><div><dt>Categoría</dt><dd>${safeText(purchase.kind === "PETTY_CASH" ? "Caja menuda" : "Orden de compra")}</dd></div><div><dt>Proveedor</dt><dd>${safeText(supplier?.name || "Según líneas")}</dd></div><div class="full"><dt>Observaciones</dt><dd>${safeText(purchase.observations || "Sin observaciones")}</dd></div><div class="full"><dt>Archivos adjuntos</dt><dd>${purchase.invoiceFileName || purchase.invoiceFile ? `${safeText(purchase.invoiceFileName || purchase.invoiceFile)} · acceso no habilitado` : "Sin archivo persistido"}</dd></div></dl>
+      <div class="table-wrap"><table><thead><tr><th>Ítem</th><th>Costo</th><th>Cantidad</th><th>Presentación</th><th>Impuesto</th><th>Descuento</th><th>Total</th></tr></thead><tbody>${items.map((item) => `<tr><td>${safeText(item.name || item.description)}</td><td>${money(item.unitCost)}</td><td>${Number(item.quantity)}</td><td>${safeText(item.presentation || "No documentada")}</td><td>${money(item.taxAmount || 0)}</td><td>${money(item.discountAmount || 0)}</td><td>${money(item.lineTotal ?? Number(item.quantity || 0) * Number(item.unitCost || 0) + Number(item.taxAmount || 0) - Number(item.discountAmount || 0))}</td></tr>`).join("")}</tbody></table></div>
+      <dl class="purchase-detail-totals"><div><dt>Subtotal</dt><dd>${money(purchase.subtotal)}</dd></div><div><dt>Extra</dt><dd>${money(purchase.extra || 0)}</dd></div><div><dt>Descuento</dt><dd>${money(purchase.discount)}</dd></div><div><dt>Impuesto</dt><dd>${money(purchase.tax)}</dd></div><div><dt>Total</dt><dd>${money(purchase.total)}</dd></div></dl>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function purchaseExportRows(purchases = store.getState().purchases) {
+  const state = store.getState();
+  return purchases.map((purchase) => ({
+    tipo: purchase.kind === "PETTY_CASH" ? "Caja menuda" : "Orden de compra",
+    numero: purchase.code || purchase.id,
+    proveedor: state.suppliers.find((supplier) => supplier.id === purchase.supplierId)?.name || "",
+    total: Number(purchase.total || 0),
+    factura: purchase.invoiceNumber || "",
+    fecha: purchase.date || "",
+    estado: purchase.status || "",
+    registro_pt: purchase.registryStatus || "Sin Registro"
+  }));
 }
 
 function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
@@ -2111,8 +2232,61 @@ document.addEventListener("click", async (event) => {
     case "back-professional-payment": openProfessionalServicePayment(ui.professionalPaymentServiceId); break;
     case "blocked-payables-mutation": showToast("Operación financiera bloqueada: faltan reglas aprobadas de cálculo, autorización, idempotencia, auditoría, pago y reversión.", "info", 7000); break;
     case "export-payables": saveDownload("pagos_servicios_sinteticos.csv", toCsv(payablesExportRows()), "text/csv;charset=utf-8"); break;
-    case "open-purchase-form": openPurchaseForm(); break;
-    case "view-purchase": runSafely(()=>printPurchase(data.id)); break;
+    case "open-purchase-form": openPurchaseTypeChooser(); break;
+    case "choose-purchase-kind": openPurchaseForm(data.kind === "PETTY_CASH" ? "PETTY_CASH" : "ORDER"); break;
+    case "back-purchase-kind": capturePurchaseDraft(document.querySelector("#purchase-form")); openPurchaseTypeChooser(); break;
+    case "add-purchase-item": {
+      const form = document.querySelector("#purchase-form");
+      if (!form || !ui.purchaseDraft) break;
+      capturePurchaseDraft(form);
+      const values = Object.fromEntries(new FormData(form));
+      const catalogItem = store.getState().catalogItems.find((item) => item.id === values.catalogItemId);
+      const supplierId = ui.purchaseDraft.kind === "PETTY_CASH" ? ui.purchaseDraft.headerSupplierId : String(values.lineSupplierId || "");
+      const quantity = Number(values.quantity);
+      const unitCost = Number(values.unitCost);
+      const taxAmount = Number(values.taxAmount || 0);
+      const discountAmount = Number(values.discountAmount || 0);
+      if (!catalogItem || !supplierId || !String(values.presentation || "").trim() || !(quantity > 0) || unitCost < 0 || taxAmount < 0 || discountAmount < 0) {
+        showToast("Completa ítem, proveedor, presentación, costo y cantidad con montos válidos.", "danger");
+        break;
+      }
+      if (discountAmount > quantity * unitCost + taxAmount) {
+        showToast("El descuento de línea no puede producir un total negativo.", "danger");
+        break;
+      }
+      ui.purchaseDraft.items.push({
+        catalogItemId: catalogItem.id,
+        supplierId,
+        name: catalogItem.name,
+        presentation: String(values.presentation).trim(),
+        quantity,
+        unitCost,
+        taxAmount,
+        discountAmount
+      });
+      openPurchaseForm(ui.purchaseDraft.kind);
+      break;
+    }
+    case "remove-purchase-item": {
+      if (!ui.purchaseDraft) break;
+      capturePurchaseDraft(document.querySelector("#purchase-form"));
+      const index = Number(data.index);
+      if (Number.isInteger(index) && index >= 0 && index < ui.purchaseDraft.items.length) ui.purchaseDraft.items.splice(index, 1);
+      openPurchaseForm(ui.purchaseDraft.kind);
+      break;
+    }
+    case "blocked-purchase-presentation": showToast("Crear presentaciones requiere confirmar catálogo, proveedor, vigencia y autorización.", "info", 6500); break;
+    case "blocked-purchase-mutation": showToast(`${data.operation || "Esta operación"} permanece bloqueada hasta confirmar estados, permisos, motivo, versionado y reversión.`, "info", 7000); break;
+    case "open-purchase-details": openPurchaseDetail(data.id); break;
+    case "view-purchase": openPurchaseDetail(data.id); break;
+    case "print-purchase": runSafely(()=>printPurchase(data.id)); break;
+    case "export-purchases": saveDownload("compras_sinteticas.csv", toCsv(purchaseExportRows()), "text/csv;charset=utf-8"); break;
+    case "export-purchase": {
+      const purchase = store.getState().purchases.find((candidate) => candidate.id === data.id);
+      if (purchase) saveDownload(`compra_${safeText(purchase.code || purchase.id)}_sintetica.csv`, toCsv(purchaseExportRows([purchase])), "text/csv;charset=utf-8");
+      break;
+    }
+    case "purchase-page": ui.purchasePage = Math.max(1, Number(data.page || 1)); render(); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
     case "open-closure-form": openClosureForm(data.caseId||""); break;
     case "approve-closure": runSafely(()=>store.approveInventoryClosure(data.id),"Cierre aprobado y auditado."); break;
@@ -2160,6 +2334,7 @@ document.addEventListener("change", (event) => {
   if (target.matches('[data-ui-filter="payablesResourceId"]')) { ui.payablesResourceId = target.value; ui.payablesPage = 1; return; }
   if (target.matches('[data-ui-filter="payablesStatus"]')) { ui.payablesStatus = target.value; ui.payablesPage = 1; return; }
   if (target.matches('[data-ui-filter="payablesPageSize"]')) { ui.payablesPageSize = Math.max(1, Math.min(50, Number(target.value || 10))); ui.payablesPage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="purchasePageSize"]')) { ui.purchasePageSize = Math.max(1, Math.min(100, Number(target.value || 10))); ui.purchasePage = 1; render(); return; }
   if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
   if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
@@ -2387,6 +2562,39 @@ document.addEventListener("input", (event) => {
     render();
     const next = document.querySelector('[data-input="payables-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="purchase-search"]')) {
+    ui.purchaseSearch = target.value;
+    ui.purchasePage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="purchase-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="purchase-extra"]') && ui.purchaseDraft) {
+    const value = Number(target.value || 0);
+    ui.purchaseDraft.extraAmount = Number.isFinite(value) && value >= 0 ? value : 0;
+    const totals = purchaseDraftTotals();
+    for (const [key, amount] of Object.entries(totals)) {
+      const output = document.querySelector(`[data-purchase-total="${key}"]`);
+      if (output) output.textContent = money(amount);
+    }
+    return;
+  }
+  if (target.matches('[data-input="purchase-catalog-search"]')) {
+    const select = target.form?.elements.namedItem("catalogItemId");
+    const query = String(target.value || "").trim().toLocaleLowerCase("es");
+    if (select) {
+      for (const option of [...select.options]) {
+        if (!option.value) continue;
+        option.hidden = Boolean(query) && !option.textContent.toLocaleLowerCase("es").includes(query);
+      }
+      const visible = [...select.options].filter((option) => option.value && !option.hidden);
+      if (query && visible.length === 1) select.value = visible[0].value;
+      else if (select.selectedOptions[0]?.hidden) select.value = "";
+    }
     return;
   }
   if (target.matches('[data-input="clinical-case-search"]')) {
@@ -2732,12 +2940,23 @@ document.addEventListener("click", async (event) => {
 
   if(action==="save-purchase"){
     const form=document.querySelector("#purchase-form");
-    if(!form?.reportValidity()) return;
-    const data=Object.fromEntries(new FormData(form));
-    const item=store.getState().catalogItems.find(i=>i.id===data.catalogItemId);
-    data.items=[{catalogItemId:item.id,name:item.name,quantity:Number(data.quantity),unitCost:Number(data.unitCost),taxRate:Number(data.taxRate)}];
-    const result=runSafely(()=>store.createPurchase(data),"Compra creada; la entrada a inventario queda separada y auditable.");
-    if(result) closeModal();
+    if(!form) return;
+    capturePurchaseDraft(form);
+    if (!ui.purchaseDraft?.items?.length) return showToast("Añade al menos un ítem antes de guardar.", "danger");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ui.purchaseDraft.date || "")) return showToast("La fecha es obligatoria.", "danger");
+    if (ui.purchaseDraft.kind === "PETTY_CASH" && (!ui.purchaseDraft.headerSupplierId || !ui.purchaseDraft.invoiceNumber)) return showToast("Proveedor y número de factura son obligatorios para caja menuda.", "danger");
+    const draft = structuredClone(ui.purchaseDraft);
+    const result=await runSafely(()=>store.createPurchase({
+      kind:draft.kind,
+      date:draft.date,
+      invoiceNumber:draft.invoiceNumber,
+      observations:draft.observations,
+      supplierId:draft.headerSupplierId || draft.items[0]?.supplierId,
+      extraAmount:draft.extraAmount,
+      idempotencyKey:draft.idempotencyKey,
+      items:draft.items
+    }),"Borrador de compra confirmado y auditado; no generó recepción ni movimiento de inventario.");
+    if(result!==undefined && result!==null) { ui.purchaseDraft=null; closeModal(); }
   }
 
   if(action==="save-inventory-movement"){

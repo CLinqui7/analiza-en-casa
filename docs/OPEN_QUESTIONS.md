@@ -151,6 +151,23 @@
 - `CH12-Q011`: definir qué representa Reclamos y su relación con Facturas, servicios y pagos profesionales. La sección se conserva vacía sin fabricar registros. Evidencia: CH12-E0001–CH12-E0004.
 - `CH12-Q012`: definir el ledger de desembolsos profesionales, referencias externas, idempotencia y corrección append-only. CH12 no muestra el resultado persistido de Guardar o pagar.
 
+## CH13 · decisiones pendientes trazadas
+
+- `CH13-Q001`: aprobar estados y transiciones exactas para Orden de compra y Caja menuda, roles, precondiciones e irreversibilidad. La plataforma sólo crea `DRAFT`. Evidencia: CH13-E0004 y CH13-E0080.
+- `CH13-Q002`: definir el evento que genera inventario: aprobación, recepción total/parcial u otro hito. Ningún borrador mueve existencias. Evidencia verbal: CH13-E0092.
+- `CH13-Q003`: confirmar recepciones parciales, bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. Evidencia verbal: CH13-E0092.
+- `CH13-Q004`: aprobar captura de impuesto por línea/global, moneda, precisión y redondeo. Se eliminó el IVA 13% inventado; sólo se aceptan montos manuales. Evidencia: CH13-E0057 y CH13-E0065.
+- `CH13-Q005`: definir significado, conceptos, límites, justificación, autorización y efecto contable/fiscal de Extra. Evidencia: CH13-E0070.
+- `CH13-Q006`: definir combinación, límites, autorización y efecto contable/fiscal de descuentos por línea/global. Evidencia: CH13-E0057 y CH13-E0060.
+- `CH13-Q007`: definir obligatoriedad, formatos, tamaño, antimalware, Storage privado, acceso, retención y eliminación del archivo de factura. La carga permanece bloqueada. Evidencia: CH13-E0040, CH13-E0041 y CH13-E0083.
+- `CH13-Q008`: aprobar unicidad de factura por organización/proveedor, facturas sin número, numeración oficial y concurrencia. El código actual identifica explícitamente un borrador. Evidencia: CH13-E0008 y CH13-E0035.
+- `CH13-Q009`: definir significado, estados, responsables, transición y efectos de Registro PT. Sólo se muestra como rótulo documental. Evidencia: CH13-E0004 y CH13-E0080.
+- `CH13-Q010`: definir campos editables tras borrador/aprobación/recepción, corrección, versionado, motivo y preservación. Editar permanece bloqueado. Evidencia: CH13-E0091.
+- `CH13-Q011`: definir qué copia Copiar: cabecera, líneas, precios, ajustes, proveedor, adjunto o plantilla. Permanece bloqueado. Evidencia: CH13-E0091.
+- `CH13-Q012`: aprobar diferencias, contenido, ocultamiento de montos, permisos, firmas y validez de PDF/con montos/Excel. Las salidas actuales son sintéticas y provisionales. Evidencia: CH13-E0091.
+- `CH13-Q013`: definir anulación, motivo, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Permanece bloqueada. Evidencia: CH13-E0091.
+- `CH13-Q014`: definir fuente, tenant, proveedor/presentación, vigencia y autorización del precio histórico y el alta de presentaciones. El costo actual es manual. Evidencia: CH13-E0019–CH13-E0025 y CH13-E0052–CH13-E0055.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

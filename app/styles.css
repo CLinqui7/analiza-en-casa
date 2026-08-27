@@ -1729,6 +1729,22 @@ body.portal-mode #app { min-height: 100vh; }
 .payables-tabs { margin-bottom:14px; }
 .payables-summary-grid { display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;align-items:start; }
 .payables-table-tools { min-width:0; }
+.purchase-table-tools { min-width:0; }
+.purchase-kind-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+.purchase-kind-card { min-height:150px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#fff,#f3f8f8);padding:22px;text-align:left;color:var(--navy-900);cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:8px; }
+.purchase-kind-card:hover,.purchase-kind-card:focus-visible { border-color:var(--teal-500);box-shadow:0 10px 28px rgba(20,123,126,.14);outline:none; }
+.purchase-kind-card strong { font-size:18px; }
+.purchase-kind-card span { color:var(--muted);line-height:1.5; }
+.purchase-compose .form-section p { margin:4px 0 0;color:var(--muted);font-size:11px; }
+.purchase-line-actions { display:flex;justify-content:flex-end;gap:8px; }
+.purchase-summary { display:grid;grid-template-columns:minmax(180px,280px) minmax(260px,1fr);gap:24px;align-items:start; }
+.purchase-summary dl,.purchase-detail-totals { margin:0;display:grid;gap:7px; }
+.purchase-summary dl div,.purchase-detail-totals div { display:flex;justify-content:space-between;gap:20px;padding:7px 10px;border-bottom:1px solid var(--line); }
+.purchase-summary dl div:last-child,.purchase-detail-totals div:last-child { font-weight:800;color:var(--navy-900);font-size:15px; }
+.purchase-summary dt,.purchase-summary dd,.purchase-detail-totals dt,.purchase-detail-totals dd { margin:0; }
+.purchase-detail-grid .full { grid-column:1/-1; }
+.purchase-detail-totals { margin:18px 0 0 auto;max-width:380px; }
+.table-link-button { appearance:none;border:0;background:none;padding:0;cursor:pointer;text-align:left; }
 .payables-actions { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 13px;flex-wrap:wrap; }
 .payables-actions > div { display:flex;gap:8px;flex-wrap:wrap; }
 .payables-filter-panel { margin-bottom:14px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm); }
@@ -1749,6 +1765,9 @@ body.portal-mode #app { min-height: 100vh; }
   .payables-actions .btn { flex:1; }
   .payables-table-tools { align-items:stretch; }
   .payables-table-tools .search-field { width:100%; }
+  .purchase-table-tools { align-items:stretch; }
+  .purchase-table-tools .search-field { width:100%; }
+  .purchase-kind-grid,.purchase-summary { grid-template-columns:1fr; }
   .professional-payment-form { grid-template-columns:1fr; }
   .professional-payment-form .full { grid-column:1; }
 }

@@ -28,6 +28,32 @@ function camelCaseObject(input) {
   ]));
 }
 
+function mapPurchase(raw = {}) {
+  const purchase = camelCaseObject(raw);
+  const sourceItems = purchase.purchaseItems || purchase.items || [];
+  return {
+    ...purchase,
+    date: purchase.purchaseDate || purchase.date,
+    kind: purchase.purchaseKind || purchase.kind || (purchase.paymentType === "PETTY_CASH" ? "PETTY_CASH" : "ORDER"),
+    tax: Number(purchase.taxAmount || purchase.tax || 0),
+    discount: Number(purchase.discountAmount || purchase.discount || 0),
+    extra: Number(purchase.extraAmount || purchase.extra || 0),
+    subtotal: Number(purchase.subtotal || 0),
+    total: Number(purchase.total || 0),
+    registryStatus: purchase.registryStatus || "Sin Registro",
+    items: sourceItems.map((item) => ({
+      ...item,
+      name: item.description || item.name || "",
+      presentation: item.presentation || "No documentada",
+      quantity: Number(item.quantity || 0),
+      unitCost: Number(item.unitCost || 0),
+      taxAmount: Number(item.taxAmount || 0),
+      discountAmount: Number(item.discountAmount || 0),
+      lineTotal: Number(item.lineTotal || 0)
+    }))
+  };
+}
+
 export function mapSupabaseBootstrap(rawCollections = {}) {
   const collections = { ...rawCollections };
   collections.patients = (rawCollections.patients || []).map((raw) => {
@@ -59,6 +85,12 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
     const doctor = camelCaseObject(raw);
     return { ...doctor, name: doctor.fullName || doctor.name || "" };
   });
+  collections.suppliers = (rawCollections.suppliers || []).map(camelCaseObject);
+  collections.catalogItems = (rawCollections.catalogItems || []).map((raw) => {
+    const item = camelCaseObject(raw);
+    return { ...item, price: Number(item.basePrice || 0), cost: Number(item.cost || 0), active: item.status !== "INACTIVE" };
+  });
+  collections.purchases = (rawCollections.purchases || []).map(mapPurchase);
 
   collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
     const root = camelCaseObject(rawQuote);
@@ -363,6 +395,8 @@ export async function createSupabaseAdapter(config) {
       ["clinicalDocuments", "clinical_documents", "*"],
       ["medicationCards", "medication_cards", "*, medication_card_items(*)"],
       ["shifts", "shifts", "*"],
+      ["suppliers", "suppliers", "*"],
+      ["catalogItems", "catalog_items", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
       ["inventoryItems", "inventory_items", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
@@ -644,19 +678,30 @@ export async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok:true, shift:camelCaseObject(data) };
       }
-      case "CREATE_PURCHASE":
-        return insert("purchases", {
-          id: payload.purchase.id,
-          supplier_id: payload.purchase.supplierId,
-          purchase_date: payload.purchase.date,
-          invoice_number: payload.purchase.invoiceNumber,
-          status: payload.purchase.status,
-          payment_type: payload.purchase.paymentType,
-          subtotal: payload.purchase.subtotal,
-          tax_amount: payload.purchase.tax,
-          discount_amount: payload.purchase.discount,
-          total: payload.purchase.total
+      case "CREATE_PURCHASE_DRAFT": {
+        const purchase = payload.purchase;
+        const { data, error } = await client.rpc("create_purchase_draft", {
+          p_supplier_id: purchase.supplierId,
+          p_purchase_date: purchase.date,
+          p_invoice_number: purchase.invoiceNumber || null,
+          p_observations: purchase.observations || null,
+          p_purchase_kind: purchase.kind,
+          p_extra_amount: purchase.extra || 0,
+          p_items: purchase.items.map((item) => ({
+            catalog_item_id: item.catalogItemId,
+            supplier_id: item.supplierId,
+            description: item.description || item.name,
+            presentation: item.presentation,
+            quantity: item.quantity,
+            unit_cost: item.unitCost,
+            tax_amount: item.taxAmount || 0,
+            discount_amount: item.discountAmount || 0
+          })),
+          p_idempotency_key: purchase.idempotencyKey
         });
+        if (error) throw error;
+        return { ok:true, purchase:mapPurchase(data) };
+      }
       case "CREATE_INVENTORY_MOVEMENT":
         return client.rpc("apply_inventory_movement_v2", {
           p_inventory_item_id: payload.movement.inventoryItemId,

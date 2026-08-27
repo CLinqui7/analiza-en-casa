@@ -1266,19 +1266,43 @@ function renderPayables(state, store, ui) {
 }
 
 function renderPurchases(state, store, ui) {
-  const rows=state.purchases.map((purchase)=>{
-    const supplier=state.suppliers.find((s)=>s.id===purchase.supplierId);
-    return `<tr><td><a class="strong-link" href="#/compras">${esc(purchase.id)}</a><small>${esc(purchase.invoiceNumber||"Sin factura")}</small></td><td>${esc(supplier?.name)}</td><td>${formatDate(purchase.date)}</td><td>${purchase.items.length}</td><td>${money(purchase.subtotal)}</td><td>${money(purchase.tax)}</td><td>${money(purchase.discount)}</td><td>${money(purchase.total)}</td><td>${badge(purchase.status)}</td><td>${actionButton("Ver / imprimir","view-purchase",{kind:"ghost",data:`data-id="${purchase.id}"`})}</td></tr>`;
+  const query=String(ui.purchaseSearch||"").trim().toLocaleLowerCase("es");
+  const pageSize=Math.max(1,Number(ui.purchasePageSize||10));
+  const matching=(state.purchases||[]).filter((purchase)=>{
+    const supplier=state.suppliers.find((candidate)=>candidate.id===purchase.supplierId);
+    const lineSuppliers=(purchase.items||[]).map((item)=>state.suppliers.find((candidate)=>candidate.id===item.supplierId)?.name).filter(Boolean);
+    return !query||[
+      purchase.code,purchase.id,purchase.invoiceNumber,purchase.status,purchase.registryStatus,
+      purchase.kind==="PETTY_CASH"?"Caja menuda":"Orden de compra",supplier?.name,...lineSuppliers
+    ].some((value)=>String(value||"").toLocaleLowerCase("es").includes(query));
   });
+  const totalPages=Math.max(1,Math.ceil(matching.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.purchasePage||1)),totalPages);
+  const visible=matching.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  const purchaseStatusLabel=(purchase)=>purchase.status==="RECEIVED"?"Compra Recibida":purchase.status==="DRAFT"?"Borrador seguro":"Pendiente";
+  const rows=visible.map((purchase)=>{
+    const supplier=state.suppliers.find((candidate)=>candidate.id===purchase.supplierId);
+    const lineSupplierNames=[...new Set((purchase.items||[]).map((item)=>state.suppliers.find((candidate)=>candidate.id===item.supplierId)?.name).filter(Boolean))];
+    const supplierLabel=supplier?.name||lineSupplierNames.join(", ")||"Proveedor no disponible";
+    const registryStatus=purchase.registryStatus||"Sin Registro";
+    const menu=`<details class="quote-row-menu purchase-row-menu"><summary aria-label="Acciones de ${esc(purchase.code||purchase.id)}">⋯</summary><div class="quote-row-menu-panel">
+      <button data-action="open-purchase-details" data-id="${esc(purchase.id)}">Ver</button>
+      <button data-action="blocked-purchase-mutation" data-operation="Editar detalles">Editar detalles</button>
+      <button data-action="blocked-purchase-mutation" data-operation="Copiar">Copiar</button>
+      <button data-action="print-purchase" data-id="${esc(purchase.id)}">Imprimir PDF</button>
+      <button data-action="print-purchase" data-id="${esc(purchase.id)}">Imprimir con montos</button>
+      <button data-action="export-purchase" data-id="${esc(purchase.id)}">Imprimir en Excel</button>
+      <button data-action="blocked-purchase-mutation" data-operation="Anular">Anular</button>
+    </div></details>`;
+    return `<tr><td>${menu}</td><td>${esc(purchase.kind==="PETTY_CASH"?"Caja menuda":"Orden de compra")}</td><td><button class="strong-link table-link-button" data-action="open-purchase-details" data-id="${esc(purchase.id)}">${esc(purchase.code||purchase.id)}</button></td><td>${esc(supplierLabel)}</td><td><strong>${money(purchase.total)}</strong></td><td>${esc(purchase.invoiceNumber||"Sin factura")}</td><td>${formatDate(purchase.date)}</td><td>${badge(purchase.status,purchaseStatusLabel(purchase))}</td><td>${badge(registryStatus,registryStatus)}</td></tr>`;
+  });
+  const pages=Array.from({length:Math.min(totalPages,7)},(_,index)=>index+1).map((page)=>`<button data-action="purchase-page" data-page="${page}" class="${page===currentPage?"active":""}">${page}</button>`).join("");
+  const toolbar=`<div class="filter-bar purchase-table-tools"><label class="page-size-label">Mostrar <select data-ui-filter="purchasePageSize" aria-label="Cantidad de compras por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize===size?"selected":""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${matching.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar compras</span><input data-input="purchase-search" value="${esc(ui.purchaseSearch||"")}" placeholder="Buscar número, proveedor, factura o estado"></label></div>`;
+  const pager=`<nav class="pagination" aria-label="Paginación de compras"><button data-action="purchase-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="purchase-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>`;
   return `
-    ${pageHeader("Compras","Solicitudes, autorización, factura, proveedor, historial de precios, impuestos, descuentos y entrada a inventario.",
-      `${actionButton("Nueva compra","open-purchase-form",{kind:"primary",iconName:"plus"})}`)}
-    <div class="metrics-grid metrics-small">
-      ${metric("Compras del período",state.purchases.length,"Órdenes y facturas","purchases","blue")}
-      ${metric("Total comprado",money(state.purchases.reduce((s,p)=>s+p.total,0)),"Datos ficticios","money","teal")}
-      ${metric("Pendientes",state.purchases.filter(p=>p.status==="PENDING_APPROVAL").length,"Requieren autorización","clock","amber")}
-    </div>
-    ${card("Órdenes y compras",table(["Compra / factura","Proveedor","Fecha","Ítems","Subtotal","IVA","Descuento","Total","Estado",""],rows))}
+    ${pageHeader("Compras","Órdenes de compra y caja menuda con líneas, importes manuales y trazabilidad de borradores.",
+      `${actionButton("Excel","export-purchases",{iconName:"export"})}${actionButton("Nuevo","open-purchase-form",{kind:"primary",iconName:"plus"})}`)}
+    ${card("Compras",`${toolbar}${table(["Acciones","Tipo","Número","Proveedor","Total","# Factura","Fecha","Estado","Registro PT"],rows)}${pager}`,{subtitle:"Las transiciones financieras y de inventario permanecen separadas hasta contar con reglas aprobadas."})}
   `;
 }
 

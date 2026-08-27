@@ -498,7 +498,22 @@
         "CH13-F10",
         "CH13-F11"
       ],
-      "open_question_ids": []
+      "open_question_ids": [
+        "CH13-Q001",
+        "CH13-Q002",
+        "CH13-Q003",
+        "CH13-Q004",
+        "CH13-Q005",
+        "CH13-Q006",
+        "CH13-Q007",
+        "CH13-Q008",
+        "CH13-Q009",
+        "CH13-Q010",
+        "CH13-Q011",
+        "CH13-Q012",
+        "CH13-Q013",
+        "CH13-Q014"
+      ]
     },
     {
       "chapter_id": "CH14",
@@ -5832,17 +5847,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q001",
+        "CH13-Q009"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "El listado queda limitado por permiso y organización.",
+        "financial_impact": "Totales y estados se leen del registro persistido; la exportación es sintética y provisional.",
+        "current_platform_evidence": "app/views.js renderPurchases; app/main.js purchase-search/purchase-page/export-purchases",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Mantener regresión de columnas, búsqueda, paginación, exportación y móvil.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Reproduce las nueve columnas observadas y los controles de tabla."
       }
     },
     {
@@ -5866,24 +5884,27 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q001",
+        "CH13-Q009"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "Una recepción falsa podría afectar disponibilidad operativa.",
+        "financial_impact": "Estado y Registro PT pueden disparar contabilidad, pago o inventario aún no definidos.",
+        "current_platform_evidence": "app/views.js sólo presenta badges; app/store.js crea exclusivamente DRAFT",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Resolver CH13-Q001, CH13-Q002, CH13-Q009 y CH13-Q010 antes de habilitar transiciones.",
+        "blocked_by_client_information": true,
+        "notes": "Los rótulos visibles se conservan, pero ninguna transición se infiere."
       }
     },
     {
       "requirement_id": "CH13-F03",
       "module": "Compras y compras al por mayor",
       "feature": "Elección de modalidad de compra",
-      "detailed_behavior": "Nuevo permite escoger Orden de compra o Caja chica.",
+      "detailed_behavior": "Nuevo permite escoger Orden de compra o Caja menuda.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH13",
       "classification": "VISIBLE",
@@ -5909,17 +5930,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "Sin impacto clínico; elegir modalidad no persiste.",
+        "financial_impact": "La modalidad define sólo la composición del borrador.",
+        "current_platform_evidence": "app/main.js openPurchaseTypeChooser/openPurchaseForm",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Mantener ambas rutas en regresión.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Usa el rótulo exacto Caja menuda observado en la interfaz."
       }
     },
     {
@@ -5947,13 +5970,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "El catálogo y proveedor se limitan al tenant.",
+        "financial_impact": "Costo es manual; precio histórico y alta de presentación permanecen bloqueados.",
+        "current_platform_evidence": "app/main.js openPurchaseForm/purchaseCatalogOptions/blocked-purchase-presentation",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Completar historial y presentaciones sólo después de resolver CH13-Q014.",
+        "blocked_by_client_information": true,
+        "notes": "Cabecera, catálogo buscable y línea están implementados; no se inventa precio histórico."
       }
     },
     {
@@ -5988,21 +6011,21 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "Sin impacto clínico; las referencias se validan por organización.",
+        "financial_impact": "Líneas múltiples se recalculan y rechazan total negativo.",
+        "current_platform_evidence": "app/main.js add-purchase-item/remove-purchase-item; app/store.js createPurchase",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Mantener pruebas de múltiples líneas y errores.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Proveedor, ítem, costo, cantidad, presentación y total aparecen en la tabla."
       }
     },
     {
       "requirement_id": "CH13-F06",
       "module": "Compras y compras al por mayor",
-      "feature": "Formulario de compra por caja chica",
+      "feature": "Formulario de compra por caja menuda",
       "detailed_behavior": "Fecha, proveedor, factura, archivo de factura con Buscar, observaciones, ítem, presentación, costo, cantidad, impuesto y descuento.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH13",
@@ -6010,6 +6033,15 @@
       "confidence": "HIGH",
       "rule_or_limit": "",
       "evidence": [
+        {
+          "chapter_id": "CH13",
+          "event_id": "CH13-E0035",
+          "timestamp": "00:37:37.800",
+          "path": "references/video-audit/chapters/CH13_compras_y_compras_al_por_mayor/event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg",
+          "detail_path": "",
+          "transcript": "00:37:30–00:38:35",
+          "observation": ""
+        },
         {
           "chapter_id": "CH13",
           "event_id": "CH13-E0052",
@@ -6020,23 +6052,26 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q008",
+        "CH13-Q014"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "El adjunto podría contener datos personales o fiscales y no se carga sin controles.",
+        "financial_impact": "Proveedor, factura y montos forman un borrador; el archivo sigue sin persistir.",
+        "current_platform_evidence": "app/main.js Nueva compra caja menuda; app/store.js createPurchase",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Implementar Storage privado sólo tras resolver CH13-Q007.",
+        "blocked_by_client_information": true,
+        "notes": "Impuesto y descuento son montos manuales; se eliminó la tasa 13% inventada."
       }
     },
     {
       "requirement_id": "CH13-F07",
       "module": "Compras y compras al por mayor",
-      "feature": "Desglose de totales de caja chica",
+      "feature": "Desglose de totales de caja menuda",
       "detailed_behavior": "Tabla Ítem, Costo, Cantidad, Presentación, Impuesto, Descuento y Total; resumen Subtotal, Descuentos, Extra, Impuesto y Total. Los valores son datos del ejemplo, no reglas de cálculo confirmadas.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH13",
@@ -6063,17 +6098,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q004"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "status": "IMPLEMENTED_EXACT",
+        "priority": "P0",
+        "patient_safety_impact": "Sin regla clínica; los importes no cambian inventario.",
+        "financial_impact": "Subtotal, descuento, extra, impuesto y total se validan en cliente y servidor sin tasa implícita.",
+        "current_platform_evidence": "app/main.js purchaseDraftTotals; app/store.js createPurchase; migration 202608270009 create_purchase_draft",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Mantener importes explícitos hasta aprobar política fiscal y redondeo.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La aritmética usa únicamente montos capturados; no interpreta impuestos."
       }
     },
     {
@@ -6106,17 +6143,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q007"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "El detalle es de sólo lectura y tenant-scoped.",
+        "financial_impact": "Muestra el snapshot persistido sin editarlo; acceso al archivo no está habilitado.",
+        "current_platform_evidence": "app/main.js openPurchaseDetail",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Habilitar Ver archivo mediante URL firmada sólo tras CH13-Q007.",
+        "blocked_by_client_information": true,
+        "notes": "Cabecera, líneas y cinco totales están implementados."
       }
     },
     {
@@ -6140,17 +6179,22 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q010",
+        "CH13-Q011",
+        "CH13-Q012",
+        "CH13-Q013"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "Anulación y edición permanecen bloqueadas para evitar cambios operativos silenciosos.",
+        "financial_impact": "Ver e impresión/CSV sintéticos funcionan; editar, copiar y anular no mutan.",
+        "current_platform_evidence": "app/views.js purchase-row-menu; app/main.js blocked-purchase-mutation/printPurchase/export-purchase",
+        "test_path": "tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Resolver CH13-Q010–CH13-Q013 antes de habilitar mutaciones o salidas oficiales.",
+        "blocked_by_client_information": true,
+        "notes": "Todas las acciones observadas permanecen visibles y ninguna acción incompleta afirma éxito."
       }
     },
     {
@@ -6174,17 +6218,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q002",
+        "CH13-Q003"
+      ],
       "platform_assessment": {
-        "status": "NOT_TESTABLE",
-        "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "Una entrada omitida o duplicada puede afectar disponibilidad de insumos.",
+        "financial_impact": "Recepción e inventario deben enlazarse de forma atómica e idempotente.",
+        "current_platform_evidence": "app/store.js createPurchase crea sólo DRAFT y no llama createInventoryMovement",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs",
+        "recommended_action": "Resolver CH13-Q002–CH13-Q003 antes de vincular recepción e inventario.",
+        "blocked_by_client_information": true,
+        "notes": "La afirmación es verbal; el video no demuestra la recepción."
       }
     },
     {
@@ -6208,17 +6255,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH13-Q002",
+        "CH13-Q003"
+      ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
-        "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/compras",
-        "test_path": "#/compras; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "priority": "P0",
+        "patient_safety_impact": "Adjuntos y recepción pueden afectar privacidad y disponibilidad operativa.",
+        "financial_impact": "Faltan reglas fiscales, aprobación, anulación, corrección, impresión y retención.",
+        "current_platform_evidence": "migration 202608270009 cierra DML directo y crea sólo borradores; UI bloquea efectos desconocidos",
+        "test_path": "tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs",
+        "recommended_action": "Resolver CH13-Q001–CH13-Q014 antes de ampliar la máquina de compra.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "El P0 previo queda contenido por RPC tenant-safe, idempotencia, auditoría y ausencia de éxito local-first."
       }
     },
     {
@@ -9545,6 +9595,156 @@
       "question": "definir el ledger de desembolsos profesionales, referencias externas, idempotencia y corrección append-only. CH12 no muestra el resultado persistido de Guardar o pagar.",
       "evidence_event_ids": [],
       "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q001",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "aprobar estados y transiciones exactas para Orden de compra y Caja menuda, roles autorizados, precondiciones y estados irreversibles. Evidencia: CH13-E0004, 00:36:46.400; CH13-E0080, 00:39:26.800.",
+      "evidence_event_ids": [
+        "CH13-E0004",
+        "CH13-E0080"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q002",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir en qué evento una compra genera inventario: aprobación, recepción total, recepción parcial u otro hito auditable. Evidencia verbal: CH13-E0092, 00:39:43.000; transcripción 00:39:51–00:39:58.",
+      "evidence_event_ids": [
+        "CH13-E0092"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q003",
+      "chapter_id": "CH13",
+      "classification": "VERBAL",
+      "question": "confirmar recepciones parciales, múltiples bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. Evidencia: CH13-E0092, 00:39:43.000; el flujo no se muestra.",
+      "evidence_event_ids": [
+        "CH13-E0092"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q004",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "aprobar si el impuesto se captura por línea, global o ambos, moneda, precisión y redondeo. No se adopta ninguna tasa del baseline o del video. Evidencia: CH13-E0057, 00:38:34.800; CH13-E0065, 00:38:52.400.",
+      "evidence_event_ids": [
+        "CH13-E0057",
+        "CH13-E0065"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q005",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir qué representa Extra, conceptos permitidos, límites, justificación, autorización y efecto contable/fiscal. Evidencia: CH13-E0070, 00:39:12.600.",
+      "evidence_event_ids": [
+        "CH13-E0070"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q006",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "confirmar si el descuento global se combina con descuentos por línea, sus límites, autorización y efecto contable/fiscal. Evidencia: CH13-E0057, 00:38:34.800; CH13-E0060, 00:38:48.000.",
+      "evidence_event_ids": [
+        "CH13-E0057",
+        "CH13-E0060"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q007",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir cuándo el archivo es obligatorio, formatos, tamaño, validación antimalware, almacenamiento privado, acceso, descarga, retención y eliminación. Evidencia: CH13-E0040, 00:37:48.400; CH13-E0041, 00:37:49.000; CH13-E0083, 00:39:33.000.",
+      "evidence_event_ids": [
+        "CH13-E0040",
+        "CH13-E0041",
+        "CH13-E0083"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q008",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "aprobar unicidad del número de factura por organización/proveedor, tratamiento de facturas sin número, numeración oficial de compras y concurrencia. Evidencia: CH13-E0008, 00:36:54.800; CH13-E0035, 00:37:37.800.",
+      "evidence_event_ids": [
+        "CH13-E0008",
+        "CH13-E0035"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q009",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir el significado de Registro PT, catálogo de estados, responsables, transición, evidencia y consecuencias operativas/contables. Evidencia: CH13-E0004, 00:36:46.400; CH13-E0080, 00:39:26.800.",
+      "evidence_event_ids": [
+        "CH13-E0004",
+        "CH13-E0080"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q010",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir campos editables tras borrador, aprobación o recepción, junto con corrección, versionado, motivo, autorización y preservación del original. Evidencia: CH13-E0091, 00:39:40.800.",
+      "evidence_event_ids": [
+        "CH13-E0091"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q011",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir qué copia la acción Copiar: cabecera, líneas, proveedores, precios, ajustes, adjunto o sólo una plantilla. Evidencia: CH13-E0091, 00:39:40.800.",
+      "evidence_event_ids": [
+        "CH13-E0091"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q012",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "aprobar diferencias, contenido, ocultamiento de montos, permisos, firmas y validez de Imprimir PDF, Imprimir con montos e Imprimir en Excel. Evidencia: CH13-E0091, 00:39:40.800.",
+      "evidence_event_ids": [
+        "CH13-E0091"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q013",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir anulación, motivo obligatorio, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Evidencia: CH13-E0091, 00:39:40.800.",
+      "evidence_event_ids": [
+        "CH13-E0091"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH13-Q014",
+      "chapter_id": "CH13",
+      "classification": "UNCERTAIN",
+      "question": "definir fuente, alcance organizacional, proveedor/presentación, vigencia y autorización del precio histórico, además del alta de presentaciones. Evidencia: CH13-E0019–CH13-E0025, 00:37:11.800–00:37:17.200; CH13-E0052–CH13-E0055, 00:38:22.400–00:38:25.200.",
+      "evidence_event_ids": [
+        "CH13-E0019",
+        "CH13-E0025",
+        "CH13-E0052",
+        "CH13-E0055"
+      ],
+      "status": "OPEN"
     }
   ],
   "platform_safety_findings": [
@@ -9677,24 +9877,45 @@
       "recommended_action": "Ejecutar las migraciones y pruebas de concurrencia, RLS, lotes, transferencias y reversión contra una instancia Supabase real antes de elevar el estado.",
       "blocked_by_client_information": false,
       "notes": "Implementado en el lote P0 3 con pruebas focalizadas de pago, reversión, comprobante/asignación, reserva, consumo, devolución, duplicado y organización. Permanece parcial hasta validación persistente en Supabase. La convención canónica es available = stock - committed."
+    },
+    {
+      "finding_id": "SAFE-P0-007",
+      "module": "Compras",
+      "feature": "Borradores financieros transaccionales y referencias tenant-safe",
+      "detailed_behavior": "La creación de una compra debe confirmar cabecera y líneas de forma atómica e idempotente, recalcular montos en servidor y validar que proveedor, catálogo y padre pertenezcan a la organización activa.",
+      "evidence_paths": [
+        "video-audit-reviews/CH13_compras_y_compras_al_por_mayor/chapter_feature_inventory.json",
+        "app/store.js",
+        "app/supabase-adapter.js",
+        "supabase/migrations/202608270009_ch13_purchase_drafts.sql",
+        "tests/ch13-purchase-drafts.test.mjs"
+      ],
+      "current_platform_evidence": "createPurchase usa requiredSync en modo Supabase; create_purchase_draft deriva organización, valida referencias, recalcula importes manuales, inserta cabecera/líneas/evento/auditoría y deduplica bajo bloqueo. DML directo queda revocado.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "priority": "P0",
+      "patient_safety_impact": "Una recepción o referencia cruzada incorrecta puede afectar la disponibilidad operativa de insumos.",
+      "financial_impact": "Persistencia parcial, importes manipulados o reintentos duplicados pueden desalinear compras, facturas e inventario.",
+      "recommended_action": "Aplicar la migración y ejecutar concurrencia/RLS con dos organizaciones en Supabase real; mantener aprobación, recepción, anulación y adjuntos cerrados hasta contar con reglas.",
+      "blocked_by_client_information": false,
+      "notes": "El P0 está contenido en código y contrato SQL, pero permanece parcial hasta validar la migración en una instancia Supabase real."
     }
   ],
   "summary": {
     "requirements": 210,
-    "open_questions": 106,
-    "safety_findings": 6,
+    "open_questions": 120,
+    "safety_findings": 7,
     "gap_status_counts": {
-      "IMPLEMENTED_EXACT": 8,
-      "IMPLEMENTED_PARTIAL": 168,
+      "IMPLEMENTED_EXACT": 12,
+      "IMPLEMENTED_PARTIAL": 164,
       "MISSING": 0,
       "CONFLICTS_WITH_VIDEO": 0,
-      "NOT_TESTABLE": 7,
-      "NEEDS_CLIENT_CONFIRMATION": 33
+      "NOT_TESTABLE": 6,
+      "NEEDS_CLIENT_CONFIRMATION": 35
     },
     "priority_counts": {
-      "P0": 9,
-      "P1": 171,
-      "P2": 36,
+      "P0": 16,
+      "P1": 167,
+      "P2": 34,
       "P3": 0
     }
   }

@@ -96,13 +96,29 @@ export async function createAppStore(config) {
     signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
     signatureMetadata: note.signatureMetadata || null
   }));
-  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications"]) {
+  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications", "suppliers", "catalogItems"]) {
     state[collection] ||= [];
     state[collection] = state[collection].map((record) => ({
       ...record,
       organizationId: record.organizationId || state.organization?.id
     }));
   }
+  state.purchases ||= [];
+  state.purchases = state.purchases.map((purchase) => ({
+    ...purchase,
+    organizationId: purchase.organizationId || state.organization?.id,
+    code: purchase.code || purchase.id,
+    kind: purchase.kind || (purchase.paymentType === "PETTY_CASH" ? "PETTY_CASH" : "ORDER"),
+    extra: Number(purchase.extra || purchase.extraAmount || 0),
+    registryStatus: purchase.registryStatus || "Sin Registro",
+    items: (purchase.items || []).map((item) => ({
+      ...item,
+      supplierId: item.supplierId || purchase.supplierId,
+      presentation: item.presentation || "No documentada",
+      taxAmount: Number(item.taxAmount ?? (Number(item.quantity || 0) * Number(item.unitCost || 0) * Number(item.taxRate || 0) / 100)),
+      discountAmount: Number(item.discountAmount || 0)
+    }))
+  }));
   state.notificationAttempts ||= [];
   let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
@@ -1674,30 +1690,106 @@ export async function createAppStore(config) {
 
   function createPurchase(input) {
     requirePermission("purchases:write");
-    const subtotal = roundMoney(input.items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitCost), 0));
-    const tax = roundMoney(input.items.reduce((sum, item) =>
-      sum + Number(item.quantity) * Number(item.unitCost) * Number(item.taxRate || 0) / 100, 0));
-    const discount = roundMoney(input.discount || 0);
+    const kind = String(input.kind || "").toUpperCase();
+    if (!new Set(["ORDER","PETTY_CASH"]).has(kind)) throw new Error("Modalidad de compra no permitida.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(input.date || ""))) throw new Error("La fecha de compra es obligatoria.");
+    const invoiceNumber = String(input.invoiceNumber || "").trim();
+    if (invoiceNumber.length > 160 || (kind === "PETTY_CASH" && !invoiceNumber)) throw new Error("Revise el número de factura.");
+    const observations = String(input.observations || "").trim();
+    if (observations.length > 5000) throw new Error("Las observaciones exceden el límite técnico.");
+    const idempotencyKey = String(input.idempotencyKey || "").trim().slice(0,160);
+    if (!idempotencyKey) throw new Error("La clave de idempotencia es obligatoria.");
+    const existing = state.purchases.find((candidate) =>
+      candidate.organizationId === state.organization.id && candidate.idempotencyKey === idempotencyKey
+    );
+    if (existing) return existing;
+    if (!Array.isArray(input.items) || input.items.length < 1 || input.items.length > 200) throw new Error("La compra requiere entre 1 y 200 ítems.");
+    const items = input.items.map((source, index) => {
+      const catalogItem = state.catalogItems.find((candidate) => candidate.id === source.catalogItemId);
+      const supplier = state.suppliers.find((candidate) => candidate.id === (source.supplierId || input.supplierId) && candidate.status !== "INACTIVE");
+      assertCurrentOrganization(catalogItem, `Ítem ${index + 1}`);
+      assertCurrentOrganization(supplier, `Proveedor del ítem ${index + 1}`);
+      const quantity = Number(source.quantity);
+      const unitCost = Number(source.unitCost);
+      const taxAmount = Number(source.taxAmount || 0);
+      const discountAmount = Number(source.discountAmount || 0);
+      const presentation = String(source.presentation || "").trim();
+      if (!Number.isFinite(quantity) || !(quantity > 0) || !Number.isFinite(unitCost) || unitCost < 0
+        || !Number.isFinite(taxAmount) || taxAmount < 0 || !Number.isFinite(discountAmount) || discountAmount < 0
+        || !presentation || presentation.length > 160) throw new Error(`Revise los montos y presentación del ítem ${index + 1}.`);
+      const lineSubtotal = roundMoney(quantity * unitCost);
+      const lineTotal = roundMoney(lineSubtotal + taxAmount - discountAmount);
+      if (lineTotal < 0) throw new Error(`El descuento del ítem ${index + 1} produce un total negativo.`);
+      return {
+        catalogItemId: catalogItem.id,
+        supplierId: supplier.id,
+        name: catalogItem.name,
+        description: catalogItem.name,
+        presentation,
+        quantity,
+        unitCost: roundMoney(unitCost),
+        taxAmount: roundMoney(taxAmount),
+        discountAmount: roundMoney(discountAmount),
+        lineTotal
+      };
+    });
+    const supplier = state.suppliers.find((candidate) => candidate.id === (input.supplierId || items[0].supplierId) && candidate.status !== "INACTIVE");
+    assertCurrentOrganization(supplier, "Proveedor");
+    const extra = roundMoney(Number(input.extraAmount || 0));
+    if (!Number.isFinite(extra) || extra < 0) throw new Error("El monto extra debe ser un valor no negativo.");
+    const subtotal = roundMoney(items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitCost), 0));
+    const tax = roundMoney(items.reduce((sum, item) => sum + item.taxAmount, 0));
+    const discount = roundMoney(items.reduce((sum, item) => sum + item.discountAmount, 0));
+    const total = roundMoney(subtotal + tax + extra - discount);
+    if (total < 0) throw new Error("Los ajustes producen un total de compra negativo.");
     const purchase = {
-      id: `PUR-${new Date().getFullYear()}-${String(83 + state.purchases.length).padStart(4, "0")}`,
-      supplierId: input.supplierId,
-      date: input.date || new Date().toISOString().slice(0, 10),
-      invoiceNumber: input.invoiceNumber || "",
-      status: input.status || "PENDING_APPROVAL",
-      paymentType: input.paymentType || "CREDIT",
-      invoiceFile: input.invoiceFile || "",
+      id: uid("PUR-DRAFT"),
+      code: `BORRADOR-${uid("PUR").slice(-8).toUpperCase()}`,
+      organizationId: state.organization.id,
+      supplierId: supplier.id,
+      date: input.date,
+      invoiceNumber,
+      observations,
+      kind,
+      status: "DRAFT",
+      registryStatus: "Sin Registro",
+      paymentType: "UNCONFIRMED",
+      invoiceFile: "",
       subtotal,
       tax,
       discount,
-      total: roundMoney(subtotal + tax - discount),
-      items: clone(input.items)
+      extra,
+      total,
+      idempotencyKey,
+      items
     };
-    setState((draft) => {
-      draft.purchases.unshift(purchase);
-      audit("CREATE_PURCHASE", purchase.id, `Compra creada por ${purchase.total}.`);
-    });
-    safeSync("CREATE_PURCHASE", { purchase });
-    return purchase;
+    const commit = (remotePurchase = purchase) => {
+      const normalized = {
+        ...purchase,
+        ...remotePurchase,
+        organizationId: remotePurchase.organizationId || purchase.organizationId,
+        supplierId: remotePurchase.supplierId || purchase.supplierId,
+        date: remotePurchase.date || remotePurchase.purchaseDate || purchase.date,
+        tax: Number(remotePurchase.tax ?? remotePurchase.taxAmount ?? purchase.tax),
+        discount: Number(remotePurchase.discount ?? remotePurchase.discountAmount ?? purchase.discount),
+        extra: Number(remotePurchase.extra ?? remotePurchase.extraAmount ?? purchase.extra),
+        total: Number(remotePurchase.total ?? purchase.total),
+        subtotal: Number(remotePurchase.subtotal ?? purchase.subtotal),
+        items: clone(remotePurchase.items?.length ? remotePurchase.items : purchase.items)
+      };
+      const duplicate = state.purchases.find((candidate) =>
+        candidate.organizationId === state.organization.id
+        && (candidate.idempotencyKey === idempotencyKey || candidate.id === normalized.id)
+      );
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.purchases.unshift(normalized);
+        audit("CREATE_PURCHASE_DRAFT", normalized.id, "Borrador de compra creado y confirmado.", { idempotencyKey, kind, itemCount:items.length });
+      });
+      return normalized;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_PURCHASE_DRAFT", { purchase }).then((result) => commit(result?.purchase));
+    return commit();
   }
 
   function createInventoryMovement(input) {
