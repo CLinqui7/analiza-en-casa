@@ -56,6 +56,14 @@ const ui = {
   caseAccountType: "",
   caseQuoteStatus: "",
   caseQuoteDate: "",
+  receivablesTab: "accounts",
+  receivablesSearch: "",
+  receivablesPage: 1,
+  receivablesPageSize: 10,
+  receivablesSortKey: "startDate",
+  receivablesSortDirection: "desc",
+  statementTab: "quotes",
+  statementContext: null,
   pwaInstallAvailable: false,
   userMenuOpen: false,
   notificationsOpen: false,
@@ -172,6 +180,10 @@ const ACTION_PERMISSIONS = {
   "send-quote": "quotes:write",
   "open-insurance-status": "insurance:write",
   "open-payment-form": "payments:write",
+  "open-reverse-payment": "payments:write",
+  "save-reverse-payment": "payments:write",
+  "open-administrative-execution": "cases:write",
+  "save-administrative-execution": "cases:write",
   "send-quote": "quotes:write",
   "send-quote-whatsapp": "quotes:write",
   "quote-add-item": "quotes:write",
@@ -662,6 +674,190 @@ function openPaymentForm(quoteId = "") {
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-payment">Aplicar pago</button>`
   });
+}
+
+function openAdministrativeExecution(quoteId) {
+  const state = store.getState();
+  const quote = state.quotes.find((candidate) => candidate.id === quoteId);
+  const record = quote && state.cases.find((candidate) => candidate.id === quote.caseId);
+  const patient = record && store.patientById(record.patientId);
+  if (!quote || !record || !patient) return showToast("No fue posible abrir el perfil administrativo.", "danger");
+  const existing = state.administrativeExecutionProfiles.find((candidate) => candidate.caseId === record.id && candidate.status === "ACTIVE");
+  openModal({
+    title: "Detalles de Hospitalización",
+    subtitle: `Perfil administrativo de ejecución${existing ? `: ${safeText(existing.id)}` : ""}`,
+    size: "xl",
+    body: `<form id="administrative-execution-form" class="form-grid">
+      <input type="hidden" name="quoteId" value="${safeText(quote.id)}">
+      <input type="hidden" name="idempotencyKey" value="${safeText(existing?.idempotencyKey || uid("EXEC"))}">
+      <div class="form-section full"><h3>Identidad administrativa</h3></div>
+      <label>Paciente<input value="${safeText(patient.fullName)}" disabled></label>
+      <label>DUI/NIT<input value="${safeText(patient.document)}" disabled></label>
+      <label>Hospitalización<input value="${safeText(record.id)}" disabled></label>
+      <label>Estado<input value="${safeText(record.status)}" disabled></label>
+      <div class="form-section full"><h3>Perfil administrativo de ejecución</h3><p>Los catálogos se capturan como valores configurables hasta recibir las listas oficiales.</p></div>
+      <label>Responsable administrativo<input name="healthManager" value="${safeText(existing?.healthManager || record.manager || store.currentUser()?.name || "")}" required></label>
+      <label>Referido por<input name="referredBy" value="${safeText(existing?.referredBy || quote.referredBy || "")}" required></label>
+      <label>Tipo Revenue<input name="revenueType" value="${safeText(existing?.revenueType || "")}" placeholder="Catálogo configurable" required></label>
+      <label>Tipo<input name="serviceType" value="${safeText(existing?.serviceType || "")}" placeholder="Catálogo configurable"></label>
+      <label>Fecha de inicio<input type="date" name="startDate" value="${safeText(existing?.startDate || record.startDate || new Date().toISOString().slice(0,10))}" required></label>
+      <label>Días de duración<input type="number" min="1" max="3660" step="1" name="durationDays" value="${safeText(existing?.durationDays || 1)}" required></label>
+      <label>Forma de pago<input name="paymentForm" value="${safeText(existing?.paymentForm || "")}" placeholder="Catálogo configurable" required></label>
+      <label>Aseguradora<select name="insurerId">${insurerOptions(existing?.insurerId || record.insurerId || "")}</select></label>
+      <label>Tipo de solicitud<input name="requestType" value="${safeText(existing?.requestType || "")}" placeholder="Catálogo configurable" required></label>
+      <label class="checkbox-label"><input type="checkbox" name="thirdPartyInvoice" ${existing?.thirdPartyInvoice ? "checked" : ""}> Generar factura a nombre de un tercero</label>
+      <label>Categoría mayor<input name="majorCategory" value="${safeText(existing?.majorCategory || "")}" placeholder="Catálogo configurable"></label>
+      <label>Subcategoría de servicios<input name="serviceSubcategory" value="${safeText(existing?.serviceSubcategory || "")}" placeholder="Catálogo configurable"></label>
+      <label class="full">Hospital del que proviene<input name="sourceHospital" value="${safeText(existing?.sourceHospital || "")}" placeholder="Catálogo configurable"></label>
+      <label class="full">Descripción<textarea name="description" rows="3">${safeText(existing?.description || "")}</textarea></label>
+      <label>Tipo de paciente<input name="patientType" value="${safeText(existing?.patientType || "")}" placeholder="Catálogo configurable"></label>
+      <label>Tipo de módulo<input name="moduleType" value="${safeText(existing?.moduleType || "")}" placeholder="Catálogo configurable"></label>
+      <label>Adicionales<input name="additionalOptions" value="${safeText(existing?.additionalOptions || "")}" placeholder="Catálogo configurable"></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-administrative-execution" ${existing ? "disabled title=\"Ya existe un perfil activo; su edición requiere reglas de corrección aprobadas.\"" : ""}>Guardar</button>`
+  });
+}
+
+function paymentRowsForCase(caseId) {
+  return store.getState().payments.filter((payment) => payment.caseId === caseId || store.getState().quotes.some((quote) => quote.id === payment.quoteId && quote.caseId === caseId));
+}
+
+function openReceivableQuotes(caseId) {
+  const state = store.getState();
+  const quotes = state.quotes.filter((quote) => quote.caseId === caseId);
+  openModal({ title: `Cotizaciones · ${safeText(caseId)}`, size: "lg", body: `<div class="table-wrap"><table><thead><tr><th>Código</th><th>Versión</th><th>Estado</th><th>Total paciente</th></tr></thead><tbody>${quotes.map((quote) => `<tr><td><a href="#/cotizaciones/${safeText(quote.id)}">${safeText(quote.displayCode || quote.id)}</a></td><td>v${safeText(quote.version || 1)}</td><td>${safeText(QUOTE_ADMIN_LABELS_MAIN[quote.status] || quote.status)}</td><td>${money(quote.patientAmount)}</td></tr>`).join("") || `<tr><td colspan="4">Sin cotizaciones.</td></tr>`}</tbody></table></div>` });
+}
+
+function openAccountHistory(caseId) {
+  openModal({
+    title: "Históricos de estados de cuenta por cobrar",
+    subtitle: caseId,
+    size: "lg",
+    body: `<nav class="tabs"><button class="tab active">Estados Particulares</button><button class="tab">Estados Mixtos</button></nav>
+      <div class="callout callout-info">No hay cortes históricos persistidos. La periodicidad y el evento que crea snapshots requieren confirmación del cliente.</div>
+      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Creador</th><th>Periodo</th><th>Saldo anterior</th><th>Total facturas</th><th>Total pagos</th><th>Total pendiente</th></tr></thead><tbody><tr><td colspan="7">Ningún dato disponible en esta tabla.</td></tr></tbody></table></div>`
+  });
+}
+
+function openReceivablePayments(caseId) {
+  const state = store.getState();
+  const payments = paymentRowsForCase(caseId);
+  const quote = state.quotes.find((candidate) => candidate.caseId === caseId && quoteBalance(candidate, state.payments) > 0);
+  openModal({
+    title: `Pagos · Hospitalización ${safeText(caseId)}`,
+    size: "xl",
+    body: `${quote ? `<div class="action-strip"><button class="btn btn-primary" data-action="open-payment-form" data-quote-id="${safeText(quote.id)}">Añadir pago</button></div>` : ""}
+      <div class="table-wrap"><table><thead><tr><th>Acc.</th><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Pagado por</th><th>Estado</th></tr></thead><tbody>${payments.map((payment) => `<tr><td><button class="row-action" data-action="print-payment" data-id="${safeText(payment.id)}">Imprimir</button>${payment.status === "APPLIED" ? `<button class="row-action" data-action="open-reverse-payment" data-id="${safeText(payment.id)}">Revertir</button>` : ""}</td><td>${new Date(payment.date).toLocaleDateString("es-SV")}</td><td>${safeText(payment.method)}</td><td>${money(payment.amount)}</td><td>${safeText(payment.payer)}</td><td>${safeText(payment.status)}</td></tr>`).join("") || `<tr><td colspan="6">Sin pagos.</td></tr>`}</tbody></table></div>`
+  });
+}
+
+function openReversePayment(paymentId) {
+  const payment = store.getState().payments.find((candidate) => candidate.id === paymentId);
+  if (!payment || payment.status !== "APPLIED") return showToast("El pago no está disponible para reversión.", "danger");
+  openModal({
+    title: "Revertir pago",
+    subtitle: `${payment.receipt} · ${money(payment.amount)}. El comprobante se conserva y queda anulado.`,
+    body: `<form id="reverse-payment-form" class="form-grid"><input type="hidden" name="paymentId" value="${safeText(payment.id)}"><input type="hidden" name="idempotencyKey" value="${safeText(uid("REVERSE"))}"><label class="full">Motivo de la corrección<textarea name="reason" rows="4" required></textarea></label></form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-danger" data-action="save-reverse-payment">Revertir y conservar historial</button>`
+  });
+}
+
+function openAccountStatement(patientId = "") {
+  const state = store.getState();
+  const patient = state.patients.find((candidate) => candidate.id === patientId) || state.patients.find((candidate) => state.cases.some((record) => record.patientId === candidate.id));
+  const cases = state.cases.filter((record) => record.patientId === patient?.id);
+  const record = cases[0];
+  openModal({
+    title: "Estado de cuenta",
+    subtitle: "Vista previa calculada desde movimientos confirmados; no crea un corte histórico.",
+    size: "lg",
+    body: `<form id="account-statement-form" class="form-grid">
+      <label class="full">Tipo de estado de cuenta<select name="statementType"><option value="PATIENT">Paciente</option><option disabled>Aseguradora · reglas pendientes</option><option disabled>Empresa · reglas pendientes</option></select></label>
+      <label class="full">Paciente<select name="patientId" data-change="statement-patient-change">${patientOptions(patient?.id)}</select></label>
+      <label>Hospitalización<select name="caseId">${cases.map((item) => `<option value="${safeText(item.id)}">${safeText(item.id)}</option>`).join("")}</select></label>
+      <label>Tipo de paciente<select name="accountType"><option value="PARTICULAR" ${record?.accountType === "PARTICULAR" ? "selected" : ""}>Particular</option><option value="MIXTO" ${record?.accountType === "MIXTO" ? "selected" : ""}>Mixto</option></select></label>
+      <label>Desde<input type="date" name="dateFrom" value="${safeText(record?.startDate || new Date().toISOString().slice(0,10))}" required></label>
+      <label>Hasta<input type="date" name="dateTo" value="${new Date().toISOString().slice(0,10)}" required></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="preview-account-statement">Vista previa</button>`
+  });
+}
+
+function currentQuotesForCase(caseId) {
+  return [...store.getState().quotes.filter((quote) => quote.caseId === caseId).reduce((roots, quote) => {
+    const root = quote.quoteId || quote.originalQuoteId || quote.id;
+    const prior = roots.get(root);
+    if (!prior || Number(quote.version || 0) >= Number(prior.version || 0)) roots.set(root, quote);
+    return roots;
+  }, new Map()).values()];
+}
+
+function statementDateInRange(value, context) {
+  const date = String(value || "").slice(0, 10);
+  return Boolean(date && date >= context.dateFrom && date <= context.dateTo);
+}
+
+function renderAccountStatementPreview() {
+  const context = ui.statementContext;
+  if (!context) return;
+  const state = store.getState();
+  const patient = store.patientById(context.patientId);
+  const record = state.cases.find((candidate) => candidate.id === context.caseId);
+  const quotes = currentQuotesForCase(context.caseId).filter((quote) => statementDateInRange(quote.invoiceDate || quote.createdAt, context));
+  const payments = paymentRowsForCase(context.caseId).filter((payment) => payment.status === "APPLIED" && statementDateInRange(payment.date, context));
+  const documents = state.clinicalDocuments.filter((document) => document.caseId === context.caseId);
+  const tab = ui.statementTab;
+  const selectedQuotes = new Set(context.selectedQuoteIds || []);
+  const selectedPayments = new Set(context.selectedPaymentIds || []);
+  const body = tab === "quotes" ? `<div class="table-wrap"><table><thead><tr><th>Sel.</th><th>Fecha de ejecución</th><th>Cotización</th><th>Estado</th><th>Total</th></tr></thead><tbody>${quotes.map((quote) => `<tr><td><input type="checkbox" name="statementQuote" value="${safeText(quote.id)}" ${selectedQuotes.has(quote.id) ? "checked" : ""}></td><td>${safeText(quote.invoiceDate || record?.startDate || "")}</td><td>${safeText(quote.displayCode || quote.id)}</td><td>${safeText(QUOTE_ADMIN_LABELS_MAIN[quote.status] || quote.status)}</td><td>${money(quote.patientAmount)}</td></tr>`).join("")}</tbody></table></div>`
+    : tab === "payments" ? `<div class="table-wrap"><table><thead><tr><th>Sel.</th><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Pagado por</th><th>Estado</th></tr></thead><tbody>${payments.map((payment) => `<tr><td><input type="checkbox" name="statementPayment" value="${safeText(payment.id)}" ${selectedPayments.has(payment.id) ? "checked" : ""}></td><td>${safeText(String(payment.date).slice(0,10))}</td><td>${safeText(payment.method)}</td><td>${money(payment.amount)}</td><td>${safeText(payment.payer)}</td><td>${safeText(payment.status)}</td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="table-wrap"><table><thead><tr><th>Documento</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>${documents.map((document) => `<tr><td>${safeText(document.title)}</td><td>${safeText(String(document.createdAt).slice(0,10))}</td><td>${safeText(document.status)}</td></tr>`).join("") || `<tr><td colspan="3">Sin documentos administrativos asociados.</td></tr>`}</tbody></table></div>`;
+  openModal({
+    title: "Cuentas por cobrar",
+    subtitle: `${safeText(patient?.fullName || "")} · ${safeText(record?.id || "")} · ${safeText(context.dateFrom)} a ${safeText(context.dateTo)}`,
+    size: "xl",
+    body: `<section class="card"><div class="card-body"><dl class="detail-list"><div><dt>Paciente</dt><dd>${safeText(patient?.fullName || "—")}</dd></div><div><dt>DUI/NIT</dt><dd>${safeText(patient?.document || "—")}</dd></div><div><dt>Fecha de nacimiento</dt><dd>${safeText(patient?.birthDate || "—")}</dd></div><div><dt>Sexo</dt><dd>${safeText(patient?.sex || "—")}</dd></div><div><dt>Tipo de cuenta</dt><dd>${safeText(context.accountType)}</dd></div><div><dt>Hospitalización</dt><dd>${safeText(record?.id || "—")}</dd></div></dl></div></section>
+      <nav class="tabs"><button class="tab ${tab === "quotes" ? "active" : ""}" data-action="account-statement-tab" data-tab="quotes">Cotizaciones</button><button class="tab ${tab === "payments" ? "active" : ""}" data-action="account-statement-tab" data-tab="payments">Pagos</button><button class="tab ${tab === "documents" ? "active" : ""}" data-action="account-statement-tab" data-tab="documents">Documentos</button></nav>${body}`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="open-payment-summary">Ver resumen</button>`
+  });
+}
+
+function openPaymentSummary() {
+  const context = ui.statementContext;
+  if (!context) return;
+  const selectedQuotes = new Set(context.selectedQuoteIds || []);
+  const selectedPayments = new Set(context.selectedPaymentIds || []);
+  const quotes = currentQuotesForCase(context.caseId).filter((quote) => selectedQuotes.has(quote.id) && statementDateInRange(quote.invoiceDate || quote.createdAt, context));
+  const payments = paymentRowsForCase(context.caseId).filter((payment) => selectedPayments.has(payment.id) && payment.status === "APPLIED" && statementDateInRange(payment.date, context));
+  const totalInvoices = quotes.reduce((sum, quote) => sum + Number(quote.patientAmount || 0), 0);
+  const totalPayments = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const pending = Math.max(0, totalInvoices - totalPayments);
+  openModal({
+    title: "Resumen del pago",
+    subtitle: "El saldo nunca se presenta como crédito hasta definir la política de sobrepagos.",
+    body: `<div class="metrics-grid metrics-small"><article class="metric-card"><p>Saldo anterior</p><strong>${money(0)}</strong></article><article class="metric-card"><p>Total facturas</p><strong>${money(totalInvoices)}</strong></article><article class="metric-card"><p>Total pagos</p><strong>${money(totalPayments)}</strong></article><article class="metric-card"><p>Total pendientes</p><strong>${money(pending)}</strong></article></div>${totalPayments > totalInvoices ? `<div class="callout callout-warning">Existe un excedente no asignado de ${money(totalPayments-totalInvoices)}. No se aplicó como crédito ni anticipo.</div>` : ""}`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="print-receivables">Imprimir</button><button class="btn btn-secondary" disabled title="Requiere reglas de snapshot histórico">Guardar cambios</button>`
+  });
+}
+
+function printPayment(paymentId) {
+  const payment = store.getState().payments.find((candidate) => candidate.id === paymentId);
+  if (!payment) throw new Error("Pago no encontrado.");
+  const patient = store.patientById(payment.patientId);
+  openPrintWindow(`<div class="header"><div class="brand"><div class="mark">AC</div><strong>Analiza en Casa</strong></div><div class="doc-title"><h1>Comprobante de pago</h1><small>Documento DEMO</small></div></div><div class="grid"><div class="field"><small>Comprobante</small><strong>${safeText(payment.receipt)}</strong></div><div class="field"><small>Paciente</small><strong>${safeText(patient?.fullName || "—")}</strong></div><div class="field"><small>Fecha</small><strong>${safeText(String(payment.date).slice(0,10))}</strong></div><div class="field"><small>Método</small><strong>${safeText(payment.method)}</strong></div><div class="field"><small>Pagado por</small><strong>${safeText(payment.payer)}</strong></div><div class="field"><small>Monto</small><strong>${money(payment.amount)}</strong></div><div class="field"><small>Estado</small><strong>${safeText(payment.status)}</strong></div></div><p>Datos completamente ficticios para QA funcional.</p>`, payment.receipt || payment.id);
+}
+
+function receivableExportRows(filtered = false) {
+  const state = store.getState();
+  const search = filtered ? String(ui.receivablesSearch || "").toLocaleLowerCase("es") : "";
+  return currentQuotesForExport(state).filter((quote) => {
+    const patient = store.patientById(quote.patientId);
+    return !search || [patient?.fullName, patient?.document, quote.caseId].some((value) => String(value || "").toLocaleLowerCase("es").includes(search));
+  }).map((quote) => ({ hospitalization: quote.caseId, patient: store.patientById(quote.patientId)?.fullName, totalInvoices: quote.patientAmount, totalPayments: state.payments.filter((payment) => payment.quoteId === quote.id && payment.status === "APPLIED").reduce((sum,payment)=>sum+payment.amount,0), pending: quoteBalance(quote,state.payments) }));
+}
+
+function currentQuotesForExport(state) {
+  return [...state.quotes.reduce((roots, quote) => { const root=quote.quoteId||quote.originalQuoteId||quote.id; const prior=roots.get(root); if(!prior||Number(quote.version||0)>=Number(prior.version||0)) roots.set(root,quote); return roots; },new Map()).values()];
 }
 
 function openClinicalDocumentForm(caseId = "", type = "HEALTH_REPORT", patientId = "") {
@@ -1232,6 +1428,15 @@ document.addEventListener("click", async (event) => {
     case "logout": runSafely(() => store.logout(), "Sesión cerrada."); break;
     case "reset-demo": if (confirm("¿Restaurar todos los datos ficticios al estado inicial?")) runSafely(() => store.reset(), "Datos demo restaurados."); break;
     case "set-tab": ui.tab = data.tab; render(); break;
+    case "set-receivables-tab": ui.receivablesTab = data.tab || "accounts"; render(); break;
+    case "receivables-page": ui.receivablesPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "sort-receivables": {
+      if (ui.receivablesSortKey === data.sort) ui.receivablesSortDirection = ui.receivablesSortDirection === "asc" ? "desc" : "asc";
+      else { ui.receivablesSortKey = data.sort; ui.receivablesSortDirection = "asc"; }
+      ui.receivablesPage = 1;
+      render();
+      break;
+    }
     case "set-patient-tab": ui.patientTab = data.tab; ui.patientPage = 1; render(); break;
     case "case-page": ui.casePage = Math.max(1, Number(data.page || 1)); render(); break;
     case "case-quote-page": ui.caseQuotePage = Math.max(1, Number(data.page || 1)); render(); break;
@@ -1316,7 +1521,30 @@ document.addEventListener("click", async (event) => {
     case "clear-quote-giftcard": syncQuoteHead(); if (ui.quoteDraft) ui.quoteDraft.giftcard = ""; renderQuoteModal(); break;
     case "quote-remove-item": syncQuoteHead(); ui.quoteDraft?.items.splice(Number(data.index),1); renderQuoteModal(); break;
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
+    case "open-administrative-execution": openAdministrativeExecution(data.id || ""); break;
     case "open-payment-form": openPaymentForm(data.quoteId || ""); break;
+    case "open-receivable-quotes": openReceivableQuotes(data.caseId || ""); break;
+    case "open-account-history": openAccountHistory(data.caseId || ""); break;
+    case "open-receivable-payments": openReceivablePayments(data.caseId || ""); break;
+    case "open-reverse-payment": openReversePayment(data.id || ""); break;
+    case "print-payment": runSafely(() => printPayment(data.id)); break;
+    case "open-account-statement": openAccountStatement(); break;
+    case "preview-account-statement": {
+      const form = document.querySelector("#account-statement-form");
+      if (!form?.reportValidity()) break;
+      const values = Object.fromEntries(new FormData(form));
+      if (values.dateFrom > values.dateTo) { showToast("El rango de fechas es inválido.", "danger"); break; }
+      const quotes = currentQuotesForCase(values.caseId).filter((quote) => statementDateInRange(quote.invoiceDate || quote.createdAt, values));
+      const payments = paymentRowsForCase(values.caseId).filter((payment) => payment.status === "APPLIED" && statementDateInRange(payment.date, values));
+      ui.statementContext = { ...values, selectedQuoteIds: quotes.map((quote) => quote.id), selectedPaymentIds: payments.map((payment) => payment.id) };
+      ui.statementTab = "quotes";
+      renderAccountStatementPreview();
+      break;
+    }
+    case "account-statement-tab": ui.statementTab = data.tab || "quotes"; renderAccountStatementPreview(); break;
+    case "open-payment-summary": openPaymentSummary(); break;
+    case "export-receivables-filtered": saveDownload("cuentas_por_cobrar_filtradas_demo.csv", toCsv(receivableExportRows(true)), "text/csv;charset=utf-8"); break;
+    case "export-receivables": saveDownload("cuentas_por_cobrar_demo.csv", toCsv(receivableExportRows(false)), "text/csv;charset=utf-8"); break;
     case "send-quote":
     case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Solicitud de envío confirmada."); break;
     case "copy-portal-link": copyPortalLink(data.token); break;
@@ -1373,6 +1601,22 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("change", (event) => {
   const target = event.target;
   const action = target.dataset.change || target.dataset.action;
+  if (action === "statement-patient-change") {
+    openAccountStatement(target.value);
+    return;
+  }
+  if (target.name === "statementQuote" && ui.statementContext) {
+    const selected = new Set(ui.statementContext.selectedQuoteIds || []);
+    target.checked ? selected.add(target.value) : selected.delete(target.value);
+    ui.statementContext.selectedQuoteIds = [...selected];
+    return;
+  }
+  if (target.name === "statementPayment" && ui.statementContext) {
+    const selected = new Set(ui.statementContext.selectedPaymentIds || []);
+    target.checked ? selected.add(target.value) : selected.delete(target.value);
+    ui.statementContext.selectedPaymentIds = [...selected];
+    return;
+  }
   if (action === "quote-referral-add" && ui.quoteDraft) {
     syncQuoteHead();
     const candidate = String(target.value || "").trim();
@@ -1465,6 +1709,11 @@ document.addEventListener("change", (event) => {
     ui.casePage = 1;
     ui.caseQuotePage = 1;
   }
+  if (target.matches('[data-ui-filter="receivablesPageSize"]')) {
+    ui.receivablesPageSize = Math.max(1, Math.min(100, Number(target.value || 10)));
+    ui.receivablesPage = 1;
+    render();
+  }
   if (target.id === "patient-import-file") {
     const file = target.files?.[0];
     if (!file) return;
@@ -1485,6 +1734,15 @@ document.addEventListener("change", (event) => {
 
 document.addEventListener("input", (event) => {
   const target = event.target;
+  if (target.matches('[data-input="receivables-search"]')) {
+    ui.receivablesSearch = target.value;
+    ui.receivablesPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="receivables-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
   if (target.id === "quote-item-search" && ui.quoteDraft) {
     const query = String(target.value || "").trim().toLocaleLowerCase("es");
     const category = ui.quoteDraft.category || "SERVICES";
@@ -1647,7 +1905,25 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#payment-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>store.createPayment(data),"Pago aplicado sin duplicar la referencia.");
+    const result=await runSafely(()=>store.createPayment(data),"Pago aplicado sin duplicar la referencia.");
+    if(result) closeModal();
+  }
+
+  if(action==="save-administrative-execution"){
+    const form=document.querySelector("#administrative-execution-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    data.thirdPartyInvoice=formBool(form,"thirdPartyInvoice");
+    modalRoot.insertAdjacentHTML("beforeend", `<div class="quote-processing" role="status"><span class="spinner"></span><strong>Procesando...</strong></div>`);
+    const result=await runSafely(()=>store.startAdministrativeExecution(data),"Perfil administrativo de ejecución creado y auditado.");
+    if(result) closeModal(); else modalRoot.querySelector(".quote-processing")?.remove();
+  }
+
+  if(action==="save-reverse-payment"){
+    const form=document.querySelector("#reverse-payment-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=await runSafely(()=>store.reversePayment(data.paymentId,data.reason,data.idempotencyKey),"Pago revertido; el comprobante original se conservó.");
     if(result) closeModal();
   }
 

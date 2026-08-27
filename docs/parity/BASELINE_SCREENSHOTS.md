@@ -63,3 +63,10 @@ La reproducción exacta, resultados automatizados y límites del recorrido está
 | Captura | Propósito |
 | --- | --- |
 | [Listado y menú contextual 1440×900](screenshots/ch07-quote-row-menu-1440x900.png) | Búsqueda por paciente/documento, menú completo, submenú de impresión y acciones no confirmadas visibles pero bloqueadas. |
+
+## Evidencia posterior al cierre de CH08
+
+| Captura | Propósito |
+| --- | --- |
+| [Cuentas y menú 1440×900](screenshots/ch08-receivables-menu-1440x900.png) | Búsqueda por paciente/hospitalización, agregación financiera y menú contextual seguro. |
+| [Cuentas, pagos y reversión móvil 390×844](screenshots/ch08-receivables-payments-390x844.png) | Tabs, movimientos, menú de pago y reversión auditada sin desbordamiento horizontal global. |

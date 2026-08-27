@@ -83,6 +83,19 @@
 - `CH07-Q012`: identificar la columna final cuyo encabezado sólo deja ver `Co...` en el material y definir su fuente. Evidencia: CH07-E0007.
 - `CH07-Q013`: confirmar si Preadmisión sigue vigente, depende de permiso/feature flag o es un estado transitorio de la interfaz anterior. Evidencia: CH07-E0002–CH07-E0003.
 
+## CH08 · decisiones pendientes trazadas
+
+- `CH08-Q001`: definir cómo registrar y aplicar un excedente de pago: crédito del paciente, anticipo, reasignación, devolución u otra figura aprobada. El ejemplo muestra pendiente negativo, pero la plataforma conserva la prohibición de sobrepago y no inventa un saldo a favor. Evidencia: CH08-E0087, 00:19:52.000.
+- `CH08-Q002`: definir reglas, fuentes y permisos para distribuir responsabilidad entre Particular, Mixto, Aseguradora y Empresa. El generador habilita Paciente y mantiene Aseguradora/Empresa bloqueados. Evidencia: CH08-E0067–CH08-E0075.
+- `CH08-Q003`: confirmar si `Guardar cambios` crea un snapshot histórico inmutable, conserva una selección o modifica asignaciones, además de su autorización e idempotencia. Evidencia: CH08-E0087.
+- `CH08-Q004`: definir periodicidad, evento de corte, saldo anterior y retención de los históricos de estados Particular/Mixto. La superficie muestra un vacío explícito y no fabrica periodos. Evidencia: CH08-E0046–CH08-E0048.
+- `CH08-Q005`: definir efectos, reversibilidad, permisos y auditoría de `Archivar` y `Registro XPO`; ambos permanecen visibles pero bloqueados. Evidencia: CH08-E0043–CH08-E0045.
+- `CH08-Q006`: confirmar que `Editar pago` debe resolverse como reversión más un pago nuevo o como una corrección versionada. La plataforma sólo habilita reversión append-only con motivo y conserva el comprobante original. Evidencia: CH08-E0060–CH08-E0061.
+- `CH08-Q007`: entregar catálogos autorizados, obligatoriedad y dependencias para Revenue, Tipo, Solicitud, Categoría, Subcategoría, Tipo de paciente, Módulo y Adicionales. Los campos son configurables y no copian ejemplos del video. Evidencia: CH08-E0003–CH08-E0020.
+- `CH08-Q008`: definir formato, secuencia, alcance organizacional y unicidad del código PI. Supabase genera UUID interno y la UI no afirma una numeración oficial. Evidencia: CH08-E0002.
+- `CH08-Q009`: especificar formato, columnas, alcance, permisos y protección de los tres controles de exportación. La implementación entrega CSV sintético utilizable, sin afirmar que sea el Excel oficial. Evidencia: CH08-E0032–CH08-E0036.
+- `CH08-Q010`: confirmar si existe una automatización de recordatorio/cobro, su evento, canal seguro, consentimiento, destinatario, reintentos y SLA; el audio no es concluyente y no se implementó una regla. Evidencia verbal alrededor de CH08-E0061–CH08-E0064.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

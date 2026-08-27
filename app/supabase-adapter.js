@@ -119,6 +119,38 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
     const notification = camelCaseObject(raw);
     return { ...notification, target: notification.destinationMasked, date: notification.createdAt };
   });
+  collections.administrativeExecutionProfiles = (rawCollections.administrativeExecutionProfiles || []).map((raw) => {
+    const profile = camelCaseObject(raw);
+    return {
+      ...profile,
+      caseId: profile.hospitalizationId,
+      rootQuoteId: profile.quoteId,
+      quoteId: profile.quoteVersionId,
+      patientId: profile.patientId,
+      durationDays: Number(profile.durationDays || 0)
+    };
+  });
+  collections.payments = (rawCollections.payments || []).map((raw) => {
+    const payment = camelCaseObject(raw);
+    const quoteVersionId = payment.quoteVersionId || currentVersionByRoot.get(payment.quoteId) || payment.quoteId;
+    return {
+      ...payment,
+      rootQuoteId: payment.quoteId,
+      quoteId: quoteVersionId,
+      quoteVersionId,
+      caseId: payment.hospitalizationId || "",
+      date: payment.paidAt || payment.createdAt,
+      reference: payment.externalReference,
+      receipt: payment.receiptCode || payment.paymentReceipts?.[0]?.receiptCode || "",
+      amount: Number(payment.amount || 0),
+      allocations: (payment.paymentAllocations || []).map((allocation) => ({
+        ...allocation,
+        quoteId: allocation.quoteVersionId || quoteVersionId,
+        rootQuoteId: allocation.quoteId,
+        amount: Number(allocation.amount || 0)
+      }))
+    };
+  });
   return collections;
 }
 
@@ -251,7 +283,7 @@ export async function createSupabaseAdapter(config) {
       ["patients", "patients", "*"],
       ["cases", "hospitalizations", "*"],
       ["quotes", "quotes", "*, quote_versions(*, quote_items(*))"],
-      ["payments", "payments", "*"],
+      ["payments", "payments", "*, payment_allocations(*), payment_receipts(*)"],
       ["clinicalDocuments", "clinical_documents", "*"],
       ["shifts", "shifts", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
@@ -260,6 +292,7 @@ export async function createSupabaseAdapter(config) {
       ["doctors", "doctors", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
       ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
+      ["administrativeExecutionProfiles", "administrative_execution_profiles", "*"],
       ["notifications", "notifications", "*"],
       ["auditLogs", "audit_logs", "*"]
     ];
@@ -381,9 +414,9 @@ export async function createSupabaseAdapter(config) {
           p_reason: payload.correction.reason,
           p_content: snakeCaseObject(payload.correction.content || {})
         });
-      case "CREATE_PAYMENT":
-        return client.rpc("apply_payment", {
-          p_quote_id: payload.payment.quoteId,
+      case "CREATE_PAYMENT": {
+        const { data, error } = await client.rpc("apply_payment", {
+          p_quote_id: payload.payment.rootQuoteId || payload.payment.quoteId,
           p_quote_version_id: payload.payment.quoteVersionId || null,
           p_hospitalization_id: payload.payment.caseId || null,
           p_patient_id: payload.payment.patientId,
@@ -394,12 +427,46 @@ export async function createSupabaseAdapter(config) {
           p_external_reference: payload.payment.reference || null,
           p_idempotency_key: payload.payment.idempotencyKey
         });
-      case "REVERSE_PAYMENT":
-        return client.rpc("reverse_payment", {
+        if (error) throw error;
+        return { ok: true, payment: camelCaseObject(data) };
+      }
+      case "REVERSE_PAYMENT": {
+        const { data, error } = await client.rpc("reverse_payment", {
           p_payment_id: payload.paymentId,
           p_reason: payload.reason,
           p_idempotency_key: payload.idempotencyKey
         });
+        if (error) throw error;
+        return { ok: true, payment: camelCaseObject(data) };
+      }
+      case "START_ADMINISTRATIVE_EXECUTION": {
+        const profile = payload.profile;
+        const { data, error } = await client.rpc("start_administrative_execution", {
+          p_quote_id: profile.rootQuoteId,
+          p_quote_version_id: profile.quoteId,
+          p_hospitalization_id: profile.caseId,
+          p_health_manager: profile.healthManager,
+          p_referred_by: profile.referredBy,
+          p_revenue_type: profile.revenueType,
+          p_service_type: profile.serviceType || null,
+          p_start_date: profile.startDate,
+          p_duration_days: profile.durationDays,
+          p_payment_form: profile.paymentForm,
+          p_insurer_id: profile.insurerId || null,
+          p_request_type: profile.requestType,
+          p_third_party_invoice: profile.thirdPartyInvoice,
+          p_major_category: profile.majorCategory || null,
+          p_service_subcategory: profile.serviceSubcategory || null,
+          p_source_hospital: profile.sourceHospital || null,
+          p_description: profile.description || null,
+          p_patient_type: profile.patientType || null,
+          p_module_type: profile.moduleType || null,
+          p_additional_options: profile.additionalOptions || null,
+          p_idempotency_key: profile.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok: true, profile: camelCaseObject(data) };
+      }
       case "CREATE_CLINICAL_DOCUMENT":
         return insert("clinical_documents", {
           id: payload.document.id,

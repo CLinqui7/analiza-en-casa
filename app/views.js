@@ -271,6 +271,7 @@ function quoteRowMenu(quote) {
         </div>
       </details>
       <button type="button" role="menuitem" data-action="open-insurance-status" data-id="${esc(quote.id)}">Envíos al seguro</button>
+      <button type="button" role="menuitem" data-action="open-administrative-execution" data-id="${esc(quote.id)}">Poner en ejecución</button>
       <a role="menuitem" href="#/cotizaciones/${esc(quote.id)}#historial-seguro">Historial de envíos</a>
       <button type="button" role="menuitem" disabled title="${unavailable}">Eliminar</button>
     </div>
@@ -819,27 +820,93 @@ function renderInsurance(state, store, ui) {
 }
 
 function renderReceivables(state, store, ui) {
-  const rows=state.quotes.map((quote)=>{
-    const paid=state.payments.filter((p)=>p.quoteId===quote.id && p.status==="APPLIED").reduce((s,p)=>s+p.amount,0);
-    const balance=quoteBalance(quote,state.payments);
-    return `<tr><td><a class="strong-link" href="#/cotizaciones/${quote.id}">${quote.id}</a></td><td>${esc(patientName(state,quote.patientId))}</td><td>${money(quote.patientAmount)}</td><td>${money(paid)}</td><td>${money(balance)}</td><td>${badge(balance<=.01?"PAID":"UNPAID")}</td><td>${actionButton("Registrar pago","open-payment-form",{kind:"ghost",data:`data-quote-id="${quote.id}"`,disabled:balance<=.01})}</td></tr>`;
+  const latestQuotes = [...state.quotes.reduce((roots, quote) => {
+    const rootId = quote.quoteId || quote.originalQuoteId || quote.id;
+    const current = roots.get(rootId);
+    if (!current || Number(quote.version || 0) >= Number(current.version || 0)) roots.set(rootId, quote);
+    return roots;
+  }, new Map()).values()];
+  const search = String(ui.receivablesSearch || "").trim().toLocaleLowerCase("es");
+  const filteredQuotes = latestQuotes.filter((quote) => {
+    const patient = state.patients.find((candidate) => candidate.id === quote.patientId);
+    return !search || [quote.id, quote.displayCode, quote.caseId, patient?.fullName, patient?.document]
+      .some((value) => String(value || "").toLocaleLowerCase("es").includes(search));
   });
+  const sortKey = ui.receivablesSortKey || "startDate";
+  const sortDirection = ui.receivablesSortDirection === "asc" ? 1 : -1;
+  const entries = filteredQuotes.map((quote) => {
+    const record = state.cases.find((candidate) => candidate.id === quote.caseId);
+    const patient = state.patients.find((candidate) => candidate.id === quote.patientId);
+    const paid = state.payments.filter((payment) => payment.quoteId === quote.id && payment.status === "APPLIED").reduce((sum, payment) => sum + payment.amount, 0);
+    return { quote, record, patient, paid, balance: quoteBalance(quote, state.payments) };
+  }).sort((left, right) => {
+    const value = (entry) => ({
+      startDate: entry.record?.startDate,
+      patient: entry.patient?.fullName,
+      caseId: entry.quote.caseId,
+      status: entry.record?.status,
+      accountType: entry.record?.accountType,
+      manager: entry.record?.manager,
+      invoices: entry.quote.patientAmount,
+      payments: entry.paid,
+      balance: entry.balance
+    })[sortKey] ?? "";
+    return String(value(left)).localeCompare(String(value(right)), "es", { numeric: true }) * sortDirection;
+  });
+  const pageSize = Number(ui.receivablesPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.receivablesPage || 1)), totalPages);
+  const pageEntries = entries.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const rows=pageEntries.map(({quote, record, paid, balance})=>{
+    return `<tr>
+      <td><details class="quote-row-menu"><summary aria-label="Acciones de ${esc(quote.caseId || quote.id)}">•••</summary><div class="quote-row-menu-panel">
+        <button data-action="open-receivable-quotes" data-case-id="${esc(quote.caseId)}">Ver cotizaciones</button>
+        <button data-action="open-account-history" data-case-id="${esc(quote.caseId)}">Estados de cuenta</button>
+        <button data-action="open-receivable-payments" data-case-id="${esc(quote.caseId)}">Ver pagos</button>
+        <button disabled title="Requiere política de archivo aprobada">Archivar</button>
+        <button disabled title="Integración no definida">Registro XPO</button>
+      </div></details></td>
+      <td>${formatDate(record?.startDate)}</td><td>${esc(patientName(state,quote.patientId))}</td>
+      <td><a class="strong-link" href="#/hospitalizaciones/${esc(quote.caseId)}">${esc(quote.caseId)}</a></td>
+      <td>${badge(record?.status || "ACTIVE")}</td><td>${esc(record?.accountType || "—")}</td><td>${esc(record?.manager || "—")}</td>
+      <td>${money(quote.patientAmount)}</td><td>${money(paid)}</td><td>${money(balance)}</td><td>${badge(balance<=.01?"PAID":"UNPAID")}</td></tr>`;
+  });
+  const sortableTh = (label, key) => `<th aria-sort="${sortKey === key ? (sortDirection === 1 ? "ascending" : "descending") : "none"}"><button class="sort-button" data-action="sort-receivables" data-sort="${key}" aria-label="Ordenar por ${esc(label)}">${esc(label)}${sortKey === key ? (sortDirection === 1 ? " ↑" : " ↓") : " ↕"}</button></th>`;
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="receivables-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
+  const accountsTable = `<div class="table-wrap"><table><thead><tr><th><span class="sr-only">Acciones</span></th>${sortableTh("Fecha inicio","startDate")}${sortableTh("Paciente","patient")}${sortableTh("Cód. hospitalización","caseId")}${sortableTh("Estado Hosp.","status")}${sortableTh("Tipo cuenta","accountType")}${sortableTh("Gestionado por","manager")}${sortableTh("Total facturas","invoices")}${sortableTh("Total pagos","payments")}${sortableTh("Pendiente","balance")}<th>Estado cuenta</th></tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="11">${emptyState("Sin resultados", "Ajusta la búsqueda.")}</td></tr>`}</tbody></table></div>`;
+  const accountsTotal = latestQuotes.reduce((sum, quote) => sum + Number(quote.patientAmount || 0), 0);
+  const paidTotal = state.payments.filter((payment) => payment.status === "APPLIED").reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const openTotal = latestQuotes.reduce((sum, quote) => sum + quoteBalance(quote, state.payments), 0);
+  const activeTab = ui.receivablesTab || "accounts";
   return `
     ${pageHeader("Cuentas por cobrar","Facturas, responsabilidad del paciente, pagos, adelantos, ajustes, comprobantes y estado de cuenta.",
-      `${actionButton("Registrar pago","open-payment-form",{kind:"primary",iconName:"plus"})}${actionButton("Imprimir estado global","print-receivables",{iconName:"print"})}`)}
+      `${actionButton("Excel con filtros","export-receivables-filtered",{iconName:"export"})}${actionButton("Reporte","open-account-statement",{iconName:"file"})}${actionButton("Excel","export-receivables",{iconName:"export"})}`)}
+    <nav class="tabs" aria-label="Cuentas por cobrar">
+      <button class="tab ${activeTab === "accounts" ? "active" : ""}" data-action="set-receivables-tab" data-tab="accounts">Cuentas <span>${latestQuotes.length}</span></button>
+      <button class="tab ${activeTab === "payments" ? "active" : ""}" data-action="set-receivables-tab" data-tab="payments">Pagos <span>${state.payments.length}</span></button>
+    </nav>
     <div class="metrics-grid metrics-small">
-      ${metric("Responsabilidad total",money(state.quotes.reduce((s,q)=>s+q.patientAmount,0)),"Suma de cuentas de pacientes","money","blue")}
-      ${metric("Pagos aplicados",money(state.payments.filter(p=>p.status==="APPLIED").reduce((s,p)=>s+p.amount,0)),"Movimientos confirmados","check","teal")}
-      ${metric("Saldo abierto",money(state.quotes.reduce((s,q)=>s+quoteBalance(q,state.payments),0)),"Pendiente de cobro","clock","coral")}
+      ${metric("Responsabilidad total",money(accountsTotal),"Suma de cuentas actuales","money","blue")}
+      ${metric("Pagos aplicados",money(paidTotal),"Movimientos confirmados","check","teal")}
+      ${metric("Saldo abierto",money(openTotal),"Pendiente de cobro","clock","coral")}
     </div>
-    ${card("Estado de cuentas",table(["Cotización","Paciente","Responsabilidad","Pagado","Saldo","Estado",""],rows))}
-    ${renderPaymentsTable(state,state.payments)}
+    ${activeTab === "accounts" ? card("Cuentas", `
+      <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="receivablesPageSize" aria-label="Cantidad de cuentas por página">${[10,25,50].map((size)=>`<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${entries.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar cuenta</span><input data-input="receivables-search" value="${esc(ui.receivablesSearch || "")}" placeholder="Paciente, documento u hospitalización"></label></div>
+      ${accountsTable}<nav class="pagination" aria-label="Paginación de cuentas"><button data-action="receivables-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="receivables-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`,
+      {subtitle:`${filteredQuotes.length} cuenta(s) mostrada(s)`}) : `
+      <div class="action-strip">${actionButton("Añadir pago","open-payment-form",{kind:"primary",iconName:"plus"})}</div>
+      ${renderPaymentsTable(state,state.payments)}`}
   `;
 }
 
 function renderPaymentsTable(state,payments) {
-  return card("Movimientos de pago",table(["Fecha","Comprobante","Paciente","Método","Pagado por","Referencia","Monto","Estado"],
-    payments.map((payment)=>`<tr><td>${formatDate(payment.date,true)}</td><td>${esc(payment.receipt)}</td><td>${esc(patientName(state,payment.patientId))}</td><td>${esc(payment.method)}</td><td>${esc(payment.payer)}</td><td><code>${esc(payment.reference)}</code></td><td>${money(payment.amount)}</td><td>${badge(payment.status)}</td></tr>`),{compact:true}));
+  return card("Movimientos de pago",table(["","Fecha","Comprobante","Paciente","Tipo","Pagado por","Referencia","Monto","Estado"],
+    payments.map((payment)=>`<tr><td><details class="quote-row-menu"><summary aria-label="Acciones del pago ${esc(payment.receipt)}">•••</summary><div class="quote-row-menu-panel">
+      <button disabled title="Los pagos aplicados son inmutables">Editar pago</button>
+      <button data-action="print-payment" data-id="${esc(payment.id)}">Imprimir</button>
+      ${payment.status === "APPLIED" ? `<button data-action="open-reverse-payment" data-id="${esc(payment.id)}">Revertir pago</button>` : ""}
+      <button disabled title="Los pagos no se eliminan; use una reversión auditada">Eliminar pagos</button>
+    </div></details></td><td>${formatDate(payment.date,true)}</td><td>${esc(payment.receipt)}</td><td>${esc(patientName(state,payment.patientId))}</td><td>${esc(payment.method)}</td><td>${esc(payment.payer)}</td><td><code>${esc(payment.reference)}</code></td><td>${money(payment.amount)}</td><td>${badge(payment.status)}</td></tr>`),{compact:true}));
 }
 
 function renderClinicalHome(state, store, ui) {

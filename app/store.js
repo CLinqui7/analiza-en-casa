@@ -39,6 +39,7 @@ export function normalizeState(rawState = {}) {
   normalized.session.authenticated = Boolean(normalized.session.authenticated && normalized.session.userId && normalized.session.role);
   normalized.clinicalCorrections ||= [];
   normalized.notificationAttempts ||= [];
+  normalized.administrativeExecutionProfiles ||= [];
   return normalized;
 }
 
@@ -964,6 +965,7 @@ export async function createAppStore(config) {
     const payment = {
       id: uid("PAY"),
       quoteId: quote.id,
+      rootQuoteId: quoteRootId(quote),
       quoteVersionId: quote.id,
       caseId: quote.caseId || "",
       patientId: quote.patientId,
@@ -980,18 +982,93 @@ export async function createAppStore(config) {
       allocations: [{ quoteId: quote.id, quoteVersionId: quote.id, amount: validation.amount, currency: quote.currency || "USD", status: "APPLIED" }]
     };
 
-    setState((draft) => {
-      draft.payments.unshift(payment);
-      const remaining = quoteBalance(quote, draft.payments);
-      if (remaining <= 0.01 && quote.status === "PATIENT_PAYMENT") quote.status = "SERVICE_SCHEDULED";
-      audit("CREATE_PAYMENT", payment.id, `Pago ${payment.amount} aplicado a ${quote.id}.`);
-    });
-    safeSync("CREATE_PAYMENT", { payment });
-    queueNotification({
-      templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: payment.patientId,
-      relatedEntityType: "QUOTE", relatedEntityId: payment.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${payment.id}`
-    });
-    return payment;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.payment || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...payment,
+        id: remote.id || payment.id,
+        organizationId: remote.organizationId || payment.organizationId,
+        date: remote.paidAt || remote.createdAt || payment.date,
+        amount: Number(remote.amount ?? payment.amount),
+        currency: remote.currency || payment.currency,
+        method: remote.method || payment.method,
+        payer: remote.payer || payment.payer,
+        reference: remote.externalReference || payment.reference,
+        status: remote.status || payment.status,
+        receipt: remote.receiptCode || payment.receipt,
+        idempotencyKey: remote.idempotencyKey || payment.idempotencyKey
+      } : payment;
+      const existing = state.payments.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.payments.unshift(committed);
+        audit("CREATE_PAYMENT", committed.id, `Pago ${committed.amount} aplicado a ${quote.id}.`, {
+          quoteId: quoteRootId(quote), quoteVersionId: quote.id, idempotencyKey: committed.idempotencyKey
+        });
+      });
+      queueNotification({
+        templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: committed.patientId,
+        relatedEntityType: "QUOTE", relatedEntityId: committed.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${committed.id}`
+      });
+      return committed;
+    };
+
+    if (adapter.mode === "supabase") return requiredSync("CREATE_PAYMENT", { payment }).then(commit);
+    return commit();
+  }
+
+  function startAdministrativeExecution(input) {
+    requirePermission("cases:write");
+    const quote = quoteById(input.quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const record = caseById(quote.caseId);
+    assertCurrentOrganization(record, "Hospitalización");
+    const durationDays = Number(input.durationDays);
+    if (!String(input.healthManager || "").trim() || !String(input.referredBy || "").trim()
+      || !String(input.revenueType || "").trim() || !/^\d{4}-\d{2}-\d{2}$/.test(String(input.startDate || ""))
+      || !Number.isInteger(durationDays) || durationDays <= 0 || durationDays > 3660
+      || !String(input.paymentForm || "").trim() || !String(input.requestType || "").trim()) {
+      throw new Error("Complete los campos administrativos obligatorios con valores válidos.");
+    }
+    const idempotencyKey = String(input.idempotencyKey || `EXEC:${quote.id}:${input.startDate}`).trim().slice(0, 160);
+    const profile = {
+      id: uid("PI"), organizationId: state.organization?.id, caseId: quote.caseId,
+      quoteId: quote.id, rootQuoteId: quoteRootId(quote), patientId: quote.patientId,
+      healthManager: String(input.healthManager).trim(), referredBy: String(input.referredBy).trim(),
+      revenueType: String(input.revenueType).trim(), serviceType: String(input.serviceType || "").trim(),
+      startDate: input.startDate, durationDays, paymentForm: String(input.paymentForm).trim(),
+      insurerId: input.insurerId || null, requestType: String(input.requestType).trim(),
+      thirdPartyInvoice: Boolean(input.thirdPartyInvoice), majorCategory: String(input.majorCategory || "").trim(),
+      serviceSubcategory: String(input.serviceSubcategory || "").trim(), sourceHospital: String(input.sourceHospital || "").trim(),
+      description: String(input.description || "").trim(), patientType: String(input.patientType || "").trim(),
+      moduleType: String(input.moduleType || "").trim(), additionalOptions: String(input.additionalOptions || "").trim(),
+      status: "ACTIVE", idempotencyKey, createdAt: nowIso()
+    };
+    const existing = state.administrativeExecutionProfiles.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (existing) return existing;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.profile || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...profile, ...remote, id: remote.id || profile.id,
+        caseId: remote.hospitalizationId || profile.caseId,
+        quoteId: remote.quoteVersionId || profile.quoteId,
+        rootQuoteId: remote.quoteId || profile.rootQuoteId,
+        durationDays: Number(remote.durationDays || profile.durationDays),
+        thirdPartyInvoice: Boolean(remote.thirdPartyInvoice ?? profile.thirdPartyInvoice)
+      } : profile;
+      const duplicate = state.administrativeExecutionProfiles.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.administrativeExecutionProfiles.unshift(committed);
+        audit("START_ADMINISTRATIVE_EXECUTION", committed.id, `Perfil administrativo creado para ${record.id}.`, {
+          quoteId: quoteRootId(quote), quoteVersionId: quote.id, idempotencyKey
+        });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("START_ADMINISTRATIVE_EXECUTION", { profile }).then(commit);
+    return commit();
   }
 
   function reversePayment(paymentId, reason, idempotencyKey = "") {
@@ -1003,18 +1080,24 @@ export async function createAppStore(config) {
     assertCurrentOrganization(payment, "Pago");
     if (payment.status !== "APPLIED") throw new Error("Sólo se puede revertir un pago aplicado.");
     const key = String(idempotencyKey || `REVERSE:${paymentId}:${normalizedReason}`).slice(0, 160);
-    setState((draft) => {
-      const target = draft.payments.find((candidate) => candidate.id === paymentId);
-      target.status = "REVERSED";
-      target.reversedAt = nowIso();
-      target.reversedBy = currentUser().id;
-      target.reversalReason = normalizedReason;
-      target.reversalIdempotencyKey = key;
-      target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
-      audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
-    });
-    safeSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key });
-    return state.payments.find((candidate) => candidate.id === paymentId);
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.payment || {};
+      const alreadyCommitted = state.payments.find((candidate) => candidate.id === paymentId && candidate.status === "REVERSED" && candidate.reversalIdempotencyKey === key);
+      if (alreadyCommitted) return alreadyCommitted;
+      setState((draft) => {
+        const target = draft.payments.find((candidate) => candidate.id === paymentId);
+        target.status = remote.status || "REVERSED";
+        target.reversedAt = remote.reversedAt || nowIso();
+        target.reversedBy = remote.reversedBy || currentUser().id;
+        target.reversalReason = remote.reversalReason || normalizedReason;
+        target.reversalIdempotencyKey = remote.reversalIdempotencyKey || key;
+        target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
+        audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
+      });
+      return state.payments.find((candidate) => candidate.id === paymentId);
+    };
+    if (adapter.mode === "supabase") return requiredSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key }).then(commit);
+    return commit();
   }
 
   function createClinicalDocument(input) {
@@ -1619,6 +1702,7 @@ export async function createAppStore(config) {
     updateQuoteStatus,
     sendQuote,
     createPayment,
+    startAdministrativeExecution,
     reversePayment,
     createClinicalDocument,
     updateClinicalDocument,
