@@ -171,6 +171,18 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       }))
     };
   });
+  collections.shifts = (rawCollections.shifts || []).map((raw) => {
+    const shift = camelCaseObject(raw);
+    return {
+      ...shift,
+      caseId: shift.hospitalizationId,
+      resourceId: shift.resourceUserId || "",
+      start: shift.startsAt,
+      end: shift.endsAt,
+      type: shift.shiftType,
+      occurrenceCount: Number(shift.occurrenceCount || 1)
+    };
+  });
   collections.payments = (rawCollections.payments || []).map((raw) => {
     const payment = camelCaseObject(raw);
     const quoteVersionId = payment.quoteVersionId || currentVersionByRoot.get(payment.quoteId) || payment.quoteId;
@@ -583,18 +595,31 @@ export async function createSupabaseAdapter(config) {
           }))
         } };
       }
-      case "CREATE_SHIFT":
-        return insert("shifts", {
-          id: payload.shift.id,
-          hospitalization_id: payload.shift.caseId,
-          patient_id: payload.shift.patientId,
-          resource_id: payload.shift.resourceId || null,
-          resource_name: payload.shift.resourceName,
-          starts_at: payload.shift.start,
-          ends_at: payload.shift.end,
-          shift_type: payload.shift.type,
-          status: payload.shift.status
+      case "CREATE_SHIFT": {
+        const shift = payload.shift;
+        const { data, error } = await client.rpc("create_shift_visit", {
+          p_hospitalization_id: shift.caseId,
+          p_starts_at: shift.start,
+          p_ends_at: shift.end,
+          p_shift_type: shift.type,
+          p_classification: shift.classification,
+          p_frequency: shift.frequency,
+          p_occurrence_count: shift.occurrenceCount,
+          p_idempotency_key: shift.idempotencyKey
         });
+        if (error) throw error;
+        return { ok:true, shift:camelCaseObject(data) };
+      }
+      case "ASSIGN_SHIFT_RESOURCE": {
+        const { data, error } = await client.rpc("assign_shift_resource", {
+          p_shift_id: payload.shiftId,
+          p_resource_user_id: payload.resourceId,
+          p_internal_observations: payload.internalObservations || null,
+          p_idempotency_key: payload.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok:true, shift:camelCaseObject(data) };
+      }
       case "CREATE_PURCHASE":
         return insert("purchases", {
           id: payload.purchase.id,

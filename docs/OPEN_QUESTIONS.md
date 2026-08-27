@@ -125,6 +125,17 @@
 - `CH10-Q012`: definir contrato, permisos y auditoría de Registro XPO; permanece sin mutación. Evidencia: CH10-E0065 y CH10-E0099.
 - `CH10-Q013`: definir campos mínimos, estados, responsable, omisión/motivo, idempotencia y correcciones para administración real. El antiguo toast de éxito simulado fue sustituido por un bloqueo explícito. Evidencia verbal: CH10-E0109–CH10-E0110.
 
+## CH11 · decisiones pendientes trazadas
+
+- `CH11-Q001`: definir significado de frecuencias, cantidad generada, límites, conflictos, zona horaria, reintentos, edición y cancelación de series. La plataforma persiste una sola visita y no simula recurrencia. Evidencia: CH11-E0021 y CH11-E0025.
+- `CH11-Q002`: definir estados/transiciones de finalización y la secuencia Primer turno, Seguimiento y Último turno. Los controles permanecen informativos. Evidencia: CH11-E0046, CH11-E0050 y CH11-E0051.
+- `CH11-Q003`: aprobar fuente/vigencia de tarifa, descuentos, ajustes, motivos, permisos, aprobación y reglas contables de liquidación profesional. No se copia ningún importe del video. Evidencia: CH11-E0051–CH11-E0058.
+- `CH11-Q004`: definir Pool, enlace, compartir y Eliminar visitas, incluidas selección, confirmación, motivo, revocación, permisos e historial. Permanecen visibles pero bloqueados. Evidencia: CH11-E0015 y CH11-E0050.
+- `CH11-Q005`: especificar Disponibilidades, Control de Visitas, Asignación de turnos y Nueva Agenda; el capítulo sólo muestra sus nombres. Evidencia: CH11-E0004 y CH11-E0069.
+- `CH11-Q006`: definir roles para crear, asignar, reasignar, finalizar, cancelar, eliminar y guardar detalles de visita. Se conserva `agenda:write` como defensa configurable. Evidencia: CH11-E0019, CH11-E0050 y CH11-E0057.
+- `CH11-Q007`: definir qué eventos producen avisos de visita finalizada, destinatarios, contenido permitido y aislamiento organizacional. Evidencia: CH11-E0046–CH11-E0048 y CH11-E0062–CH11-E0064.
+- `CH11-Q008`: definir elegibilidad y disponibilidad de recursos, solapamientos, sustituciones y concurrencia. La asignación actual sólo valida miembro activo de la organización y no inventa una política de solapamiento. Evidencia: CH11-E0050 y CH11-E0051.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

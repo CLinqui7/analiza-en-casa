@@ -79,6 +79,11 @@ const ui = {
   medicalOrderPage: 1,
   medicalOrderPageSize: 10,
   medicationDraft: null,
+  agendaView: "month",
+  agendaDate: "2026-08-01",
+  agendaPatientId: "",
+  agendaPatientQuery: "",
+  agendaResourceId: "",
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -227,7 +232,9 @@ const ACTION_PERMISSIONS = {
   "open-vitals-form": "clinical:write",
   "open-nursing-note": "clinical:write",
   "share-note": "clinical:write",
-  "open-shift-form": "clinical:write",
+  "open-shift-form": "agenda:write",
+  "open-visit-detail": "agenda:read",
+  "save-shift-assignment": "agenda:write",
   "open-medication-card": "clinical:write",
   "sign-medication-card": "clinical:sign",
   "administer-medication": "clinical:write",
@@ -1207,25 +1214,92 @@ function openNursingNoteForm(caseId = "") {
   });
 }
 
+const VISIT_TYPE_OPTIONS = [
+  ["NURSING_CARE", "Cuidado de enfermería"],
+  ["SUPERVISION", "Supervisión"],
+  ["MEDICAL_VISIT", "Visita médica"],
+  ["DAILY_RECORD", "Registro diario"],
+  ["SWALLOWING_THERAPY", "Terapia de deglución"],
+  ["OCCUPATIONAL_THERAPY", "Terapia ocupacional"],
+  ["PHYSIOTHERAPY", "Fisioterapia"],
+  ["NUTRITION", "Nutricionista"],
+  ["CAREGIVER", "Cuidador"],
+  ["CLINICAL_PSYCHOLOGY", "Consulta Psicología Clínica"],
+  ["SOCIAL_WORK", "Trabajador Social"],
+  ["SPIRITUAL_VISIT", "Visita Espiritual"],
+  ["TECHNICAL_NURSING_CARE", "Cuidados Técnicos de Enfermería"],
+  ["SPECIAL_LABORATORY", "Laboratorio Especial"],
+  ["GERIATRICS", "Visita de Geriatría"],
+  ["TERTIARY_LABORATORY", "Laboratorio Tercerizado"],
+  ["RESPIRATORY_VISIT", "Visita Respiratoria General"]
+];
+
+function visitCaseSummary(record) {
+  const state = store.getState();
+  const patient = record ? store.patientById(record.patientId) : null;
+  const insurer = state.insurers.find((item) => item.id === record?.insurerId);
+  return {
+    patientName: patient?.fullName || "—",
+    document: patient?.document || "—",
+    company: insurer?.name || "No documentada"
+  };
+}
+
 function openShiftForm(caseId = "") {
   const state = store.getState();
-  const record = state.cases.find((c) => c.id === caseId) || state.cases[0];
-  const resources = state.users.filter((u) => ["NURSE", "DOCTOR"].includes(u.role));
+  const record = state.cases.find((item) => item.id === caseId) || state.cases.find((item) => item.status === "ACTIVE") || state.cases[0];
+  const summary = visitCaseSummary(record);
   const tomorrow = new Date(Date.now() + 86400000);
   const date = tomorrow.toISOString().slice(0, 10);
   openModal({
-    title: "Programar turno",
-    subtitle: "Paciente, recurso, tipo de servicio, fecha y horario.",
-    size: "md",
+    title: "Crear turno a paciente",
+    subtitle: "La recurrencia y los descuentos no se ejecutan hasta confirmar sus reglas operativas y financieras.",
+    size: "lg",
     body: `<form id="shift-form" class="form-grid">
-      <label class="full">Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
-      <label class="full">Recurso<select name="resourceId">${resources.map((u) => `<option value="${u.id}" data-name="${safeText(u.name)}">${safeText(u.name)} · ${safeText(u.role)}</option>`).join("")}</select></label>
-      <label>Fecha<input type="date" name="date" value="${date}" required></label>
-      <label>Tipo<select name="type"><option value="ENFERMERIA_12H">Enfermería 12 horas</option><option value="ENFERMERIA_24H">Enfermería 24 horas</option><option value="VISITA_MEDICA">Visita médica</option><option value="SUPERVISION">Supervisión</option><option value="TERAPIA">Terapia</option></select></label>
-      <label>Hora inicio<input type="time" name="startTime" value="06:00" required></label>
-      <label>Hora fin<input type="time" name="endTime" value="18:00" required></label>
+      <label class="full">Paciente / hospitalización<select name="caseId" data-action="shift-case-change" required>${caseOptions(record?.id)}</select></label>
+      <label>Paciente<input name="patientName" value="${safeText(summary.patientName)}" readonly></label>
+      <label>Cédula<input name="document" value="${safeText(summary.document)}" readonly></label>
+      <label>Empresa<input name="company" value="${safeText(summary.company)}" readonly></label>
+      <label>Fecha inicio<input type="datetime-local" name="start" value="${date}T06:00" required></label>
+      <label>Fecha fin<input type="datetime-local" name="end" value="${date}T18:00" required></label>
+      <label>Frecuencia documentada<input name="frequency" value="Cada 8 horas" maxlength="160" required><small>No genera recurrencias automáticamente.</small></label>
+      <label>Número de veces<input type="number" name="occurrenceCount" value="1" min="1" max="1" required><small>Más de una visita requiere reglas confirmadas.</small></label>
+      <label>Clasificación<select name="classification" required><option value="PUNTUAL">Puntual</option><option value="TURNO">Turno</option></select></label>
+      <label>Tipo<select name="type" required>${VISIT_TYPE_OPTIONS.map(([value,label]) => `<option value="${value}">${safeText(label)}</option>`).join("")}</select></label>
+      <label class="full"><input type="checkbox" name="applyDiscount" disabled> Aplicar descuento <small>Bloqueado hasta confirmar autorización, motivo, vigencia y cálculo.</small></label>
+      <input type="hidden" name="idempotencyKey" value="${uid("VISIT")}">
     </form>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-shift">Programar</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-primary" data-action="save-shift">Guardar</button>`
+  });
+}
+
+function openVisitDetail(id) {
+  const state = store.getState();
+  const shift = state.shifts.find((item) => item.id === id);
+  if (!shift) return showToast("Visita no encontrada.", "danger");
+  const record = store.caseById(shift.caseId);
+  const patient = store.patientById(shift.patientId);
+  const visitTypeLabel = VISIT_TYPE_OPTIONS.find(([value]) => value === shift.type)?.[1] || String(shift.type || "Visita").replaceAll("_"," ");
+  const resources = state.users.filter((item) => item.status === "ACTIVE" && ["NURSE","DOCTOR"].includes(item.role));
+  const isTerminal = ["COMPLETED","CANCELLED"].includes(shift.status);
+  openModal({
+    title: `${visitTypeLabel} · ${shift.status === "COMPLETED" ? "Visita finalizada" : "Visita programada"}`,
+    subtitle: `${shift.id} · versión operativa auditable`,
+    size: "xl",
+    body: `<form id="visit-detail-form" class="form-grid"><input type="hidden" name="shiftId" value="${safeText(shift.id)}"><input type="hidden" name="idempotencyKey" value="${uid("SHIFT-ASSIGN")}">
+      <div class="tabs full" aria-label="Detalle de visita"><span class="tab active">Agenda</span><span class="tab">Actualizaciones</span></div>
+      <label>Inicio<input value="${safeText(shift.start)}" readonly></label><label>Fin<input value="${safeText(shift.end)}" readonly></label>
+      <label>Paciente<input value="${safeText(patient?.fullName || "—")}" readonly></label><label>Hospitalización<input value="${safeText(record?.id || "—")}" readonly></label>
+      <label>Clasificación<input value="${safeText(shift.classification || "No documentada")}" readonly></label><label>Estado<input value="${safeText(shift.status)}" readonly></label>
+      <label class="full">Recursos<select name="resourceId" required ${isTerminal ? "disabled" : ""}><option value="">Seleccione</option>${resources.map((resource) => `<option value="${resource.id}" ${resource.id === shift.resourceId ? "selected" : ""}>${safeText(resource.name)} · ${safeText(resource.role)}</option>`).join("")}</select>${isTerminal ? "<small>La asignación queda inmutable al finalizar o cancelar la visita.</small>" : ""}</label>
+      <fieldset class="full"><legend>Tipo de turno</legend><label><input type="radio" disabled> Primer turno</label><label><input type="radio" disabled> Turno de seguimiento</label><label><input type="radio" disabled> Último turno</label><small>La secuencia requiere una regla confirmada.</small></fieldset>
+      <label class="full">Tarifa<input value="Regla tarifaria pendiente" readonly></label>
+      <label class="full"><input type="checkbox" disabled> Aplicar descuento <small>Sin regla financiera confirmada.</small></label>
+      <button type="button" class="btn btn-secondary full" data-action="blocked-professional-payment">Editar pago de servicios profesionales</button>
+      <section class="full form-section"><h3>Ajustes de pago</h3>${simpleTable(["Motivo","Monto","Comentario"], [])}</section>
+      <label class="full">Observaciones internas<textarea name="internalObservations" maxlength="5000" ${isTerminal ? "readonly" : ""}>${safeText(shift.internalObservations || "")}</textarea></label>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>${isTerminal ? "" : '<button class="btn btn-primary" data-action="save-shift-assignment">Guardar</button>'}`
   });
 }
 
@@ -1911,6 +1985,19 @@ document.addEventListener("click", async (event) => {
     case "open-nursing-note": openNursingNoteForm(data.caseId||""); break;
     case "share-note": runSafely(()=>store.shareNursingNote(data.id),"Nota compartida mediante enlace seguro."); break;
     case "open-shift-form": openShiftForm(data.caseId||""); break;
+    case "open-visit-detail": openVisitDetail(data.id || ""); break;
+    case "set-agenda-view": ui.agendaView = data.view || "month"; render(); break;
+    case "agenda-navigate": {
+      const date = new Date(`${ui.agendaDate || "2026-08-01"}T00:00:00Z`);
+      if (data.direction === "today") ui.agendaDate = new Date().toISOString().slice(0,7) + "-01";
+      else { date.setUTCMonth(date.getUTCMonth() + Number(data.direction || 0)); ui.agendaDate = date.toISOString().slice(0,7) + "-01"; }
+      render();
+      break;
+    }
+    case "agenda-refresh": render(); break;
+    case "blocked-bulk-visits": showToast("Eliminar visitas permanece deshabilitado hasta confirmar selección, recurrencia, permisos, motivo y auditoría.", "info"); break;
+    case "blocked-agenda-destination": showToast("Este destino sólo aparece en la evidencia; su comportamiento requiere confirmación del cliente.", "info"); break;
+    case "blocked-professional-payment": showToast("Los ajustes de pago permanecen deshabilitados hasta confirmar tarifa, autorización, motivo y reglas contables.", "info"); break;
     case "open-purchase-form": openPurchaseForm(); break;
     case "view-purchase": runSafely(()=>printPurchase(data.id)); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
@@ -1953,6 +2040,18 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("change", (event) => {
   const target = event.target;
   const action = target.dataset.change || target.dataset.action;
+  if (target.matches("[data-agenda-patient]")) { ui.agendaPatientId = target.value; render(); return; }
+  if (target.matches("[data-agenda-resource]")) { ui.agendaResourceId = target.value; render(); return; }
+  if (action === "shift-case-change") {
+    const summary = visitCaseSummary(store.caseById(target.value));
+    const form = target.closest("form");
+    if (form) {
+      form.elements.namedItem("patientName").value = summary.patientName;
+      form.elements.namedItem("document").value = summary.document;
+      form.elements.namedItem("company").value = summary.company;
+    }
+    return;
+  }
   if (action === "statement-patient-change") {
     openAccountStatement(target.value);
     return;
@@ -2144,6 +2243,14 @@ document.addEventListener("change", (event) => {
 
 document.addEventListener("input", (event) => {
   const target = event.target;
+  if (target.matches('[data-input="agenda-patient-search"]')) {
+    ui.agendaPatientQuery = target.value;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="agenda-patient-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position,position); }
+    return;
+  }
   if (target.matches('[data-input="receivables-search"]')) {
     ui.receivablesSearch = target.value;
     ui.receivablesPage = 1;
@@ -2479,10 +2586,18 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#shift-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const resource=form.querySelector("select[name=resourceId] option:checked");
-    data.resourceName=resource?.dataset.name||resource?.textContent;
-    data.start=`${data.date}T${data.startTime}:00-06:00`; data.end=`${data.date}T${data.endTime}:00-06:00`;
-    const result=runSafely(()=>store.createShift(data),"Turno programado.");
+    data.start=`${data.start}:00-06:00`; data.end=`${data.end}:00-06:00`;
+    data.occurrenceCount=Number(data.occurrenceCount);
+    if(data.end<=data.start){showToast("La fecha fin debe ser posterior al inicio.","danger");return;}
+    const result=await runSafely(()=>store.createShift(data),"Visita guardada en agenda.");
+    if(result) closeModal();
+  }
+
+  if(action==="save-shift-assignment"){
+    const form=document.querySelector("#visit-detail-form");
+    if(!form?.reportValidity()) return;
+    const data=Object.fromEntries(new FormData(form));
+    const result=await runSafely(()=>store.updateShiftAssignment(data.shiftId,{resourceId:data.resourceId,internalObservations:data.internalObservations,idempotencyKey:data.idempotencyKey}),"Asignación de visita guardada y auditada.");
     if(result) closeModal();
   }
 

@@ -13,6 +13,12 @@ import { seedData } from "./mock-data.js";
 import { createSupabaseAdapter } from "./supabase-adapter.js";
 
 const STORAGE_KEY = "analiza-en-casa-production-qa-v1";
+const VISIT_TYPES = new Set([
+  "NURSING_CARE","SUPERVISION","MEDICAL_VISIT","DAILY_RECORD","SWALLOWING_THERAPY",
+  "OCCUPATIONAL_THERAPY","PHYSIOTHERAPY","NUTRITION","CAREGIVER","CLINICAL_PSYCHOLOGY",
+  "SOCIAL_WORK","SPIRITUAL_VISIT","TECHNICAL_NURSING_CARE","SPECIAL_LABORATORY","GERIATRICS",
+  "TERTIARY_LABORATORY","RESPIRATORY_VISIT"
+]);
 export const DEMO_PASSWORD = "Demo2026!";
 
 function clone(value) {
@@ -1583,23 +1589,87 @@ export async function createAppStore(config) {
 
   function createShift(input) {
     requirePermission("agenda:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const start = String(input.start || "").trim();
+    const end = String(input.end || "").trim();
+    const startsAt = Date.parse(start);
+    const endsAt = Date.parse(end);
+    if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt) || endsAt <= startsAt) throw new Error("El intervalo de la visita no es válido.");
+    const type = String(input.type || "").trim().toUpperCase();
+    const classification = String(input.classification || "").trim().toUpperCase();
+    const frequency = String(input.frequency || "").trim();
+    const occurrenceCount = Number(input.occurrenceCount || 1);
+    if (!VISIT_TYPES.has(type) || !["PUNTUAL","TURNO"].includes(classification) || !frequency || frequency.length > 160) throw new Error("Revise clasificación, tipo y frecuencia documentada.");
+    if (occurrenceCount !== 1) throw new Error("La recurrencia de múltiples visitas requiere reglas confirmadas.");
+    const idempotencyKey = String(input.idempotencyKey || uid("VISIT")).trim().slice(0,160);
+    if (!idempotencyKey) throw new Error("La clave de idempotencia es obligatoria.");
+    const duplicate = state.shifts.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const shift = {
       id: uid("SHIFT"),
-      caseId: input.caseId,
-      patientId: caseById(input.caseId)?.patientId,
-      resourceId: input.resourceId || "",
-      resourceName: input.resourceName,
-      start: input.start,
-      end: input.end,
-      type: input.type,
-      status: "PENDING"
+      organizationId: state.organization?.id,
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      resourceId: "",
+      resourceName: "Sin asignar",
+      start,
+      end,
+      type,
+      classification,
+      frequency,
+      occurrenceCount,
+      status: "PENDING",
+      internalObservations: "",
+      idempotencyKey,
+      createdAt: nowIso()
     };
-    setState((draft) => {
-      draft.shifts.unshift(shift);
-      audit("CREATE_SHIFT", shift.id, `Turno creado para ${shift.resourceName}.`);
-    });
-    safeSync("CREATE_SHIFT", { shift });
-    return shift;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.shift || {};
+      const committed = adapter.mode === "supabase" ? {...shift,...remote,id:remote.id||shift.id,caseId:remote.hospitalizationId||remote.caseId||shift.caseId,start:remote.startsAt||remote.start||shift.start,end:remote.endsAt||remote.end||shift.end,type:remote.shiftType||remote.type||shift.type} : shift;
+      const existing = state.shifts.find((candidate) => candidate.id === committed.id || candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.shifts.unshift(committed);
+        audit("CREATE_SHIFT", committed.id, "Visita creada en agenda.", {idempotencyKey,classification,type});
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_SHIFT", { shift }).then(commit);
+    return commit();
+  }
+
+  function updateShiftAssignment(id, input) {
+    requirePermission("agenda:write");
+    const source = state.shifts.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Visita no encontrada.");
+    assertCurrentOrganization(source, "Visita");
+    if (["COMPLETED","CANCELLED"].includes(source.status)) {
+      throw new Error("Una visita finalizada o cancelada no puede reasignarse.");
+    }
+    const resourceId = String(input.resourceId || "").trim();
+    const resource = state.users.find((candidate) => candidate.id === resourceId && candidate.status === "ACTIVE" && ["NURSE","DOCTOR"].includes(candidate.role));
+    if (!resource) throw new Error("Seleccione un recurso activo autorizado.");
+    const internalObservations = String(input.internalObservations || "").trim();
+    if (internalObservations.length > 5000) throw new Error("Las observaciones exceden el límite técnico.");
+    const idempotencyKey = String(input.idempotencyKey || uid("SHIFT-ASSIGN")).trim().slice(0,160);
+    const commit = () => {
+      const existing = state.shifts.find((candidate) => candidate.id === id);
+      if (existing?.assignmentIdempotencyKey === idempotencyKey) return existing;
+      setState((draft) => {
+        const target = draft.shifts.find((candidate) => candidate.id === id);
+        target.resourceId = resource.id;
+        target.resourceName = resource.name;
+        target.internalObservations = internalObservations;
+        target.assignmentIdempotencyKey = idempotencyKey;
+        target.updatedAt = nowIso();
+        audit("ASSIGN_SHIFT_RESOURCE", id, "Recurso de visita asignado.", {resourceId:resource.id,idempotencyKey});
+      });
+      return state.shifts.find((candidate) => candidate.id === id);
+    };
+    if (adapter.mode === "supabase") return requiredSync("ASSIGN_SHIFT_RESOURCE", { shiftId:id,resourceId:resource.id,internalObservations,idempotencyKey }).then(commit);
+    return commit();
   }
 
   function createPurchase(input) {
@@ -1920,6 +1990,7 @@ export async function createAppStore(config) {
     addNursingNote,
     shareNursingNote,
     createShift,
+    updateShiftAssignment,
     createPurchase,
     createInventoryMovement,
     createInventoryClosure,

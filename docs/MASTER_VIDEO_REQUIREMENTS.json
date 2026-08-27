@@ -425,7 +425,16 @@
         "CH11-F08",
         "CH11-F09"
       ],
-      "open_question_ids": []
+      "open_question_ids": [
+        "CH11-Q001",
+        "CH11-Q002",
+        "CH11-Q003",
+        "CH11-Q004",
+        "CH11-Q005",
+        "CH11-Q006",
+        "CH11-Q007",
+        "CH11-Q008"
+      ]
     },
     {
       "chapter_id": "CH12",
@@ -5142,17 +5151,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH11-Q004"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "El filtro conserva el alcance organizacional y no altera datos clínicos.",
+        "financial_impact": "Sin impacto financiero directo.",
+        "current_platform_evidence": "app/views.js: renderAgenda y renderAgendaMonth; app/main.js: agendaPatientQuery y agendaPatientId",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Mantener la regresión del selector buscable, filtros y eventos coloreados.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Selector buscable, filtro de recurso y calendario se verifican con datos sintéticos y sin desbordamiento móvil."
       }
     },
     {
@@ -5185,8 +5196,8 @@
         "current_platform_evidence": "#/agenda",
         "test_path": "#/agenda; npm test",
         "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "blocked_by_client_information": true,
+        "notes": "Navegación temporal y cuatro vistas están disponibles; Eliminar, Pool, enlace y destinos sin comportamiento demostrado son visibles y seguros."
       }
     },
     {
@@ -5223,13 +5234,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Valida caso, organización e intervalo; no inventa recurrencia clínica.",
+        "financial_impact": "El descuento permanece deshabilitado hasta contar con reglas tarifarias y contables.",
+        "current_platform_evidence": "app/main.js: openShiftForm; app/store.js: createShift; supabase/migrations/202608270007_ch11_agenda_visits.sql",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Confirmar recurrencia, zona horaria y descuento antes de habilitar series o cálculos.",
+        "blocked_by_client_information": true,
+        "notes": "Los campos visibles y el guardado remoto-first están implementados; recurrencia y descuento son bloqueos documentados."
       }
     },
     {
@@ -5264,15 +5275,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "La clasificación es documental y no ejecuta reglas clínicas implícitas.",
+        "financial_impact": "No aplica tarifas ni pagos por sí sola.",
+        "current_platform_evidence": "app/main.js: openShiftForm; app/store.js: createShift",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Conservar Puntual y Turno como catálogo observado hasta que una regla confirmada requiera más comportamiento.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "Ambas opciones observadas se muestran, validan y persisten."
       }
     },
     {
@@ -5298,15 +5309,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "IMPLEMENTED_EXACT",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "patient_safety_impact": "Los nombres son etiquetas de agenda y no prescriben atención ni dosis.",
+        "financial_impact": "No se infiere ninguna tarifa desde el tipo de visita.",
+        "current_platform_evidence": "app/main.js: VISIT_TYPE_OPTIONS y openShiftForm",
+        "test_path": "tests/ch11-agenda-visits.test.mjs",
+        "recommended_action": "Mantener el catálogo observado separado de reglas clínicas y tarifarias.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "El selector contiene el catálogo amplio mostrado por el capítulo."
       }
     },
     {
@@ -5330,17 +5341,22 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH11-Q002",
+        "CH11-Q004",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Una visita finalizada o cancelada no puede reasignarse ni editar observaciones silenciosamente.",
+        "financial_impact": "Los controles de liquidación son sólo lectura o permanecen bloqueados.",
+        "current_platform_evidence": "app/main.js: openVisitDetail; app/store.js: updateShiftAssignment",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Confirmar estados, transiciones y secuencia de turnos para completar la finalización.",
+        "blocked_by_client_information": true,
+        "notes": "El modal, pestañas, datos, recurso y observaciones existen; la transición a finalizada no se inventa."
       }
     },
     {
@@ -5366,15 +5382,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La secuencia de visitas podría afectar operación clínica y permanece deshabilitada sin regla.",
+        "financial_impact": "La fuente y vigencia de tarifa no están demostradas; no se calcula ni persiste una tarifa.",
+        "current_platform_evidence": "app/main.js: openVisitDetail muestra controles deshabilitados y bloqueo explícito",
+        "test_path": "tests/ch11-agenda-visits.test.mjs",
+        "recommended_action": "Definir secuencia de turnos y contrato tarifario antes de habilitar los controles.",
+        "blocked_by_client_information": true,
+        "notes": "La superficie es visible para paridad, sin simular efectos clínicos o financieros."
       }
     },
     {
@@ -5409,15 +5425,15 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Sin impacto clínico mientras el ajuste permanezca bloqueado.",
+        "financial_impact": "Alto si se habilita sin motivo, aprobación, cálculo, idempotencia y auditoría confirmados.",
+        "current_platform_evidence": "app/main.js: tabla vacía y blocked-professional-payment",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Confirmar modelo, permisos y reglas contables antes de implementar ajustes de pago.",
+        "blocked_by_client_information": true,
+        "notes": "Motivo, monto y comentario se muestran sin producir una operación financiera falsa."
       }
     },
     {
@@ -5445,13 +5461,13 @@
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/agenda",
-        "test_path": "#/agenda; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "patient_safety_impact": "La elegibilidad y disponibilidad del recurso requieren confirmación; el sistema limita la asignación a recursos activos del tenant.",
+        "financial_impact": "Las reglas de tarifa, descuento y liquidación siguen sin definición y no se ejecutan.",
+        "current_platform_evidence": "app/store.js: permisos agenda y recurso activo; migration CH11: RPC tenant-safe; app/main.js: controles bloqueados",
+        "test_path": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+        "recommended_action": "Confirmar roles elegibles, disponibilidad y reglas financieras antes de ampliar la asignación o liquidación.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La asignación básica es remota-first, idempotente y auditada; la política de negocio permanece explícitamente abierta."
       }
     },
     {
@@ -9279,6 +9295,98 @@
         "CH10-E0110"
       ],
       "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q001",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué significa cada frecuencia, cuántas visitas genera y cómo se resuelven límites, cruces, zona horaria, reintentos, edición y cancelación de una serie? Evidencia: CH11-E0021 y CH11-E0025.",
+      "evidence_event_ids": [
+        "CH11-E0021",
+        "CH11-E0025"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q002",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué estados y transiciones determinan una visita finalizada y la secuencia Primer turno, Turno de seguimiento y Último turno? Evidencia: CH11-E0046, CH11-E0050 y CH11-E0051.",
+      "evidence_event_ids": [
+        "CH11-E0046",
+        "CH11-E0050",
+        "CH11-E0051"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q003",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es la fuente/vigencia de tarifa y qué permisos, motivos, aprobación, cálculo, descuentos, ajustes y reglas contables aplican al pago profesional? Evidencia: CH11-E0051–CH11-E0058.",
+      "evidence_event_ids": [
+        "CH11-E0051",
+        "CH11-E0058"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q004",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué hacen Pool, enlace, compartir y Eliminar visitas; qué selección, confirmación, motivo, permisos, revocación y auditoría requieren? Evidencia: CH11-E0015 y CH11-E0050.",
+      "evidence_event_ids": [
+        "CH11-E0015",
+        "CH11-E0050"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q005",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué comportamiento tienen Disponibilidades, Control de Visitas, Asignación de turnos y Nueva Agenda? Sólo se observan los nombres. Evidencia: CH11-E0004 y CH11-E0069.",
+      "evidence_event_ids": [
+        "CH11-E0004",
+        "CH11-E0069"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q006",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué roles pueden crear, asignar, reasignar, finalizar, cancelar, eliminar y guardar detalles de visita? Evidencia: CH11-E0019, CH11-E0050 y CH11-E0057.",
+      "evidence_event_ids": [
+        "CH11-E0019",
+        "CH11-E0050",
+        "CH11-E0057"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q007",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué eventos generan las notificaciones de visita finalizada, a qué actores se muestran y cómo se evita exponer información fuera de la organización? Evidencia: CH11-E0046–CH11-E0048 y CH11-E0062–CH11-E0064.",
+      "evidence_event_ids": [
+        "CH11-E0046",
+        "CH11-E0048",
+        "CH11-E0062",
+        "CH11-E0064"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH11-Q008",
+      "chapter_id": "CH11",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué recursos son elegibles, cómo se modelan disponibilidad, solapamientos, sustituciones y concurrencia de asignación? Evidencia: CH11-E0050 y CH11-E0051.",
+      "evidence_event_ids": [
+        "CH11-E0050",
+        "CH11-E0051"
+      ],
+      "status": "OPEN"
     }
   ],
   "platform_safety_findings": [
@@ -9415,15 +9523,15 @@
   ],
   "summary": {
     "requirements": 210,
-    "open_questions": 86,
+    "open_questions": 94,
     "safety_findings": 6,
     "gap_status_counts": {
-      "IMPLEMENTED_EXACT": 2,
-      "IMPLEMENTED_PARTIAL": 177,
+      "IMPLEMENTED_EXACT": 5,
+      "IMPLEMENTED_PARTIAL": 172,
       "MISSING": 0,
       "CONFLICTS_WITH_VIDEO": 0,
       "NOT_TESTABLE": 7,
-      "NEEDS_CLIENT_CONFIRMATION": 30
+      "NEEDS_CLIENT_CONFIRMATION": 32
     },
     "priority_counts": {
       "P0": 8,

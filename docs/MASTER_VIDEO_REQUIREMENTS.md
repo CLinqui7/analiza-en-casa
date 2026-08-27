@@ -5,8 +5,8 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 86
-- Estados de gap: IMPLEMENTED_EXACT=2, IMPLEMENTED_PARTIAL=171, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=30
+- Preguntas abiertas: 94
+- Estados de gap: IMPLEMENTED_EXACT=5, IMPLEMENTED_PARTIAL=166, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=32
 - Prioridades: P0=2, P1=174, P2=34, P3=0
 
 ## Gaps P0 de seguridad e integridad
@@ -220,14 +220,14 @@ Eventos: 71/71. Requisitos: 9.
 
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
-| CH11-F01 | Agenda filtrable por paciente | CH11-E0010 @ 00:31:50.200; CH11-E0015 @ 00:31:55.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F01 | Agenda filtrable por paciente | CH11-E0010 @ 00:31:50.200; CH11-E0015 @ 00:31:55.600 | IMPLEMENTED_EXACT | P1 |
 | CH11-F02 | Navegación y vistas de calendario | CH11-E0010 @ 00:31:50.200 | IMPLEMENTED_PARTIAL | P1 |
 | CH11-F03 | Formulario de creación de visita | CH11-E0022 @ 00:32:03.600; CH11-E0023 @ 00:32:08.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F04 | Clasificación puntual o turno | CH11-E0026 @ 00:32:28.600; CH11-E0027 @ 00:32:29.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F05 | Catálogo de tipos de visita | CH11-E0040 @ 00:32:44.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F04 | Clasificación puntual o turno | CH11-E0026 @ 00:32:28.600; CH11-E0027 @ 00:32:29.200 | IMPLEMENTED_EXACT | P1 |
+| CH11-F05 | Catálogo de tipos de visita | CH11-E0040 @ 00:32:44.200 | IMPLEMENTED_EXACT | P1 |
 | CH11-F06 | Detalle de visita finalizada | CH11-E0050 @ 00:32:51.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F07 | Tipo de atención en liquidación | CH11-E0060 @ 00:33:10.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F08 | Ajustes al pago de servicio profesional | CH11-E0055 @ 00:33:00.600; CH11-E0060 @ 00:33:10.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F07 | Tipo de atención en liquidación | CH11-E0060 @ 00:33:10.600 | NEEDS_CLIENT_CONFIRMATION | P1 |
+| CH11-F08 | Ajustes al pago de servicio profesional | CH11-E0055 @ 00:33:00.600; CH11-E0060 @ 00:33:10.600 | NEEDS_CLIENT_CONFIRMATION | P1 |
 | CH11-F09 | Reglas de liquidación y permisos | CH11-E0055 @ 00:33:00.600 | NEEDS_CLIENT_CONFIRMATION | P2 |
 
 ## CH12 · Cuentas por pagar y pagos de servicios

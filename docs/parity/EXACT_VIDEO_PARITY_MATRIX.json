@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T09:50:16.275Z",
+  "generated_at": "2026-08-27T10:11:06.437Z",
   "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 101,
-    "IMPLEMENTED_PARTIAL": 87,
+    "IMPLEMENTED_EXACT": 109,
+    "IMPLEMENTED_PARTIAL": 89,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 17,
-    "NEEDS_CLIENT_CONFIRMATION": 44
+    "NOT_TESTABLE": 18,
+    "NEEDS_CLIENT_CONFIRMATION": 46
   },
   "requirements": [
     {
@@ -14352,6 +14352,785 @@
       ],
       "acceptance_criteria": [
         "No afirma una administración ni envía contenido clínico; el registro operativo permanece deshabilitado hasta definir campos, permisos y correcciones.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderAgenda/renderAgendaMonth",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-R001",
+      "event_ids": [
+        "CH11-E0007",
+        "CH11-E0009",
+        "CH11-E0015"
+      ],
+      "feature_group": "agenda_calendar",
+      "page": "Agenda",
+      "control_type": "calendar_filters",
+      "visible_label": "Detalles de visitas / Paciente / Recurso / Mes / Semana / Listas",
+      "expected_behavior": "Filtra visitas por paciente y recurso, permite buscar paciente, navega períodos y alterna las cuatro vistas observadas sin perder contexto.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:31:47.000",
+        "00:31:49.800",
+        "00:31:55.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0007",
+          "timestamp": "00:31:47.000",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0007_00h31m47s000ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0007_00h31m47s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0009",
+          "timestamp": "00:31:49.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0009_00h31m49s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0015",
+          "timestamp": "00:31:55.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0015_00h31m55s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Filtra visitas por paciente y recurso, permite buscar paciente, navega períodos y alterna las cuatro vistas observadas sin perder contexto.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "agendaPatientQuery/agendaPatientId",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-R002",
+      "event_ids": [
+        "CH11-E0010",
+        "CH11-E0011",
+        "CH11-E0015"
+      ],
+      "feature_group": "patient_context",
+      "page": "Agenda",
+      "control_type": "search_select",
+      "visible_label": "Selector buscable de paciente",
+      "expected_behavior": "Busca y selecciona sólo pacientes del alcance autorizado y actualiza eventos y acciones contextuales.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:31:50.200",
+        "00:31:50.800",
+        "00:31:55.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0010",
+          "timestamp": "00:31:50.200",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0010_00h31m50s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0010_00h31m50s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0011",
+          "timestamp": "00:31:50.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0011_00h31m50s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0015",
+          "timestamp": "00:31:55.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0015_00h31m55s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Busca y selecciona sólo pacientes del alcance autorizado y actualiza eventos y acciones contextuales.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderAgenda/blocked-bulk-visits/blocked-agenda-destination",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH11-Q004"
+      ],
+      "requirement_id": "CH11-R003",
+      "event_ids": [
+        "CH11-E0015",
+        "CH11-E0019"
+      ],
+      "feature_group": "context_actions",
+      "page": "Agenda",
+      "control_type": "action_group",
+      "visible_label": "Eliminar visitas / Crear / Pool / enlace",
+      "expected_behavior": "Crear abre el formulario; las acciones sin semántica demostrada permanecen visibles pero bloqueadas sin afirmar éxito.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:31:55.600",
+        "00:32:01.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0015",
+          "timestamp": "00:31:55.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0015_00h31m55s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0019",
+          "timestamp": "00:32:01.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0019_00h32m01s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0019_00h32m01s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Crear abre el formulario; las acciones sin semántica demostrada permanecen visibles pero bloqueadas sin afirmar éxito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openShiftForm/createShift",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-R004",
+      "event_ids": [
+        "CH11-E0021",
+        "CH11-E0025"
+      ],
+      "feature_group": "visit_form",
+      "page": "Crear turno a paciente",
+      "control_type": "structured_form",
+      "visible_label": "Paciente / cédula / empresa / inicio / fin / frecuencia / número / clasificación / tipo / descuento",
+      "expected_behavior": "Deriva identidad del caso autorizado, captura el intervalo y metadatos observados, valida fin posterior a inicio y no ejecuta descuentos.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:03.200",
+        "00:32:25.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0021",
+          "timestamp": "00:32:03.200",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0021_00h32m03s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0025",
+          "timestamp": "00:32:25.000",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0025_00h32m25s000ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0025_00h32m25s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deriva identidad del caso autorizado, captura el intervalo y metadatos observados, valida fin posterior a inicio y no ejecuta descuentos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "VISIT_TYPE_OPTIONS/openShiftForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-R005",
+      "event_ids": [
+        "CH11-E0026",
+        "CH11-E0029",
+        "CH11-E0041"
+      ],
+      "feature_group": "visit_catalogs",
+      "page": "Crear turno a paciente",
+      "control_type": "catalogs",
+      "visible_label": "Puntual / Turno / catálogo de tipos de visita",
+      "expected_behavior": "Expone las clasificaciones y nombres de servicio observados como valores documentales, sin inferir reglas clínicas ni tarifarias.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:28.600",
+        "00:32:31.800",
+        "00:32:45.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0026",
+          "timestamp": "00:32:28.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0026_00h32m28s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0026_00h32m28s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0029",
+          "timestamp": "00:32:31.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0029_00h32m31s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0029_00h32m31s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0041",
+          "timestamp": "00:32:45.400",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0041_00h32m45s400ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0041_00h32m45s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone las clasificaciones y nombres de servicio observados como valores documentales, sin inferir reglas clínicas ni tarifarias.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openShiftForm/createShift",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH11-Q001"
+      ],
+      "requirement_id": "CH11-R006",
+      "event_ids": [
+        "CH11-E0021",
+        "CH11-E0025"
+      ],
+      "feature_group": "recurrence",
+      "page": "Crear turno a paciente",
+      "control_type": "recurrence",
+      "visible_label": "Frecuencia / Número de veces",
+      "expected_behavior": "Conserva la frecuencia documentada y una visita; no genera series hasta confirmar intervalos, límites, conflictos, edición y cancelación.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:32:03.200",
+        "00:32:25.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0021",
+          "timestamp": "00:32:03.200",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0021_00h32m03s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0025",
+          "timestamp": "00:32:25.000",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0025_00h32m25s000ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0025_00h32m25s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conserva la frecuencia documentada y una visita; no genera series hasta confirmar intervalos, límites, conflictos, edición y cancelación.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/views.js",
+      "current_implementation_function": "openVisitDetail/renderAgendaMonth",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH11-Q002"
+      ],
+      "requirement_id": "CH11-R007",
+      "event_ids": [
+        "CH11-E0050",
+        "CH11-E0058"
+      ],
+      "feature_group": "visit_detail",
+      "page": "Detalle de visita",
+      "control_type": "modal_tabs",
+      "visible_label": "Agenda / Actualizaciones / inicio / fin / paciente / hospitalización / recurso / observaciones",
+      "expected_behavior": "Abre el evento y presenta sus datos operativos y observaciones; la regla de finalización y secuencia permanece sin inventar.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:32:51.800",
+        "00:33:02.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0050",
+          "timestamp": "00:32:51.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0050_00h32m51s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0058",
+          "timestamp": "00:33:02.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0058_00h33m02s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0058_00h33m02s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre el evento y presenta sus datos operativos y observaciones; la regla de finalización y secuencia permanece sin inventar.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270007_ch11_agenda_visits.sql",
+      "current_implementation_function": "updateShiftAssignment/assign_shift_resource",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-R008",
+      "event_ids": [
+        "CH11-E0050",
+        "CH11-E0051"
+      ],
+      "feature_group": "resource_assignment",
+      "page": "Detalle de visita",
+      "control_type": "assignment",
+      "visible_label": "Recursos",
+      "expected_behavior": "Asigna un usuario activo del tenant mediante confirmación remota, evento append-only y auditoría antes de reflejar éxito local.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:51.800",
+        "00:32:52.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0050",
+          "timestamp": "00:32:51.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0050_00h32m51s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0051",
+          "timestamp": "00:32:52.400",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0051_00h32m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Asigna un usuario activo del tenant mediante confirmación remota, evento append-only y auditoría antes de reflejar éxito local.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openVisitDetail/blocked-professional-payment",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH11-Q002",
+        "CH11-Q003"
+      ],
+      "requirement_id": "CH11-R009",
+      "event_ids": [
+        "CH11-E0051",
+        "CH11-E0055",
+        "CH11-E0057"
+      ],
+      "feature_group": "professional_payment",
+      "page": "Detalle de visita",
+      "control_type": "financial_controls",
+      "visible_label": "Tipo de turno / Tarifa / descuento / Editar pago / Motivo / Monto / Comentario",
+      "expected_behavior": "Muestra la superficie observada sin aplicar tarifa, descuento, ajuste o liquidación hasta confirmar contrato, permisos y reglas contables.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:32:52.400",
+        "00:33:00.600",
+        "00:33:02.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0051",
+          "timestamp": "00:32:52.400",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0051_00h32m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0055",
+          "timestamp": "00:33:00.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0055_00h33m00s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0057",
+          "timestamp": "00:33:02.200",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0057_00h33m02s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra la superficie observada sin aplicar tarifa, descuento, ajuste o liquidación hasta confirmar contrato, permisos y reglas contables.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "agenda-destinations/blocked-agenda-destination",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH11-Q005"
+      ],
+      "requirement_id": "CH11-R010",
+      "event_ids": [
+        "CH11-E0004",
+        "CH11-E0069"
+      ],
+      "feature_group": "agenda_destinations",
+      "page": "Navegación",
+      "control_type": "navigation_group",
+      "visible_label": "Agenda / Disponibilidades / Control de Visitas / Asignación de turnos / Nueva Agenda",
+      "expected_behavior": "Conserva los destinos visibles; sus páginas y acciones no se inventan porque el capítulo no las abre.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:31:42.600",
+        "00:33:24.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0004",
+          "timestamp": "00:31:42.600",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0004_00h31m42s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0004_00h31m42s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0069",
+          "timestamp": "00:33:24.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0069_00h33m24s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0069_00h33m24s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conserva los destinos visibles; sus páginas y acciones no se inventan porque el capítulo no las abre.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608270007_ch11_agenda_visits.sql",
+      "current_implementation_function": "createShift/create_shift_visit",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-H001",
+      "event_ids": [
+        "CH11-E0019",
+        "CH11-E0044"
+      ],
+      "feature_group": "shift_transaction",
+      "page": "Agenda",
+      "control_type": "transaction",
+      "visible_label": "Creación remota-first e idempotente",
+      "expected_behavior": "Valida organización e intervalo, serializa la idempotencia, confirma la RPC y sólo entonces agrega la visita local y muestra éxito.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:01.800",
+        "00:32:49.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0019",
+          "timestamp": "00:32:01.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0019_00h32m01s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0019_00h32m01s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0044",
+          "timestamp": "00:32:49.000",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0044_00h32m49s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida organización e intervalo, serializa la idempotencia, confirma la RPC y sólo entonces agrega la visita local y muestra éxito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608270007_ch11_agenda_visits.sql",
+      "current_implementation_function": "create_shift_visit/assign_shift_resource",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-H002",
+      "event_ids": [
+        "CH11-E0050",
+        "CH11-E0051"
+      ],
+      "feature_group": "tenant_resource",
+      "page": "Detalle de visita",
+      "control_type": "authorization",
+      "visible_label": "Hospitalización, paciente y recurso del tenant",
+      "expected_behavior": "Deriva organización y paciente en servidor, valida miembro activo y cierra escrituras directas sin desactivar RLS.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:51.800",
+        "00:32:52.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0050",
+          "timestamp": "00:32:51.800",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0050_00h32m51s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0051",
+          "timestamp": "00:32:52.400",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0051_00h32m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Deriva organización y paciente en servidor, valida miembro activo y cierra escrituras directas sin desactivar RLS.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH11",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "blocked-bulk-visits/blocked-professional-payment",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch11-agenda-visits.test.mjs; tests/e2e/ch11.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH11-H003",
+      "event_ids": [
+        "CH11-E0021",
+        "CH11-E0051"
+      ],
+      "feature_group": "safe_blockers",
+      "page": "Agenda / Detalle",
+      "control_type": "safety_guard",
+      "visible_label": "Recurrencia, eliminación y liquidación no simuladas",
+      "expected_behavior": "No crea series, elimina visitas ni aplica pagos/descuentos cuando faltan reglas; informa el bloqueo y registra preguntas concretas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:32:03.200",
+        "00:32:52.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0021",
+          "timestamp": "00:32:03.200",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0021_00h32m03s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH11",
+          "event_id": "CH11-E0051",
+          "timestamp": "00:32:52.400",
+          "image": "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0051_00h32m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH11_agenda_y_turnos/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No crea series, elimina visitas ni aplica pagos/descuentos cuando faltan reglas; informa el bloqueo y registra preguntas concretas.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

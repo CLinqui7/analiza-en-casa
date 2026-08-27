@@ -1163,21 +1163,53 @@ function renderEvolutions(state, store, ui) {
 }
 
 function renderAgenda(state, store, ui) {
-  const shifts=[...state.shifts].sort((a,b)=>new Date(a.start)-new Date(b.start));
+  const patientId = ui.agendaPatientId || "";
+  const resourceId = ui.agendaResourceId || "";
+  const shifts=[...state.shifts]
+    .filter((item) => !patientId || item.patientId === patientId)
+    .filter((item) => !resourceId || item.resourceId === resourceId)
+    .sort((a,b)=>new Date(a.start)-new Date(b.start));
+  const casesByPatient = new Map(state.cases.map((item) => [item.patientId,item]));
+  const patientQuery = String(ui.agendaPatientQuery || "").trim().toLowerCase();
+  const patientOptions = [...casesByPatient].filter(([id]) => !patientQuery || patientName(state,id).toLowerCase().includes(patientQuery));
+  const selectedCase = state.cases.find((item) => item.patientId === patientId);
+  const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(ui.agendaDate || "") ? ui.agendaDate : "2026-08-01";
+  const monthDate = new Date(`${selectedDate}T00:00:00Z`);
+  const monthLabel = new Intl.DateTimeFormat("es-SV",{month:"long",year:"numeric",timeZone:"UTC"}).format(monthDate).toUpperCase();
   return `
-    ${pageHeader("Agenda y turnos","Calendario de recursos, pacientes, tipo de servicio, fecha, hora y confirmación.",
-      `${actionButton("Nuevo turno","open-shift-form",{kind:"primary",iconName:"plus"})}`)}
-    <div class="agenda-layout">
-      <aside class="calendar-sidebar card">
-        <div class="mini-calendar"><header><button>‹</button><strong>Agosto 2026</strong><button>›</button></header><div class="weekday-row">${["L","M","M","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="day-grid">${Array.from({length:35},(_,i)=>`<span class="${i===25?"today":""}">${i<3?"":i-2}</span>`).join("")}</div></div>
-        <div class="resource-legend">${state.users.filter(u=>["NURSE","DOCTOR"].includes(u.role)).map(u=>`<label><span class="legend-dot"></span>${esc(u.name)}</label>`).join("")}</div>
-      </aside>
-      <section>${renderShiftList(state,shifts)}</section>
-    </div>`;
+    ${pageHeader("Agenda","Calendario de visitas por paciente, recurso, tipo de servicio, fecha y estado.")}
+    <nav class="tabs agenda-destinations" aria-label="Destinos de agenda"><span class="tab active">Agenda</span>${["Disponibilidades","Control de Visitas","Asignación de turnos","Nueva Agenda"].map((label)=>`<button class="tab" data-action="blocked-agenda-destination">${label}</button>`).join("")}</nav>
+    ${card("Detalles de visitas",`
+      <div class="agenda-filters">
+        <label>Filtrar por<select><option>Paciente</option></select></label>
+        <label>Recurso<select data-agenda-resource><option value="">Todos</option>${state.users.filter((item)=>item.status==="ACTIVE"&&["NURSE","DOCTOR"].includes(item.role)).map((item)=>`<option value="${esc(item.id)}" ${resourceId===item.id?"selected":""}>${esc(item.name)}</option>`).join("")}</select></label>
+        <label>Buscar paciente<input data-input="agenda-patient-search" value="${esc(ui.agendaPatientQuery||"")}" placeholder="Nombre sintético"></label>
+        <label>Paciente<select data-agenda-patient><option value="">Seleccione</option>${patientOptions.map(([id])=>`<option value="${esc(id)}" ${patientId===id?"selected":""}>${esc(patientName(state,id))}</option>`).join("")}</select></label>
+        <div class="agenda-filter-actions">${actionButton("Actualizar","agenda-refresh",{iconName:"reset"})}${actionButton("Calendario","agenda-refresh",{iconName:"agenda"})}</div>
+        <div class="agenda-filter-actions">${actionButton("Eliminar visitas","blocked-bulk-visits",{iconName:"close"})}${actionButton("Crear","open-shift-form",{kind:"primary",iconName:"plus",data:selectedCase?`data-case-id="${esc(selectedCase.id)}"`:""})}${actionButton("Pool pendiente","blocked-bulk-visits",{})}${actionButton("Enlace pendiente","blocked-agenda-destination",{})}</div>
+      </div>
+      <div class="agenda-toolbar"><div><button data-action="agenda-navigate" data-direction="-1" aria-label="Mes anterior">‹</button><button data-action="agenda-navigate" data-direction="1" aria-label="Mes siguiente">›</button><button data-action="agenda-navigate" data-direction="today">Hoy</button></div><strong>${esc(monthLabel)}</strong><div class="agenda-view-switch">${[["month","Mes"],["week","Semana"],["week-list","Lista por semana"],["day-list","Lista por día"]].map(([value,label])=>`<button class="${(ui.agendaView||"month")===value?"active":""}" data-action="set-agenda-view" data-view="${value}">${label}</button>`).join("")}</div></div>
+      ${(ui.agendaView||"month") === "month" ? renderAgendaMonth(state,shifts,monthDate) : renderShiftList(state,shifts,ui.agendaView)}
+    `,{className:"agenda-card"})}`;
 }
 
-function renderShiftList(state, shifts){
-  return card("Turnos programados",`<div class="shift-list">${shifts.map((shift)=>`<article class="shift-card"><time><strong>${new Date(shift.start).toLocaleTimeString("es-SV",{hour:"2-digit",minute:"2-digit"})}</strong><small>${formatDate(shift.start)}</small></time><div><h3>${esc(shift.resourceName)}</h3><p>${esc(patientName(state,shift.patientId))} · ${esc(shift.type.replaceAll("_"," "))}</p><small>${esc(shift.caseId)} · hasta ${new Date(shift.end).toLocaleTimeString("es-SV",{hour:"2-digit",minute:"2-digit"})}</small></div>${badge(shift.status)}</article>`).join("")}</div>`);
+function renderAgendaMonth(state, shifts, monthDate) {
+  const year=monthDate.getUTCFullYear();
+  const month=monthDate.getUTCMonth();
+  const leading=(new Date(Date.UTC(year,month,1)).getUTCDay()+6)%7;
+  const start=new Date(Date.UTC(year,month,1-leading));
+  const today=new Date().toISOString().slice(0,10);
+  const cells=Array.from({length:42},(_,index)=>{
+    const date=new Date(start); date.setUTCDate(start.getUTCDate()+index);
+    const key=date.toISOString().slice(0,10);
+    const events=shifts.filter((item)=>String(item.start||"").slice(0,10)===key);
+    return `<div class="agenda-day ${date.getUTCMonth()===month?"":"outside"} ${key===today?"today":""}"><time>${date.getUTCDate()}</time>${events.map((shift)=>`<button class="agenda-event ${shift.status==="COMPLETED"?"completed":""}" data-action="open-visit-detail" data-id="${esc(shift.id)}"><strong>${new Date(shift.start).toLocaleTimeString("es-SV",{hour:"2-digit",minute:"2-digit"})}</strong> ${esc(patientName(state,shift.patientId))}<small>${esc(String(shift.type||"").replaceAll("_"," "))}</small></button>`).join("")}</div>`;
+  });
+  return `<div class="agenda-month"><div class="agenda-weekdays">${["lun","mar","mié","jue","vie","sáb","dom"].map((day)=>`<span>${day}</span>`).join("")}</div><div class="agenda-days">${cells.join("")}</div></div>`;
+}
+
+function renderShiftList(state, shifts, view="week-list"){
+  return `<div class="shift-list agenda-list" data-view="${esc(view)}">${shifts.length?shifts.map((shift)=>`<button class="shift-card" data-action="open-visit-detail" data-id="${esc(shift.id)}"><time><strong>${new Date(shift.start).toLocaleTimeString("es-SV",{hour:"2-digit",minute:"2-digit"})}</strong><small>${formatDate(shift.start)}</small></time><div><h3>${esc(shift.resourceName||"Sin asignar")}</h3><p>${esc(patientName(state,shift.patientId))} · ${esc(String(shift.type||"").replaceAll("_"," "))}</p><small>${esc(shift.caseId)} · hasta ${new Date(shift.end).toLocaleTimeString("es-SV",{hour:"2-digit",minute:"2-digit"})}</small></div>${badge(shift.status)}</button>`).join(""):emptyState("Sin visitas para el filtro","Selecciona otro paciente, recurso o período.")}</div>`;
 }
 
 function renderPayables(state, store, ui) {

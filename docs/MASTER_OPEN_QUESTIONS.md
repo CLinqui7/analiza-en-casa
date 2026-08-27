@@ -2,7 +2,7 @@
 
 > Generado de forma determinista desde `docs/MASTER_VIDEO_REQUIREMENTS.json`. No editar este archivo directamente.
 
-Preguntas abiertas: 86. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
+Preguntas abiertas: 94. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
 
 ## CH01 · Contexto inicial, acceso, dashboard y listado de pacientes
 
@@ -119,3 +119,14 @@ Preguntas abiertas: 86. No se infiere ninguna regla de negocio, clínica, financ
 - **CH10-Q011 · UNCERTAIN** — ¿Qué constituye una Actualización, un Tratamiento con cambios y una entrada del Historial, y cuál es la unidad de versionado? Evidencia: CH10-E0008, CH10-E0018 y CH10-E0101.
 - **CH10-Q012 · UNCERTAIN** — ¿Qué contrato de datos, permisos y auditoría tiene Registro XPO? Evidencia: CH10-E0065 y CH10-E0099.
 - **CH10-Q013 · VERBAL** — ¿Cuáles son los campos mínimos, estados, responsables, omisión/motivo, idempotencia y correcciones del registro real de administración? Hasta confirmarlo no se simula éxito. Evidencia verbal asociada a CH10-E0109–CH10-E0110.
+
+## CH11 · Agenda y turnos
+
+- **CH11-Q001 · UNCERTAIN** — ¿Qué significa cada frecuencia, cuántas visitas genera y cómo se resuelven límites, cruces, zona horaria, reintentos, edición y cancelación de una serie? Evidencia: CH11-E0021 y CH11-E0025.
+- **CH11-Q002 · UNCERTAIN** — ¿Qué estados y transiciones determinan una visita finalizada y la secuencia Primer turno, Turno de seguimiento y Último turno? Evidencia: CH11-E0046, CH11-E0050 y CH11-E0051.
+- **CH11-Q003 · UNCERTAIN** — ¿Cuál es la fuente/vigencia de tarifa y qué permisos, motivos, aprobación, cálculo, descuentos, ajustes y reglas contables aplican al pago profesional? Evidencia: CH11-E0051–CH11-E0058.
+- **CH11-Q004 · UNCERTAIN** — ¿Qué hacen Pool, enlace, compartir y Eliminar visitas; qué selección, confirmación, motivo, permisos, revocación y auditoría requieren? Evidencia: CH11-E0015 y CH11-E0050.
+- **CH11-Q005 · UNCERTAIN** — ¿Qué comportamiento tienen Disponibilidades, Control de Visitas, Asignación de turnos y Nueva Agenda? Sólo se observan los nombres. Evidencia: CH11-E0004 y CH11-E0069.
+- **CH11-Q006 · UNCERTAIN** — ¿Qué roles pueden crear, asignar, reasignar, finalizar, cancelar, eliminar y guardar detalles de visita? Evidencia: CH11-E0019, CH11-E0050 y CH11-E0057.
+- **CH11-Q007 · UNCERTAIN** — ¿Qué eventos generan las notificaciones de visita finalizada, a qué actores se muestran y cómo se evita exponer información fuera de la organización? Evidencia: CH11-E0046–CH11-E0048 y CH11-E0062–CH11-E0064.
+- **CH11-Q008 · UNCERTAIN** — ¿Qué recursos son elegibles, cómo se modelan disponibilidad, solapamientos, sustituciones y concurrencia de asignación? Evidencia: CH11-E0050 y CH11-E0051.
