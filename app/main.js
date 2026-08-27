@@ -34,6 +34,8 @@ import {
 
 const QUOTE_ADMIN_LABELS_MAIN = Object.fromEntries(Object.entries(QUOTE_STATUS_LABELS).map(([key, value]) => [key, value.admin]));
 const STANDALONE_DEMO_OTP = "202626";
+const PROFESSIONAL_ADDITION_REASONS = ["Tiempo extra", "Excelencia", "Mal agendado", "Paciente especial", "Transporte"];
+const PROFESSIONAL_DISCOUNT_REASONS = ["Retraso", "Mal agendado", "No asistió", "Cambio del turno", "Planilla", "Paciente Hospitalizado", "Paciente Falleció", "NO CIERRE DE VISITA A TIEMPO", "Transporte", "Cumplimiento incorrecto"];
 
 const config = await loadRuntimeConfig();
 const store = await createAppStore(config);
@@ -84,6 +86,18 @@ const ui = {
   agendaPatientId: "",
   agendaPatientQuery: "",
   agendaResourceId: "",
+  payablesTab: "summary",
+  payablesFilterOpen: false,
+  payablesDateFrom: "",
+  payablesDateTo: "",
+  payablesResourceId: "",
+  payablesStatus: "",
+  payablesSearch: "",
+  payablesPage: 1,
+  payablesPageSize: 10,
+  professionalPaymentServiceId: "",
+  professionalConceptType: "ADDITION",
+  professionalConceptReason: "",
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -251,6 +265,10 @@ const ACTION_PERMISSIONS = {
   "import-catalog": "catalogs:write",
   "open-doctor-form": "doctors:write",
   "save-doctor": "doctors:write",
+  "open-professional-payment": "statements:read",
+  "open-professional-concept": "statements:read",
+  "export-payables": "statements:read",
+  "blocked-payables-mutation": "statements:write",
   "generate-statements": "statements:write",
   "send-statement": "statements:write",
   "save-settings": "settings:write",
@@ -1303,6 +1321,82 @@ function openVisitDetail(id) {
   });
 }
 
+function professionalPaymentService(id) {
+  return store.getState().doctorServices.find((item) => item.id === id) || null;
+}
+
+function professionalVisitStatus(state, service) {
+  const shift = state.shifts.find((item) => item.caseId === service.caseId && item.patientId === service.patientId && String(item.start || "").slice(0, 10) === String(service.date || "").slice(0, 10));
+  if (!shift) return "No documentado";
+  if (shift.status === "COMPLETED") return "Finalizada";
+  if (shift.status === "CANCELLED") return "Cancelada";
+  return "Iniciada";
+}
+
+function openProfessionalServicePayment(id) {
+  const state = store.getState();
+  const service = professionalPaymentService(id);
+  if (!service) return showToast("Pago de servicio no encontrado.", "danger");
+  const doctor = state.doctors.find((item) => item.id === service.doctorId);
+  const patient = state.patients.find((item) => item.id === service.patientId);
+  ui.professionalPaymentServiceId = service.id;
+  openModal({
+    title: "Pago de servicios profesionales",
+    subtitle: "Revisión del servicio. Los cambios monetarios permanecen bloqueados hasta aprobar reglas y autorizaciones.",
+    size: "lg",
+    body: `<form id="professional-payment-form" class="form-grid professional-payment-form">
+      <label>Fecha<input name="date" value="${safeText(service.date || "")}" readonly></label>
+      <label>Hospitalización<input name="hospitalization" value="${safeText(service.caseId || "—")}" readonly></label>
+      <label>Recurso<input name="resource" value="${safeText(doctor?.name || "Recurso no encontrado")}" readonly></label>
+      <label>Paciente<input name="patient" value="${safeText(patient?.fullName || "Paciente no encontrado")}" readonly></label>
+      <label>Tarifa<input name="rate" value="${safeText(money(Number(service.rate || 0)))}" readonly></label>
+      <label>Monto<input name="amount" value="${safeText(money(Number(service.quantity || 0) * Number(service.rate || 0)))}" readonly></label>
+      <label>Estatus<input name="status" value="${safeText(service.status || "PENDING")}" readonly></label>
+      <label>Estado visita<input value="${safeText(professionalVisitStatus(state, service))}" readonly></label>
+      <label class="full">Comentarios<textarea name="comments" rows="3" readonly placeholder="Requiere reglas aprobadas para edición."></textarea></label>
+      <section class="full form-section professional-concepts"><div class="section-heading"><div><h3>Conceptos</h3><p>Las líneas de añadidura o descuento deben ser append-only y auditables.</p></div><button type="button" class="btn btn-secondary" data-action="open-professional-concept" data-id="${safeText(service.id)}">Agregar</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Motivo</th><th>Monto</th><th>Comentario</th></tr></thead><tbody><tr><td colspan="4" class="muted-cell">Sin conceptos registrados.</td></tr></tbody></table></div>
+      </section>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="blocked-payables-mutation">Guardar</button>`
+  });
+}
+
+function openProfessionalPaymentConcept(id = ui.professionalPaymentServiceId) {
+  const service = professionalPaymentService(id);
+  if (!service) return showToast("Pago de servicio no encontrado.", "danger");
+  ui.professionalPaymentServiceId = service.id;
+  const reasons = ui.professionalConceptType === "DISCOUNT" ? PROFESSIONAL_DISCOUNT_REASONS : PROFESSIONAL_ADDITION_REASONS;
+  if (!reasons.includes(ui.professionalConceptReason)) ui.professionalConceptReason = "";
+  openModal({
+    title: "Agregar Concepto",
+    subtitle: "Catálogo documental observado en CH12; no define por sí solo cálculo, contabilidad ni autorización.",
+    size: "md",
+    body: `<form id="professional-concept-form" class="form-grid">
+      <label>Tipo*<select name="type" data-action="professional-concept-type" required><option value="ADDITION" ${ui.professionalConceptType === "ADDITION" ? "selected" : ""}>Añadidura</option><option value="DISCOUNT" ${ui.professionalConceptType === "DISCOUNT" ? "selected" : ""}>Descuento</option></select></label>
+      <label>Motivo*<select name="reason" data-action="professional-concept-reason" required><option value="">Seleccione</option>${reasons.map((reason) => `<option value="${safeText(reason)}" ${ui.professionalConceptReason === reason ? "selected" : ""}>${safeText(reason)}</option>`).join("")}</select></label>
+      <label>Monto*<input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required></label>
+      <label class="full">Comentario<textarea name="comment" rows="3" maxlength="1000"></textarea></label>
+      <p class="full blocked-note">La acción Agregar no modifica saldos hasta confirmar motivos, permisos, cálculo, impuestos, retenciones, aprobación y reversión.</p>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="back-professional-payment">Cancelar</button><button class="btn btn-primary" data-action="blocked-payables-mutation">Agregar</button>`
+  });
+}
+
+function payablesExportRows() {
+  const state = store.getState();
+  return state.doctorServices.map((service) => ({
+    servicio: service.id,
+    recurso: state.doctors.find((item) => item.id === service.doctorId)?.name || "",
+    fecha_visita: service.date || "",
+    referencia_paciente: service.patientId || "",
+    hospitalizacion: service.caseId || "",
+    monto: Number(service.quantity || 0) * Number(service.rate || 0),
+    estatus_pago: service.status || "",
+    estatus_visita: professionalVisitStatus(state, service)
+  }));
+}
+
 function openPurchaseForm() {
   const state = store.getState();
   openModal({
@@ -1800,6 +1894,20 @@ document.addEventListener("click", async (event) => {
     case "reset-demo": if (confirm("¿Restaurar todos los datos ficticios al estado inicial?")) runSafely(() => store.reset(), "Datos demo restaurados."); break;
     case "set-tab": ui.tab = data.tab; render(); break;
     case "set-receivables-tab": ui.receivablesTab = data.tab || "accounts"; render(); break;
+    case "set-payables-tab": ui.payablesTab = data.tab || "summary"; ui.payablesPage = 1; render(); break;
+    case "toggle-payables-filters": ui.payablesFilterOpen = !ui.payablesFilterOpen; render(); break;
+    case "apply-payables-filters": ui.payablesPage = 1; ui.payablesFilterOpen = false; render(); break;
+    case "clear-payables-filters": {
+      ui.payablesDateFrom = "";
+      ui.payablesDateTo = "";
+      ui.payablesResourceId = "";
+      ui.payablesStatus = "";
+      ui.payablesSearch = "";
+      ui.payablesPage = 1;
+      render();
+      break;
+    }
+    case "payables-page": ui.payablesPage = Math.max(1, Number(data.page || 1)); render(); break;
     case "receivables-page": ui.receivablesPage = Math.max(1, Number(data.page || 1)); render(); break;
     case "sort-receivables": {
       if (ui.receivablesSortKey === data.sort) ui.receivablesSortDirection = ui.receivablesSortDirection === "asc" ? "desc" : "asc";
@@ -1998,6 +2106,11 @@ document.addEventListener("click", async (event) => {
     case "blocked-bulk-visits": showToast("Eliminar visitas permanece deshabilitado hasta confirmar selección, recurrencia, permisos, motivo y auditoría.", "info"); break;
     case "blocked-agenda-destination": showToast("Este destino sólo aparece en la evidencia; su comportamiento requiere confirmación del cliente.", "info"); break;
     case "blocked-professional-payment": showToast("Los ajustes de pago permanecen deshabilitados hasta confirmar tarifa, autorización, motivo y reglas contables.", "info"); break;
+    case "open-professional-payment": openProfessionalServicePayment(data.id || ""); break;
+    case "open-professional-concept": openProfessionalPaymentConcept(data.id || ""); break;
+    case "back-professional-payment": openProfessionalServicePayment(ui.professionalPaymentServiceId); break;
+    case "blocked-payables-mutation": showToast("Operación financiera bloqueada: faltan reglas aprobadas de cálculo, autorización, idempotencia, auditoría, pago y reversión.", "info", 7000); break;
+    case "export-payables": saveDownload("pagos_servicios_sinteticos.csv", toCsv(payablesExportRows()), "text/csv;charset=utf-8"); break;
     case "open-purchase-form": openPurchaseForm(); break;
     case "view-purchase": runSafely(()=>printPurchase(data.id)); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
@@ -2019,8 +2132,8 @@ document.addEventListener("click", async (event) => {
     case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
     case "administer-medication": showToast("Registro de administración deshabilitado hasta confirmar campos, permisos y correcciones.", "info"); break;
     case "open-doctor-form": openDoctorForm(); break;
-    case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
-    case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id),"Estado de cuenta enviado en modo simulado."); break;
+    case "generate-statements": runSafely(()=>store.generateDoctorStatements()); break;
+    case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id)); break;
     case "print-statement": runSafely(()=>printStatement(data.id)); break;
     case "export-patients": exportPatients(); break;
     case "export-audit": exportAudit(); break;
@@ -2042,6 +2155,13 @@ document.addEventListener("change", (event) => {
   const action = target.dataset.change || target.dataset.action;
   if (target.matches("[data-agenda-patient]")) { ui.agendaPatientId = target.value; render(); return; }
   if (target.matches("[data-agenda-resource]")) { ui.agendaResourceId = target.value; render(); return; }
+  if (target.matches('[data-ui-filter="payablesDateFrom"]')) { ui.payablesDateFrom = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesDateTo"]')) { ui.payablesDateTo = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesResourceId"]')) { ui.payablesResourceId = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesStatus"]')) { ui.payablesStatus = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesPageSize"]')) { ui.payablesPageSize = Math.max(1, Math.min(50, Number(target.value || 10))); ui.payablesPage = 1; render(); return; }
+  if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
+  if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
     const summary = visitCaseSummary(store.caseById(target.value));
     const form = target.closest("form");
@@ -2257,6 +2377,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="receivables-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="payables-search"]')) {
+    ui.payablesSearch = target.value;
+    ui.payablesPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="payables-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }

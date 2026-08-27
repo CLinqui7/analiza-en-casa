@@ -204,6 +204,29 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       }))
     };
   });
+  collections.doctorServices = (rawCollections.doctorServices || []).map((raw) => {
+    const service = camelCaseObject(raw);
+    return {
+      ...service,
+      caseId: service.hospitalizationId,
+      date: service.serviceDate,
+      service: service.serviceName,
+      quantity: Number(service.quantity || 0),
+      rate: Number(service.rate || 0)
+    };
+  });
+  collections.doctorStatements = (rawCollections.doctorStatements || []).map((raw) => {
+    const statement = camelCaseObject(raw);
+    const statementItems = statement.doctorStatementItems || [];
+    return {
+      ...statement,
+      gross: Number(statement.gross || 0),
+      adjustments: Number(statement.adjustments || 0),
+      withholdings: Number(statement.withholdings || 0),
+      paid: Number(statement.paid || 0),
+      items: statementItems.map((item) => item.doctorServiceId)
+    };
+  });
   return collections;
 }
 
@@ -344,6 +367,7 @@ export async function createSupabaseAdapter(config) {
       ["inventoryItems", "inventory_items", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
       ["doctors", "doctors", "*"],
+      ["doctorServices", "doctor_services", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
       ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
       ["administrativeExecutionProfiles", "administrative_execution_profiles", "*"],

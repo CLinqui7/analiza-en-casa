@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T10:11:06.437Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T10:41:24.735Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 109,
-    "IMPLEMENTED_PARTIAL": 89,
+    "IMPLEMENTED_EXACT": 117,
+    "IMPLEMENTED_PARTIAL": 94,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
     "NOT_TESTABLE": 18,
-    "NEEDS_CLIENT_CONFIRMATION": 46
+    "NEEDS_CLIENT_CONFIRMATION": 48
   },
   "requirements": [
     {
@@ -15131,6 +15131,948 @@
       ],
       "acceptance_criteria": [
         "No crea series, elimina visitas ni aplica pagos/descuentos cuando faltan reglas; informa el bloqueo y registra preguntas concretas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPayables/set-payables-tab",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-R001",
+      "event_ids": [
+        "CH12-E0001",
+        "CH12-E0005",
+        "CH12-E0006"
+      ],
+      "feature_group": "payables_tabs",
+      "page": "Cuentas por pagar",
+      "control_type": "tabs",
+      "visible_label": "Resumen / Pagos de Servicio",
+      "expected_behavior": "Alterna las dos superficies observadas sin perder filtros ni contexto autorizado.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:29.400",
+        "00:33:33.600",
+        "00:33:34.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0001",
+          "timestamp": "00:33:29.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0001_00h33m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0005",
+          "timestamp": "00:33:33.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0005_00h33m33s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0005_00h33m33s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0006",
+          "timestamp": "00:33:34.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0006_00h33m34s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0006_00h33m34s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Alterna las dos superficies observadas sin perder filtros ni contexto autorizado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Resumen",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "renderPayables",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q011"
+      ],
+      "requirement_id": "CH12-R002",
+      "event_ids": [
+        "CH12-E0001",
+        "CH12-E0004"
+      ],
+      "feature_group": "summary",
+      "page": "Cuentas por pagar",
+      "control_type": "summary_tables",
+      "visible_label": "Facturas / Reclamos",
+      "expected_behavior": "Presenta estados profesionales disponibles y conserva Reclamos como vacío explícito hasta definir su entidad y relación financiera.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:33:29.400",
+        "00:33:30.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0001",
+          "timestamp": "00:33:29.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0001_00h33m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0004",
+          "timestamp": "00:33:30.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0004_00h33m30s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0004_00h33m30s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta estados profesionales disponibles y conserva Reclamos como vacío explícito hasta definir su entidad y relación financiera.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Resumen",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderPayables/export-payables/blocked-payables-mutation/generateDoctorStatements",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q008",
+        "CH12-Q009",
+        "CH12-Q010"
+      ],
+      "requirement_id": "CH12-R003",
+      "event_ids": [
+        "CH12-E0001"
+      ],
+      "feature_group": "summary_actions",
+      "page": "Cuentas por pagar",
+      "control_type": "action_group",
+      "visible_label": "Generar planilla / Restricciones / Descargar / Limpiar Tabla",
+      "expected_behavior": "Descarga un CSV sintético provisional; acciones monetarias o ambiguas permanecen visibles y bloqueadas sin afirmar éxito.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:33:29.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0001",
+          "timestamp": "00:33:29.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0001_00h33m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Descarga un CSV sintético provisional; acciones monetarias o ambiguas permanecen visibles y bloqueadas sin afirmar éxito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Pagos de Servicio",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPayables/apply-payables-filters/clear-payables-filters",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-R004",
+      "event_ids": [
+        "CH12-E0007",
+        "CH12-E0013",
+        "CH12-E0015"
+      ],
+      "feature_group": "payment_filters",
+      "page": "Cuentas por pagar",
+      "control_type": "filter_panel",
+      "visible_label": "Fecha desde / Fecha hasta / Recurso / Estado / Cerrar / Limpiar / Aplicar",
+      "expected_behavior": "Combina rango, recurso y estado; valida el filtro en cliente, permite limpiar y aplica sin alterar datos financieros.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:53.600",
+        "00:34:14.800",
+        "00:34:16.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0007",
+          "timestamp": "00:33:53.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0007_00h33m53s600ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0007_00h33m53s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0013",
+          "timestamp": "00:34:14.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0013_00h34m14s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0013_00h34m14s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0015",
+          "timestamp": "00:34:16.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0015_00h34m16s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0015_00h34m16s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Combina rango, recurso y estado; valida el filtro en cliente, permite limpiar y aplica sin alterar datos financieros.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Pagos de Servicio",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/supabase-adapter.js",
+      "current_implementation_function": "renderPayables/mapSupabaseBootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-R005",
+      "event_ids": [
+        "CH12-E0006",
+        "CH12-E0016",
+        "CH12-E0020"
+      ],
+      "feature_group": "service_payments",
+      "page": "Cuentas por pagar",
+      "control_type": "data_table",
+      "visible_label": "Recurso / Fecha Visita / Paciente / Monto / Estatus / Est. Visita",
+      "expected_behavior": "Lista una fila por servicio, separa estado de pago y visita, y muestra No documentado cuando no existe correlación autoritativa.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:34.000",
+        "00:34:17.000",
+        "00:34:23.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0006",
+          "timestamp": "00:33:34.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0006_00h33m34s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0006_00h33m34s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0016",
+          "timestamp": "00:34:17.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0016_00h34m17s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0016_00h34m17s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0020",
+          "timestamp": "00:34:23.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0020_00h34m23s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0020_00h34m23s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista una fila por servicio, separa estado de pago y visita, y muestra No documentado cuando no existe correlación autoritativa.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Pagos de Servicio",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPayables/payables-search/payables-page",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-R006",
+      "event_ids": [
+        "CH12-E0004",
+        "CH12-E0047",
+        "CH12-E0048"
+      ],
+      "feature_group": "table_navigation",
+      "page": "Cuentas por pagar",
+      "control_type": "search_pagination",
+      "visible_label": "Selección / búsqueda / cantidad de registros / paginación",
+      "expected_behavior": "Permite seleccionar filas localmente, buscar por recurso/paciente/caso y navegar páginas sin ejecutar una edición grupal.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:30.600",
+        "00:35:13.000",
+        "00:35:15.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0004",
+          "timestamp": "00:33:30.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0004_00h33m30s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0004_00h33m30s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0047",
+          "timestamp": "00:35:13.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0047_00h35m13s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0048",
+          "timestamp": "00:35:15.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0048_00h35m15s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Permite seleccionar filas localmente, buscar por recurso/paciente/caso y navegar páginas sin ejecutar una edición grupal.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openProfessionalServicePayment",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q002",
+        "CH12-Q003",
+        "CH12-Q004",
+        "CH12-Q007"
+      ],
+      "requirement_id": "CH12-R007",
+      "event_ids": [
+        "CH12-E0021",
+        "CH12-E0022",
+        "CH12-E0024"
+      ],
+      "feature_group": "payment_editor",
+      "page": "Pago de servicios profesionales",
+      "control_type": "modal_form",
+      "visible_label": "Fecha / Hospitalización / Recurso / Paciente / Tarifa / Monto / Estatus / Comentarios / Conceptos",
+      "expected_behavior": "Abre el servicio autorizado y presenta todos los campos observados en modo de revisión; no permite cambiar valores sin reglas financieras aprobadas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:34:42.200",
+        "00:34:42.800",
+        "00:34:44.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0021",
+          "timestamp": "00:34:42.200",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0021_00h34m42s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0022",
+          "timestamp": "00:34:42.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0022_00h34m42s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0022_00h34m42s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0024",
+          "timestamp": "00:34:44.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0024_00h34m44s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0024_00h34m44s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre el servicio autorizado y presenta todos los campos observados en modo de revisión; no permite cambiar valores sin reglas financieras aprobadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openProfessionalPaymentConcept/blocked-payables-mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q005",
+        "CH12-Q006",
+        "CH12-Q007"
+      ],
+      "requirement_id": "CH12-R008",
+      "event_ids": [
+        "CH12-E0025",
+        "CH12-E0026",
+        "CH12-E0034"
+      ],
+      "feature_group": "payment_concept",
+      "page": "Agregar Concepto",
+      "control_type": "modal_form",
+      "visible_label": "Tipo / Motivo / Monto / Comentario / Añadidura / Descuento",
+      "expected_behavior": "Alterna los catálogos documentales y captura el borrador visual, pero Agregar no modifica saldos ni persiste conceptos sin contrato aprobado.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:34:47.600",
+        "00:34:48.600",
+        "00:35:02.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0025",
+          "timestamp": "00:34:47.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0025_00h34m47s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0026",
+          "timestamp": "00:34:48.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0026_00h34m48s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0026_00h34m48s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0034",
+          "timestamp": "00:35:02.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0034_00h35m02s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0034_00h35m02s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Alterna los catálogos documentales y captura el borrador visual, pero Agregar no modifica saldos ni persiste conceptos sin contrato aprobado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "PROFESSIONAL_ADDITION_REASONS/PROFESSIONAL_DISCOUNT_REASONS",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q005",
+        "CH12-Q006"
+      ],
+      "requirement_id": "CH12-R009",
+      "event_ids": [
+        "CH12-E0029",
+        "CH12-E0035",
+        "CH12-E0037"
+      ],
+      "feature_group": "concept_catalogs",
+      "page": "Agregar Concepto",
+      "control_type": "catalogs",
+      "visible_label": "Motivos visibles de añadidura y descuento",
+      "expected_behavior": "Expone sólo los rótulos observados como catálogo documental; no deriva fórmulas, obligatoriedad ni efecto contable.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:34:55.800",
+        "00:35:02.800",
+        "00:35:04.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0029",
+          "timestamp": "00:34:55.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0029_00h34m55s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0029_00h34m55s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0035",
+          "timestamp": "00:35:02.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0035_00h35m02s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0035_00h35m02s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0037",
+          "timestamp": "00:35:04.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0037_00h35m04s800ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0037_00h35m04s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone sólo los rótulos observados como catálogo documental; no deriva fórmulas, obligatoriedad ni efecto contable.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "Pagos de Servicio",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderPayables/blocked-payables-mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q001",
+        "CH12-Q007",
+        "CH12-Q010"
+      ],
+      "requirement_id": "CH12-R010",
+      "event_ids": [
+        "CH12-E0006",
+        "CH12-E0015"
+      ],
+      "feature_group": "group_reports",
+      "page": "Cuentas por pagar",
+      "control_type": "action_group",
+      "visible_label": "Editar Grupo / Reporte Por Recurso / reporte parcialmente oculto",
+      "expected_behavior": "Conserva acciones visibles; no edita ni genera documentos oficiales hasta definir selección, permisos, contenido y el control oculto.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:33:34.000",
+        "00:34:16.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0006",
+          "timestamp": "00:33:34.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0006_00h33m34s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0006_00h33m34s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0015",
+          "timestamp": "00:34:16.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0015_00h34m16s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0015_00h34m16s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Conserva acciones visibles; no edita ni genera documentos oficiales hasta definir selección, permisos, contenido y el control oculto.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "openProfessionalServicePayment/blocked-payables-mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q002",
+        "CH12-Q007",
+        "CH12-Q012"
+      ],
+      "requirement_id": "CH12-R011",
+      "event_ids": [
+        "CH12-E0042",
+        "CH12-E0044",
+        "CH12-E0045"
+      ],
+      "feature_group": "cancel_save",
+      "page": "Pago de servicios profesionales",
+      "control_type": "form_actions",
+      "visible_label": "Cancelar / Guardar",
+      "expected_behavior": "Cancelar cierra sin persistir; Guardar permanece bloqueado hasta disponer de transición remota, permisos e historial de corrección.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:35:09.800",
+        "00:35:11.400",
+        "00:35:11.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0042",
+          "timestamp": "00:35:09.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0042_00h35m09s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0042_00h35m09s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0044",
+          "timestamp": "00:35:11.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0044_00h35m11s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0044_00h35m11s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0045",
+          "timestamp": "00:35:11.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0045_00h35m11s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Cancelar cierra sin persistir; Guardar permanece bloqueado hasta disponer de transición remota, permisos e historial de corrección.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "generateDoctorStatements",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH12-Q002",
+        "CH12-Q004",
+        "CH12-Q008",
+        "CH12-Q010",
+        "CH12-Q012"
+      ],
+      "requirement_id": "CH12-R012",
+      "event_ids": [
+        "CH12-E0001",
+        "CH12-E0050"
+      ],
+      "feature_group": "payroll_generation",
+      "page": "Cuentas por pagar",
+      "control_type": "financial_workflow",
+      "visible_label": "Corte quincenal y reporte consolidado descritos verbalmente",
+      "expected_behavior": "No se implementa una regla de período, agrupación, tarifa o desembolso a partir del audio; requiere contrato explícito.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:33:29.400",
+        "00:35:16.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0001",
+          "timestamp": "00:33:29.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0001_00h33m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0050",
+          "timestamp": "00:35:16.200",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0050_00h35m16s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No se implementa una regla de período, agrupación, tarifa o desembolso a partir del audio; requiere contrato explícito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/supabase-adapter.js",
+      "current_implementation_function": "mapSupabaseBootstrap/bootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-H001",
+      "event_ids": [
+        "CH12-E0004",
+        "CH12-E0016"
+      ],
+      "feature_group": "supabase_bootstrap",
+      "page": "Cuentas por pagar",
+      "control_type": "data_contract",
+      "visible_label": "Bootstrap productivo de servicios y estados profesionales",
+      "expected_behavior": "Carga doctor_services y normaliza snake_case, importes e ítems de doctor_statements para que la fuente Supabase no vacíe ni rompa las vistas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:30.600",
+        "00:34:17.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0004",
+          "timestamp": "00:33:30.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0004_00h33m30s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0004_00h33m30s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0016",
+          "timestamp": "00:34:17.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0016_00h34m17s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0016_00h34m17s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Carga doctor_services y normaliza snake_case, importes e ítems de doctor_statements para que la fuente Supabase no vacíe ni rompa las vistas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270008_ch12_professional_payables.sql",
+      "current_implementation_function": "doctor_statement_items_read/unique index/revokes",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-H002",
+      "event_ids": [
+        "CH12-E0016",
+        "CH12-E0022"
+      ],
+      "feature_group": "financial_boundary",
+      "page": "Persistencia",
+      "control_type": "rls_idempotency",
+      "visible_label": "Ítems tenant-safe y servicio en un solo estado",
+      "expected_behavior": "Habilita RLS en ítems, deriva tenant por el padre, impide incluir un servicio en dos estados y revoca DML directo en las tres tablas financieras.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:34:17.000",
+        "00:34:42.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0016",
+          "timestamp": "00:34:17.000",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0016_00h34m17s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0016_00h34m17s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0022",
+          "timestamp": "00:34:42.800",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0022_00h34m42s800ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0022_00h34m42s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Habilita RLS en ítems, deriva tenant por el padre, impide incluir un servicio en dos estados y revoca DML directo en las tres tablas financieras.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH12",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/main.js",
+      "current_implementation_function": "generateDoctorStatements/sendDoctorStatement/blocked-payables-mutation",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH12-H003",
+      "event_ids": [
+        "CH12-E0001",
+        "CH12-E0024"
+      ],
+      "feature_group": "no_fake_finance",
+      "page": "Cuentas por pagar / Estados",
+      "control_type": "safety_guard",
+      "visible_label": "Sin éxito financiero local-first",
+      "expected_behavior": "Generar, guardar, editar, enviar y reportes no confirmados fallan o se bloquean explícitamente sin mutar localStorage, auditoría o notificaciones.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:33:29.400",
+        "00:34:44.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0001",
+          "timestamp": "00:33:29.400",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0001_00h33m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH12",
+          "event_id": "CH12-E0024",
+          "timestamp": "00:34:44.600",
+          "image": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/event_frames/CH12-E0024_00h34m44s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/detail_crops/CH12-E0024_00h34m44s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH12_cuentas_por_pagar_y_pagos_de_servicios/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Generar, guardar, editar, enviar y reportes no confirmados fallan o se bloquean explícitamente sin mutar localStorage, auditoría o notificaciones.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

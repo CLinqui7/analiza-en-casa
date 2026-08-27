@@ -1213,21 +1213,55 @@ function renderShiftList(state, shifts, view="week-list"){
 }
 
 function renderPayables(state, store, ui) {
-  const rows=state.doctorServices.map((service)=>{
-    const doctor=state.doctors.find((d)=>d.id===service.doctorId);
-    return `<tr><td>${formatDate(service.date)}</td><td>${esc(doctor?.name)}</td><td>${esc(patientName(state,service.patientId))}<small>${esc(service.caseId)}</small></td><td>${esc(service.service)}</td><td>${service.quantity}</td><td>${money(service.rate)}</td><td>${money(service.quantity*service.rate)}</td><td>${badge(service.status)}</td></tr>`;
+  const activeTab=ui.payablesTab || "summary";
+  const query=String(ui.payablesSearch || "").trim().toLocaleLowerCase("es");
+  const visitStatus=(service)=>{
+    const shift=state.shifts.find((item)=>item.caseId===service.caseId&&item.patientId===service.patientId&&String(item.start||"").slice(0,10)===String(service.date||"").slice(0,10));
+    if (!shift) return "No documentado";
+    if (shift.status==="COMPLETED") return "Finalizada";
+    if (shift.status==="CANCELLED") return "Cancelada";
+    return "Iniciada";
+  };
+  const paymentLabel=(status)=>status==="PAID"?"Pagado":status==="REJECTED"?"Rechazado":"Pendiente pago";
+  const filtered=(state.doctorServices || [])
+    .map((service)=>({service,doctor:state.doctors.find((item)=>item.id===service.doctorId),patient:state.patients.find((item)=>item.id===service.patientId)}))
+    .filter(({service})=>!ui.payablesDateFrom||String(service.date||"")>=ui.payablesDateFrom)
+    .filter(({service})=>!ui.payablesDateTo||String(service.date||"")<=ui.payablesDateTo)
+    .filter(({service})=>!ui.payablesResourceId||service.doctorId===ui.payablesResourceId)
+    .filter(({service})=>!ui.payablesStatus||service.status===ui.payablesStatus)
+    .filter(({service,doctor,patient})=>!query||[service.id,service.caseId,service.service,doctor?.name,patient?.fullName].some((value)=>String(value||"").toLocaleLowerCase("es").includes(query)));
+  const pageSize=Number(ui.payablesPageSize || 10);
+  const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.payablesPage||1)),totalPages);
+  const pageRows=filtered.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  const pages=Array.from({length:Math.min(totalPages,5)},(_,index)=>index+1).map((page)=>`<button data-action="payables-page" data-page="${page}" class="${page===currentPage?"active":""}">${page}</button>`).join("");
+  const toolbar=`<div class="filter-bar payables-table-tools"><label class="page-size-label">Mostrar <select data-ui-filter="payablesPageSize" aria-label="Cantidad de pagos por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize===size?"selected":""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${filtered.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar pagos</span><input data-input="payables-search" value="${esc(ui.payablesSearch||"")}" placeholder="Recurso, paciente u hospitalización"></label></div>`;
+  const pager=`<nav class="pagination" aria-label="Paginación de pagos"><button data-action="payables-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="payables-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>`;
+  const filteredStatements=(state.doctorStatements || []).filter((statement)=>{
+    const doctor=state.doctors.find((item)=>item.id===statement.doctorId);
+    return !query||[statement.id,statement.status,doctor?.name].some((value)=>String(value||"").toLocaleLowerCase("es").includes(query));
   });
-  const gross=state.doctorServices.reduce((s,i)=>s+i.quantity*i.rate,0);
-  const paid=state.doctorStatements.reduce((s,i)=>s+i.paid,0);
+  const statementTotalPages=Math.max(1,Math.ceil(filteredStatements.length/pageSize));
+  const statementCurrentPage=Math.min(currentPage,statementTotalPages);
+  const statementPages=Array.from({length:Math.min(statementTotalPages,5)},(_,index)=>index+1).map((page)=>`<button data-action="payables-page" data-page="${page}" class="${page===statementCurrentPage?"active":""}">${page}</button>`).join("");
+  const statementRows=filteredStatements.slice((statementCurrentPage-1)*pageSize,statementCurrentPage*pageSize).map((statement)=>{
+    const doctor=state.doctors.find((item)=>item.id===statement.doctorId);
+    return `<tr><td><strong>${esc(statement.id)}</strong><small>${esc(doctor?.name||"Recurso no encontrado")}</small></td><td>${formatDate(statement.periodStart)} → ${formatDate(statement.periodEnd)}</td><td>${money(Number(statement.gross||0))}</td><td>${badge(statement.status)}</td></tr>`;
+  });
+  const summaryToolbar=`<div class="filter-bar payables-table-tools"><label class="page-size-label">Mostrar <select data-ui-filter="payablesPageSize" aria-label="Cantidad de facturas por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize===size?"selected":""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${filteredStatements.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar facturas</span><input data-input="payables-search" value="${esc(ui.payablesSearch||"")}" placeholder="Factura, recurso o estatus"></label></div>`;
+  const summaryPager=`<nav class="pagination" aria-label="Paginación de facturas"><button data-action="payables-page" data-page="${statementCurrentPage-1}" ${statementCurrentPage===1?"disabled":""}>Anterior</button>${statementPages}<button data-action="payables-page" data-page="${statementCurrentPage+1}" ${statementCurrentPage===statementTotalPages?"disabled":""}>Siguiente</button></nav>`;
+  const summary=`<div class="payables-summary-grid">
+    ${card("Facturas",`${summaryToolbar}${table(["Factura / recurso","Período","Monto","Estatus"],statementRows)}${summaryPager}`,{subtitle:"Estados de cuenta profesionales visibles; generación y cambios permanecen bloqueados."})}
+    ${card("Reclamos",emptyState("Sin reclamos documentados","CH12 no demuestra la relación ni el flujo de esta sección."),{subtitle:"La semántica de reclamos requiere confirmación del cliente."})}
+  </div>`;
+  const paymentRows=pageRows.map(({service,doctor,patient})=>`<tr><td><input type="checkbox" aria-label="Seleccionar ${esc(service.id)}"></td><td><strong>${esc(doctor?.name||"Recurso no encontrado")}</strong><small>${esc(service.service||service.id)}</small></td><td>${formatDate(service.date)}</td><td>${esc(patient?.fullName||"Paciente no encontrado")}<small>${esc(service.caseId||"")}</small></td><td>${money(Number(service.quantity||0)*Number(service.rate||0))}</td><td>${badge(service.status,paymentLabel(service.status))}</td><td>${badge(visitStatus(service),visitStatus(service))}</td><td>${actionButton("⋯","open-professional-payment",{kind:"ghost",data:`data-id="${esc(service.id)}" aria-label="Abrir pago ${esc(service.id)}"`})}</td></tr>`);
+  const filterPanel=ui.payablesFilterOpen?`<section class="payables-filter-panel" aria-label="Filtros de pagos"><div class="form-grid cols-3"><label>Fecha desde<input type="date" data-ui-filter="payablesDateFrom" value="${esc(ui.payablesDateFrom||"")}"></label><label>Fecha hasta<input type="date" data-ui-filter="payablesDateTo" value="${esc(ui.payablesDateTo||"")}"></label><label>Recurso<select data-ui-filter="payablesResourceId"><option value="">Todos</option>${state.doctors.map((doctor)=>`<option value="${esc(doctor.id)}" ${ui.payablesResourceId===doctor.id?"selected":""}>${esc(doctor.name)}</option>`).join("")}</select></label><label>Estado<select data-ui-filter="payablesStatus"><option value="">Todos</option>${["PENDING","APPROVED","IN_STATEMENT","PAID","REJECTED"].map((status)=>`<option value="${status}" ${ui.payablesStatus===status?"selected":""}>${esc(paymentLabel(status))}</option>`).join("")}</select></label></div><div class="payables-filter-actions">${actionButton("Cerrar","toggle-payables-filters",{kind:"ghost"})}${actionButton("Limpiar","clear-payables-filters")}${actionButton("Aplicar","apply-payables-filters",{kind:"primary"})}</div></section>`:"";
+  const payments=`${filterPanel}${card("Pagos de Servicio",`<div class="payables-actions"><div>${actionButton("Filtros","toggle-payables-filters",{iconName:"filter"})}${actionButton("Editar Grupo","blocked-payables-mutation")}</div><div>${actionButton("Reporte Por Recurso","blocked-payables-mutation")}${actionButton("Reporte pendiente de confirmar","blocked-payables-mutation")}</div></div>${toolbar}${table(["","Recurso","Fecha Visita","Paciente","Monto","Estatus","Est. Visita",""],paymentRows,{className:"payables-table"})}${pager}`,{subtitle:"Una fila por servicio/visita; estado de pago y estado de visita se conservan como dimensiones separadas."})}`;
   return `
-    ${pageHeader("Cuentas por pagar","Servicios de médicos, enfermería y proveedores; cortes, ajustes, retenciones y pagos.",
-      `${actionButton("Generar corte","generate-statements",{kind:"primary",iconName:"check"})}${linkButton("Estados de cuenta","#/estados-de-cuenta",{iconName:"view"})}`)}
-    <div class="metrics-grid metrics-small">
-      ${metric("Servicios aprobados",state.doctorServices.filter(s=>s.status==="APPROVED").length,"Listos para liquidar","check","teal")}
-      ${metric("Monto bruto",money(gross),"Servicios registrados","money","blue")}
-      ${metric("Pagado",money(paid),"Cortes aplicados","money","amber")}
-    </div>
-    ${card("Servicios realizados",table(["Fecha","Recurso","Paciente / caso","Servicio","Cantidad","Tarifa","Total","Estado"],rows))}
+    ${pageHeader("Cuentas por pagar","Facturas, reclamos y pagos por servicio con revisión segura de tarifas y conceptos.",
+      `${actionButton("Generar planilla","generate-statements",{kind:"primary",iconName:"check"})}${actionButton("Restricciones","blocked-payables-mutation",{iconName:"alert"})}${actionButton("Descargar","export-payables",{iconName:"export"})}${actionButton("Limpiar Tabla","blocked-payables-mutation",{iconName:"reset"})}${linkButton("Estados de cuenta","#/estados-de-cuenta",{iconName:"view"})}`)}
+    <nav class="tabs payables-tabs" aria-label="Cuentas por pagar"><button class="tab ${activeTab==="summary"?"active":""}" data-action="set-payables-tab" data-tab="summary">Resumen</button><button class="tab ${activeTab==="payments"?"active":""}" data-action="set-payables-tab" data-tab="payments">Pagos de Servicio</button></nav>
+    ${activeTab==="payments"?payments:summary}
   `;
 }
 
@@ -1357,8 +1391,8 @@ function renderDoctorStatements(state,store,ui){
     ${card("Cortes de honorarios",table(["Estado de cuenta","Médico","Período","Bruto","Ajustes","Retenciones","Neto","Pagado","Pendiente","Estado",""],
       state.doctorStatements.map((stm)=>{
         const doctor=state.doctors.find(d=>d.id===stm.doctorId);
-        const net=stm.gross+stm.adjustments-stm.withholdings;
-        return `<tr><td><strong>${esc(stm.id)}</strong><small>${stm.items.length} servicios</small></td><td>${esc(doctor?.name)}</td><td>${formatDate(stm.periodStart)} → ${formatDate(stm.periodEnd)}</td><td>${money(stm.gross)}</td><td>${money(stm.adjustments)}</td><td>${money(stm.withholdings)}</td><td>${money(net)}</td><td>${money(stm.paid)}</td><td>${money(statementBalance(stm))}</td><td>${badge(stm.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-statement",{kind:"ghost",iconName:"print",data:`data-id="${stm.id}"`})}${actionButton("Enviar","send-statement",{kind:"primary",iconName:"send",data:`data-id="${stm.id}"`})}</div></td></tr>`;
+        const net=Number(stm.gross||0)+Number(stm.adjustments||0)-Number(stm.withholdings||0);
+        return `<tr><td><strong>${esc(stm.id)}</strong><small>${Array.isArray(stm.items)?stm.items.length:0} servicios</small></td><td>${esc(doctor?.name||"Recurso no encontrado")}</td><td>${formatDate(stm.periodStart)} → ${formatDate(stm.periodEnd)}</td><td>${money(Number(stm.gross||0))}</td><td>${money(Number(stm.adjustments||0))}</td><td>${money(Number(stm.withholdings||0))}</td><td>${money(net)}</td><td>${money(Number(stm.paid||0))}</td><td>${money(statementBalance(stm))}</td><td>${badge(stm.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-statement",{kind:"ghost",iconName:"print",data:`data-id="${stm.id}"`})}${actionButton("Enviar","send-statement",{kind:"primary",iconName:"send",data:`data-id="${stm.id}"`})}</div></td></tr>`;
       })))}
   `;
 }

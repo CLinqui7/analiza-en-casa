@@ -1734,6 +1734,32 @@ body.portal-mode #app { min-height: 100vh; }
 .input-with-action button { border:1px solid var(--line);border-left:0;border-radius:0 9px 9px 0;background:white;color:var(--muted);cursor:pointer; }
 
 .document-frame { width:100%;height:62vh;border:1px solid var(--line);border-radius:10px;background:white; }
+.payables-tabs { margin-bottom:14px; }
+.payables-summary-grid { display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px;align-items:start; }
+.payables-table-tools { min-width:0; }
+.payables-actions { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 13px;flex-wrap:wrap; }
+.payables-actions > div { display:flex;gap:8px;flex-wrap:wrap; }
+.payables-filter-panel { margin-bottom:14px;padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm); }
+.payables-filter-actions { display:flex;justify-content:flex-end;gap:8px;margin-top:13px; }
+.payables-table th,.payables-table td { white-space:nowrap; }
+.payables-table td:nth-child(2),.payables-table td:nth-child(4) { white-space:normal;min-width:160px; }
+.payables-table input[type="checkbox"] { width:16px;height:16px;accent-color:var(--teal-600); }
+.section-heading { display:flex;align-items:flex-start;justify-content:space-between;gap:12px; }
+.professional-concepts table { min-width:620px; }
+.muted-cell { color:var(--muted);text-align:center; }
+.blocked-note { margin:0;padding:10px 12px;border:1px solid #f1dfaa;border-radius:9px;background:#fff9e9;color:#725f28;font-size:9px;line-height:1.5; }
+
+@media (max-width: 820px) {
+  .payables-summary-grid { grid-template-columns:1fr; }
+  .payables-filter-panel .form-grid { grid-template-columns:1fr; }
+  .payables-actions { align-items:stretch; }
+  .payables-actions > div { width:100%; }
+  .payables-actions .btn { flex:1; }
+  .payables-table-tools { align-items:stretch; }
+  .payables-table-tools .search-field { width:100%; }
+  .professional-payment-form { grid-template-columns:1fr; }
+  .professional-payment-form .full { grid-column:1; }
+}
 .toast-root { position:fixed;right:18px;bottom:18px;z-index:200;display:flex;flex-direction:column;gap:8px;max-width:min(390px,calc(100vw - 30px)); }
 .toast { display:grid;grid-template-columns:28px 1fr 22px;gap:8px;align-items:center;padding:11px 12px;border-radius:12px;background:var(--navy-900);color:white;box-shadow:var(--shadow-lg);font-size:10px;animation:toastIn .22s ease; }
 .toast > span { width:27px;height:27px;border-radius:8px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-weight:850; }
@@ -5144,6 +5170,29 @@ function mapSupabaseBootstrap(rawCollections = {}) {
       }))
     };
   });
+  collections.doctorServices = (rawCollections.doctorServices || []).map((raw) => {
+    const service = camelCaseObject(raw);
+    return {
+      ...service,
+      caseId: service.hospitalizationId,
+      date: service.serviceDate,
+      service: service.serviceName,
+      quantity: Number(service.quantity || 0),
+      rate: Number(service.rate || 0)
+    };
+  });
+  collections.doctorStatements = (rawCollections.doctorStatements || []).map((raw) => {
+    const statement = camelCaseObject(raw);
+    const statementItems = statement.doctorStatementItems || [];
+    return {
+      ...statement,
+      gross: Number(statement.gross || 0),
+      adjustments: Number(statement.adjustments || 0),
+      withholdings: Number(statement.withholdings || 0),
+      paid: Number(statement.paid || 0),
+      items: statementItems.map((item) => item.doctorServiceId)
+    };
+  });
   return collections;
 }
 
@@ -5284,6 +5333,7 @@ async function createSupabaseAdapter(config) {
       ["inventoryItems", "inventory_items", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
       ["doctors", "doctors", "*"],
+      ["doctorServices", "doctor_services", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
       ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
       ["administrativeExecutionProfiles", "administrative_execution_profiles", "*"],
@@ -7517,29 +7567,14 @@ async function createAppStore(config) {
 
   function generateDoctorStatements() {
     requirePermission("statements:write");
-    setState((draft) => {
-      for (const statement of draft.doctorStatements) {
-        if (statement.status === "DRAFT") statement.status = "READY_TO_SEND";
-      }
-      audit("GENERATE_DOCTOR_STATEMENTS", "2026-08", "Corte de estados de cuenta generado.");
-    });
+    throw new Error("Generar planilla permanece bloqueado hasta confirmar período, elegibilidad, tarifas, ajustes, aprobación, idempotencia y auditoría financiera.");
   }
 
   function sendDoctorStatement(id, channel = "EMAIL") {
     requirePermission("statements:write");
-    setState((draft) => {
-      const statement = draft.doctorStatements.find((candidate) => candidate.id === id);
-      if (!statement) throw new Error("Estado de cuenta no encontrado.");
-      const doctor = draft.doctors.find((candidate) => candidate.id === statement.doctorId);
-      statement.status = "SENT";
-      statement.sentAt = nowIso();
-      audit("SEND_DOCTOR_STATEMENT", id, `Estado de cuenta enviado por ${channel}.`);
-    });
     const statement = state.doctorStatements.find((candidate) => candidate.id === id);
-    if (statement) queueNotification({
-      templateCode: "DOCTOR_STATEMENT", channel, recipientId: statement.doctorId,
-      relatedEntityType: "DOCTOR_STATEMENT", relatedEntityId: statement.id, idempotencyKey: `NOT:DOCTOR_STATEMENT:${statement.id}:${channel}`
-    });
+    if (!statement) throw new Error("Estado de cuenta no encontrado.");
+    throw new Error(`Enviar por ${channel} permanece bloqueado hasta confirmar el estado financiero remoto y crear el trabajo idempotente en una sola operación auditada.`);
   }
 
   function addNotification(input) {
@@ -9107,21 +9142,55 @@ function renderShiftList(state, shifts, view="week-list"){
 }
 
 function renderPayables(state, store, ui) {
-  const rows=state.doctorServices.map((service)=>{
-    const doctor=state.doctors.find((d)=>d.id===service.doctorId);
-    return `<tr><td>${formatDate(service.date)}</td><td>${esc(doctor?.name)}</td><td>${esc(patientName(state,service.patientId))}<small>${esc(service.caseId)}</small></td><td>${esc(service.service)}</td><td>${service.quantity}</td><td>${money(service.rate)}</td><td>${money(service.quantity*service.rate)}</td><td>${badge(service.status)}</td></tr>`;
+  const activeTab=ui.payablesTab || "summary";
+  const query=String(ui.payablesSearch || "").trim().toLocaleLowerCase("es");
+  const visitStatus=(service)=>{
+    const shift=state.shifts.find((item)=>item.caseId===service.caseId&&item.patientId===service.patientId&&String(item.start||"").slice(0,10)===String(service.date||"").slice(0,10));
+    if (!shift) return "No documentado";
+    if (shift.status==="COMPLETED") return "Finalizada";
+    if (shift.status==="CANCELLED") return "Cancelada";
+    return "Iniciada";
+  };
+  const paymentLabel=(status)=>status==="PAID"?"Pagado":status==="REJECTED"?"Rechazado":"Pendiente pago";
+  const filtered=(state.doctorServices || [])
+    .map((service)=>({service,doctor:state.doctors.find((item)=>item.id===service.doctorId),patient:state.patients.find((item)=>item.id===service.patientId)}))
+    .filter(({service})=>!ui.payablesDateFrom||String(service.date||"")>=ui.payablesDateFrom)
+    .filter(({service})=>!ui.payablesDateTo||String(service.date||"")<=ui.payablesDateTo)
+    .filter(({service})=>!ui.payablesResourceId||service.doctorId===ui.payablesResourceId)
+    .filter(({service})=>!ui.payablesStatus||service.status===ui.payablesStatus)
+    .filter(({service,doctor,patient})=>!query||[service.id,service.caseId,service.service,doctor?.name,patient?.fullName].some((value)=>String(value||"").toLocaleLowerCase("es").includes(query)));
+  const pageSize=Number(ui.payablesPageSize || 10);
+  const totalPages=Math.max(1,Math.ceil(filtered.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.payablesPage||1)),totalPages);
+  const pageRows=filtered.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  const pages=Array.from({length:Math.min(totalPages,5)},(_,index)=>index+1).map((page)=>`<button data-action="payables-page" data-page="${page}" class="${page===currentPage?"active":""}">${page}</button>`).join("");
+  const toolbar=`<div class="filter-bar payables-table-tools"><label class="page-size-label">Mostrar <select data-ui-filter="payablesPageSize" aria-label="Cantidad de pagos por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize===size?"selected":""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${filtered.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar pagos</span><input data-input="payables-search" value="${esc(ui.payablesSearch||"")}" placeholder="Recurso, paciente u hospitalización"></label></div>`;
+  const pager=`<nav class="pagination" aria-label="Paginación de pagos"><button data-action="payables-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="payables-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>`;
+  const filteredStatements=(state.doctorStatements || []).filter((statement)=>{
+    const doctor=state.doctors.find((item)=>item.id===statement.doctorId);
+    return !query||[statement.id,statement.status,doctor?.name].some((value)=>String(value||"").toLocaleLowerCase("es").includes(query));
   });
-  const gross=state.doctorServices.reduce((s,i)=>s+i.quantity*i.rate,0);
-  const paid=state.doctorStatements.reduce((s,i)=>s+i.paid,0);
+  const statementTotalPages=Math.max(1,Math.ceil(filteredStatements.length/pageSize));
+  const statementCurrentPage=Math.min(currentPage,statementTotalPages);
+  const statementPages=Array.from({length:Math.min(statementTotalPages,5)},(_,index)=>index+1).map((page)=>`<button data-action="payables-page" data-page="${page}" class="${page===statementCurrentPage?"active":""}">${page}</button>`).join("");
+  const statementRows=filteredStatements.slice((statementCurrentPage-1)*pageSize,statementCurrentPage*pageSize).map((statement)=>{
+    const doctor=state.doctors.find((item)=>item.id===statement.doctorId);
+    return `<tr><td><strong>${esc(statement.id)}</strong><small>${esc(doctor?.name||"Recurso no encontrado")}</small></td><td>${formatDate(statement.periodStart)} → ${formatDate(statement.periodEnd)}</td><td>${money(Number(statement.gross||0))}</td><td>${badge(statement.status)}</td></tr>`;
+  });
+  const summaryToolbar=`<div class="filter-bar payables-table-tools"><label class="page-size-label">Mostrar <select data-ui-filter="payablesPageSize" aria-label="Cantidad de facturas por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize===size?"selected":""}>${size}</option>`).join("")}</select> registros</label><span class="filter-summary">${filteredStatements.length} registros</span><label class="search-field">${icon("search")}<span class="sr-only">Buscar facturas</span><input data-input="payables-search" value="${esc(ui.payablesSearch||"")}" placeholder="Factura, recurso o estatus"></label></div>`;
+  const summaryPager=`<nav class="pagination" aria-label="Paginación de facturas"><button data-action="payables-page" data-page="${statementCurrentPage-1}" ${statementCurrentPage===1?"disabled":""}>Anterior</button>${statementPages}<button data-action="payables-page" data-page="${statementCurrentPage+1}" ${statementCurrentPage===statementTotalPages?"disabled":""}>Siguiente</button></nav>`;
+  const summary=`<div class="payables-summary-grid">
+    ${card("Facturas",`${summaryToolbar}${table(["Factura / recurso","Período","Monto","Estatus"],statementRows)}${summaryPager}`,{subtitle:"Estados de cuenta profesionales visibles; generación y cambios permanecen bloqueados."})}
+    ${card("Reclamos",emptyState("Sin reclamos documentados","CH12 no demuestra la relación ni el flujo de esta sección."),{subtitle:"La semántica de reclamos requiere confirmación del cliente."})}
+  </div>`;
+  const paymentRows=pageRows.map(({service,doctor,patient})=>`<tr><td><input type="checkbox" aria-label="Seleccionar ${esc(service.id)}"></td><td><strong>${esc(doctor?.name||"Recurso no encontrado")}</strong><small>${esc(service.service||service.id)}</small></td><td>${formatDate(service.date)}</td><td>${esc(patient?.fullName||"Paciente no encontrado")}<small>${esc(service.caseId||"")}</small></td><td>${money(Number(service.quantity||0)*Number(service.rate||0))}</td><td>${badge(service.status,paymentLabel(service.status))}</td><td>${badge(visitStatus(service),visitStatus(service))}</td><td>${actionButton("⋯","open-professional-payment",{kind:"ghost",data:`data-id="${esc(service.id)}" aria-label="Abrir pago ${esc(service.id)}"`})}</td></tr>`);
+  const filterPanel=ui.payablesFilterOpen?`<section class="payables-filter-panel" aria-label="Filtros de pagos"><div class="form-grid cols-3"><label>Fecha desde<input type="date" data-ui-filter="payablesDateFrom" value="${esc(ui.payablesDateFrom||"")}"></label><label>Fecha hasta<input type="date" data-ui-filter="payablesDateTo" value="${esc(ui.payablesDateTo||"")}"></label><label>Recurso<select data-ui-filter="payablesResourceId"><option value="">Todos</option>${state.doctors.map((doctor)=>`<option value="${esc(doctor.id)}" ${ui.payablesResourceId===doctor.id?"selected":""}>${esc(doctor.name)}</option>`).join("")}</select></label><label>Estado<select data-ui-filter="payablesStatus"><option value="">Todos</option>${["PENDING","APPROVED","IN_STATEMENT","PAID","REJECTED"].map((status)=>`<option value="${status}" ${ui.payablesStatus===status?"selected":""}>${esc(paymentLabel(status))}</option>`).join("")}</select></label></div><div class="payables-filter-actions">${actionButton("Cerrar","toggle-payables-filters",{kind:"ghost"})}${actionButton("Limpiar","clear-payables-filters")}${actionButton("Aplicar","apply-payables-filters",{kind:"primary"})}</div></section>`:"";
+  const payments=`${filterPanel}${card("Pagos de Servicio",`<div class="payables-actions"><div>${actionButton("Filtros","toggle-payables-filters",{iconName:"filter"})}${actionButton("Editar Grupo","blocked-payables-mutation")}</div><div>${actionButton("Reporte Por Recurso","blocked-payables-mutation")}${actionButton("Reporte pendiente de confirmar","blocked-payables-mutation")}</div></div>${toolbar}${table(["","Recurso","Fecha Visita","Paciente","Monto","Estatus","Est. Visita",""],paymentRows,{className:"payables-table"})}${pager}`,{subtitle:"Una fila por servicio/visita; estado de pago y estado de visita se conservan como dimensiones separadas."})}`;
   return `
-    ${pageHeader("Cuentas por pagar","Servicios de médicos, enfermería y proveedores; cortes, ajustes, retenciones y pagos.",
-      `${actionButton("Generar corte","generate-statements",{kind:"primary",iconName:"check"})}${linkButton("Estados de cuenta","#/estados-de-cuenta",{iconName:"view"})}`)}
-    <div class="metrics-grid metrics-small">
-      ${metric("Servicios aprobados",state.doctorServices.filter(s=>s.status==="APPROVED").length,"Listos para liquidar","check","teal")}
-      ${metric("Monto bruto",money(gross),"Servicios registrados","money","blue")}
-      ${metric("Pagado",money(paid),"Cortes aplicados","money","amber")}
-    </div>
-    ${card("Servicios realizados",table(["Fecha","Recurso","Paciente / caso","Servicio","Cantidad","Tarifa","Total","Estado"],rows))}
+    ${pageHeader("Cuentas por pagar","Facturas, reclamos y pagos por servicio con revisión segura de tarifas y conceptos.",
+      `${actionButton("Generar planilla","generate-statements",{kind:"primary",iconName:"check"})}${actionButton("Restricciones","blocked-payables-mutation",{iconName:"alert"})}${actionButton("Descargar","export-payables",{iconName:"export"})}${actionButton("Limpiar Tabla","blocked-payables-mutation",{iconName:"reset"})}${linkButton("Estados de cuenta","#/estados-de-cuenta",{iconName:"view"})}`)}
+    <nav class="tabs payables-tabs" aria-label="Cuentas por pagar"><button class="tab ${activeTab==="summary"?"active":""}" data-action="set-payables-tab" data-tab="summary">Resumen</button><button class="tab ${activeTab==="payments"?"active":""}" data-action="set-payables-tab" data-tab="payments">Pagos de Servicio</button></nav>
+    ${activeTab==="payments"?payments:summary}
   `;
 }
 
@@ -9251,8 +9320,8 @@ function renderDoctorStatements(state,store,ui){
     ${card("Cortes de honorarios",table(["Estado de cuenta","Médico","Período","Bruto","Ajustes","Retenciones","Neto","Pagado","Pendiente","Estado",""],
       state.doctorStatements.map((stm)=>{
         const doctor=state.doctors.find(d=>d.id===stm.doctorId);
-        const net=stm.gross+stm.adjustments-stm.withholdings;
-        return `<tr><td><strong>${esc(stm.id)}</strong><small>${stm.items.length} servicios</small></td><td>${esc(doctor?.name)}</td><td>${formatDate(stm.periodStart)} → ${formatDate(stm.periodEnd)}</td><td>${money(stm.gross)}</td><td>${money(stm.adjustments)}</td><td>${money(stm.withholdings)}</td><td>${money(net)}</td><td>${money(stm.paid)}</td><td>${money(statementBalance(stm))}</td><td>${badge(stm.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-statement",{kind:"ghost",iconName:"print",data:`data-id="${stm.id}"`})}${actionButton("Enviar","send-statement",{kind:"primary",iconName:"send",data:`data-id="${stm.id}"`})}</div></td></tr>`;
+        const net=Number(stm.gross||0)+Number(stm.adjustments||0)-Number(stm.withholdings||0);
+        return `<tr><td><strong>${esc(stm.id)}</strong><small>${Array.isArray(stm.items)?stm.items.length:0} servicios</small></td><td>${esc(doctor?.name||"Recurso no encontrado")}</td><td>${formatDate(stm.periodStart)} → ${formatDate(stm.periodEnd)}</td><td>${money(Number(stm.gross||0))}</td><td>${money(Number(stm.adjustments||0))}</td><td>${money(Number(stm.withholdings||0))}</td><td>${money(net)}</td><td>${money(Number(stm.paid||0))}</td><td>${money(statementBalance(stm))}</td><td>${badge(stm.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-statement",{kind:"ghost",iconName:"print",data:`data-id="${stm.id}"`})}${actionButton("Enviar","send-statement",{kind:"primary",iconName:"send",data:`data-id="${stm.id}"`})}</div></td></tr>`;
       })))}
   `;
 }
@@ -9608,6 +9677,8 @@ function renderNotificationPanel(state){
 
 const QUOTE_ADMIN_LABELS_MAIN = Object.fromEntries(Object.entries(QUOTE_STATUS_LABELS).map(([key, value]) => [key, value.admin]));
 const STANDALONE_DEMO_OTP = "202626";
+const PROFESSIONAL_ADDITION_REASONS = ["Tiempo extra", "Excelencia", "Mal agendado", "Paciente especial", "Transporte"];
+const PROFESSIONAL_DISCOUNT_REASONS = ["Retraso", "Mal agendado", "No asistió", "Cambio del turno", "Planilla", "Paciente Hospitalizado", "Paciente Falleció", "NO CIERRE DE VISITA A TIEMPO", "Transporte", "Cumplimiento incorrecto"];
 
 const config = await loadRuntimeConfig();
 const store = await createAppStore(config);
@@ -9658,6 +9729,18 @@ const ui = {
   agendaPatientId: "",
   agendaPatientQuery: "",
   agendaResourceId: "",
+  payablesTab: "summary",
+  payablesFilterOpen: false,
+  payablesDateFrom: "",
+  payablesDateTo: "",
+  payablesResourceId: "",
+  payablesStatus: "",
+  payablesSearch: "",
+  payablesPage: 1,
+  payablesPageSize: 10,
+  professionalPaymentServiceId: "",
+  professionalConceptType: "ADDITION",
+  professionalConceptReason: "",
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -9825,6 +9908,10 @@ const ACTION_PERMISSIONS = {
   "import-catalog": "catalogs:write",
   "open-doctor-form": "doctors:write",
   "save-doctor": "doctors:write",
+  "open-professional-payment": "statements:read",
+  "open-professional-concept": "statements:read",
+  "export-payables": "statements:read",
+  "blocked-payables-mutation": "statements:write",
   "generate-statements": "statements:write",
   "send-statement": "statements:write",
   "save-settings": "settings:write",
@@ -10877,6 +10964,82 @@ function openVisitDetail(id) {
   });
 }
 
+function professionalPaymentService(id) {
+  return store.getState().doctorServices.find((item) => item.id === id) || null;
+}
+
+function professionalVisitStatus(state, service) {
+  const shift = state.shifts.find((item) => item.caseId === service.caseId && item.patientId === service.patientId && String(item.start || "").slice(0, 10) === String(service.date || "").slice(0, 10));
+  if (!shift) return "No documentado";
+  if (shift.status === "COMPLETED") return "Finalizada";
+  if (shift.status === "CANCELLED") return "Cancelada";
+  return "Iniciada";
+}
+
+function openProfessionalServicePayment(id) {
+  const state = store.getState();
+  const service = professionalPaymentService(id);
+  if (!service) return showToast("Pago de servicio no encontrado.", "danger");
+  const doctor = state.doctors.find((item) => item.id === service.doctorId);
+  const patient = state.patients.find((item) => item.id === service.patientId);
+  ui.professionalPaymentServiceId = service.id;
+  openModal({
+    title: "Pago de servicios profesionales",
+    subtitle: "Revisión del servicio. Los cambios monetarios permanecen bloqueados hasta aprobar reglas y autorizaciones.",
+    size: "lg",
+    body: `<form id="professional-payment-form" class="form-grid professional-payment-form">
+      <label>Fecha<input name="date" value="${safeText(service.date || "")}" readonly></label>
+      <label>Hospitalización<input name="hospitalization" value="${safeText(service.caseId || "—")}" readonly></label>
+      <label>Recurso<input name="resource" value="${safeText(doctor?.name || "Recurso no encontrado")}" readonly></label>
+      <label>Paciente<input name="patient" value="${safeText(patient?.fullName || "Paciente no encontrado")}" readonly></label>
+      <label>Tarifa<input name="rate" value="${safeText(money(Number(service.rate || 0)))}" readonly></label>
+      <label>Monto<input name="amount" value="${safeText(money(Number(service.quantity || 0) * Number(service.rate || 0)))}" readonly></label>
+      <label>Estatus<input name="status" value="${safeText(service.status || "PENDING")}" readonly></label>
+      <label>Estado visita<input value="${safeText(professionalVisitStatus(state, service))}" readonly></label>
+      <label class="full">Comentarios<textarea name="comments" rows="3" readonly placeholder="Requiere reglas aprobadas para edición."></textarea></label>
+      <section class="full form-section professional-concepts"><div class="section-heading"><div><h3>Conceptos</h3><p>Las líneas de añadidura o descuento deben ser append-only y auditables.</p></div><button type="button" class="btn btn-secondary" data-action="open-professional-concept" data-id="${safeText(service.id)}">Agregar</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Motivo</th><th>Monto</th><th>Comentario</th></tr></thead><tbody><tr><td colspan="4" class="muted-cell">Sin conceptos registrados.</td></tr></tbody></table></div>
+      </section>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="blocked-payables-mutation">Guardar</button>`
+  });
+}
+
+function openProfessionalPaymentConcept(id = ui.professionalPaymentServiceId) {
+  const service = professionalPaymentService(id);
+  if (!service) return showToast("Pago de servicio no encontrado.", "danger");
+  ui.professionalPaymentServiceId = service.id;
+  const reasons = ui.professionalConceptType === "DISCOUNT" ? PROFESSIONAL_DISCOUNT_REASONS : PROFESSIONAL_ADDITION_REASONS;
+  if (!reasons.includes(ui.professionalConceptReason)) ui.professionalConceptReason = "";
+  openModal({
+    title: "Agregar Concepto",
+    subtitle: "Catálogo documental observado en CH12; no define por sí solo cálculo, contabilidad ni autorización.",
+    size: "md",
+    body: `<form id="professional-concept-form" class="form-grid">
+      <label>Tipo*<select name="type" data-action="professional-concept-type" required><option value="ADDITION" ${ui.professionalConceptType === "ADDITION" ? "selected" : ""}>Añadidura</option><option value="DISCOUNT" ${ui.professionalConceptType === "DISCOUNT" ? "selected" : ""}>Descuento</option></select></label>
+      <label>Motivo*<select name="reason" data-action="professional-concept-reason" required><option value="">Seleccione</option>${reasons.map((reason) => `<option value="${safeText(reason)}" ${ui.professionalConceptReason === reason ? "selected" : ""}>${safeText(reason)}</option>`).join("")}</select></label>
+      <label>Monto*<input type="number" name="amount" min="0.01" step="0.01" placeholder="0.00" required></label>
+      <label class="full">Comentario<textarea name="comment" rows="3" maxlength="1000"></textarea></label>
+      <p class="full blocked-note">La acción Agregar no modifica saldos hasta confirmar motivos, permisos, cálculo, impuestos, retenciones, aprobación y reversión.</p>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="back-professional-payment">Cancelar</button><button class="btn btn-primary" data-action="blocked-payables-mutation">Agregar</button>`
+  });
+}
+
+function payablesExportRows() {
+  const state = store.getState();
+  return state.doctorServices.map((service) => ({
+    servicio: service.id,
+    recurso: state.doctors.find((item) => item.id === service.doctorId)?.name || "",
+    fecha_visita: service.date || "",
+    referencia_paciente: service.patientId || "",
+    hospitalizacion: service.caseId || "",
+    monto: Number(service.quantity || 0) * Number(service.rate || 0),
+    estatus_pago: service.status || "",
+    estatus_visita: professionalVisitStatus(state, service)
+  }));
+}
+
 function openPurchaseForm() {
   const state = store.getState();
   openModal({
@@ -11374,6 +11537,20 @@ document.addEventListener("click", async (event) => {
     case "reset-demo": if (confirm("¿Restaurar todos los datos ficticios al estado inicial?")) runSafely(() => store.reset(), "Datos demo restaurados."); break;
     case "set-tab": ui.tab = data.tab; render(); break;
     case "set-receivables-tab": ui.receivablesTab = data.tab || "accounts"; render(); break;
+    case "set-payables-tab": ui.payablesTab = data.tab || "summary"; ui.payablesPage = 1; render(); break;
+    case "toggle-payables-filters": ui.payablesFilterOpen = !ui.payablesFilterOpen; render(); break;
+    case "apply-payables-filters": ui.payablesPage = 1; ui.payablesFilterOpen = false; render(); break;
+    case "clear-payables-filters": {
+      ui.payablesDateFrom = "";
+      ui.payablesDateTo = "";
+      ui.payablesResourceId = "";
+      ui.payablesStatus = "";
+      ui.payablesSearch = "";
+      ui.payablesPage = 1;
+      render();
+      break;
+    }
+    case "payables-page": ui.payablesPage = Math.max(1, Number(data.page || 1)); render(); break;
     case "receivables-page": ui.receivablesPage = Math.max(1, Number(data.page || 1)); render(); break;
     case "sort-receivables": {
       if (ui.receivablesSortKey === data.sort) ui.receivablesSortDirection = ui.receivablesSortDirection === "asc" ? "desc" : "asc";
@@ -11572,6 +11749,11 @@ document.addEventListener("click", async (event) => {
     case "blocked-bulk-visits": showToast("Eliminar visitas permanece deshabilitado hasta confirmar selección, recurrencia, permisos, motivo y auditoría.", "info"); break;
     case "blocked-agenda-destination": showToast("Este destino sólo aparece en la evidencia; su comportamiento requiere confirmación del cliente.", "info"); break;
     case "blocked-professional-payment": showToast("Los ajustes de pago permanecen deshabilitados hasta confirmar tarifa, autorización, motivo y reglas contables.", "info"); break;
+    case "open-professional-payment": openProfessionalServicePayment(data.id || ""); break;
+    case "open-professional-concept": openProfessionalPaymentConcept(data.id || ""); break;
+    case "back-professional-payment": openProfessionalServicePayment(ui.professionalPaymentServiceId); break;
+    case "blocked-payables-mutation": showToast("Operación financiera bloqueada: faltan reglas aprobadas de cálculo, autorización, idempotencia, auditoría, pago y reversión.", "info", 7000); break;
+    case "export-payables": saveDownload("pagos_servicios_sinteticos.csv", toCsv(payablesExportRows()), "text/csv;charset=utf-8"); break;
     case "open-purchase-form": openPurchaseForm(); break;
     case "view-purchase": runSafely(()=>printPurchase(data.id)); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
@@ -11593,8 +11775,8 @@ document.addEventListener("click", async (event) => {
     case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
     case "administer-medication": showToast("Registro de administración deshabilitado hasta confirmar campos, permisos y correcciones.", "info"); break;
     case "open-doctor-form": openDoctorForm(); break;
-    case "generate-statements": runSafely(()=>store.generateDoctorStatements(),"Estados de cuenta generados."); break;
-    case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id),"Estado de cuenta enviado en modo simulado."); break;
+    case "generate-statements": runSafely(()=>store.generateDoctorStatements()); break;
+    case "send-statement": runSafely(()=>store.sendDoctorStatement(data.id)); break;
     case "print-statement": runSafely(()=>printStatement(data.id)); break;
     case "export-patients": exportPatients(); break;
     case "export-audit": exportAudit(); break;
@@ -11616,6 +11798,13 @@ document.addEventListener("change", (event) => {
   const action = target.dataset.change || target.dataset.action;
   if (target.matches("[data-agenda-patient]")) { ui.agendaPatientId = target.value; render(); return; }
   if (target.matches("[data-agenda-resource]")) { ui.agendaResourceId = target.value; render(); return; }
+  if (target.matches('[data-ui-filter="payablesDateFrom"]')) { ui.payablesDateFrom = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesDateTo"]')) { ui.payablesDateTo = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesResourceId"]')) { ui.payablesResourceId = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesStatus"]')) { ui.payablesStatus = target.value; ui.payablesPage = 1; return; }
+  if (target.matches('[data-ui-filter="payablesPageSize"]')) { ui.payablesPageSize = Math.max(1, Math.min(50, Number(target.value || 10))); ui.payablesPage = 1; render(); return; }
+  if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
+  if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
     const summary = visitCaseSummary(store.caseById(target.value));
     const form = target.closest("form");
@@ -11831,6 +12020,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="receivables-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="payables-search"]')) {
+    ui.payablesSearch = target.value;
+    ui.payablesPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="payables-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }

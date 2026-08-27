@@ -1909,29 +1909,14 @@ export async function createAppStore(config) {
 
   function generateDoctorStatements() {
     requirePermission("statements:write");
-    setState((draft) => {
-      for (const statement of draft.doctorStatements) {
-        if (statement.status === "DRAFT") statement.status = "READY_TO_SEND";
-      }
-      audit("GENERATE_DOCTOR_STATEMENTS", "2026-08", "Corte de estados de cuenta generado.");
-    });
+    throw new Error("Generar planilla permanece bloqueado hasta confirmar período, elegibilidad, tarifas, ajustes, aprobación, idempotencia y auditoría financiera.");
   }
 
   function sendDoctorStatement(id, channel = "EMAIL") {
     requirePermission("statements:write");
-    setState((draft) => {
-      const statement = draft.doctorStatements.find((candidate) => candidate.id === id);
-      if (!statement) throw new Error("Estado de cuenta no encontrado.");
-      const doctor = draft.doctors.find((candidate) => candidate.id === statement.doctorId);
-      statement.status = "SENT";
-      statement.sentAt = nowIso();
-      audit("SEND_DOCTOR_STATEMENT", id, `Estado de cuenta enviado por ${channel}.`);
-    });
     const statement = state.doctorStatements.find((candidate) => candidate.id === id);
-    if (statement) queueNotification({
-      templateCode: "DOCTOR_STATEMENT", channel, recipientId: statement.doctorId,
-      relatedEntityType: "DOCTOR_STATEMENT", relatedEntityId: statement.id, idempotencyKey: `NOT:DOCTOR_STATEMENT:${statement.id}:${channel}`
-    });
+    if (!statement) throw new Error("Estado de cuenta no encontrado.");
+    throw new Error(`Enviar por ${channel} permanece bloqueado hasta confirmar el estado financiero remoto y crear el trabajo idempotente en una sola operación auditada.`);
   }
 
   function addNotification(input) {

@@ -115,6 +115,33 @@ function defaultAssessment(feature, chapterId) {
   };
 }
 
+const assessmentOverrides = {
+  "CH12-F01": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Sin impacto clínico directo; la vista minimiza datos y no crea reclamos ficticios.", financial_impact:"Generación, restricciones y limpieza permanecen bloqueadas hasta definir sus efectos.", current_platform_evidence:"app/views.js renderPayables; app/main.js blocked-payables-mutation", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Conservar la superficie y completar Reclamos/acciones sólo tras resolver CH12-Q008–CH12-Q011.", blocked_by_client_information:true, notes:"Tabs, tablas y acciones visibles; las operaciones no demostradas no simulan éxito."
+  },
+  "CH12-F02": {
+    status:"IMPLEMENTED_EXACT", priority:"P1", patient_safety_impact:"La tabla usa únicamente el alcance de organización ya autorizado.", financial_impact:"Separa estado de pago y visita y no inventa una correlación ausente.", current_platform_evidence:"app/views.js renderPayables; app/supabase-adapter.js mapSupabaseBootstrap", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Mantener regresión de filtros, búsqueda, paginación y móvil.", blocked_by_client_information:false, notes:"La selección es local y cualquier efecto grupal continúa bloqueado."
+  },
+  "CH12-F03": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P2", patient_safety_impact:"Debe definirse la minimización de identificadores de paciente en reportes profesionales.", financial_impact:"Contenido, alcance, formato y efecto de edición grupal no están demostrados.", current_platform_evidence:"app/views.js renderPayables; app/main.js blocked-payables-mutation", test_path:"tests/e2e/ch12.spec.mjs", recommended_action:"Resolver CH12-Q001, CH12-Q007 y CH12-Q010 antes de habilitar reportes o edición grupal.", blocked_by_client_information:true, notes:"El control oculto no se nombra como hecho; se presenta como pendiente de confirmar."
+  },
+  "CH12-F04": {
+    status:"IMPLEMENTED_EXACT", priority:"P2", patient_safety_impact:"Sin impacto clínico; los filtros no alteran registros.", financial_impact:"Rango, recurso y estado filtran sólo la vista.", current_platform_evidence:"app/views.js renderPayables; app/main.js apply-payables-filters", test_path:"tests/e2e/ch12.spec.mjs", recommended_action:"Mantener pruebas de combinación, limpieza y paginación.", blocked_by_client_information:false, notes:"Cerrar, Limpiar y Aplicar están implementados."
+  },
+  "CH12-F05": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"La identidad se muestra desde datos autorizados y no se envía por canales inseguros.", financial_impact:"Tarifa, monto, estado y comentario son de sólo lectura hasta aprobar la transición financiera.", current_platform_evidence:"app/main.js openProfessionalServicePayment", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Habilitar edición únicamente mediante RPC auditada después de resolver CH12-Q002–CH12-Q007 y CH12-Q012.", blocked_by_client_information:true, notes:"La composición visual y Cancelar existen; Guardar no finge persistencia."
+  },
+  "CH12-F06": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Los motivos no ejecutan reglas clínicas ni exponen detalles en notificaciones.", financial_impact:"Agregar no cambia saldos hasta definir fórmula, autorización, contabilidad y reversión.", current_platform_evidence:"app/main.js openProfessionalPaymentConcept/blocked-payables-mutation", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Modelar líneas append-only y una RPC idempotente cuando se aprueben CH12-Q005–CH12-Q007.", blocked_by_client_information:true, notes:"Tipo, motivo, monto y comentario reproducen la superficie observada."
+  },
+  "CH12-F07": {
+    status:"IMPLEMENTED_EXACT", priority:"P2", patient_safety_impact:"Los rótulos son documentales y no se interpretan como reglas clínicas.", financial_impact:"No se asigna efecto monetario a ningún motivo.", current_platform_evidence:"app/main.js PROFESSIONAL_ADDITION_REASONS/PROFESSIONAL_DISCOUNT_REASONS", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Mantenerlos configurables y no productivos hasta confirmar CH12-Q005–CH12-Q006.", blocked_by_client_information:false, notes:"Se incluyen todos los rótulos legibles de la evidencia; no se inventan motivos adicionales."
+  },
+  "CH12-F08": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Sin regla clínica inferida; debe limitarse la identificación del paciente en exportaciones.", financial_impact:"Alto: faltan tarifa versionada, estados, aprobación, retenciones, pagos parciales, reversión e idempotencia.", current_platform_evidence:"app/store.js bloquea generateDoctorStatements/sendDoctorStatement; supabase/migrations/202608270008_ch12_professional_payables.sql cierra DML directo", test_path:"tests/ch12-professional-payables.test.mjs", recommended_action:"Aprobar CH12-Q002–CH12-Q012 y luego implementar ledger y RPC transaccionales antes de habilitar cualquier mutación.", blocked_by_client_information:true, notes:"El P0 se contiene cerrando escrituras directas, RLS de ítems, doble inclusión y éxitos local-first."
+  }
+};
+
 function defaultSafetyFindings() {
   return [
     {
@@ -278,7 +305,7 @@ async function bootstrapCanonical() {
         open_question_ids: questions
           .filter((question) => question.evidence_event_ids.some((eventId) => evidenceEventIds.has(eventId)))
           .map((question) => question.question_id),
-        platform_assessment: priorRequirement?.platform_assessment || defaultAssessment(feature, chapter.chapter_id)
+        platform_assessment: assessmentOverrides[requirementId] || priorRequirement?.platform_assessment || defaultAssessment(feature, chapter.chapter_id)
       });
     }
 

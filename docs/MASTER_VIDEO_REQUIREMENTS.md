@@ -5,9 +5,9 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 94
-- Estados de gap: IMPLEMENTED_EXACT=5, IMPLEMENTED_PARTIAL=166, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=32
-- Prioridades: P0=2, P1=174, P2=34, P3=0
+- Preguntas abiertas: 106
+- Estados de gap: IMPLEMENTED_EXACT=8, IMPLEMENTED_PARTIAL=162, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=33
+- Prioridades: P0=3, P1=171, P2=36, P3=0
 
 ## Gaps P0 de seguridad e integridad
 
@@ -237,13 +237,13 @@ Eventos: 51/51. Requisitos: 8.
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
 | CH12-F01 | Resumen de cuentas por pagar | CH12-E0004 @ 00:33:30.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F02 | Listado de pagos de servicios | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F03 | Acciones de pagos y reportes | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F04 | Filtro de pagos | CH12-E0010 @ 00:34:02.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH12-F02 | Listado de pagos de servicios | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_EXACT | P1 |
+| CH12-F03 | Acciones de pagos y reportes | CH12-E0016 @ 00:34:17.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH12-F04 | Filtro de pagos | CH12-E0010 @ 00:34:02.200 | IMPLEMENTED_EXACT | P2 |
 | CH12-F05 | Edición de pago de servicio profesional | CH12-E0022 @ 00:34:42.800; CH12-E0024 @ 00:34:44.600 | IMPLEMENTED_PARTIAL | P1 |
 | CH12-F06 | Conceptos de adición o descuento | CH12-E0025 @ 00:34:47.600; CH12-E0027 @ 00:34:49.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F07 | Catálogo visible de motivos | CH12-E0029 @ 00:34:55.800; CH12-E0034 @ 00:35:02.000; CH12-E0040 @ 00:35:07.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F08 | Reglas financieras de montos y aprobación | CH12-E0022 @ 00:34:42.800 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH12-F07 | Catálogo visible de motivos | CH12-E0029 @ 00:34:55.800; CH12-E0034 @ 00:35:02.000; CH12-E0040 @ 00:35:07.600 | IMPLEMENTED_EXACT | P2 |
+| CH12-F08 | Reglas financieras de montos y aprobación | CH12-E0022 @ 00:34:42.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
 
 ## CH13 · Compras y compras al por mayor
 
