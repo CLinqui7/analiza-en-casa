@@ -1385,15 +1385,24 @@ function renderKits(state,store,ui){
 }
 
 function renderCatalogs(state,store,ui,category=null){
-  const items=category ? state.catalogItems.filter(i=>i.category===category) : state.catalogItems;
+  const canWrite=roleCan(state.session.role,"catalogs:write");
+  const scoped=state.catalogItems.filter((item)=>item.organizationId===state.organization?.id && (!category || item.category===category));
+  const matching=searchFilter(scoped,ui.search,["sku","name","description","category","manufacturer","productType","serviceCategory"])
+    .filter((item)=>ui.catalogStatus==="ALL" || (ui.catalogStatus==="ACTIVE" ? item.active!==false : item.active===false))
+    .sort((left,right)=>String(left.sku||"").localeCompare(String(right.sku||""),"es",{numeric:true}));
+  const pageSize=Math.max(5,Math.min(50,Number(ui.catalogPageSize||10)));
+  const totalPages=Math.max(1,Math.ceil(matching.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.catalogPage||1)),totalPages);
+  const items=matching.slice((currentPage-1)*pageSize,currentPage*pageSize);
   const title=category ? ITEM_CATEGORY_LABELS[category] || category : "Catálogos y tarifas";
-  const rows=searchFilter(items,ui.search,["sku","name","category"]).map((item)=>`<tr><td><code>${esc(item.sku)}</code></td><td><strong>${esc(item.name)}</strong><small>${esc(ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(item.unit)}</td><td>${money(item.cost)}</td><td>${money(item.price)}</td><td>${item.taxable?"Sí":"No"}</td><td>${item.requiresLot?"Sí":"No"}</td><td>${badge(item.active?"ACTIVE":"INACTIVE")}</td><td>${actionButton("Editar","edit-catalog-item",{kind:"ghost",iconName:"edit",data:`data-id="${item.id}"`})}</td></tr>`);
+  const rows=items.map((item)=>`<tr><td><code>${esc(item.sku)}</code></td><td><strong>${esc(item.name)}</strong><small>${esc(item.description||ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(item.productType||item.serviceCategory||ITEM_CATEGORY_LABELS[item.category]||item.category)}</td><td>${esc(item.unit)}</td><td>${money(item.cost)}</td><td>${money(item.price)}</td><td>${item.taxable?"Sí":"No"}</td><td>${item.discountAllowed?"Sí":"No"}</td><td>${item.requiresLot?"Lote":item.requiresSerial?"Serie":"No"}</td><td>${badge(item.active!==false?"ACTIVE":"INACTIVE")}</td><td>${canWrite?`<div class="row-actions">${actionButton("Editar","edit-catalog-item",{kind:"ghost",iconName:"edit",data:`data-id="${item.id}"`})}${item.active!==false?actionButton("Inactivar","inactivate-catalog-item",{kind:"ghost",iconName:"close",data:`data-id="${item.id}"` }):""}</div>`:"—"}</td></tr>`);
+  const pages=Array.from({length:Math.min(totalPages,7)},(_,index)=>index+1).map((page)=>`<button data-action="catalog-page" data-page="${page}" class="${page===currentPage?"active":""}">${page}</button>`).join("");
   return `
     ${pageHeader(title,"Servicios, estudios, medicamentos, insumos, equipos, honorarios, extras, costos, precios y vigencias.",
-      `${actionButton("Importar CSV","import-catalog",{iconName:"upload"})}${actionButton("Nuevo ítem","open-catalog-form",{kind:"primary",iconName:"plus",data:category?`data-category="${category}"`:""})}`)}
+      canWrite?`${actionButton("Importar CSV","import-catalog",{iconName:"upload",data:category?`data-category="${category}"`:""})}${actionButton("Nuevo ítem","open-catalog-form",{kind:"primary",iconName:"plus",data:category?`data-category="${category}"`:""})}`:"")}
     ${!category?`<div class="catalog-shortcuts">${Object.entries(ITEM_CATEGORY_LABELS).map(([key,label])=>`<a href="#/catalogos/${key.toLowerCase()}"><span>${icon("catalogs")}</span><strong>${esc(label)}</strong><small>${state.catalogItems.filter(i=>i.category===key).length} ítems</small></a>`).join("")}<a href="#/catalogos/descuentos"><span>${icon("money")}</span><strong>Descuentos</strong><small>${state.discountRules.length} perfiles</small></a></div>`:""}
-    <div class="filter-bar"><label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar código o descripción" value="${esc(ui.search||"")}"></label><div class="filter-summary">${rows.length} ítems</div></div>
-    ${card("Maestro de ítems",table(["SKU","Descripción","Unidad","Costo","Precio","IVA","Lote/serie","Estado",""],rows))}
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="catalogPageSize">${[5,10,25,50].map((size)=>`<option value="${size}" ${size===pageSize?"selected":""}>${size}</option>`).join("")}</select> registros</label><label>Estado <select data-ui-filter="catalogStatus"><option value="ALL" ${ui.catalogStatus==="ALL"?"selected":""}>Todos</option><option value="ACTIVE" ${ui.catalogStatus==="ACTIVE"?"selected":""}>Activos</option><option value="INACTIVE" ${ui.catalogStatus==="INACTIVE"?"selected":""}>Inactivos</option></select></label><label class="search-field">${icon("search")}<span class="sr-only">Buscar catálogo</span><input data-ui-search placeholder="Buscar código, descripción o fabricante" value="${esc(ui.search||"")}"></label><div class="filter-summary">${matching.length} ítems</div></div>
+    ${card("Maestro de ítems",`${table(["SKU","Descripción","Tipo / categoría","Unidad","Costo","Precio","Impuesto","Descuento","Trazabilidad","Estado","Acciones"],rows)}<nav class="pagination" aria-label="Paginación de catálogo"><button data-action="catalog-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="catalog-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>`)}
   `;
 }
 

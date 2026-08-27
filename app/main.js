@@ -104,6 +104,10 @@ const ui = {
   purchaseDraft: null,
   inventoryAckTab: "PATIENTS",
   inventoryClosureTab: "PENDING",
+  catalogPage: 1,
+  catalogPageSize: 10,
+  catalogStatus: "ALL",
+  catalogImport: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -281,6 +285,9 @@ const ACTION_PERMISSIONS = {
   "apply-kit": "inventory:write",
   "open-catalog-form": "catalogs:write",
   "edit-catalog-item": "catalogs:write",
+  "save-catalog-item": "catalogs:write",
+  "inactivate-catalog-item": "catalogs:write",
+  "confirm-catalog-import": "catalogs:write",
   "open-discount-form": "catalogs:write",
   "import-catalog": "catalogs:write",
   "open-doctor-form": "doctors:write",
@@ -306,7 +313,7 @@ function applyActionPermissions(state) {
   });
 }
 
-function parseCsv(text) {
+function parseCsv(text, required = ["document", "firstName", "lastName"]) {
   const rows = [];
   let row = [], field = "", quoted = false;
   for (let index = 0; index <= text.length; index += 1) {
@@ -326,10 +333,37 @@ function parseCsv(text) {
   if (quoted) throw new Error("El CSV contiene una comilla sin cerrar.");
   if (rows.length < 2) throw new Error("El CSV requiere encabezados y al menos una fila.");
   const headers = rows[0].map((value) => value.replace(/^\uFEFF/, ""));
-  const required = ["document", "firstName", "lastName"];
   const missing = required.filter((name) => !headers.includes(name));
   if (missing.length) throw new Error(`Faltan encabezados obligatorios: ${missing.join(", ")}.`);
   return rows.slice(1).map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] || ""])));
+}
+
+function parseCatalogCsv(text, forcedCategory = "") {
+  const rows = parseCsv(text, ["sku", "name", "unit"]);
+  const allowed = new Set(Object.keys(ITEM_CATEGORY_LABELS));
+  const existing = new Set(store.getState().catalogItems.map((item) => String(item.sku || "").trim().toUpperCase()));
+  const seen = new Set();
+  const validRows = [];
+  const errors = [];
+  const bool = (value) => ["1","TRUE","SI","SÍ","YES","Y"].includes(String(value || "").trim().toUpperCase());
+  rows.forEach((source, index) => {
+    const row = { ...source };
+    row.sku = String(row.sku || "").trim().toUpperCase();
+    row.category = String(forcedCategory || row.category || "").trim().toUpperCase();
+    row.cost = !String(row.cost ?? "").trim() ? 0 : Number(row.cost);
+    row.price = !String(row.price ?? "").trim() ? 0 : Number(row.price);
+    for (const field of ["taxable","billable","discountAllowed","giftcardAllowed","requiresLot","requiresSerial","internalUse","coldChain"]) row[field] = bool(row[field]);
+    const rowErrors = [];
+    if (!row.sku || !row.name || !row.unit) rowErrors.push("código, nombre y unidad son obligatorios");
+    if (!allowed.has(row.category)) rowErrors.push("categoría no permitida");
+    if (!Number.isFinite(row.cost) || row.cost < 0 || !Number.isFinite(row.price) || row.price < 0) rowErrors.push("costo o precio inválido");
+    if (existing.has(row.sku) || seen.has(row.sku)) rowErrors.push("código duplicado");
+    if (row.validFrom && !/^\d{4}-\d{2}-\d{2}$/.test(row.validFrom)) rowErrors.push("vigencia inicial inválida");
+    if (row.validUntil && (!/^\d{4}-\d{2}-\d{2}$/.test(row.validUntil) || (row.validFrom && row.validUntil < row.validFrom))) rowErrors.push("vigencia final inválida");
+    if (rowErrors.length) errors.push({ row:index + 2, sku:row.sku || "—", message:rowErrors.join("; ") });
+    else { seen.add(row.sku); validRows.push(row); }
+  });
+  return { validRows, errors, total:rows.length };
 }
 
 function renderOverlays() {
@@ -1684,22 +1718,50 @@ function openKitForm() {
 function openCatalogForm(category = "", id = "") {
   const state = store.getState();
   const item = id ? state.catalogItems.find((i)=>i.id===id) : null;
+  const selectedCategory=item?.category||category||"SERVICES";
   openModal({
     title: item ? `Editar ${item.name}` : "Nuevo ítem de catálogo",
-    subtitle: "Datos maestros, costo, tarifa, impuestos, lote/serie y estado.",
-    size: "md",
-    body: `<form id="catalog-form" class="form-grid">
+    subtitle: "Maestro sintético configurable; no define reglas fiscales, clínicas ni de cobertura.",
+    size: "lg",
+    body: `<form id="catalog-form" class="form-grid" data-dirty="false">
       <input type="hidden" name="id" value="${safeText(item?.id||"")}">
-      <label>Categoría<select name="category">${Object.entries(ITEM_CATEGORY_LABELS).map(([k,v])=>`<option value="${k}" ${(item?.category||category)===k?"selected":""}>${safeText(v)}</option>`).join("")}</select></label>
+      <label>Categoría<select name="category">${Object.entries(ITEM_CATEGORY_LABELS).map(([k,v])=>`<option value="${k}" ${selectedCategory===k?"selected":""}>${safeText(v)}</option>`).join("")}</select></label>
       <label>SKU<input name="sku" required value="${safeText(item?.sku||`NEW-${Date.now().toString().slice(-5)}`)}"></label>
-      <label class="full">Descripción<input name="name" required value="${safeText(item?.name||"")}"></label>
+      <label class="full">Nombre<input name="name" required maxlength="300" value="${safeText(item?.name||"")}"></label>
+      <label class="full">Descripción<textarea name="description" required maxlength="1000" rows="2">${safeText(item?.description||item?.name||"")}</textarea></label>
       <label>Unidad<input name="unit" value="${safeText(item?.unit||"unidad")}"></label>
-      <label>Costo<input type="number" step=".01" name="cost" value="${item?.cost||0}"></label>
-      <label>Precio<input type="number" step=".01" name="price" value="${item?.price||0}"></label>
+      <label>Tipo de producto<input name="productType" maxlength="200" value="${safeText(item?.productType||"")}" placeholder="Configurable"></label>
+      <label>Categoría de servicio<input name="serviceCategory" maxlength="200" value="${safeText(item?.serviceCategory||"")}" placeholder="Configurable"></label>
+      <label>Fabricante<input name="manufacturer" maxlength="300" value="${safeText(item?.manufacturer||"")}"></label>
+      <label>Presentación<input name="presentation" maxlength="200" value="${safeText(item?.presentation||"")}"></label>
+      <label>Proveedor<select name="supplierId"><option value="">Sin proveedor</option>${state.suppliers.filter((supplier)=>supplier.status!=="INACTIVE").map((supplier)=>`<option value="${supplier.id}" ${item?.supplierId===supplier.id?"selected":""}>${safeText(supplier.name)}</option>`).join("")}</select></label>
+      <label>Costo sintético<input type="number" min="0" step=".01" name="cost" value="${item?.cost||0}"></label>
+      <label>Precio sintético<input type="number" min="0" step=".01" name="price" value="${item?.price||0}"></label>
+      <label>Vigencia inicial<input type="date" name="validFrom" value="${safeText(item?.validFrom||"")}"></label>
+      <label>Vigencia final<input type="date" name="validUntil" value="${safeText(item?.validUntil||"")}"></label>
+      <div class="form-section full"><h3>Banderas configurables</h3><p>Su efecto operativo permanece sujeto a decisiones del cliente.</p></div>
+      <label><input type="checkbox" name="billable" ${item?.billable?"checked":""}> Facturable</label>
+      <label><input type="checkbox" name="discountAllowed" ${item?.discountAllowed?"checked":""}> Permite descuento</label>
       <label><input type="checkbox" name="taxable" ${item?.taxable?"checked":""}> Aplica impuesto</label>
-      <label><input type="checkbox" name="requiresLot" ${item?.requiresLot?"checked":""}> Requiere lote/serie</label>
+      <label><input type="checkbox" name="giftcardAllowed" ${item?.giftcardAllowed?"checked":""}> Permite giftcard</label>
+      <label><input type="checkbox" name="requiresLot" ${item?.requiresLot?"checked":""}> Requiere lote</label>
+      <label><input type="checkbox" name="requiresSerial" ${item?.requiresSerial?"checked":""}> Requiere serie</label>
+      <label><input type="checkbox" name="internalUse" ${item?.internalUse?"checked":""}> Uso interno</label>
+      <label><input type="checkbox" name="coldChain" ${item?.coldChain?"checked":""}> Transporte en frío</label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-catalog-item">${item?"Guardar cambios":"Crear ítem"}</button>`
+  });
+}
+
+function openCatalogImport(category = "", preserve = false) {
+  if (!preserve) ui.catalogImport = { category, fileName:"", validRows:[], errors:[], total:0 };
+  const preview=ui.catalogImport || { category, fileName:"", validRows:[], errors:[], total:0 };
+  openModal({
+    title:"Importar catálogo CSV",
+    subtitle:"Validación previa, sin datos reales y sin importación parcial.",
+    size:"xl",
+    body:`<div class="bulk-import"><p>Encabezados obligatorios: <code>sku,name,unit</code>${category?". La categoría se toma de la sección actual.":",category"}. Opcionales: <code>description,cost,price,taxable,billable,discountAllowed,requiresLot,requiresSerial,manufacturer,validFrom,validUntil</code>.</p><label class="file-drop" for="catalog-import-file"><strong>Seleccionar CSV sintético</strong><span>Máximo 500 filas.</span><input id="catalog-import-file" type="file" accept=".csv,text/csv" data-category="${safeText(category)}"></label>${preview.fileName?`<p><strong>${safeText(preview.fileName)}</strong>: ${preview.validRows.length} válidas de ${preview.total}; ${preview.errors.length} con error.</p>`:""}${preview.validRows.length?`<h3>Filas válidas</h3>${simpleTable(["SKU","Categoría","Nombre","Unidad"],preview.validRows.slice(0,10).map((row)=>`<tr><td>${safeText(row.sku)}</td><td>${safeText(row.category)}</td><td>${safeText(row.name)}</td><td>${safeText(row.unit)}</td></tr>`))}`:""}${preview.errors.length?`<h3>Errores</h3><div role="alert">${simpleTable(["Fila","SKU","Error"],preview.errors.slice(0,20).map((error)=>`<tr><td>${error.row}</td><td>${safeText(error.sku)}</td><td>${safeText(error.message)}</td></tr>`))}</div>`:""}</div>`,
+    footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="confirm-catalog-import" ${!preview.validRows.length||preview.errors.length?"disabled":""}>Confirmar importación</button>`
   });
 }
 
@@ -2044,7 +2106,11 @@ document.addEventListener("click", async (event) => {
   if (action?.startsWith("save-") && action !== "save-settings") return;
 
   switch (action) {
-    case "close-modal": closeModal(); break;
+    case "close-modal": {
+      const dirtyCatalog=document.querySelector("#catalog-form[data-dirty='true']");
+      if(dirtyCatalog&&!confirm("¿Está seguro de salir? Se perderán los cambios que no se hayan guardado.")) break;
+      closeModal();break;
+    }
     case "toggle-sidebar": ui.sidebarOpen = !ui.sidebarOpen; render(); break;
     case "toggle-user-menu": ui.userMenuOpen = !ui.userMenuOpen; ui.notificationsOpen = false; renderOverlays(); break;
     case "toggle-notifications": ui.notificationsOpen = !ui.notificationsOpen; ui.userMenuOpen = false; renderOverlays(); break;
@@ -2388,6 +2454,12 @@ document.addEventListener("click", async (event) => {
     case "apply-kit": showToast("Selecciona una hospitalización desde Comprometidos para aplicar el kit.", "info"); location.hash="#/inventario/comprometidos"; break;
     case "open-catalog-form": openCatalogForm(data.category||""); break;
     case "edit-catalog-item": openCatalogForm("",data.id); break;
+    case "catalog-page": ui.catalogPage=Math.max(1,Number(data.page||1)); render(); break;
+    case "inactivate-catalog-item": {
+      const reason=prompt("Motivo de inactivación (obligatorio):","");
+      if(reason!==null) await runSafely(()=>store.inactivateCatalogItem(data.id,reason),"Ítem inactivado y conservado en el historial.");
+      break;
+    }
     case "open-discount-form": openDiscountForm(); break;
     case "open-medication-card": openMedicationCardForm(data.caseId || ""); break;
     case "print-medication-card": runSafely(()=>printMedicationCard(data.id,data.variant || "complete")); break;
@@ -2401,7 +2473,14 @@ document.addEventListener("click", async (event) => {
     case "export-audit": exportAudit(); break;
     case "export-report": exportReport(); break;
     case "import-patients": ui.patientTab = "bulk"; ui.patientPage = 1; render(); break;
-    case "import-catalog": showToast("La importación de catálogos no está implementada; el control permanece bloqueado.", "info"); break;
+    case "import-catalog": openCatalogImport(data.category||""); break;
+    case "confirm-catalog-import": {
+      const rows=ui.catalogImport?.validRows||[];
+      if(!rows.length||ui.catalogImport?.errors?.length) break;
+      const result=await runSafely(()=>store.importCatalogItems(rows),`${rows.length} ítems sintéticos importados y auditados.`);
+      if(result){ui.catalogImport=null;ui.catalogPage=1;closeModal();render();}
+      break;
+    }
     case "print-receivables": window.print(); break;
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
@@ -2423,6 +2502,8 @@ document.addEventListener("change", (event) => {
   if (target.matches('[data-ui-filter="payablesStatus"]')) { ui.payablesStatus = target.value; ui.payablesPage = 1; return; }
   if (target.matches('[data-ui-filter="payablesPageSize"]')) { ui.payablesPageSize = Math.max(1, Math.min(50, Number(target.value || 10))); ui.payablesPage = 1; render(); return; }
   if (target.matches('[data-ui-filter="purchasePageSize"]')) { ui.purchasePageSize = Math.max(1, Math.min(100, Number(target.value || 10))); ui.purchasePage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="catalogPageSize"]')) { ui.catalogPageSize = Math.max(5, Math.min(50, Number(target.value || 10))); ui.catalogPage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="catalogStatus"]')) { ui.catalogStatus = target.value || "ALL"; ui.catalogPage = 1; render(); return; }
   if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
   if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
@@ -2622,10 +2703,29 @@ document.addEventListener("change", (event) => {
       render();
     });
   }
+  if (target.id === "catalog-import-file") {
+    const file=target.files?.[0];
+    if(!file) return;
+    const category=target.dataset.category||"";
+    if(!/\.csv$/i.test(file.name)&&file.type!=="text/csv"){
+      ui.catalogImport={category,fileName:file.name,validRows:[],errors:[{row:"—",sku:"—",message:"Selecciona un archivo CSV."}],total:0};
+      openCatalogImport(category,true);return;
+    }
+    file.text().then((text)=>{
+      const parsed=parseCatalogCsv(text,category);
+      ui.catalogImport={category,fileName:file.name,...parsed};
+      openCatalogImport(category,true);
+    }).catch((error)=>{
+      ui.catalogImport={category,fileName:file.name,validRows:[],errors:[{row:"—",sku:"—",message:error.message}],total:0};
+      openCatalogImport(category,true);
+    });
+    return;
+  }
 });
 
 document.addEventListener("input", (event) => {
   const target = event.target;
+  if(target.closest("#catalog-form")) target.closest("#catalog-form").dataset.dirty="true";
   if (target.matches('[data-input="agenda-patient-search"]')) {
     ui.agendaPatientQuery = target.value;
     const position = target.selectionStart;
@@ -2722,6 +2822,7 @@ document.addEventListener("input", (event) => {
   }
   if (target.matches("[data-ui-search]")) {
     ui.search = target.value;
+    ui.catalogPage = 1;
     const pos = target.selectionStart;
     render();
     const next = document.querySelector("[data-ui-search]");
@@ -3079,10 +3180,12 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#catalog-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    data.taxable=formBool(form,"taxable");data.requiresLot=formBool(form,"requiresLot");
-    if(data.id) return showToast("La edición productiva está preparada en el repositorio Supabase; el modo demo evita alterar catálogos base.","info");
-    const result=runSafely(()=>store.createCatalogItem(data),"Ítem de catálogo creado.");
-    if(result) closeModal();
+    for(const field of ["taxable","billable","discountAllowed","giftcardAllowed","requiresLot","requiresSerial","internalUse","coldChain"]) data[field]=formBool(form,field);
+    const submit=modalRoot.querySelector('[data-action="save-catalog-item"]');
+    if(submit){submit.disabled=true;submit.textContent="Procesando…";}
+    const result=await runSafely(()=>data.id?store.updateCatalogItem(data.id,data):store.createCatalogItem(data),data.id?"Ítem de catálogo actualizado y auditado.":"Ítem de catálogo creado y auditado.");
+    if(result){form.dataset.dirty="false";closeModal();}
+    else if(submit){submit.disabled=false;submit.textContent=data.id?"Guardar cambios":"Crear ítem";}
   }
 
   if(action==="save-discount"){

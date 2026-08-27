@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T11:42:11.910Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T14:16:20.078Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CH15_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 138,
-    "IMPLEMENTED_PARTIAL": 111,
+    "IMPLEMENTED_EXACT": 143,
+    "IMPLEMENTED_PARTIAL": 119,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
     "NOT_TESTABLE": 21,
-    "NEEDS_CLIENT_CONFIRMATION": 59
+    "NEEDS_CLIENT_CONFIRMATION": 64
   },
   "requirements": [
     {
@@ -19651,6 +19651,999 @@
       ],
       "acceptance_criteria": [
         "Las operaciones sin contrato aprobado fallan o se muestran bloqueadas sin mutar estado, stock, cierres, kits ni auditoría.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openAcknowledgementForm/blocked-inventory-action",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q001"
+      ],
+      "requirement_id": "CH15-R001",
+      "event_ids": [
+        "CH15-E0003",
+        "CH15-E0009"
+      ],
+      "feature_group": "missing_items_reconciliation",
+      "page": "Inventario / Acuse nuevo",
+      "control_type": "inventory_exception",
+      "visible_label": "Disponible / Requerido / Acuse creado / Agregar al acuse",
+      "expected_behavior": "Presenta la comparación documentada, pero no crea, sustituye ni cancela faltantes hasta aprobar su transición e impacto de inventario.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:45:29.400",
+        "00:45:32.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0003",
+          "timestamp": "00:45:29.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0003_00h45m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0009",
+          "timestamp": "00:45:32.200",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0009_00h45m32s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta la comparación documentada, pero no crea, sustituye ni cancela faltantes hasta aprobar su transición e impacto de inventario.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderCommittedInventory/blocked-inventory-action",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q002"
+      ],
+      "requirement_id": "CH15-R002",
+      "event_ids": [
+        "CH15-E0013",
+        "CH15-E0017"
+      ],
+      "feature_group": "home_requests",
+      "page": "Solicitudes desde la casa del paciente",
+      "control_type": "modal_table",
+      "visible_label": "Bodega / Tipo / Código / Nombre / Disponibilidad / Cantidad / Faltante / Acusar",
+      "expected_behavior": "No acusa ni descarga solicitudes hasta definir bodegas elegibles, permiso, validación de disponibilidad e idempotencia.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:45:35.200",
+        "00:45:38.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0013",
+          "timestamp": "00:45:35.200",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0013_00h45m35s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0017",
+          "timestamp": "00:45:38.200",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0017_00h45m38s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0017_00h45m38s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No acusa ni descarga solicitudes hasta definir bodegas elegibles, permiso, validación de disponibilidad e idempotencia.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openAcknowledgementForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q001",
+        "CH15-Q002"
+      ],
+      "requirement_id": "CH15-R003",
+      "event_ids": [
+        "CH15-E0020"
+      ],
+      "feature_group": "acknowledgement_form",
+      "page": "Acuse nuevo",
+      "control_type": "form",
+      "visible_label": "Paciente / Fecha / Hospitalización / Bodega / Item / Disponible / Cantidad / Vaciar / Plantilla / Añadir",
+      "expected_behavior": "Expone la captura exacta; la persistencia y el efecto sobre existencias permanecen bloqueados por la máquina de estados de acuses.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:45:45.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0020",
+          "timestamp": "00:45:45.000",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0020_00h45m45s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone la captura exacta; la persistencia y el efecto sobre existencias permanecen bloqueados por la máquina de estados de acuses.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openAcknowledgementForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q003"
+      ],
+      "requirement_id": "CH15-R004",
+      "event_ids": [
+        "CH15-E0023",
+        "CH15-E0032"
+      ],
+      "feature_group": "acknowledgement_template",
+      "page": "Añadir plantilla",
+      "control_type": "copy_workflow",
+      "visible_label": "Plantilla / Cotización / Bodega / referencia / Tipo / Código / Descripción / Cantidad",
+      "expected_behavior": "La superficie conserva Plantilla visible sin copiar o aplicar ítems hasta aprobar orígenes, estados autorizados y efecto posterior.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:45:48.400",
+        "00:45:57.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0023",
+          "timestamp": "00:45:48.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0023_00h45m48s400ms_motion_progress.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0023_00h45m48s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0032",
+          "timestamp": "00:45:57.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0032_00h45m57s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0032_00h45m57s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "La superficie conserva Plantilla visible sin copiar o aplicar ítems hasta aprobar orígenes, estados autorizados y efecto posterior.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "NONE",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q003"
+      ],
+      "requirement_id": "CH15-R005",
+      "event_ids": [
+        "CH15-E0029"
+      ],
+      "feature_group": "quote_source_states",
+      "page": "Añadir plantilla",
+      "control_type": "select",
+      "visible_label": "En ejecución / Finalizado",
+      "expected_behavior": "No infiere qué estados pueden originar un acuse ni sus validaciones posteriores.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:45:54.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0029",
+          "timestamp": "00:45:54.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0029_00h45m54s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0029_00h45m54s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No infiere qué estados pueden originar un acuse ni sus validaciones posteriores.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderCatalogs/openCatalogForm/createCatalogItem/updateCatalogItem",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q004"
+      ],
+      "requirement_id": "CH15-R006",
+      "event_ids": [
+        "CH15-E0046",
+        "CH15-E0047"
+      ],
+      "feature_group": "medication_catalog",
+      "page": "Items / Medicamentos",
+      "control_type": "catalog_form",
+      "visible_label": "Código / nombre / principio activo / concentración / presentación / fabricante / vía / banderas",
+      "expected_behavior": "Lista, crea, edita e inactiva medicamentos con metadatos configurables, pero no inventa el efecto clínico, fiscal o logístico de sus banderas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:46:24.600",
+        "00:46:28.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0046",
+          "timestamp": "00:46:24.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0046_00h46m24s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0046_00h46m24s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0047",
+          "timestamp": "00:46:28.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0047_00h46m28s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista, crea, edita e inactiva medicamentos con metadatos configurables, pero no inventa el efecto clínico, fiscal o logístico de sus banderas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "close-modal dirty catalog guard",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-R007",
+      "event_ids": [
+        "CH15-E0052",
+        "CH15-E0071",
+        "CH15-E0114"
+      ],
+      "feature_group": "unsaved_changes",
+      "page": "Formularios de catálogo",
+      "control_type": "confirmation_dialog",
+      "visible_label": "Salir / Cancelar / Aceptar",
+      "expected_behavior": "Detecta cambios no guardados; Cancelar conserva el formulario y Aceptar descarta sólo el borrador.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:46:35.800",
+        "00:47:09.600",
+        "00:48:57.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0052",
+          "timestamp": "00:46:35.800",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0052_00h46m35s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0071",
+          "timestamp": "00:47:09.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0071_00h47m09s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0114",
+          "timestamp": "00:48:57.200",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0114_00h48m57s200ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0114_00h48m57s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Detecta cambios no guardados; Cancelar conserva el formulario y Aceptar descarta sólo el borrador.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js; app/supabase-adapter.js",
+      "current_implementation_function": "renderCatalogs/openCatalogForm/catalog CRUD",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-R008",
+      "event_ids": [
+        "CH15-E0067",
+        "CH15-E0068"
+      ],
+      "feature_group": "supply_catalog",
+      "page": "Items / Insumos",
+      "control_type": "catalog_form",
+      "visible_label": "Código / Nombre / Tipo / Fabricante / Descripción / banderas",
+      "expected_behavior": "Crea, edita e inactiva insumos con validación, proveedor, trazabilidad, vigencia, búsqueda, paginación y auditoría.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:46:48.400",
+        "00:46:51.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0067",
+          "timestamp": "00:46:48.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0067_00h46m48s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0067_00h46m48s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0068",
+          "timestamp": "00:46:51.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0068_00h46m51s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Crea, edita e inactiva insumos con validación, proveedor, trazabilidad, vigencia, búsqueda, paginación y auditoría.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderCatalogs/openCatalogForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-R009",
+      "event_ids": [
+        "CH15-E0084"
+      ],
+      "feature_group": "study_catalog",
+      "page": "Items / Estudios Dx",
+      "control_type": "data_table",
+      "visible_label": "Código / Nombre / Descripción / Impuesto / Descuento / Estado / búsqueda / paginación / Excel / alta",
+      "expected_behavior": "Lista, busca, pagina y administra estudios; la exportación oficial permanece provisional.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:47:20.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0084",
+          "timestamp": "00:47:20.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0084_00h47m20s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0084_00h47m20s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista, busca, pagina y administra estudios; la exportación oficial permanece provisional.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderCatalogs/openCatalogForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q006"
+      ],
+      "requirement_id": "CH15-R010",
+      "event_ids": [
+        "CH15-E0094",
+        "CH15-E0097"
+      ],
+      "feature_group": "fee_catalog",
+      "page": "Items / Honorarios",
+      "control_type": "catalog_form",
+      "visible_label": "Código / Nombre / Recurso / Descuento / Impuesto / Giftcard",
+      "expected_behavior": "Administra el maestro y sus banderas; la asociación versionada a un recurso y liquidación requieren contrato del cliente.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:47:31.600",
+        "00:47:42.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0094",
+          "timestamp": "00:47:31.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0094_00h47m31s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0094_00h47m31s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0097",
+          "timestamp": "00:47:42.000",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Administra el maestro y sus banderas; la asociación versionada a un recurso y liquidación requieren contrato del cliente.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; app/main.js",
+      "current_implementation_function": "requiredSync/catalog sync/save-catalog-item",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-R011",
+      "event_ids": [
+        "CH15-E0100",
+        "CH15-E0101"
+      ],
+      "feature_group": "catalog_remote_confirmation",
+      "page": "Items / Honorario nuevo",
+      "control_type": "submit",
+      "visible_label": "Procesando / guardado exitosamente",
+      "expected_behavior": "En Supabase confirma INSERT/UPDATE antes de cerrar o mostrar éxito; en demo confirma la persistencia local auditada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:48:10.400",
+        "00:48:11.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0100",
+          "timestamp": "00:48:10.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0100_00h48m10s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0101",
+          "timestamp": "00:48:11.000",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0101_00h48m11s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "En Supabase confirma INSERT/UPDATE antes de cerrar o mostrar éxito; en demo confirma la persistencia local auditada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "updateCatalogItem/inactivateCatalogItem",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q007"
+      ],
+      "requirement_id": "CH15-R012",
+      "event_ids": [
+        "CH15-E0110",
+        "CH15-E0113"
+      ],
+      "feature_group": "fee_actions",
+      "page": "Items / Honorario editar",
+      "control_type": "row_actions",
+      "visible_label": "Editar / costos de compra / precios de venta / cuentas / Inactivar",
+      "expected_behavior": "Editar e Inactivar son operaciones reales y auditadas; vistas financieras sensibles esperan permiso y definición de alcance.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:48:27.800",
+        "00:48:56.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0110",
+          "timestamp": "00:48:27.800",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0110_00h48m27s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0113",
+          "timestamp": "00:48:56.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0113_00h48m56s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Editar e Inactivar son operaciones reales y auditadas; vistas financieras sensibles esperan permiso y definición de alcance.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderCatalogs/openCatalogForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q008"
+      ],
+      "requirement_id": "CH15-R013",
+      "event_ids": [
+        "CH15-E0122",
+        "CH15-E0128"
+      ],
+      "feature_group": "service_catalog",
+      "page": "Items / Servicios",
+      "control_type": "data_table",
+      "visible_label": "Código / Nombre / Tipo de producto / Categoría / Impuesto / Descuento / Estado",
+      "expected_behavior": "Lista, busca, pagina, crea, edita e inactiva servicios con taxonomías configurables sin inventar catálogos maestros.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:49:05.800",
+        "00:49:09.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0122",
+          "timestamp": "00:49:05.800",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0122_00h49m05s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0128",
+          "timestamp": "00:49:09.000",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0128_00h49m09s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0128_00h49m09s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista, busca, pagina, crea, edita e inactiva servicios con taxonomías configurables sin inventar catálogos maestros.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/store.js",
+      "current_implementation_function": "renderDiscounts/createDiscountRule",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch06-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q009"
+      ],
+      "requirement_id": "CH15-R014",
+      "event_ids": [
+        "CH15-E0144",
+        "CH15-E0148"
+      ],
+      "feature_group": "discount_matrix",
+      "page": "Descuentos",
+      "control_type": "data_table",
+      "visible_label": "Servicios / Laboratorios / Medicamentos / Equipos / Insumos / Honorarios",
+      "expected_behavior": "Expone porcentajes por familia; integración completa con cotizaciones se cierra en CH16.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:49:33.200",
+        "00:49:41.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0144",
+          "timestamp": "00:49:33.200",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0144_00h49m33s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0144_00h49m33s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0148",
+          "timestamp": "00:49:41.400",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0148_00h49m41s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0148_00h49m41s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone porcentajes por familia; integración completa con cotizaciones se cierra en CH16.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "openCatalogForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q005"
+      ],
+      "requirement_id": "CH15-R015",
+      "event_ids": [
+        "CH15-E0068"
+      ],
+      "feature_group": "internal_lot_rule",
+      "page": "Items / Insumo nuevo",
+      "control_type": "business_rule",
+      "visible_label": "Lotes para uso interno",
+      "expected_behavior": "Permite configurar la bandera sin inferir cuándo el lote es obligatorio en consumo interno.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:46:51.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0068",
+          "timestamp": "00:46:51.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0068_00h46m51s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Permite configurar la bandera sin inferir cuándo el lote es obligatorio en consumo interno.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "NONE",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH15-Q006"
+      ],
+      "requirement_id": "CH15-R016",
+      "event_ids": [
+        "CH15-E0097"
+      ],
+      "feature_group": "fee_professional_link",
+      "page": "Items / Honorario nuevo",
+      "control_type": "relation",
+      "visible_label": "Recurso",
+      "expected_behavior": "No liquida ni deriva tarifas hasta definir versionado, profesional elegible, moneda, vigencia y permisos.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:47:42.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0097",
+          "timestamp": "00:47:42.000",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No liquida ni deriva tarifas hasta definir versionado, profesional elegible, moneda, vigencia y permisos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/20260827140639_ch15_catalogs.sql",
+      "current_implementation_function": "catalog CRUD/catalog_items_record_change",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-H001",
+      "event_ids": [
+        "CH15-E0046",
+        "CH15-E0110"
+      ],
+      "feature_group": "catalog_integrity",
+      "page": "Persistencia",
+      "control_type": "rls_audit_history",
+      "visible_label": "Catálogo tenant-safe, sin borrado y con historial",
+      "expected_behavior": "Impide SKU duplicado por organización, registra cambios/precios append-only, confirma remoto y niega borrado de maestros usados.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:46:24.600",
+        "00:48:27.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0046",
+          "timestamp": "00:46:24.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0046_00h46m24s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0046_00h46m24s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0110",
+          "timestamp": "00:48:27.800",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0110_00h48m27s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Impide SKU duplicado por organización, registra cambios/precios append-only, confirma remoto y niega borrado de maestros usados.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH15",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; app/supabase-adapter.js",
+      "current_implementation_function": "parseCatalogCsv/openCatalogImport/importCatalogItems",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch15-catalogs.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH15-H002",
+      "event_ids": [
+        "CH15-E0046",
+        "CH15-E0084"
+      ],
+      "feature_group": "catalog_bulk_import",
+      "page": "Importar catálogo",
+      "control_type": "file_workflow",
+      "visible_label": "Archivo / validación / preview / válidas / errores / duplicados / confirmar",
+      "expected_behavior": "Importa sólo CSV sintético completamente válido, rechaza lotes parciales y registra una auditoría del lote.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:46:24.600",
+        "00:47:20.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0046",
+          "timestamp": "00:46:24.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0046_00h46m24s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0046_00h46m24s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH15",
+          "event_id": "CH15-E0084",
+          "timestamp": "00:47:20.600",
+          "image": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0084_00h47m20s600ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0084_00h47m20s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Importa sólo CSV sintético completamente válido, rechaza lotes parciales y registra una auditoría del lote.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

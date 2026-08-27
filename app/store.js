@@ -1940,25 +1940,144 @@ export async function createAppStore(config) {
     throw new Error("Crear, editar o duplicar kits permanece bloqueado hasta confirmar componentes, lotes, concurrencia, sustitución y reversión.");
   }
 
+  function normalizeCatalogItem(input, existing = {}) {
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    const category = String(input.category ?? existing.category ?? "").trim().toUpperCase();
+    const sku = String(input.sku ?? existing.sku ?? "").trim().toUpperCase();
+    const name = String(input.name ?? existing.name ?? "").trim();
+    const description = String(input.description ?? existing.description ?? name).trim();
+    const unit = String(input.unit ?? existing.unit ?? "unidad").trim();
+    const cost = Number(input.cost ?? existing.cost ?? 0);
+    const price = Number(input.price ?? existing.price ?? 0);
+    const validFrom = String(input.validFrom ?? existing.validFrom ?? "").trim();
+    const validUntil = String(input.validUntil ?? existing.validUntil ?? "").trim();
+    if (!allowedCategories.has(category)) throw new Error("Seleccione una categoría de catálogo válida.");
+    if (!sku || sku.length > 80 || !name || name.length > 300 || !description || description.length > 1000 || !unit || unit.length > 80) {
+      throw new Error("Complete código, nombre, descripción y unidad con valores válidos.");
+    }
+    if (!Number.isFinite(cost) || cost < 0 || !Number.isFinite(price) || price < 0) {
+      throw new Error("Costo y precio deben ser importes no negativos.");
+    }
+    if ((validFrom && !/^\d{4}-\d{2}-\d{2}$/.test(validFrom)) || (validUntil && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) || (validFrom && validUntil && validUntil < validFrom)) {
+      throw new Error("La vigencia del catálogo no es válida.");
+    }
+    const supplierId = String(input.supplierId ?? existing.supplierId ?? "").trim();
+    if (supplierId) {
+      const supplier = state.suppliers.find((candidate) => candidate.id === supplierId && candidate.status !== "INACTIVE");
+      assertCurrentOrganization(supplier, "Proveedor");
+    }
+    return {
+      ...existing,
+      id: existing.id || uid("CAT"),
+      organizationId: state.organization?.id,
+      sku, category, name, description, unit, cost, price,
+      taxable: Boolean(input.taxable ?? existing.taxable),
+      billable: Boolean(input.billable ?? existing.billable),
+      discountAllowed: Boolean(input.discountAllowed ?? existing.discountAllowed),
+      giftcardAllowed: Boolean(input.giftcardAllowed ?? existing.giftcardAllowed),
+      requiresLot: Boolean(input.requiresLot ?? existing.requiresLot),
+      requiresSerial: Boolean(input.requiresSerial ?? existing.requiresSerial),
+      internalUse: Boolean(input.internalUse ?? existing.internalUse),
+      coldChain: Boolean(input.coldChain ?? existing.coldChain),
+      manufacturer: String(input.manufacturer ?? existing.manufacturer ?? "").trim().slice(0, 300),
+      productType: String(input.productType ?? existing.productType ?? "").trim().slice(0, 200),
+      serviceCategory: String(input.serviceCategory ?? existing.serviceCategory ?? "").trim().slice(0, 200),
+      presentation: String(input.presentation ?? existing.presentation ?? "").trim().slice(0, 200),
+      administrationRoutes: Array.isArray(input.administrationRoutes) ? input.administrationRoutes.map(String).filter(Boolean).slice(0, 30) : (existing.administrationRoutes || []),
+      supplierId: supplierId || null,
+      validFrom: validFrom || null,
+      validUntil: validUntil || null,
+      active: input.active === undefined ? existing.active !== false : Boolean(input.active),
+      metadata: { ...(existing.metadata || {}), ...(input.metadata || {}) },
+      updatedAt: nowIso(),
+      createdAt: existing.createdAt || nowIso()
+    };
+  }
+
+  function assertUniqueCatalogSku(item, ignoredId = "", additional = []) {
+    const duplicate = [...state.catalogItems, ...additional].find((candidate) =>
+      candidate.id !== ignoredId
+      && candidate.organizationId === state.organization?.id
+      && String(candidate.sku || "").trim().toUpperCase() === item.sku
+    );
+    if (duplicate) throw new Error(`El código ${item.sku} ya existe en el catálogo.`);
+  }
+
   function createCatalogItem(input) {
     requirePermission("catalogs:write");
-    const item = {
-      id: uid("CAT"),
-      sku: input.sku,
-      category: input.category,
-      name: input.name,
-      unit: input.unit,
-      price: Number(input.price || 0),
-      cost: Number(input.cost || 0),
-      taxable: Boolean(input.taxable),
-      requiresLot: Boolean(input.requiresLot),
-      active: true
+    const item = normalizeCatalogItem(input);
+    assertUniqueCatalogSku(item);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id: remoteItem.id || item.id }) : item;
+      setState((draft) => {
+        draft.catalogItems.unshift(confirmed);
+        audit("CREATE_CATALOG_ITEM", confirmed.id, `Ítem de catálogo creado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
     };
-    setState((draft) => {
-      draft.catalogItems.unshift(item);
-      audit("CREATE_CATALOG_ITEM", item.id, `Ítem de catálogo creado: ${item.name}.`);
-    });
-    return item;
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function updateCatalogItem(id, input) {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const item = normalizeCatalogItem(input, existing);
+    assertUniqueCatalogSku(item, id);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id }) : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("UPDATE_CATALOG_ITEM", id, `Ítem de catálogo actualizado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function inactivateCatalogItem(id, reason = "") {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason || normalizedReason.length > 500) throw new Error("Indique un motivo válido para inactivar.");
+    if (existing.active === false) return existing;
+    const item = { ...existing, active:false, updatedAt:nowIso() };
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? { ...item, ...remoteItem, active:false } : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("INACTIVATE_CATALOG_ITEM", id, `Ítem de catálogo inactivado: ${confirmed.name}.`, { reason:normalizedReason });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("INACTIVATE_CATALOG_ITEM", { item, reason:normalizedReason }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function importCatalogItems(rows) {
+    requirePermission("catalogs:write");
+    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 500) throw new Error("La importación requiere entre 1 y 500 filas.");
+    const items = [];
+    for (const row of rows) {
+      const item = normalizeCatalogItem(row);
+      assertUniqueCatalogSku(item, "", items);
+      items.push(item);
+    }
+    const commit = (remoteItems = null) => {
+      const confirmed = Array.isArray(remoteItems) && remoteItems.length ? remoteItems.map((remote, index) => ({ ...items[index], ...remote, active:remote.status ? remote.status !== "INACTIVE" : items[index].active })) : items;
+      setState((draft) => {
+        draft.catalogItems.unshift(...confirmed);
+        audit("IMPORT_CATALOG_ITEMS", `BATCH-${nowIso()}`, `${confirmed.length} ítems sintéticos importados.`, { count:confirmed.length, skus:confirmed.map((item) => item.sku) });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("IMPORT_CATALOG_ITEMS", { items }).then((result) => commit(result?.items));
+    return commit();
   }
 
   function createDiscountRule(input) {
@@ -2054,6 +2173,9 @@ export async function createAppStore(config) {
     approveInventoryClosure,
     createKit,
     createCatalogItem,
+    updateCatalogItem,
+    inactivateCatalogItem,
+    importCatalogItems,
     createDiscountRule,
     generateDoctorStatements,
     sendDoctorStatement,

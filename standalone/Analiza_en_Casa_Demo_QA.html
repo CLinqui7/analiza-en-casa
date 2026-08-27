@@ -5039,6 +5039,17 @@ function mapPurchase(raw = {}) {
   };
 }
 
+function mapCatalogItem(raw = {}) {
+  const item = camelCaseObject(raw);
+  return {
+    ...item,
+    price:Number(item.basePrice ?? item.price ?? 0),
+    cost:Number(item.cost || 0),
+    active:item.status !== "INACTIVE",
+    administrationRoutes:Array.isArray(item.administrationRoutes) ? item.administrationRoutes : []
+  };
+}
+
 function mapSupabaseBootstrap(rawCollections = {}) {
   const collections = { ...rawCollections };
   collections.patients = (rawCollections.patients || []).map((raw) => {
@@ -5071,10 +5082,7 @@ function mapSupabaseBootstrap(rawCollections = {}) {
     return { ...doctor, name: doctor.fullName || doctor.name || "" };
   });
   collections.suppliers = (rawCollections.suppliers || []).map(camelCaseObject);
-  collections.catalogItems = (rawCollections.catalogItems || []).map((raw) => {
-    const item = camelCaseObject(raw);
-    return { ...item, price: Number(item.basePrice || 0), cost: Number(item.cost || 0), active: item.status !== "INACTIVE" };
-  });
+  collections.catalogItems = (rawCollections.catalogItems || []).map(mapCatalogItem);
   const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
   collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
   collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
@@ -5348,6 +5356,36 @@ function toCaseRow(record) {
   };
 }
 
+function toCatalogRow(item) {
+  return {
+    sku:item.sku,
+    category:item.category,
+    name:item.name,
+    description:item.description || item.name,
+    unit:item.unit || "unidad",
+    cost:Number(item.cost || 0),
+    base_price:Number(item.price || 0),
+    taxable:Boolean(item.taxable),
+    billable:Boolean(item.billable),
+    discount_allowed:Boolean(item.discountAllowed),
+    giftcard_allowed:Boolean(item.giftcardAllowed),
+    requires_lot:Boolean(item.requiresLot),
+    requires_serial:Boolean(item.requiresSerial),
+    internal_use:Boolean(item.internalUse),
+    cold_chain:Boolean(item.coldChain),
+    manufacturer:item.manufacturer || null,
+    product_type:item.productType || null,
+    service_category:item.serviceCategory || null,
+    presentation:item.presentation || null,
+    administration_routes:item.administrationRoutes || [],
+    supplier_id:item.supplierId || null,
+    valid_from:item.validFrom || null,
+    valid_until:item.validUntil || null,
+    metadata:item.metadata || {},
+    status:item.active === false ? "INACTIVE" : "ACTIVE"
+  };
+}
+
 function toQuoteRow(record) {
   return {
     id: record.id,
@@ -5486,6 +5524,32 @@ async function createSupabaseAdapter(config) {
         return insert("patients", toPatientRow(payload.patient));
       case "CREATE_CASE":
         return insert("hospitalizations", toCaseRow(payload.case));
+      case "CREATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:null,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:null
+        });
+        if (error) throw error;
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "UPDATE_CATALOG_ITEM":
+      case "INACTIVATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:payload.item.id,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:payload.reason || null
+        });
+        if (error) throw error;
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "IMPORT_CATALOG_ITEMS": {
+        const { data, error } = await client.rpc("import_catalog_items", {
+          p_items:payload.items.map(toCatalogRow)
+        });
+        if (error) throw error;
+        return { ok:true, items:(data || []).map(mapCatalogItem) };
+      }
       case "CREATE_QUOTE": {
         const quote = payload.quote;
         const { data, error } = await client.rpc("create_quote_draft", {
@@ -7736,25 +7800,144 @@ async function createAppStore(config) {
     throw new Error("Crear, editar o duplicar kits permanece bloqueado hasta confirmar componentes, lotes, concurrencia, sustitución y reversión.");
   }
 
+  function normalizeCatalogItem(input, existing = {}) {
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    const category = String(input.category ?? existing.category ?? "").trim().toUpperCase();
+    const sku = String(input.sku ?? existing.sku ?? "").trim().toUpperCase();
+    const name = String(input.name ?? existing.name ?? "").trim();
+    const description = String(input.description ?? existing.description ?? name).trim();
+    const unit = String(input.unit ?? existing.unit ?? "unidad").trim();
+    const cost = Number(input.cost ?? existing.cost ?? 0);
+    const price = Number(input.price ?? existing.price ?? 0);
+    const validFrom = String(input.validFrom ?? existing.validFrom ?? "").trim();
+    const validUntil = String(input.validUntil ?? existing.validUntil ?? "").trim();
+    if (!allowedCategories.has(category)) throw new Error("Seleccione una categoría de catálogo válida.");
+    if (!sku || sku.length > 80 || !name || name.length > 300 || !description || description.length > 1000 || !unit || unit.length > 80) {
+      throw new Error("Complete código, nombre, descripción y unidad con valores válidos.");
+    }
+    if (!Number.isFinite(cost) || cost < 0 || !Number.isFinite(price) || price < 0) {
+      throw new Error("Costo y precio deben ser importes no negativos.");
+    }
+    if ((validFrom && !/^\d{4}-\d{2}-\d{2}$/.test(validFrom)) || (validUntil && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) || (validFrom && validUntil && validUntil < validFrom)) {
+      throw new Error("La vigencia del catálogo no es válida.");
+    }
+    const supplierId = String(input.supplierId ?? existing.supplierId ?? "").trim();
+    if (supplierId) {
+      const supplier = state.suppliers.find((candidate) => candidate.id === supplierId && candidate.status !== "INACTIVE");
+      assertCurrentOrganization(supplier, "Proveedor");
+    }
+    return {
+      ...existing,
+      id: existing.id || uid("CAT"),
+      organizationId: state.organization?.id,
+      sku, category, name, description, unit, cost, price,
+      taxable: Boolean(input.taxable ?? existing.taxable),
+      billable: Boolean(input.billable ?? existing.billable),
+      discountAllowed: Boolean(input.discountAllowed ?? existing.discountAllowed),
+      giftcardAllowed: Boolean(input.giftcardAllowed ?? existing.giftcardAllowed),
+      requiresLot: Boolean(input.requiresLot ?? existing.requiresLot),
+      requiresSerial: Boolean(input.requiresSerial ?? existing.requiresSerial),
+      internalUse: Boolean(input.internalUse ?? existing.internalUse),
+      coldChain: Boolean(input.coldChain ?? existing.coldChain),
+      manufacturer: String(input.manufacturer ?? existing.manufacturer ?? "").trim().slice(0, 300),
+      productType: String(input.productType ?? existing.productType ?? "").trim().slice(0, 200),
+      serviceCategory: String(input.serviceCategory ?? existing.serviceCategory ?? "").trim().slice(0, 200),
+      presentation: String(input.presentation ?? existing.presentation ?? "").trim().slice(0, 200),
+      administrationRoutes: Array.isArray(input.administrationRoutes) ? input.administrationRoutes.map(String).filter(Boolean).slice(0, 30) : (existing.administrationRoutes || []),
+      supplierId: supplierId || null,
+      validFrom: validFrom || null,
+      validUntil: validUntil || null,
+      active: input.active === undefined ? existing.active !== false : Boolean(input.active),
+      metadata: { ...(existing.metadata || {}), ...(input.metadata || {}) },
+      updatedAt: nowIso(),
+      createdAt: existing.createdAt || nowIso()
+    };
+  }
+
+  function assertUniqueCatalogSku(item, ignoredId = "", additional = []) {
+    const duplicate = [...state.catalogItems, ...additional].find((candidate) =>
+      candidate.id !== ignoredId
+      && candidate.organizationId === state.organization?.id
+      && String(candidate.sku || "").trim().toUpperCase() === item.sku
+    );
+    if (duplicate) throw new Error(`El código ${item.sku} ya existe en el catálogo.`);
+  }
+
   function createCatalogItem(input) {
     requirePermission("catalogs:write");
-    const item = {
-      id: uid("CAT"),
-      sku: input.sku,
-      category: input.category,
-      name: input.name,
-      unit: input.unit,
-      price: Number(input.price || 0),
-      cost: Number(input.cost || 0),
-      taxable: Boolean(input.taxable),
-      requiresLot: Boolean(input.requiresLot),
-      active: true
+    const item = normalizeCatalogItem(input);
+    assertUniqueCatalogSku(item);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id: remoteItem.id || item.id }) : item;
+      setState((draft) => {
+        draft.catalogItems.unshift(confirmed);
+        audit("CREATE_CATALOG_ITEM", confirmed.id, `Ítem de catálogo creado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
     };
-    setState((draft) => {
-      draft.catalogItems.unshift(item);
-      audit("CREATE_CATALOG_ITEM", item.id, `Ítem de catálogo creado: ${item.name}.`);
-    });
-    return item;
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function updateCatalogItem(id, input) {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const item = normalizeCatalogItem(input, existing);
+    assertUniqueCatalogSku(item, id);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id }) : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("UPDATE_CATALOG_ITEM", id, `Ítem de catálogo actualizado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function inactivateCatalogItem(id, reason = "") {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason || normalizedReason.length > 500) throw new Error("Indique un motivo válido para inactivar.");
+    if (existing.active === false) return existing;
+    const item = { ...existing, active:false, updatedAt:nowIso() };
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? { ...item, ...remoteItem, active:false } : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("INACTIVATE_CATALOG_ITEM", id, `Ítem de catálogo inactivado: ${confirmed.name}.`, { reason:normalizedReason });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("INACTIVATE_CATALOG_ITEM", { item, reason:normalizedReason }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function importCatalogItems(rows) {
+    requirePermission("catalogs:write");
+    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 500) throw new Error("La importación requiere entre 1 y 500 filas.");
+    const items = [];
+    for (const row of rows) {
+      const item = normalizeCatalogItem(row);
+      assertUniqueCatalogSku(item, "", items);
+      items.push(item);
+    }
+    const commit = (remoteItems = null) => {
+      const confirmed = Array.isArray(remoteItems) && remoteItems.length ? remoteItems.map((remote, index) => ({ ...items[index], ...remote, active:remote.status ? remote.status !== "INACTIVE" : items[index].active })) : items;
+      setState((draft) => {
+        draft.catalogItems.unshift(...confirmed);
+        audit("IMPORT_CATALOG_ITEMS", `BATCH-${nowIso()}`, `${confirmed.length} ítems sintéticos importados.`, { count:confirmed.length, skus:confirmed.map((item) => item.sku) });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("IMPORT_CATALOG_ITEMS", { items }).then((result) => commit(result?.items));
+    return commit();
   }
 
   function createDiscountRule(input) {
@@ -7850,6 +8033,9 @@ async function createAppStore(config) {
     approveInventoryClosure,
     createKit,
     createCatalogItem,
+    updateCatalogItem,
+    inactivateCatalogItem,
+    importCatalogItems,
     createDiscountRule,
     generateDoctorStatements,
     sendDoctorStatement,
@@ -9524,15 +9710,24 @@ function renderKits(state,store,ui){
 }
 
 function renderCatalogs(state,store,ui,category=null){
-  const items=category ? state.catalogItems.filter(i=>i.category===category) : state.catalogItems;
+  const canWrite=roleCan(state.session.role,"catalogs:write");
+  const scoped=state.catalogItems.filter((item)=>item.organizationId===state.organization?.id && (!category || item.category===category));
+  const matching=searchFilter(scoped,ui.search,["sku","name","description","category","manufacturer","productType","serviceCategory"])
+    .filter((item)=>ui.catalogStatus==="ALL" || (ui.catalogStatus==="ACTIVE" ? item.active!==false : item.active===false))
+    .sort((left,right)=>String(left.sku||"").localeCompare(String(right.sku||""),"es",{numeric:true}));
+  const pageSize=Math.max(5,Math.min(50,Number(ui.catalogPageSize||10)));
+  const totalPages=Math.max(1,Math.ceil(matching.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.catalogPage||1)),totalPages);
+  const items=matching.slice((currentPage-1)*pageSize,currentPage*pageSize);
   const title=category ? ITEM_CATEGORY_LABELS[category] || category : "Catálogos y tarifas";
-  const rows=searchFilter(items,ui.search,["sku","name","category"]).map((item)=>`<tr><td><code>${esc(item.sku)}</code></td><td><strong>${esc(item.name)}</strong><small>${esc(ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(item.unit)}</td><td>${money(item.cost)}</td><td>${money(item.price)}</td><td>${item.taxable?"Sí":"No"}</td><td>${item.requiresLot?"Sí":"No"}</td><td>${badge(item.active?"ACTIVE":"INACTIVE")}</td><td>${actionButton("Editar","edit-catalog-item",{kind:"ghost",iconName:"edit",data:`data-id="${item.id}"`})}</td></tr>`);
+  const rows=items.map((item)=>`<tr><td><code>${esc(item.sku)}</code></td><td><strong>${esc(item.name)}</strong><small>${esc(item.description||ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(item.productType||item.serviceCategory||ITEM_CATEGORY_LABELS[item.category]||item.category)}</td><td>${esc(item.unit)}</td><td>${money(item.cost)}</td><td>${money(item.price)}</td><td>${item.taxable?"Sí":"No"}</td><td>${item.discountAllowed?"Sí":"No"}</td><td>${item.requiresLot?"Lote":item.requiresSerial?"Serie":"No"}</td><td>${badge(item.active!==false?"ACTIVE":"INACTIVE")}</td><td>${canWrite?`<div class="row-actions">${actionButton("Editar","edit-catalog-item",{kind:"ghost",iconName:"edit",data:`data-id="${item.id}"`})}${item.active!==false?actionButton("Inactivar","inactivate-catalog-item",{kind:"ghost",iconName:"close",data:`data-id="${item.id}"` }):""}</div>`:"—"}</td></tr>`);
+  const pages=Array.from({length:Math.min(totalPages,7)},(_,index)=>index+1).map((page)=>`<button data-action="catalog-page" data-page="${page}" class="${page===currentPage?"active":""}">${page}</button>`).join("");
   return `
     ${pageHeader(title,"Servicios, estudios, medicamentos, insumos, equipos, honorarios, extras, costos, precios y vigencias.",
-      `${actionButton("Importar CSV","import-catalog",{iconName:"upload"})}${actionButton("Nuevo ítem","open-catalog-form",{kind:"primary",iconName:"plus",data:category?`data-category="${category}"`:""})}`)}
+      canWrite?`${actionButton("Importar CSV","import-catalog",{iconName:"upload",data:category?`data-category="${category}"`:""})}${actionButton("Nuevo ítem","open-catalog-form",{kind:"primary",iconName:"plus",data:category?`data-category="${category}"`:""})}`:"")}
     ${!category?`<div class="catalog-shortcuts">${Object.entries(ITEM_CATEGORY_LABELS).map(([key,label])=>`<a href="#/catalogos/${key.toLowerCase()}"><span>${icon("catalogs")}</span><strong>${esc(label)}</strong><small>${state.catalogItems.filter(i=>i.category===key).length} ítems</small></a>`).join("")}<a href="#/catalogos/descuentos"><span>${icon("money")}</span><strong>Descuentos</strong><small>${state.discountRules.length} perfiles</small></a></div>`:""}
-    <div class="filter-bar"><label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar código o descripción" value="${esc(ui.search||"")}"></label><div class="filter-summary">${rows.length} ítems</div></div>
-    ${card("Maestro de ítems",table(["SKU","Descripción","Unidad","Costo","Precio","IVA","Lote/serie","Estado",""],rows))}
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="catalogPageSize">${[5,10,25,50].map((size)=>`<option value="${size}" ${size===pageSize?"selected":""}>${size}</option>`).join("")}</select> registros</label><label>Estado <select data-ui-filter="catalogStatus"><option value="ALL" ${ui.catalogStatus==="ALL"?"selected":""}>Todos</option><option value="ACTIVE" ${ui.catalogStatus==="ACTIVE"?"selected":""}>Activos</option><option value="INACTIVE" ${ui.catalogStatus==="INACTIVE"?"selected":""}>Inactivos</option></select></label><label class="search-field">${icon("search")}<span class="sr-only">Buscar catálogo</span><input data-ui-search placeholder="Buscar código, descripción o fabricante" value="${esc(ui.search||"")}"></label><div class="filter-summary">${matching.length} ítems</div></div>
+    ${card("Maestro de ítems",`${table(["SKU","Descripción","Tipo / categoría","Unidad","Costo","Precio","Impuesto","Descuento","Trazabilidad","Estado","Acciones"],rows)}<nav class="pagination" aria-label="Paginación de catálogo"><button data-action="catalog-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="catalog-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>`)}
   `;
 }
 
@@ -9994,6 +10189,10 @@ const ui = {
   purchaseDraft: null,
   inventoryAckTab: "PATIENTS",
   inventoryClosureTab: "PENDING",
+  catalogPage: 1,
+  catalogPageSize: 10,
+  catalogStatus: "ALL",
+  catalogImport: null,
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -10171,6 +10370,9 @@ const ACTION_PERMISSIONS = {
   "apply-kit": "inventory:write",
   "open-catalog-form": "catalogs:write",
   "edit-catalog-item": "catalogs:write",
+  "save-catalog-item": "catalogs:write",
+  "inactivate-catalog-item": "catalogs:write",
+  "confirm-catalog-import": "catalogs:write",
   "open-discount-form": "catalogs:write",
   "import-catalog": "catalogs:write",
   "open-doctor-form": "doctors:write",
@@ -10196,7 +10398,7 @@ function applyActionPermissions(state) {
   });
 }
 
-function parseCsv(text) {
+function parseCsv(text, required = ["document", "firstName", "lastName"]) {
   const rows = [];
   let row = [], field = "", quoted = false;
   for (let index = 0; index <= text.length; index += 1) {
@@ -10216,10 +10418,37 @@ function parseCsv(text) {
   if (quoted) throw new Error("El CSV contiene una comilla sin cerrar.");
   if (rows.length < 2) throw new Error("El CSV requiere encabezados y al menos una fila.");
   const headers = rows[0].map((value) => value.replace(/^\uFEFF/, ""));
-  const required = ["document", "firstName", "lastName"];
   const missing = required.filter((name) => !headers.includes(name));
   if (missing.length) throw new Error(`Faltan encabezados obligatorios: ${missing.join(", ")}.`);
   return rows.slice(1).map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] || ""])));
+}
+
+function parseCatalogCsv(text, forcedCategory = "") {
+  const rows = parseCsv(text, ["sku", "name", "unit"]);
+  const allowed = new Set(Object.keys(ITEM_CATEGORY_LABELS));
+  const existing = new Set(store.getState().catalogItems.map((item) => String(item.sku || "").trim().toUpperCase()));
+  const seen = new Set();
+  const validRows = [];
+  const errors = [];
+  const bool = (value) => ["1","TRUE","SI","SÍ","YES","Y"].includes(String(value || "").trim().toUpperCase());
+  rows.forEach((source, index) => {
+    const row = { ...source };
+    row.sku = String(row.sku || "").trim().toUpperCase();
+    row.category = String(forcedCategory || row.category || "").trim().toUpperCase();
+    row.cost = !String(row.cost ?? "").trim() ? 0 : Number(row.cost);
+    row.price = !String(row.price ?? "").trim() ? 0 : Number(row.price);
+    for (const field of ["taxable","billable","discountAllowed","giftcardAllowed","requiresLot","requiresSerial","internalUse","coldChain"]) row[field] = bool(row[field]);
+    const rowErrors = [];
+    if (!row.sku || !row.name || !row.unit) rowErrors.push("código, nombre y unidad son obligatorios");
+    if (!allowed.has(row.category)) rowErrors.push("categoría no permitida");
+    if (!Number.isFinite(row.cost) || row.cost < 0 || !Number.isFinite(row.price) || row.price < 0) rowErrors.push("costo o precio inválido");
+    if (existing.has(row.sku) || seen.has(row.sku)) rowErrors.push("código duplicado");
+    if (row.validFrom && !/^\d{4}-\d{2}-\d{2}$/.test(row.validFrom)) rowErrors.push("vigencia inicial inválida");
+    if (row.validUntil && (!/^\d{4}-\d{2}-\d{2}$/.test(row.validUntil) || (row.validFrom && row.validUntil < row.validFrom))) rowErrors.push("vigencia final inválida");
+    if (rowErrors.length) errors.push({ row:index + 2, sku:row.sku || "—", message:rowErrors.join("; ") });
+    else { seen.add(row.sku); validRows.push(row); }
+  });
+  return { validRows, errors, total:rows.length };
 }
 
 function renderOverlays() {
@@ -11574,22 +11803,50 @@ function openKitForm() {
 function openCatalogForm(category = "", id = "") {
   const state = store.getState();
   const item = id ? state.catalogItems.find((i)=>i.id===id) : null;
+  const selectedCategory=item?.category||category||"SERVICES";
   openModal({
     title: item ? `Editar ${item.name}` : "Nuevo ítem de catálogo",
-    subtitle: "Datos maestros, costo, tarifa, impuestos, lote/serie y estado.",
-    size: "md",
-    body: `<form id="catalog-form" class="form-grid">
+    subtitle: "Maestro sintético configurable; no define reglas fiscales, clínicas ni de cobertura.",
+    size: "lg",
+    body: `<form id="catalog-form" class="form-grid" data-dirty="false">
       <input type="hidden" name="id" value="${safeText(item?.id||"")}">
-      <label>Categoría<select name="category">${Object.entries(ITEM_CATEGORY_LABELS).map(([k,v])=>`<option value="${k}" ${(item?.category||category)===k?"selected":""}>${safeText(v)}</option>`).join("")}</select></label>
+      <label>Categoría<select name="category">${Object.entries(ITEM_CATEGORY_LABELS).map(([k,v])=>`<option value="${k}" ${selectedCategory===k?"selected":""}>${safeText(v)}</option>`).join("")}</select></label>
       <label>SKU<input name="sku" required value="${safeText(item?.sku||`NEW-${Date.now().toString().slice(-5)}`)}"></label>
-      <label class="full">Descripción<input name="name" required value="${safeText(item?.name||"")}"></label>
+      <label class="full">Nombre<input name="name" required maxlength="300" value="${safeText(item?.name||"")}"></label>
+      <label class="full">Descripción<textarea name="description" required maxlength="1000" rows="2">${safeText(item?.description||item?.name||"")}</textarea></label>
       <label>Unidad<input name="unit" value="${safeText(item?.unit||"unidad")}"></label>
-      <label>Costo<input type="number" step=".01" name="cost" value="${item?.cost||0}"></label>
-      <label>Precio<input type="number" step=".01" name="price" value="${item?.price||0}"></label>
+      <label>Tipo de producto<input name="productType" maxlength="200" value="${safeText(item?.productType||"")}" placeholder="Configurable"></label>
+      <label>Categoría de servicio<input name="serviceCategory" maxlength="200" value="${safeText(item?.serviceCategory||"")}" placeholder="Configurable"></label>
+      <label>Fabricante<input name="manufacturer" maxlength="300" value="${safeText(item?.manufacturer||"")}"></label>
+      <label>Presentación<input name="presentation" maxlength="200" value="${safeText(item?.presentation||"")}"></label>
+      <label>Proveedor<select name="supplierId"><option value="">Sin proveedor</option>${state.suppliers.filter((supplier)=>supplier.status!=="INACTIVE").map((supplier)=>`<option value="${supplier.id}" ${item?.supplierId===supplier.id?"selected":""}>${safeText(supplier.name)}</option>`).join("")}</select></label>
+      <label>Costo sintético<input type="number" min="0" step=".01" name="cost" value="${item?.cost||0}"></label>
+      <label>Precio sintético<input type="number" min="0" step=".01" name="price" value="${item?.price||0}"></label>
+      <label>Vigencia inicial<input type="date" name="validFrom" value="${safeText(item?.validFrom||"")}"></label>
+      <label>Vigencia final<input type="date" name="validUntil" value="${safeText(item?.validUntil||"")}"></label>
+      <div class="form-section full"><h3>Banderas configurables</h3><p>Su efecto operativo permanece sujeto a decisiones del cliente.</p></div>
+      <label><input type="checkbox" name="billable" ${item?.billable?"checked":""}> Facturable</label>
+      <label><input type="checkbox" name="discountAllowed" ${item?.discountAllowed?"checked":""}> Permite descuento</label>
       <label><input type="checkbox" name="taxable" ${item?.taxable?"checked":""}> Aplica impuesto</label>
-      <label><input type="checkbox" name="requiresLot" ${item?.requiresLot?"checked":""}> Requiere lote/serie</label>
+      <label><input type="checkbox" name="giftcardAllowed" ${item?.giftcardAllowed?"checked":""}> Permite giftcard</label>
+      <label><input type="checkbox" name="requiresLot" ${item?.requiresLot?"checked":""}> Requiere lote</label>
+      <label><input type="checkbox" name="requiresSerial" ${item?.requiresSerial?"checked":""}> Requiere serie</label>
+      <label><input type="checkbox" name="internalUse" ${item?.internalUse?"checked":""}> Uso interno</label>
+      <label><input type="checkbox" name="coldChain" ${item?.coldChain?"checked":""}> Transporte en frío</label>
     </form>`,
     footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-catalog-item">${item?"Guardar cambios":"Crear ítem"}</button>`
+  });
+}
+
+function openCatalogImport(category = "", preserve = false) {
+  if (!preserve) ui.catalogImport = { category, fileName:"", validRows:[], errors:[], total:0 };
+  const preview=ui.catalogImport || { category, fileName:"", validRows:[], errors:[], total:0 };
+  openModal({
+    title:"Importar catálogo CSV",
+    subtitle:"Validación previa, sin datos reales y sin importación parcial.",
+    size:"xl",
+    body:`<div class="bulk-import"><p>Encabezados obligatorios: <code>sku,name,unit</code>${category?". La categoría se toma de la sección actual.":",category"}. Opcionales: <code>description,cost,price,taxable,billable,discountAllowed,requiresLot,requiresSerial,manufacturer,validFrom,validUntil</code>.</p><label class="file-drop" for="catalog-import-file"><strong>Seleccionar CSV sintético</strong><span>Máximo 500 filas.</span><input id="catalog-import-file" type="file" accept=".csv,text/csv" data-category="${safeText(category)}"></label>${preview.fileName?`<p><strong>${safeText(preview.fileName)}</strong>: ${preview.validRows.length} válidas de ${preview.total}; ${preview.errors.length} con error.</p>`:""}${preview.validRows.length?`<h3>Filas válidas</h3>${simpleTable(["SKU","Categoría","Nombre","Unidad"],preview.validRows.slice(0,10).map((row)=>`<tr><td>${safeText(row.sku)}</td><td>${safeText(row.category)}</td><td>${safeText(row.name)}</td><td>${safeText(row.unit)}</td></tr>`))}`:""}${preview.errors.length?`<h3>Errores</h3><div role="alert">${simpleTable(["Fila","SKU","Error"],preview.errors.slice(0,20).map((error)=>`<tr><td>${error.row}</td><td>${safeText(error.sku)}</td><td>${safeText(error.message)}</td></tr>`))}</div>`:""}</div>`,
+    footer:`<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="confirm-catalog-import" ${!preview.validRows.length||preview.errors.length?"disabled":""}>Confirmar importación</button>`
   });
 }
 
@@ -11934,7 +12191,11 @@ document.addEventListener("click", async (event) => {
   if (action?.startsWith("save-") && action !== "save-settings") return;
 
   switch (action) {
-    case "close-modal": closeModal(); break;
+    case "close-modal": {
+      const dirtyCatalog=document.querySelector("#catalog-form[data-dirty='true']");
+      if(dirtyCatalog&&!confirm("¿Está seguro de salir? Se perderán los cambios que no se hayan guardado.")) break;
+      closeModal();break;
+    }
     case "toggle-sidebar": ui.sidebarOpen = !ui.sidebarOpen; render(); break;
     case "toggle-user-menu": ui.userMenuOpen = !ui.userMenuOpen; ui.notificationsOpen = false; renderOverlays(); break;
     case "toggle-notifications": ui.notificationsOpen = !ui.notificationsOpen; ui.userMenuOpen = false; renderOverlays(); break;
@@ -12278,6 +12539,12 @@ document.addEventListener("click", async (event) => {
     case "apply-kit": showToast("Selecciona una hospitalización desde Comprometidos para aplicar el kit.", "info"); location.hash="#/inventario/comprometidos"; break;
     case "open-catalog-form": openCatalogForm(data.category||""); break;
     case "edit-catalog-item": openCatalogForm("",data.id); break;
+    case "catalog-page": ui.catalogPage=Math.max(1,Number(data.page||1)); render(); break;
+    case "inactivate-catalog-item": {
+      const reason=prompt("Motivo de inactivación (obligatorio):","");
+      if(reason!==null) await runSafely(()=>store.inactivateCatalogItem(data.id,reason),"Ítem inactivado y conservado en el historial.");
+      break;
+    }
     case "open-discount-form": openDiscountForm(); break;
     case "open-medication-card": openMedicationCardForm(data.caseId || ""); break;
     case "print-medication-card": runSafely(()=>printMedicationCard(data.id,data.variant || "complete")); break;
@@ -12291,7 +12558,14 @@ document.addEventListener("click", async (event) => {
     case "export-audit": exportAudit(); break;
     case "export-report": exportReport(); break;
     case "import-patients": ui.patientTab = "bulk"; ui.patientPage = 1; render(); break;
-    case "import-catalog": showToast("La importación de catálogos no está implementada; el control permanece bloqueado.", "info"); break;
+    case "import-catalog": openCatalogImport(data.category||""); break;
+    case "confirm-catalog-import": {
+      const rows=ui.catalogImport?.validRows||[];
+      if(!rows.length||ui.catalogImport?.errors?.length) break;
+      const result=await runSafely(()=>store.importCatalogItems(rows),`${rows.length} ítems sintéticos importados y auditados.`);
+      if(result){ui.catalogImport=null;ui.catalogPage=1;closeModal();render();}
+      break;
+    }
     case "print-receivables": window.print(); break;
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
@@ -12313,6 +12587,8 @@ document.addEventListener("change", (event) => {
   if (target.matches('[data-ui-filter="payablesStatus"]')) { ui.payablesStatus = target.value; ui.payablesPage = 1; return; }
   if (target.matches('[data-ui-filter="payablesPageSize"]')) { ui.payablesPageSize = Math.max(1, Math.min(50, Number(target.value || 10))); ui.payablesPage = 1; render(); return; }
   if (target.matches('[data-ui-filter="purchasePageSize"]')) { ui.purchasePageSize = Math.max(1, Math.min(100, Number(target.value || 10))); ui.purchasePage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="catalogPageSize"]')) { ui.catalogPageSize = Math.max(5, Math.min(50, Number(target.value || 10))); ui.catalogPage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="catalogStatus"]')) { ui.catalogStatus = target.value || "ALL"; ui.catalogPage = 1; render(); return; }
   if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
   if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
@@ -12512,10 +12788,29 @@ document.addEventListener("change", (event) => {
       render();
     });
   }
+  if (target.id === "catalog-import-file") {
+    const file=target.files?.[0];
+    if(!file) return;
+    const category=target.dataset.category||"";
+    if(!/\.csv$/i.test(file.name)&&file.type!=="text/csv"){
+      ui.catalogImport={category,fileName:file.name,validRows:[],errors:[{row:"—",sku:"—",message:"Selecciona un archivo CSV."}],total:0};
+      openCatalogImport(category,true);return;
+    }
+    file.text().then((text)=>{
+      const parsed=parseCatalogCsv(text,category);
+      ui.catalogImport={category,fileName:file.name,...parsed};
+      openCatalogImport(category,true);
+    }).catch((error)=>{
+      ui.catalogImport={category,fileName:file.name,validRows:[],errors:[{row:"—",sku:"—",message:error.message}],total:0};
+      openCatalogImport(category,true);
+    });
+    return;
+  }
 });
 
 document.addEventListener("input", (event) => {
   const target = event.target;
+  if(target.closest("#catalog-form")) target.closest("#catalog-form").dataset.dirty="true";
   if (target.matches('[data-input="agenda-patient-search"]')) {
     ui.agendaPatientQuery = target.value;
     const position = target.selectionStart;
@@ -12612,6 +12907,7 @@ document.addEventListener("input", (event) => {
   }
   if (target.matches("[data-ui-search]")) {
     ui.search = target.value;
+    ui.catalogPage = 1;
     const pos = target.selectionStart;
     render();
     const next = document.querySelector("[data-ui-search]");
@@ -12969,10 +13265,12 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#catalog-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    data.taxable=formBool(form,"taxable");data.requiresLot=formBool(form,"requiresLot");
-    if(data.id) return showToast("La edición productiva está preparada en el repositorio Supabase; el modo demo evita alterar catálogos base.","info");
-    const result=runSafely(()=>store.createCatalogItem(data),"Ítem de catálogo creado.");
-    if(result) closeModal();
+    for(const field of ["taxable","billable","discountAllowed","giftcardAllowed","requiresLot","requiresSerial","internalUse","coldChain"]) data[field]=formBool(form,field);
+    const submit=modalRoot.querySelector('[data-action="save-catalog-item"]');
+    if(submit){submit.disabled=true;submit.textContent="Procesando…";}
+    const result=await runSafely(()=>data.id?store.updateCatalogItem(data.id,data):store.createCatalogItem(data),data.id?"Ítem de catálogo actualizado y auditado.":"Ítem de catálogo creado y auditado.");
+    if(result){form.dataset.dirty="false";closeModal();}
+    else if(submit){submit.disabled=false;submit.textContent=data.id?"Guardar cambios":"Crear ítem";}
   }
 
   if(action==="save-discount"){

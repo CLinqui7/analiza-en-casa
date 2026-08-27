@@ -186,6 +186,20 @@
 - `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
 - `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
 
+## CH15 · decisiones pendientes trazadas
+
+- `CH15-Q001`: ¿Qué transición crea `Acuse creado` y cómo se resuelven, sustituyen o cancelan los faltantes? Evidencia: CH15-E0003 y CH15-E0009, 00:45:29.400–00:45:32.200.
+- `CH15-Q002`: ¿Quién puede acusar solicitudes desde la casa del paciente, qué bodegas puede elegir y qué validación de disponibilidad e idempotencia aplica? Evidencia: CH15-E0013 y CH15-E0017, 00:45:35.200–00:45:38.200.
+- `CH15-Q003`: ¿Se permiten cotizaciones `En ejecución`, `Finalizado` o ambas como origen de una plantilla de acuse, y qué efecto posterior tiene cada estado? Evidencia: CH15-E0023, CH15-E0029 y CH15-E0032, 00:45:48.400–00:45:57.400.
+- `CH15-Q004`: ¿Cuál es el efecto autorizado de Facturable, Descuento, Impuesto, Lotes, Giftcard y Transporte en frío para cada familia de catálogo? Evidencia: CH15-E0047 y CH15-E0068, 00:46:28.400–00:46:51.600.
+- `CH15-Q005`: ¿Cuándo es obligatorio capturar lote para un insumo destinado a uso interno? Evidencia: CH15-E0068 y transcripción 00:46:58–00:47:10.
+- `CH15-Q006`: ¿Cómo se versiona y liquida el honorario asociado a un Recurso, incluyendo profesional elegible, moneda, vigencia, retenciones, reparto y permisos? Evidencia: CH15-E0097, 00:47:42.000, y transcripción 00:47:28–00:48:17.
+- `CH15-Q007`: ¿Quién puede consultar costos de compra, precios de venta y cuentas, y quién puede inactivar honorarios? Evidencia: CH15-E0110 y CH15-E0113, 00:48:27.800–00:48:56.600.
+- `CH15-Q008`: ¿Cuáles son los catálogos maestros y jerarquías permitidos para Tipo de producto y Categoría de Servicios? Evidencia: CH15-E0122 y CH15-E0128, 00:49:05.800–00:49:09.000.
+- `CH15-Q009`: ¿Qué límites, precedencia, combinación y redondeo rigen la matriz de descuentos por familia? Evidencia: CH15-E0144 y CH15-E0148, 00:49:33.200–00:49:41.400.
+
+Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inventa reglas de stock, bodegas, cierre, acuse, autorización, tarifas ni descuentos.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

@@ -54,6 +54,17 @@ function mapPurchase(raw = {}) {
   };
 }
 
+function mapCatalogItem(raw = {}) {
+  const item = camelCaseObject(raw);
+  return {
+    ...item,
+    price:Number(item.basePrice ?? item.price ?? 0),
+    cost:Number(item.cost || 0),
+    active:item.status !== "INACTIVE",
+    administrationRoutes:Array.isArray(item.administrationRoutes) ? item.administrationRoutes : []
+  };
+}
+
 export function mapSupabaseBootstrap(rawCollections = {}) {
   const collections = { ...rawCollections };
   collections.patients = (rawCollections.patients || []).map((raw) => {
@@ -86,10 +97,7 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
     return { ...doctor, name: doctor.fullName || doctor.name || "" };
   });
   collections.suppliers = (rawCollections.suppliers || []).map(camelCaseObject);
-  collections.catalogItems = (rawCollections.catalogItems || []).map((raw) => {
-    const item = camelCaseObject(raw);
-    return { ...item, price: Number(item.basePrice || 0), cost: Number(item.cost || 0), active: item.status !== "INACTIVE" };
-  });
+  collections.catalogItems = (rawCollections.catalogItems || []).map(mapCatalogItem);
   const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
   collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
   collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
@@ -363,6 +371,36 @@ function toCaseRow(record) {
   };
 }
 
+function toCatalogRow(item) {
+  return {
+    sku:item.sku,
+    category:item.category,
+    name:item.name,
+    description:item.description || item.name,
+    unit:item.unit || "unidad",
+    cost:Number(item.cost || 0),
+    base_price:Number(item.price || 0),
+    taxable:Boolean(item.taxable),
+    billable:Boolean(item.billable),
+    discount_allowed:Boolean(item.discountAllowed),
+    giftcard_allowed:Boolean(item.giftcardAllowed),
+    requires_lot:Boolean(item.requiresLot),
+    requires_serial:Boolean(item.requiresSerial),
+    internal_use:Boolean(item.internalUse),
+    cold_chain:Boolean(item.coldChain),
+    manufacturer:item.manufacturer || null,
+    product_type:item.productType || null,
+    service_category:item.serviceCategory || null,
+    presentation:item.presentation || null,
+    administration_routes:item.administrationRoutes || [],
+    supplier_id:item.supplierId || null,
+    valid_from:item.validFrom || null,
+    valid_until:item.validUntil || null,
+    metadata:item.metadata || {},
+    status:item.active === false ? "INACTIVE" : "ACTIVE"
+  };
+}
+
 function toQuoteRow(record) {
   return {
     id: record.id,
@@ -501,6 +539,32 @@ export async function createSupabaseAdapter(config) {
         return insert("patients", toPatientRow(payload.patient));
       case "CREATE_CASE":
         return insert("hospitalizations", toCaseRow(payload.case));
+      case "CREATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:null,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:null
+        });
+        if (error) throw error;
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "UPDATE_CATALOG_ITEM":
+      case "INACTIVATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:payload.item.id,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:payload.reason || null
+        });
+        if (error) throw error;
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "IMPORT_CATALOG_ITEMS": {
+        const { data, error } = await client.rpc("import_catalog_items", {
+          p_items:payload.items.map(toCatalogRow)
+        });
+        if (error) throw error;
+        return { ok:true, items:(data || []).map(mapCatalogItem) };
+      }
       case "CREATE_QUOTE": {
         const quote = payload.quote;
         const { data, error } = await client.rpc("create_quote_draft", {
