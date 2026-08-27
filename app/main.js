@@ -102,6 +102,8 @@ const ui = {
   purchasePage: 1,
   purchasePageSize: 10,
   purchaseDraft: null,
+  inventoryAckTab: "PATIENTS",
+  inventoryClosureTab: "PENDING",
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -266,6 +268,12 @@ const ACTION_PERMISSIONS = {
   "view-purchase": "purchases:read",
   "open-purchase-details": "purchases:read",
   "open-inventory-movement": "inventory:write",
+  "open-inventory-history": "inventory:read",
+  "open-inventory-commitments": "inventory:read",
+  "export-inventory": "inventory:read",
+  "open-acknowledgement-form": "inventory:write",
+  "blocked-inventory-action": "inventory:write",
+  "open-closure-warning": "inventory:write",
   "open-closure-form": "inventory:write",
   "approve-closure": "inventory:write",
   "open-kit-form": "inventory:write",
@@ -1567,6 +1575,78 @@ function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
   });
 }
 
+function inventoryItemHistory(id) {
+  const state = store.getState();
+  const item = state.inventoryItems.find((candidate) => candidate.id === id);
+  if (!item) return showToast("Ítem no encontrado.", "danger");
+  const movements = state.inventoryMovements.filter((movement) => movement.inventoryItemId === item.id);
+  openModal({
+    title: "Movimientos de item",
+    subtitle: "Historial autorizado de entradas y salidas; los controles no alteran existencias.",
+    size: "xl",
+    body: `<dl class="detail-list purchase-detail-grid"><div><dt>Tipo</dt><dd>${safeText(item.category)}</dd></div><div><dt>Código</dt><dd>${safeText(item.sku)}</dd></div><div class="full"><dt>Nombre</dt><dd>${safeText(item.name)}</dd></div></dl>
+      <label class="full">Rango de fechas<input type="text" value="Rango no aplicado" readonly aria-label="Rango de fechas"></label>
+      <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Fecha</th><th>Lote / Serie</th><th>Origen</th><th>Destino</th><th>Cantidad</th><th>Movimiento</th><th>Estado</th></tr></thead><tbody>${movements.map((movement) => `<tr><td>${safeText(movement.type)}</td><td>${safeText(movement.date || "—")}</td><td>${safeText(movement.lotId || "No aplica")}</td><td>${safeText(movement.caseId ? `Paciente ${movement.caseId}` : movement.warehouseFrom || "—")}</td><td>${safeText(movement.warehouseTo || movement.caseId || "—")}</td><td>${Number(movement.quantity || 0)}</td><td>${safeText(["PURCHASE_ENTRY","POSITIVE_ADJUSTMENT","RETURN_TO_STOCK"].includes(movement.type) ? "ENTRADA" : "SALIDA")}</td><td>${safeText(movement.type === "PATIENT_CONSUMPTION" ? "Gastado" : "Disponible")}</td></tr>`).join("") || `<tr><td colspan="8">No hay movimientos autorizados para este ítem.</td></tr>`}</tbody></table></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function inventoryItemCommitments(id) {
+  const state = store.getState();
+  const item = state.inventoryItems.find((candidate) => candidate.id === id);
+  if (!item) return showToast("Ítem no encontrado.", "danger");
+  const reservations = state.inventoryReservations.filter((reservation) => reservation.inventoryItemId === id);
+  openModal({
+    title: "Inventario comprometido",
+    subtitle: "Reservas por hospitalización según la convención técnica vigente; la definición contable requiere confirmación.",
+    size: "lg",
+    body: `<div class="table-wrap"><table><thead><tr><th>Hospitalización</th><th>Comprometido</th><th>Entregado</th><th>Consumido</th><th>Devuelto</th><th>Estado</th></tr></thead><tbody>${reservations.map((reservation) => `<tr><td>${safeText(reservation.caseId)}</td><td>${Number(reservation.quantity || 0)}</td><td>${Number(reservation.delivered || 0)}</td><td>${Number(reservation.consumed || 0)}</td><td>${Number(reservation.returned || 0)}</td><td>${safeText(reservation.status)}</td></tr>`).join("") || `<tr><td colspan="6">Sin compromisos registrados.</td></tr>`}</tbody></table></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function openAcknowledgementForm(caseId = "") {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId) || state.cases.find((candidate) => candidate.status !== "CLOSED");
+  const patient = state.patients.find((candidate) => candidate.id === record?.patientId);
+  openModal({
+    title: "Acuse nuevo",
+    subtitle: "La captura se conserva sin aplicar inventario hasta confirmar la definición de comprometido y el flujo de faltantes.",
+    size: "xl",
+    body: `<form id="acknowledgement-form" class="form-grid">
+      <div class="form-section full"><h3>Información del Acuse</h3></div>
+      <label>Paciente<input value="${safeText(patient?.fullName || "Paciente sintético")}" readonly></label>
+      <label>Fecha<input type="date" value="${new Date().toISOString().slice(0,10)}" readonly></label>
+      <label>Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
+      <div class="form-section full"><h3>Información del Items a entregar</h3></div>
+      <label>Bodega<select name="warehouseId"><option value="">Seleccione</option>${warehouseOptions()}</select></label>
+      <label class="span-2">Item<select name="inventoryItemId"><option value="">Seleccione</option>${state.inventoryItems.map((item) => `<option value="${safeText(item.id)}">${safeText(item.sku)} · ${safeText(item.name)}</option>`).join("")}</select></label>
+      <label>Cantidad disponible<input value="Seleccione un ítem" readonly></label>
+      <label>Cantidad a asignar<input type="number" min="0.001" step="0.001"></label>
+      <p class="full blocked-note">Guardar, asignar, duplicar, editar, eliminar, Registro XPO e ítems faltantes permanecen bloqueados hasta confirmar sus reglas.</p>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-secondary" data-action="blocked-inventory-action" data-operation="Vaciar">Vaciar</button><button class="btn btn-secondary" data-action="blocked-inventory-action" data-operation="Plantilla">Plantilla</button><button class="btn btn-primary" data-action="blocked-inventory-action" data-operation="Añadir al acuse">Añadir</button>`
+  });
+}
+
+function openClosureWarning(caseId = "") {
+  openModal({
+    title: "Advertencia",
+    subtitle: "Ya existe un cierre abierto o datos de conciliación que podrían perderse.",
+    body: `<p>Continuar podría borrar datos guardados anteriormente. Esta operación permanece bloqueada hasta definir recuperación, autorización y auditoría.</p><p class="blocked-note">¿Está seguro que desea continuar?</p>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="blocked-inventory-action" data-operation="Aceptar cierre existente" data-case-id="${safeText(caseId)}">Aceptar</button>`
+  });
+}
+
+function exportInventory() {
+  const state = store.getState();
+  const rows = state.inventoryItems.map((item) => ({
+    tipo:item.category, codigo:item.sku, nombre:item.name, bodega:state.warehouses.find((warehouse) => warehouse.id === item.warehouseId)?.name || "",
+    disponible:Number(item.stock || 0) - Number(item.committed || 0), comprometido:Number(item.committed || 0), total:Number(item.stock || 0)
+  }));
+  saveDownload("inventario-sintetico.csv", toCsv(rows), "text/csv;charset=utf-8");
+}
+
 function openClosureForm(caseId = "") {
   const state = store.getState();
   const record = state.cases.find((c) => c.id === caseId) || state.cases.find((c)=>c.status!=="CLOSED") || state.cases[0];
@@ -2288,6 +2368,14 @@ document.addEventListener("click", async (event) => {
     }
     case "purchase-page": ui.purchasePage = Math.max(1, Number(data.page || 1)); render(); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
+    case "open-inventory-history": inventoryItemHistory(data.id); break;
+    case "open-inventory-commitments": inventoryItemCommitments(data.id); break;
+    case "export-inventory": exportInventory(); break;
+    case "open-acknowledgement-form": openAcknowledgementForm(data.caseId || ""); break;
+    case "blocked-inventory-action": showToast(`${data.operation || "La operación"} permanece bloqueada hasta confirmar estados, permisos, idempotencia, reversión y auditoría.`, "info", 7000); break;
+    case "open-closure-warning": openClosureWarning(data.caseId || ""); break;
+    case "inventory-ack-tab": ui.inventoryAckTab=data.tab || "PATIENTS"; render(); break;
+    case "inventory-closure-tab": ui.inventoryClosureTab=data.tab || "PENDING"; render(); break;
     case "open-closure-form": openClosureForm(data.caseId||""); break;
     case "approve-closure": runSafely(()=>store.approveInventoryClosure(data.id),"Cierre aprobado y auditado."); break;
     case "print-closure": runSafely(()=>printClosure(data.id)); break;
@@ -2963,8 +3051,8 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#inventory-movement-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>store.createInventoryMovement(data),"Movimiento aplicado al inventario.");
-    if(result) closeModal();
+    const result=await runSafely(()=>store.createInventoryMovement(data),"Movimiento confirmado y auditado en inventario.");
+    if(result!==undefined && result!==null) closeModal();
   }
 
   if(action==="save-closure"){
@@ -2973,8 +3061,8 @@ document.addEventListener("click", async (event) => {
     const data=Object.fromEntries(new FormData(form));
     const state=store.getState();
     data.items=state.inventoryReservations.filter(r=>r.caseId===data.caseId).map(r=>({inventoryItemId:r.inventoryItemId,delivered:r.delivered,consumed:r.consumed,returned:r.returned,difference:r.delivered-r.consumed-r.returned}));
-    const result=runSafely(()=>store.createInventoryClosure(data),"Cierre creado para revisión.");
-    if(result) closeModal();
+    const result=await runSafely(()=>store.createInventoryClosure(data),"Cierre creado para revisión.");
+    if(result!==undefined && result!==null) closeModal();
   }
 
   if(action==="save-kit"){

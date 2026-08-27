@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T11:21:21.142Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-27T11:42:11.910Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 131,
-    "IMPLEMENTED_PARTIAL": 97,
+    "IMPLEMENTED_EXACT": 138,
+    "IMPLEMENTED_PARTIAL": 111,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
-    "NOT_TESTABLE": 19,
-    "NEEDS_CLIENT_CONFIRMATION": 53
+    "NOT_TESTABLE": 21,
+    "NEEDS_CLIENT_CONFIRMATION": 59
   },
   "requirements": [
     {
@@ -17669,6 +17669,1988 @@
       ],
       "acceptance_criteria": [
         "Generar, guardar, editar, enviar y reportes no confirmados fallan o se bloquean explícitamente sin mutar localStorage, auditoría o notificaciones.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderInventory/renderRoute",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-R001",
+      "event_ids": [
+        "CH14-E0004",
+        "CH14-E0006"
+      ],
+      "feature_group": "inventory_navigation",
+      "page": "Gestión de inventario",
+      "control_type": "tabs",
+      "visible_label": "Items / Movimientos / Comprometido / Lotes",
+      "expected_behavior": "Expone las cuatro secciones observadas, conserva la pestaña activa y limita el contenido a la organización autorizada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:39:58.200",
+        "00:40:05.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0004",
+          "timestamp": "00:39:58.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0004_00h39m58s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0006_00h40m05s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone las cuatro secciones observadas, conserva la pestaña activa y limita el contenido a la organización autorizada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderInventory",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-R002",
+      "event_ids": [
+        "CH14-E0005",
+        "CH14-E0006",
+        "CH14-E0012"
+      ],
+      "feature_group": "inventory_list",
+      "page": "Gestión de inventario",
+      "control_type": "data_table",
+      "visible_label": "Bodega / Tipo / Código / Nombre / Disp / Comp / Total",
+      "expected_behavior": "Lista y busca existencias con total reconciliable; filtro de bodega y paginación real requieren completar la interacción observada.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:39:59.200",
+        "00:40:05.400",
+        "00:40:13.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0005",
+          "timestamp": "00:39:59.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0005_00h39m59s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0006_00h40m05s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0012",
+          "timestamp": "00:40:13.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0012_00h40m13s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0012_00h40m13s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista y busca existencias con total reconciliable; filtro de bodega y paginación real requieren completar la interacción observada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "exportInventory",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q003"
+      ],
+      "requirement_id": "CH14-R003",
+      "event_ids": [
+        "CH14-E0005"
+      ],
+      "feature_group": "inventory_export",
+      "page": "Gestión de inventario",
+      "control_type": "button",
+      "visible_label": "Excel",
+      "expected_behavior": "Exporta únicamente el conjunto sintético autorizado; la implementación entrega CSV utilizable sin afirmar equivalencia al libro oficial.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:39:59.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0005",
+          "timestamp": "00:39:59.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0005_00h39m59s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Exporta únicamente el conjunto sintético autorizado; la implementación entrega CSV utilizable sin afirmar equivalencia al libro oficial.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "inventoryItemHistory",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q015"
+      ],
+      "requirement_id": "CH14-R004",
+      "event_ids": [
+        "CH14-E0014",
+        "CH14-E0016",
+        "CH14-E0018",
+        "CH14-E0023"
+      ],
+      "feature_group": "item_history",
+      "page": "Movimientos de item",
+      "control_type": "modal_table",
+      "visible_label": "Rango de fechas / Lote o serie / Origen / Destino / Entrada o salida / Estado",
+      "expected_behavior": "Abre el historial tenant-safe con las columnas observadas; el rango y los estados documentales no se inventan como filtro o regla productiva.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:40:34.800",
+        "00:40:37.800",
+        "00:40:39.000",
+        "00:40:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0014",
+          "timestamp": "00:40:34.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0014_00h40m34s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0014_00h40m34s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0016",
+          "timestamp": "00:40:37.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0016_00h40m37s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0023",
+          "timestamp": "00:40:42.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0023_00h40m42s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0023_00h40m42s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Abre el historial tenant-safe con las columnas observadas; el rango y los estados documentales no se inventan como filtro o regla productiva.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js",
+      "current_implementation_function": "createInventoryMovement/CREATE_INVENTORY_MOVEMENT",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-R005",
+      "event_ids": [
+        "CH14-E0018",
+        "CH14-E0027"
+      ],
+      "feature_group": "movement_types",
+      "page": "Movimientos",
+      "control_type": "inventory_workflow",
+      "visible_label": "Entradas / salidas / compromiso / consumo / devolución / traslado / ajuste / baja",
+      "expected_behavior": "Sólo aplica tipos permitidos con referencia e idempotencia; el resultado remoto se confirma antes de reflejar éxito.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:40:39.000",
+        "00:40:47.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0027",
+          "timestamp": "00:40:47.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0027_00h40m47s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0027_00h40m47s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Sólo aplica tipos permitidos con referencia e idempotencia; el resultado remoto se confirma antes de reflejar éxito.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "createInventoryMovement",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q001"
+      ],
+      "requirement_id": "CH14-R006",
+      "event_ids": [
+        "CH14-E0018"
+      ],
+      "feature_group": "committed_semantics",
+      "page": "Inventario comprometido",
+      "control_type": "derived_state",
+      "visible_label": "Comprometido",
+      "expected_behavior": "No promueve la explicación verbal a fórmula contable hasta definir reserva, entrega, consumo, devolución y reversión.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:40:39.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No promueve la explicación verbal a fórmula contable hasta definir reserva, entrega, consumo, devolución y reversión.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderCommittedInventory",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-R007",
+      "event_ids": [
+        "CH14-E0029",
+        "CH14-E0030",
+        "CH14-E0031"
+      ],
+      "feature_group": "acknowledgement_panel",
+      "page": "Inventario / Acuses",
+      "control_type": "tabs_table",
+      "visible_label": "Pacientes / Recursos / No disponible / Solicitudes / Tareas",
+      "expected_behavior": "Expone las pestañas, selector de área y tabla de pacientes; las colecciones auxiliares permanecen vacías sin fabricar datos.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:40:51.600",
+        "00:40:52.400",
+        "00:40:52.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0029",
+          "timestamp": "00:40:51.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0029_00h40m51s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0030",
+          "timestamp": "00:40:52.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0030_00h40m52s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0031",
+          "timestamp": "00:40:52.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0031_00h40m52s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0031_00h40m52s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone las pestañas, selector de área y tabla de pacientes; las colecciones auxiliares permanecen vacías sin fabricar datos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderCommittedInventory/blocked-inventory-action",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q002",
+        "CH14-Q003"
+      ],
+      "requirement_id": "CH14-R008",
+      "event_ids": [
+        "CH14-E0032",
+        "CH14-E0035",
+        "CH14-E0038",
+        "CH14-E0039"
+      ],
+      "feature_group": "acknowledgement_actions",
+      "page": "Inventario / Acuses",
+      "control_type": "row_menu",
+      "visible_label": "Nuevo / Ver / Excel / XPO / Duplicar / Editar / Asignar / Imprimir / Faltantes / Eliminar",
+      "expected_behavior": "Mantiene visibles las acciones observadas y bloquea toda mutación cuyo estado, permiso, versión, reversión o efecto no está aprobado.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:40:53.200",
+        "00:41:00.800",
+        "00:41:05.800",
+        "00:41:08.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0032",
+          "timestamp": "00:40:53.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0032_00h40m53s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0035",
+          "timestamp": "00:41:00.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0035_00h41m00s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0035_00h41m00s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0038",
+          "timestamp": "00:41:05.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0038_00h41m05s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0038_00h41m05s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0039",
+          "timestamp": "00:41:08.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0039_00h41m08s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0039_00h41m08s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Mantiene visibles las acciones observadas y bloquea toda mutación cuyo estado, permiso, versión, reversión o efecto no está aprobado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openAcknowledgementForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q004"
+      ],
+      "requirement_id": "CH14-R009",
+      "event_ids": [
+        "CH14-E0147",
+        "CH14-E0148",
+        "CH14-E0149",
+        "CH14-E0152"
+      ],
+      "feature_group": "acknowledgement_form",
+      "page": "Acuse nuevo",
+      "control_type": "form",
+      "visible_label": "Paciente / Fecha / Hospitalización / Bodega / Item / Disponible / Asignar / Vaciar / Plantilla / Añadir",
+      "expected_behavior": "Reproduce la captura observada sin aplicar existencias ni afirmar guardado hasta aprobar su contrato e idempotencia.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:45:19.800",
+        "00:45:20.400",
+        "00:45:23.800",
+        "00:45:27.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0147",
+          "timestamp": "00:45:19.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0147_00h45m19s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0148",
+          "timestamp": "00:45:20.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0148_00h45m20s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0149",
+          "timestamp": "00:45:23.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0149_00h45m23s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Reproduce la captura observada sin aplicar existencias ni afirmar guardado hasta aprobar su contrato e idempotencia.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "blocked-inventory-action",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q005"
+      ],
+      "requirement_id": "CH14-R010",
+      "event_ids": [
+        "CH14-E0152"
+      ],
+      "feature_group": "missing_items",
+      "page": "Acuse nuevo",
+      "control_type": "inventory_exception",
+      "visible_label": "Items faltantes",
+      "expected_behavior": "No crea compras, sustituciones, notificaciones ni stock negativo hasta definir el flujo posterior y Acuse creado.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:45:27.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No crea compras, sustituciones, notificaciones ni stock negativo hasta definir el flujo posterior y Acuse creado.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderInventoryClosures",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-R011",
+      "event_ids": [
+        "CH14-E0041",
+        "CH14-E0047",
+        "CH14-E0049",
+        "CH14-E0056"
+      ],
+      "feature_group": "closure_panel",
+      "page": "Inventario / Cierres",
+      "control_type": "tabs_table",
+      "visible_label": "Pendientes / Cierres totales / Cerrados / Recursos",
+      "expected_behavior": "Expone las cuatro secciones y los casos sintéticos sin ejecutar transiciones de cierre no confirmadas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:41:38.600",
+        "00:41:57.800",
+        "00:42:14.800",
+        "00:42:36.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0041",
+          "timestamp": "00:41:38.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0047",
+          "timestamp": "00:41:57.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0047_00h41m57s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0049",
+          "timestamp": "00:42:14.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0049_00h42m14s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0056",
+          "timestamp": "00:42:36.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0056_00h42m36s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0056_00h42m36s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone las cuatro secciones y los casos sintéticos sin ejecutar transiciones de cierre no confirmadas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openClosureWarning",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q006"
+      ],
+      "requirement_id": "CH14-R012",
+      "event_ids": [
+        "CH14-E0043",
+        "CH14-E0044",
+        "CH14-E0045"
+      ],
+      "feature_group": "closure_warning",
+      "page": "Advertencia",
+      "control_type": "confirmation_dialog",
+      "visible_label": "Cancelar / Aceptar",
+      "expected_behavior": "Advierte posible pérdida, permite cancelar sin cambios y mantiene Aceptar bloqueado hasta disponer de recuperación y autorización auditada.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:41:43.600",
+        "00:41:44.200",
+        "00:41:46.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0043",
+          "timestamp": "00:41:43.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0043_00h41m43s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0044",
+          "timestamp": "00:41:44.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0044_00h41m44s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0045",
+          "timestamp": "00:41:46.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0045_00h41m46s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Advierte posible pérdida, permite cancelar sin cambios y mantiene Aceptar bloqueado hasta disponer de recuperación y autorización auditada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/main.js",
+      "current_implementation_function": "createInventoryClosure/approveInventoryClosure",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q006",
+        "CH14-Q007"
+      ],
+      "requirement_id": "CH14-R013",
+      "event_ids": [
+        "CH14-E0050",
+        "CH14-E0051",
+        "CH14-E0052",
+        "CH14-E0053",
+        "CH14-E0054"
+      ],
+      "feature_group": "closure_state_machine",
+      "page": "Cierres totales",
+      "control_type": "row_menu",
+      "visible_label": "Editar / Imprimir / Aprobar / Cancelar",
+      "expected_behavior": "No crea, aprueba, cancela ni revierte cierres hasta aprobar estados, conciliación, permisos y efectos; la impresión visible no concede validez oficial.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:42:16.400",
+        "00:42:19.600",
+        "00:42:20.200",
+        "00:42:22.200",
+        "00:42:28.600"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0050",
+          "timestamp": "00:42:16.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0050_00h42m16s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0050_00h42m16s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0051",
+          "timestamp": "00:42:19.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0051_00h42m19s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0052",
+          "timestamp": "00:42:20.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0052_00h42m20s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0053",
+          "timestamp": "00:42:22.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0053_00h42m22s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0053_00h42m22s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0054",
+          "timestamp": "00:42:28.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0054_00h42m28s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0054_00h42m28s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No crea, aprueba, cancela ni revierte cierres hasta aprobar estados, conciliación, permisos y efectos; la impresión visible no concede validez oficial.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderSuppliers",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q008"
+      ],
+      "requirement_id": "CH14-R014",
+      "event_ids": [
+        "CH14-E0058",
+        "CH14-E0059",
+        "CH14-E0061",
+        "CH14-E0064"
+      ],
+      "feature_group": "suppliers",
+      "page": "Inventario / Proveedores",
+      "control_type": "catalog_table",
+      "visible_label": "Código / Empresa / Contacto / Teléfono / Correo / Dirección / Nuevo / Editar",
+      "expected_behavior": "Presenta el catálogo sintético tenant-scoped; alta, edición y desactivación permanecen bloqueadas hasta definir identidad, unicidad e historial.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:43:19.800",
+        "00:43:21.200",
+        "00:43:24.400",
+        "00:43:26.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0058",
+          "timestamp": "00:43:19.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0058_00h43m19s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0058_00h43m19s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0059",
+          "timestamp": "00:43:21.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0059_00h43m21s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0059_00h43m21s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0061",
+          "timestamp": "00:43:24.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0061_00h43m24s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0064",
+          "timestamp": "00:43:26.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0064_00h43m26s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta el catálogo sintético tenant-scoped; alta, edición y desactivación permanecen bloqueadas hasta definir identidad, unicidad e historial.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js",
+      "current_implementation_function": "renderWarehouses",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q009"
+      ],
+      "requirement_id": "CH14-R015",
+      "event_ids": [
+        "CH14-E0069",
+        "CH14-E0070",
+        "CH14-E0071",
+        "CH14-E0073"
+      ],
+      "feature_group": "warehouses",
+      "page": "Items / Bodegas",
+      "control_type": "catalog_table",
+      "visible_label": "Estado / Nombre / Descripción / Fecha de creación / Nuevo / Editar",
+      "expected_behavior": "Presenta bodegas autorizadas; altas y cambios permanecen bloqueados hasta definir ciclo de vida y referencias históricas.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:43:31.800",
+        "00:43:32.400",
+        "00:43:33.400",
+        "00:43:36.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0069",
+          "timestamp": "00:43:31.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0069_00h43m31s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0070",
+          "timestamp": "00:43:32.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0070_00h43m32s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0071",
+          "timestamp": "00:43:33.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0071_00h43m33s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0073",
+          "timestamp": "00:43:36.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0073_00h43m36s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta bodegas autorizadas; altas y cambios permanecen bloqueados hasta definir ciclo de vida y referencias históricas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js",
+      "current_implementation_function": "createInventoryMovement/CREATE_INVENTORY_MOVEMENT",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q009"
+      ],
+      "requirement_id": "CH14-R016",
+      "event_ids": [
+        "CH14-E0005",
+        "CH14-E0069"
+      ],
+      "feature_group": "warehouse_transfer",
+      "page": "Inventario / Bodegas",
+      "control_type": "inventory_workflow",
+      "visible_label": "Traslados",
+      "expected_behavior": "Transfiere sólo por la RPC idempotente, tenant-safe y auditada; la superficie aún no reproduce el acceso directo completo.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:39:59.200",
+        "00:43:31.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0005",
+          "timestamp": "00:39:59.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0005_00h39m59s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0069",
+          "timestamp": "00:43:31.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0069_00h43m31s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Transfiere sólo por la RPC idempotente, tenant-safe y auditada; la superficie aún no reproduce el acceso directo completo.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/supabase-adapter.js",
+      "current_implementation_function": "renderInventoryLots/mapSupabaseBootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q010",
+        "CH14-Q011"
+      ],
+      "requirement_id": "CH14-R017",
+      "event_ids": [
+        "CH14-E0076",
+        "CH14-E0078",
+        "CH14-E0081",
+        "CH14-E0092"
+      ],
+      "feature_group": "lots_serials",
+      "page": "Inventario: Lotes y números de serie",
+      "control_type": "catalog_table",
+      "visible_label": "Número / Descripción / Item / Fecha E - Fecha V / Estado",
+      "expected_behavior": "Lista lotes y series tenant-safe; creación, edición, unicidad y corrección quedan bloqueadas hasta aprobar su ciclo de vida.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:44:03.000",
+        "00:44:04.600",
+        "00:44:10.400",
+        "00:44:24.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0076",
+          "timestamp": "00:44:03.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0076_00h44m03s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0078",
+          "timestamp": "00:44:04.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0078_00h44m04s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0078_00h44m04s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0081",
+          "timestamp": "00:44:10.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0081_00h44m10s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0092",
+          "timestamp": "00:44:24.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0092_00h44m24s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Lista lotes y series tenant-safe; creación, edición, unicidad y corrección quedan bloqueadas hasta aprobar su ciclo de vida.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608260006_p0_notifications_payments_inventory.sql; app/views.js",
+      "current_implementation_function": "apply_inventory_movement_v2/renderInventoryLots",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q010"
+      ],
+      "requirement_id": "CH14-R018",
+      "event_ids": [
+        "CH14-E0082",
+        "CH14-E0083",
+        "CH14-E0084",
+        "CH14-E0087"
+      ],
+      "feature_group": "invalid_expiry",
+      "page": "Lotes y números de serie",
+      "control_type": "safety_state",
+      "visible_label": "Fecha inválida con estado activo",
+      "expected_behavior": "No reproduce el defecto inseguro: la RPC rechaza lotes vencidos/no disponibles y la UI no presenta la fecha inválida como inventario utilizable.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:44:11.400",
+        "00:44:13.000",
+        "00:44:13.600",
+        "00:44:19.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0082",
+          "timestamp": "00:44:11.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0082_00h44m11s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0082_00h44m11s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0083",
+          "timestamp": "00:44:13.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0083_00h44m13s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0083_00h44m13s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0084",
+          "timestamp": "00:44:13.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0084_00h44m13s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0087",
+          "timestamp": "00:44:19.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0087_00h44m19s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No reproduce el defecto inseguro: la RPC rechaza lotes vencidos/no disponibles y la UI no presenta la fecha inválida como inventario utilizable.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/store.js",
+      "current_implementation_function": "renderKits/createKit",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q012"
+      ],
+      "requirement_id": "CH14-R019",
+      "event_ids": [
+        "CH14-E0094",
+        "CH14-E0095",
+        "CH14-E0096",
+        "CH14-E0098",
+        "CH14-E0101"
+      ],
+      "feature_group": "kit_catalog",
+      "page": "Inventario / Kit de insumos",
+      "control_type": "catalog_table",
+      "visible_label": "Excel / Nuevo / Editar / Duplicar / Eliminar",
+      "expected_behavior": "Expone lista y acciones; no afirma mutación ni exportación oficial sin reglas de versionado, uso histórico y permisos.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:44:29.000",
+        "00:44:29.400",
+        "00:44:29.800",
+        "00:44:31.400",
+        "00:44:33.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0094",
+          "timestamp": "00:44:29.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0094_00h44m29s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0096",
+          "timestamp": "00:44:29.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0096_00h44m29s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0098",
+          "timestamp": "00:44:31.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0098_00h44m31s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0101",
+          "timestamp": "00:44:33.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0101_00h44m33s000ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0101_00h44m33s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Expone lista y acciones; no afirma mutación ni exportación oficial sin reglas de versionado, uso histórico y permisos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js",
+      "current_implementation_function": "openKitForm",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q012"
+      ],
+      "requirement_id": "CH14-R020",
+      "event_ids": [
+        "CH14-E0104",
+        "CH14-E0105",
+        "CH14-E0106",
+        "CH14-E0107",
+        "CH14-E0108",
+        "CH14-E0117"
+      ],
+      "feature_group": "kit_composer",
+      "page": "Kit de insumos",
+      "control_type": "modal_form",
+      "visible_label": "Nombre / Item / Cantidad / Añadir / Quitar",
+      "expected_behavior": "Presenta composición cuantificada y controles observados; guardar permanece bloqueado para no crear un maestro incompleto.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:44:35.200",
+        "00:44:39.200",
+        "00:44:39.600",
+        "00:44:40.200",
+        "00:44:41.000",
+        "00:44:44.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0104_00h44m35s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0105",
+          "timestamp": "00:44:39.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0105_00h44m39s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0106",
+          "timestamp": "00:44:39.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0107",
+          "timestamp": "00:44:40.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0107_00h44m40s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0107_00h44m40s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0108",
+          "timestamp": "00:44:41.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0108_00h44m41s000ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0108_00h44m41s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0117",
+          "timestamp": "00:44:44.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0117_00h44m44s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0117_00h44m44s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Presenta composición cuantificada y controles observados; guardar permanece bloqueado para no crear un maestro incompleto.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "createKit",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q013"
+      ],
+      "requirement_id": "CH14-R021",
+      "event_ids": [
+        "CH14-E0104",
+        "CH14-E0117"
+      ],
+      "feature_group": "kit_consumption",
+      "page": "Kit de insumos",
+      "control_type": "atomic_inventory_workflow",
+      "visible_label": "Descarga automática de componentes",
+      "expected_behavior": "No descuenta componentes hasta definir bodega, lote/FEFO, sustitución, faltantes, concurrencia, idempotencia y reversión atómica.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:44:35.200",
+        "00:44:44.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0104_00h44m35s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0117",
+          "timestamp": "00:44:44.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0117_00h44m44s800ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0117_00h44m44s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No descuenta componentes hasta definir bodega, lote/FEFO, sustitución, faltantes, concurrencia, idempotencia y reversión atómica.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "NONE",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q014"
+      ],
+      "requirement_id": "CH14-R022",
+      "event_ids": [
+        "CH14-E0152"
+      ],
+      "feature_group": "quote_link",
+      "page": "Acuse nuevo",
+      "control_type": "ambiguous_workflow",
+      "visible_label": "Faltar una cotización",
+      "expected_behavior": "No automatiza una frase ambigua sin entidad, estado, permiso ni resultado demostrados.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:45:27.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No automatiza una frase ambigua sin entidad, estado, permiso ni resultado demostrados.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js",
+      "current_implementation_function": "runSafely/createInventoryMovement",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q015"
+      ],
+      "requirement_id": "CH14-R023",
+      "event_ids": [
+        "CH14-E0006",
+        "CH14-E0152"
+      ],
+      "feature_group": "error_behavior",
+      "page": "Inventario",
+      "control_type": "error_state",
+      "visible_label": "Validaciones y recuperación",
+      "expected_behavior": "El capítulo no provoca errores remotos, de stock, lote, concurrencia o validación; su presentación exacta no es atribuible al video.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:40:05.400",
+        "00:45:27.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0006_00h40m05s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El capítulo no provoca errores remotos, de stock, lote, concurrencia o validación; su presentación exacta no es atribuible al video.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/templates.js",
+      "current_implementation_function": "",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q003"
+      ],
+      "requirement_id": "CH14-R024",
+      "event_ids": [
+        "CH14-E0035",
+        "CH14-E0052",
+        "CH14-E0095"
+      ],
+      "feature_group": "document_results",
+      "page": "Inventario",
+      "control_type": "external_result",
+      "visible_label": "Resultado de Excel e impresión",
+      "expected_behavior": "Los menús y rótulos son visibles, pero el capítulo no demuestra archivos finales, validez ni permisos completos.",
+      "status": "NOT_TESTABLE",
+      "timestamps": [
+        "00:41:00.800",
+        "00:42:20.200",
+        "00:44:29.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0035",
+          "timestamp": "00:41:00.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0035_00h41m00s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0035_00h41m00s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0052",
+          "timestamp": "00:42:20.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0052_00h42m20s200ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Los menús y rótulos son visibles, pero el capítulo no demuestra archivos finales, validez ni permisos completos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; app/main.js",
+      "current_implementation_function": "createInventoryMovement/CREATE_INVENTORY_MOVEMENT/save-inventory-movement",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-H001",
+      "event_ids": [
+        "CH14-E0018",
+        "CH14-E0023"
+      ],
+      "feature_group": "remote_confirmation",
+      "page": "Persistencia",
+      "control_type": "idempotent_rpc",
+      "visible_label": "Movimiento confirmado antes de éxito",
+      "expected_behavior": "En modo Supabase, confirma la RPC y su identificador antes de mutar el espejo local o cerrar el formulario.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:40:39.000",
+        "00:40:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0018",
+          "timestamp": "00:40:39.000",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0018_00h40m39s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0023",
+          "timestamp": "00:40:42.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0023_00h40m42s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0023_00h40m42s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "En modo Supabase, confirma la RPC y su identificador antes de mutar el espejo local o cerrar el formulario.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/supabase-adapter.js",
+      "current_implementation_function": "mapSupabaseBootstrap/bootstrap",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-H002",
+      "event_ids": [
+        "CH14-E0006",
+        "CH14-E0049",
+        "CH14-E0096"
+      ],
+      "feature_group": "supabase_bootstrap",
+      "page": "Persistencia",
+      "control_type": "data_contract",
+      "visible_label": "Bootstrap completo de inventario",
+      "expected_behavior": "Reconstruye bodegas, items, lotes, movimientos, reservas, cierres y kits desde Supabase sin caer en datos locales obsoletos.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:40:05.400",
+        "00:42:14.800",
+        "00:44:29.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0006_00h40m05s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0049",
+          "timestamp": "00:42:14.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0049_00h42m14s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0096",
+          "timestamp": "00:44:29.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0096_00h44m29s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Reconstruye bodegas, items, lotes, movimientos, reservas, cierres y kits desde Supabase sin caer en datos locales obsoletos.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "supabase/migrations/202608270010_ch14_inventory_boundaries.sql",
+      "current_implementation_function": "inventory reads/revokes",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-H003",
+      "event_ids": [
+        "CH14-E0006",
+        "CH14-E0049",
+        "CH14-E0078",
+        "CH14-E0096"
+      ],
+      "feature_group": "inventory_rls",
+      "page": "Persistencia",
+      "control_type": "rls_dml_boundary",
+      "visible_label": "Lecturas tenant-safe y DML directo cerrado",
+      "expected_behavior": "Habilita RLS en hijos, deriva el tenant por padres autorizados y revoca escrituras directas de inventario, cierres y kits.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:40:05.400",
+        "00:42:14.800",
+        "00:44:04.600",
+        "00:44:29.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0006",
+          "timestamp": "00:40:05.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0006_00h40m05s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0006_00h40m05s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0049",
+          "timestamp": "00:42:14.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0049_00h42m14s800ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0078",
+          "timestamp": "00:44:04.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0078_00h44m04s600ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0078_00h44m04s600ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0096",
+          "timestamp": "00:44:29.800",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0096_00h44m29s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Habilita RLS en hijos, deriva el tenant por padres autorizados y revoca escrituras directas de inventario, cierres y kits.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js",
+      "current_implementation_function": "createInventoryMovement",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH14-H004",
+      "event_ids": [
+        "CH14-E0019",
+        "CH14-E0021",
+        "CH14-E0082"
+      ],
+      "feature_group": "local_lot_guard",
+      "page": "Modo local / standalone",
+      "control_type": "safety_guard",
+      "visible_label": "Sin movimientos locales inseguros de lote o serie",
+      "expected_behavior": "Bloquea toda mutación local de un ítem trazable antes de cambiar stock, lote, movimiento o auditoría; producción usa la RPC transaccional.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:40:39.600",
+        "00:40:41.200",
+        "00:44:11.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0019",
+          "timestamp": "00:40:39.600",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0019_00h40m39s600ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0021",
+          "timestamp": "00:40:41.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0021_00h40m41s200ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0021_00h40m41s200ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0082",
+          "timestamp": "00:44:11.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0082_00h44m11s400ms_abrupt_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0082_00h44m11s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Bloquea toda mutación local de un ítem trazable antes de cambiar stock, lote, movimiento o auditoría; producción usa la RPC transaccional.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH14",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/main.js",
+      "current_implementation_function": "createInventoryClosure/approveInventoryClosure/createKit/blocked-inventory-action",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH14-Q002",
+        "CH14-Q007",
+        "CH14-Q012",
+        "CH14-Q013"
+      ],
+      "requirement_id": "CH14-H005",
+      "event_ids": [
+        "CH14-E0032",
+        "CH14-E0050",
+        "CH14-E0098"
+      ],
+      "feature_group": "no_fake_inventory_success",
+      "page": "Inventario",
+      "control_type": "safety_guard",
+      "visible_label": "Sin éxito simulado en acuses, cierres o kits",
+      "expected_behavior": "Las operaciones sin contrato aprobado fallan o se muestran bloqueadas sin mutar estado, stock, cierres, kits ni auditoría.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:40:53.200",
+        "00:42:16.400",
+        "00:44:31.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0032",
+          "timestamp": "00:40:53.200",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0032_00h40m53s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0050",
+          "timestamp": "00:42:16.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0050_00h42m16s400ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0050_00h42m16s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0098",
+          "timestamp": "00:44:31.400",
+          "image": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0098_00h44m31s400ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Las operaciones sin contrato aprobado fallan o se muestran bloqueadas sin mutar estado, stock, cierres, kits ni auditoría.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

@@ -90,6 +90,72 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
     const item = camelCaseObject(raw);
     return { ...item, price: Number(item.basePrice || 0), cost: Number(item.cost || 0), active: item.status !== "INACTIVE" };
   });
+  const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
+  collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
+  collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
+    const item = camelCaseObject(raw);
+    const catalog = catalogById.get(item.catalogItemId) || {};
+    return {
+      ...item,
+      sku: catalog.sku || item.sku || "",
+      name: catalog.name || item.name || "Ítem de inventario",
+      category: catalog.category || item.category || "SUPPLIES",
+      unit: catalog.unit || item.unit || "unidad",
+      stock: Number(item.stock || 0),
+      committed: Number(item.committed || 0),
+      minimum: Number(item.minimumStock || item.minimum || 0)
+    };
+  });
+  collections.inventoryLots = (rawCollections.inventoryLots || []).map((raw) => {
+    const lot = camelCaseObject(raw);
+    return { ...lot, quantity:Number(lot.quantity || 0) };
+  });
+  collections.inventoryMovements = (rawCollections.inventoryMovements || []).map((raw) => {
+    const movement = camelCaseObject(raw);
+    return {
+      ...movement,
+      caseId: movement.hospitalizationId || movement.caseId || "",
+      type: movement.movementType || movement.type,
+      date: movement.createdAt || movement.date,
+      warehouseFrom: movement.warehouseFromId || movement.warehouseFrom || "",
+      warehouseTo: movement.warehouseToId || movement.warehouseTo || "",
+      quantity: Number(movement.quantity || 0)
+    };
+  });
+  collections.inventoryReservations = (rawCollections.inventoryReservations || []).map((raw) => {
+    const reservation = camelCaseObject(raw);
+    return {
+      ...reservation,
+      caseId: reservation.hospitalizationId || reservation.caseId,
+      quantity:Number(reservation.quantity || 0), delivered:Number(reservation.delivered || 0),
+      consumed:Number(reservation.consumed || 0), returned:Number(reservation.returned || 0)
+    };
+  });
+  collections.inventoryClosures = (rawCollections.inventoryClosures || []).map((raw) => {
+    const closure = camelCaseObject(raw);
+    return {
+      ...closure,
+      caseId: closure.hospitalizationId || closure.caseId,
+      type: closure.closureType || closure.type,
+      createdBy: closure.createdBy || "Usuario autorizado",
+      items: (closure.inventoryClosureItems || closure.items || []).map((item) => ({
+        ...item, delivered:Number(item.delivered || 0), consumed:Number(item.consumed || 0),
+        returned:Number(item.returned || 0), difference:Number(item.difference || 0)
+      }))
+    };
+  });
+  collections.kits = (rawCollections.kits || []).map((raw) => {
+    const kit = camelCaseObject(raw);
+    return {
+      ...kit,
+      active: kit.status !== "INACTIVE",
+      items: (kit.supplyKitItems || kit.items || []).map((item) => ({
+        ...item,
+        name: catalogById.get(item.catalogItemId)?.name || "Componente",
+        quantity:Number(item.quantity || 0)
+      }))
+    };
+  });
   collections.purchases = (rawCollections.purchases || []).map(mapPurchase);
 
   collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
@@ -398,8 +464,13 @@ export async function createSupabaseAdapter(config) {
       ["suppliers", "suppliers", "*"],
       ["catalogItems", "catalog_items", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
+      ["warehouses", "warehouses", "*"],
       ["inventoryItems", "inventory_items", "*"],
+      ["inventoryLots", "inventory_lots", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
+      ["inventoryReservations", "inventory_reservations", "*"],
+      ["inventoryClosures", "inventory_closures", "*, inventory_closure_items(*)"],
+      ["kits", "supply_kits", "*, supply_kit_items(*)"],
       ["doctors", "doctors", "*"],
       ["doctorServices", "doctor_services", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
@@ -702,8 +773,8 @@ export async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok:true, purchase:mapPurchase(data) };
       }
-      case "CREATE_INVENTORY_MOVEMENT":
-        return client.rpc("apply_inventory_movement_v2", {
+      case "CREATE_INVENTORY_MOVEMENT": {
+        const { data, error } = await client.rpc("apply_inventory_movement_v2", {
           p_inventory_item_id: payload.movement.inventoryItemId,
           p_movement_type: payload.movement.type,
           p_quantity: payload.movement.quantity,
@@ -716,6 +787,9 @@ export async function createSupabaseAdapter(config) {
           p_note: payload.movement.note || null,
           p_idempotency_key: payload.movement.idempotencyKey
         });
+        if (error) throw error;
+        return { ok:true, movementId:data };
+      }
       case "QUEUE_NOTIFICATION":
         return client.rpc("queue_notification", {
           p_channel: payload.notification.channel,

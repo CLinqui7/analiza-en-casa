@@ -1817,6 +1817,10 @@ export async function createAppStore(config) {
     if (!normalizedReference || !idempotencyKey) throw new Error("La referencia e idempotencia son obligatorias.");
     const duplicate = state.inventoryMovements.find((candidate) => candidate.organizationId === state.organization?.id && candidate.idempotencyKey === idempotencyKey);
     if (duplicate) return duplicate;
+    const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId);
+    if (adapter.mode !== "supabase" && catalogItem?.requiresLot) {
+      throw new Error("Los movimientos locales de ítems con lote o serie permanecen bloqueados; use la persistencia transaccional autorizada.");
+    }
     const openReservation = recordCase && state.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
       && candidate.inventoryItemId === item.id && candidate.status === "OPEN");
     if (type === "PATIENT_CONSUMPTION" && (!openReservation || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
@@ -1845,9 +1849,16 @@ export async function createAppStore(config) {
       note: input.note || ""
     };
 
-    setState((draft) => {
+    const commit = (remoteId = movement.id) => {
+      const confirmedMovement = { ...movement, id:remoteId || movement.id };
+      const duplicateAfterConfirmation = state.inventoryMovements.find((candidate) =>
+        candidate.organizationId === state.organization?.id
+        && (candidate.idempotencyKey === idempotencyKey || candidate.id === confirmedMovement.id)
+      );
+      if (duplicateAfterConfirmation) return duplicateAfterConfirmation;
+      setState((draft) => {
       const target = draft.inventoryItems.find((candidate) => candidate.id === item.id);
-      switch (movement.type) {
+      switch (confirmedMovement.type) {
         case "PURCHASE_ENTRY":
         case "POSITIVE_ADJUSTMENT":
           target.stock += quantity;
@@ -1872,7 +1883,7 @@ export async function createAppStore(config) {
         case "TRANSFER": {
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
           const targetAtDestination = draft.inventoryItems.find((candidate) => candidate.organizationId === state.organization?.id
-            && candidate.warehouseId === movement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
+            && candidate.warehouseId === confirmedMovement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
           if (!targetAtDestination) throw new Error("La bodega destino no tiene un registro autorizado para este ítem.");
           target.stock -= quantity;
           targetAtDestination.stock += quantity;
@@ -1883,81 +1894,50 @@ export async function createAppStore(config) {
       }
       const reservation = recordCase && draft.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
         && candidate.inventoryItemId === target.id && candidate.status === "OPEN");
-      if (movement.type === "PATIENT_COMMITMENT") {
+      if (confirmedMovement.type === "PATIENT_COMMITMENT") {
         if (reservation) reservation.quantity += quantity;
         else draft.inventoryReservations.unshift({
           id: uid("RES"), organizationId: state.organization?.id, caseId: recordCase.id, inventoryItemId: target.id,
           quantity, delivered: 0, consumed: 0, returned: 0, status: "OPEN", createdAt: nowIso()
         });
       }
-      if (movement.type === "PATIENT_CONSUMPTION") {
+      if (confirmedMovement.type === "PATIENT_CONSUMPTION") {
         reservation.consumed += quantity;
         reservation.delivered += quantity;
       }
-      if (movement.type === "RETURN_TO_STOCK" && reservation) {
+      if (confirmedMovement.type === "RETURN_TO_STOCK" && reservation) {
         // A return from an open reservation releases a commitment; stock never
         // left the warehouse, so increasing it here would create phantom stock.
         target.committed -= quantity;
         reservation.returned += quantity;
       }
-      draft.inventoryMovements.unshift(movement);
-      audit("CREATE_INVENTORY_MOVEMENT", movement.id, `${movement.type}: ${quantity} ${item.unit} de ${item.name}.`);
+      draft.inventoryMovements.unshift(confirmedMovement);
+      audit("CREATE_INVENTORY_MOVEMENT", confirmedMovement.id, `${confirmedMovement.type}: ${quantity} ${item.unit} de ${item.name}.`);
     });
-    safeSync("CREATE_INVENTORY_MOVEMENT", { movement });
-    return movement;
+      return confirmedMovement;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_INVENTORY_MOVEMENT", { movement }).then((result) => commit(result?.movementId));
+    }
+    return commit();
   }
 
   function createInventoryClosure(input) {
     requirePermission("inventory:write");
-    const closure = {
-      id: uid("CLOSE"),
-      caseId: input.caseId,
-      type: input.type || "PARTIAL",
-      status: "PENDING_REVIEW",
-      createdAt: nowIso(),
-      createdBy: currentUser().name,
-      note: input.note || "",
-      items: clone(input.items || [])
-    };
-    setState((draft) => {
-      draft.inventoryClosures.unshift(closure);
-      const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-      if (recordCase && closure.type === "TOTAL") recordCase.status = "PENDING_CLOSE";
-      audit("CREATE_INVENTORY_CLOSURE", closure.id, `Cierre ${closure.type} creado para ${closure.caseId}.`);
-    });
-    return closure;
+    void input;
+    throw new Error("Crear cierres permanece bloqueado hasta confirmar estados, conciliación, pérdida de borradores, aprobación y reversión.");
   }
 
   function approveInventoryClosure(id) {
     requirePermission("inventory:write");
-    setState((draft) => {
-      const closure = draft.inventoryClosures.find((candidate) => candidate.id === id);
-      if (!closure) throw new Error("Cierre no encontrado.");
-      closure.status = "APPROVED";
-      closure.approvedAt = nowIso();
-      closure.approvedBy = currentUser().name;
-      if (closure.type === "TOTAL") {
-        const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-        if (recordCase) recordCase.status = "CLOSED";
-      }
-      audit("APPROVE_INVENTORY_CLOSURE", id, "Cierre aprobado y bloqueado.");
-    });
+    void id;
+    throw new Error("Aprobar cierres permanece bloqueado hasta confirmar la máquina de estados y sus efectos clínicos, financieros e inventarios.");
   }
 
   function createKit(input) {
     requirePermission("inventory:write");
-    const kit = {
-      id: uid("KIT"),
-      name: input.name,
-      code: input.code,
-      active: true,
-      items: clone(input.items || [])
-    };
-    setState((draft) => {
-      draft.kits.unshift(kit);
-      audit("CREATE_KIT", kit.id, `Kit creado: ${kit.name}.`);
-    });
-    return kit;
+    void input;
+    throw new Error("Crear, editar o duplicar kits permanece bloqueado hasta confirmar componentes, lotes, concurrencia, sustitución y reversión.");
   }
 
   function createCatalogItem(input) {

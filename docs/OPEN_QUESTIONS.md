@@ -168,6 +168,24 @@
 - `CH13-Q013`: definir anulación, motivo, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Permanece bloqueada. Evidencia: CH13-E0091.
 - `CH13-Q014`: definir fuente, tenant, proveedor/presentación, vigencia y autorización del precio histórico y el alta de presentaciones. El costo actual es manual. Evidencia: CH13-E0019–CH13-E0025 y CH13-E0052–CH13-E0055.
 
+## CH14 · decisiones pendientes trazadas
+
+- `CH14-Q001`: definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida reversión. Evidencia: CH14-E0006 y CH14-E0018.
+- `CH14-Q002`: aprobar máquina de estados, roles, idempotencia y efectos de todas las acciones de acuse y Registro XPO. Evidencia: CH14-E0032 y CH14-E0035.
+- `CH14-Q003`: definir formato, datos, permisos y validez de Excel e impresión de acuses. Evidencia: CH14-E0032 y CH14-E0035.
+- `CH14-Q004`: definir Plantilla y Vaciar, persistencia del borrador y recuperación. Evidencia: CH14-E0151.
+- `CH14-Q005`: aprobar el flujo de faltantes, cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152 y safety_022.
+- `CH14-Q006`: determinar qué borra Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0046.
+- `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
+- `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
+- `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.
+- `CH14-Q010`: definir Fecha inválida, vencimiento, ausencia de fecha, cuarentena, agotamiento, FEFO y alertas. Evidencia: CH14-E0082.
+- `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
+- `CH14-Q012`: definir versionado, permisos, duplicación y eliminación de kits preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0098–CH14-E0101.
+- `CH14-Q013`: confirmar selección de lotes, sustitución, atomicidad, idempotencia y reversión al consumir kits. Evidencia: CH14-E0104 y CH14-E0117.
+- `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
+- `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

@@ -2,7 +2,7 @@
 
 > Generado de forma determinista desde `docs/MASTER_VIDEO_REQUIREMENTS.json`. No editar este archivo directamente.
 
-Preguntas abiertas: 120. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
+Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
 
 ## CH01 · Contexto inicial, acceso, dashboard y listado de pacientes
 
@@ -162,3 +162,21 @@ Preguntas abiertas: 120. No se infiere ninguna regla de negocio, clínica, finan
 - **CH13-Q012 · UNCERTAIN** — aprobar diferencias, contenido, ocultamiento de montos, permisos, firmas y validez de Imprimir PDF, Imprimir con montos e Imprimir en Excel. Evidencia: CH13-E0091, 00:39:40.800.
 - **CH13-Q013 · UNCERTAIN** — definir anulación, motivo obligatorio, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Evidencia: CH13-E0091, 00:39:40.800.
 - **CH13-Q014 · UNCERTAIN** — definir fuente, alcance organizacional, proveedor/presentación, vigencia y autorización del precio histórico, además del alta de presentaciones. Evidencia: CH13-E0019–CH13-E0025, 00:37:11.800–00:37:17.200; CH13-E0052–CH13-E0055, 00:38:22.400–00:38:25.200.
+
+## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
+
+- **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.
+- **CH14-Q002 · UNCERTAIN** — aprobar la máquina de estados de acuse, roles, permisos por acción, idempotencia y efectos de Nuevo, Duplicar, Editar, Asignar hospitalización, Eliminar y Registro XPO. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+- **CH14-Q003 · UNCERTAIN** — definir formato, columnas, minimización de datos, permisos y validez del Excel y la impresión de acuses. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+- **CH14-Q004 · UNCERTAIN** — definir Plantilla y Vaciar, incluida persistencia de borrador, recuperación y confirmación de pérdida. Evidencia: CH14-E0151, 00:45:27.000.
+- **CH14-Q005 · UNCERTAIN** — aprobar el flujo de faltantes, tratamiento de cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152, 00:45:27.400; safety_022 a 00:45:28.
+- **CH14-Q006 · UNCERTAIN** — determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.
+- **CH14-Q007 · UNCERTAIN** — aprobar transiciones entre cierre pendiente, total, aprobado, cerrado y cancelado, campos editables, conciliación, reversión y relación con el cierre administrativo/financiero. Evidencia: CH14-E0050, 00:42:16.400; transcripción 00:42:11–00:43:18.
+- **CH14-Q008 · UNCERTAIN** — definir identificación, unicidad, campos obligatorios, estados, edición y eliminación de proveedores por organización. Evidencia: CH14-E0061, 00:43:24.400.
+- **CH14-Q009 · UNCERTAIN** — aprobar creación/edición de bodegas y reglas de traslado: permisos, bodegas origen/destino, recepción, movimientos, lotes, series, concurrencia y reversión. Evidencia: CH14-E0068, 00:43:28.600; transcripción 00:43:26–00:43:57.
+- **CH14-Q010 · UNCERTAIN** — definir qué significa Fecha inválida y la política para lotes vencidos, sin fecha, en cuarentena o agotados; confirmar FEFO y alertas. Evidencia: CH14-E0082, 00:44:11.400; transcripción 00:44:07–00:44:24.
+- **CH14-Q011 · UNCERTAIN** — aprobar unicidad y ciclo de vida de lote/serie por organización, item y bodega, incluidos ajustes, transferencias y correcciones auditadas. Evidencia: CH14-E0078, 00:44:04.600; CH14-E0092, 00:44:24.400.
+- **CH14-Q012 · UNCERTAIN** — definir versionado, permisos y efectos de Crear, Editar, Duplicar y Eliminar kits, incluida la conservación de usos históricos. Evidencia: CH14-E0095, 00:44:29.400; CH14-E0098–CH14-E0101, 00:44:31.400–00:44:33.000.
+- **CH14-Q013 · VERBAL** — confirmar si el consumo de un kit usa FEFO, lote seleccionado, sustitución o bloqueo total, y exigir atomicidad, idempotencia y reversión de todos sus componentes. Evidencia: CH14-E0104, 00:44:35.200; CH14-E0117, 00:44:44.800; transcripción 00:44:25–00:45:02.
+- **CH14-Q014 · UNCERTAIN** — identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.
+- **CH14-Q015 · UNCERTAIN** — confirmar mensajes, reintentos y recuperación esperados para errores de inventario, acuses, cierres, catálogos y kits; el capítulo no provoca fallos. Evidencia: CH14-E0006–CH14-E0152, sin resultado de error demostrado.

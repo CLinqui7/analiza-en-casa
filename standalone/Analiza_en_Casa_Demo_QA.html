@@ -5075,6 +5075,72 @@ function mapSupabaseBootstrap(rawCollections = {}) {
     const item = camelCaseObject(raw);
     return { ...item, price: Number(item.basePrice || 0), cost: Number(item.cost || 0), active: item.status !== "INACTIVE" };
   });
+  const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
+  collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
+  collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
+    const item = camelCaseObject(raw);
+    const catalog = catalogById.get(item.catalogItemId) || {};
+    return {
+      ...item,
+      sku: catalog.sku || item.sku || "",
+      name: catalog.name || item.name || "Ítem de inventario",
+      category: catalog.category || item.category || "SUPPLIES",
+      unit: catalog.unit || item.unit || "unidad",
+      stock: Number(item.stock || 0),
+      committed: Number(item.committed || 0),
+      minimum: Number(item.minimumStock || item.minimum || 0)
+    };
+  });
+  collections.inventoryLots = (rawCollections.inventoryLots || []).map((raw) => {
+    const lot = camelCaseObject(raw);
+    return { ...lot, quantity:Number(lot.quantity || 0) };
+  });
+  collections.inventoryMovements = (rawCollections.inventoryMovements || []).map((raw) => {
+    const movement = camelCaseObject(raw);
+    return {
+      ...movement,
+      caseId: movement.hospitalizationId || movement.caseId || "",
+      type: movement.movementType || movement.type,
+      date: movement.createdAt || movement.date,
+      warehouseFrom: movement.warehouseFromId || movement.warehouseFrom || "",
+      warehouseTo: movement.warehouseToId || movement.warehouseTo || "",
+      quantity: Number(movement.quantity || 0)
+    };
+  });
+  collections.inventoryReservations = (rawCollections.inventoryReservations || []).map((raw) => {
+    const reservation = camelCaseObject(raw);
+    return {
+      ...reservation,
+      caseId: reservation.hospitalizationId || reservation.caseId,
+      quantity:Number(reservation.quantity || 0), delivered:Number(reservation.delivered || 0),
+      consumed:Number(reservation.consumed || 0), returned:Number(reservation.returned || 0)
+    };
+  });
+  collections.inventoryClosures = (rawCollections.inventoryClosures || []).map((raw) => {
+    const closure = camelCaseObject(raw);
+    return {
+      ...closure,
+      caseId: closure.hospitalizationId || closure.caseId,
+      type: closure.closureType || closure.type,
+      createdBy: closure.createdBy || "Usuario autorizado",
+      items: (closure.inventoryClosureItems || closure.items || []).map((item) => ({
+        ...item, delivered:Number(item.delivered || 0), consumed:Number(item.consumed || 0),
+        returned:Number(item.returned || 0), difference:Number(item.difference || 0)
+      }))
+    };
+  });
+  collections.kits = (rawCollections.kits || []).map((raw) => {
+    const kit = camelCaseObject(raw);
+    return {
+      ...kit,
+      active: kit.status !== "INACTIVE",
+      items: (kit.supplyKitItems || kit.items || []).map((item) => ({
+        ...item,
+        name: catalogById.get(item.catalogItemId)?.name || "Componente",
+        quantity:Number(item.quantity || 0)
+      }))
+    };
+  });
   collections.purchases = (rawCollections.purchases || []).map(mapPurchase);
 
   collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
@@ -5383,8 +5449,13 @@ async function createSupabaseAdapter(config) {
       ["suppliers", "suppliers", "*"],
       ["catalogItems", "catalog_items", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
+      ["warehouses", "warehouses", "*"],
       ["inventoryItems", "inventory_items", "*"],
+      ["inventoryLots", "inventory_lots", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
+      ["inventoryReservations", "inventory_reservations", "*"],
+      ["inventoryClosures", "inventory_closures", "*, inventory_closure_items(*)"],
+      ["kits", "supply_kits", "*, supply_kit_items(*)"],
       ["doctors", "doctors", "*"],
       ["doctorServices", "doctor_services", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
@@ -5687,8 +5758,8 @@ async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok:true, purchase:mapPurchase(data) };
       }
-      case "CREATE_INVENTORY_MOVEMENT":
-        return client.rpc("apply_inventory_movement_v2", {
+      case "CREATE_INVENTORY_MOVEMENT": {
+        const { data, error } = await client.rpc("apply_inventory_movement_v2", {
           p_inventory_item_id: payload.movement.inventoryItemId,
           p_movement_type: payload.movement.type,
           p_quantity: payload.movement.quantity,
@@ -5701,6 +5772,9 @@ async function createSupabaseAdapter(config) {
           p_note: payload.movement.note || null,
           p_idempotency_key: payload.movement.idempotencyKey
         });
+        if (error) throw error;
+        return { ok:true, movementId:data };
+      }
       case "QUEUE_NOTIFICATION":
         return client.rpc("queue_notification", {
           p_channel: payload.notification.channel,
@@ -7539,6 +7613,10 @@ async function createAppStore(config) {
     if (!normalizedReference || !idempotencyKey) throw new Error("La referencia e idempotencia son obligatorias.");
     const duplicate = state.inventoryMovements.find((candidate) => candidate.organizationId === state.organization?.id && candidate.idempotencyKey === idempotencyKey);
     if (duplicate) return duplicate;
+    const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId);
+    if (adapter.mode !== "supabase" && catalogItem?.requiresLot) {
+      throw new Error("Los movimientos locales de ítems con lote o serie permanecen bloqueados; use la persistencia transaccional autorizada.");
+    }
     const openReservation = recordCase && state.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
       && candidate.inventoryItemId === item.id && candidate.status === "OPEN");
     if (type === "PATIENT_CONSUMPTION" && (!openReservation || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
@@ -7567,9 +7645,16 @@ async function createAppStore(config) {
       note: input.note || ""
     };
 
-    setState((draft) => {
+    const commit = (remoteId = movement.id) => {
+      const confirmedMovement = { ...movement, id:remoteId || movement.id };
+      const duplicateAfterConfirmation = state.inventoryMovements.find((candidate) =>
+        candidate.organizationId === state.organization?.id
+        && (candidate.idempotencyKey === idempotencyKey || candidate.id === confirmedMovement.id)
+      );
+      if (duplicateAfterConfirmation) return duplicateAfterConfirmation;
+      setState((draft) => {
       const target = draft.inventoryItems.find((candidate) => candidate.id === item.id);
-      switch (movement.type) {
+      switch (confirmedMovement.type) {
         case "PURCHASE_ENTRY":
         case "POSITIVE_ADJUSTMENT":
           target.stock += quantity;
@@ -7594,7 +7679,7 @@ async function createAppStore(config) {
         case "TRANSFER": {
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
           const targetAtDestination = draft.inventoryItems.find((candidate) => candidate.organizationId === state.organization?.id
-            && candidate.warehouseId === movement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
+            && candidate.warehouseId === confirmedMovement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
           if (!targetAtDestination) throw new Error("La bodega destino no tiene un registro autorizado para este ítem.");
           target.stock -= quantity;
           targetAtDestination.stock += quantity;
@@ -7605,81 +7690,50 @@ async function createAppStore(config) {
       }
       const reservation = recordCase && draft.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
         && candidate.inventoryItemId === target.id && candidate.status === "OPEN");
-      if (movement.type === "PATIENT_COMMITMENT") {
+      if (confirmedMovement.type === "PATIENT_COMMITMENT") {
         if (reservation) reservation.quantity += quantity;
         else draft.inventoryReservations.unshift({
           id: uid("RES"), organizationId: state.organization?.id, caseId: recordCase.id, inventoryItemId: target.id,
           quantity, delivered: 0, consumed: 0, returned: 0, status: "OPEN", createdAt: nowIso()
         });
       }
-      if (movement.type === "PATIENT_CONSUMPTION") {
+      if (confirmedMovement.type === "PATIENT_CONSUMPTION") {
         reservation.consumed += quantity;
         reservation.delivered += quantity;
       }
-      if (movement.type === "RETURN_TO_STOCK" && reservation) {
+      if (confirmedMovement.type === "RETURN_TO_STOCK" && reservation) {
         // A return from an open reservation releases a commitment; stock never
         // left the warehouse, so increasing it here would create phantom stock.
         target.committed -= quantity;
         reservation.returned += quantity;
       }
-      draft.inventoryMovements.unshift(movement);
-      audit("CREATE_INVENTORY_MOVEMENT", movement.id, `${movement.type}: ${quantity} ${item.unit} de ${item.name}.`);
+      draft.inventoryMovements.unshift(confirmedMovement);
+      audit("CREATE_INVENTORY_MOVEMENT", confirmedMovement.id, `${confirmedMovement.type}: ${quantity} ${item.unit} de ${item.name}.`);
     });
-    safeSync("CREATE_INVENTORY_MOVEMENT", { movement });
-    return movement;
+      return confirmedMovement;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_INVENTORY_MOVEMENT", { movement }).then((result) => commit(result?.movementId));
+    }
+    return commit();
   }
 
   function createInventoryClosure(input) {
     requirePermission("inventory:write");
-    const closure = {
-      id: uid("CLOSE"),
-      caseId: input.caseId,
-      type: input.type || "PARTIAL",
-      status: "PENDING_REVIEW",
-      createdAt: nowIso(),
-      createdBy: currentUser().name,
-      note: input.note || "",
-      items: clone(input.items || [])
-    };
-    setState((draft) => {
-      draft.inventoryClosures.unshift(closure);
-      const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-      if (recordCase && closure.type === "TOTAL") recordCase.status = "PENDING_CLOSE";
-      audit("CREATE_INVENTORY_CLOSURE", closure.id, `Cierre ${closure.type} creado para ${closure.caseId}.`);
-    });
-    return closure;
+    void input;
+    throw new Error("Crear cierres permanece bloqueado hasta confirmar estados, conciliación, pérdida de borradores, aprobación y reversión.");
   }
 
   function approveInventoryClosure(id) {
     requirePermission("inventory:write");
-    setState((draft) => {
-      const closure = draft.inventoryClosures.find((candidate) => candidate.id === id);
-      if (!closure) throw new Error("Cierre no encontrado.");
-      closure.status = "APPROVED";
-      closure.approvedAt = nowIso();
-      closure.approvedBy = currentUser().name;
-      if (closure.type === "TOTAL") {
-        const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-        if (recordCase) recordCase.status = "CLOSED";
-      }
-      audit("APPROVE_INVENTORY_CLOSURE", id, "Cierre aprobado y bloqueado.");
-    });
+    void id;
+    throw new Error("Aprobar cierres permanece bloqueado hasta confirmar la máquina de estados y sus efectos clínicos, financieros e inventarios.");
   }
 
   function createKit(input) {
     requirePermission("inventory:write");
-    const kit = {
-      id: uid("KIT"),
-      name: input.name,
-      code: input.code,
-      active: true,
-      items: clone(input.items || [])
-    };
-    setState((draft) => {
-      draft.kits.unshift(kit);
-      audit("CREATE_KIT", kit.id, `Kit creado: ${kit.name}.`);
-    });
-    return kit;
+    void input;
+    throw new Error("Crear, editar o duplicar kits permanece bloqueado hasta confirmar componentes, lotes, concurrencia, sustitución y reversión.");
   }
 
   function createCatalogItem(input) {
@@ -9393,27 +9447,21 @@ function renderPurchases(state, store, ui) {
 
 function renderInventory(state, store, ui) {
   const items=searchFilter(state.inventoryItems,ui.search,["name","sku","category"]).map((item)=>{
-    const lots=state.inventoryLots.filter(l=>l.inventoryItemId===item.id);
-    return `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.sku)} · ${esc(ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(warehouseName(state,item.warehouseId))}</td><td>${item.stock} ${esc(item.unit)}</td><td>${item.committed}</td><td><strong>${inventoryFree(item)}</strong></td><td>${item.minimum}</td><td>${lots.length}</td><td>${badge(inventoryState(item))}</td><td>${actionButton("Movimiento","open-inventory-movement",{kind:"ghost",data:`data-item-id="${item.id}"`})}</td></tr>`;
+    const menu=`<details class="quote-row-menu inventory-row-menu"><summary aria-label="Acciones de ${esc(item.name)}">⋯</summary><div class="quote-row-menu-panel"><button data-action="open-inventory-history" data-id="${esc(item.id)}">Ver movimientos</button><button data-action="open-inventory-commitments" data-id="${esc(item.id)}">Ver comprometido</button></div></details>`;
+    return `<tr><td>${menu}</td><td>${esc((ITEM_CATEGORY_LABELS[item.category]||item.category||"").slice(0,4))}</td><td>${esc(item.sku)}</td><td>${esc(item.name)}</td><td>${inventoryFree(item)}</td><td>${Number(item.committed||0)}</td><td><strong>${Number(item.stock||0)}</strong></td></tr>`;
   });
   return `
-    ${pageHeader("Inventario","Existencias, comprometidos, lotes, series, bodegas, movimientos, pacientes, acuses, cierres y kits.",
-      `${actionButton("Nuevo movimiento","open-inventory-movement",{kind:"primary",iconName:"plus"})}${linkButton("Cierres","#/inventario/cierres",{iconName:"view"})}`)}
-    <div class="metrics-grid">
-      ${metric("Ítems",state.inventoryItems.length,`${state.inventoryLots.length} lotes registrados`,"inventory","blue")}
-      ${metric("Unidades comprometidas",state.inventoryItems.reduce((s,i)=>s+i.committed,0),"Inventario temporal de pacientes","clock","amber")}
-      ${metric("Alertas",state.inventoryItems.filter(i=>inventoryState(i)!=="OK").length,"Mínimo o sin disponibilidad","alert","coral")}
-      ${metric("Bodegas",state.warehouses.length,"Principal, emergencia y domiciliar","inventory","teal")}
-    </div>
-    <div class="filter-bar"><label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar SKU, medicamento, insumo o equipo" value="${esc(ui.search||"")}"></label><div class="filter-summary">${items.length} ítems</div></div>
-    ${card("Existencias por bodega",table(["Ítem","Bodega","Existencia","Comprometido","Libre","Mínimo","Lotes","Estado",""],items))}
+    ${pageHeader("Gestión de inventario","Existencias por bodega con disponible, comprometido y total reconciliables.",`${actionButton("Excel","export-inventory",{iconName:"export"})}${linkButton("Traslados","#/inventario/bodegas",{kind:"primary"})}`)}
+    <nav class="tabs" aria-label="Secciones de gestión de inventario"><a class="tab active" href="#/inventario">Items</a><a class="tab" href="#/inventario/movimientos">Movimientos</a><a class="tab" href="#/inventario/comprometidos">Comprometido</a><a class="tab" href="#/inventario/lotes">Lotes</a></nav>
+    ${card("Bodega: Todos",`<div class="filter-bar"><label class="page-size-label">Registros <select aria-label="Registros de inventario"><option>50</option></select></label><label class="search-field">${icon("search")}<span class="sr-only">Buscar inventario</span><input data-ui-search placeholder="Buscar tipo, código o nombre" value="${esc(ui.search||"")}"></label></div>${table(["Acciones","Tipo","Código","Nombre","Disp","Comp","Total"],items)}<nav class="pagination"><button disabled>Anterior</button><button class="active">1</button><button disabled>Siguiente</button></nav>`) }
   `;
 }
 
 function renderInventoryMovements(state, store, ui) {
   return `
-    ${pageHeader("Movimientos de inventario","Entradas, salidas, compromiso, consumo, devolución, traslado, ajustes y bajas.",
+    ${pageHeader("Gestión de inventario","Entradas, salidas, compromiso, consumo, devolución, traslado, ajustes y bajas.",
       `${actionButton("Registrar movimiento","open-inventory-movement",{kind:"primary",iconName:"plus"})}`)}
+    <nav class="tabs"><a class="tab" href="#/inventario">Items</a><a class="tab active" href="#/inventario/movimientos">Movimientos</a><a class="tab" href="#/inventario/comprometidos">Comprometido</a><a class="tab" href="#/inventario/lotes">Lotes</a></nav>
     ${card("Historial de movimientos",table(["Fecha","ID","Ítem","Tipo","Cantidad","Caso","Origen","Destino","Responsable","Referencia"],
       state.inventoryMovements.map((move)=>{
         const item=state.inventoryItems.find(i=>i.id===move.inventoryItemId);
@@ -9423,41 +9471,56 @@ function renderInventoryMovements(state, store, ui) {
 }
 
 function renderCommittedInventory(state, store, ui) {
+  const tabs=[["PATIENTS","Pacientes"],["RESOURCES","Recursos"],["UNAVAILABLE","No disponible"],["REQUESTS","Solicitudes"],["TASKS","Tareas"]];
+  const patientRows=state.cases.filter((record)=>record.status!=="CLOSED").map((record)=>{
+    const patient=state.patients.find((candidate)=>candidate.id===record.patientId);
+    const menu=`<details class="quote-row-menu"><summary aria-label="Acciones de ${esc(patient?.fullName||record.id)}">⋯</summary><div class="quote-row-menu-panel"><button data-action="open-acknowledgement-form" data-case-id="${esc(record.id)}">Nuevo</button><button data-action="blocked-inventory-action" data-operation="Ver acuses">Ver acuses</button><button data-action="blocked-inventory-action" data-operation="Descargar Excel de acuses">Descargar Excel de acuses</button><button data-action="blocked-inventory-action" data-operation="Registro XPO">Registro XPO</button></div></details>`;
+    return `<tr><td>${menu}</td><td>${esc(patient?.document||"SINTÉTICO")}</td><td>${esc(patient?.fullName||"Paciente sintético")}</td><td>${esc(state.organization?.name||"Organización demo")}</td><td>${esc(record.status==="ACTIVE"?"activa":record.status)}</td></tr>`;
+  });
   return `
-    ${pageHeader("Comprometidos y acuses","Inventario entregado al domicilio que permanece temporalmente asociado al paciente hasta consumo, devolución o cierre.",
-      `${actionButton("Crear acuse","open-inventory-movement",{kind:"primary",iconName:"plus",data:`data-type="PATIENT_COMMITMENT"`})}`)}
-    ${card("Inventario por paciente",table(["Caso / paciente","Ítem","Comprometido","Entregado","Consumido","Devuelto","Pendiente","Estado"],
-      state.inventoryReservations.map((res)=>{
-        const item=state.inventoryItems.find(i=>i.id===res.inventoryItemId);
-        return `<tr><td><a href="#/hospitalizaciones/${res.caseId}">${esc(caseLabel(state,res.caseId))}</a></td><td>${esc(item?.name)}</td><td>${res.quantity}</td><td>${res.delivered}</td><td>${res.consumed}</td><td>${res.returned}</td><td>${Math.max(0,res.delivered-res.consumed-res.returned)}</td><td>${badge(res.status)}</td></tr>`;
-      })))}
+    ${pageHeader("Inventario / Acuses","Inventario temporal por paciente o recurso; los efectos no confirmados permanecen bloqueados.")}
+    <label>Tipo Area<select aria-label="Tipo Area"><option>Seleccione</option></select></label>
+    <nav class="tabs inventory-subtabs">${tabs.map(([key,label])=>`<button data-action="inventory-ack-tab" data-tab="${key}" class="tab ${ui.inventoryAckTab===key?"active":""}">${label}${["REQUESTS","TASKS"].includes(key)?" 0":""}</button>`).join("")}</nav>
+    ${ui.inventoryAckTab==="PATIENTS"?card("Pacientes",`${table(["Acciones","DUI/NIT","Paciente","Empresa","Estado"],patientRows)}<nav class="pagination"><button disabled>Anterior</button><button class="active">1</button><button disabled>Siguiente</button></nav>`):card(tabs.find(([key])=>key===ui.inventoryAckTab)?.[1]||"Acuses",`<p class="empty-state">No hay registros sintéticos disponibles para esta pestaña.</p>`)}
   `;
 }
 
 function renderInventoryClosures(state, store, ui) {
+  const tabs=[["PENDING","Pendientes"],["TOTAL","Cierres totales"],["CLOSED","Cerrados"],["RESOURCES","Recursos"]];
+  const pendingRows=state.cases.filter((record)=>record.status!=="CLOSED").map((record)=>{
+    const patient=state.patients.find((candidate)=>candidate.id===record.patientId);
+    return `<tr><td><button class="icon-button" data-action="open-closure-warning" data-case-id="${esc(record.id)}" aria-label="Acciones de cierre">⋯</button></td><td>${esc(patient?.document||"SINTÉTICO")}</td><td>${esc(patient?.fullName||"Paciente sintético")}</td><td>${esc(state.organization?.name||"Organización demo")}</td><td>Abierto</td><td>${esc(record.startDate||"—")}</td></tr>`;
+  });
+  const closureRows=state.inventoryClosures.filter((closure)=>ui.inventoryClosureTab==="TOTAL"?closure.type==="TOTAL":closure.status==="APPROVED").map((closure)=>`<tr><td>⋯</td><td>${esc(closure.id)}</td><td>${esc(caseLabel(state,closure.caseId))}</td><td>${esc(closure.type)}</td><td>${formatDate(closure.createdAt,true)}</td><td>${badge(closure.status)}</td><td><div class="row-actions">${actionButton("Editar","blocked-inventory-action",{data:`data-operation="Editar cierre"`})}${actionButton("Imprimir","print-closure",{data:`data-id="${closure.id}"`})}${actionButton("Aprobar","blocked-inventory-action",{data:`data-operation="Aprobar cierre"`})}${actionButton("Cancelar","blocked-inventory-action",{data:`data-operation="Cancelar cierre"`})}</div></td></tr>`);
   return `
-    ${pageHeader("Cierres de inventario","Cierre parcial editable para conciliación y cierre total sujeto a revisión y aprobación antes de bloquear la cuenta.",
-      `${actionButton("Nuevo cierre","open-closure-form",{kind:"primary",iconName:"plus"})}`)}
-    ${card("Cierres por hospitalización",table(["Cierre","Caso / paciente","Tipo","Creación","Responsable","Nota","Estado",""],
-      state.inventoryClosures.map((closure)=>`<tr><td>${esc(closure.id)}</td><td><a href="#/hospitalizaciones/${closure.caseId}">${esc(caseLabel(state,closure.caseId))}</a></td><td>${badge(closure.type)}</td><td>${formatDate(closure.createdAt,true)}</td><td>${esc(closure.createdBy)}</td><td class="cell-wrap">${esc(closure.note)}</td><td>${badge(closure.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-closure",{kind:"ghost",iconName:"print",data:`data-id="${closure.id}"`})}${closure.status==="PENDING_REVIEW"?actionButton("Aprobar","approve-closure",{kind:"primary",data:`data-id="${closure.id}"`}):""}</div></td></tr>`)))}
+    ${pageHeader("Inventario / Cierres","Revisión de cierres sin aplicar transiciones no confirmadas.")}
+    <nav class="tabs inventory-subtabs">${tabs.map(([key,label])=>`<button data-action="inventory-closure-tab" data-tab="${key}" class="tab ${ui.inventoryClosureTab===key?"active":""}">${label}${key==="TOTAL"?` ${state.inventoryClosures.filter((closure)=>closure.type==="TOTAL").length}`:""}</button>`).join("")}</nav>
+    ${ui.inventoryClosureTab==="PENDING"?card("Pacientes activos",table(["Acciones","DUI/NIT","Paciente","Empresa","Estado","Fecha de inicio"],pendingRows)):ui.inventoryClosureTab==="RESOURCES"?card("Recursos",`<p class="empty-state">Sin cierres sintéticos de recursos.</p>`):card(ui.inventoryClosureTab==="TOTAL"?"Cierres totales":"Cerrados",table(["Acciones","Cierre","Caso / paciente","Tipo","Creación","Estado",""],closureRows))}
   `;
 }
 
 function renderWarehouses(state,store,ui){
+  const rows=state.warehouses.map((warehouse)=>`<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar bodega">⋯</button></td><td>${esc(warehouse.name)}</td><td>${esc(warehouse.description||warehouse.location||"Sin descripción")}</td><td>${formatDate(warehouse.createdAt||"2026-08-27")}</td></tr>`);
   return `
-    ${pageHeader("Bodegas y transferencias","Ubicaciones físicas, inventario de emergencia, domiciliar y traslados con trazabilidad.",
-      `${actionButton("Nueva transferencia","open-inventory-movement",{kind:"primary",iconName:"plus",data:`data-type="TRANSFER"`})}`)}
-    <div class="warehouse-grid">${state.warehouses.map((wh)=>{
-      const items=state.inventoryItems.filter(i=>i.warehouseId===wh.id);
-      return `<article class="warehouse-card"><header>${icon("inventory")}<div><h2>${esc(wh.name)}</h2><p>${esc(wh.location)}</p></div>${badge(wh.status)}</header><div class="financial-summary"><div><span>Ítems</span><strong>${items.length}</strong></div><div><span>Existencia</span><strong>${items.reduce((s,i)=>s+i.stock,0)}</strong></div><div><span>Libre</span><strong>${items.reduce((s,i)=>s+inventoryFree(i),0)}</strong></div></div></article>`;
-    }).join("")}</div>`;
+    ${pageHeader("Items / Bodegas","Ubicaciones físicas autorizadas y traslados auditados.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nueva bodega"`})}`)}
+    ${card("Bodegas",`<label>Estado<select><option>Activo</option></select></label>${table(["Acciones","Nombre","Descripción","Fecha de creación"],rows)}`)}`;
+}
+
+function renderInventoryLots(state,store,ui){
+  const rows=state.inventoryLots.map((lot)=>{const item=state.inventoryItems.find((candidate)=>candidate.id===lot.inventoryItemId);const number=lot.lotNumber||lot.serialNumber||"Sin asignar";const date=lot.expiresAt?formatDate(lot.expiresAt):"Sin fecha confirmada";return `<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar lote o serie">⋯</button></td><td>${esc(number)}</td><td>${esc(item?.unit||"unidad")}</td><td>${esc(`${item?.sku||""} | ${item?.name||"Ítem"}`)}</td><td>${esc(date)}</td><td>${badge(lot.status||"AVAILABLE")}</td></tr>`;});
+  return `${pageHeader("Inventario: Lotes y números de serie","Trazabilidad de lote, serie y vencimiento sin inferir una política de fecha inválida.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nuevo lote o serie"`})}`)}${card("Lotes y números de serie",table(["Acciones","Número","Descripción","Item","Fecha E - Fecha V","Estado"],rows))}`;
+}
+
+function renderSuppliers(state,store,ui){
+  const rows=state.suppliers.map((supplier)=>`<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar proveedor">⋯</button></td><td>${esc(supplier.code||supplier.taxId||supplier.id)}</td><td>${esc(supplier.name)}</td><td>${esc(supplier.contactName||"Sin contacto confirmado")}</td><td>${esc(supplier.phone||"—")}</td><td>${esc(supplier.email||"—")}</td><td>${esc(supplier.address||"Sin dirección confirmada")}</td></tr>`);
+  return `${pageHeader("Inventario / Proveedores","Catálogo de proveedores sintéticos de la organización.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nuevo proveedor"`})}`)}${card("Proveedores",table(["Acciones","Código","Empresa","Contacto","Teléfono","Correo","Dirección"],rows))}`;
 }
 
 function renderKits(state,store,ui){
+  const rows=state.kits.map((kit)=>`<tr><td><details class="quote-row-menu"><summary>⋯</summary><div class="quote-row-menu-panel"><button data-action="blocked-inventory-action" data-operation="Editar kit">Editar</button><button data-action="blocked-inventory-action" data-operation="Duplicar kit">Duplicar</button><button data-action="blocked-inventory-action" data-operation="Eliminar kit">Eliminar</button></div></details></td><td>${esc(kit.name)}</td><td>${esc(kit.code)}</td><td>${formatDate(kit.createdAt||"2026-08-27")}</td></tr>`);
   return `
-    ${pageHeader("Kits de insumos","Agrupaciones reutilizables para comprometer y descargar automáticamente todos sus componentes.",
-      `${actionButton("Nuevo kit","open-kit-form",{kind:"primary",iconName:"plus"})}`)}
-    <div class="kit-grid">${state.kits.map((kit)=>`<article class="card kit-card"><header class="card-header"><div><h2>${esc(kit.name)}</h2><p>${esc(kit.code)}</p></div>${badge(kit.active?"ACTIVE":"INACTIVE")}</header><div class="card-body"><ul>${kit.items.map(i=>`<li><span>${esc(i.name)}</span><strong>${i.quantity}</strong></li>`).join("")}</ul></div><footer class="card-footer">${actionButton("Duplicar","duplicate-kit",{iconName:"edit",data:`data-id="${kit.id}"`})}${actionButton("Descargar a paciente","apply-kit",{kind:"primary",iconName:"send",data:`data-id="${kit.id}"`})}</footer></article>`).join("")}</div>`;
+    ${pageHeader("Inventario / Kit de insumos","Composiciones cuantificadas; su descarga automática permanece bloqueada.",`${actionButton("Excel","blocked-inventory-action",{iconName:"export",data:`data-operation="Excel de kits"`})}${actionButton("Nuevo","open-kit-form",{kind:"primary",iconName:"plus"})}`)}
+    ${card("Kit de insumos",table(["Acciones","Nombre","Código","Fecha actualización"],rows))}`;
 }
 
 function renderCatalogs(state,store,ui,category=null){
@@ -9727,6 +9790,8 @@ function renderRoute(route,state,store,ui){
       if(sub==="cierres") return renderInventoryClosures(state,store,ui);
       if(sub==="bodegas") return renderWarehouses(state,store,ui);
       if(sub==="kits") return renderKits(state,store,ui);
+      if(sub==="lotes") return renderInventoryLots(state,store,ui);
+      if(sub==="proveedores") return renderSuppliers(state,store,ui);
       return renderInventory(state,store,ui);
     }
     case "catalogos": {
@@ -9774,7 +9839,9 @@ const navigation = [
     {href:"#/inventario/comprometidos",label:"Comprometidos y acuses",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/cierres",label:"Cierres",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/bodegas",label:"Bodegas",icon:"inventory",permission:"inventory:read"},
-    {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"}
+    {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"},
+    {href:"#/inventario/proveedores",label:"Proveedores",icon:"inventory",permission:"inventory:read"},
+    {href:"#/inventario/lotes",label:"Lotes / Series",icon:"inventory",permission:"inventory:read"}
   ]},
   {section:"RRHH",items:[
     {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},
@@ -9925,6 +9992,8 @@ const ui = {
   purchasePage: 1,
   purchasePageSize: 10,
   purchaseDraft: null,
+  inventoryAckTab: "PATIENTS",
+  inventoryClosureTab: "PENDING",
   statementTab: "quotes",
   statementContext: null,
   pwaInstallAvailable: false,
@@ -10089,6 +10158,12 @@ const ACTION_PERMISSIONS = {
   "view-purchase": "purchases:read",
   "open-purchase-details": "purchases:read",
   "open-inventory-movement": "inventory:write",
+  "open-inventory-history": "inventory:read",
+  "open-inventory-commitments": "inventory:read",
+  "export-inventory": "inventory:read",
+  "open-acknowledgement-form": "inventory:write",
+  "blocked-inventory-action": "inventory:write",
+  "open-closure-warning": "inventory:write",
   "open-closure-form": "inventory:write",
   "approve-closure": "inventory:write",
   "open-kit-form": "inventory:write",
@@ -11390,6 +11465,78 @@ function openInventoryMovementForm(itemId = "", caseId = "", type = "") {
   });
 }
 
+function inventoryItemHistory(id) {
+  const state = store.getState();
+  const item = state.inventoryItems.find((candidate) => candidate.id === id);
+  if (!item) return showToast("Ítem no encontrado.", "danger");
+  const movements = state.inventoryMovements.filter((movement) => movement.inventoryItemId === item.id);
+  openModal({
+    title: "Movimientos de item",
+    subtitle: "Historial autorizado de entradas y salidas; los controles no alteran existencias.",
+    size: "xl",
+    body: `<dl class="detail-list purchase-detail-grid"><div><dt>Tipo</dt><dd>${safeText(item.category)}</dd></div><div><dt>Código</dt><dd>${safeText(item.sku)}</dd></div><div class="full"><dt>Nombre</dt><dd>${safeText(item.name)}</dd></div></dl>
+      <label class="full">Rango de fechas<input type="text" value="Rango no aplicado" readonly aria-label="Rango de fechas"></label>
+      <div class="table-wrap"><table><thead><tr><th>Tipo</th><th>Fecha</th><th>Lote / Serie</th><th>Origen</th><th>Destino</th><th>Cantidad</th><th>Movimiento</th><th>Estado</th></tr></thead><tbody>${movements.map((movement) => `<tr><td>${safeText(movement.type)}</td><td>${safeText(movement.date || "—")}</td><td>${safeText(movement.lotId || "No aplica")}</td><td>${safeText(movement.caseId ? `Paciente ${movement.caseId}` : movement.warehouseFrom || "—")}</td><td>${safeText(movement.warehouseTo || movement.caseId || "—")}</td><td>${Number(movement.quantity || 0)}</td><td>${safeText(["PURCHASE_ENTRY","POSITIVE_ADJUSTMENT","RETURN_TO_STOCK"].includes(movement.type) ? "ENTRADA" : "SALIDA")}</td><td>${safeText(movement.type === "PATIENT_CONSUMPTION" ? "Gastado" : "Disponible")}</td></tr>`).join("") || `<tr><td colspan="8">No hay movimientos autorizados para este ítem.</td></tr>`}</tbody></table></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function inventoryItemCommitments(id) {
+  const state = store.getState();
+  const item = state.inventoryItems.find((candidate) => candidate.id === id);
+  if (!item) return showToast("Ítem no encontrado.", "danger");
+  const reservations = state.inventoryReservations.filter((reservation) => reservation.inventoryItemId === id);
+  openModal({
+    title: "Inventario comprometido",
+    subtitle: "Reservas por hospitalización según la convención técnica vigente; la definición contable requiere confirmación.",
+    size: "lg",
+    body: `<div class="table-wrap"><table><thead><tr><th>Hospitalización</th><th>Comprometido</th><th>Entregado</th><th>Consumido</th><th>Devuelto</th><th>Estado</th></tr></thead><tbody>${reservations.map((reservation) => `<tr><td>${safeText(reservation.caseId)}</td><td>${Number(reservation.quantity || 0)}</td><td>${Number(reservation.delivered || 0)}</td><td>${Number(reservation.consumed || 0)}</td><td>${Number(reservation.returned || 0)}</td><td>${safeText(reservation.status)}</td></tr>`).join("") || `<tr><td colspan="6">Sin compromisos registrados.</td></tr>`}</tbody></table></div>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
+  });
+}
+
+function openAcknowledgementForm(caseId = "") {
+  const state = store.getState();
+  const record = state.cases.find((candidate) => candidate.id === caseId) || state.cases.find((candidate) => candidate.status !== "CLOSED");
+  const patient = state.patients.find((candidate) => candidate.id === record?.patientId);
+  openModal({
+    title: "Acuse nuevo",
+    subtitle: "La captura se conserva sin aplicar inventario hasta confirmar la definición de comprometido y el flujo de faltantes.",
+    size: "xl",
+    body: `<form id="acknowledgement-form" class="form-grid">
+      <div class="form-section full"><h3>Información del Acuse</h3></div>
+      <label>Paciente<input value="${safeText(patient?.fullName || "Paciente sintético")}" readonly></label>
+      <label>Fecha<input type="date" value="${new Date().toISOString().slice(0,10)}" readonly></label>
+      <label>Hospitalización<select name="caseId">${caseOptions(record?.id)}</select></label>
+      <div class="form-section full"><h3>Información del Items a entregar</h3></div>
+      <label>Bodega<select name="warehouseId"><option value="">Seleccione</option>${warehouseOptions()}</select></label>
+      <label class="span-2">Item<select name="inventoryItemId"><option value="">Seleccione</option>${state.inventoryItems.map((item) => `<option value="${safeText(item.id)}">${safeText(item.sku)} · ${safeText(item.name)}</option>`).join("")}</select></label>
+      <label>Cantidad disponible<input value="Seleccione un ítem" readonly></label>
+      <label>Cantidad a asignar<input type="number" min="0.001" step="0.001"></label>
+      <p class="full blocked-note">Guardar, asignar, duplicar, editar, eliminar, Registro XPO e ítems faltantes permanecen bloqueados hasta confirmar sus reglas.</p>
+    </form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cerrar</button><button class="btn btn-secondary" data-action="blocked-inventory-action" data-operation="Vaciar">Vaciar</button><button class="btn btn-secondary" data-action="blocked-inventory-action" data-operation="Plantilla">Plantilla</button><button class="btn btn-primary" data-action="blocked-inventory-action" data-operation="Añadir al acuse">Añadir</button>`
+  });
+}
+
+function openClosureWarning(caseId = "") {
+  openModal({
+    title: "Advertencia",
+    subtitle: "Ya existe un cierre abierto o datos de conciliación que podrían perderse.",
+    body: `<p>Continuar podría borrar datos guardados anteriormente. Esta operación permanece bloqueada hasta definir recuperación, autorización y auditoría.</p><p class="blocked-note">¿Está seguro que desea continuar?</p>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="blocked-inventory-action" data-operation="Aceptar cierre existente" data-case-id="${safeText(caseId)}">Aceptar</button>`
+  });
+}
+
+function exportInventory() {
+  const state = store.getState();
+  const rows = state.inventoryItems.map((item) => ({
+    tipo:item.category, codigo:item.sku, nombre:item.name, bodega:state.warehouses.find((warehouse) => warehouse.id === item.warehouseId)?.name || "",
+    disponible:Number(item.stock || 0) - Number(item.committed || 0), comprometido:Number(item.committed || 0), total:Number(item.stock || 0)
+  }));
+  saveDownload("inventario-sintetico.csv", toCsv(rows), "text/csv;charset=utf-8");
+}
+
 function openClosureForm(caseId = "") {
   const state = store.getState();
   const record = state.cases.find((c) => c.id === caseId) || state.cases.find((c)=>c.status!=="CLOSED") || state.cases[0];
@@ -12111,6 +12258,14 @@ document.addEventListener("click", async (event) => {
     }
     case "purchase-page": ui.purchasePage = Math.max(1, Number(data.page || 1)); render(); break;
     case "open-inventory-movement": openInventoryMovementForm(data.itemId||"",data.caseId||"",data.type||""); break;
+    case "open-inventory-history": inventoryItemHistory(data.id); break;
+    case "open-inventory-commitments": inventoryItemCommitments(data.id); break;
+    case "export-inventory": exportInventory(); break;
+    case "open-acknowledgement-form": openAcknowledgementForm(data.caseId || ""); break;
+    case "blocked-inventory-action": showToast(`${data.operation || "La operación"} permanece bloqueada hasta confirmar estados, permisos, idempotencia, reversión y auditoría.`, "info", 7000); break;
+    case "open-closure-warning": openClosureWarning(data.caseId || ""); break;
+    case "inventory-ack-tab": ui.inventoryAckTab=data.tab || "PATIENTS"; render(); break;
+    case "inventory-closure-tab": ui.inventoryClosureTab=data.tab || "PENDING"; render(); break;
     case "open-closure-form": openClosureForm(data.caseId||""); break;
     case "approve-closure": runSafely(()=>store.approveInventoryClosure(data.id),"Cierre aprobado y auditado."); break;
     case "print-closure": runSafely(()=>printClosure(data.id)); break;
@@ -12786,8 +12941,8 @@ document.addEventListener("click", async (event) => {
     const form=document.querySelector("#inventory-movement-form");
     if(!form?.reportValidity()) return;
     const data=Object.fromEntries(new FormData(form));
-    const result=runSafely(()=>store.createInventoryMovement(data),"Movimiento aplicado al inventario.");
-    if(result) closeModal();
+    const result=await runSafely(()=>store.createInventoryMovement(data),"Movimiento confirmado y auditado en inventario.");
+    if(result!==undefined && result!==null) closeModal();
   }
 
   if(action==="save-closure"){
@@ -12796,8 +12951,8 @@ document.addEventListener("click", async (event) => {
     const data=Object.fromEntries(new FormData(form));
     const state=store.getState();
     data.items=state.inventoryReservations.filter(r=>r.caseId===data.caseId).map(r=>({inventoryItemId:r.inventoryItemId,delivered:r.delivered,consumed:r.consumed,returned:r.returned,difference:r.delivered-r.consumed-r.returned}));
-    const result=runSafely(()=>store.createInventoryClosure(data),"Cierre creado para revisión.");
-    if(result) closeModal();
+    const result=await runSafely(()=>store.createInventoryClosure(data),"Cierre creado para revisión.");
+    if(result!==undefined && result!==null) closeModal();
   }
 
   if(action==="save-kit"){

@@ -5,9 +5,9 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 120
-- Estados de gap: IMPLEMENTED_EXACT=12, IMPLEMENTED_PARTIAL=157, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=6, NEEDS_CLIENT_CONFIRMATION=35
-- Prioridades: P0=9, P1=167, P2=34, P3=0
+- Preguntas abiertas: 135
+- Estados de gap: IMPLEMENTED_EXACT=13, IMPLEMENTED_PARTIAL=152, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=6, NEEDS_CLIENT_CONFIRMATION=39
+- Prioridades: P0=18, P1=160, P2=32, P3=0
 
 ## Gaps P0 de seguridad e integridad
 
@@ -272,20 +272,20 @@ Eventos: 152/152. Requisitos: 16.
 |---|---|---|---|---|
 | CH14-F01 | Existencias disponibles, comprometidas y totales | CH14-E0006 @ 00:40:05.400 | IMPLEMENTED_PARTIAL | P1 |
 | CH14-F02 | Historial de movimientos por item | CH14-E0016 @ 00:40:37.800; CH14-E0018 @ 00:40:39.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F03 | Inventario comprometido como estado temporal | CH14-E0018 @ 00:40:39.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH14-F03 | Inventario comprometido como estado temporal | CH14-E0018 @ 00:40:39.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F04 | Panel de acuses por pacientes y recursos | CH14-E0029 @ 00:40:51.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F05 | Gestión y exportación de acuses | CH14-E0032 @ 00:40:53.200; CH14-E0035 @ 00:41:00.800 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F05 | Gestión y exportación de acuses | CH14-E0032 @ 00:40:53.200; CH14-E0035 @ 00:41:00.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F06 | Cierres pendientes, totales y cerrados | CH14-E0041 @ 00:41:38.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F07 | Advertencia de cierre ya abierto | CH14-E0046 @ 00:41:47.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F08 | Aprobación de cierre total | CH14-E0050 @ 00:42:16.400 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F07 | Advertencia de cierre ya abierto | CH14-E0046 @ 00:41:47.400 | IMPLEMENTED_EXACT | P0 |
+| CH14-F08 | Aprobación de cierre total | CH14-E0050 @ 00:42:16.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F09 | Catálogo de proveedores | CH14-E0061 @ 00:43:24.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F10 | Catálogo de bodegas y traslados | CH14-E0068 @ 00:43:28.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F11 | Lotes, números de serie y vencimiento | CH14-E0075 @ 00:43:37.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F10 | Catálogo de bodegas y traslados | CH14-E0068 @ 00:43:28.600 | IMPLEMENTED_PARTIAL | P0 |
+| CH14-F11 | Lotes, números de serie y vencimiento | CH14-E0075 @ 00:43:37.200 | IMPLEMENTED_PARTIAL | P0 |
 | CH14-F12 | Catálogo de kits de insumos | CH14-E0084 @ 00:44:13.600; CH14-E0089 @ 00:44:23.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F13 | Composición cuantificada del kit | CH14-E0091 @ 00:44:23.800; CH14-E0117 @ 00:44:44.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F14 | Creación de acuse para hospitalización | CH14-E0151 @ 00:45:27.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F15 | Detección de items faltantes | CH14-E0152 @ 00:45:27.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F16 | Vínculo de faltantes con cotización | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH14-F13 | Composición cuantificada del kit | CH14-E0091 @ 00:44:23.800; CH14-E0117 @ 00:44:44.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH14-F14 | Creación de acuse para hospitalización | CH14-E0151 @ 00:45:27.000 | IMPLEMENTED_PARTIAL | P0 |
+| CH14-F15 | Detección de items faltantes | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH14-F16 | Vínculo de faltantes con cotización | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P1 |
 
 ## CH15 · Acuse de inventario y catálogos de ítems
 

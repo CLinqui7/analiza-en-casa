@@ -8,7 +8,7 @@
       "description": "Gestión de inventario lista items por bodega y separa disponible, comprometido y total; ofrece búsqueda, paginación, Excel y Traslados.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -25,7 +25,7 @@
       "description": "Ver movimientos abre un historial con rango de fechas, lote/serie, origen, destino, cantidad, Entrada/Salida y estado Disponible/Gastado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -48,7 +48,7 @@
       "description": "La conversación explica que lo enviado al domicilio queda comprometido en la cuenta del paciente hasta cerrar o contabilizar el servicio; no demuestra la fórmula de reserva.",
       "classification": "VERBAL",
       "confidence": "MEDIUM",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -66,7 +66,7 @@
       "description": "Acuses separa Pacientes, Recursos, No disponible, Solicitudes y Tareas, con selector de área y tabla de identificación, empresa y estado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -83,7 +83,7 @@
       "description": "La fila permite Nuevo, Ver acuses, Descargar Excel y Registro XPO; un acuse permite Duplicar, Editar, Asignar hospitalización, Imprimir, consultar items faltantes y Eliminar.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -106,7 +106,7 @@
       "description": "Cierres separa Pendientes, Cierres totales, Cerrados y Recursos; Pendientes lista pacientes activos con estado y fecha de inicio.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -123,7 +123,7 @@
       "description": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_EXACT",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -140,7 +140,7 @@
       "description": "Un cierre total ofrece Editar, Imprimir, Aprobar y Cancelar. Verbalmente se explica una etapa editable antes de la aprobación/cierre definitivo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -158,7 +158,7 @@
       "description": "Proveedores muestra código, empresa, contacto, teléfono, correo y dirección, con búsqueda, paginación y alta.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -176,7 +176,7 @@
       "description": "Bodegas filtra por Activo y lista nombre, descripción y fecha; la conversación menciona traslados entre ubicaciones.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -194,7 +194,7 @@
       "description": "El módulo separa Lotes y Nros de serie; la tabla enlaza lote con item, fechas y estado, y resalta varias Fecha inválida en rojo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -212,7 +212,7 @@
       "description": "Kit de insumos ofrece Excel, Nuevo, búsqueda, paginación y acciones Editar, Duplicar y Eliminar.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -235,7 +235,7 @@
       "description": "El editor permite nombrar el kit, seleccionar item y cantidad, añadir componentes, modificar cantidades y quitarlos; el relato indica descarga automática al usar un kit.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -259,7 +259,7 @@
       "description": "Acuse nuevo captura paciente, fecha, hospitalización, bodega, item, cantidad disponible y cantidad a asignar, con Vaciar, Plantilla y Añadir.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -276,7 +276,7 @@
       "description": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
       "classification": "VISIBLE",
       "confidence": "MEDIUM",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -294,7 +294,7 @@
       "description": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
       "classification": "UNCERTAIN",
       "confidence": "LOW",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
       "evidence": [
         {
           "chapter_id": "CH14",

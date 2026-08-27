@@ -82,7 +82,10 @@ test("P0 payments: exact application, idempotent references, receipt allocation 
 
 test("P0 inventory: atomic local convention covers reserve, consume, return, duplicate and organization boundaries", async () => {
   const store = await isolatedStore();
-  const item = store.getState().inventoryItems.find((candidate) => candidate.stock - candidate.committed >= 5);
+  const state = store.getState();
+  const item = state.inventoryItems.find((candidate) => candidate.stock - candidate.committed >= 1
+    && !state.catalogItems.find((catalog) => catalog.id === candidate.catalogItemId)?.requiresLot);
+  assert.ok(item, "se requiere un ítem sintético no trazable para la convención local");
   const originalStock = item.stock;
   const originalCommitted = item.committed;
   const entry = store.createInventoryMovement({ inventoryItemId: item.id, type: "PURCHASE_ENTRY", quantity: 5, reference: "P0-INV-ENTRY" });

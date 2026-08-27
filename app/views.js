@@ -1308,27 +1308,21 @@ function renderPurchases(state, store, ui) {
 
 function renderInventory(state, store, ui) {
   const items=searchFilter(state.inventoryItems,ui.search,["name","sku","category"]).map((item)=>{
-    const lots=state.inventoryLots.filter(l=>l.inventoryItemId===item.id);
-    return `<tr><td><strong>${esc(item.name)}</strong><small>${esc(item.sku)} · ${esc(ITEM_CATEGORY_LABELS[item.category]||item.category)}</small></td><td>${esc(warehouseName(state,item.warehouseId))}</td><td>${item.stock} ${esc(item.unit)}</td><td>${item.committed}</td><td><strong>${inventoryFree(item)}</strong></td><td>${item.minimum}</td><td>${lots.length}</td><td>${badge(inventoryState(item))}</td><td>${actionButton("Movimiento","open-inventory-movement",{kind:"ghost",data:`data-item-id="${item.id}"`})}</td></tr>`;
+    const menu=`<details class="quote-row-menu inventory-row-menu"><summary aria-label="Acciones de ${esc(item.name)}">⋯</summary><div class="quote-row-menu-panel"><button data-action="open-inventory-history" data-id="${esc(item.id)}">Ver movimientos</button><button data-action="open-inventory-commitments" data-id="${esc(item.id)}">Ver comprometido</button></div></details>`;
+    return `<tr><td>${menu}</td><td>${esc((ITEM_CATEGORY_LABELS[item.category]||item.category||"").slice(0,4))}</td><td>${esc(item.sku)}</td><td>${esc(item.name)}</td><td>${inventoryFree(item)}</td><td>${Number(item.committed||0)}</td><td><strong>${Number(item.stock||0)}</strong></td></tr>`;
   });
   return `
-    ${pageHeader("Inventario","Existencias, comprometidos, lotes, series, bodegas, movimientos, pacientes, acuses, cierres y kits.",
-      `${actionButton("Nuevo movimiento","open-inventory-movement",{kind:"primary",iconName:"plus"})}${linkButton("Cierres","#/inventario/cierres",{iconName:"view"})}`)}
-    <div class="metrics-grid">
-      ${metric("Ítems",state.inventoryItems.length,`${state.inventoryLots.length} lotes registrados`,"inventory","blue")}
-      ${metric("Unidades comprometidas",state.inventoryItems.reduce((s,i)=>s+i.committed,0),"Inventario temporal de pacientes","clock","amber")}
-      ${metric("Alertas",state.inventoryItems.filter(i=>inventoryState(i)!=="OK").length,"Mínimo o sin disponibilidad","alert","coral")}
-      ${metric("Bodegas",state.warehouses.length,"Principal, emergencia y domiciliar","inventory","teal")}
-    </div>
-    <div class="filter-bar"><label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar SKU, medicamento, insumo o equipo" value="${esc(ui.search||"")}"></label><div class="filter-summary">${items.length} ítems</div></div>
-    ${card("Existencias por bodega",table(["Ítem","Bodega","Existencia","Comprometido","Libre","Mínimo","Lotes","Estado",""],items))}
+    ${pageHeader("Gestión de inventario","Existencias por bodega con disponible, comprometido y total reconciliables.",`${actionButton("Excel","export-inventory",{iconName:"export"})}${linkButton("Traslados","#/inventario/bodegas",{kind:"primary"})}`)}
+    <nav class="tabs" aria-label="Secciones de gestión de inventario"><a class="tab active" href="#/inventario">Items</a><a class="tab" href="#/inventario/movimientos">Movimientos</a><a class="tab" href="#/inventario/comprometidos">Comprometido</a><a class="tab" href="#/inventario/lotes">Lotes</a></nav>
+    ${card("Bodega: Todos",`<div class="filter-bar"><label class="page-size-label">Registros <select aria-label="Registros de inventario"><option>50</option></select></label><label class="search-field">${icon("search")}<span class="sr-only">Buscar inventario</span><input data-ui-search placeholder="Buscar tipo, código o nombre" value="${esc(ui.search||"")}"></label></div>${table(["Acciones","Tipo","Código","Nombre","Disp","Comp","Total"],items)}<nav class="pagination"><button disabled>Anterior</button><button class="active">1</button><button disabled>Siguiente</button></nav>`) }
   `;
 }
 
 function renderInventoryMovements(state, store, ui) {
   return `
-    ${pageHeader("Movimientos de inventario","Entradas, salidas, compromiso, consumo, devolución, traslado, ajustes y bajas.",
+    ${pageHeader("Gestión de inventario","Entradas, salidas, compromiso, consumo, devolución, traslado, ajustes y bajas.",
       `${actionButton("Registrar movimiento","open-inventory-movement",{kind:"primary",iconName:"plus"})}`)}
+    <nav class="tabs"><a class="tab" href="#/inventario">Items</a><a class="tab active" href="#/inventario/movimientos">Movimientos</a><a class="tab" href="#/inventario/comprometidos">Comprometido</a><a class="tab" href="#/inventario/lotes">Lotes</a></nav>
     ${card("Historial de movimientos",table(["Fecha","ID","Ítem","Tipo","Cantidad","Caso","Origen","Destino","Responsable","Referencia"],
       state.inventoryMovements.map((move)=>{
         const item=state.inventoryItems.find(i=>i.id===move.inventoryItemId);
@@ -1338,41 +1332,56 @@ function renderInventoryMovements(state, store, ui) {
 }
 
 function renderCommittedInventory(state, store, ui) {
+  const tabs=[["PATIENTS","Pacientes"],["RESOURCES","Recursos"],["UNAVAILABLE","No disponible"],["REQUESTS","Solicitudes"],["TASKS","Tareas"]];
+  const patientRows=state.cases.filter((record)=>record.status!=="CLOSED").map((record)=>{
+    const patient=state.patients.find((candidate)=>candidate.id===record.patientId);
+    const menu=`<details class="quote-row-menu"><summary aria-label="Acciones de ${esc(patient?.fullName||record.id)}">⋯</summary><div class="quote-row-menu-panel"><button data-action="open-acknowledgement-form" data-case-id="${esc(record.id)}">Nuevo</button><button data-action="blocked-inventory-action" data-operation="Ver acuses">Ver acuses</button><button data-action="blocked-inventory-action" data-operation="Descargar Excel de acuses">Descargar Excel de acuses</button><button data-action="blocked-inventory-action" data-operation="Registro XPO">Registro XPO</button></div></details>`;
+    return `<tr><td>${menu}</td><td>${esc(patient?.document||"SINTÉTICO")}</td><td>${esc(patient?.fullName||"Paciente sintético")}</td><td>${esc(state.organization?.name||"Organización demo")}</td><td>${esc(record.status==="ACTIVE"?"activa":record.status)}</td></tr>`;
+  });
   return `
-    ${pageHeader("Comprometidos y acuses","Inventario entregado al domicilio que permanece temporalmente asociado al paciente hasta consumo, devolución o cierre.",
-      `${actionButton("Crear acuse","open-inventory-movement",{kind:"primary",iconName:"plus",data:`data-type="PATIENT_COMMITMENT"`})}`)}
-    ${card("Inventario por paciente",table(["Caso / paciente","Ítem","Comprometido","Entregado","Consumido","Devuelto","Pendiente","Estado"],
-      state.inventoryReservations.map((res)=>{
-        const item=state.inventoryItems.find(i=>i.id===res.inventoryItemId);
-        return `<tr><td><a href="#/hospitalizaciones/${res.caseId}">${esc(caseLabel(state,res.caseId))}</a></td><td>${esc(item?.name)}</td><td>${res.quantity}</td><td>${res.delivered}</td><td>${res.consumed}</td><td>${res.returned}</td><td>${Math.max(0,res.delivered-res.consumed-res.returned)}</td><td>${badge(res.status)}</td></tr>`;
-      })))}
+    ${pageHeader("Inventario / Acuses","Inventario temporal por paciente o recurso; los efectos no confirmados permanecen bloqueados.")}
+    <label>Tipo Area<select aria-label="Tipo Area"><option>Seleccione</option></select></label>
+    <nav class="tabs inventory-subtabs">${tabs.map(([key,label])=>`<button data-action="inventory-ack-tab" data-tab="${key}" class="tab ${ui.inventoryAckTab===key?"active":""}">${label}${["REQUESTS","TASKS"].includes(key)?" 0":""}</button>`).join("")}</nav>
+    ${ui.inventoryAckTab==="PATIENTS"?card("Pacientes",`${table(["Acciones","DUI/NIT","Paciente","Empresa","Estado"],patientRows)}<nav class="pagination"><button disabled>Anterior</button><button class="active">1</button><button disabled>Siguiente</button></nav>`):card(tabs.find(([key])=>key===ui.inventoryAckTab)?.[1]||"Acuses",`<p class="empty-state">No hay registros sintéticos disponibles para esta pestaña.</p>`)}
   `;
 }
 
 function renderInventoryClosures(state, store, ui) {
+  const tabs=[["PENDING","Pendientes"],["TOTAL","Cierres totales"],["CLOSED","Cerrados"],["RESOURCES","Recursos"]];
+  const pendingRows=state.cases.filter((record)=>record.status!=="CLOSED").map((record)=>{
+    const patient=state.patients.find((candidate)=>candidate.id===record.patientId);
+    return `<tr><td><button class="icon-button" data-action="open-closure-warning" data-case-id="${esc(record.id)}" aria-label="Acciones de cierre">⋯</button></td><td>${esc(patient?.document||"SINTÉTICO")}</td><td>${esc(patient?.fullName||"Paciente sintético")}</td><td>${esc(state.organization?.name||"Organización demo")}</td><td>Abierto</td><td>${esc(record.startDate||"—")}</td></tr>`;
+  });
+  const closureRows=state.inventoryClosures.filter((closure)=>ui.inventoryClosureTab==="TOTAL"?closure.type==="TOTAL":closure.status==="APPROVED").map((closure)=>`<tr><td>⋯</td><td>${esc(closure.id)}</td><td>${esc(caseLabel(state,closure.caseId))}</td><td>${esc(closure.type)}</td><td>${formatDate(closure.createdAt,true)}</td><td>${badge(closure.status)}</td><td><div class="row-actions">${actionButton("Editar","blocked-inventory-action",{data:`data-operation="Editar cierre"`})}${actionButton("Imprimir","print-closure",{data:`data-id="${closure.id}"`})}${actionButton("Aprobar","blocked-inventory-action",{data:`data-operation="Aprobar cierre"`})}${actionButton("Cancelar","blocked-inventory-action",{data:`data-operation="Cancelar cierre"`})}</div></td></tr>`);
   return `
-    ${pageHeader("Cierres de inventario","Cierre parcial editable para conciliación y cierre total sujeto a revisión y aprobación antes de bloquear la cuenta.",
-      `${actionButton("Nuevo cierre","open-closure-form",{kind:"primary",iconName:"plus"})}`)}
-    ${card("Cierres por hospitalización",table(["Cierre","Caso / paciente","Tipo","Creación","Responsable","Nota","Estado",""],
-      state.inventoryClosures.map((closure)=>`<tr><td>${esc(closure.id)}</td><td><a href="#/hospitalizaciones/${closure.caseId}">${esc(caseLabel(state,closure.caseId))}</a></td><td>${badge(closure.type)}</td><td>${formatDate(closure.createdAt,true)}</td><td>${esc(closure.createdBy)}</td><td class="cell-wrap">${esc(closure.note)}</td><td>${badge(closure.status)}</td><td><div class="row-actions">${actionButton("Imprimir","print-closure",{kind:"ghost",iconName:"print",data:`data-id="${closure.id}"`})}${closure.status==="PENDING_REVIEW"?actionButton("Aprobar","approve-closure",{kind:"primary",data:`data-id="${closure.id}"`}):""}</div></td></tr>`)))}
+    ${pageHeader("Inventario / Cierres","Revisión de cierres sin aplicar transiciones no confirmadas.")}
+    <nav class="tabs inventory-subtabs">${tabs.map(([key,label])=>`<button data-action="inventory-closure-tab" data-tab="${key}" class="tab ${ui.inventoryClosureTab===key?"active":""}">${label}${key==="TOTAL"?` ${state.inventoryClosures.filter((closure)=>closure.type==="TOTAL").length}`:""}</button>`).join("")}</nav>
+    ${ui.inventoryClosureTab==="PENDING"?card("Pacientes activos",table(["Acciones","DUI/NIT","Paciente","Empresa","Estado","Fecha de inicio"],pendingRows)):ui.inventoryClosureTab==="RESOURCES"?card("Recursos",`<p class="empty-state">Sin cierres sintéticos de recursos.</p>`):card(ui.inventoryClosureTab==="TOTAL"?"Cierres totales":"Cerrados",table(["Acciones","Cierre","Caso / paciente","Tipo","Creación","Estado",""],closureRows))}
   `;
 }
 
 function renderWarehouses(state,store,ui){
+  const rows=state.warehouses.map((warehouse)=>`<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar bodega">⋯</button></td><td>${esc(warehouse.name)}</td><td>${esc(warehouse.description||warehouse.location||"Sin descripción")}</td><td>${formatDate(warehouse.createdAt||"2026-08-27")}</td></tr>`);
   return `
-    ${pageHeader("Bodegas y transferencias","Ubicaciones físicas, inventario de emergencia, domiciliar y traslados con trazabilidad.",
-      `${actionButton("Nueva transferencia","open-inventory-movement",{kind:"primary",iconName:"plus",data:`data-type="TRANSFER"`})}`)}
-    <div class="warehouse-grid">${state.warehouses.map((wh)=>{
-      const items=state.inventoryItems.filter(i=>i.warehouseId===wh.id);
-      return `<article class="warehouse-card"><header>${icon("inventory")}<div><h2>${esc(wh.name)}</h2><p>${esc(wh.location)}</p></div>${badge(wh.status)}</header><div class="financial-summary"><div><span>Ítems</span><strong>${items.length}</strong></div><div><span>Existencia</span><strong>${items.reduce((s,i)=>s+i.stock,0)}</strong></div><div><span>Libre</span><strong>${items.reduce((s,i)=>s+inventoryFree(i),0)}</strong></div></div></article>`;
-    }).join("")}</div>`;
+    ${pageHeader("Items / Bodegas","Ubicaciones físicas autorizadas y traslados auditados.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nueva bodega"`})}`)}
+    ${card("Bodegas",`<label>Estado<select><option>Activo</option></select></label>${table(["Acciones","Nombre","Descripción","Fecha de creación"],rows)}`)}`;
+}
+
+function renderInventoryLots(state,store,ui){
+  const rows=state.inventoryLots.map((lot)=>{const item=state.inventoryItems.find((candidate)=>candidate.id===lot.inventoryItemId);const number=lot.lotNumber||lot.serialNumber||"Sin asignar";const date=lot.expiresAt?formatDate(lot.expiresAt):"Sin fecha confirmada";return `<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar lote o serie">⋯</button></td><td>${esc(number)}</td><td>${esc(item?.unit||"unidad")}</td><td>${esc(`${item?.sku||""} | ${item?.name||"Ítem"}`)}</td><td>${esc(date)}</td><td>${badge(lot.status||"AVAILABLE")}</td></tr>`;});
+  return `${pageHeader("Inventario: Lotes y números de serie","Trazabilidad de lote, serie y vencimiento sin inferir una política de fecha inválida.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nuevo lote o serie"`})}`)}${card("Lotes y números de serie",table(["Acciones","Número","Descripción","Item","Fecha E - Fecha V","Estado"],rows))}`;
+}
+
+function renderSuppliers(state,store,ui){
+  const rows=state.suppliers.map((supplier)=>`<tr><td><button class="icon-button" data-action="blocked-inventory-action" data-operation="Editar proveedor">⋯</button></td><td>${esc(supplier.code||supplier.taxId||supplier.id)}</td><td>${esc(supplier.name)}</td><td>${esc(supplier.contactName||"Sin contacto confirmado")}</td><td>${esc(supplier.phone||"—")}</td><td>${esc(supplier.email||"—")}</td><td>${esc(supplier.address||"Sin dirección confirmada")}</td></tr>`);
+  return `${pageHeader("Inventario / Proveedores","Catálogo de proveedores sintéticos de la organización.",`${actionButton("Nuevo","blocked-inventory-action",{kind:"primary",iconName:"plus",data:`data-operation="Nuevo proveedor"`})}`)}${card("Proveedores",table(["Acciones","Código","Empresa","Contacto","Teléfono","Correo","Dirección"],rows))}`;
 }
 
 function renderKits(state,store,ui){
+  const rows=state.kits.map((kit)=>`<tr><td><details class="quote-row-menu"><summary>⋯</summary><div class="quote-row-menu-panel"><button data-action="blocked-inventory-action" data-operation="Editar kit">Editar</button><button data-action="blocked-inventory-action" data-operation="Duplicar kit">Duplicar</button><button data-action="blocked-inventory-action" data-operation="Eliminar kit">Eliminar</button></div></details></td><td>${esc(kit.name)}</td><td>${esc(kit.code)}</td><td>${formatDate(kit.createdAt||"2026-08-27")}</td></tr>`);
   return `
-    ${pageHeader("Kits de insumos","Agrupaciones reutilizables para comprometer y descargar automáticamente todos sus componentes.",
-      `${actionButton("Nuevo kit","open-kit-form",{kind:"primary",iconName:"plus"})}`)}
-    <div class="kit-grid">${state.kits.map((kit)=>`<article class="card kit-card"><header class="card-header"><div><h2>${esc(kit.name)}</h2><p>${esc(kit.code)}</p></div>${badge(kit.active?"ACTIVE":"INACTIVE")}</header><div class="card-body"><ul>${kit.items.map(i=>`<li><span>${esc(i.name)}</span><strong>${i.quantity}</strong></li>`).join("")}</ul></div><footer class="card-footer">${actionButton("Duplicar","duplicate-kit",{iconName:"edit",data:`data-id="${kit.id}"`})}${actionButton("Descargar a paciente","apply-kit",{kind:"primary",iconName:"send",data:`data-id="${kit.id}"`})}</footer></article>`).join("")}</div>`;
+    ${pageHeader("Inventario / Kit de insumos","Composiciones cuantificadas; su descarga automática permanece bloqueada.",`${actionButton("Excel","blocked-inventory-action",{iconName:"export",data:`data-operation="Excel de kits"`})}${actionButton("Nuevo","open-kit-form",{kind:"primary",iconName:"plus"})}`)}
+    ${card("Kit de insumos",table(["Acciones","Nombre","Código","Fecha actualización"],rows))}`;
 }
 
 function renderCatalogs(state,store,ui,category=null){
@@ -1642,6 +1651,8 @@ export function renderRoute(route,state,store,ui){
       if(sub==="cierres") return renderInventoryClosures(state,store,ui);
       if(sub==="bodegas") return renderWarehouses(state,store,ui);
       if(sub==="kits") return renderKits(state,store,ui);
+      if(sub==="lotes") return renderInventoryLots(state,store,ui);
+      if(sub==="proveedores") return renderSuppliers(state,store,ui);
       return renderInventory(state,store,ui);
     }
     case "catalogos": {
@@ -1689,7 +1700,9 @@ export const navigation = [
     {href:"#/inventario/comprometidos",label:"Comprometidos y acuses",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/cierres",label:"Cierres",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/bodegas",label:"Bodegas",icon:"inventory",permission:"inventory:read"},
-    {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"}
+    {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"},
+    {href:"#/inventario/proveedores",label:"Proveedores",icon:"inventory",permission:"inventory:read"},
+    {href:"#/inventario/lotes",label:"Lotes / Series",icon:"inventory",permission:"inventory:read"}
   ]},
   {section:"RRHH",items:[
     {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},

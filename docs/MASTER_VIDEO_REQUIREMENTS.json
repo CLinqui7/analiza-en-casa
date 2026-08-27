@@ -545,7 +545,23 @@
         "CH14-F15",
         "CH14-F16"
       ],
-      "open_question_ids": []
+      "open_question_ids": [
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q003",
+        "CH14-Q004",
+        "CH14-Q005",
+        "CH14-Q006",
+        "CH14-Q007",
+        "CH14-Q008",
+        "CH14-Q009",
+        "CH14-Q010",
+        "CH14-Q011",
+        "CH14-Q012",
+        "CH14-Q013",
+        "CH14-Q014",
+        "CH14-Q015"
+      ]
     },
     {
       "chapter_id": "CH15",
@@ -6292,17 +6308,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q001",
+        "CH14-Q015"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La lista no ejecuta cambios y conserva el alcance del tenant.",
+        "financial_impact": "Disponible, comprometido y total se reconcilian con la convención técnica actual; su definición contable sigue pendiente.",
+        "current_platform_evidence": "app/views.js renderInventory; app/store.js inventory model",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Completar filtro de bodega y paginación real después de fijar la semántica de comprometido.",
+        "blocked_by_client_information": true,
+        "notes": "La tabla, búsqueda, CSV y pestañas están presentes; bodega y tamaño de página continúan fijos."
       }
     },
     {
@@ -6335,17 +6354,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q001"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "El historial es de sólo lectura y no altera stock.",
+        "financial_impact": "Origen, destino, cantidad y lote se muestran sin afirmar un estado contable no persistido.",
+        "current_platform_evidence": "app/main.js inventoryItemHistory",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Implementar rango, referencia, nota y estado sólo desde campos autoritativos.",
+        "blocked_by_client_information": true,
+        "notes": "Columnas observadas implementadas; rango no operativo y estado visual conservador."
       }
     },
     {
@@ -6369,17 +6390,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q001"
+      ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
-        "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "priority": "P0",
+        "patient_safety_impact": "Una reserva o consumo mal interpretado puede desalinear disponibilidad operativa.",
+        "financial_impact": "La definición de comprometido afecta cuenta, cierre y reversión.",
+        "current_platform_evidence": "app/store.js createInventoryMovement; docs/OPEN_QUESTIONS.md",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs",
+        "recommended_action": "Resolver CH14-Q001 antes de ampliar acuses o cierres.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "No se promueve la explicación verbal a una regla productiva."
       }
     },
     {
@@ -6407,13 +6430,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Los datos se limitan a casos sintéticos autorizados.",
+        "financial_impact": "Las pestañas no ejecutan movimientos.",
+        "current_platform_evidence": "app/views.js renderCommittedInventory",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Conectar Recursos, No disponible, Solicitudes y Tareas sólo a colecciones autoritativas.",
+        "blocked_by_client_information": true,
+        "notes": "Pacientes funciona; las otras pestañas muestran vacío explícito."
       }
     },
     {
@@ -6446,17 +6469,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q002",
+        "CH14-Q003"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "Editar o eliminar un acuse sin versión/reversión puede borrar trazabilidad de insumos entregados.",
+        "financial_impact": "Un acuse puede afectar inventario y cuenta del paciente.",
+        "current_platform_evidence": "app/views.js renderCommittedInventory; app/main.js blocked-inventory-action",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q002–CH14-Q003 antes de habilitar cualquier acción.",
+        "blocked_by_client_information": true,
+        "notes": "Acciones visibles y bloqueadas; no existe éxito simulado."
       }
     },
     {
@@ -6484,13 +6510,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La vista no cierra hospitalizaciones ni cambia estados clínicos.",
+        "financial_impact": "No aplica conciliación financiera sin aprobación.",
+        "current_platform_evidence": "app/views.js renderInventoryClosures; app/store.js createInventoryClosure",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Mantener sólo lectura hasta resolver CH14-Q007.",
+        "blocked_by_client_information": true,
+        "notes": "Cuatro pestañas y casos visibles; mutaciones cerradas."
       }
     },
     {
@@ -6514,17 +6540,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q006"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "IMPLEMENTED_EXACT",
+        "priority": "P0",
+        "patient_safety_impact": "Cancelar preserva los datos y Aceptar no ejecuta pérdida silenciosa.",
+        "financial_impact": "No borra conciliación ni cierre previo.",
+        "current_platform_evidence": "app/main.js openClosureWarning",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Mantener bloqueo de Aceptar hasta resolver CH14-Q006.",
+        "blocked_by_client_information": true,
+        "notes": "Advertencia y ambos controles reproducidos con desviación segura: Aceptar no muta."
       }
     },
     {
@@ -6548,17 +6576,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q007"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "Cerrar una hospitalización sin conciliación puede alterar disponibilidad y continuidad operativa.",
+        "financial_impact": "Aprobación total puede bloquear o alterar cuenta e inventario.",
+        "current_platform_evidence": "app/store.js createInventoryClosure/approveInventoryClosure; migration 202608270010",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q006–CH14-Q007 y crear RPC transaccional antes de habilitar.",
+        "blocked_by_client_information": true,
+        "notes": "Editar, Aprobar y Cancelar permanecen bloqueados; impresión es provisional."
       }
     },
     {
@@ -6582,17 +6612,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q008"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Sin impacto clínico directo; el catálogo no se muta.",
+        "financial_impact": "Proveedor puede ser referencia de compras y debe conservar historial.",
+        "current_platform_evidence": "app/views.js renderSuppliers",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Definir identidad, unicidad y desactivación en CH14-Q008 antes del CRUD.",
+        "blocked_by_client_information": true,
+        "notes": "Tabla visible con datos sintéticos; alta/edición bloqueadas."
       }
     },
     {
@@ -6616,17 +6648,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q009"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "Una transferencia incorrecta puede ocultar stock disponible en la ubicación real.",
+        "financial_impact": "La RPC conserva la suma de existencias y audita el movimiento.",
+        "current_platform_evidence": "app/views.js renderWarehouses; app/store.js createInventoryMovement; apply_inventory_movement_v2",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q009 y validar concurrencia/RLS en Supabase real.",
+        "blocked_by_client_information": true,
+        "notes": "Lista presente; movimiento productivo transaccional; CRUD y acceso directo incompletos."
       }
     },
     {
@@ -6653,14 +6687,14 @@
       "open_question_ids": [],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "La RPC rechaza lote vencido, no disponible o insuficiente; el modo local bloquea ítems trazables.",
+        "financial_impact": "Evita divergencia lote–stock en rutas de mutación habilitadas.",
+        "current_platform_evidence": "app/views.js renderInventoryLots; app/store.js createInventoryMovement; apply_inventory_movement_v2",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q010–CH14-Q011 y validar migraciones en Supabase real.",
+        "blocked_by_client_information": true,
+        "notes": "Vista de sólo lectura; se rechaza deliberadamente el defecto de fechas inválidas activas observado."
       }
     },
     {
@@ -6697,13 +6731,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La lista no consume componentes.",
+        "financial_impact": "No se crean maestros incompletos ni se eliminan referencias históricas.",
+        "current_platform_evidence": "app/views.js renderKits; app/store.js createKit",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q012 antes de habilitar CRUD/versionado.",
+        "blocked_by_client_information": true,
+        "notes": "Catálogo y acciones visibles; mutaciones bloqueadas."
       }
     },
     {
@@ -6736,17 +6770,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q013"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "Una descarga parcial o desde lote incorrecto puede desalinear disponibilidad de insumos.",
+        "financial_impact": "El consumo debe ser atómico e idempotente para no duplicar cargos o existencias.",
+        "current_platform_evidence": "app/main.js openKitForm; app/store.js createKit",
+        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q012–CH14-Q013 y crear una RPC transaccional.",
+        "blocked_by_client_information": true,
+        "notes": "Composición visual presente; descarga automática no implementada."
       }
     },
     {
@@ -6770,17 +6806,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "priority": "P0",
+        "patient_safety_impact": "La captura no descuenta ni reserva stock hasta tener reglas aprobadas.",
+        "financial_impact": "No crea cargos o compromisos ficticios.",
+        "current_platform_evidence": "app/main.js openAcknowledgementForm/blocked-inventory-action",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q001–CH14-Q005 antes de persistir.",
+        "blocked_by_client_information": true,
+        "notes": "Campos y acciones observados presentes; Añadir, Vaciar y Plantilla bloqueados."
       }
     },
     {
@@ -6804,17 +6842,21 @@
           "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q005",
+        "CH14-Q014",
+        "CH14-Q015"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "priority": "P0",
+        "patient_safety_impact": "La política de faltantes puede afectar disponibilidad y sustitución de insumos.",
+        "financial_impact": "No crea compra, acuse o cotización por inferencia.",
+        "current_platform_evidence": "app/main.js blocked-inventory-action; docs/OPEN_QUESTIONS.md",
+        "test_path": "tests/e2e/ch14.spec.mjs",
+        "recommended_action": "Resolver CH14-Q005 antes de habilitar el flujo.",
+        "blocked_by_client_information": true,
+        "notes": "La evidencia aparece al final sin demostrar resultado."
       }
     },
     {
@@ -6838,17 +6880,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q005",
+        "CH14-Q014",
+        "CH14-Q015"
+      ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
-        "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits",
-        "test_path": "#/inventario/movimientos; #/inventario/comprometidos; #/inventario/cierres; #/inventario/bodegas; #/inventario/kits; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "priority": "P1",
+        "patient_safety_impact": "Sin acción clínica automática.",
+        "financial_impact": "No se cambia una cotización desde una frase ambigua.",
+        "current_platform_evidence": "docs/OPEN_QUESTIONS.md",
+        "test_path": "NONE",
+        "recommended_action": "Resolver CH14-Q014 con el cliente.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "No existe demostración visual suficiente."
       }
     },
     {
@@ -9745,6 +9791,164 @@
         "CH13-E0055"
       ],
       "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q001",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.",
+      "evidence_event_ids": [
+        "CH14-E0006",
+        "CH14-E0018"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q002",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "aprobar la máquina de estados de acuse, roles, permisos por acción, idempotencia y efectos de Nuevo, Duplicar, Editar, Asignar hospitalización, Eliminar y Registro XPO. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.",
+      "evidence_event_ids": [
+        "CH14-E0032",
+        "CH14-E0035"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q003",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir formato, columnas, minimización de datos, permisos y validez del Excel y la impresión de acuses. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.",
+      "evidence_event_ids": [
+        "CH14-E0032",
+        "CH14-E0035"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q004",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir Plantilla y Vaciar, incluida persistencia de borrador, recuperación y confirmación de pérdida. Evidencia: CH14-E0151, 00:45:27.000.",
+      "evidence_event_ids": [
+        "CH14-E0151"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q005",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "aprobar el flujo de faltantes, tratamiento de cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152, 00:45:27.400; safety_022 a 00:45:28.",
+      "evidence_event_ids": [
+        "CH14-E0152"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q006",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.",
+      "evidence_event_ids": [
+        "CH14-E0046"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q007",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "aprobar transiciones entre cierre pendiente, total, aprobado, cerrado y cancelado, campos editables, conciliación, reversión y relación con el cierre administrativo/financiero. Evidencia: CH14-E0050, 00:42:16.400; transcripción 00:42:11–00:43:18.",
+      "evidence_event_ids": [
+        "CH14-E0050"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q008",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir identificación, unicidad, campos obligatorios, estados, edición y eliminación de proveedores por organización. Evidencia: CH14-E0061, 00:43:24.400.",
+      "evidence_event_ids": [
+        "CH14-E0061"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q009",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "aprobar creación/edición de bodegas y reglas de traslado: permisos, bodegas origen/destino, recepción, movimientos, lotes, series, concurrencia y reversión. Evidencia: CH14-E0068, 00:43:28.600; transcripción 00:43:26–00:43:57.",
+      "evidence_event_ids": [
+        "CH14-E0068"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q010",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir qué significa Fecha inválida y la política para lotes vencidos, sin fecha, en cuarentena o agotados; confirmar FEFO y alertas. Evidencia: CH14-E0082, 00:44:11.400; transcripción 00:44:07–00:44:24.",
+      "evidence_event_ids": [
+        "CH14-E0082"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q011",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "aprobar unicidad y ciclo de vida de lote/serie por organización, item y bodega, incluidos ajustes, transferencias y correcciones auditadas. Evidencia: CH14-E0078, 00:44:04.600; CH14-E0092, 00:44:24.400.",
+      "evidence_event_ids": [
+        "CH14-E0078",
+        "CH14-E0092"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q012",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "definir versionado, permisos y efectos de Crear, Editar, Duplicar y Eliminar kits, incluida la conservación de usos históricos. Evidencia: CH14-E0095, 00:44:29.400; CH14-E0098–CH14-E0101, 00:44:31.400–00:44:33.000.",
+      "evidence_event_ids": [
+        "CH14-E0095",
+        "CH14-E0098",
+        "CH14-E0101"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q013",
+      "chapter_id": "CH14",
+      "classification": "VERBAL",
+      "question": "confirmar si el consumo de un kit usa FEFO, lote seleccionado, sustitución o bloqueo total, y exigir atomicidad, idempotencia y reversión de todos sus componentes. Evidencia: CH14-E0104, 00:44:35.200; CH14-E0117, 00:44:44.800; transcripción 00:44:25–00:45:02.",
+      "evidence_event_ids": [
+        "CH14-E0104",
+        "CH14-E0117"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q014",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.",
+      "evidence_event_ids": [
+        "CH14-E0152"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH14-Q015",
+      "chapter_id": "CH14",
+      "classification": "UNCERTAIN",
+      "question": "confirmar mensajes, reintentos y recuperación esperados para errores de inventario, acuses, cierres, catálogos y kits; el capítulo no provoca fallos. Evidencia: CH14-E0006–CH14-E0152, sin resultado de error demostrado.",
+      "evidence_event_ids": [
+        "CH14-E0006",
+        "CH14-E0152"
+      ],
+      "status": "OPEN"
     }
   ],
   "platform_safety_findings": [
@@ -9902,20 +10106,20 @@
   ],
   "summary": {
     "requirements": 210,
-    "open_questions": 120,
+    "open_questions": 135,
     "safety_findings": 7,
     "gap_status_counts": {
-      "IMPLEMENTED_EXACT": 12,
-      "IMPLEMENTED_PARTIAL": 164,
+      "IMPLEMENTED_EXACT": 13,
+      "IMPLEMENTED_PARTIAL": 159,
       "MISSING": 0,
       "CONFLICTS_WITH_VIDEO": 0,
       "NOT_TESTABLE": 6,
-      "NEEDS_CLIENT_CONFIRMATION": 35
+      "NEEDS_CLIENT_CONFIRMATION": 39
     },
     "priority_counts": {
-      "P0": 16,
-      "P1": 167,
-      "P2": 34,
+      "P0": 25,
+      "P1": 160,
+      "P2": 32,
       "P3": 0
     }
   }
