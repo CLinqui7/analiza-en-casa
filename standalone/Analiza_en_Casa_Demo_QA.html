@@ -1162,14 +1162,20 @@ body.portal-mode #app { min-height: 100vh; }
   scrollbar-color: rgba(255,255,255,.18) transparent;
 }
 .nav-section { margin-top: 13px; }
-.nav-section > p {
+.nav-section > summary {
   margin: 0 12px 7px;
   color: rgba(255,255,255,.42);
   text-transform: uppercase;
   letter-spacing: .09em;
   font-size: 9px;
   font-weight: 850;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
 }
+.nav-section > summary::-webkit-details-marker { display:none; }
+.nav-section[open] > summary > span { transform: rotate(180deg); }
 .nav-section > a {
   display: flex;
   align-items: center;
@@ -1197,6 +1203,7 @@ body.portal-mode #app { min-height: 100vh; }
   box-shadow: 0 0 0 4px rgba(32,182,170,.14);
 }
 
+.mobile-only { display:none!important; }
 .topbar .mobile-only { flex: 0 0 auto; }
 .global-search {
   position: relative;
@@ -1669,7 +1676,10 @@ body.portal-mode #app { min-height: 100vh; }
 .modal-footer { display:flex;justify-content:flex-end;gap:8px;padding:13px 20px;border-top:1px solid var(--line);background:var(--surface-soft); }
 
 .quote-builder { display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:18px;align-items:start; }
-.quote-add-row { display:grid;grid-template-columns:1fr 85px auto;gap:8px;margin:14px 0; }
+.quote-add-row { display:grid;grid-template-columns:85px auto;justify-content:end;gap:8px;margin:14px 0; }
+.quote-add-row label { color:var(--muted);font-size:9px;font-weight:700; }
+.quote-add-row label input { width:100%;height:40px;margin-top:5px;border:1px solid var(--line);border-radius:9px;padding:0 9px; }
+.quote-add-row .btn { align-self:end; }
 .quote-add-row select,.quote-add-row input { height:40px;border:1px solid var(--line);border-radius:9px;padding:0 9px;background:white; }
 .quote-item-list { display:flex;flex-direction:column;gap:8px; }
 .quote-item-list article { display:grid;grid-template-columns:minmax(170px,1fr) 90px 110px 90px 30px;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px; }
@@ -1680,12 +1690,42 @@ body.portal-mode #app { min-height: 100vh; }
 .quote-item-list label { color:var(--muted);font-size:7px;text-transform:uppercase; }
 .quote-item-list label input { width:100%;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 7px;margin-top:3px; }
 .quote-item-list article > button { width:29px;height:29px;border:0;border-radius:8px;background:var(--coral-100);color:var(--coral-700);cursor:pointer; }
+.quote-ledger th,.quote-ledger td { white-space:nowrap; }
+.quote-ledger td:first-child { white-space:normal;min-width:180px; }
+.quote-ledger td:first-child small { display:block;color:var(--muted);margin-top:3px; }
+.quote-ledger input[type="number"] { width:82px;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 7px; }
+.quote-ledger-group th { background:var(--surface-soft);color:var(--teal-800);text-align:left;font-size:10px;text-transform:uppercase; }
+.quote-ledger td:last-child button { border:0;border-radius:8px;background:var(--coral-100);color:var(--coral-700);width:29px;height:29px;cursor:pointer; }
+.quote-no-results { margin:8px 0;padding:10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);text-align:center; }
+.quote-item-filter { display:flex;align-items:center;justify-content:flex-end;gap:.55rem;margin:.6rem 0; }
+.quote-item-filter select { width:auto;min-width:12rem; }
+.quote-ledger code { white-space:nowrap;font-size:.78rem; }
+.quote-processing { position:fixed;inset:0;z-index:260;background:rgba(10,36,55,.34);display:flex;align-items:center;justify-content:center;gap:10px;color:white;backdrop-filter:blur(2px); }
 .quote-builder-summary { position:sticky;top:0;padding:15px;border-radius:13px;background:var(--navy-900);color:white; }
 .quote-builder-summary h3 { margin:0 0 12px; }
 .quote-builder-summary > div { display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:9px; }
 .quote-builder-summary .total { font-size:12px;font-weight:850; }
 .quote-builder-summary .balance { margin-top:8px;padding:10px;border:0;border-radius:9px;background:rgba(32,182,170,.18);color:#72e1d7;font-size:12px;font-weight:850; }
 .quote-builder-summary p { margin:12px 0 0;color:rgba(255,255,255,.58);font-size:8px; }
+.quote-category-tabs { display:flex;gap:7px;overflow-x:auto;padding:4px 0 10px;border-bottom:1px solid var(--line); }
+.quote-create-page,.quote-create-page .card-body,.quote-builder,.quote-builder-main { min-width:0;max-width:100%; }
+.quote-category-tabs { width:100%;max-width:100%; }
+.quote-patient-grid { display:grid;grid-template-columns:1.3fr .8fr .9fr 1.25fr;gap:8px; }
+.quote-patient-grid label { min-width:0; }
+.quote-category-tabs button { white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:8px 7px;border-radius:9px;cursor:pointer;font-size:10px;font-weight:750; }
+.quote-category-tabs button.active { background:var(--teal-100);color:var(--teal-800); }
+.quote-inventory-filter { display:flex;align-items:center;gap:7px;margin:12px 0;color:var(--muted); }
+.quote-add-context { display:grid;grid-template-columns:1fr 1.4fr .65fr;gap:8px; }
+.quote-add-context label { min-width:0;color:var(--muted);font-size:9px;font-weight:700; }
+.quote-add-context input,.quote-add-context select { box-sizing:border-box;min-width:0;width:100%;height:40px;margin-top:5px;border:1px solid var(--line);border-radius:9px;padding:0 9px;background:white; }
+.referral-picker { display:grid;gap:8px; }
+.referral-picker > input { width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 10px;background:white; }
+.referral-tags { display:flex;gap:6px;flex-wrap:wrap; }
+.referral-tags span { display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;background:var(--teal-100);color:var(--teal-800);font-size:9px;font-weight:750; }
+.referral-tags button { border:0;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1; }
+.input-with-action { display:grid;grid-template-columns:1fr 38px; }
+.input-with-action input { width:100%;height:40px;border:1px solid var(--line);border-radius:9px 0 0 9px!important;padding:0 10px;background:white; }
+.input-with-action button { border:1px solid var(--line);border-left:0;border-radius:0 9px 9px 0;background:white;color:var(--muted);cursor:pointer; }
 
 .document-frame { width:100%;height:62vh;border:1px solid var(--line);border-radius:10px;background:white; }
 .toast-root { position:fixed;right:18px;bottom:18px;z-index:200;display:flex;flex-direction:column;gap:8px;max-width:min(390px,calc(100vw - 30px)); }
@@ -1833,7 +1873,9 @@ body.portal-mode #app { min-height: 100vh; }
   .page-actions .btn { flex:1; }
   .global-search { max-width:none; }
   .notification-button { display:none; }
-  .quote-add-row { grid-template-columns:1fr 70px; }
+  .quote-add-row { grid-template-columns:70px 1fr;justify-content:stretch; }
+  .quote-add-context { grid-template-columns:1fr; }
+  .quote-patient-grid { grid-template-columns:1fr; }
   .quote-add-row .btn { grid-column:1/-1; }
   .quote-item-list article { grid-template-columns:1fr 1fr; }
   .quote-item-list article > div { grid-column:1/-1; }
@@ -1854,6 +1896,53 @@ body.portal-mode #app { min-height: 100vh; }
 
 
 /* Final QA layout fixes */
+.sr-only {
+  position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+}
+.metrics-grid-six { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.sort-button { border:0;background:transparent;color:inherit;font:inherit;font-weight:inherit;text-transform:inherit;letter-spacing:inherit;padding:0;cursor:pointer; }
+.sort-button:focus-visible { outline:2px solid var(--teal-500);outline-offset:3px;border-radius:4px; }
+.page-size-label { display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px;font-weight:700; }
+.pagination { display:flex;justify-content:flex-end;align-items:center;gap:5px;padding:14px;border-top:1px solid var(--line);flex-wrap:wrap; }
+.pagination button { min-width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:white;color:var(--ink);cursor:pointer; }
+.pagination button.active { background:var(--teal-500);border-color:var(--teal-500);color:white;font-weight:800; }
+.pagination button:disabled { opacity:.45;cursor:not-allowed; }
+.data-state { min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted); }
+.spinner { width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--teal-500);border-radius:50%;animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.bulk-import { display:flex;flex-direction:column;gap:16px; }
+.bulk-import code { background:var(--surface-soft);padding:2px 5px;border-radius:5px; }
+.file-drop { min-height:150px;border:2px dashed #b8d7dc;border-radius:14px;background:var(--surface-soft);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;cursor:pointer; }
+.file-drop input { margin-top:10px; }
+.file-drop span { color:var(--muted);font-size:10px; }
+.import-preview { border:1px solid var(--line);border-radius:12px;overflow:hidden; }
+.import-preview > p,.import-preview .form-actions { padding:12px 14px;margin:0; }
+.error-callout { color:var(--coral-700);background:var(--coral-100);border:1px solid #f4c4c0;border-radius:10px;padding:12px; }
+.text-button { border:0;background:transparent;color:var(--teal-700);font-weight:750;cursor:pointer;text-align:center; }
+.organization-context { display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line); }
+.organization-context small,.organization-context strong { display:block; }
+.organization-context small { color:var(--muted);font-size:9px; }
+
+@media (min-width:861px) {
+  .app-shell,.sidebar { transition:grid-template-columns .2s ease,width .2s ease; }
+  .app-shell.sidebar-collapsed { grid-template-columns:76px minmax(0,1fr); }
+  .app-shell.sidebar-collapsed .sidebar { width:76px; }
+  .app-shell.sidebar-collapsed .sidebar-brand { padding:17px;justify-content:center; }
+  .app-shell.sidebar-collapsed .sidebar-brand > a > div,
+  .app-shell.sidebar-collapsed .nav-section > summary,
+  .app-shell.sidebar-collapsed .nav-section > a > span:not(.icon),
+  .app-shell.sidebar-collapsed .sidebar-footer { display:none; }
+  .app-shell.sidebar-collapsed .sidebar-nav { padding:10px 9px; }
+  .app-shell.sidebar-collapsed .nav-section { margin:3px 0;display:block; }
+  .app-shell.sidebar-collapsed .nav-section > a { justify-content:center;padding:8px;margin:3px 0; }
+}
+
+@media (max-width:860px) {
+  .metrics-grid-six { grid-template-columns:1fr; }
+  .pagination { justify-content:center; }
+}
+
 .dashboard-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .dashboard-grid-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .timeline-dot {
@@ -1903,6 +1992,92 @@ body.portal-mode #app { min-height: 100vh; }
   .portal-main { width:min(760px,calc(100% - 24px)); }
   .portal-grid { grid-template-columns:1fr; }
   .portal-grid .span-2 { grid-column:auto; }
+}
+
+.patient-page-form { display:grid;gap:20px; }
+.patient-page-form .card { margin:0; }
+.patient-fields-grid {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  align-items:end;
+}
+.patient-fields-grid > label { display:grid;gap:7px;min-width:0;font-weight:700;color:var(--navy-800); }
+.patient-fields-grid > label > span { font-size:13px; }
+.patient-fields-grid input,
+.patient-fields-grid select { width:100%; }
+.patient-fields-grid .span-2 { grid-column:span 2; }
+.patient-fields-grid .span-all { grid-column:1/-1; }
+.patient-inline-options {
+  min-height:44px;
+  border:0;
+  padding:0;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.patient-inline-options legend { font-size:13px;font-weight:800;margin-bottom:7px;color:var(--navy-800); }
+.patient-inline-options label,
+.patient-check { display:flex!important;align-items:center;gap:7px!important;font-weight:600!important; }
+.patient-inline-options input,
+.patient-check input,
+.patient-consent input { width:auto; }
+.patient-consent {
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:12px!important;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--teal-50);
+}
+.patient-consent span { display:grid;gap:4px; }
+.patient-consent small { color:var(--slate-600);font-weight:500;line-height:1.45; }
+.patient-insurance-fields[hidden] { display:none!important; }
+.inline-control { display:flex;gap:10px; }
+.inline-control input { flex:1; }
+.synthetic-map {
+  min-height:260px;
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:6px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  color:var(--navy-900);
+  background:linear-gradient(135deg,#e7f3f1,#dbe7ed);
+}
+.map-grid { position:absolute;inset:0;opacity:.55;background-image:linear-gradient(30deg,transparent 46%,#b9ced2 47% 53%,transparent 54%),linear-gradient(120deg,transparent 46%,#c6d9dc 47% 53%,transparent 54%);background-size:90px 90px; }
+.synthetic-map > :not(.map-grid) { position:relative;z-index:1; }
+.map-pin { font-size:34px;color:var(--coral-500);text-shadow:0 4px 12px rgba(15,44,60,.2); }
+.synthetic-map small { max-width:430px;text-align:center;color:var(--slate-600); }
+.patient-form-actions { display:flex;justify-content:center;gap:12px;padding:4px 0 24px; }
+.relation-card { margin-bottom:16px;border:1px solid var(--line);border-radius:var(--radius);background:white;box-shadow:var(--shadow); }
+.relation-card header { min-height:58px;display:flex;align-items:center;gap:10px;padding:0 18px; }
+.relation-card header strong { font-size:13px; }
+.relation-card header span { min-width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line);border-radius:999px;font-size:10px; }
+.relation-card header button { margin-left:auto;border:0;background:transparent;font-size:22px;color:var(--muted); }
+.filter-panel { display:grid;grid-template-columns:repeat(3,minmax(160px,1fr)) auto;gap:14px;align-items:end;padding:16px;margin-bottom:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft); }
+.filter-panel label { display:grid;gap:6px;font-size:10px;font-weight:800;color:var(--navy-900); }
+.filter-actions { display:flex;gap:8px;align-items:center;justify-content:flex-end; }
+.form-section-title { margin:8px 0 0;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:15px; }
+.inline-add { width:24px;height:24px;margin-left:5px;border:0;border-radius:50%;background:var(--teal-500);color:white;font-weight:850; }
+.inline-add:disabled { opacity:.55;cursor:not-allowed; }
+
+@media (max-width:1100px) {
+  .patient-fields-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+@media (max-width:680px) {
+  .patient-fields-grid { grid-template-columns:1fr; }
+  .patient-fields-grid .span-2,
+  .patient-fields-grid .span-all { grid-column:auto; }
+  .patient-inline-options { align-items:flex-start;flex-wrap:wrap; }
+  .inline-control { flex-direction:column; }
+  .filter-panel { grid-template-columns:1fr; }
+  .filter-actions { justify-content:flex-start;flex-wrap:wrap; }
 }
 
 
@@ -2085,7 +2260,12 @@ function calculateQuote(items = [], discount = { type: "PERCENT", value: 0 }, in
   }
 
   let discountAmount = 0;
-  if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
+  if (discount?.type === "CATEGORY_PERCENTAGES") {
+    discountAmount = Object.entries(categoryTotals).reduce((sum, [category, categoryTotal]) => {
+      const percentage = Math.min(100, Math.max(0, Number(discount.categories?.[category] || 0)));
+      return sum + categoryTotal * percentage / 100;
+    }, 0);
+  } else if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
   else discountAmount = subtotal * Math.max(0, Number(discount?.value || 0)) / 100;
 
   discountAmount = Math.min(discountAmount, subtotal);
@@ -2253,7 +2433,7 @@ function roleCan(role, permission) {
     SUPERADMIN: ["*"],
     ADMIN: ["*"],
     NURSE: [
-      "dashboard:read", "patients:read", "patients:write", "cases:read",
+      "dashboard:read", "patients:read", "cases:read",
       "quotes:read", "insurance:read", "clinical:read", "clinical:write",
       "clinical:sign",
       "agenda:read", "inventory:read"
@@ -2843,6 +3023,7 @@ const seedData = {
       "category": "MEDICATIONS",
       "name": "Ceftriaxona 1 g vial",
       "unit": "vial",
+      "manufacturer": "Laboratorio sintético",
       "price": 14.8,
       "cost": 9.2,
       "taxable": true,
@@ -2855,6 +3036,7 @@ const seedData = {
       "category": "MEDICATIONS",
       "name": "Acetaminofén 500 mg",
       "unit": "tableta",
+      "manufacturer": "Laboratorio sintético",
       "price": 0.38,
       "cost": 0.16,
       "taxable": true,
@@ -2867,6 +3049,7 @@ const seedData = {
       "category": "MEDICATIONS",
       "name": "Ondansetrón 4 mg/2 ml",
       "unit": "ampolla",
+      "manufacturer": "Laboratorio sintético",
       "price": 6.9,
       "cost": 4.1,
       "taxable": true,
@@ -2879,6 +3062,7 @@ const seedData = {
       "category": "SUPPLIES",
       "name": "Kit de canalización",
       "unit": "kit",
+      "manufacturer": "Fabricante sintético",
       "price": 29.0,
       "cost": 17.3,
       "taxable": true,
@@ -2891,6 +3075,7 @@ const seedData = {
       "category": "SUPPLIES",
       "name": "Gasa estéril 10 x 10",
       "unit": "paquete",
+      "manufacturer": "Fabricante sintético",
       "price": 3.2,
       "cost": 1.55,
       "taxable": true,
@@ -2903,6 +3088,7 @@ const seedData = {
       "category": "SUPPLIES",
       "name": "Guante de examen talla M",
       "unit": "caja",
+      "manufacturer": "Fabricante sintético",
       "price": 12.5,
       "cost": 7.9,
       "taxable": true,
@@ -2938,6 +3124,7 @@ const seedData = {
       "sku": "HON-MED-01",
       "category": "FEES",
       "name": "Visita médica domiciliar",
+      "professional": "Dra. Valeria Núñez",
       "unit": "visita",
       "price": 95.0,
       "cost": 75.0,
@@ -2950,6 +3137,7 @@ const seedData = {
       "sku": "HON-SUP-01",
       "category": "FEES",
       "name": "Supervisión de enfermería",
+      "professional": "Dr. Mauricio Peña",
       "unit": "visita",
       "price": 55.0,
       "cost": 36.0,
@@ -4724,6 +4912,7 @@ function toCaseRow(record) {
 function toQuoteRow(record) {
   return {
     id: record.id,
+    code: record.id,
     hospitalization_id: record.caseId,
     patient_id: record.patientId,
     status: record.status,
@@ -4735,6 +4924,10 @@ function toQuoteRow(record) {
     insurer_amount: record.insurerAmount,
     patient_amount: record.patientAmount,
     comments: record.comments || null,
+    invoice_date: record.invoiceDate,
+    discount_group_id: record.discountGroupId,
+    referred_by: record.referredBy,
+    giftcard: record.giftcard || null,
     sent_at: record.sentAt || null
   };
 }
@@ -4744,7 +4937,8 @@ async function createSupabaseAdapter(config) {
     return {
       mode: "mock",
       async bootstrap() { return null; },
-      async sync() { return { ok: true, mode: "mock" }; }
+      async sync() { return { ok: true, mode: "mock" }; },
+      async signOut() { return { ok: true, mode: "mock" }; }
     };
   }
 
@@ -4752,7 +4946,7 @@ async function createSupabaseAdapter(config) {
     throw new Error("Supabase está activado, pero faltan URL o publishable key.");
   }
 
-  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.112.4");
   const client = createClient(config.supabaseUrl, config.supabasePublishableKey, {
     auth: {
       persistSession: true,
@@ -4760,6 +4954,48 @@ async function createSupabaseAdapter(config) {
       detectSessionInUrl: true
     }
   });
+
+  async function signInWithPassword(email, password) {
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error || !data?.user) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    return data.user;
+  }
+
+  async function getSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    return data.session;
+  }
+
+  async function loadCurrentProfile(userId) {
+    const { data: profile, error: profileError } = await client
+      .from("profiles")
+      .select("id, organization_id, full_name, status, organizations(id, name, slug, currency, timezone)")
+      .eq("id", userId)
+      .single();
+    if (profileError || profile?.status !== "ACTIVE") throw new Error("El usuario no tiene un perfil activo autorizado.");
+    const { data: assignments, error: roleError } = await client
+      .from("user_roles")
+      .select("roles(code)")
+      .eq("user_id", userId);
+    if (roleError) throw new Error("No fue posible cargar los permisos del usuario.");
+    const role = assignments?.map((assignment) => assignment.roles?.code).find(Boolean);
+    if (!role) throw new Error("El usuario no tiene un rol autorizado.");
+    return { ...profile, role };
+  }
+
+  async function resetPasswordForEmail(email) {
+    const redirectTo = new URL("#/auth/update-password", config.appUrl || location.origin).toString();
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw new Error("No fue posible completar la solicitud de recuperación.");
+    return { ok: true };
+  }
+
+  async function signOut() {
+    const { error } = await client.auth.signOut({ scope: "local" });
+    if (error) throw new Error("No fue posible cerrar la sesión.");
+    return { ok: true };
+  }
 
   async function bootstrap() {
     const collections = {};
@@ -4801,81 +5037,60 @@ async function createSupabaseAdapter(config) {
         return insert("hospitalizations", toCaseRow(payload.case));
       case "CREATE_QUOTE": {
         const quote = payload.quote;
-        await insert("quotes", toQuoteRow(quote));
-        const version = await insert("quote_versions", {
-          quote_id: quote.id,
-          version: quote.version,
-          status_snapshot: quote.status,
-          subtotal: quote.subtotal,
-          discount_amount: quote.discountAmount,
-          total: quote.total,
-          insurer_amount: quote.insurerAmount,
-          patient_amount: quote.patientAmount,
-          discount_snapshot: snakeCaseObject(quote.discount || {}),
-          comments: quote.comments || null,
-          immutable: Boolean(quote.immutable),
-          revision_reason: quote.revisionReason || null,
-          snapshot: snakeCaseObject(quote.sentSnapshot || quote)
-        });
-        const rows = quote.items.map((item, index) => ({
-          quote_version_id: version.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
-      }
-      case "CREATE_QUOTE_REVISION": {
-        const { data, error } = await client.rpc("create_quote_revision", {
-          p_quote_id: payload.quote.quoteId,
-          p_source_version_id: payload.sourceQuoteId,
-          p_reason: payload.quote.revisionReason
+        const { data, error } = await client.rpc("create_quote_draft", {
+          p_code: quote.id,
+          p_hospitalization_id: quote.caseId,
+          p_patient_id: quote.patientId,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_currency: quote.currency || "USD",
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
         });
         if (error) throw error;
-        return { ok: true, quoteVersionId: data };
+        return { ok: true, ...data };
+      }
+      case "CREATE_QUOTE_REVISION": {
+        const quote = payload.quote;
+        const { data, error } = await client.rpc("create_quote_revision_catalog", {
+          p_quote_id: quote.quoteId,
+          p_source_version_id: payload.sourceQuoteId,
+          p_reason: quote.revisionReason,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_DRAFT": {
         const quote = payload.quote;
-        const { error: quoteError } = await client.from("quotes")
-          .update(toQuoteRow(quote))
-          .eq("id", quote.quoteId || quote.id);
-        if (quoteError) throw quoteError;
-        const { error: versionError } = await client.from("quote_versions")
-          .update({
-            subtotal: quote.subtotal,
-            discount_amount: quote.discountAmount,
-            total: quote.total,
-            insurer_amount: quote.insurerAmount,
-            patient_amount: quote.patientAmount,
-            discount_snapshot: snakeCaseObject(quote.discount || {}),
-            comments: quote.comments || null,
-            snapshot: snakeCaseObject(quote)
-          })
-          .eq("id", quote.id);
-        if (versionError) throw versionError;
-        const { error: deleteError } = await client.from("quote_items").delete().eq("quote_version_id", quote.id);
-        if (deleteError) throw deleteError;
-        const rows = quote.items.map((item) => ({
-          quote_version_id: quote.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
+        const { data, error } = await client.rpc("update_quote_draft_catalog", {
+          p_quote_id: quote.quoteId || quote.id,
+          p_quote_version_id: quote.id,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_STATUS": {
         const { error } = await client.rpc("transition_quote_status", {
@@ -4997,7 +5212,17 @@ async function createSupabaseAdapter(config) {
     }
   }
 
-  return { mode: "supabase", client, bootstrap, sync };
+  return {
+    mode: "supabase",
+    client,
+    bootstrap,
+    sync,
+    signInWithPassword,
+    getSession,
+    loadCurrentProfile,
+    resetPasswordForEmail,
+    signOut
+  };
 }
 
 
@@ -5006,6 +5231,7 @@ async function createSupabaseAdapter(config) {
 
 
 const STORAGE_KEY = "analiza-en-casa-production-qa-v1";
+const DEMO_PASSWORD = "Demo2026!";
 
 function clone(value) {
   return structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -5015,21 +5241,50 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function normalizeState(rawState = {}) {
+  const base = clone(seedData);
+  const raw = rawState && typeof rawState === "object" ? clone(rawState) : {};
+  const normalized = {
+    ...base,
+    ...raw,
+    meta: { ...base.meta, ...(raw.meta || {}) },
+    organization: { ...base.organization, ...(raw.organization || {}) },
+    session: { ...base.session, ...(raw.session || {}) }
+  };
+  for (const [key, value] of Object.entries(base)) {
+    if (Array.isArray(value)) normalized[key] = Array.isArray(raw[key]) ? raw[key] : clone(value);
+  }
+  normalized.session.authenticated = Boolean(normalized.session.authenticated && normalized.session.userId && normalized.session.role);
+  normalized.clinicalCorrections ||= [];
+  normalized.notificationAttempts ||= [];
+  return normalized;
+}
+
 function loadLocalState() {
   try {
     const raw = safeStorage.getItem(STORAGE_KEY);
-    if (!raw) return clone(seedData);
+    if (!raw) return normalizeState(seedData);
     const parsed = JSON.parse(raw);
-    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return clone(seedData);
-    return parsed;
+    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return normalizeState(seedData);
+    return normalizeState(parsed);
   } catch {
-    return clone(seedData);
+    return normalizeState(seedData);
   }
 }
 
 async function createAppStore(config) {
   let state = loadLocalState();
   state.clinicalCorrections ||= [];
+  state.patients = state.patients.map((patient) => ({
+    ...patient,
+    organizationId: patient.organizationId || state.organization?.id,
+    fullName: patient.fullName || `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+    addressComments: patient.addressComments || ""
+  }));
+  state.cases = state.cases.map((record) => ({
+    ...record,
+    organizationId: record.organizationId || state.organization?.id
+  }));
   state.quotes = state.quotes.map((quote) => ({
     ...quote,
     organizationId: quote.organizationId || state.organization?.id,
@@ -5063,15 +5318,9 @@ async function createAppStore(config) {
   const listeners = new Set();
 
   if (adapter.mode === "supabase") {
-    try {
-      const remote = await adapter.bootstrap();
-      if (remote && Object.values(remote).some((collection) => collection?.length)) {
-        state = { ...state, ...remote, meta: { ...state.meta, remoteBootstrappedAt: nowIso() } };
-      }
-    } catch (error) {
-      state.meta.remoteError = error.message;
-      state.meta.remoteFallback = true;
-    }
+    state.session = { authenticated: false, userId: null, role: null };
+    state.meta.dataSource = "SUPABASE_AUTH_REQUIRED";
+    state.meta.remoteFallback = false;
   }
 
   function save() {
@@ -5085,7 +5334,7 @@ async function createAppStore(config) {
   }
 
   function currentUser() {
-    return state.users.find((user) => user.id === state.session.userId) || state.users[0];
+    return state.users.find((user) => user.id === state.session.userId) || null;
   }
 
   function audit(action, entity, summary, metadata = {}) {
@@ -5115,6 +5364,18 @@ async function createAppStore(config) {
         audit("REMOTE_SYNC_FAILED", action, `No se pudo sincronizar ${action}: ${error.message}`);
       });
       return { ok: false, error };
+    }
+  }
+
+  async function requiredSync(action, payload) {
+    try {
+      return await adapter.sync(action, payload);
+    } catch (error) {
+      setState((draft) => {
+        draft.meta.remoteError = error.message;
+        audit("REMOTE_SYNC_FAILED", action, `No se pudo confirmar ${action}: ${error.message}`);
+      });
+      throw error;
     }
   }
 
@@ -5279,9 +5540,7 @@ async function createAppStore(config) {
     return [original, ...corrections];
   }
 
-  function login(userId, role = null) {
-    const user = state.users.find((candidate) => candidate.id === userId);
-    if (!user) throw new Error("Usuario demo no encontrado.");
+  function establishSession(user, role = null) {
     setState((draft) => {
       draft.session = {
         authenticated: true,
@@ -5293,52 +5552,126 @@ async function createAppStore(config) {
     });
   }
 
-  function logout() {
+  async function authenticate(email, password) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const suppliedPassword = String(password || "");
+    if (!normalizedEmail || !suppliedPassword) throw new Error("Ingresa usuario y contraseña.");
+    if (adapter.mode === "mock") {
+      const user = state.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.status === "ACTIVE");
+      if (!user || suppliedPassword !== DEMO_PASSWORD) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+      establishSession(user);
+      return { userId: user.id, role: user.role, mode: "mock" };
+    }
+
+    let authUser;
+    try {
+      authUser = await adapter.signInWithPassword(normalizedEmail, suppliedPassword);
+      const profile = await adapter.loadCurrentProfile(authUser.id);
+      const user = {
+        id: authUser.id,
+        name: profile.full_name,
+        email: authUser.email,
+        role: profile.role,
+        status: profile.status,
+        organizationId: profile.organization_id
+      };
+      const remote = await adapter.bootstrap();
+      const clearedCollections = Object.fromEntries(Object.entries(seedData).filter(([, value]) => Array.isArray(value)).map(([key]) => [key, []]));
+      state = normalizeState({
+        ...state,
+        ...clearedCollections,
+        ...remote,
+        users: [user],
+        organization: profile.organizations || state.organization,
+        meta: { ...state.meta, dataSource: "SUPABASE", remoteBootstrappedAt: nowIso(), remoteFallback: false }
+      });
+      save();
+      establishSession(user, profile.role);
+      return { userId: user.id, role: profile.role, mode: "supabase" };
+    } catch (error) {
+      if (authUser) await adapter.signOut().catch(() => {});
+      throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    }
+  }
+
+  async function recoverPassword(email) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail) throw new Error("Ingresa el correo de acceso.");
+    if (adapter.mode === "supabase") await adapter.resetPasswordForEmail(normalizedEmail);
+    return { ok: true, simulated: adapter.mode === "mock" };
+  }
+
+  async function logout() {
+    if (adapter.mode === "supabase") await adapter.signOut();
     setState((draft) => {
       audit("LOGOUT", draft.session.userId, "Cierre de sesión.");
-      draft.session.authenticated = false;
+      draft.session = { authenticated: false, userId: null, role: null, loggedAt: null };
     });
   }
 
   function reset() {
-    state = clone(seedData);
+    state = normalizeState(seedData);
     safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     for (const listener of listeners) listener(state);
   }
 
   function createPatient(input) {
     requirePermission("patients:write");
+    const fullName = String(input.fullName || `${input.firstName || ""} ${input.lastName || ""}`).trim();
+    const document = String(input.document || "").trim();
+    if (!document || !fullName) throw new Error("Documento y nombre completo son obligatorios.");
+    const email = String(input.email || "").trim().toLowerCase();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Correo inválido.");
     const patient = {
       id: uid("PAT"),
       documentType: input.documentType || "DUI",
-      document: input.document.trim(),
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      fullName: `${input.firstName} ${input.lastName}`.trim(),
+      document,
+      firstName: String(input.firstName || "").trim(),
+      lastName: String(input.lastName || "").trim(),
+      fullName,
       birthDate: input.birthDate || "",
       sex: input.sex || "",
       bloodType: input.bloodType || "",
-      nationality: input.nationality || "Salvadoreña",
+      nationality: input.nationality || "",
+      company: input.company || "",
       phone: input.phone || "",
-      email: input.email || "",
+      homePhone: input.homePhone || "",
+      email,
+      retired: Boolean(input.retired),
+      civilStatus: input.civilStatus || "",
+      occupation: input.occupation || "",
       address: input.address || "",
+      addressComments: input.addressComments || "",
+      locationLink: input.locationLink || "",
       geo: input.geo || "",
-      triage: input.triage || "BAJA",
+      triage: input.triage || "NO_ASIGNADO",
       status: "ACTIVE",
       insurerId: input.insurerId || null,
       planId: input.planId || null,
       policy: input.policy || "",
+      policyCertificate: input.policyCertificate || "",
+      policyEffectiveDate: input.policyEffectiveDate || "",
       policyValidUntil: input.policyValidUntil || "",
+      isPolicyHolder: input.isPolicyHolder ?? null,
+      insuredDocument: input.insuredDocument || "",
+      insuredName: input.insuredName || "",
+      insuredBirthDate: input.insuredBirthDate || "",
       contactName: input.contactName || "",
       contactPhone: input.contactPhone || "",
+      contactEmail: input.contactEmail || "",
+      contactRelationship: input.contactRelationship || "",
+      contactRole: input.contactRole || "",
+      contactCountry: input.contactCountry || "",
       notifyWhatsApp: Boolean(input.notifyWhatsApp),
       notifySms: Boolean(input.notifySms),
-      notifyEmail: Boolean(input.notifyEmail)
+      notifyEmail: Boolean(input.notifyEmail),
+      organizationId: state.organization?.id
     };
 
     const duplicate = state.patients.some((existing) =>
-      existing.documentType === patient.documentType
-      && existing.document.replace(/\s/g, "") === patient.document.replace(/\s/g, "")
+      existing.organizationId === patient.organizationId
+      && existing.documentType === patient.documentType
+      && existing.document.replace(/\s/g, "").toUpperCase() === patient.document.replace(/\s/g, "").toUpperCase()
     );
     if (duplicate) throw new Error("Ya existe un paciente con ese documento.");
 
@@ -5350,12 +5683,56 @@ async function createAppStore(config) {
     return patient;
   }
 
+  function importPatients(inputs) {
+    requirePermission("patients:write");
+    if (adapter.mode !== "mock") throw new Error("La carga productiva requiere el importador transaccional del servidor.");
+    if (!Array.isArray(inputs) || !inputs.length) throw new Error("El archivo no contiene pacientes.");
+    if (inputs.length > 500) throw new Error("La carga demo admite hasta 500 filas por archivo.");
+    const existingKeys = new Set(state.patients.map((patient) => `${patient.documentType}:${String(patient.document).replace(/\s/g, "").toUpperCase()}`));
+    const batchKeys = new Set();
+    const imported = inputs.map((input, index) => {
+      const row = index + 2;
+      const documentType = String(input.documentType || "DUI").trim();
+      const document = String(input.document || "").trim();
+      const firstName = String(input.firstName || "").trim();
+      const lastName = String(input.lastName || "").trim();
+      const email = String(input.email || "").trim().toLowerCase();
+      if (!document || !firstName || !lastName) throw new Error(`Fila ${row}: documento, firstName y lastName son obligatorios.`);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error(`Fila ${row}: correo inválido.`);
+      if (input.birthDate && Number.isNaN(Date.parse(input.birthDate))) throw new Error(`Fila ${row}: fecha de nacimiento inválida.`);
+      const key = `${documentType}:${document.replace(/\s/g, "").toUpperCase()}`;
+      if (existingKeys.has(key) || batchKeys.has(key)) throw new Error(`Fila ${row}: documento duplicado en el alcance autorizado.`);
+      batchKeys.add(key);
+      return {
+        id: uid("PAT"), documentType, document, firstName, lastName, fullName: `${firstName} ${lastName}`,
+        birthDate: input.birthDate || "", sex: input.sex || "", bloodType: input.bloodType || "",
+        nationality: input.nationality || "Salvadoreña", company: input.company || "", phone: input.phone || "",
+        email, address: input.address || "", geo: "", triage: input.triage || "NO_ASIGNADO",
+        status: String(input.status || "ACTIVE").toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+        insurerId: null, planId: null, policy: "", policyValidUntil: "", contactName: "", contactPhone: "",
+        notifyWhatsApp: false, notifySms: false, notifyEmail: false, organizationId: state.organization?.id
+      };
+    });
+    setState((draft) => {
+      draft.patients.unshift(...imported);
+      audit("IMPORT_PATIENTS", `BATCH-${nowIso()}`, `${imported.length} pacientes sintéticos importados.`, { count: imported.length });
+    });
+    return imported;
+  }
+
   function updatePatient(id, patch) {
     requirePermission("patients:write");
     let updated;
     setState((draft) => {
       const patient = draft.patients.find((record) => record.id === id);
       if (!patient) throw new Error("Paciente no encontrado.");
+      assertCurrentOrganization(patient, "Paciente");
+      const documentType = patch.documentType || patient.documentType;
+      const document = String(patch.document ?? patient.document).replace(/\s/g, "").toUpperCase();
+      if (draft.patients.some((record) => record.id !== id && record.organizationId === patient.organizationId && record.documentType === documentType && String(record.document).replace(/\s/g, "").toUpperCase() === document)) {
+        throw new Error("No fue posible guardar el paciente con ese documento.");
+      }
+      if (patch.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(patch.email).trim())) throw new Error("Correo inválido.");
       Object.assign(patient, patch);
       if (patch.firstName || patch.lastName) patient.fullName = `${patient.firstName} ${patient.lastName}`.trim();
       updated = clone(patient);
@@ -5366,10 +5743,12 @@ async function createAppStore(config) {
 
   function createCase(input) {
     requirePermission("cases:write");
-    if (!patientById(input.patientId)) throw new Error("Paciente no encontrado.");
+    const patient = patientById(input.patientId);
+    assertCurrentOrganization(patient, "Paciente");
     const sequence = state.cases.length + 196;
     const record = {
       id: `HOS-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`,
+      organizationId: state.organization?.id,
       patientId: input.patientId,
       accountType: input.accountType || "PRIVADO",
       insurerId: input.insurerId || null,
@@ -5398,25 +5777,87 @@ async function createAppStore(config) {
     setState((draft) => {
       const record = draft.cases.find((candidate) => candidate.id === id);
       if (!record) throw new Error("Hospitalización no encontrada.");
+      assertCurrentOrganization(record, "Hospitalización");
       Object.assign(record, patch);
       audit("UPDATE_CASE", id, `Hospitalización actualizada: ${Object.keys(patch).join(", ")}.`);
     });
+  }
+
+  function validateQuoteGeneral(input, fallback = {}) {
+    const invoiceDate = String(input.invoiceDate ?? fallback.invoiceDate ?? "").trim();
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(invoiceDate) ? new Date(`${invoiceDate}T00:00:00.000Z`) : null;
+    if (!parsedDate || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== invoiceDate) {
+      throw new Error("Indique una fecha de cotización válida.");
+    }
+    const discountGroupId = String(input.discountGroupId ?? fallback.discountGroupId ?? "").trim();
+    const allowedDiscount = discountGroupId === "REGULAR" || state.discountRules.some((rule) => rule.id === discountGroupId && rule.active);
+    if (!allowedDiscount) throw new Error("Seleccione un grupo de descuento autorizado.");
+    const referredBy = String(input.referredBy ?? fallback.referredBy ?? "").trim();
+    if (!referredBy) throw new Error("Indique al menos una referencia autorizada.");
+    const comments = String(input.comments ?? fallback.comments ?? "").trim();
+    if (!comments) throw new Error("Los comentarios administrativos son obligatorios.");
+    return { invoiceDate, discountGroupId, referredBy, comments, giftcard: String(input.giftcard ?? fallback.giftcard ?? "").trim() };
+  }
+
+  function validateQuoteItems(inputItems) {
+    if (!Array.isArray(inputItems) || !inputItems.length) throw new Error("La cotización requiere al menos un concepto.");
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    return inputItems.map((item) => {
+      if (!allowedCategories.has(item.category)) throw new Error("La categoría del concepto no está autorizada.");
+      if (!String(item.name || "").trim()) throw new Error("El concepto requiere una descripción.");
+      if (!Number.isFinite(Number(item.quantity)) || !(Number(item.quantity) > 0)) throw new Error("La cantidad del concepto debe ser mayor que cero.");
+      if (!Number.isFinite(Number(item.unitPrice)) || Number(item.unitPrice) < 0) throw new Error("Hay conceptos sin precio válido.");
+      const lineDiscount = Number(item.discountAmount ?? 0);
+      if (!Number.isFinite(lineDiscount) || lineDiscount < 0) throw new Error("El descuento de línea debe ser un importe válido no negativo.");
+      if (lineDiscount > Number(item.quantity) * Number(item.unitPrice)) throw new Error("El descuento de línea no puede superar el importe bruto.");
+      const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId && candidate.active !== false);
+      if (!catalogItem || catalogItem.category !== item.category) throw new Error("El concepto no pertenece al catálogo autorizado.");
+      if (String(item.name).trim() !== String(catalogItem.name).trim()) throw new Error("La descripción debe coincidir con el catálogo autorizado.");
+      if (Number(item.unitPrice) !== Number(catalogItem.price)) throw new Error("El precio debe coincidir con el catálogo autorizado.");
+      return {
+        ...item,
+        catalogItemId: catalogItem.id,
+        category: catalogItem.category,
+        name: catalogItem.name,
+        quantity: Number(item.quantity),
+        unitPrice: Number(catalogItem.price),
+        discountAmount: lineDiscount
+      };
+    });
+  }
+
+  function resolveQuoteDiscount(discountGroupId, reason = "") {
+    if (discountGroupId === "REGULAR") {
+      return { type: "CATEGORY_PERCENTAGES", categories: {}, value: 0, reason: "", ruleId: "REGULAR" };
+    }
+    const rule = state.discountRules.find((candidate) => candidate.id === discountGroupId && candidate.active);
+    if (!rule) throw new Error("Seleccione un grupo de descuento autorizado.");
+    if (rule.requiresApproval) throw new Error("El grupo de descuento requiere un flujo de aprobación todavía no configurado.");
+    const normalizedReason = String(reason || "").trim();
+    if (rule.requiresReason && !normalizedReason) throw new Error("Indique el motivo del descuento.");
+    return {
+      type: "CATEGORY_PERCENTAGES",
+      categories: clone(rule.categories || {}),
+      value: 0,
+      reason: normalizedReason,
+      ruleId: rule.id
+    };
   }
 
   function createQuote(input) {
     requirePermission("quotes:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
     const patient = patientById(recordCase.patientId);
     if (!patient) throw new Error("Paciente no encontrado.");
-    if (!input.items?.length) throw new Error("La cotización requiere al menos un concepto.");
-
-    const missingPrice = input.items.some((item) => !(Number(item.unitPrice) >= 0));
-    if (missingPrice) throw new Error("Hay conceptos sin precio.");
+    const authorizedItems = validateQuoteItems(input.items);
+    const general = validateQuoteGeneral(input);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason);
 
     const calculation = calculateQuote(
-      input.items,
-      input.discount || { type: "PERCENT", value: 0 },
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount || 0
     );
     const sequence = 150 + state.quotes.length;
@@ -5431,7 +5872,7 @@ async function createAppStore(config) {
       status: "DRAFT",
       version: 1,
       currency: "USD",
-      items: input.items.map((item) => ({
+      items: authorizedItems.map((item) => ({
         id: item.id || uid("QTI"),
         catalogItemId: item.catalogItemId || null,
         category: item.category,
@@ -5440,9 +5881,13 @@ async function createAppStore(config) {
         unitPrice: Number(item.unitPrice),
         discountAmount: Number(item.discountAmount || 0)
       })),
-      discount: input.discount || { type: "PERCENT", value: 0, reason: "" },
+      discount: authorizedDiscount,
       ...calculation,
-      comments: input.comments || "",
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
       revisionReason: "",
       immutable: false,
       createdBy: currentUser().id,
@@ -5454,13 +5899,26 @@ async function createAppStore(config) {
     quote.quoteId = quote.id;
     quote.originalQuoteId = quote.id;
 
-    setState((draft) => {
+    const commit = (remote = null) => {
+      if (remote?.quote_id && remote?.quote_version_id) {
+        quote.displayCode = quote.id;
+        quote.id = remote.quote_version_id;
+        quote.quoteId = remote.quote_id;
+        quote.originalQuoteId = remote.quote_id;
+        quote.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(quote);
-      recordCase.nextAction = "Revisar y enviar cotización.";
+      const currentCase = draft.cases.find((candidate) => candidate.id === recordCase.id);
+      if (currentCase) currentCase.nextAction = "Revisar y enviar cotización.";
       audit("CREATE_QUOTE", quote.id, `Cotización creada para ${patient.fullName} por ${quote.total}.`);
-    });
-    safeSync("CREATE_QUOTE", { quote });
-    return quote;
+      });
+      return quote;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE", { quote }).then(commit);
+    }
+    return commit();
   }
 
   function reviseQuote(id, input) {
@@ -5470,23 +5928,22 @@ async function createAppStore(config) {
     assertCurrentOrganization(original, "Cotización");
     const revisionReason = String(input.revisionReason || "").trim();
     if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
     const rootId = quoteRootId(original);
     const nextVersion = quoteVersions(original).reduce((highest, candidate) => Math.max(highest, Number(candidate.version || 0)), 0) + 1;
-    let revised;
-    setState((draft) => {
-      const source = draft.quotes.find((candidate) => candidate.id === id);
-      if (!source) throw new Error("Cotización no encontrada.");
-      revised = {
-        ...clone(source),
+    const revised = {
+        ...clone(original),
         id: uid("QTV"),
         quoteId: rootId,
-        originalQuoteId: source.originalQuoteId || rootId,
-        previousVersionId: source.id,
+        originalQuoteId: original.originalQuoteId || rootId,
+        previousVersionId: original.id,
         version: nextVersion,
         status: "DRAFT",
         immutable: false,
@@ -5495,22 +5952,38 @@ async function createAppStore(config) {
         revisionReason,
         createdBy: currentUser().id,
         createdAt: nowIso(),
-        items: (input.items || source.items).map((item) => ({ ...clone(item), id: uid("QTI") })),
-        discount: clone(input.discount || source.discount),
-        comments: input.comments ?? source.comments,
+        items: authorizedItems.map((item) => ({ ...clone(item), id: uid("QTI") })),
+        discount: clone(authorizedDiscount),
+        comments: general.comments,
+        invoiceDate: general.invoiceDate,
+        discountGroupId: general.discountGroupId,
+        referredBy: general.referredBy,
+        giftcard: general.giftcard,
         ...calculation,
         portalToken: `demo-${uid("portal").toLowerCase()}`,
         expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
       };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) {
+        revised.id = remote.quote_version_id;
+        revised.quoteId = remote.quote_id || revised.quoteId;
+        revised.originalQuoteId = remote.quote_id || revised.originalQuoteId;
+        revised.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(revised);
-      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${source.id}; motivo: ${revisionReason}.`, {
+      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${original.id}; motivo: ${revisionReason}.`, {
         quoteId: rootId,
-        previousVersionId: source.id,
+        previousVersionId: original.id,
         version: revised.version
       });
-    });
-    safeSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id });
-    return revised;
+      });
+      return revised;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id }).then(commit);
+    }
+    return commit();
   }
 
   function updateQuoteDraft(id, input) {
@@ -5521,27 +5994,42 @@ async function createAppStore(config) {
     if (original.status !== "DRAFT" || quoteIsImmutable(original)) {
       throw new Error("La versión enviada no se puede editar. Cree una nueva versión.");
     }
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
-    let updated;
-    setState((draft) => {
+    const updated = {
+      ...clone(original),
+      items: clone(authorizedItems),
+      discount: clone(authorizedDiscount),
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
+      ...calculation
+    };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) updated.remoteConfirmedAt = nowIso();
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === id);
       if (!quote) throw new Error("Cotización no encontrada.");
-      quote.items = clone(input.items || quote.items);
-      quote.discount = clone(input.discount || quote.discount);
-      quote.comments = input.comments ?? quote.comments;
-      Object.assign(quote, calculation);
-      updated = clone(quote);
+      Object.assign(quote, clone(updated));
       audit("UPDATE_QUOTE_DRAFT", quote.id, `Borrador v${quote.version} actualizado.`, {
         quoteId: quoteRootId(quote),
         version: quote.version
       });
-    });
-    safeSync("UPDATE_QUOTE_DRAFT", { quote: updated });
-    return updated;
+      });
+      return updated;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("UPDATE_QUOTE_DRAFT", { quote: updated }).then(commit);
+    }
+    return commit();
   }
 
   function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
@@ -6287,12 +6775,14 @@ async function createAppStore(config) {
     },
     save,
     reset,
-    login,
+    authenticate,
+    recoverPassword,
     logout,
     patientById,
     caseById,
     quoteById,
     createPatient,
+    importPatients,
     updatePatient,
     createCase,
     updateCase,
@@ -6796,7 +7286,7 @@ function table(headers, rows, options = {}) {
   return `
     <div class="table-wrap ${compact ? "table-compact" : ""}">
       <table class="${className}">
-        <thead><tr>${headers.map((header) => `<th>${esc(header)}</th>`).join("")}</tr></thead>
+        <thead><tr>${headers.map((header) => `<th>${header ? esc(header) : '<span class="sr-only">Acciones</span>'}</th>`).join("")}</tr></thead>
         <tbody>${rows.length ? rows.join("") : `<tr><td colspan="${headers.length}">${emptyState("Sin resultados", "Ajusta los filtros o crea un nuevo registro.")}</td></tr>`}</tbody>
       </table>
     </div>`;
@@ -6836,109 +7326,180 @@ function searchFilter(items, query, fields) {
 }
 
 function renderDashboard(state, store, ui) {
-  const activeCases = state.cases.filter((item) => !["CLOSED", "CANCELLED"].includes(item.status));
-  const openQuotes = state.quotes.filter((item) => !["CLOSED", "CANCELLED", "REJECTED"].includes(item.status));
-  const openBalance = state.quotes.reduce((sum, quote) => sum + quoteBalance(quote, state.payments), 0);
-  const lowStock = state.inventoryItems.filter((item) => inventoryState(item) !== "OK");
-  const pendingInsurance = state.insuranceRequests.filter((item) => !["APPROVED", "REJECTED", "CLOSED"].includes(item.status));
-  const todayShifts = state.shifts.slice(0, 5);
-  const recentEvents = state.auditLogs.slice(0, 7);
-
-  const statusCounts = {};
-  for (const quote of state.quotes) statusCounts[quote.status] = (statusCounts[quote.status] || 0) + 1;
-  const maxCount = Math.max(1, ...Object.values(statusCounts));
+  const activePatients = state.patients.filter((patient) => patient.status === "ACTIVE").length;
+  const medicationItems = state.medicationCards.flatMap((card) => card.items || []);
+  const updatedTreatments = medicationItems.filter((item) => item.lastAdministration).length;
+  const carePlans = state.clinicalDocuments.filter((document) => document.type === "CARE_PLAN" && document.status !== "VOIDED").length;
+  const now = new Date();
+  const endingTreatments = medicationItems.filter((item) => {
+    if (!item.endDate) return false;
+    const days = (new Date(`${item.endDate}T23:59:59Z`) - now) / 86_400_000;
+    return days >= 0 && days <= 7;
+  }).length;
+  const vitalRows = [...state.vitalSigns].sort((left, right) => String(right.recordedAt).localeCompare(String(left.recordedAt)));
 
   return `
-    ${pageHeader("Centro operativo", "Una vista integral para pacientes, casos, cotizaciones, seguros, clínica, inventario y finanzas.",
+    ${pageHeader("Dashboard", "Indicadores del capítulo CH01 calculados desde datos sintéticos o marcados explícitamente cuando falta una regla del cliente.",
       `${actionButton("Nueva cotización", "open-quote-form", {kind: "primary", iconName: "plus"})}${actionButton("Nuevo paciente", "open-patient-form", {iconName: "plus"})}`)}
-    <div class="metrics-grid">
-      ${metric("Pacientes activos", state.patients.filter((p) => p.status === "ACTIVE").length, `${activeCases.length} hospitalizaciones abiertas`, "patients", "teal")}
-      ${metric("Cotizaciones abiertas", openQuotes.length, `${pendingInsurance.length} requieren seguimiento`, "quotes", "blue")}
-      ${metric("Saldo por cobrar", money(openBalance), "Responsabilidad pendiente del paciente", "money", "amber")}
-      ${metric("Alertas de inventario", lowStock.length, `${state.inventoryReservations.filter((r) => r.status === "OPEN").length} compromisos abiertos`, "inventory", "coral")}
+    <div class="metrics-grid metrics-grid-six">
+      ${metric("Pacientes con alertas", "—", "Pendiente de umbrales clínicos aprobados", "alert", "coral")}
+      ${metric("Pacientes activos", activePatients, "Calculado desde estado ACTIVE", "patients", "teal")}
+      ${metric("Tratamientos actualizados", updatedTreatments, "Indicador demo: administración registrada", "clinical", "blue")}
+      ${metric("Tratamientos por finalizar", endingTreatments, "Indicador demo: ventana configurable de 7 días", "clock", "amber")}
+      ${metric("Planes de cuidado", carePlans, "Documentos CARE_PLAN no anulados", "file", "purple")}
+      ${metric("Incidentes", "—", "Sin fuente ni regla aprobada", "alert", "coral")}
     </div>
-
-    <div class="dashboard-grid dashboard-grid-2">
-      ${card("Embudo de cotizaciones", `
-        <div class="status-bars">
-          ${Object.entries(statusCounts).map(([status, count]) => `
-            <a class="status-bar-row" href="#/preautorizaciones">
-              <span>${esc(QUOTE_ADMIN_LABELS[status] || status)}</span>
-              <div class="bar-track"><span style="width:${Math.max(8, count / maxCount * 100)}%"></span></div>
-              <strong>${count}</strong>
-            </a>`).join("")}
-        </div>`, {subtitle: "Distribución por estado actual", actions: linkButton("Ver flujo", "#/preautorizaciones", {kind: "ghost"})})}
-
-      ${card("Próximos turnos", `
-        <div class="timeline-list">
-          ${todayShifts.map((shift) => `
-            <article class="timeline-item">
-              <span class="timeline-dot"></span>
-              <div><strong>${esc(shift.resourceName)}</strong><p>${esc(patientName(state, shift.patientId))} · ${esc(shift.type.replaceAll("_", " "))}</p><small>${formatDate(shift.start, true)} → ${formatDate(shift.end, true)}</small></div>
-              ${badge(shift.status)}
-            </article>`).join("")}
-        </div>`, {actions: linkButton("Abrir agenda", "#/agenda", {kind: "ghost"})})}
-    </div>
-
-    <div class="dashboard-grid dashboard-grid-3">
-      ${card("Casos que requieren acción", table(
-        ["Caso", "Paciente", "Estado", "Próxima acción", ""],
-        activeCases.slice(0, 6).map((record) => `<tr>
-          <td><a class="strong-link" href="#/hospitalizaciones/${record.id}">${esc(record.id)}</a></td>
-          <td>${esc(patientName(state, record.patientId))}</td>
-          <td>${badge(record.status)}</td>
-          <td class="cell-wrap">${esc(record.nextAction)}</td>
-          <td><a class="row-action" href="#/hospitalizaciones/${record.id}">Abrir ${icon("view")}</a></td>
-        </tr>`), {compact: true}), {className: "span-2"})}
-
-      ${card("Inventario crítico", `
-        <div class="compact-list">
-          ${lowStock.slice(0, 6).map((item) => `<a href="#/inventario" class="compact-item">
-            <div><strong>${esc(item.name)}</strong><small>${esc(warehouseName(state, item.warehouseId))}</small></div>
-            <div class="align-right"><strong>${inventoryFree(item)} ${esc(item.unit)}</strong>${badge(inventoryState(item))}</div>
-          </a>`).join("") || `<p class="success-callout">No hay alertas críticas.</p>`}
-        </div>`, {actions: linkButton("Gestionar", "#/inventario", {kind: "ghost"})})}
-    </div>
-
-    ${card("Actividad reciente", table(
-      ["Fecha", "Usuario", "Rol", "Acción", "Entidad", "Detalle"],
-      recentEvents.map((event) => `<tr>
-        <td>${formatDate(event.date, true)}</td>
-        <td>${esc(event.user)}</td>
-        <td>${badge(event.role, event.role)}</td>
-        <td><code>${esc(event.action)}</code></td>
-        <td>${esc(event.entity)}</td>
-        <td class="cell-wrap">${esc(event.summary)}</td>
-      </tr>`), {compact: true}), {actions: linkButton("Auditoría completa", "#/auditoria", {kind: "ghost"})})}
+    ${card("Pacientes con valores fuera de rango", table(
+      ["Acciones", "Paciente", "FC", "FR", "Oxígeno", "Sistólica", "Diastólica", "Temp", "Dolor", "Glicemia", "Fecha", "Recurso"],
+      vitalRows.map((vital) => `<tr>
+        <td><a class="row-action" href="#/hospitalizaciones/${esc(vital.caseId)}">Ver ${icon("view")}</a></td>
+        <td>${esc(patientName(state, vital.patientId))}<small>Sin clasificación clínica</small></td>
+        <td>${esc(vital.heartRate)}</td><td>${esc(vital.respiratoryRate)}</td><td>${esc(vital.spo2)}%</td>
+        <td>${esc(vital.systolic)}</td><td>${esc(vital.diastolic)}</td><td>${esc(vital.temperature)} °C</td>
+        <td>${esc(vital.pain)}</td><td>—</td><td>${formatDate(vital.recordedAt, true)}</td><td>${esc(vital.authorName)}</td>
+      </tr>`), {compact: true}), {
+        subtitle: "Los umbrales están bloqueados por decisión del cliente; ningún registro se etiqueta normal o anormal.",
+        actions: `<button class="btn btn-secondary" type="button" disabled title="Requiere umbrales clínicos aprobados">Normales</button><span class="badge badge-neutral">Sin clasificar</span>`
+      })}
   `;
 }
 
 function renderPatients(state, store, ui) {
-  const rows = searchFilter(state.patients, ui.search, ["fullName", "document", "phone", "email", "address"]).map((patient) => {
-    const cases = state.cases.filter((item) => item.patientId === patient.id);
-    return `<tr>
-      <td><div class="person-cell"><span class="avatar">${initials(patient.fullName)}</span><div><a class="strong-link" href="#/pacientes/${patient.id}">${esc(patient.fullName)}</a><small>${esc(patient.id)}</small></div></div></td>
-      <td>${esc(patient.documentType)} ${esc(patient.document)}</td>
-      <td>${ageFromBirthDate(patient.birthDate)} años<br><small>${esc(patient.bloodType)}</small></td>
-      <td>${esc(patient.phone)}<br><small>${esc(patient.email)}</small></td>
-      <td>${esc(insurerName(state, patient.insurerId))}<br><small>${esc(patient.policy || "Sin póliza")}</small></td>
-      <td>${badge(patient.triage)}</td>
-      <td>${cases.length}</td>
-      <td>${badge(patient.status)}</td>
-      <td><div class="row-actions"><a href="#/pacientes/${patient.id}" title="Ver">${icon("view")}</a><button data-action="edit-patient" data-id="${patient.id}" title="Editar">${icon("edit")}</button></div></td>
-    </tr>`;
-  });
+  const tab = ui.patientTab || "active";
+  const canWrite = roleCan(state.session.role, "patients:write");
+  const activeCount = state.patients.filter((patient) => patient.status === "ACTIVE").length;
+  const inactiveCount = state.patients.filter((patient) => patient.status === "INACTIVE").length;
+  const tabControls = `<nav class="tabs" aria-label="Estados de pacientes">
+    <button class="tab ${tab === "active" ? "active" : ""}" data-action="set-patient-tab" data-tab="active" aria-current="${tab === "active" ? "page" : "false"}">Activos <span>${activeCount}</span></button>
+    <button class="tab ${tab === "inactive" ? "active" : ""}" data-action="set-patient-tab" data-tab="inactive" aria-current="${tab === "inactive" ? "page" : "false"}">Inactivos <span>${inactiveCount}</span></button>
+    ${canWrite ? `<button class="tab ${tab === "bulk" ? "active" : ""}" data-action="set-patient-tab" data-tab="bulk" aria-current="${tab === "bulk" ? "page" : "false"}">Carga masiva</button>` : ""}
+  </nav>`;
+
+  if (tab === "bulk") {
+    if (!canWrite) return accessDenied(state.session.role, "patients:write");
+    const preview = ui.patientImport;
+    return `
+      ${pageHeader("Pacientes", "Carga masiva transaccional en modo demo con datos exclusivamente sintéticos.", actionButton("Volver a activos", "set-patient-tab", {data:'data-tab="active"'}))}
+      ${tabControls}
+      ${card("Carga masiva", `
+        <div class="bulk-import">
+          <p>CSV UTF-8. Encabezados obligatorios: <code>document,firstName,lastName</code>. Opcionales: <code>documentType,birthDate,sex,phone,email,company,status</code>.</p>
+          <label class="file-drop" for="patient-import-file"><strong>Seleccionar CSV sintético</strong><span>No use información real.</span><input id="patient-import-file" type="file" accept=".csv,text/csv"></label>
+          ${preview?.error ? `<p class="error-callout" role="alert">${esc(preview.error)}</p>` : ""}
+          ${preview?.rows?.length ? `<div class="import-preview"><p><strong>${preview.rows.length}</strong> filas listas desde ${esc(preview.fileName)}.</p>${table(["Documento","Nombre","Correo","Empresa"], preview.rows.slice(0,10).map((item)=>`<tr><td>${esc(item.documentType || "DUI")} ${esc(item.document)}</td><td>${esc(item.firstName)} ${esc(item.lastName)}</td><td>${esc(item.email || "—")}</td><td>${esc(item.company || "—")}</td></tr>`), {compact:true})}<div class="form-actions">${actionButton("Cancelar","clear-patient-import")}${actionButton("Importar pacientes","confirm-patient-import",{kind:"primary"})}</div></div>` : ""}
+        </div>`)}
+    `;
+  }
+
+  const expectedStatus = tab === "inactive" ? "INACTIVE" : "ACTIVE";
+  const filtered = searchFilter(state.patients.filter((patient) => patient.status === expectedStatus), ui.search, ["fullName", "document", "phone", "email", "address", "company"]);
+  const sortKey = ui.patientSortKey || "fullName";
+  const direction = ui.patientSortDirection === "desc" ? -1 : 1;
+  filtered.sort((left, right) => String(sortKey === "age" ? left.birthDate : left[sortKey] || "").localeCompare(String(sortKey === "age" ? right.birthDate : right[sortKey] || ""), "es", {numeric:true}) * direction);
+  const pageSize = Number(ui.patientPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.patientPage || 1)), totalPages);
+  const pageRows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const sortHeader = (label, key) => `<button class="sort-button" data-action="sort-patients" data-sort="${key}" aria-label="Ordenar por ${esc(label)}" aria-pressed="${sortKey === key}">${esc(label)}${sortKey === key ? (direction === 1 ? " ↑" : " ↓") : " ↕"}</button>`;
+  const sortableTh = (label, key) => `<th aria-sort="${sortKey === key ? (direction === 1 ? "ascending" : "descending") : "none"}">${sortHeader(label, key)}</th>`;
+  const rows = pageRows.map((patient) => `<tr>
+    <td><div class="row-actions"><a href="#/pacientes/${patient.id}" title="Ver paciente" aria-label="Ver ${esc(patient.fullName)}">${icon("view")}</a><button data-action="edit-patient" data-id="${patient.id}" title="Editar paciente" aria-label="Editar ${esc(patient.fullName)}">${icon("edit")}</button></div></td>
+    <td>${esc(patient.documentType)} ${esc(patient.document)}</td>
+    <td><a class="strong-link" href="#/pacientes/${patient.id}">${esc(patient.fullName)}</a></td>
+    <td>${ageFromBirthDate(patient.birthDate)} años</td>
+    <td>${esc(patient.company || "Sin empresa")}</td>
+    <td>${badge(patient.triage, patient.triage === "NO_ASIGNADO" ? "No asignado" : LABELS[patient.triage] || patient.triage)}</td>
+    <td>${patient.notifyWhatsApp ? badge("ACTIVE", "Autorizado") : badge("INACTIVE", "No autorizado")}</td>
+    <td>${badge(patient.status)}</td>
+  </tr>`);
+  const loading = ui.patientLoadState === "loading";
+  const remoteError = store.config.dataMode === "supabase" && state.meta.remoteError;
+  const body = loading
+    ? `<div class="data-state" role="status" aria-live="polite"><span class="spinner"></span><strong>Cargando...</strong></div>`
+    : remoteError
+      ? `<div class="data-state error-callout" role="alert"><strong>No fue posible cargar pacientes.</strong><span>${esc(state.meta.remoteError)}</span></div>`
+      : `<div class="table-wrap"><table><thead><tr><th>Acciones</th>${sortableTh("Documento","document")}${sortableTh("Nombre completo","fullName")}${sortableTh("Edad","age")}${sortableTh("Empresa","company")}${sortableTh("Triage","triage")}<th>Notif. Botmaker/WhatsApp</th>${sortableTh("Estado","status")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="8">${emptyState("No hay registros disponibles", "Ajusta la búsqueda o cambia de pestaña.")}</td></tr>`}</tbody></table></div>`;
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="patient-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
 
   return `
     ${pageHeader("Pacientes", "Expediente administrativo único con datos personales, responsables, seguro, ubicación y trazabilidad.",
-      `${actionButton("Importar CSV", "import-patients", {iconName: "upload"})}${actionButton("Exportar", "export-patients", {iconName: "export"})}${actionButton("Nuevo paciente", "open-patient-form", {kind: "primary", iconName: "plus"})}`)}
+      `${actionButton("Excel", "export-patients", {iconName: "export"})}${actionButton("Nuevo", "open-patient-form", {kind: "primary", iconName: "plus"})}`)}
+    ${tabControls}
     <div class="filter-bar">
-      <label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar por nombre, DUI, teléfono o seguro" value="${esc(ui.search || "")}"></label>
-      <select data-ui-filter="patientStatus"><option value="">Todos los estados</option><option>ACTIVE</option><option>INACTIVE</option></select>
-      <div class="filter-summary">${rows.length} registros</div>
+      <label class="search-field">${icon("search")}<span class="sr-only">Buscar pacientes</span><input data-ui-search placeholder="Buscar por nombre, documento, teléfono o empresa" value="${esc(ui.search || "")}"></label>
+      <label class="page-size-label">Mostrar <select data-ui-filter="patientPageSize" aria-label="Cantidad de registros por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label>
+      <div class="filter-summary">${filtered.length} registros</div>
     </div>
-    ${card("Directorio de pacientes", table(["Paciente", "Documento", "Edad", "Contacto", "Seguro", "Triage", "Casos", "Estado", ""], rows))}
+    ${card("Directorio de pacientes", `${body}<nav class="pagination" aria-label="Paginación de pacientes"><button data-action="patient-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="patient-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)}
   `;
+}
+
+function renderPatientForm(state, store, ui, id = null) {
+  if (!roleCan(state.session.role, "patients:write")) return accessDenied(state.session.role, "patients:write");
+  const patient = id ? state.patients.find((item) => item.id === id) : null;
+  if (id && !patient) return notFound("Paciente");
+  const insurerOptions = [
+    `<option value="REGULAR" ${!patient?.insurerId ? "selected" : ""}>Paciente regular</option>`,
+    ...state.insurers.filter((item) => item.status === "ACTIVE").map((item) => `<option value="${esc(item.id)}" ${patient?.insurerId === item.id ? "selected" : ""}>${esc(item.id)} | ${esc(item.name)}</option>`)
+  ].join("");
+  const companies = [...new Set(state.patients.map((item) => item.company).filter(Boolean))];
+  const insured = Boolean(patient?.insurerId);
+  return `
+    ${pageHeader(patient ? "Editar paciente" : "Paciente nuevo", "Datos administrativos del paciente. Los campos marcados con * son obligatorios según la interfaz observada.")}
+    <form id="patient-form" class="patient-page-form">
+      <input type="hidden" name="id" value="${esc(patient?.id || "")}">
+      ${card("Datos del paciente", `<div class="patient-fields-grid">
+        <label><span>* Tipo de documento</span><select name="documentType" required><option value="DUI" ${["DUI","Cédula"].includes(patient?.documentType) ? "selected" : ""}>Cédula</option><option value="Pasaporte" ${patient?.documentType === "Pasaporte" ? "selected" : ""}>Pasaporte</option></select></label>
+        <label><span>* Documento</span><input name="document" required value="${esc(patient?.document || "")}" autocomplete="off"></label>
+        <label class="span-2"><span>* Nombre completo</span><input name="fullName" required value="${esc(patient?.fullName || "")}" autocomplete="name"></label>
+        <label><span>* Fecha de nacimiento</span><input type="date" name="birthDate" required value="${esc(patient?.birthDate || "")}"></label>
+        <fieldset class="patient-inline-options"><legend>* Sexo</legend><label><input type="radio" name="sex" value="M" ${patient?.sex === "M" ? "checked" : ""} required> Masculino</label><label><input type="radio" name="sex" value="F" ${patient?.sex === "F" ? "checked" : ""}> Femenino</label></fieldset>
+        <label><span>* Teléfono celular</span><input type="tel" name="phone" required value="${esc(patient?.phone || "")}" autocomplete="tel"></label>
+        <label><span>Teléfono casa</span><input type="tel" name="homePhone" value="${esc(patient?.homePhone || "")}"></label>
+        <label><span>Correo</span><input type="email" name="email" value="${esc(patient?.email || "")}" autocomplete="email"></label>
+        <label class="patient-check"><input type="checkbox" name="retired" ${patient?.retired ? "checked" : ""}> Jubilado</label>
+        <label><span>Tipo de sangre</span><select name="bloodType"><option value="">Seleccione</option>${["O+","O-","A+","A-","B+","B-","AB+","AB-"].map((value) => `<option ${patient?.bloodType === value ? "selected" : ""}>${value}</option>`).join("")}</select></label>
+        <label><span>Estado civil</span><input name="civilStatus" value="${esc(patient?.civilStatus || "")}" placeholder="Pendiente de catálogo del cliente"></label>
+        <label><span>Nacionalidad</span><input name="nationality" list="patient-nationalities" value="${esc(patient?.nationality || "")}" placeholder="Buscar nacionalidad"><datalist id="patient-nationalities"><option value="Salvadoreña"><option value="Panameña"></datalist></label>
+        <label><span>* Empresa</span><input name="company" list="patient-companies" required value="${esc(patient?.company || "")}" placeholder="Seleccionar empresa"><datalist id="patient-companies">${companies.map((value) => `<option value="${esc(value)}">`).join("")}</datalist></label>
+        <label><span>Ocupación</span><input name="occupation" value="${esc(patient?.occupation || "")}"></label>
+        <label class="patient-consent span-all"><input type="checkbox" name="notifyWhatsApp" ${patient?.notifyWhatsApp ? "checked" : ""}><span><strong>Este paciente desea recibir notificaciones automáticas por WhatsApp (Botmaker)</strong><small>Desmarcado por defecto. No se enviará contenido clínico; la base legal, revocación e historial requieren confirmación del cliente.</small></span></label>
+      </div>`) }
+
+      ${card("Información de seguro", `<div class="patient-fields-grid">
+        <label class="span-all"><span>* Seguro</span><select name="insurerId" data-change="patient-insurance-change" required>${insurerOptions}</select></label>
+        <fieldset class="patient-inline-options span-all patient-insurance-fields" ${insured ? "" : "hidden"}><legend>¿Paciente es el asegurado titular?</legend><label><input type="radio" name="isPolicyHolder" value="false" data-change="patient-holder-change" ${patient?.isPolicyHolder === false ? "checked" : ""} ${insured ? "required" : ""}> No</label><label><input type="radio" name="isPolicyHolder" value="true" data-change="patient-holder-change" ${patient?.isPolicyHolder ? "checked" : ""} ${insured ? "required" : ""}> Sí</label></fieldset>
+        <div class="patient-fields-grid span-all patient-insurance-fields" ${insured ? "" : "hidden"}>
+          <label><span>* Nro de póliza</span><input name="policy" value="${esc(patient?.policy || "")}" ${insured ? "required" : ""}></label>
+          <label><span>Certificado/Unidad</span><input name="policyCertificate" value="${esc(patient?.policyCertificate || "")}"></label>
+          <label><span>Fecha efectiva</span><input type="date" name="policyEffectiveDate" value="${esc(patient?.policyEffectiveDate || "")}"></label>
+          <label><span>* DUI/NIT del asegurado</span><input name="insuredDocument" value="${esc(patient?.insuredDocument || "")}" ${insured ? "required" : ""}></label>
+          <label><span>* Nombre asegurado</span><input name="insuredName" value="${esc(patient?.insuredName || "")}" ${insured ? "required" : ""}></label>
+          <label><span>* Fecha de nacimiento del asegurado</span><input type="date" name="insuredBirthDate" value="${esc(patient?.insuredBirthDate || "")}" ${insured ? "required" : ""}></label>
+          <button class="btn btn-secondary" type="button" disabled title="CH02-Q005: requiere reglas de múltiples coberturas">Agregar</button>
+        </div>
+      </div>`, {subtitle:"El catálogo es sintético. La titularidad y las múltiples coberturas permanecen sujetas a CH02-Q004/CH02-Q005."})}
+
+      ${card("Información de contactos", `<div class="patient-fields-grid">
+        <label><span>Nombre completo</span><input name="contactName" value="${esc(patient?.contactName || "")}"></label>
+        <label><span>Teléfono</span><input type="tel" name="contactPhone" value="${esc(patient?.contactPhone || "")}"></label>
+        <label><span>Correo</span><input type="email" name="contactEmail" value="${esc(patient?.contactEmail || "")}"></label>
+        <label><span>Parentesco</span><input name="contactRelationship" value="${esc(patient?.contactRelationship || "")}" placeholder="Pendiente de catálogo"></label>
+        <label><span>Rol</span><input name="contactRole" value="${esc(patient?.contactRole || "")}" placeholder="Pendiente de catálogo"></label>
+        <label><span>País de residencia</span><input name="contactCountry" value="${esc(patient?.contactCountry || "")}" placeholder="Pendiente de catálogo"></label>
+      </div>`, {subtitle:"La multiplicidad y los catálogos de contactos requieren decisión CH02-Q006."})}
+
+      ${card("Información de dirección", `<div class="patient-fields-grid">
+        <label class="span-all"><span>Pegar enlace <small title="CH02-Q007: proveedores y precedencia pendientes">ⓘ</small></span><div class="inline-control"><input name="locationLink" value="${esc(patient?.locationLink || "")}" placeholder="Enlace de ubicación"><button class="btn btn-secondary" type="button" data-action="clear-patient-location">Limpiar</button></div></label>
+        <label class="span-2"><span>* Dirección</span><input name="address" required value="${esc(patient?.address || "")}" placeholder="Enter a location"></label>
+        <label class="span-2"><span>Ubicación geográfica</span><input name="geo" value="${esc(patient?.geo || "")}" placeholder="Marcador o coordenadas"></label>
+        <label class="span-2"><span>* Comentarios relevantes de la dirección</span><input name="addressComments" required value="${esc(patient?.addressComments || "")}"></label>
+        <button class="btn btn-secondary" type="button" disabled title="CH02-Q007: finalidad y retención de cámara pendientes">Cámara</button>
+        <div class="synthetic-map span-all" role="img" aria-label="Mapa demo sin geocodificación real"><div class="map-grid"></div><span class="map-pin">●</span><strong>Mapa demo</strong><small>No geocodifica ni captura imágenes. Configuración pendiente CH02-Q007.</small></div>
+      </div>`) }
+
+      <div class="patient-form-actions"><a class="btn btn-secondary" href="#/pacientes">Atrás</a><button class="btn btn-primary" type="submit">Guardar</button></div>
+    </form>`;
 }
 
 function renderPatientDetail(state, store, ui, id) {
@@ -7004,30 +7565,85 @@ function renderPatientDetail(state, store, ui, id) {
 }
 
 function renderCases(state, store, ui) {
-  const records = searchFilter(state.cases, ui.search, ["id", "manager", "status", "diagnosisSummary", "nextAction"])
-    .map((record) => {
-      const quote = state.quotes.find((item) => item.caseId === record.id);
+  const canWriteCases = roleCan(state.session.role, "cases:write");
+  const canWriteQuotes = roleCan(state.session.role, "quotes:write");
+  const activeTab = ["active", "quotes", "pic"].includes(ui.tab) ? ui.tab : "active";
+  const casePageSize = Number(ui.casePageSize || 10);
+  const tabControls = `<nav class="tabs" aria-label="Gestión de hospitalización">
+    <button class="tab ${activeTab === "active" ? "active" : ""}" data-action="set-tab" data-tab="active" aria-current="${activeTab === "active" ? "page" : "false"}">Activos</button>
+    <button class="tab ${activeTab === "quotes" ? "active" : ""}" data-action="set-tab" data-tab="quotes" aria-current="${activeTab === "quotes" ? "page" : "false"}">Cotizaciones</button>
+    <button class="tab ${activeTab === "pic" ? "active" : ""}" data-action="set-tab" data-tab="pic" aria-current="${activeTab === "pic" ? "page" : "false"}">PIC Ejecución <span title="CH03-Q003: fórmula no confirmada">—</span></button>
+  </nav>`;
+
+  let tabBody = "";
+  if (activeTab === "pic") {
+    tabBody = `<div class="data-state" role="status"><strong>PIC Ejecución pendiente de reglas del cliente</strong><span>No se muestra un conteo ni se habilitan transiciones hasta resolver CH03-Q001, CH03-Q003 y CH03-Q005.</span></div>`;
+  } else if (activeTab === "quotes") {
+    const filteredQuotes = searchFilter(state.quotes, ui.search, ["id", "status", "comments"])
+      .filter((quote) => !ui.caseQuoteStatus || quote.status === ui.caseQuoteStatus)
+      .filter((quote) => !ui.caseQuoteDate || String(quote.createdAt || "").slice(0, 10) === ui.caseQuoteDate);
+    const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / casePageSize));
+    const currentPage = Math.min(Math.max(1, Number(ui.caseQuotePage || 1)), totalPages);
+    const pageRows = filteredQuotes.slice((currentPage - 1) * casePageSize, currentPage * casePageSize);
+    const rows = pageRows.map((quote) => {
+      const patient = state.patients.find((item) => item.id === quote.patientId);
+      const request = state.insuranceRequests.find((item) => item.quoteId === quote.id);
       return `<tr>
-        <td><a class="strong-link" href="#/hospitalizaciones/${record.id}">${esc(record.id)}</a></td>
-        <td>${esc(patientName(state, record.patientId))}</td>
-        <td>${esc(record.accountType)}<br><small>${esc(insurerName(state, record.insurerId))}</small></td>
-        <td>${esc(record.manager)}</td>
-        <td>${formatDate(record.startDate)}<br><small>${daysBetween(record.startDate, record.endDate || new Date().toISOString())} días</small></td>
-        <td>${badge(record.priority)}</td>
-        <td>${badge(record.status)}</td>
-        <td>${quote ? `<a href="#/cotizaciones/${quote.id}">${esc(quote.id)}<br>${badge(quote.status)}</a>` : `<span class="muted">Sin cotización</span>`}</td>
-        <td><a class="row-action" href="#/hospitalizaciones/${record.id}">Gestionar ${icon("view")}</a></td>
+        <td><a class="row-action" href="#/cotizaciones/${esc(quote.id)}" aria-label="Abrir ${esc(quote.id)}">${icon("view")}</a></td>
+        <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
+        <td>${esc(patient?.document || "—")}</td>
+        <td><a class="strong-link" href="#/cotizaciones/${esc(quote.id)}">${esc(quote.id)}</a></td>
+        <td>${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</td>
+        <td>${badge(request?.preauthorizationSentAt ? "SENT" : "PENDING", request?.preauthorizationSentAt ? "Enviado" : "Regla pendiente")}</td>
+        <td>${badge(request?.responseStatus || "PENDING", request?.responseStatus ? (QUOTE_ADMIN_LABELS[request.responseStatus] || request.responseStatus) : "Regla pendiente")}</td>
+        <td>${badge(request?.claimStatus || "PENDING", request?.claimStatus || "Regla pendiente")}</td>
+        <td>${formatDate(quote.createdAt)}</td>
+        <td>${money(quote.total)}</td>
       </tr>`;
     });
-  return `
-    ${pageHeader("Hospitalizaciones", "El caso es el contenedor central: paciente, cotización, seguro, pagos, clínica, agenda, inventario y cierre.",
-      `${actionButton("Nueva hospitalización", "open-case-form", {kind:"primary", iconName:"plus"})}`)}
-    <div class="filter-bar">
-      <label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar caso, paciente, responsable o estado" value="${esc(ui.search || "")}"></label>
-      <select data-ui-filter="caseStatus"><option value="">Todos los estados</option><option>ACTIVE</option><option>PENDING_CLOSE</option><option>CLOSED</option></select>
-      <div class="filter-summary">${records.length} casos</div>
+    const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="case-quote-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
+    tabBody = `<div class="filter-panel">
+      <label>Estado<select data-ui-filter="caseQuoteStatus"><option value="">Seleccione</option>${Object.entries(QUOTE_ADMIN_LABELS).map(([status, label]) => `<option value="${esc(status)}" ${ui.caseQuoteStatus === status ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+      <label>Fecha de creación<input type="date" data-ui-filter="caseQuoteDate" value="${esc(ui.caseQuoteDate || "")}"></label>
+      <div class="filter-actions"><button class="btn btn-primary" data-action="apply-case-filters">✓ Aplicar</button><button class="btn btn-secondary" data-action="clear-case-filters">Limpiar</button>${canWriteQuotes ? actionButton("Nuevo", "open-quote-form", {kind:"primary", iconName:"plus"}) : ""}</div>
     </div>
-    ${card("Gestión de hospitalizaciones", table(["Hospitalización", "Paciente", "Cuenta", "Responsable", "Duración", "Prioridad", "Estado", "Cotización", ""], records))}
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="casePageSize" aria-label="Cantidad de cotizaciones por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${casePageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label><nav class="pagination" aria-label="Paginación de cotizaciones"><button data-action="case-quote-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="case-quote-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav><label class="search-field">${icon("search")}<span class="sr-only">Buscar cotizaciones</span><input data-ui-search value="${esc(ui.search || "")}"></label></div>
+    ${table(["", "Paciente", "DUI/NIT", "Nro.", "Estado", "Envío preautorización", "Respuesta seguro", "Envío de reclamo", "Creación", "Total"], rows)}`;
+  } else {
+    const filteredCases = state.cases.map((record) => ({record, patient: state.patients.find((item) => item.id === record.patientId)}))
+      .filter(({record}) => !ui.caseStatus || record.status === ui.caseStatus)
+      .filter(({record}) => !ui.caseStartDate || record.startDate === ui.caseStartDate)
+      .filter(({record}) => !ui.caseAccountType || record.accountType === ui.caseAccountType)
+      .filter(({record, patient}) => !ui.search || [record.id, record.status, record.accountType, patient?.fullName, patient?.document, patient?.company].some((value) => String(value || "").toLowerCase().includes(String(ui.search).toLowerCase())));
+    const totalPages = Math.max(1, Math.ceil(filteredCases.length / casePageSize));
+    const currentPage = Math.min(Math.max(1, Number(ui.casePage || 1)), totalPages);
+    const pageRows = filteredCases.slice((currentPage - 1) * casePageSize, currentPage * casePageSize);
+    const rows = pageRows.map(({record, patient}) => `<tr>
+      <td><a class="row-action" href="#/hospitalizaciones/${esc(record.id)}" aria-label="Gestionar ${esc(record.id)}">${icon("view")}</a></td>
+      <td><a class="strong-link" href="#/hospitalizaciones/${esc(record.id)}">${esc(record.id)}</a></td>
+      <td>${esc(patient?.document || "—")}</td>
+      <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
+      <td>${esc(patient?.company || "Sin empresa")}</td>
+      <td>${esc(record.accountType)}</td>
+      <td>${badge(record.status)}</td>
+      <td>${formatDate(record.startDate)} al ${record.endDate ? formatDate(record.endDate) : "actual"}<small>${daysBetween(record.startDate, record.endDate || new Date().toISOString())} días</small></td>
+    </tr>`);
+    const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="case-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
+    const accountTypes = [...new Set(state.cases.map((record) => record.accountType).filter(Boolean))];
+    tabBody = `<div class="filter-panel">
+      <label>Estado Administrativo<select data-ui-filter="caseStatus"><option value="">Todos</option>${["ACTIVE","PENDING_CLOSE","CLOSED"].map((status)=>`<option value="${status}" ${ui.caseStatus === status ? "selected" : ""}>${LABELS[status] || status}</option>`).join("")}</select></label>
+      <label>Fecha de inicio<input type="date" data-ui-filter="caseStartDate" value="${esc(ui.caseStartDate || "")}"></label>
+      <label>Tipo de cuenta<select data-ui-filter="caseAccountType"><option value="">Seleccione</option>${accountTypes.map((type) => `<option value="${esc(type)}" ${ui.caseAccountType === type ? "selected" : ""}>${esc(type)}</option>`).join("")}</select></label>
+      <div class="filter-actions"><button class="btn btn-primary" data-action="apply-case-filters">✓ Aplicar</button><button class="btn btn-secondary" data-action="clear-case-filters">Limpiar</button></div>
+    </div>
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="casePageSize" aria-label="Cantidad de hospitalizaciones por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${casePageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label><nav class="pagination" aria-label="Paginación de hospitalizaciones"><button data-action="case-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="case-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav><label class="search-field">${icon("search")}<span class="sr-only">Buscar hospitalizaciones</span><input data-ui-search value="${esc(ui.search || "")}"></label></div>
+    ${table(["", "Hospitalización", "DUI/NIT", "Paciente", "Empresa", "Tipo Cuenta", "Administrativo", "Duración"], rows)}`;
+  }
+  return `
+    ${pageHeader("Hospitalización", "Gestión administrativa de casos, cotizaciones y seguimiento previo a ejecución.", canWriteCases ? actionButton("Nueva hospitalización", "open-case-form", {kind:"primary", iconName:"plus"}) : "")}
+    <section class="relation-card"><header><strong>Relación de pacientes por empresa</strong><span title="CH03-Q003: fórmula pendiente">—</span><button type="button" disabled title="CH03-Q003: alcance del panel pendiente">+</button></header></section>
+    ${tabControls}
+    ${card(activeTab === "active" ? "Hospitalizaciones activas" : activeTab === "quotes" ? "Cotizaciones" : "PIC Ejecución", tabBody)}
   `;
 }
 
@@ -7554,16 +8170,17 @@ function renderReports(state,store,ui){
 }
 
 function renderSettings(state,store,ui){
+  const canWrite = roleCan(state.session.role, "settings:write");
   return `
     ${pageHeader("Configuración","Usuarios, roles, aseguradoras, plantillas, mensajería, seguridad y modo de datos.",
       `${actionButton("Guardar configuración","save-settings",{kind:"primary",iconName:"check"})}`)}
     <div class="settings-grid">
       ${card("Entorno",`<form id="settings-form" class="form-grid">
-        <label>Modo de datos<select name="dataMode"><option value="mock" ${store.config.dataMode==="mock"?"selected":""}>Demo local</option><option value="supabase" ${store.config.dataMode==="supabase"?"selected":""}>Supabase</option></select></label>
-        <label>Modo de mensajería<select name="notificationsMode"><option value="mock" ${store.config.notificationsMode==="mock"?"selected":""}>Simulado</option><option value="live" ${store.config.notificationsMode==="live"?"selected":""}>Proveedores reales</option></select></label>
-        <label class="full">URL de Supabase<input name="supabaseUrl" value="${esc(store.config.supabaseUrl||"")}" placeholder="https://xxxx.supabase.co"></label>
-        <label class="full">Publishable key<input name="supabasePublishableKey" value="${esc(store.config.supabasePublishableKey||"")}" placeholder="sb_publishable_..."></label>
-      </form><div class="info-callout">Las claves de servicio nunca se guardan en el navegador. Los proveedores reales se configuran como variables de entorno en Vercel.</div>`)}
+        <label>Modo de datos<select name="dataMode" ${canWrite?"":"disabled"}><option value="mock" ${store.config.dataMode==="mock"?"selected":""}>Demo local</option><option value="supabase" ${store.config.dataMode==="supabase"?"selected":""}>Supabase</option></select></label>
+        <label>Modo de mensajería<select name="notificationsMode" ${canWrite?"":"disabled"}><option value="mock" ${store.config.notificationsMode==="mock"?"selected":""}>Simulado</option><option value="live" ${store.config.notificationsMode==="live"?"selected":""}>Proveedores reales</option></select></label>
+        <label class="full">URL de Supabase<input name="supabaseUrl" value="${esc(store.config.supabaseUrl||"")}" placeholder="https://xxxx.supabase.co" ${canWrite?"":"readonly"}></label>
+        <label class="full">Publishable key<input name="supabasePublishableKey" value="${esc(store.config.supabasePublishableKey||"")}" placeholder="sb_publishable_..." ${canWrite?"":"readonly"}></label>
+      </form><div class="info-callout">${canWrite?"Las claves de servicio nunca se guardan en el navegador. Los proveedores reales se configuran como variables de entorno en Vercel.":"Vista de sólo lectura para este rol. No se permite modificar la configuración."}</div>`)}
       ${card("Usuarios y roles",table(["Usuario","Correo","Rol","Estado"],state.users.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${badge(u.role,u.role)}</td><td>${badge(u.status)}</td></tr>`),{compact:true}))}
       ${card("Plantillas de documentos",table(["Plantilla","Tipo","Versión","Estado"],state.templates.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.type)}</td><td>v${t.version}</td><td>${badge(t.status)}</td></tr>`),{compact:true}))}
       ${card("Aseguradoras",table(["Aseguradora","Contacto","Teléfono","Correo","Estado"],state.insurers.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.contactName)}</td><td>${esc(i.phone)}</td><td>${esc(i.email)}</td><td>${badge(i.status)}</td></tr>`),{compact:true}))}
@@ -7711,7 +8328,11 @@ function renderRoute(route,state,store,ui){
   if(permission && !roleCan(state.session.role, permission)) return accessDenied(state.session.role, permission);
   switch(head){
     case "dashboard": return renderDashboard(state,store,ui);
-    case "pacientes": return parts[1]?renderPatientDetail(state,store,ui,parts[1]):renderPatients(state,store,ui);
+    case "pacientes": {
+      if (parts[1] === "nuevo") return renderPatientForm(state,store,ui);
+      if (parts[2] === "editar") return renderPatientForm(state,store,ui,parts[1]);
+      return parts[1] ? renderPatientDetail(state,store,ui,parts[1]) : renderPatients(state,store,ui);
+    }
     case "hospitalizaciones": return parts[1]?renderCaseDetail(state,store,ui,parts[1]):renderCases(state,store,ui);
     case "cotizaciones": return parts[1]?renderQuoteDetail(state,store,ui,parts[1]):renderQuotes(state,store,ui);
     case "preautorizaciones": return renderInsurance(state,store,ui);
@@ -7758,13 +8379,18 @@ function renderRoute(route,state,store,ui){
 }
 
 const navigation = [
-  {section:"Operación",items:[
+  {section:"Operaciones",items:[
     {href:"#/dashboard",label:"Dashboard",icon:"dashboard",permission:"dashboard:read"},
     {href:"#/pacientes",label:"Pacientes",icon:"patients",permission:"patients:read"},
-    {href:"#/hospitalizaciones",label:"Hospitalizaciones",icon:"cases",permission:"cases:read"},
-    {href:"#/cotizaciones",label:"Cotizaciones",icon:"quotes",permission:"quotes:read"},
-    {href:"#/preautorizaciones",label:"Seguros",icon:"insurance",permission:"insurance:read"},
     {href:"#/agenda",label:"Agenda y turnos",icon:"agenda",permission:"agenda:read"}
+  ]},
+  {section:"Facturación",items:[
+    {href:"#/hospitalizaciones",label:"Hospitalización",icon:"cases",permission:"cases:read"},
+    {href:"#/cuentas-por-cobrar",label:"Cuentas por cobrar",icon:"money",permission:"payments:read"},
+    {href:"#/preautorizaciones",label:"Preautorizaciones & Reclamos",icon:"insurance",permission:"insurance:read"},
+    {href:"#/cotizaciones",label:"Cotizaciones",icon:"quotes",permission:"quotes:read"},
+    {href:"#/cuentas-por-pagar",label:"Cuentas por pagar",icon:"money",permission:"statements:read"},
+    {href:"#/compras",label:"Compras",icon:"purchases",permission:"purchases:read"}
   ]},
   {section:"Clínica",items:[
     {href:"#/clinica",label:"Expediente clínico",icon:"clinical",permission:"clinical:read"},
@@ -7774,12 +8400,6 @@ const navigation = [
     {href:"#/clinica/planes-de-cuidado",label:"Planes de cuidado",icon:"file",permission:"clinical:read"},
     {href:"#/clinica/evoluciones",label:"Evoluciones y notas",icon:"clinical",permission:"clinical:read"}
   ]},
-  {section:"Finanzas",items:[
-    {href:"#/cuentas-por-cobrar",label:"Cuentas por cobrar",icon:"money",permission:"payments:read"},
-    {href:"#/cuentas-por-pagar",label:"Cuentas por pagar",icon:"money",permission:"statements:read"},
-    {href:"#/estados-de-cuenta",label:"Estados médicos",icon:"doctors",permission:"statements:read"},
-    {href:"#/compras",label:"Compras",icon:"purchases",permission:"purchases:read"}
-  ]},
   {section:"Inventario",items:[
     {href:"#/inventario",label:"Existencias",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/movimientos",label:"Movimientos",icon:"inventory",permission:"inventory:read"},
@@ -7788,10 +8408,13 @@ const navigation = [
     {href:"#/inventario/bodegas",label:"Bodegas",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"}
   ]},
-  {section:"Administración",items:[
+  {section:"RRHH",items:[
+    {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},
+    {href:"#/estados-de-cuenta",label:"Estados médicos",icon:"doctors",permission:"statements:read"}
+  ]},
+  {section:"Items y Maestros",items:[
     {href:"#/catalogos",label:"Catálogos y tarifas",icon:"catalogs",permission:"catalogs:read"},
     {href:"#/catalogos/descuentos",label:"Descuentos",icon:"money",permission:"catalogs:read"},
-    {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},
     {href:"#/reportes",label:"Reportes",icon:"reports",permission:"reports:read"},
     {href:"#/auditoria",label:"Auditoría",icon:"audit",permission:"audit:read"},
     {href:"#/qa-cobertura",label:"QA video vs sistema",icon:"qa",permission:"qa:read"},
@@ -7803,11 +8426,16 @@ function renderNavigation(role,currentRoute){
   return navigation.map(section=>{
     const visible=section.items.filter(item=>roleCan(role,item.permission));
     if(!visible.length) return "";
-    return `<div class="nav-section"><p>${esc(section.section)}</p>${visible.map(item=>`<a href="${item.href}" class="${currentRoute.startsWith(item.href.slice(2))?"active":""}">${icon(item.icon)}<span>${esc(item.label)}</span></a>`).join("")}</div>`;
+    const containsActive = visible.some((item)=>currentRoute.startsWith(item.href.slice(2)));
+    return `<details class="nav-section" ${containsActive ? "open" : ""}><summary>${esc(section.section)}<span aria-hidden="true">⌄</span></summary>${visible.map(item=>{
+      const active=currentRoute.startsWith(item.href.slice(2));
+      return `<a href="${item.href}" class="${active?"active":""}" ${active?'aria-current="page"':""}>${icon(item.icon)}<span>${esc(item.label)}</span></a>`;
+    }).join("")}</details>`;
   }).join("");
 }
 
-function renderLogin(state){
+function renderLogin(state, config = {}, ui = {}){
+  const demoMode = config.dataMode !== "supabase";
   return `
     <div class="login-shell">
       <section class="login-brand">
@@ -7819,24 +8447,23 @@ function renderLogin(state){
       </section>
       <section class="login-panel">
         <form id="login-form" class="login-card">
-          <div><p class="eyebrow">Acceso seguro</p><h2>Iniciar sesión</h2><p>Selecciona un perfil para probar permisos y flujos.</p></div>
-          <label>Correo<input type="email" name="email" value="admin@analiza.demo" required></label>
-          <label>Contraseña<div class="password-field"><input type="password" name="password" value="Demo2026!" required><button type="button" data-action="toggle-password">◉</button></div></label>
-          <button class="btn btn-primary btn-block" type="submit">Entrar al sistema</button>
-          <div class="demo-users">
-            <p>Accesos rápidos</p>
-            ${state.users.slice(0,6).map(u=>`<button type="button" data-action="quick-login" data-email="${esc(u.email)}"><span class="avatar">${initials(u.name)}</span><div><strong>${esc(u.name)}</strong><small>${esc(u.role)}</small></div></button>`).join("")}
-          </div>
-          <small class="privacy-note">La autenticación real se conecta mediante Supabase Auth. Este modo local es únicamente para QA.</small>
+          <div><p class="eyebrow">${demoMode ? "Modo demostración" : "Acceso con Supabase Auth"}</p><h2>Iniciar sesión</h2><p>${demoMode ? "Datos sintéticos. Todos los perfiles demo exigen la contraseña exacta Demo2026!." : "Usa las credenciales asignadas por la organización."}</p></div>
+          <label>Usuario o correo<input type="email" name="email" autocomplete="username" placeholder="usuario@organizacion" required autofocus></label>
+          <label>Clave<div class="password-field"><input type="password" name="password" autocomplete="current-password" required><button type="button" data-action="toggle-password" aria-label="Mostrar u ocultar clave">◉</button></div></label>
+          <button class="btn btn-primary btn-block" type="submit">Iniciar sesión</button>
+          ${ui.pwaInstallAvailable ? `<button class="btn btn-secondary btn-block" type="button" data-action="install-pwa">${icon("upload")} Instalar en dispositivo</button>` : ""}
+          <button class="text-button" type="button" data-action="recover-password">¿Olvidaste tu contraseña?</button>
+          ${demoMode ? `<div class="demo-users"><p>Perfiles sintéticos — sólo completan el formulario</p>${state.users.map(u=>`<button type="button" data-action="quick-login" data-email="${esc(u.email)}"><span class="avatar">${initials(u.name)}</span><div><strong>${esc(u.name)}</strong><small>${esc(u.role)}</small></div></button>`).join("")}</div>` : ""}
+          <small class="privacy-note">${demoMode ? "DEMO LOCAL · Ninguna autenticación ni entrega es real." : "La sesión se valida exclusivamente mediante Supabase Auth."}</small>
         </form>
       </section>
     </div>`;
 }
 
-function renderTopbar(state,store,route){
+function renderTopbar(state,store,route,ui={}){
   const user=store.currentUser();
   return `
-    <button class="icon-button mobile-only" data-action="toggle-sidebar" aria-label="Menú">☰</button>
+    <button class="icon-button" data-action="toggle-sidebar" aria-label="Expandir o contraer menú" aria-expanded="${Boolean(ui.sidebarOpen)}">☰</button>
     <label class="global-search">${icon("search")}<input data-global-search placeholder="Buscar paciente, caso, cotización o comando…"><kbd>Ctrl K</kbd></label>
     <div class="topbar-actions">
       <button class="icon-button notification-button" data-action="toggle-notifications" title="Notificaciones">${icon("alert")}<span>${state.notifications.filter(n=>["QUEUED","FAILED"].includes(n.status)).length}</span></button>
@@ -7846,7 +8473,7 @@ function renderTopbar(state,store,route){
 
 function renderUserMenu(state,store){
   const user=store.currentUser();
-  return `<div class="popover user-popover"><header><span class="avatar avatar-lg">${initials(user?.name)}</span><div><strong>${esc(user?.name)}</strong><small>${esc(user?.email)}</small></div></header><a href="#/configuracion">${icon("settings")} Configuración</a><button data-action="reset-demo">${icon("reset")} Restaurar datos demo</button><button data-action="logout">${icon("close")} Cerrar sesión</button></div>`;
+  return `<div class="popover user-popover"><header><span class="avatar avatar-lg">${initials(user?.name)}</span><div><strong>${esc(user?.name)}</strong><small>${esc(user?.email)}</small></div></header><div class="organization-context"><span>${icon("cases")}</span><div><small>Organización activa</small><strong>${esc(state.organization?.name || "Sin organización")}</strong></div></div><button data-action="open-my-user">${icon("doctors")} Mi usuario</button><a href="#/configuracion">${icon("settings")} Configuración</a><button data-action="reset-demo">${icon("reset")} Restaurar datos demo</button><button data-action="logout">${icon("close")} Cerrar sesión</button></div>`;
 }
 
 function renderNotificationPanel(state){
@@ -7861,6 +8488,7 @@ function renderNotificationPanel(state){
 
 
 const QUOTE_ADMIN_LABELS_MAIN = Object.fromEntries(Object.entries(QUOTE_STATUS_LABELS).map(([key, value]) => [key, value.admin]));
+const STANDALONE_DEMO_OTP = "202626";
 
 const config = await loadRuntimeConfig();
 const store = await createAppStore(config);
@@ -7869,6 +8497,21 @@ const ui = {
   search: "",
   tab: "overview",
   sidebarOpen: false,
+  patientTab: "active",
+  patientPage: 1,
+  patientPageSize: 10,
+  patientSortKey: "fullName",
+  patientSortDirection: "asc",
+  patientImport: null,
+  casePage: 1,
+  caseQuotePage: 1,
+  casePageSize: 10,
+  caseStatus: "ACTIVE",
+  caseStartDate: "",
+  caseAccountType: "",
+  caseQuoteStatus: "",
+  caseQuoteDate: "",
+  pwaInstallAvailable: false,
   userMenuOpen: false,
   notificationsOpen: false,
   commandOpen: false,
@@ -7882,6 +8525,26 @@ const app = document.querySelector("#app");
 const modalRoot = document.querySelector("#modal-root");
 const toastRoot = document.querySelector("#toast-root");
 const overlayRoot = document.querySelector("#overlay-root");
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  ui.pwaInstallAvailable = true;
+  render();
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  ui.pwaInstallAvailable = false;
+  render();
+});
+
+if ("serviceWorker" in navigator && ["http:", "https:"].includes(location.protocol)) {
+  navigator.serviceWorker.register("/service-worker.js").catch(() => {
+    // La app sigue disponible online; la acción de instalación no se muestra sin prompt nativo.
+  });
+}
 
 function routeFromHash() {
   return (location.hash.replace(/^#\/?/, "") || "dashboard").replace(/\/+$/, "");
@@ -7915,14 +8578,17 @@ function render() {
   }
 
   if (!state.session.authenticated) {
-    app.innerHTML = renderLogin(state);
+    app.innerHTML = renderLogin(state, store.config, ui);
     closeOverlays();
     return;
   }
 
   const role = state.session.role;
+  const routeContent = route === "cotizaciones/nueva"
+    ? renderQuoteModal({ asPage: true })
+    : renderRoute(route, state, store, ui);
   app.innerHTML = `
-    <div class="app-shell ${ui.sidebarOpen ? "sidebar-open" : ""}">
+    <div class="app-shell ${ui.sidebarOpen ? "sidebar-open" : "sidebar-collapsed"}">
       <aside class="sidebar">
         <div class="sidebar-brand">
           <a href="#/dashboard"><span class="brand-mark">AC</span><div><strong>Analiza en Casa</strong><small>Atención domiciliar</small></div></a>
@@ -7935,11 +8601,114 @@ function render() {
         </div>
       </aside>
       <div class="main-shell">
-        <header class="topbar">${renderTopbar(state, store, route)}</header>
-        <main class="content" id="content">${renderRoute(route, state, store, ui)}</main>
+        <header class="topbar">${renderTopbar(state, store, route, ui)}</header>
+        <main class="content" id="content">${routeContent}</main>
       </div>
     </div>`;
   renderOverlays();
+  applyActionPermissions(state);
+}
+
+const ACTION_PERMISSIONS = {
+  "open-patient-form": "patients:write",
+  "edit-patient": "patients:write",
+  "save-patient": "patients:write",
+  "import-patients": "patients:write",
+  "confirm-patient-import": "patients:write",
+  "patient-insurance-change": "patients:write",
+  "patient-holder-change": "patients:write",
+  "clear-patient-location": "patients:write",
+  "open-case-form": "cases:write",
+  "edit-case": "cases:write",
+  "save-case": "cases:write",
+  "open-quote-form": "quotes:write",
+  "edit-quote-draft": "quotes:write",
+  "revise-quote": "quotes:write",
+  "send-quote": "quotes:write",
+  "open-insurance-status": "insurance:write",
+  "open-payment-form": "payments:write",
+  "send-quote": "quotes:write",
+  "send-quote-whatsapp": "quotes:write",
+  "quote-add-item": "quotes:write",
+  "quote-remove-item": "quotes:write",
+  "quote-patient-change": "quotes:write",
+  "quote-referral-add": "quotes:write",
+  "open-quote-referral": "quotes:write",
+  "save-quote-referral": "quotes:write",
+  "open-quote-date-picker": "quotes:write",
+  "save-quote-date": "quotes:write",
+  "quote-remove-referral": "quotes:write",
+  "quote-set-category": "quotes:write",
+  "quote-item-select": "quotes:write",
+  "quote-item-filter": "quotes:write",
+  "clear-quote-giftcard": "quotes:write",
+  "quote-calc-change": "quotes:write",
+  "save-quote": "quotes:write",
+  "open-clinical-document": "clinical:write",
+  "sign-document": "clinical:sign",
+  "open-clinical-correction": "clinical:write",
+  "open-clinical-void": "clinical:write",
+  "open-vitals-form": "clinical:write",
+  "open-nursing-note": "clinical:write",
+  "share-note": "clinical:write",
+  "open-shift-form": "clinical:write",
+  "open-medication-card": "clinical:write",
+  "sign-medication-card": "clinical:sign",
+  "administer-medication": "clinical:write",
+  "open-purchase-form": "purchases:write",
+  "open-inventory-movement": "inventory:write",
+  "open-closure-form": "inventory:write",
+  "approve-closure": "inventory:write",
+  "open-kit-form": "inventory:write",
+  "duplicate-kit": "inventory:write",
+  "apply-kit": "inventory:write",
+  "open-catalog-form": "catalogs:write",
+  "edit-catalog-item": "catalogs:write",
+  "open-discount-form": "catalogs:write",
+  "import-catalog": "catalogs:write",
+  "open-doctor-form": "doctors:write",
+  "save-doctor": "doctors:write",
+  "generate-statements": "statements:write",
+  "send-statement": "statements:write",
+  "save-settings": "settings:write",
+  "reset-demo": "settings:write"
+};
+
+function actionPermission(action) {
+  return ACTION_PERMISSIONS[action] || null;
+}
+
+function applyActionPermissions(state) {
+  document.querySelectorAll("[data-action]").forEach((control) => {
+    const permission = actionPermission(control.dataset.action);
+    if (permission && !roleCan(state.session.role, permission)) control.remove();
+  });
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [], field = "", quoted = false;
+  for (let index = 0; index <= text.length; index += 1) {
+    const char = text[index] ?? "\n";
+    if (quoted) {
+      if (char === '"' && text[index + 1] === '"') { field += '"'; index += 1; }
+      else if (char === '"') quoted = false;
+      else field += char;
+    } else if (char === '"') quoted = true;
+    else if (char === ",") { row.push(field.trim()); field = ""; }
+    else if (char === "\n") {
+      row.push(field.trim().replace(/\r$/, "")); field = "";
+      if (row.some((value) => value !== "")) rows.push(row);
+      row = [];
+    } else field += char;
+  }
+  if (quoted) throw new Error("El CSV contiene una comilla sin cerrar.");
+  if (rows.length < 2) throw new Error("El CSV requiere encabezados y al menos una fila.");
+  const headers = rows[0].map((value) => value.replace(/^\uFEFF/, ""));
+  const required = ["document", "firstName", "lastName"];
+  const missing = required.filter((name) => !headers.includes(name));
+  if (missing.length) throw new Error(`Faltan encabezados obligatorios: ${missing.join(", ")}.`);
+  return rows.slice(1).map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] || ""])));
 }
 
 function renderOverlays() {
@@ -7950,6 +8719,7 @@ function renderOverlays() {
   if (ui.commandOpen) parts.push(renderCommandPalette(state));
   overlayRoot.innerHTML = parts.join("");
   overlayRoot.classList.toggle("open", Boolean(parts.length));
+  applyActionPermissions(state);
 }
 
 function closeOverlays() {
@@ -8029,7 +8799,7 @@ function openModal({ title, subtitle = "", body, size = "md", footer = "", close
 function closeModal() {
   modalRoot.innerHTML = "";
   modalRoot.classList.remove("open");
-  ui.quoteDraft = null;
+  if (routeFromHash() !== "cotizaciones/nueva") ui.quoteDraft = null;
 }
 
 function formValue(form, name) {
@@ -8070,40 +8840,22 @@ function catalogOptions(selected = "", category = "") {
   return store.getState().catalogItems.filter((i) => !category || i.category === category).map((i) => `<option value="${i.id}" ${i.id === selected ? "selected" : ""}>${safeText(i.sku)} · ${safeText(i.name)} · ${money(i.price)}</option>`).join("");
 }
 
+function quotePatientLabel(patient) {
+  return patient ? `${patient.document} · ${patient.fullName}` : "";
+}
+
+function quoteCategoryLabel(category) {
+  return category === "STUDIES" ? "Estudios Dx" : ITEM_CATEGORY_LABELS[category] || category;
+}
+
+function quoteCatalogLabel(item) {
+  if (!item) return "";
+  const metadata = [item.professional, item.unit, item.manufacturer].filter(Boolean).join(" · ");
+  return `${item.sku} · ${item.name}${metadata ? ` · ${metadata}` : ""}`;
+}
+
 function openPatientForm(id = null) {
-  const state = store.getState();
-  const p = id ? state.patients.find((item) => item.id === id) : null;
-  openModal({
-    title: p ? `Editar ${p.fullName}` : "Nuevo paciente",
-    subtitle: "Datos personales, responsable, seguro, dirección y preferencias de notificación.",
-    size: "lg",
-    body: `<form id="patient-form" class="form-grid">
-      <input type="hidden" name="id" value="${safeText(p?.id || "")}">
-      <label>Tipo de documento<select name="documentType"><option ${p?.documentType === "DUI" ? "selected" : ""}>DUI</option><option ${p?.documentType === "Pasaporte" ? "selected" : ""}>Pasaporte</option><option ${p?.documentType === "NIT" ? "selected" : ""}>NIT</option></select></label>
-      <label>Número de documento<input name="document" required value="${safeText(p?.document || "")}" placeholder="00000000-0"></label>
-      <label>Nombres<input name="firstName" required value="${safeText(p?.firstName || "")}"></label>
-      <label>Apellidos<input name="lastName" required value="${safeText(p?.lastName || "")}"></label>
-      <label>Fecha de nacimiento<input type="date" name="birthDate" value="${safeText(p?.birthDate || "")}"></label>
-      <label>Sexo<select name="sex"><option value="">Seleccionar</option><option value="F" ${p?.sex === "F" ? "selected" : ""}>Femenino</option><option value="M" ${p?.sex === "M" ? "selected" : ""}>Masculino</option><option value="O" ${p?.sex === "O" ? "selected" : ""}>Otro</option></select></label>
-      <label>Tipo de sangre<select name="bloodType"><option value="">Seleccionar</option>${["O+","O-","A+","A-","B+","B-","AB+","AB-"].map(v=>`<option ${p?.bloodType===v?"selected":""}>${v}</option>`).join("")}</select></label>
-      <label>Nacionalidad<input name="nationality" value="${safeText(p?.nationality || "Salvadoreña")}"></label>
-      <label>Teléfono<input name="phone" value="${safeText(p?.phone || "")}"></label>
-      <label>Correo<input type="email" name="email" value="${safeText(p?.email || "")}"></label>
-      <label class="full">Dirección<input name="address" value="${safeText(p?.address || "")}"></label>
-      <label>Ubicación / coordenadas<input name="geo" value="${safeText(p?.geo || "")}" placeholder="13.69,-89.21"></label>
-      <label>Triage<select name="triage"><option value="BAJA" ${p?.triage==="BAJA"?"selected":""}>Baja</option><option value="MEDIA" ${p?.triage==="MEDIA"?"selected":""}>Media</option><option value="ALTA" ${p?.triage==="ALTA"?"selected":""}>Alta</option></select></label>
-      <div class="form-section full"><h3>Seguro</h3></div>
-      <label>Aseguradora<select name="insurerId">${insurerOptions(p?.insurerId)}</select></label>
-      <label>Plan<select name="planId">${planOptions(p?.planId)}</select></label>
-      <label>Número de póliza<input name="policy" value="${safeText(p?.policy || "")}"></label>
-      <label>Vigencia<input type="date" name="policyValidUntil" value="${safeText(p?.policyValidUntil || "")}"></label>
-      <div class="form-section full"><h3>Responsable</h3></div>
-      <label>Nombre del responsable<input name="contactName" value="${safeText(p?.contactName || "")}"></label>
-      <label>Teléfono responsable<input name="contactPhone" value="${safeText(p?.contactPhone || "")}"></label>
-      <fieldset class="full checkbox-group"><legend>Notificaciones autorizadas</legend><label><input type="checkbox" name="notifyWhatsApp" ${p?.notifyWhatsApp ? "checked" : ""}> WhatsApp</label><label><input type="checkbox" name="notifySms" ${p?.notifySms ? "checked" : ""}> SMS</label><label><input type="checkbox" name="notifyEmail" ${p?.notifyEmail ? "checked" : ""}> Correo</label></fieldset>
-    </form>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-patient">Guardar paciente</button>`
-  });
+  location.hash = id ? `#/pacientes/${encodeURIComponent(id)}/editar` : "#/pacientes/nuevo";
 }
 
 function openCaseForm(id = null, patientId = "") {
@@ -8140,68 +8892,184 @@ function openQuoteForm(caseId = "", quoteId = null, revise = false, editDraft = 
     editDraft: Boolean(existing && editDraft),
     caseId: selectedCase?.id || "",
     patientId: selectedCase?.patientId || "",
+    category: "SERVICES",
     items: existing ? structuredClone(existing.items) : [],
     discount: existing ? structuredClone(existing.discount) : { type: "PERCENT", value: 0, reason: "" },
+    invoiceDate: existing?.invoiceDate || new Date().toISOString().slice(0, 10),
+    discountGroupId: existing?.discountGroupId || "REGULAR",
+    referredBy: existing?.referredBy || "",
+    giftcard: existing?.giftcard || "",
     insurerAmount: existing?.insurerAmount || 0,
     comments: existing?.comments || ""
   };
+  if (!quoteId) {
+    if (routeFromHash() === "cotizaciones/nueva") render();
+    else location.hash = "#/cotizaciones/nueva";
+    return;
+  }
   renderQuoteModal();
 }
 
-function renderQuoteModal() {
+function openQuoteReferralForm() {
+  syncQuoteHead();
+  openModal({
+    title: "Agregar referencia",
+    subtitle: "Alta provisional para esta cotización; el catálogo maestro y sus tipos dependen de CH03-Q007/CH04-Q005/CH04-Q006.",
+    body: `<form id="quote-referral-form" class="form-grid"><label class="full">Nombre o etiqueta sintética<input name="label" required autocomplete="off" placeholder="Referencia sintética"></label><p class="full form-help">No ingrese datos clínicos ni información real. Esta entrada no crea un maestro productivo.</p></form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote-referral">Agregar</button>`
+  });
+}
+
+function openQuoteDatePicker() {
+  syncQuoteHead();
+  openModal({
+    title: "Seleccionar fecha",
+    subtitle: "La zona horaria y los rangos permitidos permanecen configurables mediante CH04-Q003.",
+    body: `<form id="quote-date-form" class="form-grid"><label class="full">Fecha<input type="date" name="invoiceDate" value="${safeText(ui.quoteDraft?.invoiceDate || "")}" required></label></form>`,
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote-date">Seleccionar</button>`
+  });
+}
+
+function renderQuoteModal({ asPage = false } = {}) {
   const state = store.getState();
+  if (!ui.quoteDraft && asPage) {
+    const selectedCase = state.cases[0];
+    ui.quoteDraft = {
+      quoteId: null,
+      revise: false,
+      editDraft: false,
+      caseId: selectedCase?.id || "",
+      patientId: selectedCase?.patientId || "",
+      category: "SERVICES",
+      items: [],
+      discount: { type: "PERCENT", value: 0, reason: "" },
+      invoiceDate: new Date().toISOString().slice(0, 10),
+      discountGroupId: "REGULAR",
+      referredBy: "",
+      giftcard: "",
+      insurerAmount: 0,
+      comments: ""
+    };
+  }
   const draft = ui.quoteDraft;
-  if (!draft) return;
+  if (!draft) return "";
+  if (!asPage && routeFromHash() === "cotizaciones/nueva") {
+    render();
+    return "";
+  }
   const record = state.cases.find((c) => c.id === draft.caseId);
   if (record) draft.patientId = record.patientId;
-  const result = calculateQuote(draft.items, draft.discount, draft.insurerAmount);
-  openModal({
-    title: draft.editDraft ? `Editar borrador ${draft.quoteId}` : draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización",
-    subtitle: "Agrega servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.",
-    size: "xl",
-    body: `
+  const patient = store.patientById(draft.patientId);
+  const quotePatients = state.patients.filter((candidate) => state.cases.some((item) => item.patientId === candidate.id));
+  const referralValues = String(draft.referredBy || "").split("|").map((value) => value.trim()).filter(Boolean);
+  const referralCatalog = [...new Set(state.quotes.flatMap((quote) => String(quote.referredBy || "").split("|").map((value) => value.trim())).filter(Boolean))];
+  const activeCategory = draft.category || "SERVICES";
+  const categoryItems = state.catalogItems.filter((item) => item.category === activeCategory);
+  const selectedCatalogItem = Object.hasOwn(draft, "selectedCatalogItemId")
+    ? categoryItems.find((item) => item.id === draft.selectedCatalogItemId)
+    : categoryItems[0];
+  const itemFilter = draft.itemFilter || "ALL";
+  const visibleQuoteItems = draft.items.map((item, index) => ({ item, index }))
+    .filter(({ item }) => itemFilter === "ALL" || item.catalogItemId === itemFilter);
+  const activeDiscountRule = state.discountRules.find((rule) => rule.id === draft.discountGroupId && rule.active && !rule.requiresApproval);
+  const effectiveDiscount = activeDiscountRule
+    ? { type:"CATEGORY_PERCENTAGES", categories:activeDiscountRule.categories || {}, value:0, reason:draft.discount?.reason || "", ruleId:activeDiscountRule.id }
+    : { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR" };
+  const discountSummary = activeDiscountRule
+    ? Object.entries(activeDiscountRule.categories || {}).filter(([, value]) => Number(value) > 0).map(([category, value]) => `${quoteCategoryLabel(category)} ${value}%`).join(" · ")
+    : "Regular · 0%";
+  const result = calculateQuote(draft.items, effectiveDiscount, draft.insurerAmount);
+  const title = draft.editDraft ? `Editar borrador ${draft.quoteId}` : draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización";
+  const subtitle = "Agrega servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.";
+  const body = `
       <div class="quote-builder">
         <section class="quote-builder-main">
           <form id="quote-head-form" class="form-grid compact-form">
-            <label>Hospitalización<select name="caseId" data-action="quote-case-change">${caseOptions(draft.caseId)}</select></label>
-            <label>Paciente<input disabled value="${safeText(store.patientById(draft.patientId)?.fullName || "")}"></label>
-            <label>Descuento %<input type="number" name="discountValue" min="0" max="100" step=".01" value="${draft.discount.value || 0}" data-action="quote-calc-change"></label>
+            <h3 class="full form-section-title">Datos del paciente</h3>
+            <input type="hidden" name="caseId" value="${safeText(draft.caseId)}">
+            <input type="hidden" name="patientId" value="${safeText(draft.patientId)}">
+            <div class="full quote-patient-grid">
+              <label>* Paciente<input name="patientSearch" list="quote-patient-options" value="${safeText(quotePatientLabel(patient))}" required autocomplete="off" placeholder="Buscar por documento o nombre" data-action="quote-patient-change"><datalist id="quote-patient-options">${quotePatients.map((candidate) => `<option value="${safeText(quotePatientLabel(candidate))}"></option>`).join("")}</datalist></label>
+              <label>DUI/NIT<input name="patientDocument" disabled value="${safeText(patient?.document || "")}"></label>
+              <label>Teléfono<input name="patientPhone" disabled value="${safeText(patient?.phone || "")}"></label>
+              <label>Correo<input name="patientEmail" disabled value="${safeText(patient?.email || "")}"></label>
+            </div>
+            <h3 class="full form-section-title">Datos de la factura</h3>
+            <label>* Fecha<div class="input-with-action"><input name="invoiceDate" value="${safeText(draft.invoiceDate)}" required readonly><button type="button" data-action="open-quote-date-picker" aria-label="Abrir calendario">📅</button></div></label>
+            <label>* Grupo de descuento<select name="discountGroupId" required data-action="quote-calc-change"><option value="REGULAR" ${draft.discountGroupId === "REGULAR" ? "selected" : ""}>Regular</option>${state.discountRules.filter((rule) => rule.active).map((rule) => `<option value="${safeText(rule.id)}" ${draft.discountGroupId === rule.id ? "selected" : ""} ${rule.requiresApproval ? "disabled" : ""}>${safeText(rule.name)}${rule.requiresApproval ? " · aprobación pendiente" : ""}</option>`).join("")}</select></label>
+            <label class="full"><span>* Referido por <button type="button" class="inline-add" data-action="open-quote-referral" title="Agregar referencia provisional">+</button></span><input type="hidden" name="referredBy" value="${safeText(referralValues.join(" | "))}"><div class="referral-picker"><input name="referralCandidate" list="quote-referral-options" ${referralValues.length ? "" : "required"} autocomplete="off" placeholder="Buscar referencia autorizada" data-action="quote-referral-add"><datalist id="quote-referral-options">${referralCatalog.map((value) => `<option value="${safeText(value)}"></option>`).join("")}</datalist><div class="referral-tags">${referralValues.map((value, index) => `<span>${safeText(value)}<button type="button" data-action="quote-remove-referral" data-index="${index}" aria-label="Quitar ${safeText(value)}">×</button></span>`).join("")}</div></div></label>
+            <label>Giftcard<div class="input-with-action"><input name="giftcard" value="${safeText(draft.giftcard)}" data-action="quote-calc-change"><button type="button" data-action="clear-quote-giftcard" aria-label="Limpiar giftcard">×</button></div></label>
+            <label>Descuento configurado<input value="${safeText(discountSummary)}" disabled></label>
             <label>Monto del seguro<input type="number" name="insurerAmount" min="0" step=".01" value="${draft.insurerAmount || 0}" data-action="quote-calc-change"></label>
-            <label class="full">Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" data-action="quote-calc-change"></label>
-            <label class="full">Comentarios<textarea name="comments" rows="2" data-action="quote-calc-change">${safeText(draft.comments || "")}</textarea></label>
+            <label class="full">${activeDiscountRule?.requiresReason ? "* " : ""}Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" ${activeDiscountRule?.requiresReason ? "required" : ""} data-action="quote-calc-change"></label>
+            <label class="full">* Comentarios<textarea name="comments" rows="2" required data-action="quote-calc-change">${safeText(draft.comments || "")}</textarea></label>
             ${draft.revise ? `<label class="full">Motivo de la nueva versión<textarea name="revisionReason" rows="2" required data-action="quote-calc-change">${safeText(draft.revisionReason || "")}</textarea></label>` : ""}
           </form>
+          <nav class="quote-category-tabs" aria-label="Categorías de cotización">${Object.keys(ITEM_CATEGORY_LABELS).map((category) => `<button type="button" class="${category === activeCategory ? "active" : ""}" data-action="quote-set-category" data-category="${category}" aria-current="${category === activeCategory ? "page" : "false"}">${safeText(quoteCategoryLabel(category))}</button>`).join("")}</nav>
+          <label class="quote-inventory-filter"><input type="checkbox" disabled title="CH05-Q005: regla de disponibilidad pendiente"> Solo disponibles en inventario</label>
+          <div class="quote-add-context">
+            <label>* Socio de negocios<input value="Pendiente de catálogo CH05-Q001" disabled></label>
+            <label>${safeText(quoteCategoryLabel(activeCategory))}<input id="quote-item-search" list="quote-item-options" value="${safeText(quoteCatalogLabel(selectedCatalogItem))}" autocomplete="off" placeholder="Buscar concepto" data-action="quote-item-select"><datalist id="quote-item-options">${categoryItems.map((item) => `<option value="${safeText(quoteCatalogLabel(item))}"></option>`).join("")}</datalist><select id="quote-item-select" class="sr-only" aria-hidden="true" tabindex="-1"><option value="${safeText(selectedCatalogItem?.id || "")}"></option></select></label>
+            <label>Precio<input id="quote-item-price" value="${safeText(selectedCatalogItem?.price ?? "")}" disabled></label>
+          </div>
+          <div class="quote-no-results" role="status" ${draft.catalogNoResults ? "" : "hidden"}>No results found</div>
           <div class="quote-add-row">
-            <select id="quote-item-select">${catalogOptions()}</select>
-            <input id="quote-item-qty" type="number" min=".01" step=".01" value="1" aria-label="Cantidad">
-            <button class="btn btn-primary" data-action="quote-add-item">+ Agregar concepto</button>
+            <label>* Cantidad<input id="quote-item-qty" type="number" min=".01" step=".01" value="0" required aria-label="Cantidad"></label>
+            <button class="btn btn-primary" data-action="quote-add-item" ${draft.processing ? "disabled" : ""}>+ Añadir</button>
           </div>
           <div class="quote-item-list">
-            ${draft.items.length ? draft.items.map((item, index) => `<article><div><span>${safeText(ITEM_CATEGORY_LABELS[item.category] || item.category)}</span><strong>${safeText(item.name)}</strong><small>${safeText(item.catalogItemId || "Concepto libre")}</small></div><label>Cantidad<input type="number" step=".01" min=".01" value="${item.quantity}" data-action="quote-item-qty-change" data-index="${index}"></label><label>Precio<input type="number" step=".01" min="0" value="${item.unitPrice}" data-action="quote-item-price-change" data-index="${index}"></label><strong>${money(item.quantity * item.unitPrice)}</strong><button data-action="quote-remove-item" data-index="${index}">×</button></article>`).join("") : `<div class="empty-state"><h3>Sin conceptos</h3><p>Selecciona un ítem del catálogo para iniciar.</p></div>`}
+            ${draft.items.length ? `<label class="quote-item-filter">Filtrar por Item<select data-action="quote-item-filter"><option value="ALL">Todos</option>${draft.items.map((item) => `<option value="${safeText(item.catalogItemId)}" ${itemFilter === item.catalogItemId ? "selected" : ""}>${safeText(item.name)}</option>`).join("")}</select></label><div class="table-wrap"><table class="quote-ledger"><thead><tr><th>Tipo</th><th>Código</th><th>Item</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th><th>Desc. %</th><th>Desc. $</th><th>Impuesto</th><th>Total</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody>${Object.keys(ITEM_CATEGORY_LABELS).filter((category) => visibleQuoteItems.some(({item}) => item.category === category)).map((category) => `<tr class="quote-ledger-group"><th colspan="11">${safeText(quoteCategoryLabel(category))}</th></tr>${visibleQuoteItems.filter(({item}) => item.category === category).map(({item,index}) => { const catalogItem=state.catalogItems.find((candidate)=>candidate.id===item.catalogItemId); const subtotal=item.quantity*item.unitPrice; const discountPercent=Number(effectiveDiscount.categories?.[item.category]||0); const discount=subtotal*discountPercent/100; return `<tr><td>${safeText(quoteCategoryLabel(item.category))}</td><td><code>${safeText(catalogItem?.sku || item.catalogItemId || "—")}</code></td><td><strong>${safeText(item.name)}</strong></td><td><input type="number" step=".01" min=".01" value="${item.quantity}" data-action="quote-item-qty-change" data-index="${index}" aria-label="Cantidad ${safeText(item.name)}"></td><td><output aria-label="Precio de catálogo ${safeText(item.name)}">${money(item.unitPrice)}</output></td><td>${money(subtotal)}</td><td>${discountPercent.toFixed(2)}%</td><td>${money(discount)}</td><td><input type="checkbox" disabled title="CH05-Q004: impuesto pendiente de reglas" aria-label="Impuesto ${safeText(item.name)}"></td><td><strong>${money(subtotal-discount)}</strong></td><td><button data-action="quote-remove-item" data-index="${index}" aria-label="Quitar ${safeText(item.name)}">×</button></td></tr>`; }).join("")}`).join("")}</tbody></table></div>` : `<div class="empty-state"><h3>Sin conceptos</h3><p>Selecciona un ítem del catálogo para iniciar.</p></div>`}
           </div>
         </section>
         <aside class="quote-builder-summary">
           <h3>Resumen</h3>
           <div><span>Subtotal</span><strong>${money(result.subtotal)}</strong></div>
           <div><span>Descuento</span><strong>−${money(result.discountAmount)}</strong></div>
+          <div title="CH05-Q004: tasa y base pendientes"><span>Impuesto</span><strong>${money(0)}</strong></div>
           <div class="total"><span>Total</span><strong>${money(result.total)}</strong></div>
           <div><span>Seguro</span><strong>${money(result.insurerAmount)}</strong></div>
           <div class="balance"><span>Paciente</span><strong>${money(result.patientAmount)}</strong></div>
           <p>${draft.items.length} conceptos · ${new Set(draft.items.map(i=>i.category)).size} categorías</p>
         </aside>
-      </div>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${draft.editDraft ? "Guardar borrador" : draft.revise ? "Crear nueva versión" : "Guardar cotización"}</button>`
-  });
+      </div>${draft.processing ? `<div class="quote-processing" role="status"><span class="spinner"></span><strong>Procesando...</strong></div>` : ""}`;
+  const saveLabel = draft.editDraft ? "Guardar borrador" : draft.revise ? "Crear nueva versión" : "Guardar cotización";
+  if (asPage) {
+    return `<section class="page quote-create-page">
+      <header class="page-header">
+        <div><p class="eyebrow">Hospitalización / Cotizaciones</p><h1>${safeText(title)}</h1><p>${safeText(subtitle)}</p></div>
+        <div class="page-actions"><a class="btn btn-secondary" href="#/hospitalizaciones">Atrás</a><button class="btn btn-primary" data-action="save-quote">${saveLabel}</button></div>
+      </header>
+      <article class="card"><div class="card-body">${body}</div><footer class="card-footer"><a class="btn btn-secondary" href="#/hospitalizaciones">Atrás</a><button class="btn btn-primary" data-action="save-quote">${saveLabel}</button></footer></article>
+    </section>`;
+  }
+  openModal({ title, subtitle, size: "xl", body, footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-quote">${saveLabel}</button>` });
+  return "";
 }
 
 function syncQuoteHead() {
   const form = document.querySelector("#quote-head-form");
   if (!form || !ui.quoteDraft) return;
   const data = new FormData(form);
-  ui.quoteDraft.caseId = data.get("caseId");
-  const record = store.caseById(ui.quoteDraft.caseId);
-  ui.quoteDraft.patientId = record?.patientId || "";
-  ui.quoteDraft.discount = { type: "PERCENT", value: Number(data.get("discountValue") || 0), reason: data.get("discountReason") || "" };
+  const hasPatientSearch = data.has("patientSearch");
+  const patientSearch = String(data.get("patientSearch") || "").trim();
+  const matchedPatient = store.getState().patients.find((candidate) => quotePatientLabel(candidate) === patientSearch || candidate.id === patientSearch);
+  const selectedPatientId = hasPatientSearch ? (matchedPatient?.id || "") : (data.get("patientId") || ui.quoteDraft.patientId);
+  const selectedCaseId = data.get("caseId") || ui.quoteDraft.caseId;
+  const selectedCase = store.caseById(selectedCaseId);
+  const compatibleCase = selectedCase?.patientId === selectedPatientId
+    ? selectedCase
+    : store.getState().cases.find((candidate) => candidate.patientId === selectedPatientId);
+  ui.quoteDraft.caseId = compatibleCase?.id || "";
+  ui.quoteDraft.patientId = selectedPatientId || compatibleCase?.patientId || "";
+  const discountGroupId = String(data.get("discountGroupId") || "REGULAR");
+  const discountRule = store.getState().discountRules.find((rule) => rule.id === discountGroupId && rule.active && !rule.requiresApproval);
+  ui.quoteDraft.discount = discountRule
+    ? { type:"CATEGORY_PERCENTAGES", categories:structuredClone(discountRule.categories || {}), value:0, reason:data.get("discountReason") || "", ruleId:discountRule.id }
+    : { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR" };
+  ui.quoteDraft.invoiceDate = data.get("invoiceDate") || "";
+  ui.quoteDraft.discountGroupId = discountRule?.id || "REGULAR";
+  ui.quoteDraft.referredBy = data.get("referredBy") || "";
+  ui.quoteDraft.giftcard = data.get("giftcard") || "";
   ui.quoteDraft.insurerAmount = Number(data.get("insurerAmount") || 0);
   ui.quoteDraft.comments = data.get("comments") || "";
   ui.quoteDraft.revisionReason = data.get("revisionReason") || "";
@@ -8658,9 +9526,46 @@ function portalTokenFromRoute() {
   return isPortalRoute(route) ? route.slice("portal/".length) : "";
 }
 
+function isStandaloneDemo() {
+  return location.protocol === "file:" && store.config.dataMode === "mock";
+}
+
+function standalonePortalSnapshot(token) {
+  const state = store.getState();
+  const quote = state.quotes.find((candidate) => candidate.portalToken === token);
+  if (!quote) return null;
+  const paid = state.payments
+    .filter((payment) => payment.quoteId === quote.id && payment.status === "APPLIED")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const events = [
+    { status: "DRAFT", note: "Cotización creada.", date: quote.createdAt },
+    ...(quote.sentAt ? [{ status: "SENT_TO_PATIENT", note: "Cotización disponible en el portal seguro.", date: quote.sentAt }] : []),
+    ...(quote.status && !["DRAFT", "SENT_TO_PATIENT"].includes(quote.status)
+      ? [{ status: quote.status, note: "Estado administrativo actualizado.", date: quote.updatedAt || quote.sentAt || quote.createdAt }]
+      : [])
+  ];
+  return {
+    quote_id: quote.id,
+    status: quote.status,
+    total: Number(quote.total || 0),
+    insurer_amount: Number(quote.insurerAmount || 0),
+    patient_amount: Number(quote.patientAmount || 0),
+    paid,
+    balance: Math.max(0, Number(quote.patientAmount || 0) - paid),
+    updated_at: quote.updatedAt || quote.sentAt || quote.createdAt,
+    events
+  };
+}
+
 async function requestPortalCode() {
   const token = portalTokenFromRoute();
   if (!token) return;
+  if (isStandaloneDemo()) {
+    // La respuesta es idéntica para tokens válidos e inválidos para no revelar existencia.
+    ui.portalMessage = `Modo autónomo con datos sintéticos: usa el código demo ${STANDALONE_DEMO_OTP}. No se envió ningún mensaje.`;
+    render();
+    return;
+  }
   try {
     const response = await fetch("/api/portal-request-code", {
       method: "POST",
@@ -8681,6 +9586,13 @@ async function verifyPortalAccess(form) {
   const data = new FormData(form);
   const token = String(data.get("token") || "");
   const verificationCode = String(data.get("verificationCode") || "").trim();
+  if (isStandaloneDemo()) {
+    const snapshot = verificationCode === STANDALONE_DEMO_OTP ? standalonePortalSnapshot(token) : null;
+    ui.portalSnapshot = snapshot ? { token, data: snapshot } : null;
+    ui.portalMessage = snapshot ? "" : "No fue posible validar el acceso.";
+    render();
+    return;
+  }
   try {
     const response = await fetch("/api/portal-status", {
       method: "POST",
@@ -8705,11 +9617,18 @@ async function runInternalQa() {
   setTimeout(() => showToast(message), 600);
 }
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const target = event.target.closest("[data-action]");
   if (!target) return;
+  if (target.matches("input, select, textarea")) return;
   const action = target.dataset.action;
   const data = target.dataset;
+  const permission = actionPermission(action);
+  if (permission && !roleCan(store.getState().session.role, permission)) {
+    event.preventDefault();
+    showToast("No tienes permiso para realizar esta acción.", "danger");
+    return;
+  }
 
   if (action !== "set-tab" && target.tagName === "A") return;
   event.preventDefault();
@@ -8725,19 +9644,95 @@ document.addEventListener("click", (event) => {
       if (input) input.type = input.type === "password" ? "text" : "password";
       break;
     }
+    case "install-pwa": {
+      if (!deferredInstallPrompt) {
+        showToast("La instalación no está disponible en este navegador.", "info");
+        break;
+      }
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        ui.pwaInstallAvailable = false;
+        render();
+      });
+      break;
+    }
     case "quick-login": {
       const user = store.getState().users.find((u) => u.email === data.email);
-      if (user) runSafely(() => store.login(user.id), `Sesión iniciada como ${user.role}.`);
+      const form = document.querySelector("#login-form");
+      if (user && form) {
+        form.elements.email.value = user.email;
+        form.elements.password.value = "Demo2026!";
+        form.elements.email.focus();
+        showToast(`Perfil ${user.role} preparado. Confirma con Entrar al sistema.`, "info");
+      }
+      break;
+    }
+    case "recover-password": {
+      const email = document.querySelector("#login-form input[name=email]")?.value || "";
+      runSafely(() => store.recoverPassword(email), "Si la cuenta existe, recibirá instrucciones por el canal configurado.");
+      break;
+    }
+    case "open-my-user": {
+      const user = store.currentUser();
+      openModal({
+        title: "Mi usuario",
+        subtitle: store.getState().organization?.name || "Organización no disponible",
+        body: `<dl class="detail-list"><div><dt>Nombre</dt><dd>${safeText(user?.name || "")}</dd></div><div><dt>Correo</dt><dd>${safeText(user?.email || "")}</dd></div><div><dt>Rol</dt><dd>${safeText(store.getState().session.role || "")}</dd></div><div><dt>Estado</dt><dd>${safeText(user?.status || "ACTIVE")}</dd></div></dl>`
+      });
       break;
     }
     case "logout": runSafely(() => store.logout(), "Sesión cerrada."); break;
     case "reset-demo": if (confirm("¿Restaurar todos los datos ficticios al estado inicial?")) runSafely(() => store.reset(), "Datos demo restaurados."); break;
     case "set-tab": ui.tab = data.tab; render(); break;
+    case "set-patient-tab": ui.patientTab = data.tab; ui.patientPage = 1; render(); break;
+    case "case-page": ui.casePage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "case-quote-page": ui.caseQuotePage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "apply-case-filters": ui.casePage = 1; ui.caseQuotePage = 1; render(); break;
+    case "clear-case-filters": {
+      ui.caseStatus = "ACTIVE";
+      ui.caseStartDate = "";
+      ui.caseAccountType = "";
+      ui.caseQuoteStatus = "";
+      ui.caseQuoteDate = "";
+      ui.casePage = 1;
+      ui.caseQuotePage = 1;
+      render();
+      break;
+    }
+    case "sort-patients": {
+      if (ui.patientSortKey === data.sort) ui.patientSortDirection = ui.patientSortDirection === "asc" ? "desc" : "asc";
+      else { ui.patientSortKey = data.sort; ui.patientSortDirection = "asc"; }
+      ui.patientPage = 1;
+      render();
+      break;
+    }
+    case "patient-page": ui.patientPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "clear-patient-import": ui.patientImport = null; render(); break;
+    case "clear-patient-location": {
+      const form = document.querySelector("#patient-form");
+      if (form) {
+        for (const name of ["locationLink", "address", "geo", "addressComments"]) {
+          const input = form.elements.namedItem(name);
+          if (input) input.value = "";
+        }
+        form.elements.namedItem("address")?.focus();
+      }
+      break;
+    }
+    case "confirm-patient-import": {
+      const rows = ui.patientImport?.rows || [];
+      const result = runSafely(() => store.importPatients(rows), `${rows.length} pacientes sintéticos importados.`);
+      if (result) { ui.patientImport = null; ui.patientTab = "active"; ui.patientPage = 1; render(); }
+      break;
+    }
     case "open-patient-form": openPatientForm(); break;
     case "edit-patient": openPatientForm(data.id); break;
     case "open-case-form": openCaseForm(null, data.patientId || ""); break;
     case "edit-case": openCaseForm(data.id); break;
     case "open-quote-form": openQuoteForm(data.caseId || ""); break;
+    case "open-quote-referral": openQuoteReferralForm(); break;
+    case "open-quote-date-picker": openQuoteDatePicker(); break;
     case "revise-quote": openQuoteForm("", data.id, true); break;
     case "edit-quote-draft": openQuoteForm("", data.id, false, true); break;
     case "quote-add-item": {
@@ -8745,12 +9740,33 @@ document.addEventListener("click", (event) => {
       const select=document.querySelector("#quote-item-select");
       const qty=document.querySelector("#quote-item-qty");
       const item=store.getState().catalogItems.find(i=>i.id===select?.value);
-      if(item&&ui.quoteDraft){
-        ui.quoteDraft.items.push({id:uid("QTI"),catalogItemId:item.id,category:item.category,name:item.name,quantity:Number(qty?.value||1),unitPrice:item.price,discountAmount:0});
+      const quantity=Number(qty?.value || 0);
+      if(!item) { showToast("Seleccione un concepto autorizado.","danger"); break; }
+      if(!(quantity > 0)) { showToast("Indique una cantidad válida.","danger"); break; }
+      if(ui.quoteDraft){
+        ui.quoteDraft.processing=true;
         renderQuoteModal();
+        setTimeout(()=>{
+          if(!ui.quoteDraft) return;
+          ui.quoteDraft.items.push({id:uid("QTI"),catalogItemId:item.id,category:item.category,name:item.name,quantity,unitPrice:item.price,discountAmount:0});
+          ui.quoteDraft.processing=false;
+          ui.quoteDraft.selectedCatalogItemId="";
+          ui.quoteDraft.catalogNoResults=false;
+          renderQuoteModal();
+        },350);
       }
       break;
     }
+    case "quote-set-category": syncQuoteHead(); if (ui.quoteDraft) { ui.quoteDraft.category = data.category || "SERVICES"; delete ui.quoteDraft.selectedCatalogItemId; ui.quoteDraft.catalogNoResults=false; } renderQuoteModal(); break;
+    case "quote-remove-referral": {
+      syncQuoteHead();
+      const values = String(ui.quoteDraft?.referredBy || "").split("|").map((value) => value.trim()).filter(Boolean);
+      values.splice(Number(data.index), 1);
+      if (ui.quoteDraft) ui.quoteDraft.referredBy = values.join(" | ");
+      renderQuoteModal();
+      break;
+    }
+    case "clear-quote-giftcard": syncQuoteHead(); if (ui.quoteDraft) ui.quoteDraft.giftcard = ""; renderQuoteModal(); break;
     case "quote-remove-item": syncQuoteHead(); ui.quoteDraft?.items.splice(Number(data.index),1); renderQuoteModal(); break;
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
     case "open-payment-form": openPaymentForm(data.quoteId || ""); break;
@@ -8795,37 +9811,141 @@ document.addEventListener("click", (event) => {
     case "export-patients": exportPatients(); break;
     case "export-audit": exportAudit(); break;
     case "export-report": exportReport(); break;
-    case "import-patients":
-    case "import-catalog": showToast("El importador CSV productivo está documentado; en esta demo se valida con archivos sintéticos.", "info"); break;
+    case "import-patients": ui.patientTab = "bulk"; ui.patientPage = 1; render(); break;
+    case "import-catalog": showToast("La importación de catálogos no está implementada; el control permanece bloqueado.", "info"); break;
     case "print-receivables": window.print(); break;
     case "print-case": window.print(); break;
     case "run-qa": runInternalQa(); break;
     case "portal-support": showToast("Solicitud enviada a administración en modo simulado."); break;
     case "request-portal-code": requestPortalCode(); break;
     case "save-settings": document.querySelector("#settings-form")?.requestSubmit(); break;
-    default: showToast(`Acción ${action} registrada para QA.`, "info");
+    default: showToast(`La acción ${action} no está disponible.`, "danger");
   }
 });
 
 document.addEventListener("change", (event) => {
   const target = event.target;
-  const action = target.dataset.action;
-  if (action === "quote-case-change" || action === "quote-calc-change") {
+  const action = target.dataset.change || target.dataset.action;
+  if (action === "quote-referral-add" && ui.quoteDraft) {
+    syncQuoteHead();
+    const candidate = String(target.value || "").trim();
+    const allowed = [...new Set(store.getState().quotes.flatMap((quote) => String(quote.referredBy || "").split("|").map((value) => value.trim())).filter(Boolean))];
+    const values = String(ui.quoteDraft.referredBy || "").split("|").map((value) => value.trim()).filter(Boolean);
+    const catalogValue = allowed.find((value) => value.toLocaleLowerCase("es") === candidate.toLocaleLowerCase("es"));
+    if (!catalogValue && candidate) showToast("Seleccione una referencia autorizada o use + para un alta provisional.", "danger");
+    if (catalogValue && !values.some((value) => value.toLocaleLowerCase("es") === catalogValue.toLocaleLowerCase("es"))) values.push(catalogValue);
+    ui.quoteDraft.referredBy = values.join(" | ");
+    renderQuoteModal();
+    return;
+  }
+  if (action === "quote-item-select" && ui.quoteDraft) {
+    syncQuoteHead();
+    const candidate=String(target.value || "").trim();
+    const item=store.getState().catalogItems.find((entry)=>entry.category===(ui.quoteDraft.category || "SERVICES") && quoteCatalogLabel(entry)===candidate);
+    ui.quoteDraft.selectedCatalogItemId=item?.id || "";
+    ui.quoteDraft.catalogNoResults=Boolean(candidate && !item);
+    renderQuoteModal();
+    return;
+  }
+  if (action === "quote-item-filter" && ui.quoteDraft) {
+    ui.quoteDraft.itemFilter = String(target.value || "ALL");
+    renderQuoteModal();
+    return;
+  }
+  if (action === "quote-case-change" || action === "quote-patient-change") {
     syncQuoteHead();
     renderQuoteModal();
+  }
+  if (action === "quote-calc-change") {
+    syncQuoteHead();
+    // Re-rendering a focused input on blur removes a subsequently clicked
+    // button before the browser can dispatch its click event. Only the
+    // discount selector needs an immediate structural refresh.
+    if (target.matches('select[name="discountGroupId"]')) renderQuoteModal();
   }
   if (action === "quote-item-qty-change" && ui.quoteDraft) {
     ui.quoteDraft.items[Number(target.dataset.index)].quantity = Number(target.value || 0);
     renderQuoteModal();
   }
-  if (action === "quote-item-price-change" && ui.quoteDraft) {
-    ui.quoteDraft.items[Number(target.dataset.index)].unitPrice = Number(target.value || 0);
-    renderQuoteModal();
+  if (action === "patient-insurance-change") {
+    const enabled = target.value !== "REGULAR";
+    const form = target.form;
+    form?.querySelectorAll(".patient-insurance-fields").forEach((section) => { section.hidden = !enabled; });
+    for (const name of ["policy", "insuredDocument", "insuredName", "insuredBirthDate"]) {
+      const input = form?.elements.namedItem(name);
+      if (input) input.required = enabled;
+    }
+    form?.querySelectorAll('input[name="isPolicyHolder"]').forEach((input) => { input.required = enabled; });
+    if (!enabled) {
+      form?.querySelectorAll('input[name="isPolicyHolder"]').forEach((input) => { input.checked = false; });
+    }
+  }
+  if (action === "patient-holder-change" && target.value === "true") {
+    const form = target.form;
+    if (form) {
+      form.elements.namedItem("insuredDocument").value = form.elements.namedItem("document").value;
+      form.elements.namedItem("insuredName").value = form.elements.namedItem("fullName").value;
+      form.elements.namedItem("insuredBirthDate").value = form.elements.namedItem("birthDate").value;
+    }
+  }
+  if (target.matches('[data-ui-filter="patientPageSize"]')) {
+    ui.patientPageSize = Math.max(1, Math.min(100, Number(target.value || 10)));
+    ui.patientPage = 1;
+    render();
+  }
+  if (target.matches('[data-ui-filter="caseStatus"]')) {
+    ui.caseStatus = target.value;
+    ui.casePage = 1;
+  }
+  if (target.matches('[data-ui-filter="caseStartDate"]')) {
+    ui.caseStartDate = target.value;
+    ui.casePage = 1;
+  }
+  if (target.matches('[data-ui-filter="caseAccountType"]')) {
+    ui.caseAccountType = target.value;
+    ui.casePage = 1;
+  }
+  if (target.matches('[data-ui-filter="caseQuoteStatus"]')) {
+    ui.caseQuoteStatus = target.value;
+    ui.caseQuotePage = 1;
+  }
+  if (target.matches('[data-ui-filter="caseQuoteDate"]')) {
+    ui.caseQuoteDate = target.value;
+    ui.caseQuotePage = 1;
+  }
+  if (target.matches('[data-ui-filter="casePageSize"]')) {
+    ui.casePageSize = Math.max(1, Math.min(100, Number(target.value || 10)));
+    ui.casePage = 1;
+    ui.caseQuotePage = 1;
+  }
+  if (target.id === "patient-import-file") {
+    const file = target.files?.[0];
+    if (!file) return;
+    if (!/\.csv$/i.test(file.name) && file.type !== "text/csv") {
+      ui.patientImport = { error: "Selecciona un archivo CSV.", rows: [], fileName: file.name };
+      render();
+      return;
+    }
+    file.text().then((text) => {
+      ui.patientImport = { error: "", rows: parseCsv(text), fileName: file.name };
+      render();
+    }).catch((error) => {
+      ui.patientImport = { error: error.message, rows: [], fileName: file.name };
+      render();
+    });
   }
 });
 
 document.addEventListener("input", (event) => {
   const target = event.target;
+  if (target.id === "quote-item-search" && ui.quoteDraft) {
+    const query = String(target.value || "").trim().toLocaleLowerCase("es");
+    const category = ui.quoteDraft.category || "SERVICES";
+    const hasMatch = !query || store.getState().catalogItems.some((item) => item.category === category && quoteCatalogLabel(item).toLocaleLowerCase("es").includes(query));
+    ui.quoteDraft.catalogNoResults = !hasMatch;
+    const status = document.querySelector(".quote-no-results");
+    if (status) status.hidden = hasMatch;
+  }
   if (target.matches("[data-ui-search]")) {
     ui.search = target.value;
     const pos = target.selectionStart;
@@ -8851,31 +9971,65 @@ document.addEventListener("input", (event) => {
 
 document.addEventListener("submit", (event) => {
   const form = event.target;
+  const formId = form.getAttribute("id");
   event.preventDefault();
 
-  if (form.id === "login-form") {
-    const email=formValue(form,"email");
-    const user=store.getState().users.find((u)=>u.email===email) || store.getState().users[0];
-    runSafely(()=>store.login(user.id),"Bienvenido al sistema.");
+  if (formId === "login-form") {
+    const email = formValue(form, "email");
+    const password = formValue(form, "password");
+    runSafely(() => store.authenticate(email, password), "Bienvenido al sistema.");
     return;
   }
 
-  if (form.id === "portal-verification-form") {
+  if (formId === "portal-verification-form") {
     verifyPortalAccess(form);
     return;
   }
 
-  if(form.id==="settings-form"){
+  if (formId === "patient-form") {
+    if (!roleCan(store.getState().session.role, "patients:write")) {
+      showToast("No tienes permiso para guardar pacientes.", "danger");
+      return;
+    }
+    if (!form.reportValidity()) return;
+    const data = Object.fromEntries(new FormData(form));
+    data.notifyWhatsApp = formBool(form, "notifyWhatsApp");
+    data.notifySms = false;
+    data.notifyEmail = false;
+    data.retired = formBool(form, "retired");
+    data.insurerId = data.insurerId === "REGULAR" ? "" : data.insurerId;
+    data.isPolicyHolder = data.insurerId ? data.isPolicyHolder === "true" : null;
+    const id = data.id;
+    delete data.id;
+    const result = runSafely(() => id ? store.updatePatient(id, data) : store.createPatient(data), id ? "Paciente actualizado." : "Paciente creado.");
+    if (result) location.hash = `#/pacientes/${id || result.id}`;
+    return;
+  }
+
+  if(formId==="settings-form"){
+    if (!roleCan(store.getState().session.role, "settings:write")) {
+      showToast("No tienes permiso para modificar la configuración.", "danger");
+      return;
+    }
     const data=new FormData(form);
     saveRuntimeConfigOverride({dataMode:data.get("dataMode"),notificationsMode:data.get("notificationsMode"),supabaseUrl:data.get("supabaseUrl"),supabasePublishableKey:data.get("supabasePublishableKey")});
     showToast("Configuración guardada. Recarga para aplicar el modo de datos.");
   }
 });
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const button=event.target.closest("[data-action]");
   if(!button) return;
+  // Controls whose data-action is handled by the change listener must retain
+  // their native checked/selected state instead of entering the command switch.
+  if (button.matches("input, select, textarea")) return;
   const action=button.dataset.action;
+  const permission = actionPermission(action);
+  if (permission && !roleCan(store.getState().session.role, permission)) {
+    event.preventDefault();
+    showToast("No tienes permiso para realizar esta acción.", "danger");
+    return;
+  }
   if(!action?.startsWith("save-")) return;
   event.preventDefault();
 
@@ -8900,11 +10054,38 @@ document.addEventListener("click", (event) => {
   }
 
   if(action==="save-quote"){
+    const headForm=document.querySelector("#quote-head-form");
     syncQuoteHead();
+    const patientInput=headForm?.elements.namedItem("patientSearch");
+    const selectedPatient=ui.quoteDraft ? store.patientById(ui.quoteDraft.patientId) : null;
+    if(patientInput instanceof HTMLInputElement){
+      const validPatient=Boolean(selectedPatient && quotePatientLabel(selectedPatient)===patientInput.value.trim() && store.caseById(ui.quoteDraft.caseId)?.patientId===selectedPatient.id);
+      patientInput.setCustomValidity(validPatient ? "" : "Seleccione un paciente autorizado de la lista.");
+    }
+    if(!headForm?.reportValidity()) return;
     if(!ui.quoteDraft?.items.length) return showToast("Agrega al menos un concepto.","danger");
     const draft=structuredClone(ui.quoteDraft);
-    const result=runSafely(()=>draft.editDraft?store.updateQuoteDraft(draft.quoteId,draft):draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.editDraft?"Borrador actualizado.":draft.revise?"Nueva versión creada.":"Cotización guardada.");
+    const result=await runSafely(()=>draft.editDraft?store.updateQuoteDraft(draft.quoteId,draft):draft.revise?store.reviseQuote(draft.quoteId,draft):store.createQuote(draft),draft.editDraft?"Borrador actualizado.":draft.revise?"Nueva versión creada.":"Cotización guardada.");
     if(result){closeModal(); location.hash=`#/cotizaciones/${result.id}`;}
+  }
+
+  if(action==="save-quote-referral"){
+    const form=document.querySelector("#quote-referral-form");
+    if(!form?.reportValidity() || !ui.quoteDraft) return;
+    const label=String(new FormData(form).get("label") || "").trim();
+    const values=String(ui.quoteDraft.referredBy || "").split("|").map((value)=>value.trim()).filter(Boolean);
+    if(!values.some((value)=>value.toLocaleLowerCase("es")===label.toLocaleLowerCase("es"))) values.push(label);
+    ui.quoteDraft.referredBy=values.join(" | ");
+    closeModal();
+    render();
+  }
+
+  if(action==="save-quote-date"){
+    const form=document.querySelector("#quote-date-form");
+    if(!form?.reportValidity() || !ui.quoteDraft) return;
+    ui.quoteDraft.invoiceDate=String(new FormData(form).get("invoiceDate") || "");
+    closeModal();
+    render();
   }
 
   if(action==="save-insurance-status"){

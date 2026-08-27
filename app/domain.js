@@ -142,7 +142,12 @@ export function calculateQuote(items = [], discount = { type: "PERCENT", value: 
   }
 
   let discountAmount = 0;
-  if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
+  if (discount?.type === "CATEGORY_PERCENTAGES") {
+    discountAmount = Object.entries(categoryTotals).reduce((sum, [category, categoryTotal]) => {
+      const percentage = Math.min(100, Math.max(0, Number(discount.categories?.[category] || 0)));
+      return sum + categoryTotal * percentage / 100;
+    }, 0);
+  } else if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
   else discountAmount = subtotal * Math.max(0, Number(discount?.value || 0)) / 100;
 
   discountAmount = Math.min(discountAmount, subtotal);
@@ -310,7 +315,7 @@ export function roleCan(role, permission) {
     SUPERADMIN: ["*"],
     ADMIN: ["*"],
     NURSE: [
-      "dashboard:read", "patients:read", "patients:write", "cases:read",
+      "dashboard:read", "patients:read", "cases:read",
       "quotes:read", "insurance:read", "clinical:read", "clinical:write",
       "clinical:sign",
       "agenda:read", "inventory:read"

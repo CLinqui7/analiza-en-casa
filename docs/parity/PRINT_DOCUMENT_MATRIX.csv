@@ -1,0 +1,2 @@
+"requirement_id","document","source_event","expected_versioning","expected_permission","template_status","current_status","test_id"
+"CH01-R005","Pacientes Excel","CH01-E0009","NO_APLICA","patients:export","PROVISIONAL","IMPLEMENTED_PARTIAL","NONE"

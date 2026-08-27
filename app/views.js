@@ -202,7 +202,7 @@ function table(headers, rows, options = {}) {
   return `
     <div class="table-wrap ${compact ? "table-compact" : ""}">
       <table class="${className}">
-        <thead><tr>${headers.map((header) => `<th>${esc(header)}</th>`).join("")}</tr></thead>
+        <thead><tr>${headers.map((header) => `<th>${header ? esc(header) : '<span class="sr-only">Acciones</span>'}</th>`).join("")}</tr></thead>
         <tbody>${rows.length ? rows.join("") : `<tr><td colspan="${headers.length}">${emptyState("Sin resultados", "Ajusta los filtros o crea un nuevo registro.")}</td></tr>`}</tbody>
       </table>
     </div>`;
@@ -242,109 +242,180 @@ function searchFilter(items, query, fields) {
 }
 
 function renderDashboard(state, store, ui) {
-  const activeCases = state.cases.filter((item) => !["CLOSED", "CANCELLED"].includes(item.status));
-  const openQuotes = state.quotes.filter((item) => !["CLOSED", "CANCELLED", "REJECTED"].includes(item.status));
-  const openBalance = state.quotes.reduce((sum, quote) => sum + quoteBalance(quote, state.payments), 0);
-  const lowStock = state.inventoryItems.filter((item) => inventoryState(item) !== "OK");
-  const pendingInsurance = state.insuranceRequests.filter((item) => !["APPROVED", "REJECTED", "CLOSED"].includes(item.status));
-  const todayShifts = state.shifts.slice(0, 5);
-  const recentEvents = state.auditLogs.slice(0, 7);
-
-  const statusCounts = {};
-  for (const quote of state.quotes) statusCounts[quote.status] = (statusCounts[quote.status] || 0) + 1;
-  const maxCount = Math.max(1, ...Object.values(statusCounts));
+  const activePatients = state.patients.filter((patient) => patient.status === "ACTIVE").length;
+  const medicationItems = state.medicationCards.flatMap((card) => card.items || []);
+  const updatedTreatments = medicationItems.filter((item) => item.lastAdministration).length;
+  const carePlans = state.clinicalDocuments.filter((document) => document.type === "CARE_PLAN" && document.status !== "VOIDED").length;
+  const now = new Date();
+  const endingTreatments = medicationItems.filter((item) => {
+    if (!item.endDate) return false;
+    const days = (new Date(`${item.endDate}T23:59:59Z`) - now) / 86_400_000;
+    return days >= 0 && days <= 7;
+  }).length;
+  const vitalRows = [...state.vitalSigns].sort((left, right) => String(right.recordedAt).localeCompare(String(left.recordedAt)));
 
   return `
-    ${pageHeader("Centro operativo", "Una vista integral para pacientes, casos, cotizaciones, seguros, clínica, inventario y finanzas.",
+    ${pageHeader("Dashboard", "Indicadores del capítulo CH01 calculados desde datos sintéticos o marcados explícitamente cuando falta una regla del cliente.",
       `${actionButton("Nueva cotización", "open-quote-form", {kind: "primary", iconName: "plus"})}${actionButton("Nuevo paciente", "open-patient-form", {iconName: "plus"})}`)}
-    <div class="metrics-grid">
-      ${metric("Pacientes activos", state.patients.filter((p) => p.status === "ACTIVE").length, `${activeCases.length} hospitalizaciones abiertas`, "patients", "teal")}
-      ${metric("Cotizaciones abiertas", openQuotes.length, `${pendingInsurance.length} requieren seguimiento`, "quotes", "blue")}
-      ${metric("Saldo por cobrar", money(openBalance), "Responsabilidad pendiente del paciente", "money", "amber")}
-      ${metric("Alertas de inventario", lowStock.length, `${state.inventoryReservations.filter((r) => r.status === "OPEN").length} compromisos abiertos`, "inventory", "coral")}
+    <div class="metrics-grid metrics-grid-six">
+      ${metric("Pacientes con alertas", "—", "Pendiente de umbrales clínicos aprobados", "alert", "coral")}
+      ${metric("Pacientes activos", activePatients, "Calculado desde estado ACTIVE", "patients", "teal")}
+      ${metric("Tratamientos actualizados", updatedTreatments, "Indicador demo: administración registrada", "clinical", "blue")}
+      ${metric("Tratamientos por finalizar", endingTreatments, "Indicador demo: ventana configurable de 7 días", "clock", "amber")}
+      ${metric("Planes de cuidado", carePlans, "Documentos CARE_PLAN no anulados", "file", "purple")}
+      ${metric("Incidentes", "—", "Sin fuente ni regla aprobada", "alert", "coral")}
     </div>
-
-    <div class="dashboard-grid dashboard-grid-2">
-      ${card("Embudo de cotizaciones", `
-        <div class="status-bars">
-          ${Object.entries(statusCounts).map(([status, count]) => `
-            <a class="status-bar-row" href="#/preautorizaciones">
-              <span>${esc(QUOTE_ADMIN_LABELS[status] || status)}</span>
-              <div class="bar-track"><span style="width:${Math.max(8, count / maxCount * 100)}%"></span></div>
-              <strong>${count}</strong>
-            </a>`).join("")}
-        </div>`, {subtitle: "Distribución por estado actual", actions: linkButton("Ver flujo", "#/preautorizaciones", {kind: "ghost"})})}
-
-      ${card("Próximos turnos", `
-        <div class="timeline-list">
-          ${todayShifts.map((shift) => `
-            <article class="timeline-item">
-              <span class="timeline-dot"></span>
-              <div><strong>${esc(shift.resourceName)}</strong><p>${esc(patientName(state, shift.patientId))} · ${esc(shift.type.replaceAll("_", " "))}</p><small>${formatDate(shift.start, true)} → ${formatDate(shift.end, true)}</small></div>
-              ${badge(shift.status)}
-            </article>`).join("")}
-        </div>`, {actions: linkButton("Abrir agenda", "#/agenda", {kind: "ghost"})})}
-    </div>
-
-    <div class="dashboard-grid dashboard-grid-3">
-      ${card("Casos que requieren acción", table(
-        ["Caso", "Paciente", "Estado", "Próxima acción", ""],
-        activeCases.slice(0, 6).map((record) => `<tr>
-          <td><a class="strong-link" href="#/hospitalizaciones/${record.id}">${esc(record.id)}</a></td>
-          <td>${esc(patientName(state, record.patientId))}</td>
-          <td>${badge(record.status)}</td>
-          <td class="cell-wrap">${esc(record.nextAction)}</td>
-          <td><a class="row-action" href="#/hospitalizaciones/${record.id}">Abrir ${icon("view")}</a></td>
-        </tr>`), {compact: true}), {className: "span-2"})}
-
-      ${card("Inventario crítico", `
-        <div class="compact-list">
-          ${lowStock.slice(0, 6).map((item) => `<a href="#/inventario" class="compact-item">
-            <div><strong>${esc(item.name)}</strong><small>${esc(warehouseName(state, item.warehouseId))}</small></div>
-            <div class="align-right"><strong>${inventoryFree(item)} ${esc(item.unit)}</strong>${badge(inventoryState(item))}</div>
-          </a>`).join("") || `<p class="success-callout">No hay alertas críticas.</p>`}
-        </div>`, {actions: linkButton("Gestionar", "#/inventario", {kind: "ghost"})})}
-    </div>
-
-    ${card("Actividad reciente", table(
-      ["Fecha", "Usuario", "Rol", "Acción", "Entidad", "Detalle"],
-      recentEvents.map((event) => `<tr>
-        <td>${formatDate(event.date, true)}</td>
-        <td>${esc(event.user)}</td>
-        <td>${badge(event.role, event.role)}</td>
-        <td><code>${esc(event.action)}</code></td>
-        <td>${esc(event.entity)}</td>
-        <td class="cell-wrap">${esc(event.summary)}</td>
-      </tr>`), {compact: true}), {actions: linkButton("Auditoría completa", "#/auditoria", {kind: "ghost"})})}
+    ${card("Pacientes con valores fuera de rango", table(
+      ["Acciones", "Paciente", "FC", "FR", "Oxígeno", "Sistólica", "Diastólica", "Temp", "Dolor", "Glicemia", "Fecha", "Recurso"],
+      vitalRows.map((vital) => `<tr>
+        <td><a class="row-action" href="#/hospitalizaciones/${esc(vital.caseId)}">Ver ${icon("view")}</a></td>
+        <td>${esc(patientName(state, vital.patientId))}<small>Sin clasificación clínica</small></td>
+        <td>${esc(vital.heartRate)}</td><td>${esc(vital.respiratoryRate)}</td><td>${esc(vital.spo2)}%</td>
+        <td>${esc(vital.systolic)}</td><td>${esc(vital.diastolic)}</td><td>${esc(vital.temperature)} °C</td>
+        <td>${esc(vital.pain)}</td><td>—</td><td>${formatDate(vital.recordedAt, true)}</td><td>${esc(vital.authorName)}</td>
+      </tr>`), {compact: true}), {
+        subtitle: "Los umbrales están bloqueados por decisión del cliente; ningún registro se etiqueta normal o anormal.",
+        actions: `<button class="btn btn-secondary" type="button" disabled title="Requiere umbrales clínicos aprobados">Normales</button><span class="badge badge-neutral">Sin clasificar</span>`
+      })}
   `;
 }
 
 function renderPatients(state, store, ui) {
-  const rows = searchFilter(state.patients, ui.search, ["fullName", "document", "phone", "email", "address"]).map((patient) => {
-    const cases = state.cases.filter((item) => item.patientId === patient.id);
-    return `<tr>
-      <td><div class="person-cell"><span class="avatar">${initials(patient.fullName)}</span><div><a class="strong-link" href="#/pacientes/${patient.id}">${esc(patient.fullName)}</a><small>${esc(patient.id)}</small></div></div></td>
-      <td>${esc(patient.documentType)} ${esc(patient.document)}</td>
-      <td>${ageFromBirthDate(patient.birthDate)} años<br><small>${esc(patient.bloodType)}</small></td>
-      <td>${esc(patient.phone)}<br><small>${esc(patient.email)}</small></td>
-      <td>${esc(insurerName(state, patient.insurerId))}<br><small>${esc(patient.policy || "Sin póliza")}</small></td>
-      <td>${badge(patient.triage)}</td>
-      <td>${cases.length}</td>
-      <td>${badge(patient.status)}</td>
-      <td><div class="row-actions"><a href="#/pacientes/${patient.id}" title="Ver">${icon("view")}</a><button data-action="edit-patient" data-id="${patient.id}" title="Editar">${icon("edit")}</button></div></td>
-    </tr>`;
-  });
+  const tab = ui.patientTab || "active";
+  const canWrite = roleCan(state.session.role, "patients:write");
+  const activeCount = state.patients.filter((patient) => patient.status === "ACTIVE").length;
+  const inactiveCount = state.patients.filter((patient) => patient.status === "INACTIVE").length;
+  const tabControls = `<nav class="tabs" aria-label="Estados de pacientes">
+    <button class="tab ${tab === "active" ? "active" : ""}" data-action="set-patient-tab" data-tab="active" aria-current="${tab === "active" ? "page" : "false"}">Activos <span>${activeCount}</span></button>
+    <button class="tab ${tab === "inactive" ? "active" : ""}" data-action="set-patient-tab" data-tab="inactive" aria-current="${tab === "inactive" ? "page" : "false"}">Inactivos <span>${inactiveCount}</span></button>
+    ${canWrite ? `<button class="tab ${tab === "bulk" ? "active" : ""}" data-action="set-patient-tab" data-tab="bulk" aria-current="${tab === "bulk" ? "page" : "false"}">Carga masiva</button>` : ""}
+  </nav>`;
+
+  if (tab === "bulk") {
+    if (!canWrite) return accessDenied(state.session.role, "patients:write");
+    const preview = ui.patientImport;
+    return `
+      ${pageHeader("Pacientes", "Carga masiva transaccional en modo demo con datos exclusivamente sintéticos.", actionButton("Volver a activos", "set-patient-tab", {data:'data-tab="active"'}))}
+      ${tabControls}
+      ${card("Carga masiva", `
+        <div class="bulk-import">
+          <p>CSV UTF-8. Encabezados obligatorios: <code>document,firstName,lastName</code>. Opcionales: <code>documentType,birthDate,sex,phone,email,company,status</code>.</p>
+          <label class="file-drop" for="patient-import-file"><strong>Seleccionar CSV sintético</strong><span>No use información real.</span><input id="patient-import-file" type="file" accept=".csv,text/csv"></label>
+          ${preview?.error ? `<p class="error-callout" role="alert">${esc(preview.error)}</p>` : ""}
+          ${preview?.rows?.length ? `<div class="import-preview"><p><strong>${preview.rows.length}</strong> filas listas desde ${esc(preview.fileName)}.</p>${table(["Documento","Nombre","Correo","Empresa"], preview.rows.slice(0,10).map((item)=>`<tr><td>${esc(item.documentType || "DUI")} ${esc(item.document)}</td><td>${esc(item.firstName)} ${esc(item.lastName)}</td><td>${esc(item.email || "—")}</td><td>${esc(item.company || "—")}</td></tr>`), {compact:true})}<div class="form-actions">${actionButton("Cancelar","clear-patient-import")}${actionButton("Importar pacientes","confirm-patient-import",{kind:"primary"})}</div></div>` : ""}
+        </div>`)}
+    `;
+  }
+
+  const expectedStatus = tab === "inactive" ? "INACTIVE" : "ACTIVE";
+  const filtered = searchFilter(state.patients.filter((patient) => patient.status === expectedStatus), ui.search, ["fullName", "document", "phone", "email", "address", "company"]);
+  const sortKey = ui.patientSortKey || "fullName";
+  const direction = ui.patientSortDirection === "desc" ? -1 : 1;
+  filtered.sort((left, right) => String(sortKey === "age" ? left.birthDate : left[sortKey] || "").localeCompare(String(sortKey === "age" ? right.birthDate : right[sortKey] || ""), "es", {numeric:true}) * direction);
+  const pageSize = Number(ui.patientPageSize || 10);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(Math.max(1, Number(ui.patientPage || 1)), totalPages);
+  const pageRows = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const sortHeader = (label, key) => `<button class="sort-button" data-action="sort-patients" data-sort="${key}" aria-label="Ordenar por ${esc(label)}" aria-pressed="${sortKey === key}">${esc(label)}${sortKey === key ? (direction === 1 ? " ↑" : " ↓") : " ↕"}</button>`;
+  const sortableTh = (label, key) => `<th aria-sort="${sortKey === key ? (direction === 1 ? "ascending" : "descending") : "none"}">${sortHeader(label, key)}</th>`;
+  const rows = pageRows.map((patient) => `<tr>
+    <td><div class="row-actions"><a href="#/pacientes/${patient.id}" title="Ver paciente" aria-label="Ver ${esc(patient.fullName)}">${icon("view")}</a><button data-action="edit-patient" data-id="${patient.id}" title="Editar paciente" aria-label="Editar ${esc(patient.fullName)}">${icon("edit")}</button></div></td>
+    <td>${esc(patient.documentType)} ${esc(patient.document)}</td>
+    <td><a class="strong-link" href="#/pacientes/${patient.id}">${esc(patient.fullName)}</a></td>
+    <td>${ageFromBirthDate(patient.birthDate)} años</td>
+    <td>${esc(patient.company || "Sin empresa")}</td>
+    <td>${badge(patient.triage, patient.triage === "NO_ASIGNADO" ? "No asignado" : LABELS[patient.triage] || patient.triage)}</td>
+    <td>${patient.notifyWhatsApp ? badge("ACTIVE", "Autorizado") : badge("INACTIVE", "No autorizado")}</td>
+    <td>${badge(patient.status)}</td>
+  </tr>`);
+  const loading = ui.patientLoadState === "loading";
+  const remoteError = store.config.dataMode === "supabase" && state.meta.remoteError;
+  const body = loading
+    ? `<div class="data-state" role="status" aria-live="polite"><span class="spinner"></span><strong>Cargando...</strong></div>`
+    : remoteError
+      ? `<div class="data-state error-callout" role="alert"><strong>No fue posible cargar pacientes.</strong><span>${esc(state.meta.remoteError)}</span></div>`
+      : `<div class="table-wrap"><table><thead><tr><th>Acciones</th>${sortableTh("Documento","document")}${sortableTh("Nombre completo","fullName")}${sortableTh("Edad","age")}${sortableTh("Empresa","company")}${sortableTh("Triage","triage")}<th>Notif. Botmaker/WhatsApp</th>${sortableTh("Estado","status")}</tr></thead><tbody>${rows.length ? rows.join("") : `<tr><td colspan="8">${emptyState("No hay registros disponibles", "Ajusta la búsqueda o cambia de pestaña.")}</td></tr>`}</tbody></table></div>`;
+  const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="patient-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
 
   return `
     ${pageHeader("Pacientes", "Expediente administrativo único con datos personales, responsables, seguro, ubicación y trazabilidad.",
-      `${actionButton("Importar CSV", "import-patients", {iconName: "upload"})}${actionButton("Exportar", "export-patients", {iconName: "export"})}${actionButton("Nuevo paciente", "open-patient-form", {kind: "primary", iconName: "plus"})}`)}
+      `${actionButton("Excel", "export-patients", {iconName: "export"})}${actionButton("Nuevo", "open-patient-form", {kind: "primary", iconName: "plus"})}`)}
+    ${tabControls}
     <div class="filter-bar">
-      <label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar por nombre, DUI, teléfono o seguro" value="${esc(ui.search || "")}"></label>
-      <select data-ui-filter="patientStatus"><option value="">Todos los estados</option><option>ACTIVE</option><option>INACTIVE</option></select>
-      <div class="filter-summary">${rows.length} registros</div>
+      <label class="search-field">${icon("search")}<span class="sr-only">Buscar pacientes</span><input data-ui-search placeholder="Buscar por nombre, documento, teléfono o empresa" value="${esc(ui.search || "")}"></label>
+      <label class="page-size-label">Mostrar <select data-ui-filter="patientPageSize" aria-label="Cantidad de registros por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${pageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label>
+      <div class="filter-summary">${filtered.length} registros</div>
     </div>
-    ${card("Directorio de pacientes", table(["Paciente", "Documento", "Edad", "Contacto", "Seguro", "Triage", "Casos", "Estado", ""], rows))}
+    ${card("Directorio de pacientes", `${body}<nav class="pagination" aria-label="Paginación de pacientes"><button data-action="patient-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="patient-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav>`)}
   `;
+}
+
+function renderPatientForm(state, store, ui, id = null) {
+  if (!roleCan(state.session.role, "patients:write")) return accessDenied(state.session.role, "patients:write");
+  const patient = id ? state.patients.find((item) => item.id === id) : null;
+  if (id && !patient) return notFound("Paciente");
+  const insurerOptions = [
+    `<option value="REGULAR" ${!patient?.insurerId ? "selected" : ""}>Paciente regular</option>`,
+    ...state.insurers.filter((item) => item.status === "ACTIVE").map((item) => `<option value="${esc(item.id)}" ${patient?.insurerId === item.id ? "selected" : ""}>${esc(item.id)} | ${esc(item.name)}</option>`)
+  ].join("");
+  const companies = [...new Set(state.patients.map((item) => item.company).filter(Boolean))];
+  const insured = Boolean(patient?.insurerId);
+  return `
+    ${pageHeader(patient ? "Editar paciente" : "Paciente nuevo", "Datos administrativos del paciente. Los campos marcados con * son obligatorios según la interfaz observada.")}
+    <form id="patient-form" class="patient-page-form">
+      <input type="hidden" name="id" value="${esc(patient?.id || "")}">
+      ${card("Datos del paciente", `<div class="patient-fields-grid">
+        <label><span>* Tipo de documento</span><select name="documentType" required><option value="DUI" ${["DUI","Cédula"].includes(patient?.documentType) ? "selected" : ""}>Cédula</option><option value="Pasaporte" ${patient?.documentType === "Pasaporte" ? "selected" : ""}>Pasaporte</option></select></label>
+        <label><span>* Documento</span><input name="document" required value="${esc(patient?.document || "")}" autocomplete="off"></label>
+        <label class="span-2"><span>* Nombre completo</span><input name="fullName" required value="${esc(patient?.fullName || "")}" autocomplete="name"></label>
+        <label><span>* Fecha de nacimiento</span><input type="date" name="birthDate" required value="${esc(patient?.birthDate || "")}"></label>
+        <fieldset class="patient-inline-options"><legend>* Sexo</legend><label><input type="radio" name="sex" value="M" ${patient?.sex === "M" ? "checked" : ""} required> Masculino</label><label><input type="radio" name="sex" value="F" ${patient?.sex === "F" ? "checked" : ""}> Femenino</label></fieldset>
+        <label><span>* Teléfono celular</span><input type="tel" name="phone" required value="${esc(patient?.phone || "")}" autocomplete="tel"></label>
+        <label><span>Teléfono casa</span><input type="tel" name="homePhone" value="${esc(patient?.homePhone || "")}"></label>
+        <label><span>Correo</span><input type="email" name="email" value="${esc(patient?.email || "")}" autocomplete="email"></label>
+        <label class="patient-check"><input type="checkbox" name="retired" ${patient?.retired ? "checked" : ""}> Jubilado</label>
+        <label><span>Tipo de sangre</span><select name="bloodType"><option value="">Seleccione</option>${["O+","O-","A+","A-","B+","B-","AB+","AB-"].map((value) => `<option ${patient?.bloodType === value ? "selected" : ""}>${value}</option>`).join("")}</select></label>
+        <label><span>Estado civil</span><input name="civilStatus" value="${esc(patient?.civilStatus || "")}" placeholder="Pendiente de catálogo del cliente"></label>
+        <label><span>Nacionalidad</span><input name="nationality" list="patient-nationalities" value="${esc(patient?.nationality || "")}" placeholder="Buscar nacionalidad"><datalist id="patient-nationalities"><option value="Salvadoreña"><option value="Panameña"></datalist></label>
+        <label><span>* Empresa</span><input name="company" list="patient-companies" required value="${esc(patient?.company || "")}" placeholder="Seleccionar empresa"><datalist id="patient-companies">${companies.map((value) => `<option value="${esc(value)}">`).join("")}</datalist></label>
+        <label><span>Ocupación</span><input name="occupation" value="${esc(patient?.occupation || "")}"></label>
+        <label class="patient-consent span-all"><input type="checkbox" name="notifyWhatsApp" ${patient?.notifyWhatsApp ? "checked" : ""}><span><strong>Este paciente desea recibir notificaciones automáticas por WhatsApp (Botmaker)</strong><small>Desmarcado por defecto. No se enviará contenido clínico; la base legal, revocación e historial requieren confirmación del cliente.</small></span></label>
+      </div>`) }
+
+      ${card("Información de seguro", `<div class="patient-fields-grid">
+        <label class="span-all"><span>* Seguro</span><select name="insurerId" data-change="patient-insurance-change" required>${insurerOptions}</select></label>
+        <fieldset class="patient-inline-options span-all patient-insurance-fields" ${insured ? "" : "hidden"}><legend>¿Paciente es el asegurado titular?</legend><label><input type="radio" name="isPolicyHolder" value="false" data-change="patient-holder-change" ${patient?.isPolicyHolder === false ? "checked" : ""} ${insured ? "required" : ""}> No</label><label><input type="radio" name="isPolicyHolder" value="true" data-change="patient-holder-change" ${patient?.isPolicyHolder ? "checked" : ""} ${insured ? "required" : ""}> Sí</label></fieldset>
+        <div class="patient-fields-grid span-all patient-insurance-fields" ${insured ? "" : "hidden"}>
+          <label><span>* Nro de póliza</span><input name="policy" value="${esc(patient?.policy || "")}" ${insured ? "required" : ""}></label>
+          <label><span>Certificado/Unidad</span><input name="policyCertificate" value="${esc(patient?.policyCertificate || "")}"></label>
+          <label><span>Fecha efectiva</span><input type="date" name="policyEffectiveDate" value="${esc(patient?.policyEffectiveDate || "")}"></label>
+          <label><span>* DUI/NIT del asegurado</span><input name="insuredDocument" value="${esc(patient?.insuredDocument || "")}" ${insured ? "required" : ""}></label>
+          <label><span>* Nombre asegurado</span><input name="insuredName" value="${esc(patient?.insuredName || "")}" ${insured ? "required" : ""}></label>
+          <label><span>* Fecha de nacimiento del asegurado</span><input type="date" name="insuredBirthDate" value="${esc(patient?.insuredBirthDate || "")}" ${insured ? "required" : ""}></label>
+          <button class="btn btn-secondary" type="button" disabled title="CH02-Q005: requiere reglas de múltiples coberturas">Agregar</button>
+        </div>
+      </div>`, {subtitle:"El catálogo es sintético. La titularidad y las múltiples coberturas permanecen sujetas a CH02-Q004/CH02-Q005."})}
+
+      ${card("Información de contactos", `<div class="patient-fields-grid">
+        <label><span>Nombre completo</span><input name="contactName" value="${esc(patient?.contactName || "")}"></label>
+        <label><span>Teléfono</span><input type="tel" name="contactPhone" value="${esc(patient?.contactPhone || "")}"></label>
+        <label><span>Correo</span><input type="email" name="contactEmail" value="${esc(patient?.contactEmail || "")}"></label>
+        <label><span>Parentesco</span><input name="contactRelationship" value="${esc(patient?.contactRelationship || "")}" placeholder="Pendiente de catálogo"></label>
+        <label><span>Rol</span><input name="contactRole" value="${esc(patient?.contactRole || "")}" placeholder="Pendiente de catálogo"></label>
+        <label><span>País de residencia</span><input name="contactCountry" value="${esc(patient?.contactCountry || "")}" placeholder="Pendiente de catálogo"></label>
+      </div>`, {subtitle:"La multiplicidad y los catálogos de contactos requieren decisión CH02-Q006."})}
+
+      ${card("Información de dirección", `<div class="patient-fields-grid">
+        <label class="span-all"><span>Pegar enlace <small title="CH02-Q007: proveedores y precedencia pendientes">ⓘ</small></span><div class="inline-control"><input name="locationLink" value="${esc(patient?.locationLink || "")}" placeholder="Enlace de ubicación"><button class="btn btn-secondary" type="button" data-action="clear-patient-location">Limpiar</button></div></label>
+        <label class="span-2"><span>* Dirección</span><input name="address" required value="${esc(patient?.address || "")}" placeholder="Enter a location"></label>
+        <label class="span-2"><span>Ubicación geográfica</span><input name="geo" value="${esc(patient?.geo || "")}" placeholder="Marcador o coordenadas"></label>
+        <label class="span-2"><span>* Comentarios relevantes de la dirección</span><input name="addressComments" required value="${esc(patient?.addressComments || "")}"></label>
+        <button class="btn btn-secondary" type="button" disabled title="CH02-Q007: finalidad y retención de cámara pendientes">Cámara</button>
+        <div class="synthetic-map span-all" role="img" aria-label="Mapa demo sin geocodificación real"><div class="map-grid"></div><span class="map-pin">●</span><strong>Mapa demo</strong><small>No geocodifica ni captura imágenes. Configuración pendiente CH02-Q007.</small></div>
+      </div>`) }
+
+      <div class="patient-form-actions"><a class="btn btn-secondary" href="#/pacientes">Atrás</a><button class="btn btn-primary" type="submit">Guardar</button></div>
+    </form>`;
 }
 
 function renderPatientDetail(state, store, ui, id) {
@@ -410,30 +481,85 @@ function renderPatientDetail(state, store, ui, id) {
 }
 
 function renderCases(state, store, ui) {
-  const records = searchFilter(state.cases, ui.search, ["id", "manager", "status", "diagnosisSummary", "nextAction"])
-    .map((record) => {
-      const quote = state.quotes.find((item) => item.caseId === record.id);
+  const canWriteCases = roleCan(state.session.role, "cases:write");
+  const canWriteQuotes = roleCan(state.session.role, "quotes:write");
+  const activeTab = ["active", "quotes", "pic"].includes(ui.tab) ? ui.tab : "active";
+  const casePageSize = Number(ui.casePageSize || 10);
+  const tabControls = `<nav class="tabs" aria-label="Gestión de hospitalización">
+    <button class="tab ${activeTab === "active" ? "active" : ""}" data-action="set-tab" data-tab="active" aria-current="${activeTab === "active" ? "page" : "false"}">Activos</button>
+    <button class="tab ${activeTab === "quotes" ? "active" : ""}" data-action="set-tab" data-tab="quotes" aria-current="${activeTab === "quotes" ? "page" : "false"}">Cotizaciones</button>
+    <button class="tab ${activeTab === "pic" ? "active" : ""}" data-action="set-tab" data-tab="pic" aria-current="${activeTab === "pic" ? "page" : "false"}">PIC Ejecución <span title="CH03-Q003: fórmula no confirmada">—</span></button>
+  </nav>`;
+
+  let tabBody = "";
+  if (activeTab === "pic") {
+    tabBody = `<div class="data-state" role="status"><strong>PIC Ejecución pendiente de reglas del cliente</strong><span>No se muestra un conteo ni se habilitan transiciones hasta resolver CH03-Q001, CH03-Q003 y CH03-Q005.</span></div>`;
+  } else if (activeTab === "quotes") {
+    const filteredQuotes = searchFilter(state.quotes, ui.search, ["id", "status", "comments"])
+      .filter((quote) => !ui.caseQuoteStatus || quote.status === ui.caseQuoteStatus)
+      .filter((quote) => !ui.caseQuoteDate || String(quote.createdAt || "").slice(0, 10) === ui.caseQuoteDate);
+    const totalPages = Math.max(1, Math.ceil(filteredQuotes.length / casePageSize));
+    const currentPage = Math.min(Math.max(1, Number(ui.caseQuotePage || 1)), totalPages);
+    const pageRows = filteredQuotes.slice((currentPage - 1) * casePageSize, currentPage * casePageSize);
+    const rows = pageRows.map((quote) => {
+      const patient = state.patients.find((item) => item.id === quote.patientId);
+      const request = state.insuranceRequests.find((item) => item.quoteId === quote.id);
       return `<tr>
-        <td><a class="strong-link" href="#/hospitalizaciones/${record.id}">${esc(record.id)}</a></td>
-        <td>${esc(patientName(state, record.patientId))}</td>
-        <td>${esc(record.accountType)}<br><small>${esc(insurerName(state, record.insurerId))}</small></td>
-        <td>${esc(record.manager)}</td>
-        <td>${formatDate(record.startDate)}<br><small>${daysBetween(record.startDate, record.endDate || new Date().toISOString())} días</small></td>
-        <td>${badge(record.priority)}</td>
-        <td>${badge(record.status)}</td>
-        <td>${quote ? `<a href="#/cotizaciones/${quote.id}">${esc(quote.id)}<br>${badge(quote.status)}</a>` : `<span class="muted">Sin cotización</span>`}</td>
-        <td><a class="row-action" href="#/hospitalizaciones/${record.id}">Gestionar ${icon("view")}</a></td>
+        <td><a class="row-action" href="#/cotizaciones/${esc(quote.id)}" aria-label="Abrir ${esc(quote.id)}">${icon("view")}</a></td>
+        <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
+        <td>${esc(patient?.document || "—")}</td>
+        <td><a class="strong-link" href="#/cotizaciones/${esc(quote.id)}">${esc(quote.id)}</a></td>
+        <td>${badge(quote.status, QUOTE_ADMIN_LABELS[quote.status] || quote.status)}</td>
+        <td>${badge(request?.preauthorizationSentAt ? "SENT" : "PENDING", request?.preauthorizationSentAt ? "Enviado" : "Regla pendiente")}</td>
+        <td>${badge(request?.responseStatus || "PENDING", request?.responseStatus ? (QUOTE_ADMIN_LABELS[request.responseStatus] || request.responseStatus) : "Regla pendiente")}</td>
+        <td>${badge(request?.claimStatus || "PENDING", request?.claimStatus || "Regla pendiente")}</td>
+        <td>${formatDate(quote.createdAt)}</td>
+        <td>${money(quote.total)}</td>
       </tr>`;
     });
-  return `
-    ${pageHeader("Hospitalizaciones", "El caso es el contenedor central: paciente, cotización, seguro, pagos, clínica, agenda, inventario y cierre.",
-      `${actionButton("Nueva hospitalización", "open-case-form", {kind:"primary", iconName:"plus"})}`)}
-    <div class="filter-bar">
-      <label class="search-field">${icon("search")}<input data-ui-search placeholder="Buscar caso, paciente, responsable o estado" value="${esc(ui.search || "")}"></label>
-      <select data-ui-filter="caseStatus"><option value="">Todos los estados</option><option>ACTIVE</option><option>PENDING_CLOSE</option><option>CLOSED</option></select>
-      <div class="filter-summary">${records.length} casos</div>
+    const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="case-quote-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
+    tabBody = `<div class="filter-panel">
+      <label>Estado<select data-ui-filter="caseQuoteStatus"><option value="">Seleccione</option>${Object.entries(QUOTE_ADMIN_LABELS).map(([status, label]) => `<option value="${esc(status)}" ${ui.caseQuoteStatus === status ? "selected" : ""}>${esc(label)}</option>`).join("")}</select></label>
+      <label>Fecha de creación<input type="date" data-ui-filter="caseQuoteDate" value="${esc(ui.caseQuoteDate || "")}"></label>
+      <div class="filter-actions"><button class="btn btn-primary" data-action="apply-case-filters">✓ Aplicar</button><button class="btn btn-secondary" data-action="clear-case-filters">Limpiar</button>${canWriteQuotes ? actionButton("Nuevo", "open-quote-form", {kind:"primary", iconName:"plus"}) : ""}</div>
     </div>
-    ${card("Gestión de hospitalizaciones", table(["Hospitalización", "Paciente", "Cuenta", "Responsable", "Duración", "Prioridad", "Estado", "Cotización", ""], records))}
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="casePageSize" aria-label="Cantidad de cotizaciones por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${casePageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label><nav class="pagination" aria-label="Paginación de cotizaciones"><button data-action="case-quote-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="case-quote-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav><label class="search-field">${icon("search")}<span class="sr-only">Buscar cotizaciones</span><input data-ui-search value="${esc(ui.search || "")}"></label></div>
+    ${table(["", "Paciente", "DUI/NIT", "Nro.", "Estado", "Envío preautorización", "Respuesta seguro", "Envío de reclamo", "Creación", "Total"], rows)}`;
+  } else {
+    const filteredCases = state.cases.map((record) => ({record, patient: state.patients.find((item) => item.id === record.patientId)}))
+      .filter(({record}) => !ui.caseStatus || record.status === ui.caseStatus)
+      .filter(({record}) => !ui.caseStartDate || record.startDate === ui.caseStartDate)
+      .filter(({record}) => !ui.caseAccountType || record.accountType === ui.caseAccountType)
+      .filter(({record, patient}) => !ui.search || [record.id, record.status, record.accountType, patient?.fullName, patient?.document, patient?.company].some((value) => String(value || "").toLowerCase().includes(String(ui.search).toLowerCase())));
+    const totalPages = Math.max(1, Math.ceil(filteredCases.length / casePageSize));
+    const currentPage = Math.min(Math.max(1, Number(ui.casePage || 1)), totalPages);
+    const pageRows = filteredCases.slice((currentPage - 1) * casePageSize, currentPage * casePageSize);
+    const rows = pageRows.map(({record, patient}) => `<tr>
+      <td><a class="row-action" href="#/hospitalizaciones/${esc(record.id)}" aria-label="Gestionar ${esc(record.id)}">${icon("view")}</a></td>
+      <td><a class="strong-link" href="#/hospitalizaciones/${esc(record.id)}">${esc(record.id)}</a></td>
+      <td>${esc(patient?.document || "—")}</td>
+      <td>${esc(patient?.fullName || "Paciente no encontrado")}</td>
+      <td>${esc(patient?.company || "Sin empresa")}</td>
+      <td>${esc(record.accountType)}</td>
+      <td>${badge(record.status)}</td>
+      <td>${formatDate(record.startDate)} al ${record.endDate ? formatDate(record.endDate) : "actual"}<small>${daysBetween(record.startDate, record.endDate || new Date().toISOString())} días</small></td>
+    </tr>`);
+    const pages = Array.from({length: totalPages}, (_, index) => index + 1).map((page) => `<button data-action="case-page" data-page="${page}" class="${page === currentPage ? "active" : ""}" aria-current="${page === currentPage ? "page" : "false"}">${page}</button>`).join("");
+    const accountTypes = [...new Set(state.cases.map((record) => record.accountType).filter(Boolean))];
+    tabBody = `<div class="filter-panel">
+      <label>Estado Administrativo<select data-ui-filter="caseStatus"><option value="">Todos</option>${["ACTIVE","PENDING_CLOSE","CLOSED"].map((status)=>`<option value="${status}" ${ui.caseStatus === status ? "selected" : ""}>${LABELS[status] || status}</option>`).join("")}</select></label>
+      <label>Fecha de inicio<input type="date" data-ui-filter="caseStartDate" value="${esc(ui.caseStartDate || "")}"></label>
+      <label>Tipo de cuenta<select data-ui-filter="caseAccountType"><option value="">Seleccione</option>${accountTypes.map((type) => `<option value="${esc(type)}" ${ui.caseAccountType === type ? "selected" : ""}>${esc(type)}</option>`).join("")}</select></label>
+      <div class="filter-actions"><button class="btn btn-primary" data-action="apply-case-filters">✓ Aplicar</button><button class="btn btn-secondary" data-action="clear-case-filters">Limpiar</button></div>
+    </div>
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="casePageSize" aria-label="Cantidad de hospitalizaciones por página">${[5,10,25,50].map((size)=>`<option value="${size}" ${casePageSize === size ? "selected" : ""}>${size}</option>`).join("")}</select> registros</label><nav class="pagination" aria-label="Paginación de hospitalizaciones"><button data-action="case-page" data-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>Anterior</button>${pages}<button data-action="case-page" data-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Siguiente</button></nav><label class="search-field">${icon("search")}<span class="sr-only">Buscar hospitalizaciones</span><input data-ui-search value="${esc(ui.search || "")}"></label></div>
+    ${table(["", "Hospitalización", "DUI/NIT", "Paciente", "Empresa", "Tipo Cuenta", "Administrativo", "Duración"], rows)}`;
+  }
+  return `
+    ${pageHeader("Hospitalización", "Gestión administrativa de casos, cotizaciones y seguimiento previo a ejecución.", canWriteCases ? actionButton("Nueva hospitalización", "open-case-form", {kind:"primary", iconName:"plus"}) : "")}
+    <section class="relation-card"><header><strong>Relación de pacientes por empresa</strong><span title="CH03-Q003: fórmula pendiente">—</span><button type="button" disabled title="CH03-Q003: alcance del panel pendiente">+</button></header></section>
+    ${tabControls}
+    ${card(activeTab === "active" ? "Hospitalizaciones activas" : activeTab === "quotes" ? "Cotizaciones" : "PIC Ejecución", tabBody)}
   `;
 }
 
@@ -960,16 +1086,17 @@ function renderReports(state,store,ui){
 }
 
 function renderSettings(state,store,ui){
+  const canWrite = roleCan(state.session.role, "settings:write");
   return `
     ${pageHeader("Configuración","Usuarios, roles, aseguradoras, plantillas, mensajería, seguridad y modo de datos.",
       `${actionButton("Guardar configuración","save-settings",{kind:"primary",iconName:"check"})}`)}
     <div class="settings-grid">
       ${card("Entorno",`<form id="settings-form" class="form-grid">
-        <label>Modo de datos<select name="dataMode"><option value="mock" ${store.config.dataMode==="mock"?"selected":""}>Demo local</option><option value="supabase" ${store.config.dataMode==="supabase"?"selected":""}>Supabase</option></select></label>
-        <label>Modo de mensajería<select name="notificationsMode"><option value="mock" ${store.config.notificationsMode==="mock"?"selected":""}>Simulado</option><option value="live" ${store.config.notificationsMode==="live"?"selected":""}>Proveedores reales</option></select></label>
-        <label class="full">URL de Supabase<input name="supabaseUrl" value="${esc(store.config.supabaseUrl||"")}" placeholder="https://xxxx.supabase.co"></label>
-        <label class="full">Publishable key<input name="supabasePublishableKey" value="${esc(store.config.supabasePublishableKey||"")}" placeholder="sb_publishable_..."></label>
-      </form><div class="info-callout">Las claves de servicio nunca se guardan en el navegador. Los proveedores reales se configuran como variables de entorno en Vercel.</div>`)}
+        <label>Modo de datos<select name="dataMode" ${canWrite?"":"disabled"}><option value="mock" ${store.config.dataMode==="mock"?"selected":""}>Demo local</option><option value="supabase" ${store.config.dataMode==="supabase"?"selected":""}>Supabase</option></select></label>
+        <label>Modo de mensajería<select name="notificationsMode" ${canWrite?"":"disabled"}><option value="mock" ${store.config.notificationsMode==="mock"?"selected":""}>Simulado</option><option value="live" ${store.config.notificationsMode==="live"?"selected":""}>Proveedores reales</option></select></label>
+        <label class="full">URL de Supabase<input name="supabaseUrl" value="${esc(store.config.supabaseUrl||"")}" placeholder="https://xxxx.supabase.co" ${canWrite?"":"readonly"}></label>
+        <label class="full">Publishable key<input name="supabasePublishableKey" value="${esc(store.config.supabasePublishableKey||"")}" placeholder="sb_publishable_..." ${canWrite?"":"readonly"}></label>
+      </form><div class="info-callout">${canWrite?"Las claves de servicio nunca se guardan en el navegador. Los proveedores reales se configuran como variables de entorno en Vercel.":"Vista de sólo lectura para este rol. No se permite modificar la configuración."}</div>`)}
       ${card("Usuarios y roles",table(["Usuario","Correo","Rol","Estado"],state.users.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${badge(u.role,u.role)}</td><td>${badge(u.status)}</td></tr>`),{compact:true}))}
       ${card("Plantillas de documentos",table(["Plantilla","Tipo","Versión","Estado"],state.templates.map(t=>`<tr><td>${esc(t.name)}</td><td>${esc(t.type)}</td><td>v${t.version}</td><td>${badge(t.status)}</td></tr>`),{compact:true}))}
       ${card("Aseguradoras",table(["Aseguradora","Contacto","Teléfono","Correo","Estado"],state.insurers.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.contactName)}</td><td>${esc(i.phone)}</td><td>${esc(i.email)}</td><td>${badge(i.status)}</td></tr>`),{compact:true}))}
@@ -1117,7 +1244,11 @@ export function renderRoute(route,state,store,ui){
   if(permission && !roleCan(state.session.role, permission)) return accessDenied(state.session.role, permission);
   switch(head){
     case "dashboard": return renderDashboard(state,store,ui);
-    case "pacientes": return parts[1]?renderPatientDetail(state,store,ui,parts[1]):renderPatients(state,store,ui);
+    case "pacientes": {
+      if (parts[1] === "nuevo") return renderPatientForm(state,store,ui);
+      if (parts[2] === "editar") return renderPatientForm(state,store,ui,parts[1]);
+      return parts[1] ? renderPatientDetail(state,store,ui,parts[1]) : renderPatients(state,store,ui);
+    }
     case "hospitalizaciones": return parts[1]?renderCaseDetail(state,store,ui,parts[1]):renderCases(state,store,ui);
     case "cotizaciones": return parts[1]?renderQuoteDetail(state,store,ui,parts[1]):renderQuotes(state,store,ui);
     case "preautorizaciones": return renderInsurance(state,store,ui);
@@ -1164,13 +1295,18 @@ export function renderRoute(route,state,store,ui){
 }
 
 export const navigation = [
-  {section:"Operación",items:[
+  {section:"Operaciones",items:[
     {href:"#/dashboard",label:"Dashboard",icon:"dashboard",permission:"dashboard:read"},
     {href:"#/pacientes",label:"Pacientes",icon:"patients",permission:"patients:read"},
-    {href:"#/hospitalizaciones",label:"Hospitalizaciones",icon:"cases",permission:"cases:read"},
-    {href:"#/cotizaciones",label:"Cotizaciones",icon:"quotes",permission:"quotes:read"},
-    {href:"#/preautorizaciones",label:"Seguros",icon:"insurance",permission:"insurance:read"},
     {href:"#/agenda",label:"Agenda y turnos",icon:"agenda",permission:"agenda:read"}
+  ]},
+  {section:"Facturación",items:[
+    {href:"#/hospitalizaciones",label:"Hospitalización",icon:"cases",permission:"cases:read"},
+    {href:"#/cuentas-por-cobrar",label:"Cuentas por cobrar",icon:"money",permission:"payments:read"},
+    {href:"#/preautorizaciones",label:"Preautorizaciones & Reclamos",icon:"insurance",permission:"insurance:read"},
+    {href:"#/cotizaciones",label:"Cotizaciones",icon:"quotes",permission:"quotes:read"},
+    {href:"#/cuentas-por-pagar",label:"Cuentas por pagar",icon:"money",permission:"statements:read"},
+    {href:"#/compras",label:"Compras",icon:"purchases",permission:"purchases:read"}
   ]},
   {section:"Clínica",items:[
     {href:"#/clinica",label:"Expediente clínico",icon:"clinical",permission:"clinical:read"},
@@ -1180,12 +1316,6 @@ export const navigation = [
     {href:"#/clinica/planes-de-cuidado",label:"Planes de cuidado",icon:"file",permission:"clinical:read"},
     {href:"#/clinica/evoluciones",label:"Evoluciones y notas",icon:"clinical",permission:"clinical:read"}
   ]},
-  {section:"Finanzas",items:[
-    {href:"#/cuentas-por-cobrar",label:"Cuentas por cobrar",icon:"money",permission:"payments:read"},
-    {href:"#/cuentas-por-pagar",label:"Cuentas por pagar",icon:"money",permission:"statements:read"},
-    {href:"#/estados-de-cuenta",label:"Estados médicos",icon:"doctors",permission:"statements:read"},
-    {href:"#/compras",label:"Compras",icon:"purchases",permission:"purchases:read"}
-  ]},
   {section:"Inventario",items:[
     {href:"#/inventario",label:"Existencias",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/movimientos",label:"Movimientos",icon:"inventory",permission:"inventory:read"},
@@ -1194,10 +1324,13 @@ export const navigation = [
     {href:"#/inventario/bodegas",label:"Bodegas",icon:"inventory",permission:"inventory:read"},
     {href:"#/inventario/kits",label:"Kits",icon:"inventory",permission:"inventory:read"}
   ]},
-  {section:"Administración",items:[
+  {section:"RRHH",items:[
+    {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},
+    {href:"#/estados-de-cuenta",label:"Estados médicos",icon:"doctors",permission:"statements:read"}
+  ]},
+  {section:"Items y Maestros",items:[
     {href:"#/catalogos",label:"Catálogos y tarifas",icon:"catalogs",permission:"catalogs:read"},
     {href:"#/catalogos/descuentos",label:"Descuentos",icon:"money",permission:"catalogs:read"},
-    {href:"#/medicos",label:"Médicos y recursos",icon:"doctors",permission:"doctors:read"},
     {href:"#/reportes",label:"Reportes",icon:"reports",permission:"reports:read"},
     {href:"#/auditoria",label:"Auditoría",icon:"audit",permission:"audit:read"},
     {href:"#/qa-cobertura",label:"QA video vs sistema",icon:"qa",permission:"qa:read"},
@@ -1209,11 +1342,16 @@ export function renderNavigation(role,currentRoute){
   return navigation.map(section=>{
     const visible=section.items.filter(item=>roleCan(role,item.permission));
     if(!visible.length) return "";
-    return `<div class="nav-section"><p>${esc(section.section)}</p>${visible.map(item=>`<a href="${item.href}" class="${currentRoute.startsWith(item.href.slice(2))?"active":""}">${icon(item.icon)}<span>${esc(item.label)}</span></a>`).join("")}</div>`;
+    const containsActive = visible.some((item)=>currentRoute.startsWith(item.href.slice(2)));
+    return `<details class="nav-section" ${containsActive ? "open" : ""}><summary>${esc(section.section)}<span aria-hidden="true">⌄</span></summary>${visible.map(item=>{
+      const active=currentRoute.startsWith(item.href.slice(2));
+      return `<a href="${item.href}" class="${active?"active":""}" ${active?'aria-current="page"':""}>${icon(item.icon)}<span>${esc(item.label)}</span></a>`;
+    }).join("")}</details>`;
   }).join("");
 }
 
-export function renderLogin(state){
+export function renderLogin(state, config = {}, ui = {}){
+  const demoMode = config.dataMode !== "supabase";
   return `
     <div class="login-shell">
       <section class="login-brand">
@@ -1225,24 +1363,23 @@ export function renderLogin(state){
       </section>
       <section class="login-panel">
         <form id="login-form" class="login-card">
-          <div><p class="eyebrow">Acceso seguro</p><h2>Iniciar sesión</h2><p>Selecciona un perfil para probar permisos y flujos.</p></div>
-          <label>Correo<input type="email" name="email" value="admin@analiza.demo" required></label>
-          <label>Contraseña<div class="password-field"><input type="password" name="password" value="Demo2026!" required><button type="button" data-action="toggle-password">◉</button></div></label>
-          <button class="btn btn-primary btn-block" type="submit">Entrar al sistema</button>
-          <div class="demo-users">
-            <p>Accesos rápidos</p>
-            ${state.users.slice(0,6).map(u=>`<button type="button" data-action="quick-login" data-email="${esc(u.email)}"><span class="avatar">${initials(u.name)}</span><div><strong>${esc(u.name)}</strong><small>${esc(u.role)}</small></div></button>`).join("")}
-          </div>
-          <small class="privacy-note">La autenticación real se conecta mediante Supabase Auth. Este modo local es únicamente para QA.</small>
+          <div><p class="eyebrow">${demoMode ? "Modo demostración" : "Acceso con Supabase Auth"}</p><h2>Iniciar sesión</h2><p>${demoMode ? "Datos sintéticos. Todos los perfiles demo exigen la contraseña exacta Demo2026!." : "Usa las credenciales asignadas por la organización."}</p></div>
+          <label>Usuario o correo<input type="email" name="email" autocomplete="username" placeholder="usuario@organizacion" required autofocus></label>
+          <label>Clave<div class="password-field"><input type="password" name="password" autocomplete="current-password" required><button type="button" data-action="toggle-password" aria-label="Mostrar u ocultar clave">◉</button></div></label>
+          <button class="btn btn-primary btn-block" type="submit">Iniciar sesión</button>
+          ${ui.pwaInstallAvailable ? `<button class="btn btn-secondary btn-block" type="button" data-action="install-pwa">${icon("upload")} Instalar en dispositivo</button>` : ""}
+          <button class="text-button" type="button" data-action="recover-password">¿Olvidaste tu contraseña?</button>
+          ${demoMode ? `<div class="demo-users"><p>Perfiles sintéticos — sólo completan el formulario</p>${state.users.map(u=>`<button type="button" data-action="quick-login" data-email="${esc(u.email)}"><span class="avatar">${initials(u.name)}</span><div><strong>${esc(u.name)}</strong><small>${esc(u.role)}</small></div></button>`).join("")}</div>` : ""}
+          <small class="privacy-note">${demoMode ? "DEMO LOCAL · Ninguna autenticación ni entrega es real." : "La sesión se valida exclusivamente mediante Supabase Auth."}</small>
         </form>
       </section>
     </div>`;
 }
 
-export function renderTopbar(state,store,route){
+export function renderTopbar(state,store,route,ui={}){
   const user=store.currentUser();
   return `
-    <button class="icon-button mobile-only" data-action="toggle-sidebar" aria-label="Menú">☰</button>
+    <button class="icon-button" data-action="toggle-sidebar" aria-label="Expandir o contraer menú" aria-expanded="${Boolean(ui.sidebarOpen)}">☰</button>
     <label class="global-search">${icon("search")}<input data-global-search placeholder="Buscar paciente, caso, cotización o comando…"><kbd>Ctrl K</kbd></label>
     <div class="topbar-actions">
       <button class="icon-button notification-button" data-action="toggle-notifications" title="Notificaciones">${icon("alert")}<span>${state.notifications.filter(n=>["QUEUED","FAILED"].includes(n.status)).length}</span></button>
@@ -1252,7 +1389,7 @@ export function renderTopbar(state,store,route){
 
 export function renderUserMenu(state,store){
   const user=store.currentUser();
-  return `<div class="popover user-popover"><header><span class="avatar avatar-lg">${initials(user?.name)}</span><div><strong>${esc(user?.name)}</strong><small>${esc(user?.email)}</small></div></header><a href="#/configuracion">${icon("settings")} Configuración</a><button data-action="reset-demo">${icon("reset")} Restaurar datos demo</button><button data-action="logout">${icon("close")} Cerrar sesión</button></div>`;
+  return `<div class="popover user-popover"><header><span class="avatar avatar-lg">${initials(user?.name)}</span><div><strong>${esc(user?.name)}</strong><small>${esc(user?.email)}</small></div></header><div class="organization-context"><span>${icon("cases")}</span><div><small>Organización activa</small><strong>${esc(state.organization?.name || "Sin organización")}</strong></div></div><button data-action="open-my-user">${icon("doctors")} Mi usuario</button><a href="#/configuracion">${icon("settings")} Configuración</a><button data-action="reset-demo">${icon("reset")} Restaurar datos demo</button><button data-action="logout">${icon("close")} Cerrar sesión</button></div>`;
 }
 
 export function renderNotificationPanel(state){

@@ -57,6 +57,7 @@ function toCaseRow(record) {
 function toQuoteRow(record) {
   return {
     id: record.id,
+    code: record.id,
     hospitalization_id: record.caseId,
     patient_id: record.patientId,
     status: record.status,
@@ -68,6 +69,10 @@ function toQuoteRow(record) {
     insurer_amount: record.insurerAmount,
     patient_amount: record.patientAmount,
     comments: record.comments || null,
+    invoice_date: record.invoiceDate,
+    discount_group_id: record.discountGroupId,
+    referred_by: record.referredBy,
+    giftcard: record.giftcard || null,
     sent_at: record.sentAt || null
   };
 }
@@ -77,7 +82,8 @@ export async function createSupabaseAdapter(config) {
     return {
       mode: "mock",
       async bootstrap() { return null; },
-      async sync() { return { ok: true, mode: "mock" }; }
+      async sync() { return { ok: true, mode: "mock" }; },
+      async signOut() { return { ok: true, mode: "mock" }; }
     };
   }
 
@@ -85,7 +91,7 @@ export async function createSupabaseAdapter(config) {
     throw new Error("Supabase está activado, pero faltan URL o publishable key.");
   }
 
-  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.112.4");
   const client = createClient(config.supabaseUrl, config.supabasePublishableKey, {
     auth: {
       persistSession: true,
@@ -93,6 +99,48 @@ export async function createSupabaseAdapter(config) {
       detectSessionInUrl: true
     }
   });
+
+  async function signInWithPassword(email, password) {
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error || !data?.user) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    return data.user;
+  }
+
+  async function getSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    return data.session;
+  }
+
+  async function loadCurrentProfile(userId) {
+    const { data: profile, error: profileError } = await client
+      .from("profiles")
+      .select("id, organization_id, full_name, status, organizations(id, name, slug, currency, timezone)")
+      .eq("id", userId)
+      .single();
+    if (profileError || profile?.status !== "ACTIVE") throw new Error("El usuario no tiene un perfil activo autorizado.");
+    const { data: assignments, error: roleError } = await client
+      .from("user_roles")
+      .select("roles(code)")
+      .eq("user_id", userId);
+    if (roleError) throw new Error("No fue posible cargar los permisos del usuario.");
+    const role = assignments?.map((assignment) => assignment.roles?.code).find(Boolean);
+    if (!role) throw new Error("El usuario no tiene un rol autorizado.");
+    return { ...profile, role };
+  }
+
+  async function resetPasswordForEmail(email) {
+    const redirectTo = new URL("#/auth/update-password", config.appUrl || location.origin).toString();
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw new Error("No fue posible completar la solicitud de recuperación.");
+    return { ok: true };
+  }
+
+  async function signOut() {
+    const { error } = await client.auth.signOut({ scope: "local" });
+    if (error) throw new Error("No fue posible cerrar la sesión.");
+    return { ok: true };
+  }
 
   async function bootstrap() {
     const collections = {};
@@ -134,81 +182,60 @@ export async function createSupabaseAdapter(config) {
         return insert("hospitalizations", toCaseRow(payload.case));
       case "CREATE_QUOTE": {
         const quote = payload.quote;
-        await insert("quotes", toQuoteRow(quote));
-        const version = await insert("quote_versions", {
-          quote_id: quote.id,
-          version: quote.version,
-          status_snapshot: quote.status,
-          subtotal: quote.subtotal,
-          discount_amount: quote.discountAmount,
-          total: quote.total,
-          insurer_amount: quote.insurerAmount,
-          patient_amount: quote.patientAmount,
-          discount_snapshot: snakeCaseObject(quote.discount || {}),
-          comments: quote.comments || null,
-          immutable: Boolean(quote.immutable),
-          revision_reason: quote.revisionReason || null,
-          snapshot: snakeCaseObject(quote.sentSnapshot || quote)
-        });
-        const rows = quote.items.map((item, index) => ({
-          quote_version_id: version.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
-      }
-      case "CREATE_QUOTE_REVISION": {
-        const { data, error } = await client.rpc("create_quote_revision", {
-          p_quote_id: payload.quote.quoteId,
-          p_source_version_id: payload.sourceQuoteId,
-          p_reason: payload.quote.revisionReason
+        const { data, error } = await client.rpc("create_quote_draft", {
+          p_code: quote.id,
+          p_hospitalization_id: quote.caseId,
+          p_patient_id: quote.patientId,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_currency: quote.currency || "USD",
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
         });
         if (error) throw error;
-        return { ok: true, quoteVersionId: data };
+        return { ok: true, ...data };
+      }
+      case "CREATE_QUOTE_REVISION": {
+        const quote = payload.quote;
+        const { data, error } = await client.rpc("create_quote_revision_catalog", {
+          p_quote_id: quote.quoteId,
+          p_source_version_id: payload.sourceQuoteId,
+          p_reason: quote.revisionReason,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_DRAFT": {
         const quote = payload.quote;
-        const { error: quoteError } = await client.from("quotes")
-          .update(toQuoteRow(quote))
-          .eq("id", quote.quoteId || quote.id);
-        if (quoteError) throw quoteError;
-        const { error: versionError } = await client.from("quote_versions")
-          .update({
-            subtotal: quote.subtotal,
-            discount_amount: quote.discountAmount,
-            total: quote.total,
-            insurer_amount: quote.insurerAmount,
-            patient_amount: quote.patientAmount,
-            discount_snapshot: snakeCaseObject(quote.discount || {}),
-            comments: quote.comments || null,
-            snapshot: snakeCaseObject(quote)
-          })
-          .eq("id", quote.id);
-        if (versionError) throw versionError;
-        const { error: deleteError } = await client.from("quote_items").delete().eq("quote_version_id", quote.id);
-        if (deleteError) throw deleteError;
-        const rows = quote.items.map((item) => ({
-          quote_version_id: quote.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
+        const { data, error } = await client.rpc("update_quote_draft_catalog", {
+          p_quote_id: quote.quoteId || quote.id,
+          p_quote_version_id: quote.id,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_STATUS": {
         const { error } = await client.rpc("transition_quote_status", {
@@ -330,5 +357,15 @@ export async function createSupabaseAdapter(config) {
     }
   }
 
-  return { mode: "supabase", client, bootstrap, sync };
+  return {
+    mode: "supabase",
+    client,
+    bootstrap,
+    sync,
+    signInWithPassword,
+    getSession,
+    loadCurrentProfile,
+    resetPasswordForEmail,
+    signOut
+  };
 }

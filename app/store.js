@@ -13,6 +13,7 @@ import { seedData } from "./mock-data.js";
 import { createSupabaseAdapter } from "./supabase-adapter.js";
 
 const STORAGE_KEY = "analiza-en-casa-production-qa-v1";
+export const DEMO_PASSWORD = "Demo2026!";
 
 function clone(value) {
   return structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -22,21 +23,50 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+export function normalizeState(rawState = {}) {
+  const base = clone(seedData);
+  const raw = rawState && typeof rawState === "object" ? clone(rawState) : {};
+  const normalized = {
+    ...base,
+    ...raw,
+    meta: { ...base.meta, ...(raw.meta || {}) },
+    organization: { ...base.organization, ...(raw.organization || {}) },
+    session: { ...base.session, ...(raw.session || {}) }
+  };
+  for (const [key, value] of Object.entries(base)) {
+    if (Array.isArray(value)) normalized[key] = Array.isArray(raw[key]) ? raw[key] : clone(value);
+  }
+  normalized.session.authenticated = Boolean(normalized.session.authenticated && normalized.session.userId && normalized.session.role);
+  normalized.clinicalCorrections ||= [];
+  normalized.notificationAttempts ||= [];
+  return normalized;
+}
+
 function loadLocalState() {
   try {
     const raw = safeStorage.getItem(STORAGE_KEY);
-    if (!raw) return clone(seedData);
+    if (!raw) return normalizeState(seedData);
     const parsed = JSON.parse(raw);
-    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return clone(seedData);
-    return parsed;
+    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return normalizeState(seedData);
+    return normalizeState(parsed);
   } catch {
-    return clone(seedData);
+    return normalizeState(seedData);
   }
 }
 
 export async function createAppStore(config) {
   let state = loadLocalState();
   state.clinicalCorrections ||= [];
+  state.patients = state.patients.map((patient) => ({
+    ...patient,
+    organizationId: patient.organizationId || state.organization?.id,
+    fullName: patient.fullName || `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+    addressComments: patient.addressComments || ""
+  }));
+  state.cases = state.cases.map((record) => ({
+    ...record,
+    organizationId: record.organizationId || state.organization?.id
+  }));
   state.quotes = state.quotes.map((quote) => ({
     ...quote,
     organizationId: quote.organizationId || state.organization?.id,
@@ -70,15 +100,9 @@ export async function createAppStore(config) {
   const listeners = new Set();
 
   if (adapter.mode === "supabase") {
-    try {
-      const remote = await adapter.bootstrap();
-      if (remote && Object.values(remote).some((collection) => collection?.length)) {
-        state = { ...state, ...remote, meta: { ...state.meta, remoteBootstrappedAt: nowIso() } };
-      }
-    } catch (error) {
-      state.meta.remoteError = error.message;
-      state.meta.remoteFallback = true;
-    }
+    state.session = { authenticated: false, userId: null, role: null };
+    state.meta.dataSource = "SUPABASE_AUTH_REQUIRED";
+    state.meta.remoteFallback = false;
   }
 
   function save() {
@@ -92,7 +116,7 @@ export async function createAppStore(config) {
   }
 
   function currentUser() {
-    return state.users.find((user) => user.id === state.session.userId) || state.users[0];
+    return state.users.find((user) => user.id === state.session.userId) || null;
   }
 
   function audit(action, entity, summary, metadata = {}) {
@@ -122,6 +146,18 @@ export async function createAppStore(config) {
         audit("REMOTE_SYNC_FAILED", action, `No se pudo sincronizar ${action}: ${error.message}`);
       });
       return { ok: false, error };
+    }
+  }
+
+  async function requiredSync(action, payload) {
+    try {
+      return await adapter.sync(action, payload);
+    } catch (error) {
+      setState((draft) => {
+        draft.meta.remoteError = error.message;
+        audit("REMOTE_SYNC_FAILED", action, `No se pudo confirmar ${action}: ${error.message}`);
+      });
+      throw error;
     }
   }
 
@@ -286,9 +322,7 @@ export async function createAppStore(config) {
     return [original, ...corrections];
   }
 
-  function login(userId, role = null) {
-    const user = state.users.find((candidate) => candidate.id === userId);
-    if (!user) throw new Error("Usuario demo no encontrado.");
+  function establishSession(user, role = null) {
     setState((draft) => {
       draft.session = {
         authenticated: true,
@@ -300,52 +334,126 @@ export async function createAppStore(config) {
     });
   }
 
-  function logout() {
+  async function authenticate(email, password) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const suppliedPassword = String(password || "");
+    if (!normalizedEmail || !suppliedPassword) throw new Error("Ingresa usuario y contraseña.");
+    if (adapter.mode === "mock") {
+      const user = state.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.status === "ACTIVE");
+      if (!user || suppliedPassword !== DEMO_PASSWORD) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+      establishSession(user);
+      return { userId: user.id, role: user.role, mode: "mock" };
+    }
+
+    let authUser;
+    try {
+      authUser = await adapter.signInWithPassword(normalizedEmail, suppliedPassword);
+      const profile = await adapter.loadCurrentProfile(authUser.id);
+      const user = {
+        id: authUser.id,
+        name: profile.full_name,
+        email: authUser.email,
+        role: profile.role,
+        status: profile.status,
+        organizationId: profile.organization_id
+      };
+      const remote = await adapter.bootstrap();
+      const clearedCollections = Object.fromEntries(Object.entries(seedData).filter(([, value]) => Array.isArray(value)).map(([key]) => [key, []]));
+      state = normalizeState({
+        ...state,
+        ...clearedCollections,
+        ...remote,
+        users: [user],
+        organization: profile.organizations || state.organization,
+        meta: { ...state.meta, dataSource: "SUPABASE", remoteBootstrappedAt: nowIso(), remoteFallback: false }
+      });
+      save();
+      establishSession(user, profile.role);
+      return { userId: user.id, role: profile.role, mode: "supabase" };
+    } catch (error) {
+      if (authUser) await adapter.signOut().catch(() => {});
+      throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    }
+  }
+
+  async function recoverPassword(email) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail) throw new Error("Ingresa el correo de acceso.");
+    if (adapter.mode === "supabase") await adapter.resetPasswordForEmail(normalizedEmail);
+    return { ok: true, simulated: adapter.mode === "mock" };
+  }
+
+  async function logout() {
+    if (adapter.mode === "supabase") await adapter.signOut();
     setState((draft) => {
       audit("LOGOUT", draft.session.userId, "Cierre de sesión.");
-      draft.session.authenticated = false;
+      draft.session = { authenticated: false, userId: null, role: null, loggedAt: null };
     });
   }
 
   function reset() {
-    state = clone(seedData);
+    state = normalizeState(seedData);
     safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     for (const listener of listeners) listener(state);
   }
 
   function createPatient(input) {
     requirePermission("patients:write");
+    const fullName = String(input.fullName || `${input.firstName || ""} ${input.lastName || ""}`).trim();
+    const document = String(input.document || "").trim();
+    if (!document || !fullName) throw new Error("Documento y nombre completo son obligatorios.");
+    const email = String(input.email || "").trim().toLowerCase();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Correo inválido.");
     const patient = {
       id: uid("PAT"),
       documentType: input.documentType || "DUI",
-      document: input.document.trim(),
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      fullName: `${input.firstName} ${input.lastName}`.trim(),
+      document,
+      firstName: String(input.firstName || "").trim(),
+      lastName: String(input.lastName || "").trim(),
+      fullName,
       birthDate: input.birthDate || "",
       sex: input.sex || "",
       bloodType: input.bloodType || "",
-      nationality: input.nationality || "Salvadoreña",
+      nationality: input.nationality || "",
+      company: input.company || "",
       phone: input.phone || "",
-      email: input.email || "",
+      homePhone: input.homePhone || "",
+      email,
+      retired: Boolean(input.retired),
+      civilStatus: input.civilStatus || "",
+      occupation: input.occupation || "",
       address: input.address || "",
+      addressComments: input.addressComments || "",
+      locationLink: input.locationLink || "",
       geo: input.geo || "",
-      triage: input.triage || "BAJA",
+      triage: input.triage || "NO_ASIGNADO",
       status: "ACTIVE",
       insurerId: input.insurerId || null,
       planId: input.planId || null,
       policy: input.policy || "",
+      policyCertificate: input.policyCertificate || "",
+      policyEffectiveDate: input.policyEffectiveDate || "",
       policyValidUntil: input.policyValidUntil || "",
+      isPolicyHolder: input.isPolicyHolder ?? null,
+      insuredDocument: input.insuredDocument || "",
+      insuredName: input.insuredName || "",
+      insuredBirthDate: input.insuredBirthDate || "",
       contactName: input.contactName || "",
       contactPhone: input.contactPhone || "",
+      contactEmail: input.contactEmail || "",
+      contactRelationship: input.contactRelationship || "",
+      contactRole: input.contactRole || "",
+      contactCountry: input.contactCountry || "",
       notifyWhatsApp: Boolean(input.notifyWhatsApp),
       notifySms: Boolean(input.notifySms),
-      notifyEmail: Boolean(input.notifyEmail)
+      notifyEmail: Boolean(input.notifyEmail),
+      organizationId: state.organization?.id
     };
 
     const duplicate = state.patients.some((existing) =>
-      existing.documentType === patient.documentType
-      && existing.document.replace(/\s/g, "") === patient.document.replace(/\s/g, "")
+      existing.organizationId === patient.organizationId
+      && existing.documentType === patient.documentType
+      && existing.document.replace(/\s/g, "").toUpperCase() === patient.document.replace(/\s/g, "").toUpperCase()
     );
     if (duplicate) throw new Error("Ya existe un paciente con ese documento.");
 
@@ -357,12 +465,56 @@ export async function createAppStore(config) {
     return patient;
   }
 
+  function importPatients(inputs) {
+    requirePermission("patients:write");
+    if (adapter.mode !== "mock") throw new Error("La carga productiva requiere el importador transaccional del servidor.");
+    if (!Array.isArray(inputs) || !inputs.length) throw new Error("El archivo no contiene pacientes.");
+    if (inputs.length > 500) throw new Error("La carga demo admite hasta 500 filas por archivo.");
+    const existingKeys = new Set(state.patients.map((patient) => `${patient.documentType}:${String(patient.document).replace(/\s/g, "").toUpperCase()}`));
+    const batchKeys = new Set();
+    const imported = inputs.map((input, index) => {
+      const row = index + 2;
+      const documentType = String(input.documentType || "DUI").trim();
+      const document = String(input.document || "").trim();
+      const firstName = String(input.firstName || "").trim();
+      const lastName = String(input.lastName || "").trim();
+      const email = String(input.email || "").trim().toLowerCase();
+      if (!document || !firstName || !lastName) throw new Error(`Fila ${row}: documento, firstName y lastName son obligatorios.`);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error(`Fila ${row}: correo inválido.`);
+      if (input.birthDate && Number.isNaN(Date.parse(input.birthDate))) throw new Error(`Fila ${row}: fecha de nacimiento inválida.`);
+      const key = `${documentType}:${document.replace(/\s/g, "").toUpperCase()}`;
+      if (existingKeys.has(key) || batchKeys.has(key)) throw new Error(`Fila ${row}: documento duplicado en el alcance autorizado.`);
+      batchKeys.add(key);
+      return {
+        id: uid("PAT"), documentType, document, firstName, lastName, fullName: `${firstName} ${lastName}`,
+        birthDate: input.birthDate || "", sex: input.sex || "", bloodType: input.bloodType || "",
+        nationality: input.nationality || "Salvadoreña", company: input.company || "", phone: input.phone || "",
+        email, address: input.address || "", geo: "", triage: input.triage || "NO_ASIGNADO",
+        status: String(input.status || "ACTIVE").toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+        insurerId: null, planId: null, policy: "", policyValidUntil: "", contactName: "", contactPhone: "",
+        notifyWhatsApp: false, notifySms: false, notifyEmail: false, organizationId: state.organization?.id
+      };
+    });
+    setState((draft) => {
+      draft.patients.unshift(...imported);
+      audit("IMPORT_PATIENTS", `BATCH-${nowIso()}`, `${imported.length} pacientes sintéticos importados.`, { count: imported.length });
+    });
+    return imported;
+  }
+
   function updatePatient(id, patch) {
     requirePermission("patients:write");
     let updated;
     setState((draft) => {
       const patient = draft.patients.find((record) => record.id === id);
       if (!patient) throw new Error("Paciente no encontrado.");
+      assertCurrentOrganization(patient, "Paciente");
+      const documentType = patch.documentType || patient.documentType;
+      const document = String(patch.document ?? patient.document).replace(/\s/g, "").toUpperCase();
+      if (draft.patients.some((record) => record.id !== id && record.organizationId === patient.organizationId && record.documentType === documentType && String(record.document).replace(/\s/g, "").toUpperCase() === document)) {
+        throw new Error("No fue posible guardar el paciente con ese documento.");
+      }
+      if (patch.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(patch.email).trim())) throw new Error("Correo inválido.");
       Object.assign(patient, patch);
       if (patch.firstName || patch.lastName) patient.fullName = `${patient.firstName} ${patient.lastName}`.trim();
       updated = clone(patient);
@@ -373,10 +525,12 @@ export async function createAppStore(config) {
 
   function createCase(input) {
     requirePermission("cases:write");
-    if (!patientById(input.patientId)) throw new Error("Paciente no encontrado.");
+    const patient = patientById(input.patientId);
+    assertCurrentOrganization(patient, "Paciente");
     const sequence = state.cases.length + 196;
     const record = {
       id: `HOS-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`,
+      organizationId: state.organization?.id,
       patientId: input.patientId,
       accountType: input.accountType || "PRIVADO",
       insurerId: input.insurerId || null,
@@ -405,25 +559,87 @@ export async function createAppStore(config) {
     setState((draft) => {
       const record = draft.cases.find((candidate) => candidate.id === id);
       if (!record) throw new Error("Hospitalización no encontrada.");
+      assertCurrentOrganization(record, "Hospitalización");
       Object.assign(record, patch);
       audit("UPDATE_CASE", id, `Hospitalización actualizada: ${Object.keys(patch).join(", ")}.`);
     });
+  }
+
+  function validateQuoteGeneral(input, fallback = {}) {
+    const invoiceDate = String(input.invoiceDate ?? fallback.invoiceDate ?? "").trim();
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(invoiceDate) ? new Date(`${invoiceDate}T00:00:00.000Z`) : null;
+    if (!parsedDate || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== invoiceDate) {
+      throw new Error("Indique una fecha de cotización válida.");
+    }
+    const discountGroupId = String(input.discountGroupId ?? fallback.discountGroupId ?? "").trim();
+    const allowedDiscount = discountGroupId === "REGULAR" || state.discountRules.some((rule) => rule.id === discountGroupId && rule.active);
+    if (!allowedDiscount) throw new Error("Seleccione un grupo de descuento autorizado.");
+    const referredBy = String(input.referredBy ?? fallback.referredBy ?? "").trim();
+    if (!referredBy) throw new Error("Indique al menos una referencia autorizada.");
+    const comments = String(input.comments ?? fallback.comments ?? "").trim();
+    if (!comments) throw new Error("Los comentarios administrativos son obligatorios.");
+    return { invoiceDate, discountGroupId, referredBy, comments, giftcard: String(input.giftcard ?? fallback.giftcard ?? "").trim() };
+  }
+
+  function validateQuoteItems(inputItems) {
+    if (!Array.isArray(inputItems) || !inputItems.length) throw new Error("La cotización requiere al menos un concepto.");
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    return inputItems.map((item) => {
+      if (!allowedCategories.has(item.category)) throw new Error("La categoría del concepto no está autorizada.");
+      if (!String(item.name || "").trim()) throw new Error("El concepto requiere una descripción.");
+      if (!Number.isFinite(Number(item.quantity)) || !(Number(item.quantity) > 0)) throw new Error("La cantidad del concepto debe ser mayor que cero.");
+      if (!Number.isFinite(Number(item.unitPrice)) || Number(item.unitPrice) < 0) throw new Error("Hay conceptos sin precio válido.");
+      const lineDiscount = Number(item.discountAmount ?? 0);
+      if (!Number.isFinite(lineDiscount) || lineDiscount < 0) throw new Error("El descuento de línea debe ser un importe válido no negativo.");
+      if (lineDiscount > Number(item.quantity) * Number(item.unitPrice)) throw new Error("El descuento de línea no puede superar el importe bruto.");
+      const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId && candidate.active !== false);
+      if (!catalogItem || catalogItem.category !== item.category) throw new Error("El concepto no pertenece al catálogo autorizado.");
+      if (String(item.name).trim() !== String(catalogItem.name).trim()) throw new Error("La descripción debe coincidir con el catálogo autorizado.");
+      if (Number(item.unitPrice) !== Number(catalogItem.price)) throw new Error("El precio debe coincidir con el catálogo autorizado.");
+      return {
+        ...item,
+        catalogItemId: catalogItem.id,
+        category: catalogItem.category,
+        name: catalogItem.name,
+        quantity: Number(item.quantity),
+        unitPrice: Number(catalogItem.price),
+        discountAmount: lineDiscount
+      };
+    });
+  }
+
+  function resolveQuoteDiscount(discountGroupId, reason = "") {
+    if (discountGroupId === "REGULAR") {
+      return { type: "CATEGORY_PERCENTAGES", categories: {}, value: 0, reason: "", ruleId: "REGULAR" };
+    }
+    const rule = state.discountRules.find((candidate) => candidate.id === discountGroupId && candidate.active);
+    if (!rule) throw new Error("Seleccione un grupo de descuento autorizado.");
+    if (rule.requiresApproval) throw new Error("El grupo de descuento requiere un flujo de aprobación todavía no configurado.");
+    const normalizedReason = String(reason || "").trim();
+    if (rule.requiresReason && !normalizedReason) throw new Error("Indique el motivo del descuento.");
+    return {
+      type: "CATEGORY_PERCENTAGES",
+      categories: clone(rule.categories || {}),
+      value: 0,
+      reason: normalizedReason,
+      ruleId: rule.id
+    };
   }
 
   function createQuote(input) {
     requirePermission("quotes:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
     const patient = patientById(recordCase.patientId);
     if (!patient) throw new Error("Paciente no encontrado.");
-    if (!input.items?.length) throw new Error("La cotización requiere al menos un concepto.");
-
-    const missingPrice = input.items.some((item) => !(Number(item.unitPrice) >= 0));
-    if (missingPrice) throw new Error("Hay conceptos sin precio.");
+    const authorizedItems = validateQuoteItems(input.items);
+    const general = validateQuoteGeneral(input);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason);
 
     const calculation = calculateQuote(
-      input.items,
-      input.discount || { type: "PERCENT", value: 0 },
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount || 0
     );
     const sequence = 150 + state.quotes.length;
@@ -438,7 +654,7 @@ export async function createAppStore(config) {
       status: "DRAFT",
       version: 1,
       currency: "USD",
-      items: input.items.map((item) => ({
+      items: authorizedItems.map((item) => ({
         id: item.id || uid("QTI"),
         catalogItemId: item.catalogItemId || null,
         category: item.category,
@@ -447,9 +663,13 @@ export async function createAppStore(config) {
         unitPrice: Number(item.unitPrice),
         discountAmount: Number(item.discountAmount || 0)
       })),
-      discount: input.discount || { type: "PERCENT", value: 0, reason: "" },
+      discount: authorizedDiscount,
       ...calculation,
-      comments: input.comments || "",
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
       revisionReason: "",
       immutable: false,
       createdBy: currentUser().id,
@@ -461,13 +681,26 @@ export async function createAppStore(config) {
     quote.quoteId = quote.id;
     quote.originalQuoteId = quote.id;
 
-    setState((draft) => {
+    const commit = (remote = null) => {
+      if (remote?.quote_id && remote?.quote_version_id) {
+        quote.displayCode = quote.id;
+        quote.id = remote.quote_version_id;
+        quote.quoteId = remote.quote_id;
+        quote.originalQuoteId = remote.quote_id;
+        quote.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(quote);
-      recordCase.nextAction = "Revisar y enviar cotización.";
+      const currentCase = draft.cases.find((candidate) => candidate.id === recordCase.id);
+      if (currentCase) currentCase.nextAction = "Revisar y enviar cotización.";
       audit("CREATE_QUOTE", quote.id, `Cotización creada para ${patient.fullName} por ${quote.total}.`);
-    });
-    safeSync("CREATE_QUOTE", { quote });
-    return quote;
+      });
+      return quote;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE", { quote }).then(commit);
+    }
+    return commit();
   }
 
   function reviseQuote(id, input) {
@@ -477,23 +710,22 @@ export async function createAppStore(config) {
     assertCurrentOrganization(original, "Cotización");
     const revisionReason = String(input.revisionReason || "").trim();
     if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
     const rootId = quoteRootId(original);
     const nextVersion = quoteVersions(original).reduce((highest, candidate) => Math.max(highest, Number(candidate.version || 0)), 0) + 1;
-    let revised;
-    setState((draft) => {
-      const source = draft.quotes.find((candidate) => candidate.id === id);
-      if (!source) throw new Error("Cotización no encontrada.");
-      revised = {
-        ...clone(source),
+    const revised = {
+        ...clone(original),
         id: uid("QTV"),
         quoteId: rootId,
-        originalQuoteId: source.originalQuoteId || rootId,
-        previousVersionId: source.id,
+        originalQuoteId: original.originalQuoteId || rootId,
+        previousVersionId: original.id,
         version: nextVersion,
         status: "DRAFT",
         immutable: false,
@@ -502,22 +734,38 @@ export async function createAppStore(config) {
         revisionReason,
         createdBy: currentUser().id,
         createdAt: nowIso(),
-        items: (input.items || source.items).map((item) => ({ ...clone(item), id: uid("QTI") })),
-        discount: clone(input.discount || source.discount),
-        comments: input.comments ?? source.comments,
+        items: authorizedItems.map((item) => ({ ...clone(item), id: uid("QTI") })),
+        discount: clone(authorizedDiscount),
+        comments: general.comments,
+        invoiceDate: general.invoiceDate,
+        discountGroupId: general.discountGroupId,
+        referredBy: general.referredBy,
+        giftcard: general.giftcard,
         ...calculation,
         portalToken: `demo-${uid("portal").toLowerCase()}`,
         expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
       };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) {
+        revised.id = remote.quote_version_id;
+        revised.quoteId = remote.quote_id || revised.quoteId;
+        revised.originalQuoteId = remote.quote_id || revised.originalQuoteId;
+        revised.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(revised);
-      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${source.id}; motivo: ${revisionReason}.`, {
+      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${original.id}; motivo: ${revisionReason}.`, {
         quoteId: rootId,
-        previousVersionId: source.id,
+        previousVersionId: original.id,
         version: revised.version
       });
-    });
-    safeSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id });
-    return revised;
+      });
+      return revised;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id }).then(commit);
+    }
+    return commit();
   }
 
   function updateQuoteDraft(id, input) {
@@ -528,27 +776,42 @@ export async function createAppStore(config) {
     if (original.status !== "DRAFT" || quoteIsImmutable(original)) {
       throw new Error("La versión enviada no se puede editar. Cree una nueva versión.");
     }
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
-    let updated;
-    setState((draft) => {
+    const updated = {
+      ...clone(original),
+      items: clone(authorizedItems),
+      discount: clone(authorizedDiscount),
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
+      ...calculation
+    };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) updated.remoteConfirmedAt = nowIso();
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === id);
       if (!quote) throw new Error("Cotización no encontrada.");
-      quote.items = clone(input.items || quote.items);
-      quote.discount = clone(input.discount || quote.discount);
-      quote.comments = input.comments ?? quote.comments;
-      Object.assign(quote, calculation);
-      updated = clone(quote);
+      Object.assign(quote, clone(updated));
       audit("UPDATE_QUOTE_DRAFT", quote.id, `Borrador v${quote.version} actualizado.`, {
         quoteId: quoteRootId(quote),
         version: quote.version
       });
-    });
-    safeSync("UPDATE_QUOTE_DRAFT", { quote: updated });
-    return updated;
+      });
+      return updated;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("UPDATE_QUOTE_DRAFT", { quote: updated }).then(commit);
+    }
+    return commit();
   }
 
   function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
@@ -1294,12 +1557,14 @@ export async function createAppStore(config) {
     },
     save,
     reset,
-    login,
+    authenticate,
+    recoverPassword,
     logout,
     patientById,
     caseById,
     quoteById,
     createPatient,
+    importPatients,
     updatePatient,
     createCase,
     updateCase,

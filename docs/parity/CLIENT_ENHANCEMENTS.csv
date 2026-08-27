@@ -1,0 +1,6 @@
+"enhancement_id","requirement_type","name","feature_group","status","video_parity_credit","notes"
+"UE-001","USER_ENHANCEMENT","Envío automático de cotización","Cotización","IMPLEMENTED_PARTIAL","NONE","No cuenta como evidencia de VIDEO_REQUIREMENT."
+"UE-002","USER_ENHANCEMENT","WhatsApp/SMS/correo administrativo seguro","Notificaciones","IMPLEMENTED_PARTIAL","NONE","No cuenta como evidencia de VIDEO_REQUIREMENT."
+"UE-003","USER_ENHANCEMENT","Portal del paciente con QR","Portal","IMPLEMENTED_PARTIAL","NONE","No cuenta como evidencia de VIDEO_REQUIREMENT."
+"UE-004","USER_ENHANCEMENT","Seguimiento de aprobación","Seguro","IMPLEMENTED_PARTIAL","NONE","No cuenta como evidencia de VIDEO_REQUIREMENT."
+"UE-005","USER_ENHANCEMENT","Estados de cuenta médicos","Finanzas","IMPLEMENTED_PARTIAL","NONE","No cuenta como evidencia de VIDEO_REQUIREMENT."

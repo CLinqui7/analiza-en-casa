@@ -1,5 +1,72 @@
 # Preguntas abiertas y bloqueadores
 
+## CH01 · decisiones pendientes trazadas
+
+- `CH01-Q001`: confirmar si el enlace histórico `/pacientes.php` debe conservar una ruta de retorno después del login. El SPA aplica guardia de sesión; no se inventó una regla de redirección heredada.
+- `CH01-Q002`: definir fórmula, período, fuente y permisos de los seis contadores del dashboard. Los valores sin regla aprobada muestran `—`; los cálculos demo están rotulados como tales.
+- `CH01-Q003`: aprobar y versionar umbrales clínicos para “valores fuera de rango” y “Normales”. Hasta entonces la tabla muestra datos sin clasificación y el filtro Normales permanece deshabilitado.
+- `CH01-Q004`: confirmar la semántica final de carga, vacío, fallo y reintento en persistencia real. La UI actual mantiene carga, vacío y error mutuamente excluyentes.
+- `CH01-Q005`: confirmar permisos definitivos de módulos, exportación, creación de pacientes y consentimiento/canal Botmaker. La política provisional niega toda mutación al rol AUDITOR y restringe alta/carga de pacientes a `patients:write`.
+
+## CH02 · decisiones pendientes trazadas
+
+- `CH02-Q001`: definir normalización, formato, unicidad y validación de Cédula/Pasaporte, incluido el comportamiento anti-enumeración. Evidencia: CH02-E0012, 00:02:23.400, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0012_00h02m23s400ms_DETAIL.jpg`.
+- `CH02-Q002`: definir reglas organizacionales de teléfono, correo, fecha de nacimiento, edad, sexo y catálogos demográficos, incluido el país/prefijo telefónico inicial. Evidencia: CH02-E0011, 00:02:17.800, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0011_00h02m17s800ms_abrupt_change.jpg`.
+- `CH02-Q003`: aprobar base de consentimiento, valor inicial, historial y revocación de Botmaker/WhatsApp. El placeholder seguro queda desmarcado y nunca envía contenido clínico. Evidencia: CH02-E0022, 00:02:57.200, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0022_00h02m57s200ms_DETAIL.jpg`.
+- `CH02-Q004`: identificar las fuentes maestras y alcances de Empresa y Seguro, además de resolver entradas dudosas del catálogo observado. Evidencia: CH02-E0058, 00:03:46.600, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0058_00h03m46s600ms_DETAIL.jpg`.
+- `CH02-Q005`: definir la rama de titular No, autocopia/edición posterior, número de coberturas, semántica de Agregar y reglas de póliza, certificado y vigencia. Evidencia: CH02-E0062, 00:03:49.800, y CH02-E0066, 00:04:10.000.
+- `CH02-Q006`: definir multiplicidad, obligatoriedad, catálogos y protección de contactos. Evidencia: CH02-E0068, 00:04:11.000, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/event_frames/CH02-E0068_00h04m11s000ms_stable_change.jpg`.
+- `CH02-Q007`: seleccionar proveedor/licencia de mapa, formatos de enlace, precedencia de dirección/coordenadas/marcador, permisos de ubicación y finalidad/retención de cámara. Evidencia: CH02-E0071, 00:04:19.600, y CH02-E0076, 00:04:35.800.
+- `CH02-Q008`: confirmar roles definitivos de alta/edición, comportamiento de Atrás, errores, idempotencia, auditoría y mensaje exacto de Guardar. El video termina sin ejecutar las acciones. Evidencia: CH02-E0082, 00:04:39.000, `references/video-audit/chapters/CH02_alta_y_edicion_de_pacientes/detail_crops/CH02-E0082_00h04m39s000ms_DETAIL.jpg`.
+
+## CH03 · decisiones pendientes trazadas
+
+- `CH03-Q001`: confirmar si Preadmisión es feature flag, permiso, ruta incompleta o residuo de pintura. El clip exacto confirma que sólo aparece brevemente durante la carga. Evidencia: CH03-E0007, 00:04:52.200, y CH03-E0037, 00:05:37.400.
+- `CH03-Q002`: definir creación/cierre de Hospitalización Activa y su relación formal con Paciente Activo/Inactivo, incluidas autorización y auditoría. Evidencia: CH03-E0017, 00:05:06.400.
+- `CH03-Q003`: definir fórmula, alcance organizacional y frecuencia de refresco de los badges 8 y 67. Hasta entonces se muestra `—`. Evidencia: CH03-E0040, 00:05:39.200.
+- `CH03-Q004`: definir catálogos, operadores y combinación de Estado Administrativo, Fecha de inicio y Tipo de cuenta. Evidencia: CH03-E0009, 00:04:53.200.
+- `CH03-Q005`: aprobar la máquina de estados de cotización, preautorización, respuesta del seguro y reclamo, incluidos permisos, reintentos, idempotencia y auditoría. La UI no infiere estados y muestra `Regla pendiente`. Evidencia: CH03-E0042, 00:05:55.800.
+- `CH03-Q006`: definir moneda, precios, descuentos, impuestos, cobertura y redondeo. Ningún valor del video se adopta como regla productiva. Evidencia: CH03-E0043, 00:05:59.000.
+- `CH03-Q007`: definir catálogos y validaciones de Paciente, Fecha, Grupo de descuento, Referido por, Giftcard y Comentarios, además del significado del botón `+`. Evidencia: CH03-E0046, 00:06:09.600.
+- `CH03-Q008`: definir acciones de elipsis por estado/rol y la auditoría exigida. No se inventan operaciones no demostradas. Evidencia: CH03-E0010, 00:04:57.600, y CH03-E0042, 00:05:55.800.
+
+## CH04 · decisiones pendientes trazadas
+
+- `CH04-Q001`: definir si las entradas rotuladas Cotización representan un paciente genérico/cotización abierta y qué controles organizacionales y anti-enumeración aplican. No se replica la identificación cero. Evidencia: CH04-E0003, 00:06:18.800.
+- `CH04-Q002`: definir si DUI/NIT, Teléfono y Correo son referencias vivas o snapshot histórico de la cotización, y quién puede editarlos. Evidencia: CH04-E0005, 00:06:21.800.
+- `CH04-Q003`: definir zona horaria, fecha inicial y rangos pasados/futuros permitidos. Evidencia: CH04-E0007, 00:06:30.600.
+- `CH04-Q004`: aprobar catálogo, elegibilidad, precedencia, autorización y fórmula de Grupo de descuento. Regular es sólo el valor inicial observado. Evidencia: CH04-E0008, 00:06:33.000.
+- `CH04-Q005`: definir tipos, alcance, máximo, deduplicación y significado de `VACIO` en Referido por. Evidencia: CH04-E0014, 00:06:42.000, y CH04-E0032, 00:06:59.600.
+- `CH04-Q006`: definir la entidad real que crea `+`, permisos y gobierno del maestro. El flujo actual es provisional y no crea un catálogo productivo. Evidencia: CH04-E0009, 00:06:34.800.
+- `CH04-Q007`: definir validación, saldo, expiración, unicidad, idempotencia y auditoría de Giftcard. No se aplica financieramente. Evidencia: CH04-E0034, 00:07:01.000.
+- `CH04-Q008`: definir finalidad, visibilidad y límites de contenido de Comentarios; no debe contener datos clínicos destinados a notificaciones inseguras. Evidencia: CH04-E0034, 00:07:01.000.
+- `CH04-Q009`: definir resultado exacto de Guardar, estado inicial, errores y relación paciente↔factura↔ítems. CH04 no ejecuta la acción. Evidencia: CH04-E0035, 00:07:01.600.
+
+## CH05 · decisiones pendientes trazadas
+
+- `CH05-Q001`: definir qué Socio de negocios/lista de precios puede elegir cada organización, además de vigencia, prioridad y moneda. Producción exige una lista activa explícita y permanece bloqueada hasta configurar esa correspondencia. Evidencia: CH05-E0003, 00:07:49.400.
+- `CH05-Q002`: confirmar la taxonomía entre Servicios y Equipos; el video incluye un atril con bomba dentro de Servicios. Evidencia: CH05-E0065, 00:09:50.400.
+- `CH05-Q003`: definir unidad, precisión, límites y relación de Cantidad con horas, días, alquileres y medicamentos. Sólo se exige un valor mayor que cero. Evidencia: CH05-E0052, 00:09:30.400.
+- `CH05-Q004`: aprobar moneda, tasa, base, exenciones, redondeo y precedencia entre descuentos e impuesto. El impuesto permanece en cero y deshabilitado; no se infirió una tasa del ejemplo. Evidencia: CH05-E0067, 00:09:56.400.
+- `CH05-Q005`: definir el conteo entre paréntesis de Medicamentos y su relación con disponibilidad, reservas, lotes, bodegas y concurrencia. `Solo disponibles en inventario` permanece bloqueado. Evidencia: CH05-E0075, 00:10:46.800.
+- `CH05-Q006`: definir controles clínicos y autorizaciones de medicamento, presentación y cantidad. Ningún ejemplo del ASR se convirtió en regla de dosificación. Evidencia: CH05-E0080, 00:11:04.400.
+- `CH05-Q007`: confirmar si añadir Invanz inserta una línea; el frame y el clip exacto muestran procesamiento y reset, pero la fila queda fuera del encuadre. Evidencia: CH05-E0080 y CH05-E0082.
+- `CH05-Q008`: confirmar resultado, mensaje, versionado e idempotencia exactos de Guardar; el capítulo nunca ejecuta la acción. La plataforma aplica versionado y RPC transaccionales como hardening, sin atribuirlos al video. Evidencia: CH05-E0067, 00:09:56.400.
+- `CH05-Q009`: definir permisos y auditoría fina para eliminar líneas, editar cantidades o controlar impuestos. Actualmente se exige `quotes:write`, se recalcula y se protegen versiones enviadas. Evidencia: CH05-E0054, 00:09:31.400.
+
+## CH06 · decisiones pendientes trazadas
+
+- `CH06-Q001`: definir la fuente autoritativa de socios y listas de precios, vigencia, prioridad, moneda y qué socio es obligatorio u opcional por categoría. Evidencia: CH06-E0007, 00:11:34.600; CH06-E0045, 00:12:20.800; CH06-E0075, 00:13:03.200.
+- `CH06-Q002`: aprobar tasa, base, categorías gravadas o exentas, autorización para marcar/desmarcar, precedencia con descuentos y política de redondeo del impuesto. El video muestra un ejemplo de 13% sobre neto agregado y una diferencia de un centavo frente a sumar líneas redondeadas; la aplicación mantiene impuesto en cero. Evidencia: CH06-E0004, 00:11:30.000, y CH06-E0114, 00:14:23.200.
+- `CH06-Q003`: definir qué atributo del paciente, caso o aseguradora asigna automáticamente el grupo de descuento y el referido, además de elegibilidad, aprobación y precedencia. La matriz configurable existe, pero no se copió el ejemplo de 15%. Evidencia: CH06-E0107, 00:14:12.600, y CH06-E0108, 00:14:13.200.
+- `CH06-Q004`: definir qué significa existencia/disponibilidad: stock físico, menos comprometido, lotes vigentes, almacén elegido, reservas y concurrencia. Hasta entonces no se muestran conteos ni se habilita `Solo disponibles en inventario`. Evidencia: CH06-E0013, 00:11:39.600; CH06-E0029, 00:12:01.600.
+- `CH06-Q005`: confirmar si al cambiar de paciente se conserva el ledger previo, se limpia o se exige confirmación; también debe validarse nuevamente la elegibilidad de precios y descuentos. Evidencia: CH06-E0107–CH06-E0114.
+- `CH06-Q006`: confirmar si Socio de negocios es opcional para Honorarios y cómo determina catálogo/precio. El video no muestra asterisco en esa categoría. Evidencia: CH06-E0072–CH06-E0076.
+- `CH06-Q007`: definir si Equipos y Extras usan socio, inventario, impuestos y precios igual que Insumos. CH06 sólo muestra sus pestañas y no ejerce los flujos. Evidencia: CH06-E0071, 00:12:59.200.
+- `CH06-Q008`: definir el resultado exacto de Guardar —permanecer, navegar al detalle o volver al listado— y los mensajes de éxito/error. El clip termina con el cursor sobre Guardar sin resultado observable. Evidencia: CH06-E0115, 00:14:24.200.
+- `CH06-Q009`: confirmar si Atrás advierte por cambios sin guardar y qué ruta exacta debe recuperar. Evidencia: CH06-E0096, 00:14:01.800.
+- `CH06-Q010`: aprobar permisos y auditoría fina para cambios de cantidad, retiro de línea, selección de impuesto, asignación de descuento y cambio de paciente dentro de un borrador.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.
