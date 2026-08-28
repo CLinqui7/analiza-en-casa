@@ -27,6 +27,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   error: string | null;
   providerMode: DataProvider['mode'];
   addPatient: (patient: Patient) => void;
+  addPatients: (patients: Patient[]) => void;
   updatePatient: (patient: Patient) => void;
   addVitalReading: (reading: VitalReading) => void;
   addNursingResource: (resource: NursingResource) => void;
@@ -117,6 +118,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         ...current,
         patients: [...current.patients, patient],
         auditEntries: [audit('Paciente registrado', patient.id), ...current.auditEntries],
+      })),
+      addPatients: (patients) => commit((current) => ({
+        ...current,
+        patients: [...current.patients, ...patients],
+        auditEntries: [audit('Pacientes importados', `${patients.length} registros`), ...current.auditEntries],
       })),
       updatePatient: (patient) => commit((current) => ({
         ...current,
