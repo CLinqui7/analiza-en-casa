@@ -12,8 +12,8 @@ import {
 } from '@analiza/domain';
 
 const patients: Patient[] = [
-  { id: 'one', fullName: 'Áurea Demo', documentType: 'DUI', documentId: '12345678-9' },
-  { id: 'two', fullName: 'Brisa Demo', documentType: 'OTHER', documentId: 'DEMO-2' },
+  { id: 'one', fullName: 'Áurea Demo', documentType: 'DUI', documentId: '12345678-9', status: 'ACTIVE' },
+  { id: 'two', fullName: 'Brisa Demo', documentType: 'OTHER', documentId: 'DEMO-2', status: 'ACTIVE' },
 ];
 
 describe('domain boundaries', () => {

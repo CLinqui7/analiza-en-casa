@@ -9,6 +9,7 @@ export const patientSchema = z.object({
   documentId: z.string().trim().min(1),
   phone: z.string().trim().optional(),
   insurer: z.string().trim().optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
 });
 
 export const vitalReadingSchema = z.object({

@@ -12,7 +12,7 @@ import {
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -28,19 +28,26 @@ const patientFormSchema = z.object({
 type PatientForm = z.infer<typeof patientFormSchema>;
 
 export default function PatientsPage() {
-  const { addPatient, patients } = useWorkspace();
+  const { addPatient, patients, updatePatient } = useWorkspace();
   const { can } = useAuth();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [dismissedLinkedDialog, setDismissedLinkedDialog] = useState(false);
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
+  const [sort, setSort] = useState<'fullName' | 'documentId'>('fullName');
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [page, setPage] = useState(1);
   const [result, setResult] = useState<string | null>(null);
   const form = useForm<PatientForm>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: { fullName: '', documentType: 'DUI', documentId: '', phone: '', insurer: '' },
   });
   const documentType = useWatch({ control: form.control, name: 'documentType' });
-  const visiblePatients = searchPatients(patients, query);
+  const visiblePatients = useMemo(() => searchPatients(patients.filter((patient) => patient.status === tab), query).sort((a, b) => a[sort].localeCompare(b[sort], 'es') * direction), [direction, patients, query, sort, tab]);
+  const pages = Math.max(1, Math.ceil(visiblePatients.length / pageSize));
+  const pageRows = visiblePatients.slice((Math.min(page, pages) - 1) * pageSize, Math.min(page, pages) * pageSize);
   const documentInput = form.register('documentId');
 
   const linkedDialogOpen = searchParams.get('create') === '1' && can('patients:write') && !dismissedLinkedDialog;
@@ -72,6 +79,7 @@ export default function PatientsPage() {
       documentId: values.documentId,
       phone: values.phone || undefined,
       insurer: values.insurer || undefined,
+      status: 'ACTIVE',
     };
     addPatient(patient);
     setResult(`Registro sintético agregado para ${patient.fullName}.`);
@@ -103,37 +111,29 @@ export default function PatientsPage() {
           {result}
         </p>
       ) : null}
+      <div className="tabs" role="tablist"><Button data-action-id="PATIENT-TAB-ACTIVE" className={tab === 'ACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('ACTIVE'); setPage(1); }} type="button">Activos</Button><Button data-action-id="PATIENT-TAB-INACTIVE" className={tab === 'INACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('INACTIVE'); setPage(1); }} type="button">Inactivos</Button></div>
       <Panel>
-        <label className="search-label" htmlFor="patient-search">
-          Buscar paciente
-        </label>
-        <input
-          id="patient-search"
-          data-action-id="PATIENT-SEARCH"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Nombre, documento, teléfono o aseguradora"
-          type="search"
-          value={query}
-        />
+        <div className="table-heading"><div><label className="search-label" htmlFor="patient-search">Buscar paciente</label><input id="patient-search" data-action-id="PATIENT-SEARCH" onChange={(event) => setQuery(event.target.value)} placeholder="Nombre, documento, teléfono o aseguradora" type="search" value={query} /></div>{query ? <Button className="button-secondary" data-action-id="PATIENT-SEARCH-CLEAR" onClick={() => setQuery('')} type="button">Limpiar búsqueda</Button> : null}</div>
       </Panel>
       <Panel>
         <div className="table-heading">
           <h2>Resultados</h2>
-          <StatusTag>{visiblePatients.length} visibles</StatusTag>
+          <div><StatusTag>{visiblePatients.length} visibles</StatusTag><label> Mostrar <select data-action-id="PATIENT-PAGE-SIZE" onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); }} value={pageSize}><option value="5">5</option><option value="10">10</option><option value="25">25</option></select></label></div>
         </div>
         {visiblePatients.length ? (
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Paciente</th>
-                  <th>Documento</th>
+                  <th><Button data-action-id="PATIENT-SORT-NAME" onClick={() => { setDirection(sort === 'fullName' ? (direction * -1) as 1 | -1 : 1); setSort('fullName'); }} type="button">Paciente</Button></th>
+                  <th><Button data-action-id="PATIENT-SORT-DOCUMENT" onClick={() => { setDirection(sort === 'documentId' ? (direction * -1) as 1 | -1 : 1); setSort('documentId'); }} type="button">Documento</Button></th>
                   <th>Aseguradora</th>
                   <th>Contacto demo</th>
+                  <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
-                {visiblePatients.map((patient) => (
+                {pageRows.map((patient) => (
                   <tr key={patient.id}>
                     <td>
                       <Link data-action-id="PATIENT-DETAIL-NAVIGATE" href={`/patients/${patient.id}`}>
@@ -145,6 +145,7 @@ export default function PatientsPage() {
                     </td>
                     <td>{patient.insurer ?? 'Sin dato'}</td>
                     <td>{patient.phone ?? 'Sin dato'}</td>
+                    <td>{can('patients:write') ? <Button data-action-id={patient.status === 'ACTIVE' ? 'PATIENT-INACTIVATE' : 'PATIENT-REACTIVATE'} onClick={() => updatePatient({ ...patient, status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })} type="button">{patient.status === 'ACTIVE' ? 'Inactivar' : 'Reactivar'}</Button> : 'Solo lectura'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -157,14 +158,15 @@ export default function PatientsPage() {
           />
         )}
       </Panel>
+      <nav className="pagination" aria-label="Paginación de pacientes"><Button data-action-id="PATIENT-PAGE-PREVIOUS" disabled={page === 1} onClick={() => setPage(page - 1)} type="button">Anterior</Button>{Array.from({ length: pages }, (_, index) => <Button data-action-id="PATIENT-PAGINATE" key={index} onClick={() => setPage(index + 1)} type="button">{index + 1}</Button>)}<Button data-action-id="PATIENT-PAGE-NEXT" disabled={page >= pages} onClick={() => setPage(page + 1)} type="button">Siguiente</Button></nav>
       <Dialog
         description="Los datos ingresados se mantienen en memoria de este demo y se validan antes de registrar."
         footer={
           <>
-            <Button className="button-secondary" onClick={closeDialog} type="button">
+            <Button className="button-secondary" data-action-id="PATIENT-CREATE-CANCEL" onClick={closeDialog} type="button">
               Cancelar
             </Button>
-            <Button form="patient-form" type="submit">
+            <Button data-action-id="PATIENT-CREATE-SUBMIT" form="patient-form" type="submit">
               Guardar registro
             </Button>
           </>

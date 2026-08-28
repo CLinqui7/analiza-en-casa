@@ -21,6 +21,7 @@ export const demoPatients: Patient[] = [
     documentId: '12345678-9',
     phone: '0000-0000',
     insurer: 'Aseguradora de demostración',
+    status: 'ACTIVE',
   },
   {
     id: 'patient-demo-002',
@@ -28,6 +29,7 @@ export const demoPatients: Patient[] = [
     documentType: 'OTHER',
     documentId: 'DEMO-002',
     insurer: 'Sin aseguradora registrada',
+    status: 'INACTIVE',
   },
 ];
 
