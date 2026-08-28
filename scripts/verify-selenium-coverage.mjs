@@ -24,8 +24,7 @@ const source = existsSync(seleniumRoot)
   : '';
 const discovered = new Set([...source.matchAll(/^\s*#\s*test-id:\s*([\w.-]+)\s*$/gm)].map((match) => match[1]));
 const required = inventory.actions.filter((action) => action.selenium_required && (!moduleName || action.module === moduleName) && (!prefix || action.action_id.startsWith(prefix)));
-const universalPatientSuite = prefix === 'PATIENT-' && discovered.has('SEL-PAT-FULL');
-const uncovered = required.filter((action) => !universalPatientSuite && (!action.selenium_test_ids.length || action.selenium_test_ids.some((id) => !discovered.has(id))));
+const uncovered = required.filter((action) => !action.selenium_test_ids.length || action.selenium_test_ids.some((id) => !discovered.has(id)));
 const covered = required.length - uncovered.length;
 const coverage = required.length ? (covered / required.length) * 100 : 100;
 

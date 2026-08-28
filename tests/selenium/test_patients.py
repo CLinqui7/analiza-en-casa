@@ -1,7 +1,8 @@
 """Authenticated Selenium patient regression with machine-readable action evidence."""
 # test-id: SEL-PAT-FULL
+# test-id: SEL-PAT-FLOW
 from __future__ import annotations
-import json, os, subprocess, time, unittest
+import os, subprocess, time, unittest
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
@@ -10,23 +11,18 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
+from helpers.action_recorder import record_pass, reset
 
 ROOT=Path(__file__).resolve().parents[2]; BASE=os.getenv('SELENIUM_BASE_URL','http://127.0.0.1:4174'); SERVER=None
 def ready():
     try: return urlopen(BASE,timeout=1).status<500 # nosec B310 local only
     except (URLError, TimeoutError, OSError): return False
-def actions():
-    data=json.loads((ROOT/'docs/qa/UI_ACTION_INVENTORY.json').read_text(encoding='utf8'))
-    return [x['action_id'] for x in data['actions'] if x['action_id'].startswith('PATIENT-') and x['selenium_required']]
-def results(status):
-    out=ROOT/'.qa-results'/'selenium-patients.json'; out.parent.mkdir(exist_ok=True)
-    sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(); now=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
-    out.write_text(json.dumps({'git_sha':sha,'results':[{'action_id':x,'test_id':'SEL-PAT-FULL','status':status,'git_sha':sha,'executed_at':now,'duration_ms':0} for x in actions()]},indent=2),encoding='utf8')
 
 class Patients(unittest.TestCase):
  @classmethod
  def setUpClass(c):
     global SERVER
+    reset()
     if not ready(): SERVER=subprocess.Popen(['npm.cmd','run','dev','--workspace=@analiza/web','--','--port','4174'],cwd=ROOT,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0));
     for _ in range(60):
       if ready(): break
@@ -38,7 +34,8 @@ class Patients(unittest.TestCase):
     if SERVER: SERVER.terminate()
  def setUp(s):
     s.d.get(BASE+'/login'); s.d.execute_script('localStorage.clear()'); s.d.refresh(); email=s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Correo')]//input"))); email.clear(); email.send_keys('admin@demo.local'); password=s.d.find_element(By.CSS_SELECTOR,'input[type="password"]'); password.clear(); password.send_keys('demo-admin'); s.d.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); s.w.until(EC.url_contains('/dashboard'))
- def click(s,x): s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,f'[data-action-id="{x}"]'))).click()
+ def click(s,x):
+    started=time.time(); s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,f'[data-action-id="{x}"]'))).click(); record_pass(x,'SEL-PAT-FLOW',started,s.d.current_url)
  def field(s,label): return s.d.find_element(By.XPATH,f"//label[contains(.,'{label}')]//*[self::input or self::select or self::textarea]")
  def test_patient_actions(s):
     d=s.d; d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1')))
@@ -53,4 +50,4 @@ class Patients(unittest.TestCase):
     d.get(BASE+'/patients'); s.click('PATIENT-IMPORT'); s.click('PATIENT-IMPORT-CANCEL'); s.click('PATIENT-EXPORT')
 
 if __name__=='__main__':
- r=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Patients)); results('PASS' if r.wasSuccessful() else 'FAIL'); raise SystemExit(not r.wasSuccessful())
+ r=unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Patients)); raise SystemExit(not r.wasSuccessful())
