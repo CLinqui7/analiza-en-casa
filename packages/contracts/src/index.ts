@@ -126,6 +126,15 @@ export const catalogItemSchema = z.object({
   createdAt: z.string(),
 });
 
+export const purchaseSchema = z.object({
+  id: z.string(),
+  catalogItemId: z.string(),
+  reference: z.string().trim().min(1),
+  note: z.string().trim().optional(),
+  status: z.literal('DRAFT'),
+  createdAt: z.string(),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
@@ -136,4 +145,5 @@ export type Quote = z.infer<typeof quoteSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
 export type ClinicalDocument = z.infer<typeof clinicalDocumentSchema>;
 export type CatalogItem = z.infer<typeof catalogItemSchema>;
+export type Purchase = z.infer<typeof purchaseSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;

@@ -232,6 +232,19 @@ test('catalog items require a unique SKU and persist after refresh', async ({ pa
   await expect(page.getByText('QA-CATALOG-001')).toBeVisible();
 });
 
+test('purchase drafts persist without changing inventory', async ({ page }) => {
+  await login(page);
+  await page.goto('/purchases');
+  await page.getByRole('button', { name: 'Nueva compra' }).click();
+  await page.getByLabel('Referencia de compra').fill('PURCHASE-QA-001');
+  await page.getByLabel('Nota (opcional)').fill('Borrador sintético de QA.');
+  await page.getByRole('button', { name: 'Guardar borrador' }).click();
+  await expect(page.getByRole('status')).toContainText('guardada como borrador');
+  await page.reload();
+  await expect(page.getByText('PURCHASE-QA-001')).toBeVisible();
+  await expect(page.getByText('Borrador sintético de QA.')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

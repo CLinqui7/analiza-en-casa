@@ -40,6 +40,7 @@ const navigation: NavigationGroup[] = [
     ],
   },
   { label: 'Catálogos', href: '/catalogs', permission: 'catalogs:read', actionId: 'CATALOG-NAVIGATE' },
+  { label: 'Compras', href: '/purchases', permission: 'purchases:read', actionId: 'PURCHASE-NAVIGATE' },
   {
     label: 'Reportes',
     children: [{ label: 'Horas de enfermería', href: '/reports/nurse-hours', permission: 'reports:read', actionId: 'NURSE-HOURS-NAVIGATE' }],

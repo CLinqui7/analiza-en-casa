@@ -1,6 +1,6 @@
 'use client';
 
-import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
@@ -42,6 +42,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   signClinicalDocument: (documentId: string) => void;
   correctClinicalDocument: (documentId: string, reason: string, summary: string, author: string) => void;
   addCatalogItem: (item: CatalogItem) => void;
+  addPurchase: (purchase: Purchase) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -218,6 +219,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           auditEntries: [audit('Ítem de catálogo creado', item.id), ...current.auditEntries],
         };
       }),
+      addPurchase: (purchase) => commit((current) => ({
+        ...current,
+        purchases: [...current.purchases, purchase],
+        auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
+      })),
     }),
     [commit, error, loading, provider.mode, snapshot],
   );

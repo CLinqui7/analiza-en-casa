@@ -10,6 +10,7 @@ import type {
   Payment,
   ClinicalDocument,
   CatalogItem,
+  Purchase,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -104,6 +105,8 @@ export const demoCatalogItems: CatalogItem[] = [
   { id: 'catalog-demo-kit', sku: 'KIT-DEMO-001', name: 'Kit operativo demo', status: 'ACTIVE', createdAt: '2026-08-28T08:00:00.000Z' },
   { id: 'catalog-demo-supplies', sku: 'INS-DEMO-001', name: 'Insumos demo', status: 'ACTIVE', createdAt: '2026-08-28T08:00:00.000Z' },
 ];
+
+export const demoPurchases: Purchase[] = [];
 
 export const demoInventoryMovements: InventoryMovement[] = [
   {
