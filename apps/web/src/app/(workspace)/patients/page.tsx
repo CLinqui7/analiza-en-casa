@@ -11,6 +11,7 @@ import {
 } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -29,7 +30,9 @@ type PatientForm = z.infer<typeof patientFormSchema>;
 export default function PatientsPage() {
   const { addPatient, patients } = useWorkspace();
   const { can } = useAuth();
+  const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const [dismissedLinkedDialog, setDismissedLinkedDialog] = useState(false);
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<string | null>(null);
   const form = useForm<PatientForm>({
@@ -40,8 +43,11 @@ export default function PatientsPage() {
   const visiblePatients = searchPatients(patients, query);
   const documentInput = form.register('documentId');
 
+  const linkedDialogOpen = searchParams.get('create') === '1' && can('patients:write') && !dismissedLinkedDialog;
+
   function closeDialog() {
     setIsOpen(false);
+    setDismissedLinkedDialog(true);
     form.reset();
   }
 
@@ -84,6 +90,7 @@ export default function PatientsPage() {
           data-action-id="PATIENT-CREATE"
           onClick={() => {
             setResult(null);
+            setDismissedLinkedDialog(false);
             setIsOpen(true);
           }}
           type="button"
@@ -163,7 +170,7 @@ export default function PatientsPage() {
           </>
         }
         onClose={closeDialog}
-        open={isOpen}
+        open={isOpen || linkedDialogOpen}
         title="Agregar paciente"
       >
         <form

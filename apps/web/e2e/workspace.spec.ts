@@ -42,6 +42,34 @@ test('primary navigation requires a session and hides patient access for invento
   await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
 });
 
+test('dashboard presents unclassified measurements and opens authorized operational actions', async ({ page }) => {
+  await login(page);
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+  await expect(page.getByText('Sin clasificar')).toBeVisible();
+  await expect(page.getByText('normalmente', { exact: false })).toHaveCount(0);
+
+  await page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]').click();
+  await expect(page).toHaveURL(/\/patients\?create=1$/);
+  await expect(page.getByRole('dialog', { name: 'Agregar paciente' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar diálogo' }).click();
+
+  await page.goto('/dashboard');
+  await page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]').click();
+  await expect(page).toHaveURL(/\/quotes\?create=1$/);
+  await expect(page.getByRole('dialog', { name: 'Nueva cotización' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar diálogo' }).click();
+
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'nurse@demo.local', 'demo-nurse');
+  await expect(page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]')).toBeVisible();
+  await expect(page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'finance@demo.local', 'demo-finance');
+  await expect(page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]')).toHaveCount(0);
+  await expect(page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]')).toBeVisible();
+});
+
 test('patient duplicate validation and individual vital registration are usable', async ({
   page,
 }) => {
