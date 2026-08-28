@@ -16,7 +16,7 @@ export default defineConfig({
     screenshot: "only-on-failure"
   },
   webServer: {
-    command: "npm start",
+    command: "npm run start:legacy",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: true,
     timeout: 30_000

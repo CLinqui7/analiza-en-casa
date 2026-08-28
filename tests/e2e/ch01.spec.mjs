@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, resolve } from "node:path";
+import { DEMO_PASSWORD } from "../helpers/demo-auth.mjs";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const evidenceDir = resolve(projectRoot, "docs/parity/screenshots");
@@ -15,7 +16,7 @@ async function openCleanLogin(page) {
   await expect(page.locator("#login-form")).toBeVisible();
 }
 
-async function login(page, email, password = "Demo2026!") {
+async function login(page, email, password = DEMO_PASSWORD) {
   await page.locator('#login-form input[name="email"]').fill(email);
   await page.locator('#login-form input[name="password"]').fill(password);
   await page.locator('#login-form button[type="submit"]').click();

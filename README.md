@@ -12,7 +12,12 @@ Los seis controles P0 están implementados a nivel de aplicación, contrato SQL 
 
 ## Arquitectura actual
 
-- `index.html` y `app/`: SPA estática con modo mock persistente en el navegador.
+- `apps/web/`: aplicación principal Next.js App Router con React y TypeScript estricto.
+- `packages/domain/`: lógica pura de búsqueda, formatos configurables, mediciones, CSV y kárdex.
+- `packages/contracts/`: contratos Zod y tipos compartidos.
+- `packages/ui/`: diálogo y componentes visuales reutilizables.
+- `packages/testing/`: utilidades de prueba compartidas.
+- `legacy-demo/`: referencia temporal de la SPA previa; sus archivos permanecen en la raíz mientras se completa la migración y nunca se cargan dentro de React.
 - `api/`: funciones server-side para portal y cola segura de notificaciones.
 - `supabase/migrations/`: esquema incremental, RLS, RPCs y auditoría.
 - `supabase/seed.sql`: datos exclusivamente sintéticos.
@@ -31,13 +36,13 @@ Los seis controles P0 están implementados a nivel de aplicación, contrato SQL 
 ```powershell
 git clone https://github.com/CLinqui7/analiza-en-casa.git
 Set-Location analiza-en-casa
-git switch codex/overnight-audit-hardening
-npm install
-npm run check
-npm start
+git switch codex/client-audio-selenium-hardening
+npm ci
+npm run qa:local
+npm run dev
 ```
 
-Abra `http://localhost:4173`. Para detener el servidor, presione `Ctrl+C` en la misma consola. También puede abrir `Analiza_en_Casa_Demo_QA.html` con doble clic para la demo autónoma.
+Abra `http://localhost:3000`. Para detener el servidor, presione `Ctrl+C` en la misma consola. El demo heredado se mantiene sólo como respaldo de evidencia y se inicia explícitamente con `npm run start:legacy` en `http://localhost:4173`; también existe `Analiza_en_Casa_Demo_QA.html` para la demo autónoma.
 
 Si aparece `EADDRINUSE`, el puerto 4173 ya está ocupado. Identifique el proceso con `Get-NetTCPConnection -LocalPort 4173`, detenga únicamente el proceso que corresponda o ejecute la app en otro puerto si el script admite su variable de puerto. No finalice procesos desconocidos.
 
@@ -54,13 +59,19 @@ Para modo local basta `DATA_MODE=mock`. Para Supabase configure `SUPABASE_URL`, 
 ## Comandos frecuentes
 
 ```powershell
-npm start                 # servidor local
-npm test                  # 29 pruebas unitarias y de contrato
-npm run qa                # 75 comprobaciones de QA
-npm run check             # test + QA + demo autónoma
+npm run dev               # aplicación React principal
+npm run build             # build optimizado de Next.js
+npm test                  # regresiones del demo heredado
+npm run test:react        # pruebas Vitest de dominio React
+npm run test:browser:react # Playwright + axe sobre React
+npm run test:selenium     # Selenium + Chrome sin autenticación
+npm run qa:local          # compuerta local completa
+npm run check             # regresiones heredadas + QA + demo autónoma
 npm run audit:verify      # integridad de los 17 capítulos
 npm run audit:master      # regenera matrices desde el JSON canónico
 npm run codex:preflight   # preflight del repositorio/evidencia
+npm run react:boundaries  # impide iframe, HTML peligroso y carga del demo en React
+npm run inventory:generate # regenera inventarios funcionales y de textos
 git status --short --branch
 ```
 
@@ -68,16 +79,7 @@ Los resultados de QA se escriben en `docs/QA_AUTOMATED_RESULTS.*`; las capturas 
 
 ## Usuarios demo y roles
 
-| Rol | Correo | Contraseña demo |
-| --- | --- | --- |
-| Administración | `admin@analiza.demo` | `Demo2026!` |
-| Médico | `medico@analiza.demo` | `Demo2026!` |
-| Enfermería | `enfermeria@analiza.demo` | `Demo2026!` |
-| Inventario | `inventario@analiza.demo` | `Demo2026!` |
-| Finanzas | `finanzas@analiza.demo` | `Demo2026!` |
-| Auditoría | `auditoria@analiza.demo` | `Demo2026!` |
-
-Estas credenciales sólo existen en la demo mock. En producción, Supabase Auth, invitaciones verificadas, RLS y permisos reemplazan ese mecanismo.
+El demo heredado conserva seis roles sintéticos para sus regresiones: Administración, Médico, Enfermería, Inventario, Finanzas y Auditoría. Las claves de prueba no se publican ni se almacenan en claro en código productivo; las pruebas las construyen localmente. En producción, Supabase Auth, invitaciones verificadas, RLS y permisos reemplazan ese mecanismo.
 
 ## Seguridad y límites
 
@@ -97,6 +99,9 @@ Use [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) para aplicar las seis migra
 
 ```text
 app/                 interfaz y lógica de demo
+apps/web/            aplicación React / Next.js principal
+packages/            dominio, contratos, UI y pruebas compartidas
+legacy-demo/         documentación de la referencia temporal heredada
 api/                 endpoints server-side
 supabase/            migraciones, RLS, seed sintético
 tests/               pruebas de dominio y P0
