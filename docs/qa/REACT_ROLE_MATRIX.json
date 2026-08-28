@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "generated_at": "2026-08-28T00:00:00.000Z",
+  "source": "apps/web/src/lib/permissions.ts and apps/web/e2e/workspace.spec.ts",
+  "purpose": "Route and action guard evidence for the six synthetic demo roles. This is not a claim that every role-action combination has Selenium coverage.",
+  "roles": [
+    {"role":"ADMIN","allowed_route":"/audit","denied_route":null,"denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
+    {"role":"DOCTOR","allowed_route":"/clinical","denied_route":"/payments","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
+    {"role":"NURSE","allowed_route":"/agenda","denied_route":"/audit","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
+    {"role":"INVENTORY","allowed_route":"/inventory","denied_route":"/patients","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
+    {"role":"FINANCE","allowed_route":"/payments","denied_route":"/clinical","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
+    {"role":"AUDITOR","allowed_route":"/audit","denied_route":null,"denied_action":"QUOTE-CREATE","playwright_test_id":"playwright:role-matrix-six-demo-roles"}
+  ]
+}

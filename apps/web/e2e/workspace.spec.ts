@@ -1,12 +1,16 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-async function login(page: import('@playwright/test').Page) {
+async function loginAs(page: import('@playwright/test').Page, email: string, password: string) {
   await page.goto('/login');
-  await page.getByLabel('Correo').fill('admin@demo.local');
-  await page.getByLabel('Contraseña').fill('demo-admin');
+  await page.getByLabel('Correo').fill(email);
+  await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+async function login(page: import('@playwright/test').Page) {
+  await loginAs(page, 'admin@demo.local', 'demo-admin');
 }
 
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
@@ -181,6 +185,32 @@ test('help search gives deterministic local results and a safe empty state', asy
   await page.getByLabel('¿Qué necesitas hacer?').fill('consulta inexistente de QA');
   await expect(page.getByRole('heading', { name: 'Sin resultados' })).toBeVisible();
   await expect(page.getByText('no se muestra ni inventa un número')).toBeVisible();
+});
+
+test('all six demo roles enforce their route matrix', async ({ browser }) => {
+  const roles = [
+    { email: 'admin@demo.local', password: 'demo-admin', allowed: '/audit' },
+    { email: 'doctor@demo.local', password: 'demo-doctor', allowed: '/clinical', denied: '/payments' },
+    { email: 'nurse@demo.local', password: 'demo-nurse', allowed: '/agenda', denied: '/audit' },
+    { email: 'inventory@demo.local', password: 'demo-inventory', allowed: '/inventory', denied: '/patients' },
+    { email: 'finance@demo.local', password: 'demo-finance', allowed: '/payments', denied: '/clinical' },
+    { email: 'auditor@demo.local', password: 'demo-auditor', allowed: '/audit' },
+  ];
+  for (const role of roles) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await loginAs(page, role.email, role.password);
+    await page.goto(role.allowed);
+    await expect(page.locator('main[role="alert"]')).toHaveCount(0);
+    if (role.denied) {
+      await page.goto(role.denied);
+      await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido');
+    } else if (role.email === 'auditor@demo.local') {
+      await page.goto('/quotes');
+      await expect(page.getByRole('button', { name: 'Nueva cotización' })).toHaveCount(0);
+    }
+    await context.close();
+  }
 });
 
 test('dashboard has no automatically detectable serious accessibility violations', async ({
