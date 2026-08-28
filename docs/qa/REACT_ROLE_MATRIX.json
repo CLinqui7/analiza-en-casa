@@ -4,11 +4,11 @@
   "source": "apps/web/src/lib/permissions.ts and apps/web/e2e/workspace.spec.ts",
   "purpose": "Route and action guard evidence for the six synthetic demo roles. This is not a claim that every role-action combination has Selenium coverage.",
   "roles": [
-    {"role":"ADMIN","allowed_route":"/audit","denied_route":null,"denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
-    {"role":"DOCTOR","allowed_route":"/clinical","denied_route":"/payments","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
-    {"role":"NURSE","allowed_route":"/agenda","denied_route":"/audit","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
-    {"role":"INVENTORY","allowed_route":"/inventory","denied_route":"/patients","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
-    {"role":"FINANCE","allowed_route":"/payments","denied_route":"/clinical","denied_action":null,"playwright_test_id":"playwright:role-matrix-six-demo-roles"},
-    {"role":"AUDITOR","allowed_route":"/audit","denied_route":null,"denied_action":"QUOTE-CREATE","playwright_test_id":"playwright:role-matrix-six-demo-roles"}
+    {"role":"ADMIN","allowed_route":"/audit","denied_route":null,"allowed_actions":["NURSING-RESOURCE-CREATE"],"denied_actions":[],"playwright_test_ids":["playwright:role-matrix-six-demo-roles","playwright:nursing-resource-persistence-role-guard"]},
+    {"role":"DOCTOR","allowed_route":"/clinical","denied_route":"/payments","allowed_actions":["MEDICAL-ORDER-CREATE"],"denied_actions":["NURSING-RESOURCE-CREATE"],"playwright_test_ids":["playwright:role-matrix-six-demo-roles","playwright:nursing-resource-persistence-role-guard","playwright:clinical-action-search-role-guard"]},
+    {"role":"NURSE","allowed_route":"/agenda","denied_route":"/audit","allowed_actions":["NURSING-RESOURCE-CREATE"],"denied_actions":["MEDICAL-ORDER-CREATE"],"playwright_test_ids":["playwright:role-matrix-six-demo-roles","playwright:nursing-resource-persistence-role-guard","playwright:clinical-action-search-role-guard"]},
+    {"role":"INVENTORY","allowed_route":"/inventory","denied_route":"/patients","allowed_actions":[],"denied_actions":["PATIENT-NAVIGATE"],"playwright_test_ids":["playwright:role-matrix-six-demo-roles","playwright:navigation-session-role-guard"]},
+    {"role":"FINANCE","allowed_route":"/payments","denied_route":"/clinical","allowed_actions":[],"denied_actions":[],"playwright_test_ids":["playwright:role-matrix-six-demo-roles"]},
+    {"role":"AUDITOR","allowed_route":"/audit","denied_route":null,"allowed_actions":[],"denied_actions":["QUOTE-CREATE"],"playwright_test_ids":["playwright:role-matrix-six-demo-roles"]}
   ]
 }
