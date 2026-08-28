@@ -183,7 +183,7 @@ test('help search gives deterministic local results and a safe empty state', asy
   await page.getByLabel('¿Qué necesitas hacer?').fill('movimiento');
   await expect(page.getByRole('heading', { name: '¿Cómo hago un movimiento?' })).toBeVisible();
   await page.getByLabel('¿Qué necesitas hacer?').fill('consulta inexistente de QA');
-  await expect(page.getByRole('heading', { name: 'Sin resultados' })).toBeVisible();
+  await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible();
   await expect(page.getByText('no se muestra ni inventa un número')).toBeVisible();
 });
 
@@ -262,6 +262,19 @@ test('patient portal requires a second factor and keeps invalid access generic',
   await page.getByRole('button', { name: 'Verificar código' }).click();
   await expect(page.getByRole('heading', { name: 'Acceso verificado' })).toBeVisible();
   await expect(page.getByText('Q-PORTAL-QA')).toBeVisible();
+});
+
+test('insurance search is normalized and unavailable to nurse role', async ({ page }) => {
+  await login(page);
+  await page.goto('/insurance');
+  await page.getByLabel('Buscar por paciente').fill('123456789');
+  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
+  await page.getByLabel('Buscar por paciente').fill('no existe en QA');
+  await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'nurse@demo.local', 'demo-nurse');
+  await page.goto('/insurance');
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol NURSE');
 });
 
 test('dashboard has no automatically detectable serious accessibility violations', async ({
