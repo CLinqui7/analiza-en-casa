@@ -115,6 +115,28 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await expect(page.getByText('Corrección de QA sintética.')).toBeVisible();
 });
 
+test('signed clinical documents remain immutable and corrections create a new version', async ({ page }) => {
+  await login(page);
+  await page.goto('/clinical/care-plans');
+  await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
+  await page.getByLabel('Título').fill('Plan sintético de QA');
+  await page.getByLabel('Resumen sintético').fill('Resumen sintético para verificar la inmutabilidad.');
+  await page.getByLabel('Autor responsable').fill('Profesional de QA');
+  await page.getByRole('button', { name: 'Guardar borrador' }).click();
+  await expect(page.getByRole('status')).toContainText('persistido como borrador');
+  await page.getByRole('button', { name: 'Firmar' }).click();
+  await expect(page.getByRole('status')).toContainText('firmado e inmutable');
+  await page.getByRole('button', { name: 'Corregir' }).click();
+  await page.getByLabel('Motivo de corrección').fill('Ajuste sintético de QA.');
+  await page.getByLabel('Nuevo resumen sintético').fill('Resumen sintético corregido para QA.');
+  await page.getByRole('button', { name: 'Crear corrección' }).click();
+  await expect(page.getByRole('status')).toContainText('versión firmada original se conserva');
+  await page.reload();
+  await expect(page.getByText('Resumen sintético para verificar la inmutabilidad.')).toBeVisible();
+  await expect(page.getByText('Resumen sintético corregido para QA.')).toBeVisible();
+  await expect(page.getByText('Motivo: Ajuste sintético de QA.')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

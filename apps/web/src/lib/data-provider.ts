@@ -1,12 +1,13 @@
 'use client';
 
-import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
   demoInventoryMovements,
   demoHospitalizations,
   demoQuotes,
   demoPayments,
+  demoClinicalDocuments,
   demoNurseHours,
   demoNursingResources,
   demoPatients,
@@ -25,6 +26,7 @@ export type WorkspaceSnapshot = {
   hospitalizations: Hospitalization[];
   quotes: Quote[];
   payments: Payment[];
+  clinicalDocuments: ClinicalDocument[];
   auditEntries: AuditEntry[];
 };
 
@@ -38,6 +40,7 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
   hospitalizations: demoHospitalizations,
   quotes: demoQuotes,
   payments: demoPayments,
+  clinicalDocuments: demoClinicalDocuments,
   auditEntries: [{ id: 'audit-demo-001', at: '2026-08-28T08:00:00.000Z', action: 'Demo iniciado', subject: 'Aplicación React' }],
 });
 
@@ -57,7 +60,7 @@ export class MockDataProvider implements DataProvider {
       const saved = window.localStorage.getItem(storageKey);
       if (!saved) return defaultSnapshot();
       const parsed = JSON.parse(saved) as WorkspaceSnapshot;
-      if (!Array.isArray(parsed.patients) || !Array.isArray(parsed.auditEntries) || !Array.isArray(parsed.shifts) || !Array.isArray(parsed.hospitalizations) || !Array.isArray(parsed.quotes) || !Array.isArray(parsed.payments)) throw new Error('invalid');
+      if (!Array.isArray(parsed.patients) || !Array.isArray(parsed.auditEntries) || !Array.isArray(parsed.shifts) || !Array.isArray(parsed.hospitalizations) || !Array.isArray(parsed.quotes) || !Array.isArray(parsed.payments) || !Array.isArray(parsed.clinicalDocuments)) throw new Error('invalid');
       return parsed;
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -78,13 +81,13 @@ export class SupabaseDataProvider implements DataProvider {
   }
   async load(): Promise<WorkspaceSnapshot> {
     const client = this.client();
-    const [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, auditEntries] = await Promise.all([
+    const [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, auditEntries] = await Promise.all([
       client.from('patients').select('*'), client.from('vital_readings').select('*'),
       client.from('nursing_resources').select('*'), client.from('nurse_hour_entries').select('*'),
-      client.from('inventory_movements').select('*'), client.from('shifts').select('*'), client.from('hospitalizations').select('*'), client.from('quotes').select('*'), client.from('payments').select('*'),
+      client.from('inventory_movements').select('*'), client.from('shifts').select('*'), client.from('hospitalizations').select('*'), client.from('quotes').select('*'), client.from('payments').select('*'), client.from('clinical_documents').select('*'),
       client.from('audit_log').select('*'),
     ]);
-    const failed = [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, auditEntries]
+    const failed = [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, auditEntries]
       .find((result) => result.error);
     if (failed?.error) throw new Error(`No fue posible cargar datos de Supabase: ${failed.error.message}`);
     return {
@@ -95,6 +98,7 @@ export class SupabaseDataProvider implements DataProvider {
       hospitalizations: (hospitalizations.data ?? []) as Hospitalization[],
       quotes: (quotes.data ?? []) as Quote[],
       payments: (payments.data ?? []) as Payment[],
+      clinicalDocuments: (clinicalDocuments.data ?? []) as ClinicalDocument[],
     };
   }
   async save(snapshot: WorkspaceSnapshot): Promise<void> {
@@ -102,7 +106,7 @@ export class SupabaseDataProvider implements DataProvider {
     const results = await Promise.all([
       client.from('patients').upsert(snapshot.patients), client.from('vital_readings').upsert(snapshot.vitalReadings),
       client.from('nursing_resources').upsert(snapshot.nursingResources), client.from('nurse_hour_entries').upsert(snapshot.nurseHours),
-      client.from('inventory_movements').upsert(snapshot.inventoryMovements), client.from('shifts').upsert(snapshot.shifts), client.from('hospitalizations').upsert(snapshot.hospitalizations), client.from('quotes').upsert(snapshot.quotes), client.from('payments').upsert(snapshot.payments), client.from('audit_log').upsert(snapshot.auditEntries),
+      client.from('inventory_movements').upsert(snapshot.inventoryMovements), client.from('shifts').upsert(snapshot.shifts), client.from('hospitalizations').upsert(snapshot.hospitalizations), client.from('quotes').upsert(snapshot.quotes), client.from('payments').upsert(snapshot.payments), client.from('clinical_documents').upsert(snapshot.clinicalDocuments), client.from('audit_log').upsert(snapshot.auditEntries),
     ]);
     const failed = results.find((result) => result.error);
     if (failed?.error) throw new Error(`No fue posible persistir datos en Supabase: ${failed.error.message}`);

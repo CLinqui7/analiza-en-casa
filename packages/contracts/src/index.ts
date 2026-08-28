@@ -102,6 +102,22 @@ export const paymentSchema = z.object({
   voidReason: z.string().trim().optional(),
 });
 
+export const clinicalDocumentSchema = z.object({
+  id: z.string(),
+  caseId: z.string(),
+  patientId: z.string(),
+  type: z.enum(['CARE_PLAN', 'CLINICAL_EVOLUTION']),
+  title: z.string().trim().min(1),
+  summary: z.string().trim().min(1),
+  author: z.string().trim().min(1),
+  status: z.enum(['DRAFT', 'SIGNED']),
+  version: z.number().int().positive(),
+  createdAt: z.string(),
+  signedAt: z.string().optional(),
+  correctionOf: z.string().optional(),
+  correctionReason: z.string().trim().optional(),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
@@ -110,4 +126,5 @@ export type Shift = z.infer<typeof shiftSchema>;
 export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type Quote = z.infer<typeof quoteSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
+export type ClinicalDocument = z.infer<typeof clinicalDocumentSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;

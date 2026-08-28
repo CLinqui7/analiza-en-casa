@@ -8,6 +8,7 @@ import type {
   Hospitalization,
   Quote,
   Payment,
+  ClinicalDocument,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -95,6 +96,8 @@ export const demoQuotes: Quote[] = [
 ];
 
 export const demoPayments: Payment[] = [];
+
+export const demoClinicalDocuments: ClinicalDocument[] = [];
 
 export const demoInventoryMovements: InventoryMovement[] = [
   {

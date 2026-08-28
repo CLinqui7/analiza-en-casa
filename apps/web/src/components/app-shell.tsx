@@ -20,8 +20,12 @@ const navigation: NavigationGroup[] = [
   {
     label: 'Clínico',
     children: [
+      { label: 'Expediente clínico', href: '/clinical', permission: 'clinical:read', actionId: 'CLINICAL-HOME-NAVIGATE' },
+      { label: 'Hospitalizaciones clínicas', href: '/clinical/hospitalizations', permission: 'clinical:read', actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE' },
       { label: 'Reporte de salud', href: '/clinical/reports', permission: 'clinical:read', actionId: 'HEALTH-REPORT-NAVIGATE' },
       { label: 'Órdenes y acciones', href: '/clinical/orders', permission: 'clinical:read', actionId: 'MEDICAL-ORDER-NAVIGATE' },
+      { label: 'Tarjetas de medicamentos', href: '/clinical/medication-cards', permission: 'clinical:read', actionId: 'MEDICATION-CARD-NAVIGATE' },
+      { label: 'Planes de cuidado', href: '/clinical/care-plans', permission: 'clinical:read', actionId: 'CARE-PLAN-NAVIGATE' },
       { label: 'Evoluciones', href: '/clinical/evolutions', permission: 'clinical:read', actionId: 'EVOLUTION-NAVIGATE' },
       { label: 'Tablero de enfermería', href: '/clinical/nursing', permission: 'clinical:read', actionId: 'NURSING-RESOURCE-NAVIGATE' },
     ],
@@ -39,7 +43,7 @@ const navigation: NavigationGroup[] = [
 ];
 
 function isActive(pathname: string, href: string) {
-  return pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
+  return pathname === href || (href !== '/dashboard' && href !== '/clinical' && pathname.startsWith(`${href}/`));
 }
 
 function DeniedRoute({ pathname }: { pathname: string }) {

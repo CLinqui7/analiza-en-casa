@@ -1,6 +1,6 @@
 'use client';
 
-import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
@@ -38,6 +38,9 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   sendQuote: (quoteId: string) => void;
   addPayment: (payment: Payment) => void;
   voidPayment: (paymentId: string, reason: string) => void;
+  addClinicalDocument: (document: ClinicalDocument) => void;
+  signClinicalDocument: (documentId: string) => void;
+  correctClinicalDocument: (documentId: string, reason: string, summary: string, author: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -178,6 +181,32 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current,
           payments: current.payments.map((candidate) => candidate.id === paymentId ? { ...candidate, status: 'VOIDED', voidReason } : candidate),
           auditEntries: [audit('Pago reversado', paymentId), ...current.auditEntries],
+        };
+      }),
+      addClinicalDocument: (document) => commit((current) => ({
+        ...current,
+        clinicalDocuments: [...current.clinicalDocuments, document],
+        auditEntries: [audit('Documento clínico creado', document.id), ...current.auditEntries],
+      })),
+      signClinicalDocument: (documentId) => commit((current) => {
+        const document = current.clinicalDocuments.find((candidate) => candidate.id === documentId);
+        if (!document || document.status !== 'DRAFT') return current;
+        return {
+          ...current,
+          clinicalDocuments: current.clinicalDocuments.map((candidate) => candidate.id === documentId ? { ...candidate, status: 'SIGNED', signedAt: new Date().toISOString() } : candidate),
+          auditEntries: [audit('Documento clínico firmado', documentId), ...current.auditEntries],
+        };
+      }),
+      correctClinicalDocument: (documentId, reason, summary, author) => commit((current) => {
+        const original = current.clinicalDocuments.find((candidate) => candidate.id === documentId);
+        const correctionReason = reason.trim();
+        if (!original || original.status !== 'SIGNED' || !correctionReason || !summary.trim() || !author.trim()) return current;
+        const nextVersion = Math.max(...current.clinicalDocuments.filter((candidate) => candidate.id === original.id || candidate.correctionOf === original.id).map((candidate) => candidate.version), original.version) + 1;
+        const correction: ClinicalDocument = { ...original, id: crypto.randomUUID(), summary: summary.trim(), author: author.trim(), status: 'DRAFT', version: nextVersion, createdAt: new Date().toISOString(), signedAt: undefined, correctionOf: original.id, correctionReason };
+        return {
+          ...current,
+          clinicalDocuments: [...current.clinicalDocuments, correction],
+          auditEntries: [audit('Corrección clínica creada', correction.id), ...current.auditEntries],
         };
       }),
     }),
