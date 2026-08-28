@@ -1,10 +1,10 @@
 # Resultado automatizado de QA
 
 - Estado: **PASSED**
-- Controles: 75
-- Aprobados: 75
+- Controles: 76
+- Aprobados: 76
 - Fallidos: 0
-- Generado: 2026-08-28T05:19:00.624Z
+- Generado: 2026-08-28T05:55:45.081Z
 
 | Control | Resultado | Detalle |
 |---|---|---|
@@ -32,7 +32,8 @@
 | security:no-service-role-in-client | PASS | La clave de servicio solo aparece como nombre de variable, nunca con valor. |
 | security:no-hardcoded-provider-secret | PASS | No hay secretos de proveedor en el cliente. |
 | seed:synthetic-classification | PASS | SYNTHETIC_DEMO |
-| seed:17-video-chapters | PASS | 17 capítulos |
+| parity:17-video-chapters | PASS | 17 capítulos de la matriz canónica |
+| parity:no-unresolved-missing | PASS | 0 faltantes no bloqueados |
 | seed:patients | PASS | 8 pacientes |
 | seed:cases | PASS | 6 hospitalizaciones |
 | seed:quotes | PASS | 6 cotizaciones |
@@ -44,7 +45,7 @@
 | integrity:coverage-sum | PASS | Total = seguro + paciente |
 | integrity:committed-not-over-stock | PASS | Comprometido no supera existencia |
 | integrity:closure-review-step | PASS | Los cierres no saltan revisión |
-| ui:actions-have-handlers | PASS | 71 acciones cubiertas |
+| ui:actions-have-handlers | PASS | 76 acciones cubiertas |
 | ui:route-permission-enforcement | PASS | Rutas directas validan permisos |
 | ui:quote-labels-normalized | PASS | Estados no renderizan objetos |
 | ui:save-actions-no-generic-toast | PASS | Guardar no dispara aviso duplicado |

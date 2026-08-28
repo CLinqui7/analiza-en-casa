@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const modules = [
   "app/domain.js",
+  "app/parity-summary.js",
   "app/mock-data.js",
   "app/config.js",
   "app/supabase-adapter.js",

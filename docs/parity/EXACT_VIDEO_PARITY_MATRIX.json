@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-28T05:50:30.067Z",
+  "generated_at": "2026-08-28T05:54:56.986Z",
   "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CH15_CH16_CH17_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",

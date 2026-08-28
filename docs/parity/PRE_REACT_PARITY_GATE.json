@@ -1,0 +1,23 @@
+{
+  "gate": "PRE_REACT_PARITY_GATE",
+  "status": "PASSED",
+  "generated_at": "2026-08-28T05:55:48.636Z",
+  "matrix": {
+    "source": "docs/parity/EXACT_VIDEO_PARITY_MATRIX.json",
+    "chapters": 17,
+    "requirements": 372,
+    "missing": 0,
+    "conflicts_with_video": 0
+  },
+  "resolved_defects": ["BASE-P1-018"],
+  "commands": [
+    { "command": "node --test tests/pre-react-parity.test.mjs", "status": "PASSED" },
+    { "command": "npm run check", "status": "PASSED", "unit_tests": 98 },
+    { "command": "npm run audit:verify", "status": "PASSED", "verified_chapters": 17 },
+    { "command": "npm run codex:preflight", "status": "PASSED" }
+  ],
+  "blockers": {
+    "client": ["CH17-Q001", "CH17-Q002", "CH17-Q003", "CH17-Q004", "CH17-Q005"],
+    "supabase_runtime": "No hay proyecto Supabase configurado ni daemon Docker activo; no se afirma validación runtime."
+  }
+}

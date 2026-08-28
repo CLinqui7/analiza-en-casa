@@ -6,6 +6,6 @@
 - Documentos clínicos: la firma es metadata de aplicación, no firma electrónica legal. Los documentos firmados conservan versión; correcciones, addenda, enmiendas y anulaciones requieren autorización, motivo y auditoría.
 - Bloqueos CH17: formato y validez oficial de impresión, catálogo/política de alergias, IA clínica, WhatsApp y matriz definitiva de roles permanecen en `docs/OPEN_QUESTIONS.md`.
 - Evidencia global: 17/17 auditorías fuente completas y 1,359/1,359 eventos observados; la matriz sólo reutiliza evidencia CH17 ya revisada.
-- Gate pre-React pendiente: resolver `BASE-P1-018`, ejecutar `npm run check`, `npm run audit:verify` y `npm run codex:preflight`.
+- Gate pre-React: PASS. `BASE-P1-018` se cerró y `PRE_REACT_PARITY_GATE.{json,md}` registra `npm run check`, `npm run audit:verify` y `npm run codex:preflight` verdes.
 - Supabase: no hay proyecto configurado ni daemon Docker activo; la validación de migraciones/RLS en runtime permanece pendiente y no usa fallback a seed.
 - Legacy sigue siendo la aplicación principal hasta completar la migración React/Next.js.
