@@ -114,6 +114,34 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
   await expect(page.getByText('Turnos', { exact: true })).toBeVisible();
 });
 
+test('nursing resources require professional registration, persist, and honor role guards', async ({ page }) => {
+  await login(page);
+  await page.goto('/clinical/nursing');
+  await page.getByRole('button', { name: 'Registrar recurso' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Registrar recurso de enfermería' });
+  await dialog.getByLabel('Nombre visible').fill('Recurso sin registro de QA');
+  await dialog.getByRole('button', { name: 'Guardar recurso' }).click();
+  await expect(dialog.getByText('Ingrese el número de Junta o registro profesional.')).toBeVisible();
+
+  await dialog.getByLabel('Número de Junta / registro profesional').fill('JUNTA-QA-001');
+  await dialog.getByLabel('Nombre visible').fill('Recurso de enfermería QA');
+  await dialog.getByLabel('Territorio').fill('Zona sintética de QA');
+  await dialog.getByLabel('Capacidad disponible').fill('3');
+  await dialog.getByRole('button', { name: 'Guardar recurso' }).click();
+  await expect(page.getByRole('status')).toContainText('Recurso de enfermería QA registrado');
+  await page.reload();
+  await expect(page.getByText('JUNTA-QA-001')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'nurse@demo.local', 'demo-nurse');
+  await page.goto('/clinical/nursing');
+  await expect(page.getByRole('button', { name: 'Registrar recurso' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'doctor@demo.local', 'demo-doctor');
+  await page.goto('/clinical/nursing');
+  await expect(page.getByRole('button', { name: 'Registrar recurso' })).toHaveCount(0);
+});
+
 test('quote draft becomes an immutable sent version', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');

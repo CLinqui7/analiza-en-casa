@@ -67,7 +67,7 @@ export default function NursingBoardPage() {
           <h1>Tablero de enfermería</h1>
           <p>Disponibilidad, territorio, turno y capacidad operativa, sin datos de pacientes.</p>
         </div>
-        {can('clinical:write') ? <Button
+        {can('nursing:write') ? <Button
           data-action-id="NURSING-RESOURCE-CREATE"
           onClick={() => {
             setResult(null);
