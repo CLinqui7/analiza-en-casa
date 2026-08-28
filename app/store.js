@@ -19,6 +19,7 @@ const VISIT_TYPES = new Set([
   "SOCIAL_WORK","SPIRITUAL_VISIT","TECHNICAL_NURSING_CARE","SPECIAL_LABORATORY","GERIATRICS",
   "TERTIARY_LABORATORY","RESPIRATORY_VISIT"
 ]);
+const DISCOUNT_CATEGORIES = ["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"];
 export const DEMO_PASSWORD = "Demo2026!";
 
 function clone(value) {
@@ -47,6 +48,8 @@ export function normalizeState(rawState = {}) {
   normalized.notificationAttempts ||= [];
   normalized.administrativeExecutionProfiles ||= [];
   normalized.clinicalProfiles ||= [];
+  normalized.discountRules ||= [];
+  normalized.discountApprovalRequests ||= [];
   return normalized;
 }
 
@@ -96,7 +99,7 @@ export async function createAppStore(config) {
     signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
     signatureMetadata: note.signatureMetadata || null
   }));
-  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications", "suppliers", "catalogItems"]) {
+  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications", "suppliers", "catalogItems", "discountRules", "discountApprovalRequests"]) {
     state[collection] ||= [];
     state[collection] = state[collection].map((record) => ({
       ...record,
@@ -634,21 +637,163 @@ export async function createAppStore(config) {
     });
   }
 
-  function resolveQuoteDiscount(discountGroupId, reason = "") {
-    if (discountGroupId === "REGULAR") {
-      return { type: "CATEGORY_PERCENTAGES", categories: {}, value: 0, reason: "", ruleId: "REGULAR" };
+  function isoDate(value, label) {
+    const normalized = String(value || "").trim();
+    if (!normalized) return "";
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? new Date(`${normalized}T00:00:00.000Z`) : null;
+    if (!date || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== normalized) {
+      throw new Error(`${label} debe ser una fecha válida.`);
     }
-    const rule = state.discountRules.find((candidate) => candidate.id === discountGroupId && candidate.active);
+    return normalized;
+  }
+
+  function isDiscountRuleActive(rule) {
+    return Boolean(rule && rule.active !== false && rule.status !== "INACTIVE");
+  }
+
+  function normalizeDiscountCategories(input = {}) {
+    const exclusions = new Set(Array.isArray(input.exclusions) ? input.exclusions : []);
+    const categories = {};
+    for (const category of DISCOUNT_CATEGORIES) {
+      const value = Number(input.categories?.[category] ?? 0);
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new Error(`El porcentaje de ${category} debe estar entre 0 y 100.`);
+      }
+      categories[category] = exclusions.has(category) ? 0 : roundMoney(value);
+    }
+    return categories;
+  }
+
+  function normalizeDiscountRule(input = {}, existing = {}) {
+    const name = String(input.name ?? existing.name ?? "").trim();
+    if (!name) throw new Error("El nombre del perfil de descuento es obligatorio.");
+    const calculationType = String(input.calculationType ?? existing.calculationType ?? "CATEGORY_PERCENTAGES").toUpperCase();
+    if (!["CATEGORY_PERCENTAGES", "FIXED"].includes(calculationType)) throw new Error("Seleccione un tipo de cálculo de descuento válido.");
+    const fixedAmount = Number(input.fixedAmount ?? existing.fixedAmount ?? 0);
+    if (!Number.isFinite(fixedAmount) || fixedAmount < 0) throw new Error("El monto fijo debe ser un importe no negativo.");
+    if (calculationType === "FIXED" && !(fixedAmount > 0)) throw new Error("Indique un monto fijo mayor que cero.");
+    const validFrom = isoDate(input.validFrom ?? existing.validFrom ?? "", "La fecha de inicio");
+    const validUntil = isoDate(input.validUntil ?? existing.validUntil ?? "", "La fecha de fin");
+    if (validFrom && validUntil && validUntil < validFrom) throw new Error("La fecha de fin no puede ser anterior a la fecha de inicio.");
+    const maxAmountRaw = input.maxAmount ?? existing.maxAmount ?? null;
+    const maxAmount = maxAmountRaw === "" || maxAmountRaw === null || maxAmountRaw === undefined ? null : Number(maxAmountRaw);
+    if (maxAmount !== null && (!Number.isFinite(maxAmount) || maxAmount < 0)) throw new Error("El límite máximo debe ser un importe no negativo.");
+    const requiresApproval = Boolean(input.requiresApproval ?? existing.requiresApproval);
+    const approverId = String(input.approverId ?? existing.approverId ?? "").trim();
+    if (requiresApproval && !approverId) throw new Error("Seleccione el aprobador configurado para este perfil.");
+    if (approverId && !state.users.some((user) => user.id === approverId && user.status === "ACTIVE")) {
+      throw new Error("El aprobador configurado no está disponible.");
+    }
+    const eligibility = {
+      patientId: String(input.eligibility?.patientId ?? existing.eligibility?.patientId ?? "").trim(),
+      insurerId: String(input.eligibility?.insurerId ?? existing.eligibility?.insurerId ?? "").trim(),
+      companyName: String(input.eligibility?.companyName ?? existing.eligibility?.companyName ?? "").trim(),
+      retireeOnly: Boolean(input.eligibility?.retireeOnly ?? existing.eligibility?.retireeOnly)
+    };
+    if (eligibility.patientId && !state.patients.some((patient) => patient.id === eligibility.patientId)) {
+      throw new Error("El paciente de elegibilidad no está disponible.");
+    }
+    if (eligibility.insurerId && !state.insurers.some((insurer) => insurer.id === eligibility.insurerId && insurer.status === "ACTIVE")) {
+      throw new Error("La aseguradora de elegibilidad no está disponible.");
+    }
+    const exclusions = [...new Set((Array.isArray(input.exclusions) ? input.exclusions : existing.exclusions || [])
+      .map((value) => String(value).toUpperCase())
+      .filter((value) => DISCOUNT_CATEGORIES.includes(value)))];
+    return {
+      id: existing.id || uid("DISC"),
+      name,
+      description: String(input.description ?? existing.description ?? "").trim(),
+      type: String(input.type ?? existing.type ?? "PROFILE").toUpperCase(),
+      calculationType,
+      fixedAmount: roundMoney(fixedAmount),
+      categories: normalizeDiscountCategories({ categories: input.categories ?? existing.categories ?? {}, exclusions }),
+      validFrom: validFrom || null,
+      validUntil: validUntil || null,
+      status: String(input.status ?? existing.status ?? (existing.active === false ? "INACTIVE" : "ACTIVE")).toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+      active: String(input.status ?? existing.status ?? (existing.active === false ? "INACTIVE" : "ACTIVE")).toUpperCase() !== "INACTIVE",
+      eligibility,
+      requiresReason: Boolean(input.requiresReason ?? existing.requiresReason ?? true),
+      requiresApproval,
+      approverId: approverId || null,
+      exclusions,
+      maxAmount: maxAmount === null ? null : roundMoney(maxAmount),
+      combinable: Boolean(input.combinable ?? existing.combinable),
+      createdBy: existing.createdBy || currentUser()?.id || null,
+      createdAt: existing.createdAt || nowIso(),
+      updatedAt: nowIso()
+    };
+  }
+
+  function discountEligibility(rule, context = {}) {
+    if (!isDiscountRuleActive(rule)) return { eligible:false, reason:"El perfil de descuento no está activo." };
+    const date = isoDate(context.invoiceDate || new Date().toISOString().slice(0, 10), "La fecha de cotización");
+    if (rule.validFrom && date < rule.validFrom) return { eligible:false, reason:"El perfil todavía no está vigente para la fecha de cotización." };
+    if (rule.validUntil && date > rule.validUntil) return { eligible:false, reason:"El perfil ya no está vigente para la fecha de cotización." };
+    const patient = patientById(context.patientId);
+    const recordCase = caseById(context.caseId);
+    if (!patient || !recordCase || recordCase.patientId !== patient.id) return { eligible:false, reason:"El paciente y la hospitalización no son válidos para el perfil." };
+    const eligibility = rule.eligibility || {};
+    if (eligibility.patientId && eligibility.patientId !== patient.id) return { eligible:false, reason:"El perfil no aplica al paciente seleccionado." };
+    const insurerId = recordCase.insurerId || patient.insurerId || "";
+    if (eligibility.insurerId && eligibility.insurerId !== insurerId) return { eligible:false, reason:"El perfil no aplica a la aseguradora seleccionada." };
+    const companyName = String(recordCase.companyName || recordCase.company || patient.companyName || patient.company || "").trim();
+    if (eligibility.companyName && eligibility.companyName.localeCompare(companyName, "es", { sensitivity:"accent" }) !== 0) {
+      return { eligible:false, reason:"El perfil no aplica a la empresa seleccionada." };
+    }
+    if (eligibility.retireeOnly && patient.isRetired !== true) return { eligible:false, reason:"El perfil exige elegibilidad de jubilado configurada." };
+    return { eligible:true, reason:"Elegibilidad configurada confirmada.", patient, recordCase };
+  }
+
+  function discountFingerprint(rule, context = {}) {
+    return JSON.stringify({
+      ruleId:rule.id,
+      ruleUpdatedAt:rule.updatedAt || rule.createdAt || "",
+      caseId:context.caseId || "",
+      patientId:context.patientId || "",
+      invoiceDate:context.invoiceDate || "",
+      items:(context.items || []).map((item) => ({ id:item.catalogItemId || item.id || "", quantity:Number(item.quantity || 0), price:Number(item.unitPrice || 0), category:item.category || "" }))
+    });
+  }
+
+  function discountApprovalStatus(rule, context = {}) {
+    if (!rule?.requiresApproval) return { approved:true, request:null, reason:"No requiere aprobación." };
+    const request = state.discountApprovalRequests.find((candidate) => candidate.id === context.approvalRequestId);
+    if (!request) return { approved:false, request:null, reason:"Solicite la aprobación configurada." };
+    if (request.status !== "APPROVED") return { approved:false, request, reason:"La solicitud de aprobación continúa pendiente." };
+    if (request.ruleId !== rule.id || request.fingerprint !== discountFingerprint(rule, context)) {
+      return { approved:false, request, reason:"La aprobación no coincide con el perfil, fecha o conceptos actuales." };
+    }
+    return { approved:true, request, reason:"Aprobación configurada confirmada." };
+  }
+
+  function resolveQuoteDiscount(discountGroupId, reason = "", context = {}) {
+    if (discountGroupId === "REGULAR") {
+      return { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR", approvalRequestId:null };
+    }
+    const rule = state.discountRules.find((candidate) => candidate.id === discountGroupId);
     if (!rule) throw new Error("Seleccione un grupo de descuento autorizado.");
-    if (rule.requiresApproval) throw new Error("El grupo de descuento requiere un flujo de aprobación todavía no configurado.");
+    const eligibility = discountEligibility(rule, context);
+    if (!eligibility.eligible) throw new Error(eligibility.reason);
     const normalizedReason = String(reason || "").trim();
     if (rule.requiresReason && !normalizedReason) throw new Error("Indique el motivo del descuento.");
+    let approvalRequestId = null;
+    if (rule.requiresApproval) {
+      const approval = discountApprovalStatus(rule, context);
+      if (!approval.approved) {
+        throw new Error("El perfil requiere aprobación configurada antes de aplicar este descuento.");
+      }
+      approvalRequestId = approval.request.id;
+    }
     return {
-      type: "CATEGORY_PERCENTAGES",
-      categories: clone(rule.categories || {}),
-      value: 0,
-      reason: normalizedReason,
-      ruleId: rule.id
+      type:rule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES",
+      categories:clone(rule.categories || {}),
+      value:rule.calculationType === "FIXED" ? Number(rule.fixedAmount || 0) : 0,
+      fixedAmount:rule.fixedAmount ?? 0,
+      maxAmount:rule.maxAmount ?? null,
+      reason:normalizedReason,
+      ruleId:rule.id,
+      approvalRequestId,
+      ruleSnapshot:clone(rule)
     };
   }
 
@@ -661,7 +806,13 @@ export async function createAppStore(config) {
     if (!patient) throw new Error("Paciente no encontrado.");
     const authorizedItems = validateQuoteItems(input.items);
     const general = validateQuoteGeneral(input);
-    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason, {
+      caseId:recordCase.id,
+      patientId:patient.id,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId
+    });
 
     const calculation = calculateQuote(
       authorizedItems,
@@ -690,6 +841,7 @@ export async function createAppStore(config) {
         discountAmount: Number(item.discountAmount || 0)
       })),
       discount: authorizedDiscount,
+      discountApprovalRequestId: authorizedDiscount.approvalRequestId,
       ...calculation,
       comments: general.comments,
       invoiceDate: general.invoiceDate,
@@ -717,6 +869,10 @@ export async function createAppStore(config) {
       }
       setState((draft) => {
       draft.quotes.unshift(quote);
+      if (authorizedDiscount.approvalRequestId) {
+        const request = draft.discountApprovalRequests.find((candidate) => candidate.id === authorizedDiscount.approvalRequestId);
+        if (request) request.quoteVersionId = quote.id;
+      }
       const currentCase = draft.cases.find((candidate) => candidate.id === recordCase.id);
       if (currentCase) currentCase.nextAction = "Revisar y enviar cotización.";
       audit("CREATE_QUOTE", quote.id, `Cotización creada para ${patient.fullName} por ${quote.total}.`);
@@ -738,7 +894,13 @@ export async function createAppStore(config) {
     if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
     const general = validateQuoteGeneral(input, original);
     const authorizedItems = validateQuoteItems(input.items || original.items);
-    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason, {
+      caseId:original.caseId,
+      patientId:original.patientId,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId || original.discountApprovalRequestId
+    });
     const calculation = calculateQuote(
       authorizedItems,
       authorizedDiscount,
@@ -762,6 +924,7 @@ export async function createAppStore(config) {
         createdAt: nowIso(),
         items: authorizedItems.map((item) => ({ ...clone(item), id: uid("QTI") })),
         discount: clone(authorizedDiscount),
+        discountApprovalRequestId: authorizedDiscount.approvalRequestId,
         comments: general.comments,
         invoiceDate: general.invoiceDate,
         discountGroupId: general.discountGroupId,
@@ -780,6 +943,10 @@ export async function createAppStore(config) {
       }
       setState((draft) => {
       draft.quotes.unshift(revised);
+      if (authorizedDiscount.approvalRequestId) {
+        const request = draft.discountApprovalRequests.find((candidate) => candidate.id === authorizedDiscount.approvalRequestId);
+        if (request) request.quoteVersionId = revised.id;
+      }
       audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${original.id}; motivo: ${revisionReason}.`, {
         quoteId: rootId,
         previousVersionId: original.id,
@@ -804,7 +971,13 @@ export async function createAppStore(config) {
     }
     const general = validateQuoteGeneral(input, original);
     const authorizedItems = validateQuoteItems(input.items || original.items);
-    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason, {
+      caseId:original.caseId,
+      patientId:original.patientId,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId || original.discountApprovalRequestId
+    });
     const calculation = calculateQuote(
       authorizedItems,
       authorizedDiscount,
@@ -814,6 +987,7 @@ export async function createAppStore(config) {
       ...clone(original),
       items: clone(authorizedItems),
       discount: clone(authorizedDiscount),
+      discountApprovalRequestId: authorizedDiscount.approvalRequestId,
       comments: general.comments,
       invoiceDate: general.invoiceDate,
       discountGroupId: general.discountGroupId,
@@ -2082,20 +2256,163 @@ export async function createAppStore(config) {
 
   function createDiscountRule(input) {
     requirePermission("catalogs:write");
-    const rule = {
-      id: uid("DISC"),
-      name: input.name,
-      type: input.type || "PROFILE",
-      categories: clone(input.categories || {}),
-      requiresReason: true,
-      requiresApproval: Boolean(input.requiresApproval),
-      active: true
+    const rule = normalizeDiscountRule(input);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        draft.discountRules.unshift(confirmed);
+        audit("CREATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento creado: ${confirmed.name}.`, {
+          calculationType:confirmed.calculationType,
+          validFrom:confirmed.validFrom,
+          validUntil:confirmed.validUntil,
+          requiresApproval:confirmed.requiresApproval,
+          approverId:confirmed.approverId
+        });
+      });
+      return confirmed;
     };
-    setState((draft) => {
-      draft.discountRules.unshift(rule);
-      audit("CREATE_DISCOUNT_RULE", rule.id, `Perfil de descuento creado: ${rule.name}.`);
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule }).then(commit);
+    return commit();
+  }
+
+  function updateDiscountRule(id, input) {
+    requirePermission("catalogs:write");
+    const existing = state.discountRules.find((candidate) => candidate.id === id);
+    if (!existing) throw new Error("El perfil de descuento no está disponible.");
+    assertCurrentOrganization(existing, "Perfil de descuento");
+    const rule = normalizeDiscountRule(input, existing);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        const index = draft.discountRules.findIndex((candidate) => candidate.id === id);
+        if (index < 0) throw new Error("El perfil de descuento no está disponible.");
+        draft.discountRules[index] = confirmed;
+        audit("UPDATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento actualizado: ${confirmed.name}.`, {
+          calculationType:confirmed.calculationType,
+          validFrom:confirmed.validFrom,
+          validUntil:confirmed.validUntil,
+          status:confirmed.status,
+          requiresApproval:confirmed.requiresApproval,
+          approverId:confirmed.approverId
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule }).then(commit);
+    return commit();
+  }
+
+  function inactivateDiscountRule(id, reason) {
+    requirePermission("catalogs:write");
+    const existing = state.discountRules.find((candidate) => candidate.id === id);
+    if (!existing) throw new Error("El perfil de descuento no está disponible.");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de inactivación.");
+    const rule = normalizeDiscountRule({ ...existing, status:"INACTIVE" }, existing);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        const index = draft.discountRules.findIndex((candidate) => candidate.id === id);
+        draft.discountRules[index] = confirmed;
+        audit("INACTIVATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento inactivado: ${confirmed.name}.`, { reason:normalizedReason });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule, reason:normalizedReason }).then(commit);
+    return commit();
+  }
+
+  function requestDiscountApproval(input) {
+    requirePermission("quotes:write");
+    const rule = state.discountRules.find((candidate) => candidate.id === input.ruleId);
+    if (!rule || !rule.requiresApproval) throw new Error("El perfil seleccionado no requiere una solicitud de aprobación.");
+    const items = validateQuoteItems(input.items || []);
+    const context = {
+      caseId:String(input.caseId || ""),
+      patientId:String(input.patientId || ""),
+      invoiceDate:isoDate(input.invoiceDate, "La fecha de cotización"),
+      items
+    };
+    const eligibility = discountEligibility(rule, context);
+    if (!eligibility.eligible) throw new Error(eligibility.reason);
+    const reason = String(input.reason || "").trim();
+    if (rule.requiresReason && !reason) throw new Error("Indique el motivo del descuento antes de solicitar aprobación.");
+    const fingerprint = discountFingerprint(rule, context);
+    const requestedKey = String(input.requestKey || "").trim() || uid("DARQ");
+    const sameKey = state.discountApprovalRequests.find((candidate) => candidate.requestKey === requestedKey);
+    const requestKey = sameKey && sameKey.fingerprint !== fingerprint ? uid("DARQ") : requestedKey;
+    const existing = state.discountApprovalRequests.find((candidate) => candidate.requestKey === requestKey || (candidate.fingerprint === fingerprint && candidate.status === "PENDING"));
+    if (existing) return existing;
+    const calculation = calculateQuote(items, {
+      type:rule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES",
+      categories:rule.categories,
+      value:rule.fixedAmount,
+      fixedAmount:rule.fixedAmount,
+      maxAmount:rule.maxAmount
     });
-    return rule;
+    const request = {
+      id:uid("DAR"),
+      organizationId:state.organization?.id,
+      ruleId:rule.id,
+      caseId:context.caseId,
+      patientId:context.patientId,
+      invoiceDate:context.invoiceDate,
+      items:clone(items),
+      fingerprint,
+      requestKey,
+      reason,
+      status:"PENDING",
+      approverId:rule.approverId,
+      requestedBy:currentUser()?.id || null,
+      requestedAt:nowIso(),
+      decisionAt:null,
+      decisionNote:"",
+      calculatedDiscountAmount:calculation.discountAmount,
+      quoteVersionId:null
+    };
+    const commit = (remote = null) => {
+      const confirmed = remote?.request ? { ...request, ...remote.request } : request;
+      setState((draft) => {
+        draft.discountApprovalRequests.unshift(confirmed);
+        audit("REQUEST_DISCOUNT_APPROVAL", confirmed.id, `Solicitud de aprobación creada para ${rule.name}.`, {
+          ruleId:rule.id,
+          caseId:confirmed.caseId,
+          patientId:confirmed.patientId,
+          requestKey:confirmed.requestKey,
+          calculatedDiscountAmount:confirmed.calculatedDiscountAmount
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("REQUEST_DISCOUNT_APPROVAL", { request }).then(commit);
+    return commit();
+  }
+
+  function approveDiscountRequest(id, note = "") {
+    requirePermission("quotes:write");
+    const request = state.discountApprovalRequests.find((candidate) => candidate.id === id);
+    if (!request) throw new Error("La solicitud de descuento no está disponible.");
+    assertCurrentOrganization(request, "Solicitud de descuento");
+    if (request.status === "APPROVED") return request;
+    if (request.status !== "PENDING") throw new Error("La solicitud de descuento ya no está pendiente.");
+    if (request.approverId !== currentUser()?.id) throw new Error("Sólo el aprobador configurado puede aprobar esta solicitud.");
+    const decisionNote = String(note || "").trim();
+    const decided = { ...request, status:"APPROVED", decidedBy:currentUser()?.id || null, decisionAt:nowIso(), decisionNote };
+    const commit = (remote = null) => {
+      const confirmed = remote?.request ? { ...decided, ...remote.request } : decided;
+      setState((draft) => {
+        const index = draft.discountApprovalRequests.findIndex((candidate) => candidate.id === id);
+        draft.discountApprovalRequests[index] = confirmed;
+        audit("APPROVE_DISCOUNT_REQUEST", confirmed.id, "Solicitud de descuento aprobada.", {
+          ruleId:confirmed.ruleId,
+          requestKey:confirmed.requestKey,
+          decidedBy:confirmed.decidedBy
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("DECIDE_DISCOUNT_APPROVAL", { request:decided }).then(commit);
+    return commit();
   }
 
   function generateDoctorStatements() {
@@ -2177,6 +2494,12 @@ export async function createAppStore(config) {
     inactivateCatalogItem,
     importCatalogItems,
     createDiscountRule,
+    updateDiscountRule,
+    inactivateDiscountRule,
+    discountEligibility,
+    discountApprovalStatus,
+    requestDiscountApproval,
+    approveDiscountRequest,
     generateDoctorStatements,
     sendDoctorStatement,
     addNotification,

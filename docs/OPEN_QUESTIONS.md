@@ -200,6 +200,16 @@
 
 Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inventa reglas de stock, bodegas, cierre, acuse, autorización, tarifas ni descuentos.
 
+## CH16 · descuentos y reglas por categoría
+
+- `CH16-Q001`: ¿Cuál es la entidad objetivo, vigencia, versionado y retiro de un perfil de descuento asignado a paciente, empresa, aseguradora o convenio? Evidencia: CH16-E0034 y CH16-E0035, 00:50:59.200–00:51:00.000.
+- `CH16-Q002`: ¿Cuál es la precedencia autorizada entre perfil, promoción, convenio, condición de jubilado y ajuste manual, y cuándo se admite combinabilidad? Evidencia verbal: CH16-E0003, 00:49:45.400.
+- `CH16-Q003`: ¿Qué precisión, redondeo, rango y límite de monto se aplican a porcentajes y descuentos fijos? No se adopta ningún importe de la grabación como regla financiera. Evidencia: CH16-E0001 y CH16-E0024, 00:49:44.600–00:50:28.400.
+- `CH16-Q004`: ¿Qué significa exactamente `Es Jubilado`, quién puede actualizarlo y qué evidencia o autorización se requiere? Evidencia: CH16-E0034 y CH16-E0035, 00:50:59.200–00:51:00.000.
+- `CH16-Q005`: ¿Qué roles definitivos pueden crear, editar, inactivar, solicitar y decidir perfiles de descuento, y cómo se debe presentar carga/error en producción? La implementación usa permisos configurados y aprobación nominativa sin inferir la política final. Evidencia: CH16-E0035–CH16-E0039, 00:51:00.000–00:51:07.200.
+- `CH16-Q006`: ¿La exclusión global de medicamentos es obligatoria, condicional o negociable por perfil? Evidencia: CH16-E0003 y CH16-E0024, 00:49:45.400–00:50:28.400.
+- `CH16-Q007`: ¿Qué alcance legal, rol y flujo de corrección requiere el bloqueo de edición clínica mencionado durante la navegación al reporte de salud? No se declara firma ni regla clínica legal. Evidencia verbal: CH16-E0003; navegación CH16-E0041 y CH16-E0044, 00:51:11.200–00:51:27.400.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T14:16:20.078Z",
-  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CH15_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
+  "generated_at": "2026-08-28T05:18:49.433Z",
+  "scope": "CH01_CH02_CH03_CH04_CH05_CH06_CH07_CH08_CH09_CH10_CH11_CH12_CH13_CH14_CH15_CH16_CLOSED_WITH_CLIENT_BLOCKERS_RECORDED",
   "allowed_statuses": [
     "IMPLEMENTED_EXACT",
     "IMPLEMENTED_PARTIAL",
@@ -16,12 +16,12 @@
     "A later chapter may not start while the current chapter has non-blocked MISSING or CONFLICTS_WITH_VIDEO rows."
   ],
   "status_counts": {
-    "IMPLEMENTED_EXACT": 143,
-    "IMPLEMENTED_PARTIAL": 119,
+    "IMPLEMENTED_EXACT": 150,
+    "IMPLEMENTED_PARTIAL": 121,
     "MISSING": 0,
     "CONFLICTS_WITH_VIDEO": 0,
     "NOT_TESTABLE": 21,
-    "NEEDS_CLIENT_CONFIRMATION": 64
+    "NEEDS_CLIENT_CONFIRMATION": 67
   },
   "requirements": [
     {
@@ -20644,6 +20644,669 @@
       ],
       "acceptance_criteria": [
         "Importa sólo CSV sintético completamente válido, rechaza lotes parciales y registra una auditoría del lote.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/store.js",
+      "current_implementation_function": "renderDiscounts/normalizeDiscountRule",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R001",
+      "event_ids": [
+        "CH16-E0001",
+        "CH16-E0018"
+      ],
+      "feature_group": "discount_matrix",
+      "page": "Descuentos",
+      "control_type": "data_table",
+      "visible_label": "Servicios / Estudios / Medicamentos / Insumos / Equipos / Honorarios / Extras",
+      "expected_behavior": "Muestra una matriz configurable por las siete categorías y conserva porcentajes cero y exclusiones explícitas.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:49:45.000",
+        "00:50:18.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0001",
+          "timestamp": "00:49:45.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0001_00h49m45s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0001_00h49m45s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0018",
+          "timestamp": "00:50:18.200",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0018_00h50m18s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Muestra una matriz configurable por las siete categorías y conserva porcentajes cero y exclusiones explícitas.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js",
+      "current_implementation_function": "renderDiscounts/exportDiscounts",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R002",
+      "event_ids": [
+        "CH16-E0013",
+        "CH16-E0030"
+      ],
+      "feature_group": "discount_directory",
+      "page": "Descuentos",
+      "control_type": "filter_pagination_export",
+      "visible_label": "Buscar / registros / Anterior / Siguiente / Excel",
+      "expected_behavior": "Busca perfiles, filtra por estado, pagina datos reales del estado y exporta el conjunto sintético visible sin declarar formato oficial.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:50:13.800",
+        "00:50:38.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0013",
+          "timestamp": "00:50:13.800",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0013_00h50m13s800ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0013_00h50m13s800ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0030",
+          "timestamp": "00:50:38.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0030_00h50m38s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Busca perfiles, filtra por estado, pagina datos reales del estado y exporta el conjunto sintético visible sin declarar formato oficial.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/domain.js",
+      "current_implementation_function": "normalizeDiscountCategories/calculateQuote",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R003",
+      "event_ids": [
+        "CH16-E0003",
+        "CH16-E0024"
+      ],
+      "feature_group": "category_exclusions",
+      "page": "Descuentos",
+      "control_type": "matrix_validation",
+      "visible_label": "Porcentaje 0% / exclusiones",
+      "expected_behavior": "Valida porcentajes entre 0 y 100, conserva los ceros y fuerza a cero una categoría excluida antes de recalcular.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:49:58.000",
+        "00:50:25.800"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0003",
+          "timestamp": "00:49:58.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0024",
+          "timestamp": "00:50:25.800",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0024_00h50m25s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Valida porcentajes entre 0 y 100, conserva los ceros y fuerza a cero una categoría excluida antes de recalcular.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; app/supabase-adapter.js; supabase/migrations/202608280001_ch16_discount_rules_and_approvals.sql",
+      "current_implementation_function": "openDiscountForm/createDiscountRule/updateDiscountRule/inactivateDiscountRule",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R004",
+      "event_ids": [
+        "CH16-E0035"
+      ],
+      "feature_group": "discount_profile_form",
+      "page": "Nuevo perfil de descuento",
+      "control_type": "form",
+      "visible_label": "Nombre / tipo / fechas / estado / motivo / aprobación / aprobador / límite / combinabilidad",
+      "expected_behavior": "Crea, edita e inactiva perfiles sintéticos con validaciones, permisos, auditoría y confirmación remota antes de actualizar el estado local.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:50:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Crea, edita e inactiva perfiles sintéticos con validaciones, permisos, auditoría y confirmación remota antes de actualizar el estado local.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; app/supabase-adapter.js; supabase/migrations/202608280001_ch16_discount_rules_and_approvals.sql",
+      "current_implementation_function": "discountEligibility/request_discount_approval",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R005",
+      "event_ids": [
+        "CH16-E0034",
+        "CH16-E0035"
+      ],
+      "feature_group": "discount_eligibility",
+      "page": "Nuevo perfil de descuento",
+      "control_type": "eligibility_configuration",
+      "visible_label": "Paciente / aseguradora / empresa / jubilado",
+      "expected_behavior": "Configura y verifica elegibilidad explícita contra paciente y hospitalización autorizados; no asigna perfiles automáticamente ni deduce jubilación.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:50:41.800",
+        "00:50:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0034",
+          "timestamp": "00:50:41.800",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0034_00h50m41s800ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Configura y verifica elegibilidad explícita contra paciente y hospitalización autorizados; no asigna perfiles automáticamente ni deduce jubilación.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; app/store.js; app/supabase-adapter.js; supabase/migrations/202608280001_ch16_discount_rules_and_approvals.sql",
+      "current_implementation_function": "requestDiscountApproval/approveDiscountRequest/resolveQuoteDiscount/apply_quote_draft_catalog_v2",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-R006",
+      "event_ids": [
+        "CH16-E0035",
+        "CH16-E0039"
+      ],
+      "feature_group": "discount_quote_application",
+      "page": "Cotización",
+      "control_type": "approval_workflow",
+      "visible_label": "Solicitar aprobación / recalcular",
+      "expected_behavior": "Selecciona un perfil, verifica elegibilidad, exige motivo cuando procede y enlaza una aprobación configurada al mismo conjunto de líneas antes de recalcular, persistir y auditar.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:50:42.400",
+        "00:50:49.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0039",
+          "timestamp": "00:50:49.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0039_00h50m49s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Selecciona un perfil, verifica elegibilidad, exige motivo cuando procede y enlaza una aprobación configurada al mismo conjunto de líneas antes de recalcular, persistir y auditar.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/views.js; app/main.js; app/store.js",
+      "current_implementation_function": "renderDiscounts/runSafely/requiredSync",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH16-Q005"
+      ],
+      "requirement_id": "CH16-R007",
+      "event_ids": [
+        "CH16-E0036",
+        "CH16-E0039"
+      ],
+      "feature_group": "discount_feedback_states",
+      "page": "Descuentos",
+      "control_type": "loading_empty_error",
+      "visible_label": "Carga / actualización tras guardar",
+      "expected_behavior": "El directorio conserva estado vacío y sólo confirma tras persistir; queda pendiente una presentación específica de carga/error remoto por validar en un proyecto Supabase real.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:50:48.000",
+        "00:50:49.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0036",
+          "timestamp": "00:50:48.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0036_00h50m48s000ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0039",
+          "timestamp": "00:50:49.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0039_00h50m49s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El directorio conserva estado vacío y sólo confirma tras persistir; queda pendiente una presentación específica de carga/error remoto por validar en un proyecto Supabase real.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/main.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "routeFromHash",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "NONE",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH16-Q007"
+      ],
+      "requirement_id": "CH16-R008",
+      "event_ids": [
+        "CH16-E0041",
+        "CH16-E0044"
+      ],
+      "feature_group": "report_health_navigation",
+      "page": "Reporte de salud",
+      "control_type": "navigation",
+      "visible_label": "Reporte de salud",
+      "expected_behavior": "La navegación observada se conserva; contenido, impresión, firma y versión clínica se resuelven en CH17 y no se infieren desde este capítulo.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:50:54.000",
+        "00:51:07.200"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0041",
+          "timestamp": "00:50:54.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0041_00h50m54s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0041_00h50m54s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0044",
+          "timestamp": "00:51:07.200",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "La navegación observada se conserva; contenido, impresión, firma y versión clínica se resuelven en CH17 y no se infieren desde este capítulo.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "VIDEO_REQUIREMENT",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "updateClinicalDocument/createClinicalCorrection",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/p0-immutable-records.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH16-Q007"
+      ],
+      "requirement_id": "CH16-R009",
+      "event_ids": [
+        "CH16-E0003"
+      ],
+      "feature_group": "clinical_edit_lock",
+      "page": "Documentos clínicos",
+      "control_type": "verbal_rule",
+      "visible_label": "Bloqueo de edición clínica",
+      "expected_behavior": "No adopta como regla legal una explicación verbal ambigua; los documentos firmados existentes preservan versión y corrección auditada.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:49:58.000"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0003",
+          "timestamp": "00:49:58.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No adopta como regla legal una explicación verbal ambigua; los documentos firmados existentes preservan versión y corrección auditada.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/supabase-adapter.js; supabase/migrations/202608280001_ch16_discount_rules_and_approvals.sql",
+      "current_implementation_function": "mapSupabaseBootstrap/SAVE_DISCOUNT_RULE/REQUEST_DISCOUNT_APPROVAL",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH16-Q005"
+      ],
+      "requirement_id": "CH16-H001",
+      "event_ids": [
+        "CH16-E0001",
+        "CH16-E0035"
+      ],
+      "feature_group": "discount_persistence",
+      "page": "Persistencia",
+      "control_type": "tenant_safe_rpc",
+      "visible_label": "Reglas y solicitudes tenant-safe",
+      "expected_behavior": "El adaptador carga reglas y solicitudes explícitamente; sus escrituras pasan por RPCs con RLS y auditoría. La ejecución contra una instancia Supabase real aún no está disponible.",
+      "status": "IMPLEMENTED_PARTIAL",
+      "timestamps": [
+        "00:49:45.000",
+        "00:50:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0001",
+          "timestamp": "00:49:45.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0001_00h49m45s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0001_00h49m45s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "El adaptador carga reglas y solicitudes explícitamente; sus escrituras pasan por RPCs con RLS y auditoría. La ejecución contra una instancia Supabase real aún no está disponible.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; supabase/migrations/202608280001_ch16_discount_rules_and_approvals.sql",
+      "current_implementation_function": "discountFingerprint/resolveQuoteDiscount/apply_quote_draft_catalog_v2",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [],
+      "requirement_id": "CH16-H002",
+      "event_ids": [
+        "CH16-E0035",
+        "CH16-E0039"
+      ],
+      "feature_group": "approval_integrity",
+      "page": "Cotización",
+      "control_type": "financial_integrity",
+      "visible_label": "Aprobación vinculada a líneas",
+      "expected_behavior": "Una aprobación se vincula a regla, paciente, hospitalización y líneas/cantidades; cambios posteriores invalidan la aplicación y cada decisión deja auditoría.",
+      "status": "IMPLEMENTED_EXACT",
+      "timestamps": [
+        "00:50:42.400",
+        "00:50:49.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0039",
+          "timestamp": "00:50:49.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0039_00h50m49s400ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "Una aprobación se vincula a regla, paciente, hospitalización y líneas/cantidades; cambios posteriores invalidan la aplicación y cada decisión deja auditoría.",
+        "Persiste después de recargar cuando la acción modifica datos.",
+        "Respeta rol y organización.",
+        "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."
+      ]
+    },
+    {
+      "requirement_type": "PLATFORM_HARDENING",
+      "chapter_id": "CH16",
+      "tab": "",
+      "expected_data": "Datos sintéticos y alcance de la organización activa.",
+      "expected_validation": "Entrada válida, estado vacío y error accionable sin revelar existencia de registros.",
+      "expected_permission": "Permiso explícito de lectura o escritura aplicado en navegación, control, store y persistencia.",
+      "expected_state_changes": "El estado visible cambia sólo después de completar la operación autorizada.",
+      "expected_error_behavior": "Error accesible y genérico; no mostrar éxito anticipado.",
+      "expected_print_behavior": "NO_APLICA",
+      "current_implementation_file": "app/store.js; docs/OPEN_QUESTIONS.md",
+      "current_implementation_function": "resolveQuoteDiscount",
+      "current_data_contract": "Estado mock persistido en localStorage; Supabase todavía no validado en runtime.",
+      "current_test": "tests/ch16-discounts.test.mjs",
+      "defect_ids": [],
+      "client_blocker_ids": [
+        "CH16-Q002",
+        "CH16-Q003"
+      ],
+      "requirement_id": "CH16-H003",
+      "event_ids": [
+        "CH16-E0003",
+        "CH16-E0035"
+      ],
+      "feature_group": "discount_precedence",
+      "page": "Descuentos",
+      "control_type": "financial_policy",
+      "visible_label": "Precedencia y combinación",
+      "expected_behavior": "No combina ni prioriza perfiles, promociones o convenios automáticamente hasta que el cliente defina la política y el redondeo autorizados.",
+      "status": "NEEDS_CLIENT_CONFIRMATION",
+      "timestamps": [
+        "00:49:58.000",
+        "00:50:42.400"
+      ],
+      "source_evidence": [
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0003",
+          "timestamp": "00:49:58.000",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg",
+          "detail_crop": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        },
+        {
+          "chapter_id": "CH16",
+          "event_id": "CH16-E0035",
+          "timestamp": "00:50:42.400",
+          "image": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg",
+          "detail_crop": "",
+          "transcript": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/transcript_raw.txt"
+        }
+      ],
+      "acceptance_criteria": [
+        "No combina ni prioriza perfiles, promociones o convenios automáticamente hasta que el cliente defina la política y el redondeo autorizados.",
         "Persiste después de recargar cuando la acción modifica datos.",
         "Respeta rol y organización.",
         "Tiene prueba automatizada específica y prueba de navegador cuando corresponde."

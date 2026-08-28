@@ -1408,12 +1408,34 @@ function renderCatalogs(state,store,ui,category=null){
 
 function renderDiscounts(state,store,ui){
   const categories=Object.keys(ITEM_CATEGORY_LABELS);
+  const canWrite=roleCan(state.session.role,"catalogs:write");
+  const search=String(ui.discountSearch || "").trim().toLocaleLowerCase("es");
+  const status=ui.discountStatus || "ALL";
+  const matching=state.discountRules
+    .filter((rule)=>status==="ALL" || (status==="ACTIVE" ? rule.active!==false && rule.status!=="INACTIVE" : rule.active===false || rule.status==="INACTIVE"))
+    .filter((rule)=>!search || [rule.name,rule.description,rule.type,rule.eligibility?.companyName].some((value)=>String(value||"").toLocaleLowerCase("es").includes(search)))
+    .sort((left,right)=>String(left.name||"").localeCompare(String(right.name||""),"es"));
+  const pageSize=Math.max(5,Math.min(50,Number(ui.discountPageSize || 10)));
+  const totalPages=Math.max(1,Math.ceil(matching.length/pageSize));
+  const currentPage=Math.min(Math.max(1,Number(ui.discountPage || 1)),totalPages);
+  const rules=matching.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  const eligibility=(rule)=>{
+    const entries=[];
+    if(rule.eligibility?.patientId) entries.push("Paciente");
+    if(rule.eligibility?.insurerId) entries.push("Aseguradora");
+    if(rule.eligibility?.companyName) entries.push(`Empresa: ${rule.eligibility.companyName}`);
+    if(rule.eligibility?.retireeOnly) entries.push("Jubilado");
+    return entries.length ? entries.join(" · ") : "Sin restricción";
+  };
+  const pages=Array.from({length:Math.min(totalPages,7)},(_,index)=>index+1).map((page)=>`<button data-action="discount-page" data-page="${page}" class="${page===currentPage?"active":""}" aria-current="${page===currentPage?"page":"false"}">${page}</button>`).join("");
   return `
     ${pageHeader("Descuentos y convenios","Perfiles por cliente, empresa o aseguradora con porcentaje permitido por categoría, autorización y motivo.",
-      `${actionButton("Nuevo perfil","open-discount-form",{kind:"primary",iconName:"plus"})}`)}
-    ${card("Reglas de descuento",table(["Perfil","Tipo",...categories.map(c=>ITEM_CATEGORY_LABELS[c]),"Aprobación","Estado"],
-      state.discountRules.map((rule)=>`<tr><td><strong>${esc(rule.name)}</strong><small>${esc(rule.id)}</small></td><td>${esc(rule.type)}</td>${categories.map(c=>`<td>${rule.categories[c]??0}%</td>`).join("")}<td>${rule.requiresApproval?"Sí":"No"}</td><td>${badge(rule.active?"ACTIVE":"INACTIVE")}</td></tr>`)))}
-    <div class="warning-callout"><strong>Regla legal y financiera:</strong> los descuentos requieren motivo, permisos y auditoría. Medicamentos u otras categorías pueden configurarse en 0%.</div>`;
+      `${actionButton("Excel","export-discounts",{iconName:"export"})}${canWrite?actionButton("Nuevo perfil","open-discount-form",{kind:"primary",iconName:"plus"}):""}`)}
+    <div class="filter-bar"><label class="page-size-label">Mostrar <select data-ui-filter="discountPageSize">${[5,10,25,50].map((size)=>`<option value="${size}" ${size===pageSize?"selected":""}>${size}</option>`).join("")}</select> perfiles</label><label>Estado <select data-ui-filter="discountStatus"><option value="ALL" ${status==="ALL"?"selected":""}>Todos</option><option value="ACTIVE" ${status==="ACTIVE"?"selected":""}>Activos</option><option value="INACTIVE" ${status==="INACTIVE"?"selected":""}>Inactivos</option></select></label><label class="search-field">${icon("search")}<span class="sr-only">Buscar descuentos</span><input data-input="discount-search" placeholder="Buscar perfil, tipo o empresa" value="${esc(ui.discountSearch||"")}"></label><div class="filter-summary">${matching.length} perfiles</div></div>
+    ${card("Reglas de descuento",rules.length?table(["Perfil","Cálculo",...categories.map(c=>ITEM_CATEGORY_LABELS[c]),"Elegibilidad","Vigencia","Control","Estado","Acciones"],
+      rules.map((rule)=>`<tr><td><strong>${esc(rule.name)}</strong><small>${esc(rule.description || rule.id)}</small></td><td>${esc(rule.type)}<small>${rule.calculationType==="FIXED"?money(rule.fixedAmount || 0):"Por categoría"}</small></td>${categories.map(c=>`<td>${rule.exclusions?.includes(c)?"—":`${rule.categories?.[c]??0}%`}</td>`).join("")}<td>${esc(eligibility(rule))}</td><td>${esc(rule.validFrom||"Sin inicio")}<small>${esc(rule.validUntil||"Sin fin")}</small></td><td>${rule.requiresReason?"Motivo":""}${rule.requiresApproval?`<small>Aprobador: ${esc(state.users.find((user)=>user.id===rule.approverId)?.name || "No configurado")}</small>`:""}${rule.maxAmount!==null&&rule.maxAmount!==undefined?`<small>Tope: ${money(rule.maxAmount)}</small>`:""}<small>${rule.combinable?"Combinable; sin precedencia automática":"No combinable"}</small></td><td>${badge(rule.active!==false&&rule.status!=="INACTIVE"?"ACTIVE":"INACTIVE")}</td><td>${canWrite?`<div class="row-actions">${actionButton("Editar","edit-discount-rule",{kind:"ghost",iconName:"edit",data:`data-id="${rule.id}"`})}${rule.active!==false&&rule.status!=="INACTIVE"?actionButton("Inactivar","inactivate-discount-rule",{kind:"ghost",iconName:"close",data:`data-id="${rule.id}"`}):""}</div>`:"—"}</td></tr>`)):"<div class=\"empty-state\"><h3>Sin perfiles coincidentes</h3><p>Ajusta los filtros o crea un perfil sintético autorizado.</p></div>")}
+    <nav class="pagination" aria-label="Paginación de descuentos"><button data-action="discount-page" data-page="${currentPage-1}" ${currentPage===1?"disabled":""}>Anterior</button>${pages}<button data-action="discount-page" data-page="${currentPage+1}" ${currentPage===totalPages?"disabled":""}>Siguiente</button></nav>
+    <div class="warning-callout"><strong>Regla legal y financiera:</strong> los descuentos requieren motivo, permisos y auditoría. Medicamentos u otras categorías pueden configurarse en 0%; la precedencia y combinación entre reglas continúan como decisión explícita del cliente.</div>`;
 }
 
 function renderDoctors(state,store,ui){

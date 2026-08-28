@@ -150,9 +150,15 @@ export function calculateQuote(items = [], discount = { type: "PERCENT", value: 
       const percentage = Math.min(100, Math.max(0, Number(discount.categories?.[category] || 0)));
       return sum + categoryTotal * percentage / 100;
     }, 0);
-  } else if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
+  } else if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || discount.fixedAmount || 0));
   else discountAmount = subtotal * Math.max(0, Number(discount?.value || 0)) / 100;
 
+  const configuredMaximum = discount?.maxAmount === null || discount?.maxAmount === undefined || discount?.maxAmount === ""
+    ? null
+    : Number(discount.maxAmount);
+  if (Number.isFinite(configuredMaximum) && configuredMaximum >= 0) {
+    discountAmount = Math.min(discountAmount, configuredMaximum);
+  }
   discountAmount = Math.min(discountAmount, subtotal);
   const total = roundMoney(subtotal - discountAmount);
   const insurerAmount = roundMoney(Math.min(Math.max(0, Number(insuranceApproved || 0)), total));

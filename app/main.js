@@ -248,6 +248,9 @@ const ACTION_PERMISSIONS = {
   "quote-item-filter": "quotes:write",
   "clear-quote-giftcard": "quotes:write",
   "quote-calc-change": "quotes:write",
+  "request-discount-approval": "quotes:write",
+  "open-discount-approvals": "quotes:write",
+  "approve-discount-request": "quotes:write",
   "save-quote": "quotes:write",
   "open-clinical-document": "clinical:write",
   "sign-document": "clinical:sign",
@@ -289,6 +292,9 @@ const ACTION_PERMISSIONS = {
   "inactivate-catalog-item": "catalogs:write",
   "confirm-catalog-import": "catalogs:write",
   "open-discount-form": "catalogs:write",
+  "edit-discount-rule": "catalogs:write",
+  "inactivate-discount-rule": "catalogs:write",
+  "save-discount": "catalogs:write",
   "import-catalog": "catalogs:write",
   "open-doctor-form": "doctors:write",
   "save-doctor": "doctors:write",
@@ -550,6 +556,7 @@ function openQuoteForm(caseId = "", quoteId = null, revise = false, editDraft = 
     category: "SERVICES",
     items: existing ? structuredClone(existing.items) : [],
     discount: existing ? structuredClone(existing.discount) : { type: "PERCENT", value: 0, reason: "" },
+    discountApprovalRequestId: existing?.discountApprovalRequestId || null,
     invoiceDate: existing?.invoiceDate || new Date().toISOString().slice(0, 10),
     discountGroupId: existing?.discountGroupId || "REGULAR",
     referredBy: existing?.referredBy || "",
@@ -598,6 +605,7 @@ function renderQuoteModal({ asPage = false } = {}) {
       category: "SERVICES",
       items: [],
       discount: { type: "PERCENT", value: 0, reason: "" },
+      discountApprovalRequestId: null,
       invoiceDate: new Date().toISOString().slice(0, 10),
       discountGroupId: "REGULAR",
       referredBy: "",
@@ -626,13 +634,35 @@ function renderQuoteModal({ asPage = false } = {}) {
   const itemFilter = draft.itemFilter || "ALL";
   const visibleQuoteItems = draft.items.map((item, index) => ({ item, index }))
     .filter(({ item }) => itemFilter === "ALL" || item.catalogItemId === itemFilter);
-  const activeDiscountRule = state.discountRules.find((rule) => rule.id === draft.discountGroupId && rule.active && !rule.requiresApproval);
+  const selectedDiscountRule = state.discountRules.find((rule) => rule.id === draft.discountGroupId && rule.active !== false && rule.status !== "INACTIVE");
+  let discountEligibility = { eligible:true, reason:"Regular · 0%" };
+  if (selectedDiscountRule) {
+    try {
+      discountEligibility = store.discountEligibility(selectedDiscountRule, { caseId:draft.caseId, patientId:draft.patientId, invoiceDate:draft.invoiceDate });
+    } catch (error) {
+      discountEligibility = { eligible:false, reason:error.message || "No fue posible validar la elegibilidad." };
+    }
+  }
+  const approvalState = selectedDiscountRule ? store.discountApprovalStatus(selectedDiscountRule, {
+    caseId:draft.caseId,
+    patientId:draft.patientId,
+    invoiceDate:draft.invoiceDate,
+    items:draft.items,
+    approvalRequestId:draft.discountApprovalRequestId
+  }) : { approved:true, request:null, reason:"Regular · 0%" };
+  const approvalRequest = approvalState.request;
+  const approvalConfirmed = approvalState.approved;
+  const activeDiscountRule = selectedDiscountRule && discountEligibility.eligible && approvalConfirmed ? selectedDiscountRule : null;
   const effectiveDiscount = activeDiscountRule
-    ? { type:"CATEGORY_PERCENTAGES", categories:activeDiscountRule.categories || {}, value:0, reason:draft.discount?.reason || "", ruleId:activeDiscountRule.id }
+    ? { type:activeDiscountRule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES", categories:activeDiscountRule.categories || {}, value:activeDiscountRule.fixedAmount || 0, fixedAmount:activeDiscountRule.fixedAmount || 0, maxAmount:activeDiscountRule.maxAmount ?? null, reason:draft.discount?.reason || "", ruleId:activeDiscountRule.id, approvalRequestId:approvalRequest?.id || null }
     : { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR" };
   const discountSummary = activeDiscountRule
-    ? Object.entries(activeDiscountRule.categories || {}).filter(([, value]) => Number(value) > 0).map(([category, value]) => `${quoteCategoryLabel(category)} ${value}%`).join(" · ")
-    : "Regular · 0%";
+    ? activeDiscountRule.calculationType === "FIXED"
+      ? `Monto fijo ${money(activeDiscountRule.fixedAmount || 0)}`
+      : Object.entries(activeDiscountRule.categories || {}).filter(([, value]) => Number(value) > 0).map(([category, value]) => `${quoteCategoryLabel(category)} ${value}%`).join(" · ") || "Sin categorías aplicables"
+    : selectedDiscountRule
+      ? discountEligibility.eligible ? approvalState.reason : discountEligibility.reason
+      : "Regular · 0%";
   const result = calculateQuote(draft.items, effectiveDiscount, draft.insurerAmount);
   const title = draft.editDraft ? `Editar borrador ${draft.quoteId}` : draft.revise ? `Nueva versión de ${draft.quoteId}` : "Nueva cotización";
   const subtitle = "Agrega servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.";
@@ -651,12 +681,14 @@ function renderQuoteModal({ asPage = false } = {}) {
             </div>
             <h3 class="full form-section-title">Datos de la factura</h3>
             <label>* Fecha<div class="input-with-action"><input name="invoiceDate" value="${safeText(draft.invoiceDate)}" required readonly><button type="button" data-action="open-quote-date-picker" aria-label="Abrir calendario">📅</button></div></label>
-            <label>* Grupo de descuento<select name="discountGroupId" required data-action="quote-calc-change"><option value="REGULAR" ${draft.discountGroupId === "REGULAR" ? "selected" : ""}>Regular</option>${state.discountRules.filter((rule) => rule.active).map((rule) => `<option value="${safeText(rule.id)}" ${draft.discountGroupId === rule.id ? "selected" : ""} ${rule.requiresApproval ? "disabled" : ""}>${safeText(rule.name)}${rule.requiresApproval ? " · aprobación pendiente" : ""}</option>`).join("")}</select></label>
+            <label>* Grupo de descuento<select name="discountGroupId" required data-action="quote-calc-change"><option value="REGULAR" ${draft.discountGroupId === "REGULAR" ? "selected" : ""}>Regular</option>${state.discountRules.filter((rule) => rule.active !== false && rule.status !== "INACTIVE").map((rule) => { let eligibility={eligible:true}; try { eligibility=store.discountEligibility(rule,{caseId:draft.caseId,patientId:draft.patientId,invoiceDate:draft.invoiceDate}); } catch { eligibility={eligible:false}; } return `<option value="${safeText(rule.id)}" ${draft.discountGroupId === rule.id ? "selected" : ""} ${eligibility.eligible ? "" : "disabled"}>${safeText(rule.name)}${rule.requiresApproval ? " · requiere aprobación" : ""}</option>`; }).join("")}</select></label>
             <label class="full"><span>* Referido por <button type="button" class="inline-add" data-action="open-quote-referral" title="Agregar referencia provisional">+</button></span><input type="hidden" name="referredBy" value="${safeText(referralValues.join(" | "))}"><div class="referral-picker"><input name="referralCandidate" list="quote-referral-options" ${referralValues.length ? "" : "required"} autocomplete="off" placeholder="Buscar referencia autorizada" data-action="quote-referral-add"><datalist id="quote-referral-options">${referralCatalog.map((value) => `<option value="${safeText(value)}"></option>`).join("")}</datalist><div class="referral-tags">${referralValues.map((value, index) => `<span>${safeText(value)}<button type="button" data-action="quote-remove-referral" data-index="${index}" aria-label="Quitar ${safeText(value)}">×</button></span>`).join("")}</div></div></label>
             <label>Giftcard<div class="input-with-action"><input name="giftcard" value="${safeText(draft.giftcard)}" data-action="quote-calc-change"><button type="button" data-action="clear-quote-giftcard" aria-label="Limpiar giftcard">×</button></div></label>
             <label>Descuento configurado<input value="${safeText(discountSummary)}" disabled></label>
+            <div class="full"><button type="button" class="btn btn-secondary" data-action="open-discount-approvals">Solicitudes de descuento asignadas</button></div>
             <label>Monto del seguro<input type="number" name="insurerAmount" min="0" step=".01" value="${draft.insurerAmount || 0}" data-action="quote-calc-change"></label>
-            <label class="full">${activeDiscountRule?.requiresReason ? "* " : ""}Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" ${activeDiscountRule?.requiresReason ? "required" : ""} data-action="quote-calc-change"></label>
+            <label class="full">${selectedDiscountRule?.requiresReason ? "* " : ""}Motivo del descuento<input name="discountReason" value="${safeText(draft.discount.reason || "")}" ${selectedDiscountRule?.requiresReason ? "required" : ""} data-action="quote-calc-change"></label>
+            ${selectedDiscountRule?.requiresApproval ? `<div class="full warning-callout"><strong>${approvalConfirmed ? "Aprobación confirmada" : "Aprobación requerida"}</strong><p>${approvalConfirmed ? "La solicitud aprobada queda vinculada a esta cotización mientras no cambien sus conceptos, fecha ni perfil." : safeText(approvalState.reason || "Solicita la aprobación configurada después de indicar el motivo; la cotización no se recalcula ni guarda hasta confirmarla.")}</p>${approvalRequest?.status === "PENDING" ? `<p>Solicitud pendiente para ${safeText(state.users.find((user) => user.id === selectedDiscountRule.approverId)?.name || "el aprobador configurado")}.</p>` : approvalConfirmed ? `<p>ID ${safeText(approvalRequest.id)} · ${safeText(state.users.find((user) => user.id === approvalRequest.decidedBy)?.name || "Aprobador configurado")}</p>` : `<button type="button" class="btn btn-secondary" data-action="request-discount-approval">Solicitar aprobación</button>`}</div>` : ""}
             <label class="full">* Comentarios<textarea name="comments" rows="2" required data-action="quote-calc-change">${safeText(draft.comments || "")}</textarea></label>
             ${draft.revise ? `<label class="full">Motivo de la nueva versión<textarea name="revisionReason" rows="2" required data-action="quote-calc-change">${safeText(draft.revisionReason || "")}</textarea></label>` : ""}
           </form>
@@ -717,12 +749,17 @@ function syncQuoteHead() {
   ui.quoteDraft.caseId = compatibleCase?.id || "";
   ui.quoteDraft.patientId = selectedPatientId || compatibleCase?.patientId || "";
   const discountGroupId = String(data.get("discountGroupId") || "REGULAR");
-  const discountRule = store.getState().discountRules.find((rule) => rule.id === discountGroupId && rule.active && !rule.requiresApproval);
+  const discountRule = store.getState().discountRules.find((rule) => rule.id === discountGroupId && rule.active !== false && rule.status !== "INACTIVE");
+  const previousDiscountGroupId = ui.quoteDraft.discountGroupId;
   ui.quoteDraft.discount = discountRule
-    ? { type:"CATEGORY_PERCENTAGES", categories:structuredClone(discountRule.categories || {}), value:0, reason:data.get("discountReason") || "", ruleId:discountRule.id }
+    ? { type:discountRule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES", categories:structuredClone(discountRule.categories || {}), value:Number(discountRule.fixedAmount || 0), fixedAmount:Number(discountRule.fixedAmount || 0), maxAmount:discountRule.maxAmount ?? null, reason:data.get("discountReason") || "", ruleId:discountRule.id }
     : { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR" };
   ui.quoteDraft.invoiceDate = data.get("invoiceDate") || "";
   ui.quoteDraft.discountGroupId = discountRule?.id || "REGULAR";
+  if (previousDiscountGroupId !== ui.quoteDraft.discountGroupId) {
+    ui.quoteDraft.discountApprovalRequestId = null;
+    ui.quoteDraft.discountApprovalRequestKey = null;
+  }
   ui.quoteDraft.referredBy = data.get("referredBy") || "";
   ui.quoteDraft.giftcard = data.get("giftcard") || "";
   ui.quoteDraft.insurerAmount = Number(data.get("insurerAmount") || 0);
@@ -1765,18 +1802,56 @@ function openCatalogImport(category = "", preserve = false) {
   });
 }
 
-function openDiscountForm() {
+function openDiscountForm(id = "") {
+  const state = store.getState();
+  const existing = id ? state.discountRules.find((rule) => rule.id === id) : null;
+  const rule = existing || {
+    type:"PROFILE", calculationType:"CATEGORY_PERCENTAGES", fixedAmount:0, categories:{}, exclusions:[],
+    validFrom:"", validUntil:"", status:"ACTIVE", eligibility:{}, requiresReason:true,
+    requiresApproval:false, approverId:"", maxAmount:null, combinable:false
+  };
   openModal({
-    title: "Nuevo perfil de descuento",
-    subtitle: "Porcentajes máximos por categoría; requiere motivo y puede requerir aprobación.",
-    size: "lg",
+    title: existing ? `Editar ${existing.name}` : "Nuevo perfil de descuento",
+    subtitle: "Configuración sintética por categoría; la precedencia financiera sigue pendiente de decisión del cliente.",
+    size: "xl",
     body: `<form id="discount-form" class="form-grid">
-      <label>Nombre<input name="name" required placeholder="Convenio Empresa Demo"></label>
-      <label>Tipo<select name="type"><option>PROFILE</option><option>INSURER</option><option>COMPANY</option><option>PROMOTION</option></select></label>
-      ${Object.entries(ITEM_CATEGORY_LABELS).map(([key,label])=>`<label>${safeText(label)} %<input type="number" min="0" max="100" step=".01" name="cat-${key}" value="0"></label>`).join("")}
-      <label class="full"><input type="checkbox" name="requiresApproval" checked> Requiere aprobación financiera</label>
+      <input type="hidden" name="id" value="${safeText(rule.id || "")}">
+      <label>Nombre<input name="name" required maxlength="160" value="${safeText(rule.name || "")}" placeholder="Convenio sintético"></label>
+      <label>Tipo<select name="type">${["PROFILE","INSURER","COMPANY","PATIENT","PROMOTION"].map((type)=>`<option value="${type}" ${rule.type===type?"selected":""}>${type}</option>`).join("")}</select></label>
+      <label class="full">Descripción<textarea name="description" rows="2" maxlength="500" placeholder="Alcance sintético del perfil">${safeText(rule.description || "")}</textarea></label>
+      <label>Tipo de cálculo<select name="calculationType"><option value="CATEGORY_PERCENTAGES" ${rule.calculationType !== "FIXED" ? "selected" : ""}>Porcentaje por categoría</option><option value="FIXED" ${rule.calculationType === "FIXED" ? "selected" : ""}>Monto fijo</option></select></label>
+      <label>Monto fijo<input name="fixedAmount" type="number" min="0" step=".01" value="${safeText(rule.fixedAmount ?? 0)}"></label>
+      <label>Fecha inicio<input name="validFrom" type="date" value="${safeText(rule.validFrom || "")}"></label>
+      <label>Fecha fin<input name="validUntil" type="date" value="${safeText(rule.validUntil || "")}"></label>
+      <label>Estado<select name="status"><option value="ACTIVE" ${rule.status !== "INACTIVE" ? "selected" : ""}>Activo</option><option value="INACTIVE" ${rule.status === "INACTIVE" ? "selected" : ""}>Inactivo</option></select></label>
+      <label>Límite máximo<input name="maxAmount" type="number" min="0" step=".01" value="${safeText(rule.maxAmount ?? "")}" placeholder="Sin límite"></label>
+      <h3 class="full form-section-title">Porcentajes y exclusiones</h3>
+      ${Object.entries(ITEM_CATEGORY_LABELS).map(([key,label])=>`<label>${safeText(label)} %<input type="number" min="0" max="100" step=".01" name="cat-${key}" value="${safeText(rule.categories?.[key] ?? 0)}"><span><input type="checkbox" name="exclude-${key}" ${rule.exclusions?.includes(key)?"checked":""}> Excluir</span></label>`).join("")}
+      <h3 class="full form-section-title">Elegibilidad configurable</h3>
+      <label>Paciente<select name="eligiblePatientId"><option value="">Cualquier paciente</option>${state.patients.filter((patient)=>patient.status==="ACTIVE").map((patient)=>`<option value="${safeText(patient.id)}" ${rule.eligibility?.patientId===patient.id?"selected":""}>${safeText(patient.fullName)}</option>`).join("")}</select></label>
+      <label>Aseguradora<select name="eligibleInsurerId"><option value="">Cualquier aseguradora</option>${state.insurers.filter((insurer)=>insurer.status==="ACTIVE").map((insurer)=>`<option value="${safeText(insurer.id)}" ${rule.eligibility?.insurerId===insurer.id?"selected":""}>${safeText(insurer.name)}</option>`).join("")}</select></label>
+      <label>Empresa<input name="eligibleCompanyName" maxlength="160" value="${safeText(rule.eligibility?.companyName || "")}" placeholder="Empresa sintética exacta"></label>
+      <label><input type="checkbox" name="retireeOnly" ${rule.eligibility?.retireeOnly?"checked":""}> Requiere elegibilidad de jubilado</label>
+      <h3 class="full form-section-title">Control y auditoría</h3>
+      <label><input type="checkbox" name="requiresReason" ${rule.requiresReason !== false?"checked":""}> Requiere motivo</label>
+      <label><input type="checkbox" name="requiresApproval" ${rule.requiresApproval?"checked":""}> Requiere aprobación</label>
+      <label>Aprobador<select name="approverId"><option value="">Sin aprobador</option>${state.users.filter((user)=>user.status==="ACTIVE").map((user)=>`<option value="${safeText(user.id)}" ${rule.approverId===user.id?"selected":""}>${safeText(user.name)} · ${safeText(user.role)}</option>`).join("")}</select></label>
+      <label><input type="checkbox" name="combinable" ${rule.combinable?"checked":""}> Combinable (sin precedencia automática)</label>
     </form>`,
-    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-discount">Crear perfil</button>`
+    footer: `<button class="btn btn-secondary" data-action="close-modal">Cancelar</button><button class="btn btn-primary" data-action="save-discount">${existing ? "Guardar cambios" : "Crear perfil"}</button>`
+  });
+}
+
+function openDiscountApprovals() {
+  const state = store.getState();
+  const currentUser = store.currentUser();
+  const requests = state.discountApprovalRequests.filter((request) => request.approverId === currentUser?.id && request.status === "PENDING");
+  openModal({
+    title: "Solicitudes de descuento",
+    subtitle: "Sólo se muestran solicitudes sintéticas asignadas al aprobador configurado.",
+    size:"lg",
+    body: requests.length ? `<div class="table-wrap"><table><thead><tr><th>Solicitud</th><th>Perfil</th><th>Paciente</th><th>Motivo</th><th>Monto calculado</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${requests.map((request) => { const rule=state.discountRules.find((candidate)=>candidate.id===request.ruleId); const patient=store.patientById(request.patientId); return `<tr><td><code>${safeText(request.id)}</code></td><td>${safeText(rule?.name || request.ruleId)}</td><td>${safeText(patient?.fullName || "Paciente no disponible")}</td><td>${safeText(request.reason)}</td><td>${money(request.calculatedDiscountAmount)}</td><td>Pendiente</td><td><button class="btn btn-primary" data-action="approve-discount-request" data-id="${safeText(request.id)}">Aprobar</button></td></tr>`; }).join("")}</tbody></table></div>` : `<div class="empty-state"><h3>Sin solicitudes pendientes</h3><p>No hay aprobaciones asignadas a tu usuario.</p></div>`,
+    footer:`<button class="btn btn-secondary" data-action="close-modal">Cerrar</button>`
   });
 }
 
@@ -1973,6 +2048,38 @@ function saveDownload(filename, content, type = "text/plain;charset=utf-8") {
 function exportPatients() {
   const rows = store.getState().patients.map(({ id, fullName, documentType, document, birthDate, sex, bloodType, phone, email, address, triage, status }) => ({ id, fullName, documentType, document, birthDate, sex, bloodType, phone, email, address, triage, status }));
   saveDownload("pacientes_demo.csv", toCsv(rows), "text/csv;charset=utf-8");
+}
+
+function exportDiscounts() {
+  const state = store.getState();
+  const search = String(ui.discountSearch || "").trim().toLocaleLowerCase("es");
+  const status = ui.discountStatus || "ALL";
+  const rows = state.discountRules
+    .filter((rule) => status === "ALL" || (status === "ACTIVE" ? rule.active !== false && rule.status !== "INACTIVE" : rule.active === false || rule.status === "INACTIVE"))
+    .filter((rule) => !search || [rule.name, rule.description, rule.type, rule.eligibility?.companyName].some((value) => String(value || "").toLocaleLowerCase("es").includes(search)))
+    .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "es"))
+    .map((rule) => ({
+    id: rule.id,
+    nombre: rule.name,
+    tipo: rule.type,
+    calculo: rule.calculationType,
+    monto_fijo: rule.fixedAmount || 0,
+    inicio: rule.validFrom || "",
+    fin: rule.validUntil || "",
+    estado: rule.active !== false && rule.status !== "INACTIVE" ? "ACTIVE" : "INACTIVE",
+    paciente: rule.eligibility?.patientId || "",
+    aseguradora: rule.eligibility?.insurerId || "",
+    empresa: rule.eligibility?.companyName || "",
+    solo_jubilado: Boolean(rule.eligibility?.retireeOnly),
+    requiere_motivo: Boolean(rule.requiresReason),
+    requiere_aprobacion: Boolean(rule.requiresApproval),
+    aprobador: rule.approverId || "",
+    exclusiones: (rule.exclusions || []).join("|"),
+    limite_maximo: rule.maxAmount ?? "",
+    combinable: Boolean(rule.combinable),
+    ...Object.fromEntries(Object.keys(ITEM_CATEGORY_LABELS).map((category) => [`porcentaje_${category.toLowerCase()}`, rule.categories?.[category] ?? 0]))
+    }));
+  saveDownload("descuentos_sinteticos.csv", toCsv(rows), "text/csv;charset=utf-8");
 }
 
 function exportAudit() {
@@ -2266,6 +2373,36 @@ document.addEventListener("click", async (event) => {
     }
     case "clear-quote-giftcard": syncQuoteHead(); if (ui.quoteDraft) ui.quoteDraft.giftcard = ""; renderQuoteModal(); break;
     case "quote-remove-item": syncQuoteHead(); ui.quoteDraft?.items.splice(Number(data.index),1); renderQuoteModal(); break;
+    case "request-discount-approval": {
+      syncQuoteHead();
+      const draft = ui.quoteDraft;
+      if (!draft?.items.length || !draft.discountGroupId || draft.discountGroupId === "REGULAR") {
+        showToast("Seleccione un perfil y agregue al menos un concepto antes de solicitar aprobación.", "danger");
+        break;
+      }
+      draft.discountApprovalRequestKey ||= uid("DARQ");
+      const request = await runSafely(() => store.requestDiscountApproval({
+        ruleId:draft.discountGroupId,
+        caseId:draft.caseId,
+        patientId:draft.patientId,
+        invoiceDate:draft.invoiceDate,
+        items:draft.items,
+        reason:draft.discount?.reason || "",
+        requestKey:draft.discountApprovalRequestKey
+      }), "Solicitud de aprobación creada y auditada.");
+      if (request) {
+        draft.discountApprovalRequestId = request.id;
+        draft.discountApprovalRequestKey = request.requestKey;
+        renderQuoteModal();
+      }
+      break;
+    }
+    case "open-discount-approvals": openDiscountApprovals(); break;
+    case "approve-discount-request": {
+      const approved = await runSafely(() => store.approveDiscountRequest(data.id), "Solicitud de descuento aprobada y auditada.");
+      if (approved) openDiscountApprovals();
+      break;
+    }
     case "open-insurance-status": openInsuranceStatus(data.id || ""); break;
     case "open-administrative-execution": openAdministrativeExecution(data.id || ""); break;
     case "open-clinical-profiles": openClinicalProfiles(data.caseId || ""); break;
@@ -2346,6 +2483,7 @@ document.addEventListener("click", async (event) => {
     case "open-payment-summary": openPaymentSummary(); break;
     case "export-receivables-filtered": saveDownload("cuentas_por_cobrar_filtradas_demo.csv", toCsv(receivableExportRows(true)), "text/csv;charset=utf-8"); break;
     case "export-receivables": saveDownload("cuentas_por_cobrar_demo.csv", toCsv(receivableExportRows(false)), "text/csv;charset=utf-8"); break;
+    case "export-discounts": exportDiscounts(); break;
     case "send-quote":
     case "send-quote-whatsapp": runSafely(()=>store.sendQuote(data.id,action==="send-quote-whatsapp"?"WHATSAPP":"EMAIL"),"Solicitud de envío confirmada."); break;
     case "copy-portal-link": copyPortalLink(data.token); break;
@@ -2455,12 +2593,19 @@ document.addEventListener("click", async (event) => {
     case "open-catalog-form": openCatalogForm(data.category||""); break;
     case "edit-catalog-item": openCatalogForm("",data.id); break;
     case "catalog-page": ui.catalogPage=Math.max(1,Number(data.page||1)); render(); break;
+    case "discount-page": ui.discountPage=Math.max(1,Number(data.page||1)); render(); break;
     case "inactivate-catalog-item": {
       const reason=prompt("Motivo de inactivación (obligatorio):","");
       if(reason!==null) await runSafely(()=>store.inactivateCatalogItem(data.id,reason),"Ítem inactivado y conservado en el historial.");
       break;
     }
     case "open-discount-form": openDiscountForm(); break;
+    case "edit-discount-rule": openDiscountForm(data.id); break;
+    case "inactivate-discount-rule": {
+      const reason = prompt("Motivo de inactivación (obligatorio):", "");
+      if (reason !== null) await runSafely(() => store.inactivateDiscountRule(data.id, reason), "Perfil de descuento inactivado y auditado.");
+      break;
+    }
     case "open-medication-card": openMedicationCardForm(data.caseId || ""); break;
     case "print-medication-card": runSafely(()=>printMedicationCard(data.id,data.variant || "complete")); break;
     case "sign-medication-card": runSafely(()=>store.signMedicationCard(data.id),"Tarjeta firmada y bloqueada."); break;
@@ -2504,6 +2649,8 @@ document.addEventListener("change", (event) => {
   if (target.matches('[data-ui-filter="purchasePageSize"]')) { ui.purchasePageSize = Math.max(1, Math.min(100, Number(target.value || 10))); ui.purchasePage = 1; render(); return; }
   if (target.matches('[data-ui-filter="catalogPageSize"]')) { ui.catalogPageSize = Math.max(5, Math.min(50, Number(target.value || 10))); ui.catalogPage = 1; render(); return; }
   if (target.matches('[data-ui-filter="catalogStatus"]')) { ui.catalogStatus = target.value || "ALL"; ui.catalogPage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="discountPageSize"]')) { ui.discountPageSize = Math.max(5, Math.min(50, Number(target.value || 10))); ui.discountPage = 1; render(); return; }
+  if (target.matches('[data-ui-filter="discountStatus"]')) { ui.discountStatus = target.value || "ALL"; ui.discountPage = 1; render(); return; }
   if (action === "professional-concept-type") { ui.professionalConceptType = target.value === "DISCOUNT" ? "DISCOUNT" : "ADDITION"; ui.professionalConceptReason = ""; openProfessionalPaymentConcept(); return; }
   if (action === "professional-concept-reason") { ui.professionalConceptReason = target.value; return; }
   if (action === "shift-case-change") {
@@ -2809,6 +2956,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="medical-order-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="discount-search"]')) {
+    ui.discountSearch = target.value;
+    ui.discountPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="discount-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }
@@ -3191,9 +3347,29 @@ document.addEventListener("click", async (event) => {
   if(action==="save-discount"){
     const form=document.querySelector("#discount-form");
     if(!form?.reportValidity()) return;
-    const fd=new FormData(form);const categories={};
+    const fd=new FormData(form); const categories={}; const exclusions=[];
     Object.keys(ITEM_CATEGORY_LABELS).forEach(k=>categories[k]=Number(fd.get(`cat-${k}`)||0));
-    const result=runSafely(()=>store.createDiscountRule({name:fd.get("name"),type:fd.get("type"),categories,requiresApproval:fd.has("requiresApproval")}),"Perfil de descuento creado.");
+    Object.keys(ITEM_CATEGORY_LABELS).forEach((key) => { if (fd.has(`exclude-${key}`)) exclusions.push(key); });
+    const data={
+      name:fd.get("name"),
+      type:fd.get("type"),
+      description:fd.get("description"),
+      calculationType:fd.get("calculationType"),
+      fixedAmount:fd.get("fixedAmount"),
+      categories,
+      exclusions,
+      validFrom:fd.get("validFrom"),
+      validUntil:fd.get("validUntil"),
+      status:fd.get("status"),
+      maxAmount:fd.get("maxAmount"),
+      eligibility:{ patientId:fd.get("eligiblePatientId"), insurerId:fd.get("eligibleInsurerId"), companyName:fd.get("eligibleCompanyName"), retireeOnly:fd.has("retireeOnly") },
+      requiresReason:fd.has("requiresReason"),
+      requiresApproval:fd.has("requiresApproval"),
+      approverId:fd.get("approverId"),
+      combinable:fd.has("combinable")
+    };
+    const id=String(fd.get("id") || "");
+    const result=await runSafely(()=>id?store.updateDiscountRule(id,data):store.createDiscountRule(data),id?"Perfil de descuento actualizado y auditado.":"Perfil de descuento creado y auditado.");
     if(result) closeModal();
   }
 

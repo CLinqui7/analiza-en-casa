@@ -682,6 +682,9 @@ export const seedData = {
       "id": "DISC-001",
       "name": "Convenio Empresa Azul",
       "type": "PROFILE",
+      "description": "Perfil sintético por categorías con aprobación configurada.",
+      "calculationType": "CATEGORY_PERCENTAGES",
+      "fixedAmount": 0,
       "categories": {
         "SERVICES": 15,
         "STUDIES": 10,
@@ -693,12 +696,20 @@ export const seedData = {
       },
       "requiresReason": true,
       "requiresApproval": true,
+      "approverId": "USR-006",
+      "eligibility": { "patientId": "", "insurerId": "", "companyName": "", "retireeOnly": false },
+      "exclusions": ["MEDICATIONS", "FEES", "EXTRAS"],
+      "maxAmount": null,
+      "combinable": false,
       "active": true
     },
     {
       "id": "DISC-002",
       "name": "Paciente frecuente",
       "type": "PROFILE",
+      "description": "Perfil sintético disponible para pruebas de cotización.",
+      "calculationType": "CATEGORY_PERCENTAGES",
+      "fixedAmount": 0,
       "categories": {
         "SERVICES": 10,
         "STUDIES": 5,
@@ -710,12 +721,20 @@ export const seedData = {
       },
       "requiresReason": true,
       "requiresApproval": false,
+      "approverId": null,
+      "eligibility": { "patientId": "", "insurerId": "", "companyName": "", "retireeOnly": false },
+      "exclusions": ["MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"],
+      "maxAmount": null,
+      "combinable": false,
       "active": true
     },
     {
       "id": "DISC-003",
       "name": "Cortesía autorizada",
       "type": "MANUAL",
+      "description": "Perfil sintético que exige solicitud y aprobación explícitas.",
+      "calculationType": "CATEGORY_PERCENTAGES",
+      "fixedAmount": 0,
       "categories": {
         "SERVICES": 20,
         "STUDIES": 20,
@@ -727,6 +746,11 @@ export const seedData = {
       },
       "requiresReason": true,
       "requiresApproval": true,
+      "approverId": "USR-006",
+      "eligibility": { "patientId": "", "insurerId": "", "companyName": "", "retireeOnly": false },
+      "exclusions": ["MEDICATIONS"],
+      "maxAmount": null,
+      "combinable": false,
       "active": true
     }
   ],

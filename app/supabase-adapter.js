@@ -65,6 +65,41 @@ function mapCatalogItem(raw = {}) {
   };
 }
 
+function mapDiscountRule(raw = {}) {
+  const rule = camelCaseObject(raw);
+  return {
+    ...rule,
+    type:rule.ruleType || rule.type || "PROFILE",
+    calculationType:rule.calculationType || "CATEGORY_PERCENTAGES",
+    fixedAmount:Number(rule.fixedAmount || 0),
+    categories:rule.categoryPercentages || rule.categories || {},
+    validFrom:rule.validFrom || null,
+    validUntil:rule.validUntil || null,
+    eligibility:rule.eligibility || {},
+    exclusions:Array.isArray(rule.excludedCategories) ? rule.excludedCategories : rule.exclusions || [],
+    maxAmount:rule.maxAmount === null || rule.maxAmount === undefined ? null : Number(rule.maxAmount),
+    approverId:rule.approverUserId || rule.approverId || null,
+    active:rule.status !== "INACTIVE"
+  };
+}
+
+function mapDiscountApprovalRequest(raw = {}) {
+  const request = camelCaseObject(raw);
+  return {
+    ...request,
+    ruleId:request.discountRuleId || request.ruleId,
+    caseId:request.hospitalizationId || request.caseId,
+    patientId:request.patientId,
+    approverId:request.approverUserId || request.approverId || null,
+    requestedBy:request.requestedBy || null,
+    decidedBy:request.decidedBy || null,
+    calculatedDiscountAmount:Number(request.calculatedDiscountAmount || 0),
+    items:request.quoteContext?.items || request.items || [],
+    fingerprint:request.quoteContext?.fingerprint || request.fingerprint || "",
+    requestKey:request.requestKey || ""
+  };
+}
+
 export function mapSupabaseBootstrap(rawCollections = {}) {
   const collections = { ...rawCollections };
   collections.patients = (rawCollections.patients || []).map((raw) => {
@@ -98,6 +133,8 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
   });
   collections.suppliers = (rawCollections.suppliers || []).map(camelCaseObject);
   collections.catalogItems = (rawCollections.catalogItems || []).map(mapCatalogItem);
+  collections.discountRules = (rawCollections.discountRules || []).map(mapDiscountRule);
+  collections.discountApprovalRequests = (rawCollections.discountApprovalRequests || []).map(mapDiscountApprovalRequest);
   const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
   collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
   collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
@@ -185,6 +222,7 @@ export function mapSupabaseBootstrap(rawCollections = {}) {
       insurerAmount: Number(version.insurerAmount),
       patientAmount: Number(version.patientAmount),
       discount: version.discountSnapshot || {},
+      discountApprovalRequestId: version.discountApprovalRequestId || null,
       comments: version.comments || "",
       invoiceDate: version.invoiceDate || root.invoiceDate || "",
       discountGroupId: version.discountGroupId || root.discountGroupId || "REGULAR",
@@ -349,6 +387,7 @@ function toPatientRow(patient) {
     nationality: patient.nationality || null,
     phone: patient.phone || null,
     email: patient.email || null,
+    is_retired: Boolean(patient.isRetired),
     triage: patient.triage || "BAJA",
     status: patient.status || "ACTIVE"
   };
@@ -366,6 +405,7 @@ function toCaseRow(record) {
     status: record.status,
     priority: record.priority,
     diagnosis_summary: record.diagnosisSummary || null,
+    company_name: record.companyName || record.company || null,
     contracting_doctor_id: record.contractingDoctorId || null,
     next_action: record.nextAction || null
   };
@@ -398,6 +438,27 @@ function toCatalogRow(item) {
     valid_until:item.validUntil || null,
     metadata:item.metadata || {},
     status:item.active === false ? "INACTIVE" : "ACTIVE"
+  };
+}
+
+function toDiscountRuleRow(rule) {
+  return {
+    name:rule.name,
+    description:rule.description || null,
+    rule_type:rule.type || "PROFILE",
+    calculation_type:rule.calculationType || "CATEGORY_PERCENTAGES",
+    fixed_amount:Number(rule.fixedAmount || 0),
+    category_percentages:rule.categories || {},
+    requires_reason:Boolean(rule.requiresReason),
+    requires_approval:Boolean(rule.requiresApproval),
+    valid_from:rule.validFrom || null,
+    valid_until:rule.validUntil || null,
+    status:rule.active === false || rule.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+    eligibility:snakeCaseObject(rule.eligibility || {}),
+    excluded_categories:rule.exclusions || [],
+    max_amount:rule.maxAmount === null || rule.maxAmount === undefined ? null : Number(rule.maxAmount),
+    combinable:Boolean(rule.combinable),
+    approver_user_id:rule.approverId || null
   };
 }
 
@@ -501,6 +562,8 @@ export async function createSupabaseAdapter(config) {
       ["shifts", "shifts", "*"],
       ["suppliers", "suppliers", "*"],
       ["catalogItems", "catalog_items", "*"],
+      ["discountRules", "discount_rules", "*"],
+      ["discountApprovalRequests", "discount_approval_requests", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
       ["warehouses", "warehouses", "*"],
       ["inventoryItems", "inventory_items", "*"],
@@ -565,9 +628,48 @@ export async function createSupabaseAdapter(config) {
         if (error) throw error;
         return { ok:true, items:(data || []).map(mapCatalogItem) };
       }
+      case "SAVE_DISCOUNT_RULE": {
+        const rule = payload.rule;
+        const remoteId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(rule.id || "")) ? rule.id : null;
+        const { data, error } = await client.rpc("save_discount_rule", {
+          p_discount_rule_id:remoteId,
+          p_rule:toDiscountRuleRow(rule),
+          p_inactivation_reason:payload.reason || null
+        });
+        if (error) throw error;
+        return { ok:true, rule:mapDiscountRule(data?.rule || data) };
+      }
+      case "REQUEST_DISCOUNT_APPROVAL": {
+        const request = payload.request;
+        const { data, error } = await client.rpc("request_discount_approval", {
+          p_discount_rule_id:request.ruleId,
+          p_hospitalization_id:request.caseId,
+          p_patient_id:request.patientId,
+          p_quote_context:snakeCaseObject({
+            invoiceDate:request.invoiceDate,
+            items:request.items,
+            fingerprint:request.fingerprint,
+            calculatedDiscountAmount:request.calculatedDiscountAmount
+          }),
+          p_reason:request.reason || "",
+          p_request_key:request.requestKey
+        });
+        if (error) throw error;
+        return { ok:true, request:mapDiscountApprovalRequest(data?.request || data) };
+      }
+      case "DECIDE_DISCOUNT_APPROVAL": {
+        const request = payload.request;
+        const { data, error } = await client.rpc("decide_discount_approval", {
+          p_request_id:request.id,
+          p_decision:"APPROVED",
+          p_note:request.decisionNote || ""
+        });
+        if (error) throw error;
+        return { ok:true, request:mapDiscountApprovalRequest(data?.request || data) };
+      }
       case "CREATE_QUOTE": {
         const quote = payload.quote;
-        const { data, error } = await client.rpc("create_quote_draft", {
+        const { data, error } = await client.rpc("create_quote_draft_v2", {
           p_code: quote.id,
           p_hospitalization_id: quote.caseId,
           p_patient_id: quote.patientId,
@@ -580,14 +682,15 @@ export async function createSupabaseAdapter(config) {
           p_discount_reason: quote.discount?.reason || "",
           p_referred_by: quote.referredBy,
           p_giftcard: quote.giftcard || "",
-          p_comments: quote.comments
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
         });
         if (error) throw error;
         return { ok: true, ...data };
       }
       case "CREATE_QUOTE_REVISION": {
         const quote = payload.quote;
-        const { data, error } = await client.rpc("create_quote_revision_catalog", {
+        const { data, error } = await client.rpc("create_quote_revision_catalog_v2", {
           p_quote_id: quote.quoteId,
           p_source_version_id: payload.sourceQuoteId,
           p_reason: quote.revisionReason,
@@ -599,14 +702,15 @@ export async function createSupabaseAdapter(config) {
           p_discount_reason: quote.discount?.reason || "",
           p_referred_by: quote.referredBy,
           p_giftcard: quote.giftcard || "",
-          p_comments: quote.comments
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
         });
         if (error) throw error;
         return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_DRAFT": {
         const quote = payload.quote;
-        const { data, error } = await client.rpc("update_quote_draft_catalog", {
+        const { data, error } = await client.rpc("update_quote_draft_catalog_v2", {
           p_quote_id: quote.quoteId || quote.id,
           p_quote_version_id: quote.id,
           p_price_list_id: quote.priceListId || null,
@@ -617,7 +721,8 @@ export async function createSupabaseAdapter(config) {
           p_discount_reason: quote.discount?.reason || "",
           p_referred_by: quote.referredBy,
           p_giftcard: quote.giftcard || "",
-          p_comments: quote.comments
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
         });
         if (error) throw error;
         return { ok: true, ...data };
