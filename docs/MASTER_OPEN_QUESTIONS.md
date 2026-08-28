@@ -2,7 +2,7 @@
 
 > Generado de forma determinista desde `docs/MASTER_VIDEO_REQUIREMENTS.json`. No editar este archivo directamente.
 
-Preguntas abiertas: 73. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
+Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, financiera o legal ausente.
 
 ## CH01 · Contexto inicial, acceso, dashboard y listado de pacientes
 
@@ -103,3 +103,80 @@ Preguntas abiertas: 73. No se infiere ninguna regla de negocio, clínica, financ
 - **CH09-Q011 · UNCERTAIN** — ¿Qué ocurrió entre 00:24:47.200 y 00:27:13.800? No debe inferirse una impresión exitosa ni un estado intermedio a partir del salto de eventos.
 - **CH09-Q012 · UNCERTAIN** — ¿La superposición de videollamada forma parte del producto o es ajena a la aplicación grabada? La evidencia no permite atribuirla a Analiza en Casa.
 - **CH09-Q013 · UNCERTAIN** — ¿Cuáles son exactamente los campos obligatorios y el orden del PDF/expediente final? El contenido detallado sólo se describe verbalmente y no se ve el documento generado.
+
+## CH10 · Orden médica, tratamientos y tarjeta de medicamentos
+
+- **CH10-Q001 · UNCERTAIN** — ¿Qué roles pueden crear, modificar, finalizar, anular e imprimir órdenes o tarjetas? Evidencia: CH10-E0112, 00:31:12.200.
+- **CH10-Q002 · UNCERTAIN** — ¿Qué significa PMC, quién lo actualiza y qué transiciones conectan Revisar/Listo con firma o finalización? Evidencia: CH10-E0102, CH10-E0105 y CH10-E0113.
+- **CH10-Q003 · UNCERTAIN** — ¿Cuáles son los catálogos oficiales de vía, frecuencia, duración y horarios, sus relaciones y las reglas de PRN? Evidencia: CH10-E0028, CH10-E0031 y CH10-E0042.
+- **CH10-Q004 · UNCERTAIN** — INFERRED — ¿La fecha final se calcula inclusiva o exclusivamente desde inicio y duración, qué zona horaria aplica y cómo se comporta un tratamiento crónico? Sólo se observa un caso. Evidencia: CH10-E0035 y CH10-E0038.
+- **CH10-Q005 · UNCERTAIN** — ¿Cuál es la fuente maestra, deduplicación y permiso de alta inline para medicamentos y prescriptores? Evidencia: CH10-E0021–CH10-E0026.
+- **CH10-Q006 · UNCERTAIN** — ¿“Mostrar diluciones” sólo despliega captura documentada o aplica una regla clínica, y qué obligatoriedad tiene Crónico? Evidencia: CH10-E0039 y CH10-E0050.
+- **CH10-Q007 · UNCERTAIN** — ¿Cuáles son las etiquetas oficiales, cuáles son configurables y quién puede crearlas, quitarlas y reordenarlas? Evidencia: CH10-E0075–CH10-E0086.
+- **CH10-Q008 · UNCERTAIN** — ¿Qué sanitización, obligatoriedad, firma y reglas de borradores vacíos aplican a los editores por sección? Evidencia: CH10-E0088–CH10-E0093.
+- **CH10-Q009 · UNCERTAIN** — ¿Qué contenido, encabezado, firma, papel y validez corresponden a tarjeta completa, tarjeta simple y conteo presencial? Evidencia: CH10-E0109.
+- **CH10-Q010 · VERBAL** — ¿Cómo se entrega una tarjeta a enfermería domiciliaria mediante un enlace seguro, autenticado, revocable, auditable y con expiración, sin incluir contenido clínico en WhatsApp/SMS/email? Evidencia verbal: CH10-E0109–CH10-E0110.
+- **CH10-Q011 · UNCERTAIN** — ¿Qué constituye una Actualización, un Tratamiento con cambios y una entrada del Historial, y cuál es la unidad de versionado? Evidencia: CH10-E0008, CH10-E0018 y CH10-E0101.
+- **CH10-Q012 · UNCERTAIN** — ¿Qué contrato de datos, permisos y auditoría tiene Registro XPO? Evidencia: CH10-E0065 y CH10-E0099.
+- **CH10-Q013 · VERBAL** — ¿Cuáles son los campos mínimos, estados, responsables, omisión/motivo, idempotencia y correcciones del registro real de administración? Hasta confirmarlo no se simula éxito. Evidencia verbal asociada a CH10-E0109–CH10-E0110.
+
+## CH11 · Agenda y turnos
+
+- **CH11-Q001 · UNCERTAIN** — ¿Qué significa cada frecuencia, cuántas visitas genera y cómo se resuelven límites, cruces, zona horaria, reintentos, edición y cancelación de una serie? Evidencia: CH11-E0021 y CH11-E0025.
+- **CH11-Q002 · UNCERTAIN** — ¿Qué estados y transiciones determinan una visita finalizada y la secuencia Primer turno, Turno de seguimiento y Último turno? Evidencia: CH11-E0046, CH11-E0050 y CH11-E0051.
+- **CH11-Q003 · UNCERTAIN** — ¿Cuál es la fuente/vigencia de tarifa y qué permisos, motivos, aprobación, cálculo, descuentos, ajustes y reglas contables aplican al pago profesional? Evidencia: CH11-E0051–CH11-E0058.
+- **CH11-Q004 · UNCERTAIN** — ¿Qué hacen Pool, enlace, compartir y Eliminar visitas; qué selección, confirmación, motivo, permisos, revocación y auditoría requieren? Evidencia: CH11-E0015 y CH11-E0050.
+- **CH11-Q005 · UNCERTAIN** — ¿Qué comportamiento tienen Disponibilidades, Control de Visitas, Asignación de turnos y Nueva Agenda? Sólo se observan los nombres. Evidencia: CH11-E0004 y CH11-E0069.
+- **CH11-Q006 · UNCERTAIN** — ¿Qué roles pueden crear, asignar, reasignar, finalizar, cancelar, eliminar y guardar detalles de visita? Evidencia: CH11-E0019, CH11-E0050 y CH11-E0057.
+- **CH11-Q007 · UNCERTAIN** — ¿Qué eventos generan las notificaciones de visita finalizada, a qué actores se muestran y cómo se evita exponer información fuera de la organización? Evidencia: CH11-E0046–CH11-E0048 y CH11-E0062–CH11-E0064.
+- **CH11-Q008 · UNCERTAIN** — ¿Qué recursos son elegibles, cómo se modelan disponibilidad, solapamientos, sustituciones y concurrencia de asignación? Evidencia: CH11-E0050 y CH11-E0051.
+
+## CH12 · Cuentas por pagar y pagos de servicios
+
+- **CH12-Q001 · UNCERTAIN** — identificar el rótulo, contenido y comportamiento del reporte parcialmente oculto junto a “Reporte Por Recurso”. Evidencia: CH12-E0016, 00:34:17.000.
+- **CH12-Q002 · UNCERTAIN** — aprobar la máquina de estados de servicio, planilla y pago, incluidas aprobación, anulación, reapertura, pago parcial y reversión. Evidencia: CH12-E0016–CH12-E0020.
+- **CH12-Q003 · UNCERTAIN** — definir qué estados de visita habilitan pago y cómo se enlazan visitas, recursos contractuales y servicios profesionales. Evidencia: CH12-E0016–CH12-E0020.
+- **CH12-Q004 · UNCERTAIN** — aprobar la fuente versionada de tarifa, su vigencia, modalidad por recurso y cálculo de monto. Ningún importe del video se adopta como regla. Evidencia: CH12-E0022.
+- **CH12-Q005 · UNCERTAIN** — confirmar si los catálogos visibles de añadidura/descuento son definitivos o configurables, y cuándo exigen comentario o evidencia. Evidencia: CH12-E0029 y CH12-E0035–CH12-E0040.
+- **CH12-Q006 · UNCERTAIN** — definir el efecto contable, fiscal y de retenciones de cada concepto, junto con precisión y redondeo. Evidencia: CH12-E0025–CH12-E0041.
+- **CH12-Q007 · UNCERTAIN** — definir roles para editar individualmente o en grupo, agregar conceptos, aprobar, generar planilla, pagar, enviar, anular o revertir. Evidencia: CH12-E0001, CH12-E0006 y CH12-E0022.
+- **CH12-Q008 · VERBAL** — definir período, zona horaria, agrupación, bloqueo, unicidad, reintentos y concurrencia de planillas. Evidencia verbal 00:33:30–00:36:39.
+- **CH12-Q009 · UNCERTAIN** — definir “Restricciones” y “Limpiar Tabla”, incluidas confirmación, reversibilidad, permisos y auditoría. Evidencia: CH12-E0001.
+- **CH12-Q010 · UNCERTAIN** — aprobar formatos, columnas, firmas, validez y minimización de datos para descarga, reporte por recurso y consolidado. Evidencia: CH12-E0001, CH12-E0006 y transcripción.
+- **CH12-Q011 · UNCERTAIN** — definir qué representa Reclamos y su relación con Facturas, servicios y pagos profesionales. Evidencia: CH12-E0001–CH12-E0004.
+- **CH12-Q012 · UNCERTAIN** — definir el ledger de desembolsos profesionales, referencias externas, idempotencia y corrección append-only. CH12 no muestra el resultado persistido de Guardar o pagar.
+
+## CH13 · Compras y compras al por mayor
+
+- **CH13-Q001 · UNCERTAIN** — aprobar estados y transiciones exactas para Orden de compra y Caja menuda, roles autorizados, precondiciones y estados irreversibles. Evidencia: CH13-E0004, 00:36:46.400; CH13-E0080, 00:39:26.800.
+- **CH13-Q002 · UNCERTAIN** — definir en qué evento una compra genera inventario: aprobación, recepción total, recepción parcial u otro hito auditable. Evidencia verbal: CH13-E0092, 00:39:43.000; transcripción 00:39:51–00:39:58.
+- **CH13-Q003 · VERBAL** — confirmar recepciones parciales, múltiples bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. Evidencia: CH13-E0092, 00:39:43.000; el flujo no se muestra.
+- **CH13-Q004 · UNCERTAIN** — aprobar si el impuesto se captura por línea, global o ambos, moneda, precisión y redondeo. No se adopta ninguna tasa del baseline o del video. Evidencia: CH13-E0057, 00:38:34.800; CH13-E0065, 00:38:52.400.
+- **CH13-Q005 · UNCERTAIN** — definir qué representa Extra, conceptos permitidos, límites, justificación, autorización y efecto contable/fiscal. Evidencia: CH13-E0070, 00:39:12.600.
+- **CH13-Q006 · UNCERTAIN** — confirmar si el descuento global se combina con descuentos por línea, sus límites, autorización y efecto contable/fiscal. Evidencia: CH13-E0057, 00:38:34.800; CH13-E0060, 00:38:48.000.
+- **CH13-Q007 · UNCERTAIN** — definir cuándo el archivo es obligatorio, formatos, tamaño, validación antimalware, almacenamiento privado, acceso, descarga, retención y eliminación. Evidencia: CH13-E0040, 00:37:48.400; CH13-E0041, 00:37:49.000; CH13-E0083, 00:39:33.000.
+- **CH13-Q008 · UNCERTAIN** — aprobar unicidad del número de factura por organización/proveedor, tratamiento de facturas sin número, numeración oficial de compras y concurrencia. Evidencia: CH13-E0008, 00:36:54.800; CH13-E0035, 00:37:37.800.
+- **CH13-Q009 · UNCERTAIN** — definir el significado de Registro PT, catálogo de estados, responsables, transición, evidencia y consecuencias operativas/contables. Evidencia: CH13-E0004, 00:36:46.400; CH13-E0080, 00:39:26.800.
+- **CH13-Q010 · UNCERTAIN** — definir campos editables tras borrador, aprobación o recepción, junto con corrección, versionado, motivo, autorización y preservación del original. Evidencia: CH13-E0091, 00:39:40.800.
+- **CH13-Q011 · UNCERTAIN** — definir qué copia la acción Copiar: cabecera, líneas, proveedores, precios, ajustes, adjunto o sólo una plantilla. Evidencia: CH13-E0091, 00:39:40.800.
+- **CH13-Q012 · UNCERTAIN** — aprobar diferencias, contenido, ocultamiento de montos, permisos, firmas y validez de Imprimir PDF, Imprimir con montos e Imprimir en Excel. Evidencia: CH13-E0091, 00:39:40.800.
+- **CH13-Q013 · UNCERTAIN** — definir anulación, motivo obligatorio, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Evidencia: CH13-E0091, 00:39:40.800.
+- **CH13-Q014 · UNCERTAIN** — definir fuente, alcance organizacional, proveedor/presentación, vigencia y autorización del precio histórico, además del alta de presentaciones. Evidencia: CH13-E0019–CH13-E0025, 00:37:11.800–00:37:17.200; CH13-E0052–CH13-E0055, 00:38:22.400–00:38:25.200.
+
+## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
+
+- **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.
+- **CH14-Q002 · UNCERTAIN** — aprobar la máquina de estados de acuse, roles, permisos por acción, idempotencia y efectos de Nuevo, Duplicar, Editar, Asignar hospitalización, Eliminar y Registro XPO. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+- **CH14-Q003 · UNCERTAIN** — definir formato, columnas, minimización de datos, permisos y validez del Excel y la impresión de acuses. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+- **CH14-Q004 · UNCERTAIN** — definir Plantilla y Vaciar, incluida persistencia de borrador, recuperación y confirmación de pérdida. Evidencia: CH14-E0151, 00:45:27.000.
+- **CH14-Q005 · UNCERTAIN** — aprobar el flujo de faltantes, tratamiento de cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152, 00:45:27.400; safety_022 a 00:45:28.
+- **CH14-Q006 · UNCERTAIN** — determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.
+- **CH14-Q007 · UNCERTAIN** — aprobar transiciones entre cierre pendiente, total, aprobado, cerrado y cancelado, campos editables, conciliación, reversión y relación con el cierre administrativo/financiero. Evidencia: CH14-E0050, 00:42:16.400; transcripción 00:42:11–00:43:18.
+- **CH14-Q008 · UNCERTAIN** — definir identificación, unicidad, campos obligatorios, estados, edición y eliminación de proveedores por organización. Evidencia: CH14-E0061, 00:43:24.400.
+- **CH14-Q009 · UNCERTAIN** — aprobar creación/edición de bodegas y reglas de traslado: permisos, bodegas origen/destino, recepción, movimientos, lotes, series, concurrencia y reversión. Evidencia: CH14-E0068, 00:43:28.600; transcripción 00:43:26–00:43:57.
+- **CH14-Q010 · UNCERTAIN** — definir qué significa Fecha inválida y la política para lotes vencidos, sin fecha, en cuarentena o agotados; confirmar FEFO y alertas. Evidencia: CH14-E0082, 00:44:11.400; transcripción 00:44:07–00:44:24.
+- **CH14-Q011 · UNCERTAIN** — aprobar unicidad y ciclo de vida de lote/serie por organización, item y bodega, incluidos ajustes, transferencias y correcciones auditadas. Evidencia: CH14-E0078, 00:44:04.600; CH14-E0092, 00:44:24.400.
+- **CH14-Q012 · UNCERTAIN** — definir versionado, permisos y efectos de Crear, Editar, Duplicar y Eliminar kits, incluida la conservación de usos históricos. Evidencia: CH14-E0095, 00:44:29.400; CH14-E0098–CH14-E0101, 00:44:31.400–00:44:33.000.
+- **CH14-Q013 · VERBAL** — confirmar si el consumo de un kit usa FEFO, lote seleccionado, sustitución o bloqueo total, y exigir atomicidad, idempotencia y reversión de todos sus componentes. Evidencia: CH14-E0104, 00:44:35.200; CH14-E0117, 00:44:44.800; transcripción 00:44:25–00:45:02.
+- **CH14-Q014 · UNCERTAIN** — identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.
+- **CH14-Q015 · UNCERTAIN** — confirmar mensajes, reintentos y recuperación esperados para errores de inventario, acuses, cierres, catálogos y kits; el capítulo no provoca fallos. Evidencia: CH14-E0006–CH14-E0152, sin resultado de error demostrado.

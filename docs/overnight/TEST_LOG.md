@@ -1,5 +1,17 @@
 # Test log
 
+## 2026-08-27 · Cierre secuencial CH13
+
+- `npm test`: PASS (76/76); incluye 5 contratos CH13 de borrador, idempotencia, importes manuales, tenant scope, bootstrap y SQL/RPC/RLS.
+- `npm run qa`: PASS (75/75).
+- `npm run build:standalone`: PASS (695,512 bytes).
+- `npm run test:browser:ch13`: PASS (2/2); escritorio y móvil sin overflow global.
+- Regresión acumulada CH01–CH13: PASS (36/36) en Chrome headless.
+- `npm run audit:master:bootstrap`: PASS (210 features, 120 preguntas, 7 hallazgos).
+- `npm run parity:generate`: PASS (300 requisitos; 131 exactos, 97 parciales, 19 no verificables, 53 decisiones de cliente, 0 faltantes y 0 conflictos).
+- `npm run audit:verify`: PASS (17/17 capítulos, 1,359/1,359 observaciones, 0 pendientes, 0 fallos).
+- Supabase real: NOT RUN; la migración CH13 y sus rutas de concurrencia/RLS requieren una instancia configurada.
+
 ## 2026-08-26 · Final handoff gate
 
 - `npm run check`: PASS (29/29 tests, 75/75 QA checks, standalone build 407,920 bytes).
@@ -140,3 +152,19 @@
 | Supabase/RLS real | NOT RUN | CLI no disponible y no se proporcionaron credenciales ni base local. |
 
 Capturas del baseline en `docs/overnight/screenshots/`.
+
+# 2026-08-27 · Checkpoint CH14
+
+- `node --test tests/ch14-inventory-boundaries.test.mjs`: PASS, 6/6.
+- `npm run test:browser:ch14`: PASS, 2/2. Capturas desktop 1440×900 y móvil 390×844; sin overflow horizontal global.
+- `npm run parity:generate`: PASS, 329 requisitos; 138 exactos, 111 parciales, 21 no testables, 59 bloqueados por cliente, 0 missing y 0 conflicts.
+- `npm run audit:master:bootstrap`: PASS, 210 features, 135 preguntas y 7 hallazgos P0.
+- `npm run check`: ejecutado una única vez; FAIL inicial 81/82 porque `tests/p0-notifications-payments-inventory.test.mjs` esperaba mutación local de un medicamento sin lote, ahora correctamente bloqueada por CH14. El comando no se repitió.
+- Corrección de la prueba: selecciona un ítem sintético no trazable para la convención local; el guard de trazables tiene prueba CH14 independiente.
+- `node --test tests/p0-notifications-payments-inventory.test.mjs tests/ch14-inventory-boundaries.test.mjs`: PASS, 10/10.
+- `node --test tests/*.test.mjs`: PASS, 82/82.
+- `npm run qa`: PASS, 75/75.
+- `npm run build:standalone`: PASS, 711,425 bytes.
+- `npm run audit:verify`: PASS, 17/17 capítulos, 0 pendientes, 0 fallos.
+- `npm run codex:preflight`: PASS, 6,498 archivos, 1,359 eventos, 730 detail crops, 17 clips, 158 event sheets, 212 safety sheets, 0 errores, 0 advertencias.
+- Supabase real: NOT RUN; no hay runtime/proyecto autorizado y configurado.

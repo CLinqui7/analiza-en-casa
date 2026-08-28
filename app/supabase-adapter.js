@@ -19,6 +19,361 @@ function snakeCaseObject(input) {
   ]));
 }
 
+function camelCaseObject(input) {
+  if (Array.isArray(input)) return input.map(camelCaseObject);
+  if (!input || typeof input !== "object") return input;
+  return Object.fromEntries(Object.entries(input).map(([key, value]) => [
+    key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase()),
+    camelCaseObject(value)
+  ]));
+}
+
+function mapPurchase(raw = {}) {
+  const purchase = camelCaseObject(raw);
+  const sourceItems = purchase.purchaseItems || purchase.items || [];
+  return {
+    ...purchase,
+    date: purchase.purchaseDate || purchase.date,
+    kind: purchase.purchaseKind || purchase.kind || (purchase.paymentType === "PETTY_CASH" ? "PETTY_CASH" : "ORDER"),
+    tax: Number(purchase.taxAmount || purchase.tax || 0),
+    discount: Number(purchase.discountAmount || purchase.discount || 0),
+    extra: Number(purchase.extraAmount || purchase.extra || 0),
+    subtotal: Number(purchase.subtotal || 0),
+    total: Number(purchase.total || 0),
+    registryStatus: purchase.registryStatus || "Sin Registro",
+    items: sourceItems.map((item) => ({
+      ...item,
+      name: item.description || item.name || "",
+      presentation: item.presentation || "No documentada",
+      quantity: Number(item.quantity || 0),
+      unitCost: Number(item.unitCost || 0),
+      taxAmount: Number(item.taxAmount || 0),
+      discountAmount: Number(item.discountAmount || 0),
+      lineTotal: Number(item.lineTotal || 0)
+    }))
+  };
+}
+
+function mapCatalogItem(raw = {}) {
+  const item = camelCaseObject(raw);
+  return {
+    ...item,
+    price:Number(item.basePrice ?? item.price ?? 0),
+    cost:Number(item.cost || 0),
+    active:item.status !== "INACTIVE",
+    administrationRoutes:Array.isArray(item.administrationRoutes) ? item.administrationRoutes : []
+  };
+}
+
+function mapDiscountRule(raw = {}) {
+  const rule = camelCaseObject(raw);
+  return {
+    ...rule,
+    type:rule.ruleType || rule.type || "PROFILE",
+    calculationType:rule.calculationType || "CATEGORY_PERCENTAGES",
+    fixedAmount:Number(rule.fixedAmount || 0),
+    categories:rule.categoryPercentages || rule.categories || {},
+    validFrom:rule.validFrom || null,
+    validUntil:rule.validUntil || null,
+    eligibility:rule.eligibility || {},
+    exclusions:Array.isArray(rule.excludedCategories) ? rule.excludedCategories : rule.exclusions || [],
+    maxAmount:rule.maxAmount === null || rule.maxAmount === undefined ? null : Number(rule.maxAmount),
+    approverId:rule.approverUserId || rule.approverId || null,
+    active:rule.status !== "INACTIVE"
+  };
+}
+
+function mapDiscountApprovalRequest(raw = {}) {
+  const request = camelCaseObject(raw);
+  return {
+    ...request,
+    ruleId:request.discountRuleId || request.ruleId,
+    caseId:request.hospitalizationId || request.caseId,
+    patientId:request.patientId,
+    approverId:request.approverUserId || request.approverId || null,
+    requestedBy:request.requestedBy || null,
+    decidedBy:request.decidedBy || null,
+    calculatedDiscountAmount:Number(request.calculatedDiscountAmount || 0),
+    items:request.quoteContext?.items || request.items || [],
+    fingerprint:request.quoteContext?.fingerprint || request.fingerprint || "",
+    requestKey:request.requestKey || ""
+  };
+}
+
+export function mapSupabaseBootstrap(rawCollections = {}) {
+  const collections = { ...rawCollections };
+  collections.patients = (rawCollections.patients || []).map((raw) => {
+    const patient = camelCaseObject(raw);
+    return {
+      ...patient,
+      document: patient.documentNumber,
+      fullName: `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+      organizationId: patient.organizationId
+    };
+  });
+  collections.cases = (rawCollections.cases || []).map((raw) => {
+    const record = camelCaseObject(raw);
+    return {
+      ...record,
+      patientId: record.patientId,
+      insurerId: record.insurerId,
+      accountType: record.accountType,
+      manager: record.administrativeManagerName || "",
+      contractingDoctorId: record.contractingDoctorId,
+      startDate: record.startDate,
+      endDate: record.endDate,
+      diagnosisSummary: record.diagnosisSummary,
+      nextAction: record.nextAction,
+      organizationId: record.organizationId
+    };
+  });
+  collections.doctors = (rawCollections.doctors || []).map((raw) => {
+    const doctor = camelCaseObject(raw);
+    return { ...doctor, name: doctor.fullName || doctor.name || "" };
+  });
+  collections.suppliers = (rawCollections.suppliers || []).map(camelCaseObject);
+  collections.catalogItems = (rawCollections.catalogItems || []).map(mapCatalogItem);
+  collections.discountRules = (rawCollections.discountRules || []).map(mapDiscountRule);
+  collections.discountApprovalRequests = (rawCollections.discountApprovalRequests || []).map(mapDiscountApprovalRequest);
+  const catalogById = new Map(collections.catalogItems.map((item) => [item.id, item]));
+  collections.warehouses = (rawCollections.warehouses || []).map(camelCaseObject);
+  collections.inventoryItems = (rawCollections.inventoryItems || []).map((raw) => {
+    const item = camelCaseObject(raw);
+    const catalog = catalogById.get(item.catalogItemId) || {};
+    return {
+      ...item,
+      sku: catalog.sku || item.sku || "",
+      name: catalog.name || item.name || "Ítem de inventario",
+      category: catalog.category || item.category || "SUPPLIES",
+      unit: catalog.unit || item.unit || "unidad",
+      stock: Number(item.stock || 0),
+      committed: Number(item.committed || 0),
+      minimum: Number(item.minimumStock || item.minimum || 0)
+    };
+  });
+  collections.inventoryLots = (rawCollections.inventoryLots || []).map((raw) => {
+    const lot = camelCaseObject(raw);
+    return { ...lot, quantity:Number(lot.quantity || 0) };
+  });
+  collections.inventoryMovements = (rawCollections.inventoryMovements || []).map((raw) => {
+    const movement = camelCaseObject(raw);
+    return {
+      ...movement,
+      caseId: movement.hospitalizationId || movement.caseId || "",
+      type: movement.movementType || movement.type,
+      date: movement.createdAt || movement.date,
+      warehouseFrom: movement.warehouseFromId || movement.warehouseFrom || "",
+      warehouseTo: movement.warehouseToId || movement.warehouseTo || "",
+      quantity: Number(movement.quantity || 0)
+    };
+  });
+  collections.inventoryReservations = (rawCollections.inventoryReservations || []).map((raw) => {
+    const reservation = camelCaseObject(raw);
+    return {
+      ...reservation,
+      caseId: reservation.hospitalizationId || reservation.caseId,
+      quantity:Number(reservation.quantity || 0), delivered:Number(reservation.delivered || 0),
+      consumed:Number(reservation.consumed || 0), returned:Number(reservation.returned || 0)
+    };
+  });
+  collections.inventoryClosures = (rawCollections.inventoryClosures || []).map((raw) => {
+    const closure = camelCaseObject(raw);
+    return {
+      ...closure,
+      caseId: closure.hospitalizationId || closure.caseId,
+      type: closure.closureType || closure.type,
+      createdBy: closure.createdBy || "Usuario autorizado",
+      items: (closure.inventoryClosureItems || closure.items || []).map((item) => ({
+        ...item, delivered:Number(item.delivered || 0), consumed:Number(item.consumed || 0),
+        returned:Number(item.returned || 0), difference:Number(item.difference || 0)
+      }))
+    };
+  });
+  collections.kits = (rawCollections.kits || []).map((raw) => {
+    const kit = camelCaseObject(raw);
+    return {
+      ...kit,
+      active: kit.status !== "INACTIVE",
+      items: (kit.supplyKitItems || kit.items || []).map((item) => ({
+        ...item,
+        name: catalogById.get(item.catalogItemId)?.name || "Componente",
+        quantity:Number(item.quantity || 0)
+      }))
+    };
+  });
+  collections.purchases = (rawCollections.purchases || []).map(mapPurchase);
+
+  collections.quotes = (rawCollections.quotes || []).flatMap((rawQuote) => {
+    const root = camelCaseObject(rawQuote);
+    return (root.quoteVersions || []).map((version) => ({
+      id: version.id,
+      displayCode: root.code,
+      quoteId: root.id,
+      originalQuoteId: root.id,
+      caseId: root.hospitalizationId,
+      patientId: root.patientId,
+      organizationId: root.organizationId,
+      status: version.version === root.currentVersion ? root.status : version.statusSnapshot,
+      version: version.version,
+      currency: root.currency,
+      subtotal: Number(version.subtotal),
+      discountAmount: Number(version.discountAmount),
+      total: Number(version.total),
+      insurerAmount: Number(version.insurerAmount),
+      patientAmount: Number(version.patientAmount),
+      discount: version.discountSnapshot || {},
+      discountApprovalRequestId: version.discountApprovalRequestId || null,
+      comments: version.comments || "",
+      invoiceDate: version.invoiceDate || root.invoiceDate || "",
+      discountGroupId: version.discountGroupId || root.discountGroupId || "REGULAR",
+      referredBy: version.referredBy || root.referredBy || "",
+      giftcard: version.giftcard || root.giftcard || "",
+      priceListId: version.priceListId || null,
+      immutable: Boolean(version.immutable),
+      sentAt: version.sentAt || (version.version === root.currentVersion ? root.sentAt : null),
+      createdAt: version.createdAt,
+      items: (version.quoteItems || []).map((item) => ({
+        id: item.id,
+        catalogItemId: item.catalogItemId,
+        category: item.category,
+        name: item.description,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.unitPrice),
+        discountAmount: Number(item.discountAmount || 0)
+      }))
+    }));
+  });
+
+  const currentVersionByRoot = new Map(
+    collections.quotes
+      .slice()
+      .sort((left, right) => Number(left.version) - Number(right.version))
+      .map((quote) => [quote.quoteId, quote.id])
+  );
+  collections.insuranceRequests = (rawCollections.insuranceRequests || []).map((raw) => {
+    const request = camelCaseObject(raw);
+    return {
+      ...request,
+      rootQuoteId: request.quoteId,
+      quoteId: currentVersionByRoot.get(request.quoteId) || request.quoteId,
+      requestedAmount: Number(request.requestedAmount || 0),
+      approvedAmount: Number(request.approvedAmount || 0),
+      events: (request.insuranceRequestEvents || [])
+        .map((event) => ({ ...event, date: event.createdAt }))
+        .sort((left, right) => String(left.date).localeCompare(String(right.date)))
+    };
+  });
+  collections.notifications = (rawCollections.notifications || []).map((raw) => {
+    const notification = camelCaseObject(raw);
+    return { ...notification, target: notification.destinationMasked, date: notification.createdAt };
+  });
+  collections.administrativeExecutionProfiles = (rawCollections.administrativeExecutionProfiles || []).map((raw) => {
+    const profile = camelCaseObject(raw);
+    return {
+      ...profile,
+      caseId: profile.hospitalizationId,
+      rootQuoteId: profile.quoteId,
+      quoteId: profile.quoteVersionId,
+      patientId: profile.patientId,
+      durationDays: Number(profile.durationDays || 0)
+    };
+  });
+  collections.clinicalProfiles = (rawCollections.clinicalProfiles || []).map((raw) => {
+    const profile = camelCaseObject(raw);
+    return {
+      ...profile,
+      caseId: profile.hospitalizationId,
+      otherDoctorIds: profile.otherDoctorIds || [],
+      devices: profile.devices || [],
+      attachmentMetadata: profile.attachmentMetadata || []
+    };
+  });
+  collections.clinicalDocuments = (rawCollections.clinicalDocuments || []).map((raw) => {
+    const document = camelCaseObject(raw);
+    return {
+      ...document,
+      caseId: document.hospitalizationId,
+      type: document.documentType,
+      version: Number(document.versionNumber || 1),
+      content: document.content || {}
+    };
+  });
+  collections.medicationCards = (rawCollections.medicationCards || []).map((raw) => {
+    const card = camelCaseObject(raw);
+    return {
+      ...card,
+      caseId: card.hospitalizationId,
+      version: Number(card.versionNumber || 1),
+      documentStatus: card.documentStatus || "DRAFT",
+      otherDoctorIds: card.otherDoctorIds || [],
+      items: (card.medicationCardItems || card.items || []).map((item) => ({
+        ...item,
+        medication: item.medicationName || item.medication,
+        doctorId: item.prescribingDoctorId || item.doctorId,
+        schedule: item.schedule || [],
+        administrationStatus: item.administrationStatus || "PENDING"
+      }))
+    };
+  });
+  collections.shifts = (rawCollections.shifts || []).map((raw) => {
+    const shift = camelCaseObject(raw);
+    return {
+      ...shift,
+      caseId: shift.hospitalizationId,
+      resourceId: shift.resourceUserId || "",
+      start: shift.startsAt,
+      end: shift.endsAt,
+      type: shift.shiftType,
+      occurrenceCount: Number(shift.occurrenceCount || 1)
+    };
+  });
+  collections.payments = (rawCollections.payments || []).map((raw) => {
+    const payment = camelCaseObject(raw);
+    const quoteVersionId = payment.quoteVersionId || currentVersionByRoot.get(payment.quoteId) || payment.quoteId;
+    return {
+      ...payment,
+      rootQuoteId: payment.quoteId,
+      quoteId: quoteVersionId,
+      quoteVersionId,
+      caseId: payment.hospitalizationId || "",
+      date: payment.paidAt || payment.createdAt,
+      reference: payment.externalReference,
+      receipt: payment.receiptCode || payment.paymentReceipts?.[0]?.receiptCode || "",
+      amount: Number(payment.amount || 0),
+      allocations: (payment.paymentAllocations || []).map((allocation) => ({
+        ...allocation,
+        quoteId: allocation.quoteVersionId || quoteVersionId,
+        rootQuoteId: allocation.quoteId,
+        amount: Number(allocation.amount || 0)
+      }))
+    };
+  });
+  collections.doctorServices = (rawCollections.doctorServices || []).map((raw) => {
+    const service = camelCaseObject(raw);
+    return {
+      ...service,
+      caseId: service.hospitalizationId,
+      date: service.serviceDate,
+      service: service.serviceName,
+      quantity: Number(service.quantity || 0),
+      rate: Number(service.rate || 0)
+    };
+  });
+  collections.doctorStatements = (rawCollections.doctorStatements || []).map((raw) => {
+    const statement = camelCaseObject(raw);
+    const statementItems = statement.doctorStatementItems || [];
+    return {
+      ...statement,
+      gross: Number(statement.gross || 0),
+      adjustments: Number(statement.adjustments || 0),
+      withholdings: Number(statement.withholdings || 0),
+      paid: Number(statement.paid || 0),
+      items: statementItems.map((item) => item.doctorServiceId)
+    };
+  });
+  return collections;
+}
+
 function toPatientRow(patient) {
   return {
     id: patient.id,
@@ -32,6 +387,7 @@ function toPatientRow(patient) {
     nationality: patient.nationality || null,
     phone: patient.phone || null,
     email: patient.email || null,
+    is_retired: Boolean(patient.isRetired),
     triage: patient.triage || "BAJA",
     status: patient.status || "ACTIVE"
   };
@@ -49,14 +405,67 @@ function toCaseRow(record) {
     status: record.status,
     priority: record.priority,
     diagnosis_summary: record.diagnosisSummary || null,
+    company_name: record.companyName || record.company || null,
     contracting_doctor_id: record.contractingDoctorId || null,
     next_action: record.nextAction || null
+  };
+}
+
+function toCatalogRow(item) {
+  return {
+    sku:item.sku,
+    category:item.category,
+    name:item.name,
+    description:item.description || item.name,
+    unit:item.unit || "unidad",
+    cost:Number(item.cost || 0),
+    base_price:Number(item.price || 0),
+    taxable:Boolean(item.taxable),
+    billable:Boolean(item.billable),
+    discount_allowed:Boolean(item.discountAllowed),
+    giftcard_allowed:Boolean(item.giftcardAllowed),
+    requires_lot:Boolean(item.requiresLot),
+    requires_serial:Boolean(item.requiresSerial),
+    internal_use:Boolean(item.internalUse),
+    cold_chain:Boolean(item.coldChain),
+    manufacturer:item.manufacturer || null,
+    product_type:item.productType || null,
+    service_category:item.serviceCategory || null,
+    presentation:item.presentation || null,
+    administration_routes:item.administrationRoutes || [],
+    supplier_id:item.supplierId || null,
+    valid_from:item.validFrom || null,
+    valid_until:item.validUntil || null,
+    metadata:item.metadata || {},
+    status:item.active === false ? "INACTIVE" : "ACTIVE"
+  };
+}
+
+function toDiscountRuleRow(rule) {
+  return {
+    name:rule.name,
+    description:rule.description || null,
+    rule_type:rule.type || "PROFILE",
+    calculation_type:rule.calculationType || "CATEGORY_PERCENTAGES",
+    fixed_amount:Number(rule.fixedAmount || 0),
+    category_percentages:rule.categories || {},
+    requires_reason:Boolean(rule.requiresReason),
+    requires_approval:Boolean(rule.requiresApproval),
+    valid_from:rule.validFrom || null,
+    valid_until:rule.validUntil || null,
+    status:rule.active === false || rule.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+    eligibility:snakeCaseObject(rule.eligibility || {}),
+    excluded_categories:rule.exclusions || [],
+    max_amount:rule.maxAmount === null || rule.maxAmount === undefined ? null : Number(rule.maxAmount),
+    combinable:Boolean(rule.combinable),
+    approver_user_id:rule.approverId || null
   };
 }
 
 function toQuoteRow(record) {
   return {
     id: record.id,
+    code: record.id,
     hospitalization_id: record.caseId,
     patient_id: record.patientId,
     status: record.status,
@@ -68,6 +477,10 @@ function toQuoteRow(record) {
     insurer_amount: record.insurerAmount,
     patient_amount: record.patientAmount,
     comments: record.comments || null,
+    invoice_date: record.invoiceDate,
+    discount_group_id: record.discountGroupId,
+    referred_by: record.referredBy,
+    giftcard: record.giftcard || null,
     sent_at: record.sentAt || null
   };
 }
@@ -77,7 +490,8 @@ export async function createSupabaseAdapter(config) {
     return {
       mode: "mock",
       async bootstrap() { return null; },
-      async sync() { return { ok: true, mode: "mock" }; }
+      async sync() { return { ok: true, mode: "mock" }; },
+      async signOut() { return { ok: true, mode: "mock" }; }
     };
   }
 
@@ -85,7 +499,7 @@ export async function createSupabaseAdapter(config) {
     throw new Error("Supabase está activado, pero faltan URL o publishable key.");
   }
 
-  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.112.4");
   const client = createClient(config.supabaseUrl, config.supabasePublishableKey, {
     auth: {
       persistSession: true,
@@ -94,20 +508,76 @@ export async function createSupabaseAdapter(config) {
     }
   });
 
+  async function signInWithPassword(email, password) {
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error || !data?.user) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    return data.user;
+  }
+
+  async function getSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    return data.session;
+  }
+
+  async function loadCurrentProfile(userId) {
+    const { data: profile, error: profileError } = await client
+      .from("profiles")
+      .select("id, organization_id, full_name, status, organizations(id, name, slug, currency, timezone)")
+      .eq("id", userId)
+      .single();
+    if (profileError || profile?.status !== "ACTIVE") throw new Error("El usuario no tiene un perfil activo autorizado.");
+    const { data: assignments, error: roleError } = await client
+      .from("user_roles")
+      .select("roles(code)")
+      .eq("user_id", userId);
+    if (roleError) throw new Error("No fue posible cargar los permisos del usuario.");
+    const role = assignments?.map((assignment) => assignment.roles?.code).find(Boolean);
+    if (!role) throw new Error("El usuario no tiene un rol autorizado.");
+    return { ...profile, role };
+  }
+
+  async function resetPasswordForEmail(email) {
+    const redirectTo = new URL("#/auth/update-password", config.appUrl || location.origin).toString();
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw new Error("No fue posible completar la solicitud de recuperación.");
+    return { ok: true };
+  }
+
+  async function signOut() {
+    const { error } = await client.auth.signOut({ scope: "local" });
+    if (error) throw new Error("No fue posible cerrar la sesión.");
+    return { ok: true };
+  }
+
   async function bootstrap() {
-    const collections = {};
+    const rawCollections = {};
     const queries = [
       ["patients", "patients", "*"],
       ["cases", "hospitalizations", "*"],
       ["quotes", "quotes", "*, quote_versions(*, quote_items(*))"],
-      ["payments", "payments", "*"],
+      ["payments", "payments", "*, payment_allocations(*), payment_receipts(*)"],
       ["clinicalDocuments", "clinical_documents", "*"],
+      ["medicationCards", "medication_cards", "*, medication_card_items(*)"],
       ["shifts", "shifts", "*"],
+      ["suppliers", "suppliers", "*"],
+      ["catalogItems", "catalog_items", "*"],
+      ["discountRules", "discount_rules", "*"],
+      ["discountApprovalRequests", "discount_approval_requests", "*"],
       ["purchases", "purchases", "*, purchase_items(*)"],
+      ["warehouses", "warehouses", "*"],
       ["inventoryItems", "inventory_items", "*"],
+      ["inventoryLots", "inventory_lots", "*"],
       ["inventoryMovements", "inventory_movements", "*"],
+      ["inventoryReservations", "inventory_reservations", "*"],
+      ["inventoryClosures", "inventory_closures", "*, inventory_closure_items(*)"],
+      ["kits", "supply_kits", "*, supply_kit_items(*)"],
       ["doctors", "doctors", "*"],
+      ["doctorServices", "doctor_services", "*"],
       ["doctorStatements", "doctor_statements", "*, doctor_statement_items(*)"],
+      ["insuranceRequests", "insurance_requests", "*, insurance_request_events(*)"],
+      ["administrativeExecutionProfiles", "administrative_execution_profiles", "*"],
+      ["clinicalProfiles", "clinical_profiles", "*"],
       ["notifications", "notifications", "*"],
       ["auditLogs", "audit_logs", "*"]
     ];
@@ -115,9 +585,9 @@ export async function createSupabaseAdapter(config) {
     for (const [key, table, select] of queries) {
       const { data, error } = await client.from(table).select(select).limit(500);
       if (error) throw error;
-      collections[key] = data || [];
+      rawCollections[key] = data || [];
     }
-    return collections;
+    return mapSupabaseBootstrap(rawCollections);
   }
 
   async function insert(table, row) {
@@ -132,121 +602,189 @@ export async function createSupabaseAdapter(config) {
         return insert("patients", toPatientRow(payload.patient));
       case "CREATE_CASE":
         return insert("hospitalizations", toCaseRow(payload.case));
-      case "CREATE_QUOTE": {
-        const quote = payload.quote;
-        await insert("quotes", toQuoteRow(quote));
-        const version = await insert("quote_versions", {
-          quote_id: quote.id,
-          version: quote.version,
-          status_snapshot: quote.status,
-          subtotal: quote.subtotal,
-          discount_amount: quote.discountAmount,
-          total: quote.total,
-          insurer_amount: quote.insurerAmount,
-          patient_amount: quote.patientAmount,
-          discount_snapshot: snakeCaseObject(quote.discount || {}),
-          comments: quote.comments || null,
-          immutable: Boolean(quote.immutable),
-          revision_reason: quote.revisionReason || null,
-          snapshot: snakeCaseObject(quote.sentSnapshot || quote)
-        });
-        const rows = quote.items.map((item, index) => ({
-          quote_version_id: version.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
-      }
-      case "CREATE_QUOTE_REVISION": {
-        const { data, error } = await client.rpc("create_quote_revision", {
-          p_quote_id: payload.quote.quoteId,
-          p_source_version_id: payload.sourceQuoteId,
-          p_reason: payload.quote.revisionReason
+      case "CREATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:null,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:null
         });
         if (error) throw error;
-        return { ok: true, quoteVersionId: data };
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "UPDATE_CATALOG_ITEM":
+      case "INACTIVATE_CATALOG_ITEM": {
+        const { data, error } = await client.rpc("save_catalog_item", {
+          p_catalog_item_id:payload.item.id,
+          p_item:toCatalogRow(payload.item),
+          p_inactivation_reason:payload.reason || null
+        });
+        if (error) throw error;
+        return { ok:true, item:mapCatalogItem(data) };
+      }
+      case "IMPORT_CATALOG_ITEMS": {
+        const { data, error } = await client.rpc("import_catalog_items", {
+          p_items:payload.items.map(toCatalogRow)
+        });
+        if (error) throw error;
+        return { ok:true, items:(data || []).map(mapCatalogItem) };
+      }
+      case "SAVE_DISCOUNT_RULE": {
+        const rule = payload.rule;
+        const remoteId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(rule.id || "")) ? rule.id : null;
+        const { data, error } = await client.rpc("save_discount_rule", {
+          p_discount_rule_id:remoteId,
+          p_rule:toDiscountRuleRow(rule),
+          p_inactivation_reason:payload.reason || null
+        });
+        if (error) throw error;
+        return { ok:true, rule:mapDiscountRule(data?.rule || data) };
+      }
+      case "REQUEST_DISCOUNT_APPROVAL": {
+        const request = payload.request;
+        const { data, error } = await client.rpc("request_discount_approval", {
+          p_discount_rule_id:request.ruleId,
+          p_hospitalization_id:request.caseId,
+          p_patient_id:request.patientId,
+          p_quote_context:snakeCaseObject({
+            invoiceDate:request.invoiceDate,
+            items:request.items,
+            fingerprint:request.fingerprint,
+            calculatedDiscountAmount:request.calculatedDiscountAmount
+          }),
+          p_reason:request.reason || "",
+          p_request_key:request.requestKey
+        });
+        if (error) throw error;
+        return { ok:true, request:mapDiscountApprovalRequest(data?.request || data) };
+      }
+      case "DECIDE_DISCOUNT_APPROVAL": {
+        const request = payload.request;
+        const { data, error } = await client.rpc("decide_discount_approval", {
+          p_request_id:request.id,
+          p_decision:"APPROVED",
+          p_note:request.decisionNote || ""
+        });
+        if (error) throw error;
+        return { ok:true, request:mapDiscountApprovalRequest(data?.request || data) };
+      }
+      case "CREATE_QUOTE": {
+        const quote = payload.quote;
+        const { data, error } = await client.rpc("create_quote_draft_v2", {
+          p_code: quote.id,
+          p_hospitalization_id: quote.caseId,
+          p_patient_id: quote.patientId,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_currency: quote.currency || "USD",
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
+      }
+      case "CREATE_QUOTE_REVISION": {
+        const quote = payload.quote;
+        const { data, error } = await client.rpc("create_quote_revision_catalog_v2", {
+          p_quote_id: quote.quoteId,
+          p_source_version_id: payload.sourceQuoteId,
+          p_reason: quote.revisionReason,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "UPDATE_QUOTE_DRAFT": {
         const quote = payload.quote;
-        const { error: quoteError } = await client.from("quotes")
-          .update(toQuoteRow(quote))
-          .eq("id", quote.quoteId || quote.id);
-        if (quoteError) throw quoteError;
-        const { error: versionError } = await client.from("quote_versions")
-          .update({
-            subtotal: quote.subtotal,
-            discount_amount: quote.discountAmount,
-            total: quote.total,
-            insurer_amount: quote.insurerAmount,
-            patient_amount: quote.patientAmount,
-            discount_snapshot: snakeCaseObject(quote.discount || {}),
-            comments: quote.comments || null,
-            snapshot: snakeCaseObject(quote)
-          })
-          .eq("id", quote.id);
-        if (versionError) throw versionError;
-        const { error: deleteError } = await client.from("quote_items").delete().eq("quote_version_id", quote.id);
-        if (deleteError) throw deleteError;
-        const rows = quote.items.map((item) => ({
-          quote_version_id: quote.id,
-          catalog_item_id: item.catalogItemId || null,
-          category: item.category,
-          description: item.name,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          discount_amount: item.discountAmount || 0
-        }));
-        if (rows.length) {
-          const { error } = await client.from("quote_items").insert(rows);
-          if (error) throw error;
-        }
-        return { ok: true };
-      }
-      case "UPDATE_QUOTE_STATUS": {
-        const { error } = await client.rpc("transition_quote_status", {
-          p_quote_id: payload.quoteId,
-          p_to_status: payload.status,
-          p_note: payload.note || null
+        const { data, error } = await client.rpc("update_quote_draft_catalog_v2", {
+          p_quote_id: quote.quoteId || quote.id,
+          p_quote_version_id: quote.id,
+          p_price_list_id: quote.priceListId || null,
+          p_items: quote.items.map((item) => ({ catalog_item_id: item.catalogItemId, quantity: item.quantity })),
+          p_insurer_amount: quote.insurerAmount || 0,
+          p_invoice_date: quote.invoiceDate,
+          p_discount_group_id: quote.discountGroupId,
+          p_discount_reason: quote.discount?.reason || "",
+          p_referred_by: quote.referredBy,
+          p_giftcard: quote.giftcard || "",
+          p_comments: quote.comments,
+          p_discount_approval_request_id: quote.discountApprovalRequestId || null
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
+      }
+      case "UPDATE_QUOTE_STATUS": {
+        const { data, error } = await client.rpc("transition_quote_insurance_status", {
+          p_quote_id: payload.quoteId,
+          p_quote_version_id: payload.quoteVersionId,
+          p_to_status: payload.status,
+          p_note: payload.note,
+          p_approved_amount: payload.approvedAmount,
+          p_claim_number: payload.claimNumber || null,
+          p_idempotency_key: payload.eventId
+        });
+        if (error) throw error;
+        return { ok: true, ...data };
       }
       case "SEND_QUOTE_VERSION": {
         const quote = payload.quote;
-        const { error } = await client.rpc("send_quote_version", {
+        const { data, error } = await client.rpc("send_quote_version_and_queue", {
           p_quote_id: quote.quoteId || quote.id,
-          p_quote_version_id: quote.id
+          p_quote_version_id: quote.id,
+          p_channel: payload.channel,
+          p_idempotency_key: payload.idempotencyKey
         });
         if (error) throw error;
-        return { ok: true };
+        return { ok: true, ...data };
       }
-      case "SIGN_CLINICAL_DOCUMENT":
-        return client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
-      case "SIGN_MEDICATION_CARD":
-        return client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
-      case "VOID_CLINICAL_DOCUMENT":
-        return client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
-      case "VOID_CLINICAL_RECORD":
-        return client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
-      case "CREATE_CLINICAL_CORRECTION":
-        return client.rpc("create_clinical_record_correction", {
+      case "SIGN_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "SIGN_MEDICATION_CARD": {
+        const { data, error } = await client.rpc("sign_clinical_record", { p_subject_type: "MEDICATION_CARD", p_subject_id: payload.cardId });
+        if (error) throw error;
+        return { ok: true, card: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_DOCUMENT": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: "CLINICAL_DOCUMENT", p_subject_id: payload.documentId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "VOID_CLINICAL_RECORD": {
+        const { data, error } = await client.rpc("void_clinical_record", { p_subject_type: payload.subjectType, p_subject_id: payload.subjectId, p_reason: payload.reason });
+        if (error) throw error;
+        return { ok: true, record: camelCaseObject(data) };
+      }
+      case "CREATE_CLINICAL_CORRECTION": {
+        const { data, error } = await client.rpc("create_clinical_record_correction", {
           p_subject_type: payload.correction.subjectType,
           p_subject_id: payload.correction.subjectId,
           p_correction_kind: payload.correction.correctionKind,
           p_reason: payload.correction.reason,
           p_content: snakeCaseObject(payload.correction.content || {})
         });
-      case "CREATE_PAYMENT":
-        return client.rpc("apply_payment", {
-          p_quote_id: payload.payment.quoteId,
+        if (error) throw error;
+        return { ok: true, correction: typeof data === "string" ? { id: data } : camelCaseObject(data) };
+      }
+      case "CREATE_PAYMENT": {
+        const { data, error } = await client.rpc("apply_payment", {
+          p_quote_id: payload.payment.rootQuoteId || payload.payment.quoteId,
           p_quote_version_id: payload.payment.quoteVersionId || null,
           p_hospitalization_id: payload.payment.caseId || null,
           p_patient_id: payload.payment.patientId,
@@ -257,52 +795,155 @@ export async function createSupabaseAdapter(config) {
           p_external_reference: payload.payment.reference || null,
           p_idempotency_key: payload.payment.idempotencyKey
         });
-      case "REVERSE_PAYMENT":
-        return client.rpc("reverse_payment", {
+        if (error) throw error;
+        return { ok: true, payment: camelCaseObject(data) };
+      }
+      case "REVERSE_PAYMENT": {
+        const { data, error } = await client.rpc("reverse_payment", {
           p_payment_id: payload.paymentId,
           p_reason: payload.reason,
           p_idempotency_key: payload.idempotencyKey
         });
-      case "CREATE_CLINICAL_DOCUMENT":
-        return insert("clinical_documents", {
-          id: payload.document.id,
-          hospitalization_id: payload.document.caseId,
-          patient_id: payload.document.patientId,
-          document_type: payload.document.type,
-          title: payload.document.title,
-          status: payload.document.status,
-          author_id: payload.document.authorId || null,
-          version_number: payload.document.version || 1,
-          summary: payload.document.summary || null,
-          content: payload.document.content || {}
+        if (error) throw error;
+        return { ok: true, payment: camelCaseObject(data) };
+      }
+      case "START_ADMINISTRATIVE_EXECUTION": {
+        const profile = payload.profile;
+        const { data, error } = await client.rpc("start_administrative_execution", {
+          p_quote_id: profile.rootQuoteId,
+          p_quote_version_id: profile.quoteId,
+          p_hospitalization_id: profile.caseId,
+          p_health_manager: profile.healthManager,
+          p_referred_by: profile.referredBy,
+          p_revenue_type: profile.revenueType,
+          p_service_type: profile.serviceType || null,
+          p_start_date: profile.startDate,
+          p_duration_days: profile.durationDays,
+          p_payment_form: profile.paymentForm,
+          p_insurer_id: profile.insurerId || null,
+          p_request_type: profile.requestType,
+          p_third_party_invoice: profile.thirdPartyInvoice,
+          p_major_category: profile.majorCategory || null,
+          p_service_subcategory: profile.serviceSubcategory || null,
+          p_source_hospital: profile.sourceHospital || null,
+          p_description: profile.description || null,
+          p_patient_type: profile.patientType || null,
+          p_module_type: profile.moduleType || null,
+          p_additional_options: profile.additionalOptions || null,
+          p_idempotency_key: profile.idempotencyKey
         });
-      case "CREATE_SHIFT":
-        return insert("shifts", {
-          id: payload.shift.id,
-          hospitalization_id: payload.shift.caseId,
-          patient_id: payload.shift.patientId,
-          resource_id: payload.shift.resourceId || null,
-          resource_name: payload.shift.resourceName,
-          starts_at: payload.shift.start,
-          ends_at: payload.shift.end,
-          shift_type: payload.shift.type,
-          status: payload.shift.status
+        if (error) throw error;
+        return { ok: true, profile: camelCaseObject(data) };
+      }
+      case "CREATE_CLINICAL_PROFILE": {
+        const profile = payload.profile;
+        const { data, error } = await client.rpc("create_clinical_profile", {
+          p_hospitalization_id: profile.caseId,
+          p_profile: snakeCaseObject(profile),
+          p_idempotency_key: profile.idempotencyKey
         });
-      case "CREATE_PURCHASE":
-        return insert("purchases", {
-          id: payload.purchase.id,
-          supplier_id: payload.purchase.supplierId,
-          purchase_date: payload.purchase.date,
-          invoice_number: payload.purchase.invoiceNumber,
-          status: payload.purchase.status,
-          payment_type: payload.purchase.paymentType,
-          subtotal: payload.purchase.subtotal,
-          tax_amount: payload.purchase.tax,
-          discount_amount: payload.purchase.discount,
-          total: payload.purchase.total
+        if (error) throw error;
+        return { ok: true, profile: camelCaseObject(data) };
+      }
+      case "VALIDATE_HEALTH_REPORT_RANGE": {
+        const { data, error } = await client.rpc("validate_health_report_range", {
+          p_hospitalization_id: payload.caseId,
+          p_start_date: payload.start,
+          p_end_date: payload.end
         });
-      case "CREATE_INVENTORY_MOVEMENT":
-        return client.rpc("apply_inventory_movement_v2", {
+        if (error) throw error;
+        return { ok: Boolean(data) };
+      }
+      case "CREATE_CLINICAL_DOCUMENT": {
+        const document = payload.document;
+        const { data, error } = await client.rpc("create_clinical_document_draft", {
+          p_hospitalization_id: document.caseId,
+          p_document_type: document.type,
+          p_title: document.title,
+          p_summary: document.summary || null,
+          p_content: snakeCaseObject(document.content || {}),
+          p_idempotency_key: document.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok: true, document: camelCaseObject(data) };
+      }
+      case "CREATE_MEDICATION_CARD": {
+        const card = payload.card;
+        const { data, error } = await client.rpc("create_medication_card_draft", {
+          p_hospitalization_id: card.caseId,
+          p_header: snakeCaseObject({
+            treatingDoctorId: card.treatingDoctorId,
+            otherDoctorIds: card.otherDoctorIds || [],
+            diagnosis: card.diagnosis || ""
+          }),
+          p_items: snakeCaseObject(card.items || []),
+          p_idempotency_key: card.idempotencyKey
+        });
+        if (error) throw error;
+        const normalized = camelCaseObject(data);
+        return { ok: true, card: {
+          ...normalized,
+          caseId: normalized.hospitalizationId,
+          version: Number(normalized.versionNumber || 1),
+          items: (normalized.items || []).map((item) => ({
+            ...item,
+            medication: item.medicationName || item.medication,
+            doctorId: item.prescribingDoctorId || item.doctorId,
+            schedule: item.schedule || []
+          }))
+        } };
+      }
+      case "CREATE_SHIFT": {
+        const shift = payload.shift;
+        const { data, error } = await client.rpc("create_shift_visit", {
+          p_hospitalization_id: shift.caseId,
+          p_starts_at: shift.start,
+          p_ends_at: shift.end,
+          p_shift_type: shift.type,
+          p_classification: shift.classification,
+          p_frequency: shift.frequency,
+          p_occurrence_count: shift.occurrenceCount,
+          p_idempotency_key: shift.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok:true, shift:camelCaseObject(data) };
+      }
+      case "ASSIGN_SHIFT_RESOURCE": {
+        const { data, error } = await client.rpc("assign_shift_resource", {
+          p_shift_id: payload.shiftId,
+          p_resource_user_id: payload.resourceId,
+          p_internal_observations: payload.internalObservations || null,
+          p_idempotency_key: payload.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok:true, shift:camelCaseObject(data) };
+      }
+      case "CREATE_PURCHASE_DRAFT": {
+        const purchase = payload.purchase;
+        const { data, error } = await client.rpc("create_purchase_draft", {
+          p_supplier_id: purchase.supplierId,
+          p_purchase_date: purchase.date,
+          p_invoice_number: purchase.invoiceNumber || null,
+          p_observations: purchase.observations || null,
+          p_purchase_kind: purchase.kind,
+          p_extra_amount: purchase.extra || 0,
+          p_items: purchase.items.map((item) => ({
+            catalog_item_id: item.catalogItemId,
+            supplier_id: item.supplierId,
+            description: item.description || item.name,
+            presentation: item.presentation,
+            quantity: item.quantity,
+            unit_cost: item.unitCost,
+            tax_amount: item.taxAmount || 0,
+            discount_amount: item.discountAmount || 0
+          })),
+          p_idempotency_key: purchase.idempotencyKey
+        });
+        if (error) throw error;
+        return { ok:true, purchase:mapPurchase(data) };
+      }
+      case "CREATE_INVENTORY_MOVEMENT": {
+        const { data, error } = await client.rpc("apply_inventory_movement_v2", {
           p_inventory_item_id: payload.movement.inventoryItemId,
           p_movement_type: payload.movement.type,
           p_quantity: payload.movement.quantity,
@@ -315,6 +956,9 @@ export async function createSupabaseAdapter(config) {
           p_note: payload.movement.note || null,
           p_idempotency_key: payload.movement.idempotencyKey
         });
+        if (error) throw error;
+        return { ok:true, movementId:data };
+      }
       case "QUEUE_NOTIFICATION":
         return client.rpc("queue_notification", {
           p_channel: payload.notification.channel,
@@ -330,5 +974,15 @@ export async function createSupabaseAdapter(config) {
     }
   }
 
-  return { mode: "supabase", client, bootstrap, sync };
+  return {
+    mode: "supabase",
+    client,
+    bootstrap,
+    sync,
+    signInWithPassword,
+    getSession,
+    loadCurrentProfile,
+    resetPasswordForEmail,
+    signOut
+  };
 }

@@ -9,6 +9,7 @@ import {
   inventoryFree,
   inventoryState,
   statementBalance,
+  formatDate,
   roleCan,
   toCsv
 } from "../app/domain.js";
@@ -84,4 +85,8 @@ test("roles respetan separación de funciones", () => {
 test("CSV escapa comas y comillas", () => {
   const csv = toCsv([{ name: 'Paciente, "Demo"', status: "ACTIVE" }]);
   assert.match(csv, /"Paciente, ""Demo"""/);
+});
+
+test("fechas de calendario no retroceden un día por la zona horaria", () => {
+  assert.match(formatDate("2026-06-01"), /01.*jun.*2026/i);
 });

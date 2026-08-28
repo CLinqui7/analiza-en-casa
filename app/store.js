@@ -13,6 +13,14 @@ import { seedData } from "./mock-data.js";
 import { createSupabaseAdapter } from "./supabase-adapter.js";
 
 const STORAGE_KEY = "analiza-en-casa-production-qa-v1";
+const VISIT_TYPES = new Set([
+  "NURSING_CARE","SUPERVISION","MEDICAL_VISIT","DAILY_RECORD","SWALLOWING_THERAPY",
+  "OCCUPATIONAL_THERAPY","PHYSIOTHERAPY","NUTRITION","CAREGIVER","CLINICAL_PSYCHOLOGY",
+  "SOCIAL_WORK","SPIRITUAL_VISIT","TECHNICAL_NURSING_CARE","SPECIAL_LABORATORY","GERIATRICS",
+  "TERTIARY_LABORATORY","RESPIRATORY_VISIT"
+]);
+const DISCOUNT_CATEGORIES = ["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"];
+export const DEMO_PASSWORD = "Demo2026!";
 
 function clone(value) {
   return structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -22,21 +30,54 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+export function normalizeState(rawState = {}) {
+  const base = clone(seedData);
+  const raw = rawState && typeof rawState === "object" ? clone(rawState) : {};
+  const normalized = {
+    ...base,
+    ...raw,
+    meta: { ...base.meta, ...(raw.meta || {}) },
+    organization: { ...base.organization, ...(raw.organization || {}) },
+    session: { ...base.session, ...(raw.session || {}) }
+  };
+  for (const [key, value] of Object.entries(base)) {
+    if (Array.isArray(value)) normalized[key] = Array.isArray(raw[key]) ? raw[key] : clone(value);
+  }
+  normalized.session.authenticated = Boolean(normalized.session.authenticated && normalized.session.userId && normalized.session.role);
+  normalized.clinicalCorrections ||= [];
+  normalized.notificationAttempts ||= [];
+  normalized.administrativeExecutionProfiles ||= [];
+  normalized.clinicalProfiles ||= [];
+  normalized.discountRules ||= [];
+  normalized.discountApprovalRequests ||= [];
+  return normalized;
+}
+
 function loadLocalState() {
   try {
     const raw = safeStorage.getItem(STORAGE_KEY);
-    if (!raw) return clone(seedData);
+    if (!raw) return normalizeState(seedData);
     const parsed = JSON.parse(raw);
-    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return clone(seedData);
-    return parsed;
+    if (parsed?.meta?.schemaVersion !== seedData.meta.schemaVersion) return normalizeState(seedData);
+    return normalizeState(parsed);
   } catch {
-    return clone(seedData);
+    return normalizeState(seedData);
   }
 }
 
 export async function createAppStore(config) {
   let state = loadLocalState();
   state.clinicalCorrections ||= [];
+  state.patients = state.patients.map((patient) => ({
+    ...patient,
+    organizationId: patient.organizationId || state.organization?.id,
+    fullName: patient.fullName || `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
+    addressComments: patient.addressComments || ""
+  }));
+  state.cases = state.cases.map((record) => ({
+    ...record,
+    organizationId: record.organizationId || state.organization?.id
+  }));
   state.quotes = state.quotes.map((quote) => ({
     ...quote,
     organizationId: quote.organizationId || state.organization?.id,
@@ -58,27 +99,37 @@ export async function createAppStore(config) {
     signedAt: note.signedAt || (note.status === "SIGNED" ? note.createdAt : null),
     signatureMetadata: note.signatureMetadata || null
   }));
-  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications"]) {
+  for (const collection of ["payments", "inventoryItems", "inventoryLots", "inventoryMovements", "inventoryReservations", "inventoryClosures", "warehouses", "kits", "notifications", "suppliers", "catalogItems", "discountRules", "discountApprovalRequests"]) {
     state[collection] ||= [];
     state[collection] = state[collection].map((record) => ({
       ...record,
       organizationId: record.organizationId || state.organization?.id
     }));
   }
+  state.purchases ||= [];
+  state.purchases = state.purchases.map((purchase) => ({
+    ...purchase,
+    organizationId: purchase.organizationId || state.organization?.id,
+    code: purchase.code || purchase.id,
+    kind: purchase.kind || (purchase.paymentType === "PETTY_CASH" ? "PETTY_CASH" : "ORDER"),
+    extra: Number(purchase.extra || purchase.extraAmount || 0),
+    registryStatus: purchase.registryStatus || "Sin Registro",
+    items: (purchase.items || []).map((item) => ({
+      ...item,
+      supplierId: item.supplierId || purchase.supplierId,
+      presentation: item.presentation || "No documentada",
+      taxAmount: Number(item.taxAmount ?? (Number(item.quantity || 0) * Number(item.unitCost || 0) * Number(item.taxRate || 0) / 100)),
+      discountAmount: Number(item.discountAmount || 0)
+    }))
+  }));
   state.notificationAttempts ||= [];
   let adapter = await createSupabaseAdapter(config);
   const listeners = new Set();
 
   if (adapter.mode === "supabase") {
-    try {
-      const remote = await adapter.bootstrap();
-      if (remote && Object.values(remote).some((collection) => collection?.length)) {
-        state = { ...state, ...remote, meta: { ...state.meta, remoteBootstrappedAt: nowIso() } };
-      }
-    } catch (error) {
-      state.meta.remoteError = error.message;
-      state.meta.remoteFallback = true;
-    }
+    state.session = { authenticated: false, userId: null, role: null };
+    state.meta.dataSource = "SUPABASE_AUTH_REQUIRED";
+    state.meta.remoteFallback = false;
   }
 
   function save() {
@@ -92,7 +143,7 @@ export async function createAppStore(config) {
   }
 
   function currentUser() {
-    return state.users.find((user) => user.id === state.session.userId) || state.users[0];
+    return state.users.find((user) => user.id === state.session.userId) || null;
   }
 
   function audit(action, entity, summary, metadata = {}) {
@@ -122,6 +173,20 @@ export async function createAppStore(config) {
         audit("REMOTE_SYNC_FAILED", action, `No se pudo sincronizar ${action}: ${error.message}`);
       });
       return { ok: false, error };
+    }
+  }
+
+  async function requiredSync(action, payload) {
+    try {
+      const result = await adapter.sync(action, payload);
+      if (result?.error) throw result.error;
+      return result;
+    } catch (error) {
+      setState((draft) => {
+        draft.meta.remoteError = error.message;
+        audit("REMOTE_SYNC_FAILED", action, `No se pudo confirmar ${action}: ${error.message}`);
+      });
+      throw error;
     }
   }
 
@@ -235,7 +300,7 @@ export async function createAppStore(config) {
         templateCode, channel, relatedEntityType, relatedEntityId, idempotencyKey
       });
     });
-    safeSync("QUEUE_NOTIFICATION", { notification });
+    if (!input.remoteConfirmed) safeSync("QUEUE_NOTIFICATION", { notification });
     return notification;
   }
 
@@ -286,9 +351,7 @@ export async function createAppStore(config) {
     return [original, ...corrections];
   }
 
-  function login(userId, role = null) {
-    const user = state.users.find((candidate) => candidate.id === userId);
-    if (!user) throw new Error("Usuario demo no encontrado.");
+  function establishSession(user, role = null) {
     setState((draft) => {
       draft.session = {
         authenticated: true,
@@ -300,52 +363,126 @@ export async function createAppStore(config) {
     });
   }
 
-  function logout() {
+  async function authenticate(email, password) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const suppliedPassword = String(password || "");
+    if (!normalizedEmail || !suppliedPassword) throw new Error("Ingresa usuario y contraseña.");
+    if (adapter.mode === "mock") {
+      const user = state.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.status === "ACTIVE");
+      if (!user || suppliedPassword !== DEMO_PASSWORD) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+      establishSession(user);
+      return { userId: user.id, role: user.role, mode: "mock" };
+    }
+
+    let authUser;
+    try {
+      authUser = await adapter.signInWithPassword(normalizedEmail, suppliedPassword);
+      const profile = await adapter.loadCurrentProfile(authUser.id);
+      const user = {
+        id: authUser.id,
+        name: profile.full_name,
+        email: authUser.email,
+        role: profile.role,
+        status: profile.status,
+        organizationId: profile.organization_id
+      };
+      const remote = await adapter.bootstrap();
+      const clearedCollections = Object.fromEntries(Object.entries(seedData).filter(([, value]) => Array.isArray(value)).map(([key]) => [key, []]));
+      state = normalizeState({
+        ...state,
+        ...clearedCollections,
+        ...remote,
+        users: [user],
+        organization: profile.organizations || state.organization,
+        meta: { ...state.meta, dataSource: "SUPABASE", remoteBootstrappedAt: nowIso(), remoteFallback: false }
+      });
+      save();
+      establishSession(user, profile.role);
+      return { userId: user.id, role: profile.role, mode: "supabase" };
+    } catch (error) {
+      if (authUser) await adapter.signOut().catch(() => {});
+      throw new Error("No fue posible iniciar sesión con esas credenciales.");
+    }
+  }
+
+  async function recoverPassword(email) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail) throw new Error("Ingresa el correo de acceso.");
+    if (adapter.mode === "supabase") await adapter.resetPasswordForEmail(normalizedEmail);
+    return { ok: true, simulated: adapter.mode === "mock" };
+  }
+
+  async function logout() {
+    if (adapter.mode === "supabase") await adapter.signOut();
     setState((draft) => {
       audit("LOGOUT", draft.session.userId, "Cierre de sesión.");
-      draft.session.authenticated = false;
+      draft.session = { authenticated: false, userId: null, role: null, loggedAt: null };
     });
   }
 
   function reset() {
-    state = clone(seedData);
+    state = normalizeState(seedData);
     safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     for (const listener of listeners) listener(state);
   }
 
   function createPatient(input) {
     requirePermission("patients:write");
+    const fullName = String(input.fullName || `${input.firstName || ""} ${input.lastName || ""}`).trim();
+    const document = String(input.document || "").trim();
+    if (!document || !fullName) throw new Error("Documento y nombre completo son obligatorios.");
+    const email = String(input.email || "").trim().toLowerCase();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Correo inválido.");
     const patient = {
       id: uid("PAT"),
       documentType: input.documentType || "DUI",
-      document: input.document.trim(),
-      firstName: input.firstName.trim(),
-      lastName: input.lastName.trim(),
-      fullName: `${input.firstName} ${input.lastName}`.trim(),
+      document,
+      firstName: String(input.firstName || "").trim(),
+      lastName: String(input.lastName || "").trim(),
+      fullName,
       birthDate: input.birthDate || "",
       sex: input.sex || "",
       bloodType: input.bloodType || "",
-      nationality: input.nationality || "Salvadoreña",
+      nationality: input.nationality || "",
+      company: input.company || "",
       phone: input.phone || "",
-      email: input.email || "",
+      homePhone: input.homePhone || "",
+      email,
+      retired: Boolean(input.retired),
+      civilStatus: input.civilStatus || "",
+      occupation: input.occupation || "",
       address: input.address || "",
+      addressComments: input.addressComments || "",
+      locationLink: input.locationLink || "",
       geo: input.geo || "",
-      triage: input.triage || "BAJA",
+      triage: input.triage || "NO_ASIGNADO",
       status: "ACTIVE",
       insurerId: input.insurerId || null,
       planId: input.planId || null,
       policy: input.policy || "",
+      policyCertificate: input.policyCertificate || "",
+      policyEffectiveDate: input.policyEffectiveDate || "",
       policyValidUntil: input.policyValidUntil || "",
+      isPolicyHolder: input.isPolicyHolder ?? null,
+      insuredDocument: input.insuredDocument || "",
+      insuredName: input.insuredName || "",
+      insuredBirthDate: input.insuredBirthDate || "",
       contactName: input.contactName || "",
       contactPhone: input.contactPhone || "",
+      contactEmail: input.contactEmail || "",
+      contactRelationship: input.contactRelationship || "",
+      contactRole: input.contactRole || "",
+      contactCountry: input.contactCountry || "",
       notifyWhatsApp: Boolean(input.notifyWhatsApp),
       notifySms: Boolean(input.notifySms),
-      notifyEmail: Boolean(input.notifyEmail)
+      notifyEmail: Boolean(input.notifyEmail),
+      organizationId: state.organization?.id
     };
 
     const duplicate = state.patients.some((existing) =>
-      existing.documentType === patient.documentType
-      && existing.document.replace(/\s/g, "") === patient.document.replace(/\s/g, "")
+      existing.organizationId === patient.organizationId
+      && existing.documentType === patient.documentType
+      && existing.document.replace(/\s/g, "").toUpperCase() === patient.document.replace(/\s/g, "").toUpperCase()
     );
     if (duplicate) throw new Error("Ya existe un paciente con ese documento.");
 
@@ -357,12 +494,56 @@ export async function createAppStore(config) {
     return patient;
   }
 
+  function importPatients(inputs) {
+    requirePermission("patients:write");
+    if (adapter.mode !== "mock") throw new Error("La carga productiva requiere el importador transaccional del servidor.");
+    if (!Array.isArray(inputs) || !inputs.length) throw new Error("El archivo no contiene pacientes.");
+    if (inputs.length > 500) throw new Error("La carga demo admite hasta 500 filas por archivo.");
+    const existingKeys = new Set(state.patients.map((patient) => `${patient.documentType}:${String(patient.document).replace(/\s/g, "").toUpperCase()}`));
+    const batchKeys = new Set();
+    const imported = inputs.map((input, index) => {
+      const row = index + 2;
+      const documentType = String(input.documentType || "DUI").trim();
+      const document = String(input.document || "").trim();
+      const firstName = String(input.firstName || "").trim();
+      const lastName = String(input.lastName || "").trim();
+      const email = String(input.email || "").trim().toLowerCase();
+      if (!document || !firstName || !lastName) throw new Error(`Fila ${row}: documento, firstName y lastName son obligatorios.`);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error(`Fila ${row}: correo inválido.`);
+      if (input.birthDate && Number.isNaN(Date.parse(input.birthDate))) throw new Error(`Fila ${row}: fecha de nacimiento inválida.`);
+      const key = `${documentType}:${document.replace(/\s/g, "").toUpperCase()}`;
+      if (existingKeys.has(key) || batchKeys.has(key)) throw new Error(`Fila ${row}: documento duplicado en el alcance autorizado.`);
+      batchKeys.add(key);
+      return {
+        id: uid("PAT"), documentType, document, firstName, lastName, fullName: `${firstName} ${lastName}`,
+        birthDate: input.birthDate || "", sex: input.sex || "", bloodType: input.bloodType || "",
+        nationality: input.nationality || "Salvadoreña", company: input.company || "", phone: input.phone || "",
+        email, address: input.address || "", geo: "", triage: input.triage || "NO_ASIGNADO",
+        status: String(input.status || "ACTIVE").toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+        insurerId: null, planId: null, policy: "", policyValidUntil: "", contactName: "", contactPhone: "",
+        notifyWhatsApp: false, notifySms: false, notifyEmail: false, organizationId: state.organization?.id
+      };
+    });
+    setState((draft) => {
+      draft.patients.unshift(...imported);
+      audit("IMPORT_PATIENTS", `BATCH-${nowIso()}`, `${imported.length} pacientes sintéticos importados.`, { count: imported.length });
+    });
+    return imported;
+  }
+
   function updatePatient(id, patch) {
     requirePermission("patients:write");
     let updated;
     setState((draft) => {
       const patient = draft.patients.find((record) => record.id === id);
       if (!patient) throw new Error("Paciente no encontrado.");
+      assertCurrentOrganization(patient, "Paciente");
+      const documentType = patch.documentType || patient.documentType;
+      const document = String(patch.document ?? patient.document).replace(/\s/g, "").toUpperCase();
+      if (draft.patients.some((record) => record.id !== id && record.organizationId === patient.organizationId && record.documentType === documentType && String(record.document).replace(/\s/g, "").toUpperCase() === document)) {
+        throw new Error("No fue posible guardar el paciente con ese documento.");
+      }
+      if (patch.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(patch.email).trim())) throw new Error("Correo inválido.");
       Object.assign(patient, patch);
       if (patch.firstName || patch.lastName) patient.fullName = `${patient.firstName} ${patient.lastName}`.trim();
       updated = clone(patient);
@@ -373,10 +554,12 @@ export async function createAppStore(config) {
 
   function createCase(input) {
     requirePermission("cases:write");
-    if (!patientById(input.patientId)) throw new Error("Paciente no encontrado.");
+    const patient = patientById(input.patientId);
+    assertCurrentOrganization(patient, "Paciente");
     const sequence = state.cases.length + 196;
     const record = {
       id: `HOS-${new Date().getFullYear()}-${String(sequence).padStart(4, "0")}`,
+      organizationId: state.organization?.id,
       patientId: input.patientId,
       accountType: input.accountType || "PRIVADO",
       insurerId: input.insurerId || null,
@@ -405,25 +588,235 @@ export async function createAppStore(config) {
     setState((draft) => {
       const record = draft.cases.find((candidate) => candidate.id === id);
       if (!record) throw new Error("Hospitalización no encontrada.");
+      assertCurrentOrganization(record, "Hospitalización");
       Object.assign(record, patch);
       audit("UPDATE_CASE", id, `Hospitalización actualizada: ${Object.keys(patch).join(", ")}.`);
     });
+  }
+
+  function validateQuoteGeneral(input, fallback = {}) {
+    const invoiceDate = String(input.invoiceDate ?? fallback.invoiceDate ?? "").trim();
+    const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(invoiceDate) ? new Date(`${invoiceDate}T00:00:00.000Z`) : null;
+    if (!parsedDate || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== invoiceDate) {
+      throw new Error("Indique una fecha de cotización válida.");
+    }
+    const discountGroupId = String(input.discountGroupId ?? fallback.discountGroupId ?? "").trim();
+    const allowedDiscount = discountGroupId === "REGULAR" || state.discountRules.some((rule) => rule.id === discountGroupId && rule.active);
+    if (!allowedDiscount) throw new Error("Seleccione un grupo de descuento autorizado.");
+    const referredBy = String(input.referredBy ?? fallback.referredBy ?? "").trim();
+    if (!referredBy) throw new Error("Indique al menos una referencia autorizada.");
+    const comments = String(input.comments ?? fallback.comments ?? "").trim();
+    if (!comments) throw new Error("Los comentarios administrativos son obligatorios.");
+    return { invoiceDate, discountGroupId, referredBy, comments, giftcard: String(input.giftcard ?? fallback.giftcard ?? "").trim() };
+  }
+
+  function validateQuoteItems(inputItems) {
+    if (!Array.isArray(inputItems) || !inputItems.length) throw new Error("La cotización requiere al menos un concepto.");
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    return inputItems.map((item) => {
+      if (!allowedCategories.has(item.category)) throw new Error("La categoría del concepto no está autorizada.");
+      if (!String(item.name || "").trim()) throw new Error("El concepto requiere una descripción.");
+      if (!Number.isFinite(Number(item.quantity)) || !(Number(item.quantity) > 0)) throw new Error("La cantidad del concepto debe ser mayor que cero.");
+      if (!Number.isFinite(Number(item.unitPrice)) || Number(item.unitPrice) < 0) throw new Error("Hay conceptos sin precio válido.");
+      const lineDiscount = Number(item.discountAmount ?? 0);
+      if (!Number.isFinite(lineDiscount) || lineDiscount < 0) throw new Error("El descuento de línea debe ser un importe válido no negativo.");
+      if (lineDiscount > Number(item.quantity) * Number(item.unitPrice)) throw new Error("El descuento de línea no puede superar el importe bruto.");
+      const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId && candidate.active !== false);
+      if (!catalogItem || catalogItem.category !== item.category) throw new Error("El concepto no pertenece al catálogo autorizado.");
+      if (String(item.name).trim() !== String(catalogItem.name).trim()) throw new Error("La descripción debe coincidir con el catálogo autorizado.");
+      if (Number(item.unitPrice) !== Number(catalogItem.price)) throw new Error("El precio debe coincidir con el catálogo autorizado.");
+      return {
+        ...item,
+        catalogItemId: catalogItem.id,
+        category: catalogItem.category,
+        name: catalogItem.name,
+        quantity: Number(item.quantity),
+        unitPrice: Number(catalogItem.price),
+        discountAmount: lineDiscount
+      };
+    });
+  }
+
+  function isoDate(value, label) {
+    const normalized = String(value || "").trim();
+    if (!normalized) return "";
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? new Date(`${normalized}T00:00:00.000Z`) : null;
+    if (!date || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== normalized) {
+      throw new Error(`${label} debe ser una fecha válida.`);
+    }
+    return normalized;
+  }
+
+  function isDiscountRuleActive(rule) {
+    return Boolean(rule && rule.active !== false && rule.status !== "INACTIVE");
+  }
+
+  function normalizeDiscountCategories(input = {}) {
+    const exclusions = new Set(Array.isArray(input.exclusions) ? input.exclusions : []);
+    const categories = {};
+    for (const category of DISCOUNT_CATEGORIES) {
+      const value = Number(input.categories?.[category] ?? 0);
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new Error(`El porcentaje de ${category} debe estar entre 0 y 100.`);
+      }
+      categories[category] = exclusions.has(category) ? 0 : roundMoney(value);
+    }
+    return categories;
+  }
+
+  function normalizeDiscountRule(input = {}, existing = {}) {
+    const name = String(input.name ?? existing.name ?? "").trim();
+    if (!name) throw new Error("El nombre del perfil de descuento es obligatorio.");
+    const calculationType = String(input.calculationType ?? existing.calculationType ?? "CATEGORY_PERCENTAGES").toUpperCase();
+    if (!["CATEGORY_PERCENTAGES", "FIXED"].includes(calculationType)) throw new Error("Seleccione un tipo de cálculo de descuento válido.");
+    const fixedAmount = Number(input.fixedAmount ?? existing.fixedAmount ?? 0);
+    if (!Number.isFinite(fixedAmount) || fixedAmount < 0) throw new Error("El monto fijo debe ser un importe no negativo.");
+    if (calculationType === "FIXED" && !(fixedAmount > 0)) throw new Error("Indique un monto fijo mayor que cero.");
+    const validFrom = isoDate(input.validFrom ?? existing.validFrom ?? "", "La fecha de inicio");
+    const validUntil = isoDate(input.validUntil ?? existing.validUntil ?? "", "La fecha de fin");
+    if (validFrom && validUntil && validUntil < validFrom) throw new Error("La fecha de fin no puede ser anterior a la fecha de inicio.");
+    const maxAmountRaw = input.maxAmount ?? existing.maxAmount ?? null;
+    const maxAmount = maxAmountRaw === "" || maxAmountRaw === null || maxAmountRaw === undefined ? null : Number(maxAmountRaw);
+    if (maxAmount !== null && (!Number.isFinite(maxAmount) || maxAmount < 0)) throw new Error("El límite máximo debe ser un importe no negativo.");
+    const requiresApproval = Boolean(input.requiresApproval ?? existing.requiresApproval);
+    const approverId = String(input.approverId ?? existing.approverId ?? "").trim();
+    if (requiresApproval && !approverId) throw new Error("Seleccione el aprobador configurado para este perfil.");
+    if (approverId && !state.users.some((user) => user.id === approverId && user.status === "ACTIVE")) {
+      throw new Error("El aprobador configurado no está disponible.");
+    }
+    const eligibility = {
+      patientId: String(input.eligibility?.patientId ?? existing.eligibility?.patientId ?? "").trim(),
+      insurerId: String(input.eligibility?.insurerId ?? existing.eligibility?.insurerId ?? "").trim(),
+      companyName: String(input.eligibility?.companyName ?? existing.eligibility?.companyName ?? "").trim(),
+      retireeOnly: Boolean(input.eligibility?.retireeOnly ?? existing.eligibility?.retireeOnly)
+    };
+    if (eligibility.patientId && !state.patients.some((patient) => patient.id === eligibility.patientId)) {
+      throw new Error("El paciente de elegibilidad no está disponible.");
+    }
+    if (eligibility.insurerId && !state.insurers.some((insurer) => insurer.id === eligibility.insurerId && insurer.status === "ACTIVE")) {
+      throw new Error("La aseguradora de elegibilidad no está disponible.");
+    }
+    const exclusions = [...new Set((Array.isArray(input.exclusions) ? input.exclusions : existing.exclusions || [])
+      .map((value) => String(value).toUpperCase())
+      .filter((value) => DISCOUNT_CATEGORIES.includes(value)))];
+    return {
+      id: existing.id || uid("DISC"),
+      name,
+      description: String(input.description ?? existing.description ?? "").trim(),
+      type: String(input.type ?? existing.type ?? "PROFILE").toUpperCase(),
+      calculationType,
+      fixedAmount: roundMoney(fixedAmount),
+      categories: normalizeDiscountCategories({ categories: input.categories ?? existing.categories ?? {}, exclusions }),
+      validFrom: validFrom || null,
+      validUntil: validUntil || null,
+      status: String(input.status ?? existing.status ?? (existing.active === false ? "INACTIVE" : "ACTIVE")).toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+      active: String(input.status ?? existing.status ?? (existing.active === false ? "INACTIVE" : "ACTIVE")).toUpperCase() !== "INACTIVE",
+      eligibility,
+      requiresReason: Boolean(input.requiresReason ?? existing.requiresReason ?? true),
+      requiresApproval,
+      approverId: approverId || null,
+      exclusions,
+      maxAmount: maxAmount === null ? null : roundMoney(maxAmount),
+      combinable: Boolean(input.combinable ?? existing.combinable),
+      createdBy: existing.createdBy || currentUser()?.id || null,
+      createdAt: existing.createdAt || nowIso(),
+      updatedAt: nowIso()
+    };
+  }
+
+  function discountEligibility(rule, context = {}) {
+    if (!isDiscountRuleActive(rule)) return { eligible:false, reason:"El perfil de descuento no está activo." };
+    const date = isoDate(context.invoiceDate || new Date().toISOString().slice(0, 10), "La fecha de cotización");
+    if (rule.validFrom && date < rule.validFrom) return { eligible:false, reason:"El perfil todavía no está vigente para la fecha de cotización." };
+    if (rule.validUntil && date > rule.validUntil) return { eligible:false, reason:"El perfil ya no está vigente para la fecha de cotización." };
+    const patient = patientById(context.patientId);
+    const recordCase = caseById(context.caseId);
+    if (!patient || !recordCase || recordCase.patientId !== patient.id) return { eligible:false, reason:"El paciente y la hospitalización no son válidos para el perfil." };
+    const eligibility = rule.eligibility || {};
+    if (eligibility.patientId && eligibility.patientId !== patient.id) return { eligible:false, reason:"El perfil no aplica al paciente seleccionado." };
+    const insurerId = recordCase.insurerId || patient.insurerId || "";
+    if (eligibility.insurerId && eligibility.insurerId !== insurerId) return { eligible:false, reason:"El perfil no aplica a la aseguradora seleccionada." };
+    const companyName = String(recordCase.companyName || recordCase.company || patient.companyName || patient.company || "").trim();
+    if (eligibility.companyName && eligibility.companyName.localeCompare(companyName, "es", { sensitivity:"accent" }) !== 0) {
+      return { eligible:false, reason:"El perfil no aplica a la empresa seleccionada." };
+    }
+    if (eligibility.retireeOnly && patient.isRetired !== true) return { eligible:false, reason:"El perfil exige elegibilidad de jubilado configurada." };
+    return { eligible:true, reason:"Elegibilidad configurada confirmada.", patient, recordCase };
+  }
+
+  function discountFingerprint(rule, context = {}) {
+    return JSON.stringify({
+      ruleId:rule.id,
+      ruleUpdatedAt:rule.updatedAt || rule.createdAt || "",
+      caseId:context.caseId || "",
+      patientId:context.patientId || "",
+      invoiceDate:context.invoiceDate || "",
+      items:(context.items || []).map((item) => ({ id:item.catalogItemId || item.id || "", quantity:Number(item.quantity || 0), price:Number(item.unitPrice || 0), category:item.category || "" }))
+    });
+  }
+
+  function discountApprovalStatus(rule, context = {}) {
+    if (!rule?.requiresApproval) return { approved:true, request:null, reason:"No requiere aprobación." };
+    const request = state.discountApprovalRequests.find((candidate) => candidate.id === context.approvalRequestId);
+    if (!request) return { approved:false, request:null, reason:"Solicite la aprobación configurada." };
+    if (request.status !== "APPROVED") return { approved:false, request, reason:"La solicitud de aprobación continúa pendiente." };
+    if (request.ruleId !== rule.id || request.fingerprint !== discountFingerprint(rule, context)) {
+      return { approved:false, request, reason:"La aprobación no coincide con el perfil, fecha o conceptos actuales." };
+    }
+    return { approved:true, request, reason:"Aprobación configurada confirmada." };
+  }
+
+  function resolveQuoteDiscount(discountGroupId, reason = "", context = {}) {
+    if (discountGroupId === "REGULAR") {
+      return { type:"CATEGORY_PERCENTAGES", categories:{}, value:0, reason:"", ruleId:"REGULAR", approvalRequestId:null };
+    }
+    const rule = state.discountRules.find((candidate) => candidate.id === discountGroupId);
+    if (!rule) throw new Error("Seleccione un grupo de descuento autorizado.");
+    const eligibility = discountEligibility(rule, context);
+    if (!eligibility.eligible) throw new Error(eligibility.reason);
+    const normalizedReason = String(reason || "").trim();
+    if (rule.requiresReason && !normalizedReason) throw new Error("Indique el motivo del descuento.");
+    let approvalRequestId = null;
+    if (rule.requiresApproval) {
+      const approval = discountApprovalStatus(rule, context);
+      if (!approval.approved) {
+        throw new Error("El perfil requiere aprobación configurada antes de aplicar este descuento.");
+      }
+      approvalRequestId = approval.request.id;
+    }
+    return {
+      type:rule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES",
+      categories:clone(rule.categories || {}),
+      value:rule.calculationType === "FIXED" ? Number(rule.fixedAmount || 0) : 0,
+      fixedAmount:rule.fixedAmount ?? 0,
+      maxAmount:rule.maxAmount ?? null,
+      reason:normalizedReason,
+      ruleId:rule.id,
+      approvalRequestId,
+      ruleSnapshot:clone(rule)
+    };
   }
 
   function createQuote(input) {
     requirePermission("quotes:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
     const patient = patientById(recordCase.patientId);
     if (!patient) throw new Error("Paciente no encontrado.");
-    if (!input.items?.length) throw new Error("La cotización requiere al menos un concepto.");
-
-    const missingPrice = input.items.some((item) => !(Number(item.unitPrice) >= 0));
-    if (missingPrice) throw new Error("Hay conceptos sin precio.");
+    const authorizedItems = validateQuoteItems(input.items);
+    const general = validateQuoteGeneral(input);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason, {
+      caseId:recordCase.id,
+      patientId:patient.id,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId
+    });
 
     const calculation = calculateQuote(
-      input.items,
-      input.discount || { type: "PERCENT", value: 0 },
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount || 0
     );
     const sequence = 150 + state.quotes.length;
@@ -438,7 +831,7 @@ export async function createAppStore(config) {
       status: "DRAFT",
       version: 1,
       currency: "USD",
-      items: input.items.map((item) => ({
+      items: authorizedItems.map((item) => ({
         id: item.id || uid("QTI"),
         catalogItemId: item.catalogItemId || null,
         category: item.category,
@@ -447,9 +840,14 @@ export async function createAppStore(config) {
         unitPrice: Number(item.unitPrice),
         discountAmount: Number(item.discountAmount || 0)
       })),
-      discount: input.discount || { type: "PERCENT", value: 0, reason: "" },
+      discount: authorizedDiscount,
+      discountApprovalRequestId: authorizedDiscount.approvalRequestId,
       ...calculation,
-      comments: input.comments || "",
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
       revisionReason: "",
       immutable: false,
       createdBy: currentUser().id,
@@ -461,13 +859,30 @@ export async function createAppStore(config) {
     quote.quoteId = quote.id;
     quote.originalQuoteId = quote.id;
 
-    setState((draft) => {
+    const commit = (remote = null) => {
+      if (remote?.quote_id && remote?.quote_version_id) {
+        quote.displayCode = quote.id;
+        quote.id = remote.quote_version_id;
+        quote.quoteId = remote.quote_id;
+        quote.originalQuoteId = remote.quote_id;
+        quote.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(quote);
-      recordCase.nextAction = "Revisar y enviar cotización.";
+      if (authorizedDiscount.approvalRequestId) {
+        const request = draft.discountApprovalRequests.find((candidate) => candidate.id === authorizedDiscount.approvalRequestId);
+        if (request) request.quoteVersionId = quote.id;
+      }
+      const currentCase = draft.cases.find((candidate) => candidate.id === recordCase.id);
+      if (currentCase) currentCase.nextAction = "Revisar y enviar cotización.";
       audit("CREATE_QUOTE", quote.id, `Cotización creada para ${patient.fullName} por ${quote.total}.`);
-    });
-    safeSync("CREATE_QUOTE", { quote });
-    return quote;
+      });
+      return quote;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE", { quote }).then(commit);
+    }
+    return commit();
   }
 
   function reviseQuote(id, input) {
@@ -477,23 +892,28 @@ export async function createAppStore(config) {
     assertCurrentOrganization(original, "Cotización");
     const revisionReason = String(input.revisionReason || "").trim();
     if (!revisionReason) throw new Error("Indique el motivo de la nueva versión.");
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason, {
+      caseId:original.caseId,
+      patientId:original.patientId,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId || original.discountApprovalRequestId
+    });
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
     const rootId = quoteRootId(original);
     const nextVersion = quoteVersions(original).reduce((highest, candidate) => Math.max(highest, Number(candidate.version || 0)), 0) + 1;
-    let revised;
-    setState((draft) => {
-      const source = draft.quotes.find((candidate) => candidate.id === id);
-      if (!source) throw new Error("Cotización no encontrada.");
-      revised = {
-        ...clone(source),
+    const revised = {
+        ...clone(original),
         id: uid("QTV"),
         quoteId: rootId,
-        originalQuoteId: source.originalQuoteId || rootId,
-        previousVersionId: source.id,
+        originalQuoteId: original.originalQuoteId || rootId,
+        previousVersionId: original.id,
         version: nextVersion,
         status: "DRAFT",
         immutable: false,
@@ -502,22 +922,43 @@ export async function createAppStore(config) {
         revisionReason,
         createdBy: currentUser().id,
         createdAt: nowIso(),
-        items: (input.items || source.items).map((item) => ({ ...clone(item), id: uid("QTI") })),
-        discount: clone(input.discount || source.discount),
-        comments: input.comments ?? source.comments,
+        items: authorizedItems.map((item) => ({ ...clone(item), id: uid("QTI") })),
+        discount: clone(authorizedDiscount),
+        discountApprovalRequestId: authorizedDiscount.approvalRequestId,
+        comments: general.comments,
+        invoiceDate: general.invoiceDate,
+        discountGroupId: general.discountGroupId,
+        referredBy: general.referredBy,
+        giftcard: general.giftcard,
         ...calculation,
         portalToken: `demo-${uid("portal").toLowerCase()}`,
         expiresAt: new Date(Date.now() + 72 * 3600 * 1000).toISOString()
       };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) {
+        revised.id = remote.quote_version_id;
+        revised.quoteId = remote.quote_id || revised.quoteId;
+        revised.originalQuoteId = remote.quote_id || revised.originalQuoteId;
+        revised.remoteConfirmedAt = nowIso();
+      }
+      setState((draft) => {
       draft.quotes.unshift(revised);
-      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${source.id}; motivo: ${revisionReason}.`, {
+      if (authorizedDiscount.approvalRequestId) {
+        const request = draft.discountApprovalRequests.find((candidate) => candidate.id === authorizedDiscount.approvalRequestId);
+        if (request) request.quoteVersionId = revised.id;
+      }
+      audit("CREATE_QUOTE_REVISION", revised.id, `Versión ${revised.version} creada desde ${original.id}; motivo: ${revisionReason}.`, {
         quoteId: rootId,
-        previousVersionId: source.id,
+        previousVersionId: original.id,
         version: revised.version
       });
-    });
-    safeSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id });
-    return revised;
+      });
+      return revised;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_QUOTE_REVISION", { quote: revised, sourceQuoteId: id }).then(commit);
+    }
+    return commit();
   }
 
   function updateQuoteDraft(id, input) {
@@ -528,95 +969,155 @@ export async function createAppStore(config) {
     if (original.status !== "DRAFT" || quoteIsImmutable(original)) {
       throw new Error("La versión enviada no se puede editar. Cree una nueva versión.");
     }
+    const general = validateQuoteGeneral(input, original);
+    const authorizedItems = validateQuoteItems(input.items || original.items);
+    const authorizedDiscount = resolveQuoteDiscount(general.discountGroupId, input.discount?.reason || original.discount?.reason, {
+      caseId:original.caseId,
+      patientId:original.patientId,
+      invoiceDate:general.invoiceDate,
+      items:authorizedItems,
+      approvalRequestId:input.discountApprovalRequestId || original.discountApprovalRequestId
+    });
     const calculation = calculateQuote(
-      input.items || original.items,
-      input.discount || original.discount,
+      authorizedItems,
+      authorizedDiscount,
       input.insurerAmount ?? original.insurerAmount
     );
-    let updated;
-    setState((draft) => {
+    const updated = {
+      ...clone(original),
+      items: clone(authorizedItems),
+      discount: clone(authorizedDiscount),
+      discountApprovalRequestId: authorizedDiscount.approvalRequestId,
+      comments: general.comments,
+      invoiceDate: general.invoiceDate,
+      discountGroupId: general.discountGroupId,
+      referredBy: general.referredBy,
+      giftcard: general.giftcard,
+      ...calculation
+    };
+    const commit = (remote = null) => {
+      if (remote?.quote_version_id) updated.remoteConfirmedAt = nowIso();
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === id);
       if (!quote) throw new Error("Cotización no encontrada.");
-      quote.items = clone(input.items || quote.items);
-      quote.discount = clone(input.discount || quote.discount);
-      quote.comments = input.comments ?? quote.comments;
-      Object.assign(quote, calculation);
-      updated = clone(quote);
+      Object.assign(quote, clone(updated));
       audit("UPDATE_QUOTE_DRAFT", quote.id, `Borrador v${quote.version} actualizado.`, {
         quoteId: quoteRootId(quote),
         version: quote.version
       });
-    });
-    safeSync("UPDATE_QUOTE_DRAFT", { quote: updated });
-    return updated;
+      });
+      return updated;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("UPDATE_QUOTE_DRAFT", { quote: updated }).then(commit);
+    }
+    return commit();
   }
 
-  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null) {
+  function updateQuoteStatus(quoteId, status, note = "", approvedAmount = null, claimNumber = "", idempotencyKey = "") {
     requirePermission("insurance:write");
-    const eventId = uid("QSE");
-    setState((draft) => {
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const normalizedNote = String(note || "").trim();
+    const normalizedApprovedAmount = approvedAmount === null || approvedAmount === "" ? null : Number(approvedAmount);
+    if (normalizedApprovedAmount !== null && (!Number.isFinite(normalizedApprovedAmount) || normalizedApprovedAmount < 0 || normalizedApprovedAmount > Number(quote.total))) {
+      throw new Error("El monto aprobado debe ser válido y no superar el total de la cotización.");
+    }
+    const normalizedClaimNumber = String(claimNumber || "").trim();
+    if (normalizedClaimNumber.length > 120) throw new Error("El número de reclamo o autorización es demasiado largo.");
+    const eventId = String(idempotencyKey || uid("QSE")).trim();
+    if (!eventId || eventId.length > 160) throw new Error("La clave de idempotencia de seguro es inválida.");
+    const priorRequest = state.insuranceRequests.find((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+    const priorEvent = priorRequest?.events.find((event) => event.idempotencyKey === eventId);
+    if (priorEvent) {
+      if (priorRequest.quoteId !== quoteId || priorEvent.status !== status || priorEvent.note !== normalizedNote
+        || Number(priorEvent.approvedAmount ?? normalizedApprovedAmount) !== Number(normalizedApprovedAmount)
+        || String(priorEvent.claimNumber ?? normalizedClaimNumber) !== normalizedClaimNumber) {
+        throw new Error("La clave de idempotencia ya pertenece a otra operación.");
+      }
+      return quote;
+    }
+    if (!canTransitionQuote(quote.status, status)) {
+      throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
+    }
+    if (!normalizedNote) throw new Error("La actualización de seguro requiere una observación.");
+    const previousStatus = quote.status;
+
+    const commit = (remote = null) => {
+      const committedEvent = state.insuranceRequests.some((request) => request.events?.some((event) => event.idempotencyKey === eventId));
+      if (committedEvent) return quoteById(quoteId);
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (!canTransitionQuote(quote.status, status)) {
-        throw new Error(`Transición no permitida: ${quote.status} → ${status}.`);
-      }
-      const previousStatus = quote.status;
-      if (quoteIsImmutable(quote) && approvedAmount !== null && approvedAmount !== "" && Number(approvedAmount) !== Number(quote.insurerAmount)) {
-        throw new Error("La cobertura de una versión enviada es inmutable. Cree una nueva versión.");
-      }
       quote.status = status;
-      if (approvedAmount !== null && approvedAmount !== "") {
-        quote.insurerAmount = roundMoney(Math.min(Number(approvedAmount), quote.total));
-        quote.patientAmount = roundMoney(Math.max(0, quote.total - quote.insurerAmount));
-      }
       const request = draft.insuranceRequests.find((candidate) => candidate.quoteId === quoteId);
       if (request) {
         request.status = status;
-        request.approvedAmount = quote.insurerAmount;
-        request.lastNote = note || request.lastNote;
-        request.events.push({ date: nowIso(), status, note });
+        if (normalizedApprovedAmount !== null) request.approvedAmount = roundMoney(normalizedApprovedAmount);
+        if (normalizedClaimNumber) request.claimNumber = normalizedClaimNumber;
+        request.lastNote = normalizedNote;
+        if (!request.events.some((event) => event.idempotencyKey === eventId)) request.events.push({
+          date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+          approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+        });
       } else if (["SENT_TO_INSURER", "INSURER_REVIEW", "INFO_REQUIRED", "PARTIALLY_APPROVED", "APPROVED", "REJECTED"].includes(status)) {
         draft.insuranceRequests.unshift({
-          id: uid("PRE"),
+          id: remote?.insurance_request_id || uid("PRE"),
           quoteId,
           insurerId: patientById(quote.patientId)?.insurerId || null,
           status,
           submittedAt: nowIso(),
-          approvedAmount: quote.insurerAmount,
+          approvedAmount: roundMoney(normalizedApprovedAmount || 0),
           requestedDocuments: [],
-          claimNumber: "",
-          lastNote: note,
-          events: [{ date: nowIso(), status, note }]
+          claimNumber: normalizedClaimNumber,
+          lastNote: normalizedNote,
+          events: [{
+            date: nowIso(), status, note: normalizedNote, idempotencyKey: eventId,
+            approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, quoteVersionId: quoteId
+          }]
         });
       }
-      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${note}`, {
+      audit("UPDATE_QUOTE_STATUS", quoteId, `Estado actualizado de ${previousStatus} a ${status}. ${normalizedNote}`, {
         quoteId: quoteRootId(quote),
-        version: quote.version
+        version: quote.version,
+        eventId
       });
-    });
-    safeSync("UPDATE_QUOTE_STATUS", { quoteId, status, note, eventId });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: quote.patientId,
-      relatedEntityType: "QUOTE", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_STATUS", channel: "WHATSAPP", recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE", relatedEntityId: committedQuote.id, idempotencyKey: `NOT:QUOTE_STATUS:${eventId}`,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    const payload = { quoteId: quote.quoteId || quote.id, quoteVersionId: quote.id, status, note: normalizedNote, approvedAmount: normalizedApprovedAmount, claimNumber: normalizedClaimNumber, eventId };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_QUOTE_STATUS", payload).then(commit);
+    return commit();
   }
 
   function sendQuote(quoteId, channel = "WHATSAPP") {
     requirePermission("quotes:write");
-    setState((draft) => {
+    const normalizedChannel = String(channel || "").toUpperCase();
+    if (!["WHATSAPP", "EMAIL"].includes(normalizedChannel)) throw new Error("Canal de envío no permitido para cotizaciones.");
+    const quote = quoteById(quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const notificationKey = `NOT:QUOTE_READY:${quote.id}:${normalizedChannel}`;
+    const priorDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+    if (quoteIsImmutable(quote) && priorDelivery) return quote;
+    if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
+    if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
+    if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) throw new Error("No se puede enviar una cotización con precios faltantes.");
+
+    const commit = () => {
+      const current = quoteById(quoteId);
+      const committedDelivery = state.notifications.find((notification) => notification.idempotencyKey === notificationKey);
+      if (quoteIsImmutable(current) && committedDelivery) return current;
+      setState((draft) => {
       const quote = draft.quotes.find((candidate) => candidate.id === quoteId);
-      if (!quote) throw new Error("Cotización no encontrada.");
-      assertCurrentOrganization(quote, "Cotización");
-      if (quoteIsImmutable(quote)) throw new Error("La versión ya fue enviada y no puede enviarse nuevamente.");
-      if (!["DRAFT", "READY_TO_SEND"].includes(quote.status)) {
-        throw new Error("Sólo se puede enviar una versión en borrador o lista para enviar.");
-      }
-      if (quote.items.some((item) => item.unitPrice === null || item.unitPrice === undefined)) {
-        throw new Error("No se puede enviar una cotización con precios faltantes.");
-      }
-      if (quote.status === "DRAFT") quote.status = "SENT_TO_PATIENT";
+      quote.status = "SENT_TO_PATIENT";
       quote.sentAt = nowIso();
       quote.immutable = true;
       quote.sentSnapshot = clone({
@@ -625,18 +1126,24 @@ export async function createAppStore(config) {
         items: quote.items,
         discount: quote.discount
       });
-      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${channel} y bloqueada.`, {
+      audit("SEND_QUOTE", quoteId, `Cotización v${quote.version} enviada por ${normalizedChannel} y bloqueada.`, {
         quoteId: quoteRootId(quote),
         version: quote.version,
-        channel
+        channel: normalizedChannel,
+        idempotencyKey: notificationKey
       });
-    });
-    safeSync("SEND_QUOTE_VERSION", { quote: quoteById(quoteId), channel });
-    const quote = quoteById(quoteId);
-    if (quote) queueNotification({
-      templateCode: "QUOTE_READY", channel, recipientId: quote.patientId,
-      relatedEntityType: "QUOTE_VERSION", relatedEntityId: quote.id, idempotencyKey: `NOT:QUOTE_READY:${quote.id}:${channel}`
-    });
+      });
+      const committedQuote = quoteById(quoteId);
+      queueNotification({
+        templateCode: "QUOTE_READY", channel: normalizedChannel, recipientId: committedQuote.patientId,
+        relatedEntityType: "QUOTE_VERSION", relatedEntityId: committedQuote.id, idempotencyKey: notificationKey,
+        remoteConfirmed: adapter.mode === "supabase"
+      });
+      return committedQuote;
+    };
+
+    if (adapter.mode === "supabase") return requiredSync("SEND_QUOTE_VERSION", { quote, channel: normalizedChannel, idempotencyKey: notificationKey }).then(commit);
+    return commit();
   }
 
   function createPayment(input) {
@@ -657,6 +1164,7 @@ export async function createAppStore(config) {
     const payment = {
       id: uid("PAY"),
       quoteId: quote.id,
+      rootQuoteId: quoteRootId(quote),
       quoteVersionId: quote.id,
       caseId: quote.caseId || "",
       patientId: quote.patientId,
@@ -673,18 +1181,93 @@ export async function createAppStore(config) {
       allocations: [{ quoteId: quote.id, quoteVersionId: quote.id, amount: validation.amount, currency: quote.currency || "USD", status: "APPLIED" }]
     };
 
-    setState((draft) => {
-      draft.payments.unshift(payment);
-      const remaining = quoteBalance(quote, draft.payments);
-      if (remaining <= 0.01 && quote.status === "PATIENT_PAYMENT") quote.status = "SERVICE_SCHEDULED";
-      audit("CREATE_PAYMENT", payment.id, `Pago ${payment.amount} aplicado a ${quote.id}.`);
-    });
-    safeSync("CREATE_PAYMENT", { payment });
-    queueNotification({
-      templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: payment.patientId,
-      relatedEntityType: "QUOTE", relatedEntityId: payment.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${payment.id}`
-    });
-    return payment;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.payment || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...payment,
+        id: remote.id || payment.id,
+        organizationId: remote.organizationId || payment.organizationId,
+        date: remote.paidAt || remote.createdAt || payment.date,
+        amount: Number(remote.amount ?? payment.amount),
+        currency: remote.currency || payment.currency,
+        method: remote.method || payment.method,
+        payer: remote.payer || payment.payer,
+        reference: remote.externalReference || payment.reference,
+        status: remote.status || payment.status,
+        receipt: remote.receiptCode || payment.receipt,
+        idempotencyKey: remote.idempotencyKey || payment.idempotencyKey
+      } : payment;
+      const existing = state.payments.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.payments.unshift(committed);
+        audit("CREATE_PAYMENT", committed.id, `Pago ${committed.amount} aplicado a ${quote.id}.`, {
+          quoteId: quoteRootId(quote), quoteVersionId: quote.id, idempotencyKey: committed.idempotencyKey
+        });
+      });
+      queueNotification({
+        templateCode: "PAYMENT_RECEIVED", channel: "EMAIL", recipientId: committed.patientId,
+        relatedEntityType: "QUOTE", relatedEntityId: committed.quoteId, idempotencyKey: `NOT:PAYMENT_RECEIVED:${committed.id}`
+      });
+      return committed;
+    };
+
+    if (adapter.mode === "supabase") return requiredSync("CREATE_PAYMENT", { payment }).then(commit);
+    return commit();
+  }
+
+  function startAdministrativeExecution(input) {
+    requirePermission("cases:write");
+    const quote = quoteById(input.quoteId);
+    if (!quote) throw new Error("Cotización no encontrada.");
+    assertCurrentOrganization(quote, "Cotización");
+    const record = caseById(quote.caseId);
+    assertCurrentOrganization(record, "Hospitalización");
+    const durationDays = Number(input.durationDays);
+    if (!String(input.healthManager || "").trim() || !String(input.referredBy || "").trim()
+      || !String(input.revenueType || "").trim() || !/^\d{4}-\d{2}-\d{2}$/.test(String(input.startDate || ""))
+      || !Number.isInteger(durationDays) || durationDays <= 0 || durationDays > 3660
+      || !String(input.paymentForm || "").trim() || !String(input.requestType || "").trim()) {
+      throw new Error("Complete los campos administrativos obligatorios con valores válidos.");
+    }
+    const idempotencyKey = String(input.idempotencyKey || `EXEC:${quote.id}:${input.startDate}`).trim().slice(0, 160);
+    const profile = {
+      id: uid("PI"), organizationId: state.organization?.id, caseId: quote.caseId,
+      quoteId: quote.id, rootQuoteId: quoteRootId(quote), patientId: quote.patientId,
+      healthManager: String(input.healthManager).trim(), referredBy: String(input.referredBy).trim(),
+      revenueType: String(input.revenueType).trim(), serviceType: String(input.serviceType || "").trim(),
+      startDate: input.startDate, durationDays, paymentForm: String(input.paymentForm).trim(),
+      insurerId: input.insurerId || null, requestType: String(input.requestType).trim(),
+      thirdPartyInvoice: Boolean(input.thirdPartyInvoice), majorCategory: String(input.majorCategory || "").trim(),
+      serviceSubcategory: String(input.serviceSubcategory || "").trim(), sourceHospital: String(input.sourceHospital || "").trim(),
+      description: String(input.description || "").trim(), patientType: String(input.patientType || "").trim(),
+      moduleType: String(input.moduleType || "").trim(), additionalOptions: String(input.additionalOptions || "").trim(),
+      status: "ACTIVE", idempotencyKey, createdAt: nowIso()
+    };
+    const existing = state.administrativeExecutionProfiles.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (existing) return existing;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.profile || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...profile, ...remote, id: remote.id || profile.id,
+        caseId: remote.hospitalizationId || profile.caseId,
+        quoteId: remote.quoteVersionId || profile.quoteId,
+        rootQuoteId: remote.quoteId || profile.rootQuoteId,
+        durationDays: Number(remote.durationDays || profile.durationDays),
+        thirdPartyInvoice: Boolean(remote.thirdPartyInvoice ?? profile.thirdPartyInvoice)
+      } : profile;
+      const duplicate = state.administrativeExecutionProfiles.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.administrativeExecutionProfiles.unshift(committed);
+        audit("START_ADMINISTRATIVE_EXECUTION", committed.id, `Perfil administrativo creado para ${record.id}.`, {
+          quoteId: quoteRootId(quote), quoteVersionId: quote.id, idempotencyKey
+        });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("START_ADMINISTRATIVE_EXECUTION", { profile }).then(commit);
+    return commit();
   }
 
   function reversePayment(paymentId, reason, idempotencyKey = "") {
@@ -696,29 +1279,49 @@ export async function createAppStore(config) {
     assertCurrentOrganization(payment, "Pago");
     if (payment.status !== "APPLIED") throw new Error("Sólo se puede revertir un pago aplicado.");
     const key = String(idempotencyKey || `REVERSE:${paymentId}:${normalizedReason}`).slice(0, 160);
-    setState((draft) => {
-      const target = draft.payments.find((candidate) => candidate.id === paymentId);
-      target.status = "REVERSED";
-      target.reversedAt = nowIso();
-      target.reversedBy = currentUser().id;
-      target.reversalReason = normalizedReason;
-      target.reversalIdempotencyKey = key;
-      target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
-      audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
-    });
-    safeSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key });
-    return state.payments.find((candidate) => candidate.id === paymentId);
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.payment || {};
+      const alreadyCommitted = state.payments.find((candidate) => candidate.id === paymentId && candidate.status === "REVERSED" && candidate.reversalIdempotencyKey === key);
+      if (alreadyCommitted) return alreadyCommitted;
+      setState((draft) => {
+        const target = draft.payments.find((candidate) => candidate.id === paymentId);
+        target.status = remote.status || "REVERSED";
+        target.reversedAt = remote.reversedAt || nowIso();
+        target.reversedBy = remote.reversedBy || currentUser().id;
+        target.reversalReason = remote.reversalReason || normalizedReason;
+        target.reversalIdempotencyKey = remote.reversalIdempotencyKey || key;
+        target.allocations = (target.allocations || []).map((allocation) => ({ ...allocation, status: "REVERSED", reversedAt: target.reversedAt }));
+        audit("REVERSE_PAYMENT", paymentId, "Pago revertido sin eliminar el comprobante.", { reason: normalizedReason, idempotencyKey: key });
+      });
+      return state.payments.find((candidate) => candidate.id === paymentId);
+    };
+    if (adapter.mode === "supabase") return requiredSync("REVERSE_PAYMENT", { paymentId, reason: normalizedReason, idempotencyKey: key }).then(commit);
+    return commit();
   }
 
   function createClinicalDocument(input) {
     requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const type = String(input.type || "HEALTH_REPORT").trim().toUpperCase();
+    if (!["HEALTH_REPORT","MEDICAL_ORDER","CARE_PLAN","CLINICAL_EVOLUTION","LAB_REQUEST","NURSING_NOTE"].includes(type)) throw new Error("Tipo de documento clínico no válido.");
+    const title = String(input.title || "Documento clínico").trim();
+    const summary = String(input.summary || "").trim();
+    if (!title || title.length > 300 || summary.length > 5000 || JSON.stringify(input.content || {}).length > 100000) throw new Error("Revise el contenido del documento clínico.");
+    const doctorIds = [input.content?.treatingDoctorId, ...(input.content?.otherDoctorIds || [])].filter(Boolean);
+    if (type === "MEDICAL_ORDER" && !input.content?.treatingDoctorId) throw new Error("Seleccione el médico tratante de la orden.");
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId && doctor.status === "ACTIVE" && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    const idempotencyKey = String(input.idempotencyKey || uid("CLINICAL-DOCUMENT")).trim().slice(0,160);
+    const duplicate = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const document = {
       id: uid("DOC"),
-      caseId: input.caseId,
-      patientId: caseById(input.caseId)?.patientId || input.patientId,
-      type: input.type || "HEALTH_REPORT",
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      type,
       organizationId: state.organization?.id,
-      title: input.title || "Documento clínico",
+      title,
       status: "DRAFT",
       authorId: currentUser().id,
       authorName: currentUser().name,
@@ -726,15 +1329,115 @@ export async function createAppStore(config) {
       signedAt: null,
       signatureMetadata: null,
       version: 1,
-      summary: input.summary || "",
-      content: input.content || {}
+      summary,
+      content: clone(input.content || {}),
+      idempotencyKey
     };
-    setState((draft) => {
-      draft.clinicalDocuments.unshift(document);
-      audit("CREATE_CLINICAL_DOCUMENT", document.id, `${document.title} creado en borrador.`);
-    });
-    safeSync("CREATE_CLINICAL_DOCUMENT", { document });
-    return document;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.document || {};
+      const committed = adapter.mode === "supabase" ? {...document,...remote,id:remote.id||document.id,caseId:remote.hospitalizationId||document.caseId,patientId:remote.patientId||document.patientId,type:remote.documentType||document.type} : document;
+      const existing = state.clinicalDocuments.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey || candidate.id === committed.id);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.clinicalDocuments.unshift(committed);
+        audit("CREATE_CLINICAL_DOCUMENT", committed.id, `${committed.title} creado en borrador.`, {idempotencyKey});
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_DOCUMENT", { document }).then(commit);
+    return commit();
+  }
+
+  function createClinicalProfile(input) {
+    requirePermission("clinical:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const requiredText = ["diagnosisCode", "diagnosisLabel", "diagnosisGroup", "triage", "profileGroup", "profileSubgroup", "patientType", "serviceType"];
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(input.startDate || ""))
+      || (input.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(String(input.endDate)))
+      || (input.endDate && input.endDate < input.startDate)
+      || requiredText.some((field) => !String(input[field] || "").trim())) {
+      throw new Error("Complete los campos clínicos obligatorios con valores válidos.");
+    }
+    const devices = Array.isArray(input.devices) ? input.devices.map((device) => ({
+      deviceType: String(device.deviceType || "").trim(),
+      date: String(device.date || "").trim(),
+      gauge: String(device.gauge || "").trim(),
+      reason: String(device.reason || "").trim(),
+      changeFrequency: String(device.changeFrequency || "").trim(),
+      observations: String(device.observations || "").trim()
+    })) : [];
+    if (devices.length > 50 || devices.some((device) => !device.deviceType || (device.date && !/^\d{4}-\d{2}-\d{2}$/.test(device.date)))) {
+      throw new Error("Revise los dispositivos del perfil clínico.");
+    }
+    const shiftStartDate = String(input.shiftStartDate || "").trim();
+    const shiftEndDate = String(input.shiftEndDate || "").trim();
+    if ((shiftStartDate || shiftEndDate) && (!/^\d{4}-\d{2}-\d{2}$/.test(shiftStartDate) || !/^\d{4}-\d{2}-\d{2}$/.test(shiftEndDate) || shiftEndDate < shiftStartDate)) {
+      throw new Error("El rango de planificación de turnos no es válido.");
+    }
+    const otherDoctorIds = Array.isArray(input.otherDoctorIds) ? [...new Set(input.otherDoctorIds.filter(Boolean))] : [];
+    const referencedDoctorIds = [input.treatingDoctorId, input.coordinatorId, ...otherDoctorIds].filter(Boolean);
+    if (referencedDoctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId
+      && doctor.status === "ACTIVE"
+      && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) {
+      throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    }
+    const idempotencyKey = String(input.idempotencyKey || uid("CLINICAL-PROFILE")).trim().slice(0, 160);
+    const profile = {
+      id: uid("CP"), organizationId: state.organization?.id, caseId: recordCase.id, patientId: recordCase.patientId,
+      startDate: input.startDate, endDate: input.endDate || null,
+      treatingDoctorId: input.treatingDoctorId || null,
+      otherDoctorIds,
+      diagnosisCode: String(input.diagnosisCode).trim(), diagnosisLabel: String(input.diagnosisLabel).trim(),
+      diagnosisGroup: String(input.diagnosisGroup).trim(), triage: String(input.triage).trim(),
+      profileGroup: String(input.profileGroup).trim(), profileSubgroup: String(input.profileSubgroup).trim(),
+      patientType: String(input.patientType).trim(), supervisorName: String(input.supervisorName || "").trim(),
+      coordinatorId: input.coordinatorId || null, nursingTags: String(input.nursingTags || "").trim(),
+      supervisionFrequency: String(input.supervisionFrequency || "").trim(),
+      physicianReportFrequency: String(input.physicianReportFrequency || "").trim(), serviceType: String(input.serviceType).trim(),
+      devices, shiftStartDate: shiftStartDate || null, shiftEndDate: shiftEndDate || null,
+      shiftFrequency: String(input.shiftFrequency || "").trim(), attentionType: String(input.attentionType || "").trim(),
+      clinicalStatus: "DRAFT", attachmentMetadata: [], idempotencyKey, createdAt: nowIso(), createdBy: currentUser().id
+    };
+    const existing = state.clinicalProfiles.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (existing) return existing;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.profile || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...profile, ...remote, id: remote.id || profile.id,
+        caseId: remote.hospitalizationId || profile.caseId,
+        otherDoctorIds: remote.otherDoctorIds || profile.otherDoctorIds,
+        devices: remote.devices || profile.devices,
+        attachmentMetadata: remote.attachmentMetadata || profile.attachmentMetadata
+      } : profile;
+      const duplicate = state.clinicalProfiles.find((candidate) => candidate.idempotencyKey === committed.idempotencyKey);
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.clinicalProfiles.unshift(committed);
+        audit("CREATE_CLINICAL_PROFILE", committed.id, `Perfil clínico creado para ${recordCase.id}.`, {
+          caseId: recordCase.id, idempotencyKey: committed.idempotencyKey
+        });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_PROFILE", { profile }).then(commit);
+    return commit();
+  }
+
+  function validateHealthReportRange(input) {
+    requirePermission("clinical:read");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const start = String(input.start || "").trim();
+    const end = String(input.end || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) {
+      throw new Error("El rango del reporte de salud no es válido.");
+    }
+    const result = {caseId: recordCase.id, start, end};
+    if (adapter.mode === "supabase") return requiredSync("VALIDATE_HEALTH_REPORT_RANGE", result).then(() => result);
+    return result;
   }
 
   function updateClinicalDocument(id, patch) {
@@ -752,11 +1455,13 @@ export async function createAppStore(config) {
 
   function signClinicalDocument(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
+    const document = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!document) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(document, "Documento clínico");
+    if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "DRAFT") throw new Error("Sólo se puede firmar un borrador.");
       document.status = "SIGNED";
       document.signedAt = nowIso();
       document.signedBy = currentUser().id;
@@ -771,19 +1476,24 @@ export async function createAppStore(config) {
         version: document.version,
         signatureMetadata: document.signatureMetadata
       });
-    });
-    safeSync("SIGN_CLINICAL_DOCUMENT", { documentId: id });
+      });
+      return document;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_CLINICAL_DOCUMENT", { documentId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalDocument(id, reason) {
     requirePermission("clinical:correct_signed");
     const normalizedReason = String(reason || "").trim();
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
-    setState((draft) => {
+    const source = state.clinicalDocuments.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Documento clínico no encontrado.");
+    assertCurrentOrganization(source, "Documento clínico");
+    if (source.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
+    const commit = () => {
+      setState((draft) => {
       const document = draft.clinicalDocuments.find((candidate) => candidate.id === id);
-      if (!document) throw new Error("Documento clínico no encontrado.");
-      assertCurrentOrganization(document, "Documento clínico");
-      if (document.status !== "SIGNED") throw new Error("Sólo se puede anular un documento firmado.");
       document.status = "VOIDED";
       document.voidReason = normalizedReason;
       document.voidedAt = nowIso();
@@ -792,9 +1502,11 @@ export async function createAppStore(config) {
         version: document.version,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_DOCUMENT", { documentId: id, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function createClinicalCorrection(subjectType, subjectId, input) {
@@ -810,43 +1522,93 @@ export async function createAppStore(config) {
     if (!["AMENDMENT", "ADDENDUM", "ERRATA"].includes(correctionKind)) {
       throw new Error("Tipo de corrección no válido.");
     }
-    let correction;
-    setState((draft) => {
-      const prior = draft.clinicalCorrections
-        .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
-        .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
-      correction = {
-        id: uid("COR"),
-        organizationId: state.organization?.id,
-        subjectType,
-        subjectId,
-        originalDocumentId: subjectId,
-        previousVersionId: prior?.id || subjectId,
-        correctionKind,
-        reason,
-        content: clone(input.content || {}),
-        authorId: currentUser().id,
-        authorName: currentUser().name,
-        authorRole: state.session.role,
-        status: "CORRECTED",
-        createdAt: nowIso()
-      };
-      draft.clinicalCorrections.unshift(correction);
-      audit("CREATE_CLINICAL_CORRECTION", correction.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
-        subjectType,
-        subjectId,
-        previousVersionId: correction.previousVersionId,
-        correctionKind
+    const prior = state.clinicalCorrections
+      .filter((candidate) => candidate.subjectType === subjectType && candidate.subjectId === subjectId)
+      .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))[0];
+    const correction = {
+      id: uid("COR"),
+      organizationId: state.organization?.id,
+      subjectType,
+      subjectId,
+      originalDocumentId: subjectId,
+      previousVersionId: prior?.id || subjectId,
+      correctionKind,
+      reason,
+      content: clone(input.content || {}),
+      authorId: currentUser().id,
+      authorName: currentUser().name,
+      authorRole: state.session.role,
+      status: "CORRECTED",
+      createdAt: nowIso()
+    };
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.correction || {};
+      const committed = adapter.mode === "supabase" ? {...correction,...remote,id:remote.id||correction.id} : correction;
+      if (state.clinicalCorrections.some((candidate) => candidate.id === committed.id)) return committed;
+      setState((draft) => {
+        draft.clinicalCorrections.unshift(committed);
+        audit("CREATE_CLINICAL_CORRECTION", committed.id, `${correctionKind} creado para ${subjectType} ${subjectId}: ${reason}.`, {
+          subjectType,
+          subjectId,
+          previousVersionId: committed.previousVersionId,
+          correctionKind
+        });
       });
-    });
-    safeSync("CREATE_CLINICAL_CORRECTION", { correction });
-    return correction;
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CLINICAL_CORRECTION", { correction }).then(commit);
+    return commit();
   }
 
   function createMedicationCard(input) {
     requirePermission("clinical:write");
     const recordCase = caseById(input.caseId);
     if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const treatingDoctorId = String(input.treatingDoctorId || "").trim();
+    if (!treatingDoctorId) throw new Error("Seleccione el médico tratante de la tarjeta.");
+    const otherDoctorIds = [...new Set((Array.isArray(input.otherDoctorIds) ? input.otherDoctorIds : []).filter(Boolean))];
+    const rawItems = Array.isArray(input.items) ? input.items : [];
+    if (!rawItems.length || rawItems.length > 100) throw new Error("Agregue entre 1 y 100 tratamientos documentados.");
+    const doctorIds = [treatingDoctorId, ...otherDoctorIds, ...rawItems.map((item) => item.doctorId)].filter(Boolean);
+    if (doctorIds.some((doctorId) => !state.doctors.some((doctor) => doctor.id === doctorId
+      && doctor.status === "ACTIVE"
+      && (!doctor.organizationId || doctor.organizationId === state.organization?.id)))) {
+      throw new Error("Seleccione únicamente profesionales activos de la organización.");
+    }
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+    const items = rawItems.map((rawItem) => {
+      const item = {
+        id: rawItem.id || uid("MCI"),
+        medication: String(rawItem.medication || "").trim(),
+        doctorId: String(rawItem.doctorId || treatingDoctorId || "").trim() || null,
+        route: String(rawItem.route || "").trim(),
+        dose: String(rawItem.dose || "").trim(),
+        frequency: String(rawItem.frequency || "").trim(),
+        durationDays: rawItem.durationDays === "" || rawItem.durationDays == null ? null : Number(rawItem.durationDays),
+        startDate: String(rawItem.startDate || "").trim(),
+        endDate: String(rawItem.endDate || "").trim(),
+        chronic: Boolean(rawItem.chronic),
+        schedule: [...new Set((Array.isArray(rawItem.schedule) ? rawItem.schedule : []).map((value) => String(value).trim()).filter(Boolean))],
+        indications: String(rawItem.indications || "").trim(),
+        dilutions: String(rawItem.dilutions || "").trim(),
+        administrationStatus: String(rawItem.administrationStatus || "PENDING").trim()
+      };
+      if (![item.medication,item.route,item.dose,item.frequency].every(Boolean)
+        || [item.medication,item.route,item.dose,item.frequency].some((value) => value.length > 500)
+        || item.indications.length > 5000 || item.dilutions.length > 5000
+        || Boolean(item.startDate) !== Boolean(item.endDate)
+        || (item.startDate && (!isoDate.test(item.startDate) || !isoDate.test(item.endDate) || item.endDate < item.startDate))
+        || (item.durationDays != null && !item.startDate)
+        || (item.durationDays != null && (!Number.isInteger(item.durationDays) || item.durationDays < 1 || item.durationDays > 3660))
+        || item.schedule.length > 96 || item.schedule.some((value) => value.length > 20)) {
+        throw new Error("Revise medicamento, prescriptor, vía, dosis, frecuencia, calendario y detalles del tratamiento.");
+      }
+      return item;
+    });
+    const idempotencyKey = String(input.idempotencyKey || uid("MEDICATION-CARD")).trim().slice(0,160);
+    const duplicate = state.medicationCards.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const card = {
       id: uid("MC"),
       organizationId: state.organization?.id,
@@ -857,28 +1619,46 @@ export async function createAppStore(config) {
       version: 1,
       createdAt: nowIso(),
       createdBy: currentUser().id,
+      createdByName: currentUser().name,
+      treatingDoctorId: treatingDoctorId || null,
+      otherDoctorIds,
+      diagnosis: String(input.diagnosis || "").trim().slice(0, 5000),
+      idempotencyKey,
       signatureMetadata: null,
-      items: clone(input.items || [])
+      items
     };
-    setState((draft) => {
-      draft.medicationCards.unshift(card);
-      audit("CREATE_MEDICATION_CARD", card.id, "Tarjeta de medicamentos creada en borrador.");
-    });
-    safeSync("CREATE_MEDICATION_CARD", { card });
-    return card;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.card || {};
+      const committed = adapter.mode === "supabase" ? {
+        ...card, ...remote, id: remote.id || card.id, caseId: remote.hospitalizationId || card.caseId,
+        documentStatus: remote.documentStatus || card.documentStatus,
+        items: remote.items || card.items
+      } : card;
+      const existing = state.medicationCards.find((candidate) => candidate.id === committed.id || candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.medicationCards.unshift(committed);
+        audit("CREATE_MEDICATION_CARD", committed.id, "Tarjeta de medicamentos creada en borrador.", { idempotencyKey });
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_MEDICATION_CARD", { card }).then(commit);
+    return commit();
   }
 
   function signMedicationCard(id) {
     requirePermission("clinical:sign");
-    setState((draft) => {
-      const card = draft.medicationCards.find((candidate) => candidate.id === id);
-      if (!card) throw new Error("Tarjeta de medicamentos no encontrada.");
-      assertCurrentOrganization(card, "Tarjeta de medicamentos");
-      if (card.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
-      card.documentStatus = "SIGNED";
-      card.signedAt = nowIso();
-      card.signedBy = currentUser().id;
-      card.signatureMetadata = {
+    const source = state.medicationCards.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Tarjeta de medicamentos no encontrada.");
+    assertCurrentOrganization(source, "Tarjeta de medicamentos");
+    if (source.documentStatus !== "DRAFT") throw new Error("Sólo se puede firmar una tarjeta en borrador.");
+    const commit = () => {
+      setState((draft) => {
+        const card = draft.medicationCards.find((candidate) => candidate.id === id);
+        card.documentStatus = "SIGNED";
+        card.signedAt = nowIso();
+        card.signedBy = currentUser().id;
+        card.signatureMetadata = {
         signedAt: card.signedAt,
         signedBy: currentUser().id,
         signerRole: state.session.role,
@@ -886,8 +1666,11 @@ export async function createAppStore(config) {
         legalValidation: "NEEDS_CLIENT_CONFIRMATION"
       };
       audit("SIGN_MEDICATION_CARD", id, "Tarjeta de medicamentos firmada y bloqueada.");
-    });
-    safeSync("SIGN_MEDICATION_CARD", { cardId: id });
+      });
+      return state.medicationCards.find((candidate) => candidate.id === id);
+    };
+    if (adapter.mode === "supabase") return requiredSync("SIGN_MEDICATION_CARD", { cardId: id }).then(commit);
+    return commit();
   }
 
   function voidClinicalRecord(subjectType, subjectId, reason) {
@@ -899,21 +1682,24 @@ export async function createAppStore(config) {
     if (!normalizedReason) throw new Error("Indique el motivo de la anulación.");
     const status = subjectType === "MEDICATION_CARD" ? record.documentStatus : record.status;
     if (status !== "SIGNED") throw new Error("Sólo se puede anular un registro firmado.");
-    setState((draft) => {
-      const target = clinicalRecord(subjectType, subjectId);
-      if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
-      else target.status = "VOIDED";
-      target.voidReason = normalizedReason;
-      target.voidedAt = nowIso();
-      target.voidedBy = currentUser().id;
-      audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
+    const commit = () => {
+      setState(() => {
+        const target = clinicalRecord(subjectType, subjectId);
+        if (subjectType === "MEDICATION_CARD") target.documentStatus = "VOIDED";
+        else target.status = "VOIDED";
+        target.voidReason = normalizedReason;
+        target.voidedAt = nowIso();
+        target.voidedBy = currentUser().id;
+        audit("VOID_CLINICAL_RECORD", subjectId, `${subjectType} anulado: ${normalizedReason}.`, {
         subjectType,
         version: target.version || 1,
         reason: normalizedReason
       });
-    });
-    safeSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason });
-    return true;
+      });
+      return true;
+    };
+    if (adapter.mode === "supabase") return requiredSync("VOID_CLINICAL_RECORD", { subjectType, subjectId, reason: normalizedReason }).then(commit);
+    return commit();
   }
 
   function addVitalSigns(input) {
@@ -993,51 +1779,191 @@ export async function createAppStore(config) {
 
   function createShift(input) {
     requirePermission("agenda:write");
+    const recordCase = caseById(input.caseId);
+    if (!recordCase) throw new Error("Seleccione una hospitalización válida.");
+    assertCurrentOrganization(recordCase, "Hospitalización");
+    const start = String(input.start || "").trim();
+    const end = String(input.end || "").trim();
+    const startsAt = Date.parse(start);
+    const endsAt = Date.parse(end);
+    if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt) || endsAt <= startsAt) throw new Error("El intervalo de la visita no es válido.");
+    const type = String(input.type || "").trim().toUpperCase();
+    const classification = String(input.classification || "").trim().toUpperCase();
+    const frequency = String(input.frequency || "").trim();
+    const occurrenceCount = Number(input.occurrenceCount || 1);
+    if (!VISIT_TYPES.has(type) || !["PUNTUAL","TURNO"].includes(classification) || !frequency || frequency.length > 160) throw new Error("Revise clasificación, tipo y frecuencia documentada.");
+    if (occurrenceCount !== 1) throw new Error("La recurrencia de múltiples visitas requiere reglas confirmadas.");
+    const idempotencyKey = String(input.idempotencyKey || uid("VISIT")).trim().slice(0,160);
+    if (!idempotencyKey) throw new Error("La clave de idempotencia es obligatoria.");
+    const duplicate = state.shifts.find((candidate) => candidate.idempotencyKey === idempotencyKey);
+    if (duplicate) return duplicate;
     const shift = {
       id: uid("SHIFT"),
-      caseId: input.caseId,
-      patientId: caseById(input.caseId)?.patientId,
-      resourceId: input.resourceId || "",
-      resourceName: input.resourceName,
-      start: input.start,
-      end: input.end,
-      type: input.type,
-      status: "PENDING"
+      organizationId: state.organization?.id,
+      caseId: recordCase.id,
+      patientId: recordCase.patientId,
+      resourceId: "",
+      resourceName: "Sin asignar",
+      start,
+      end,
+      type,
+      classification,
+      frequency,
+      occurrenceCount,
+      status: "PENDING",
+      internalObservations: "",
+      idempotencyKey,
+      createdAt: nowIso()
     };
-    setState((draft) => {
-      draft.shifts.unshift(shift);
-      audit("CREATE_SHIFT", shift.id, `Turno creado para ${shift.resourceName}.`);
-    });
-    safeSync("CREATE_SHIFT", { shift });
-    return shift;
+    const commit = (remoteResult = null) => {
+      const remote = remoteResult?.shift || {};
+      const committed = adapter.mode === "supabase" ? {...shift,...remote,id:remote.id||shift.id,caseId:remote.hospitalizationId||remote.caseId||shift.caseId,start:remote.startsAt||remote.start||shift.start,end:remote.endsAt||remote.end||shift.end,type:remote.shiftType||remote.type||shift.type} : shift;
+      const existing = state.shifts.find((candidate) => candidate.id === committed.id || candidate.idempotencyKey === committed.idempotencyKey);
+      if (existing) return existing;
+      setState((draft) => {
+        draft.shifts.unshift(committed);
+        audit("CREATE_SHIFT", committed.id, "Visita creada en agenda.", {idempotencyKey,classification,type});
+      });
+      return committed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_SHIFT", { shift }).then(commit);
+    return commit();
+  }
+
+  function updateShiftAssignment(id, input) {
+    requirePermission("agenda:write");
+    const source = state.shifts.find((candidate) => candidate.id === id);
+    if (!source) throw new Error("Visita no encontrada.");
+    assertCurrentOrganization(source, "Visita");
+    if (["COMPLETED","CANCELLED"].includes(source.status)) {
+      throw new Error("Una visita finalizada o cancelada no puede reasignarse.");
+    }
+    const resourceId = String(input.resourceId || "").trim();
+    const resource = state.users.find((candidate) => candidate.id === resourceId && candidate.status === "ACTIVE" && ["NURSE","DOCTOR"].includes(candidate.role));
+    if (!resource) throw new Error("Seleccione un recurso activo autorizado.");
+    const internalObservations = String(input.internalObservations || "").trim();
+    if (internalObservations.length > 5000) throw new Error("Las observaciones exceden el límite técnico.");
+    const idempotencyKey = String(input.idempotencyKey || uid("SHIFT-ASSIGN")).trim().slice(0,160);
+    const commit = () => {
+      const existing = state.shifts.find((candidate) => candidate.id === id);
+      if (existing?.assignmentIdempotencyKey === idempotencyKey) return existing;
+      setState((draft) => {
+        const target = draft.shifts.find((candidate) => candidate.id === id);
+        target.resourceId = resource.id;
+        target.resourceName = resource.name;
+        target.internalObservations = internalObservations;
+        target.assignmentIdempotencyKey = idempotencyKey;
+        target.updatedAt = nowIso();
+        audit("ASSIGN_SHIFT_RESOURCE", id, "Recurso de visita asignado.", {resourceId:resource.id,idempotencyKey});
+      });
+      return state.shifts.find((candidate) => candidate.id === id);
+    };
+    if (adapter.mode === "supabase") return requiredSync("ASSIGN_SHIFT_RESOURCE", { shiftId:id,resourceId:resource.id,internalObservations,idempotencyKey }).then(commit);
+    return commit();
   }
 
   function createPurchase(input) {
     requirePermission("purchases:write");
-    const subtotal = roundMoney(input.items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitCost), 0));
-    const tax = roundMoney(input.items.reduce((sum, item) =>
-      sum + Number(item.quantity) * Number(item.unitCost) * Number(item.taxRate || 0) / 100, 0));
-    const discount = roundMoney(input.discount || 0);
+    const kind = String(input.kind || "").toUpperCase();
+    if (!new Set(["ORDER","PETTY_CASH"]).has(kind)) throw new Error("Modalidad de compra no permitida.");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(input.date || ""))) throw new Error("La fecha de compra es obligatoria.");
+    const invoiceNumber = String(input.invoiceNumber || "").trim();
+    if (invoiceNumber.length > 160 || (kind === "PETTY_CASH" && !invoiceNumber)) throw new Error("Revise el número de factura.");
+    const observations = String(input.observations || "").trim();
+    if (observations.length > 5000) throw new Error("Las observaciones exceden el límite técnico.");
+    const idempotencyKey = String(input.idempotencyKey || "").trim().slice(0,160);
+    if (!idempotencyKey) throw new Error("La clave de idempotencia es obligatoria.");
+    const existing = state.purchases.find((candidate) =>
+      candidate.organizationId === state.organization.id && candidate.idempotencyKey === idempotencyKey
+    );
+    if (existing) return existing;
+    if (!Array.isArray(input.items) || input.items.length < 1 || input.items.length > 200) throw new Error("La compra requiere entre 1 y 200 ítems.");
+    const items = input.items.map((source, index) => {
+      const catalogItem = state.catalogItems.find((candidate) => candidate.id === source.catalogItemId);
+      const supplier = state.suppliers.find((candidate) => candidate.id === (source.supplierId || input.supplierId) && candidate.status !== "INACTIVE");
+      assertCurrentOrganization(catalogItem, `Ítem ${index + 1}`);
+      assertCurrentOrganization(supplier, `Proveedor del ítem ${index + 1}`);
+      const quantity = Number(source.quantity);
+      const unitCost = Number(source.unitCost);
+      const taxAmount = Number(source.taxAmount || 0);
+      const discountAmount = Number(source.discountAmount || 0);
+      const presentation = String(source.presentation || "").trim();
+      if (!Number.isFinite(quantity) || !(quantity > 0) || !Number.isFinite(unitCost) || unitCost < 0
+        || !Number.isFinite(taxAmount) || taxAmount < 0 || !Number.isFinite(discountAmount) || discountAmount < 0
+        || !presentation || presentation.length > 160) throw new Error(`Revise los montos y presentación del ítem ${index + 1}.`);
+      const lineSubtotal = roundMoney(quantity * unitCost);
+      const lineTotal = roundMoney(lineSubtotal + taxAmount - discountAmount);
+      if (lineTotal < 0) throw new Error(`El descuento del ítem ${index + 1} produce un total negativo.`);
+      return {
+        catalogItemId: catalogItem.id,
+        supplierId: supplier.id,
+        name: catalogItem.name,
+        description: catalogItem.name,
+        presentation,
+        quantity,
+        unitCost: roundMoney(unitCost),
+        taxAmount: roundMoney(taxAmount),
+        discountAmount: roundMoney(discountAmount),
+        lineTotal
+      };
+    });
+    const supplier = state.suppliers.find((candidate) => candidate.id === (input.supplierId || items[0].supplierId) && candidate.status !== "INACTIVE");
+    assertCurrentOrganization(supplier, "Proveedor");
+    const extra = roundMoney(Number(input.extraAmount || 0));
+    if (!Number.isFinite(extra) || extra < 0) throw new Error("El monto extra debe ser un valor no negativo.");
+    const subtotal = roundMoney(items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitCost), 0));
+    const tax = roundMoney(items.reduce((sum, item) => sum + item.taxAmount, 0));
+    const discount = roundMoney(items.reduce((sum, item) => sum + item.discountAmount, 0));
+    const total = roundMoney(subtotal + tax + extra - discount);
+    if (total < 0) throw new Error("Los ajustes producen un total de compra negativo.");
     const purchase = {
-      id: `PUR-${new Date().getFullYear()}-${String(83 + state.purchases.length).padStart(4, "0")}`,
-      supplierId: input.supplierId,
-      date: input.date || new Date().toISOString().slice(0, 10),
-      invoiceNumber: input.invoiceNumber || "",
-      status: input.status || "PENDING_APPROVAL",
-      paymentType: input.paymentType || "CREDIT",
-      invoiceFile: input.invoiceFile || "",
+      id: uid("PUR-DRAFT"),
+      code: `BORRADOR-${uid("PUR").slice(-8).toUpperCase()}`,
+      organizationId: state.organization.id,
+      supplierId: supplier.id,
+      date: input.date,
+      invoiceNumber,
+      observations,
+      kind,
+      status: "DRAFT",
+      registryStatus: "Sin Registro",
+      paymentType: "UNCONFIRMED",
+      invoiceFile: "",
       subtotal,
       tax,
       discount,
-      total: roundMoney(subtotal + tax - discount),
-      items: clone(input.items)
+      extra,
+      total,
+      idempotencyKey,
+      items
     };
-    setState((draft) => {
-      draft.purchases.unshift(purchase);
-      audit("CREATE_PURCHASE", purchase.id, `Compra creada por ${purchase.total}.`);
-    });
-    safeSync("CREATE_PURCHASE", { purchase });
-    return purchase;
+    const commit = (remotePurchase = purchase) => {
+      const normalized = {
+        ...purchase,
+        ...remotePurchase,
+        organizationId: remotePurchase.organizationId || purchase.organizationId,
+        supplierId: remotePurchase.supplierId || purchase.supplierId,
+        date: remotePurchase.date || remotePurchase.purchaseDate || purchase.date,
+        tax: Number(remotePurchase.tax ?? remotePurchase.taxAmount ?? purchase.tax),
+        discount: Number(remotePurchase.discount ?? remotePurchase.discountAmount ?? purchase.discount),
+        extra: Number(remotePurchase.extra ?? remotePurchase.extraAmount ?? purchase.extra),
+        total: Number(remotePurchase.total ?? purchase.total),
+        subtotal: Number(remotePurchase.subtotal ?? purchase.subtotal),
+        items: clone(remotePurchase.items?.length ? remotePurchase.items : purchase.items)
+      };
+      const duplicate = state.purchases.find((candidate) =>
+        candidate.organizationId === state.organization.id
+        && (candidate.idempotencyKey === idempotencyKey || candidate.id === normalized.id)
+      );
+      if (duplicate) return duplicate;
+      setState((draft) => {
+        draft.purchases.unshift(normalized);
+        audit("CREATE_PURCHASE_DRAFT", normalized.id, "Borrador de compra creado y confirmado.", { idempotencyKey, kind, itemCount:items.length });
+      });
+      return normalized;
+    };
+    if (adapter.mode === "supabase") return requiredSync("CREATE_PURCHASE_DRAFT", { purchase }).then((result) => commit(result?.purchase));
+    return commit();
   }
 
   function createInventoryMovement(input) {
@@ -1065,6 +1991,10 @@ export async function createAppStore(config) {
     if (!normalizedReference || !idempotencyKey) throw new Error("La referencia e idempotencia son obligatorias.");
     const duplicate = state.inventoryMovements.find((candidate) => candidate.organizationId === state.organization?.id && candidate.idempotencyKey === idempotencyKey);
     if (duplicate) return duplicate;
+    const catalogItem = state.catalogItems.find((candidate) => candidate.id === item.catalogItemId);
+    if (adapter.mode !== "supabase" && catalogItem?.requiresLot) {
+      throw new Error("Los movimientos locales de ítems con lote o serie permanecen bloqueados; use la persistencia transaccional autorizada.");
+    }
     const openReservation = recordCase && state.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
       && candidate.inventoryItemId === item.id && candidate.status === "OPEN");
     if (type === "PATIENT_CONSUMPTION" && (!openReservation || openReservation.quantity - openReservation.consumed - openReservation.returned < quantity)) {
@@ -1093,9 +2023,16 @@ export async function createAppStore(config) {
       note: input.note || ""
     };
 
-    setState((draft) => {
+    const commit = (remoteId = movement.id) => {
+      const confirmedMovement = { ...movement, id:remoteId || movement.id };
+      const duplicateAfterConfirmation = state.inventoryMovements.find((candidate) =>
+        candidate.organizationId === state.organization?.id
+        && (candidate.idempotencyKey === idempotencyKey || candidate.id === confirmedMovement.id)
+      );
+      if (duplicateAfterConfirmation) return duplicateAfterConfirmation;
+      setState((draft) => {
       const target = draft.inventoryItems.find((candidate) => candidate.id === item.id);
-      switch (movement.type) {
+      switch (confirmedMovement.type) {
         case "PURCHASE_ENTRY":
         case "POSITIVE_ADJUSTMENT":
           target.stock += quantity;
@@ -1120,7 +2057,7 @@ export async function createAppStore(config) {
         case "TRANSFER": {
           if (target.stock - target.committed < quantity) throw new Error("Stock libre insuficiente.");
           const targetAtDestination = draft.inventoryItems.find((candidate) => candidate.organizationId === state.organization?.id
-            && candidate.warehouseId === movement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
+            && candidate.warehouseId === confirmedMovement.warehouseTo && candidate.catalogItemId === target.catalogItemId);
           if (!targetAtDestination) throw new Error("La bodega destino no tiene un registro autorizado para este ítem.");
           target.stock -= quantity;
           targetAtDestination.stock += quantity;
@@ -1131,147 +2068,363 @@ export async function createAppStore(config) {
       }
       const reservation = recordCase && draft.inventoryReservations.find((candidate) => candidate.caseId === recordCase.id
         && candidate.inventoryItemId === target.id && candidate.status === "OPEN");
-      if (movement.type === "PATIENT_COMMITMENT") {
+      if (confirmedMovement.type === "PATIENT_COMMITMENT") {
         if (reservation) reservation.quantity += quantity;
         else draft.inventoryReservations.unshift({
           id: uid("RES"), organizationId: state.organization?.id, caseId: recordCase.id, inventoryItemId: target.id,
           quantity, delivered: 0, consumed: 0, returned: 0, status: "OPEN", createdAt: nowIso()
         });
       }
-      if (movement.type === "PATIENT_CONSUMPTION") {
+      if (confirmedMovement.type === "PATIENT_CONSUMPTION") {
         reservation.consumed += quantity;
         reservation.delivered += quantity;
       }
-      if (movement.type === "RETURN_TO_STOCK" && reservation) {
+      if (confirmedMovement.type === "RETURN_TO_STOCK" && reservation) {
         // A return from an open reservation releases a commitment; stock never
         // left the warehouse, so increasing it here would create phantom stock.
         target.committed -= quantity;
         reservation.returned += quantity;
       }
-      draft.inventoryMovements.unshift(movement);
-      audit("CREATE_INVENTORY_MOVEMENT", movement.id, `${movement.type}: ${quantity} ${item.unit} de ${item.name}.`);
+      draft.inventoryMovements.unshift(confirmedMovement);
+      audit("CREATE_INVENTORY_MOVEMENT", confirmedMovement.id, `${confirmedMovement.type}: ${quantity} ${item.unit} de ${item.name}.`);
     });
-    safeSync("CREATE_INVENTORY_MOVEMENT", { movement });
-    return movement;
+      return confirmedMovement;
+    };
+    if (adapter.mode === "supabase") {
+      return requiredSync("CREATE_INVENTORY_MOVEMENT", { movement }).then((result) => commit(result?.movementId));
+    }
+    return commit();
   }
 
   function createInventoryClosure(input) {
     requirePermission("inventory:write");
-    const closure = {
-      id: uid("CLOSE"),
-      caseId: input.caseId,
-      type: input.type || "PARTIAL",
-      status: "PENDING_REVIEW",
-      createdAt: nowIso(),
-      createdBy: currentUser().name,
-      note: input.note || "",
-      items: clone(input.items || [])
-    };
-    setState((draft) => {
-      draft.inventoryClosures.unshift(closure);
-      const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-      if (recordCase && closure.type === "TOTAL") recordCase.status = "PENDING_CLOSE";
-      audit("CREATE_INVENTORY_CLOSURE", closure.id, `Cierre ${closure.type} creado para ${closure.caseId}.`);
-    });
-    return closure;
+    void input;
+    throw new Error("Crear cierres permanece bloqueado hasta confirmar estados, conciliación, pérdida de borradores, aprobación y reversión.");
   }
 
   function approveInventoryClosure(id) {
     requirePermission("inventory:write");
-    setState((draft) => {
-      const closure = draft.inventoryClosures.find((candidate) => candidate.id === id);
-      if (!closure) throw new Error("Cierre no encontrado.");
-      closure.status = "APPROVED";
-      closure.approvedAt = nowIso();
-      closure.approvedBy = currentUser().name;
-      if (closure.type === "TOTAL") {
-        const recordCase = draft.cases.find((candidate) => candidate.id === closure.caseId);
-        if (recordCase) recordCase.status = "CLOSED";
-      }
-      audit("APPROVE_INVENTORY_CLOSURE", id, "Cierre aprobado y bloqueado.");
-    });
+    void id;
+    throw new Error("Aprobar cierres permanece bloqueado hasta confirmar la máquina de estados y sus efectos clínicos, financieros e inventarios.");
   }
 
   function createKit(input) {
     requirePermission("inventory:write");
-    const kit = {
-      id: uid("KIT"),
-      name: input.name,
-      code: input.code,
-      active: true,
-      items: clone(input.items || [])
+    void input;
+    throw new Error("Crear, editar o duplicar kits permanece bloqueado hasta confirmar componentes, lotes, concurrencia, sustitución y reversión.");
+  }
+
+  function normalizeCatalogItem(input, existing = {}) {
+    const allowedCategories = new Set(["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"]);
+    const category = String(input.category ?? existing.category ?? "").trim().toUpperCase();
+    const sku = String(input.sku ?? existing.sku ?? "").trim().toUpperCase();
+    const name = String(input.name ?? existing.name ?? "").trim();
+    const description = String(input.description ?? existing.description ?? name).trim();
+    const unit = String(input.unit ?? existing.unit ?? "unidad").trim();
+    const cost = Number(input.cost ?? existing.cost ?? 0);
+    const price = Number(input.price ?? existing.price ?? 0);
+    const validFrom = String(input.validFrom ?? existing.validFrom ?? "").trim();
+    const validUntil = String(input.validUntil ?? existing.validUntil ?? "").trim();
+    if (!allowedCategories.has(category)) throw new Error("Seleccione una categoría de catálogo válida.");
+    if (!sku || sku.length > 80 || !name || name.length > 300 || !description || description.length > 1000 || !unit || unit.length > 80) {
+      throw new Error("Complete código, nombre, descripción y unidad con valores válidos.");
+    }
+    if (!Number.isFinite(cost) || cost < 0 || !Number.isFinite(price) || price < 0) {
+      throw new Error("Costo y precio deben ser importes no negativos.");
+    }
+    if ((validFrom && !/^\d{4}-\d{2}-\d{2}$/.test(validFrom)) || (validUntil && !/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) || (validFrom && validUntil && validUntil < validFrom)) {
+      throw new Error("La vigencia del catálogo no es válida.");
+    }
+    const supplierId = String(input.supplierId ?? existing.supplierId ?? "").trim();
+    if (supplierId) {
+      const supplier = state.suppliers.find((candidate) => candidate.id === supplierId && candidate.status !== "INACTIVE");
+      assertCurrentOrganization(supplier, "Proveedor");
+    }
+    return {
+      ...existing,
+      id: existing.id || uid("CAT"),
+      organizationId: state.organization?.id,
+      sku, category, name, description, unit, cost, price,
+      taxable: Boolean(input.taxable ?? existing.taxable),
+      billable: Boolean(input.billable ?? existing.billable),
+      discountAllowed: Boolean(input.discountAllowed ?? existing.discountAllowed),
+      giftcardAllowed: Boolean(input.giftcardAllowed ?? existing.giftcardAllowed),
+      requiresLot: Boolean(input.requiresLot ?? existing.requiresLot),
+      requiresSerial: Boolean(input.requiresSerial ?? existing.requiresSerial),
+      internalUse: Boolean(input.internalUse ?? existing.internalUse),
+      coldChain: Boolean(input.coldChain ?? existing.coldChain),
+      manufacturer: String(input.manufacturer ?? existing.manufacturer ?? "").trim().slice(0, 300),
+      productType: String(input.productType ?? existing.productType ?? "").trim().slice(0, 200),
+      serviceCategory: String(input.serviceCategory ?? existing.serviceCategory ?? "").trim().slice(0, 200),
+      presentation: String(input.presentation ?? existing.presentation ?? "").trim().slice(0, 200),
+      administrationRoutes: Array.isArray(input.administrationRoutes) ? input.administrationRoutes.map(String).filter(Boolean).slice(0, 30) : (existing.administrationRoutes || []),
+      supplierId: supplierId || null,
+      validFrom: validFrom || null,
+      validUntil: validUntil || null,
+      active: input.active === undefined ? existing.active !== false : Boolean(input.active),
+      metadata: { ...(existing.metadata || {}), ...(input.metadata || {}) },
+      updatedAt: nowIso(),
+      createdAt: existing.createdAt || nowIso()
     };
-    setState((draft) => {
-      draft.kits.unshift(kit);
-      audit("CREATE_KIT", kit.id, `Kit creado: ${kit.name}.`);
-    });
-    return kit;
+  }
+
+  function assertUniqueCatalogSku(item, ignoredId = "", additional = []) {
+    const duplicate = [...state.catalogItems, ...additional].find((candidate) =>
+      candidate.id !== ignoredId
+      && candidate.organizationId === state.organization?.id
+      && String(candidate.sku || "").trim().toUpperCase() === item.sku
+    );
+    if (duplicate) throw new Error(`El código ${item.sku} ya existe en el catálogo.`);
   }
 
   function createCatalogItem(input) {
     requirePermission("catalogs:write");
-    const item = {
-      id: uid("CAT"),
-      sku: input.sku,
-      category: input.category,
-      name: input.name,
-      unit: input.unit,
-      price: Number(input.price || 0),
-      cost: Number(input.cost || 0),
-      taxable: Boolean(input.taxable),
-      requiresLot: Boolean(input.requiresLot),
-      active: true
+    const item = normalizeCatalogItem(input);
+    assertUniqueCatalogSku(item);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id: remoteItem.id || item.id }) : item;
+      setState((draft) => {
+        draft.catalogItems.unshift(confirmed);
+        audit("CREATE_CATALOG_ITEM", confirmed.id, `Ítem de catálogo creado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
     };
-    setState((draft) => {
-      draft.catalogItems.unshift(item);
-      audit("CREATE_CATALOG_ITEM", item.id, `Ítem de catálogo creado: ${item.name}.`);
-    });
-    return item;
+    if (adapter.mode === "supabase") return requiredSync("CREATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function updateCatalogItem(id, input) {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const item = normalizeCatalogItem(input, existing);
+    assertUniqueCatalogSku(item, id);
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? normalizeCatalogItem({ ...item, ...remoteItem }, { ...item, id }) : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("UPDATE_CATALOG_ITEM", id, `Ítem de catálogo actualizado: ${confirmed.name}.`, { sku:confirmed.sku, category:confirmed.category });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("UPDATE_CATALOG_ITEM", { item }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function inactivateCatalogItem(id, reason = "") {
+    requirePermission("catalogs:write");
+    const existing = state.catalogItems.find((candidate) => candidate.id === id);
+    assertCurrentOrganization(existing, "Ítem de catálogo");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason || normalizedReason.length > 500) throw new Error("Indique un motivo válido para inactivar.");
+    if (existing.active === false) return existing;
+    const item = { ...existing, active:false, updatedAt:nowIso() };
+    const commit = (remoteItem = null) => {
+      const confirmed = remoteItem ? { ...item, ...remoteItem, active:false } : item;
+      setState((draft) => {
+        const index = draft.catalogItems.findIndex((candidate) => candidate.id === id);
+        draft.catalogItems[index] = confirmed;
+        audit("INACTIVATE_CATALOG_ITEM", id, `Ítem de catálogo inactivado: ${confirmed.name}.`, { reason:normalizedReason });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("INACTIVATE_CATALOG_ITEM", { item, reason:normalizedReason }).then((result) => commit(result?.item));
+    return commit();
+  }
+
+  function importCatalogItems(rows) {
+    requirePermission("catalogs:write");
+    if (!Array.isArray(rows) || rows.length < 1 || rows.length > 500) throw new Error("La importación requiere entre 1 y 500 filas.");
+    const items = [];
+    for (const row of rows) {
+      const item = normalizeCatalogItem(row);
+      assertUniqueCatalogSku(item, "", items);
+      items.push(item);
+    }
+    const commit = (remoteItems = null) => {
+      const confirmed = Array.isArray(remoteItems) && remoteItems.length ? remoteItems.map((remote, index) => ({ ...items[index], ...remote, active:remote.status ? remote.status !== "INACTIVE" : items[index].active })) : items;
+      setState((draft) => {
+        draft.catalogItems.unshift(...confirmed);
+        audit("IMPORT_CATALOG_ITEMS", `BATCH-${nowIso()}`, `${confirmed.length} ítems sintéticos importados.`, { count:confirmed.length, skus:confirmed.map((item) => item.sku) });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("IMPORT_CATALOG_ITEMS", { items }).then((result) => commit(result?.items));
+    return commit();
   }
 
   function createDiscountRule(input) {
     requirePermission("catalogs:write");
-    const rule = {
-      id: uid("DISC"),
-      name: input.name,
-      type: input.type || "PROFILE",
-      categories: clone(input.categories || {}),
-      requiresReason: true,
-      requiresApproval: Boolean(input.requiresApproval),
-      active: true
+    const rule = normalizeDiscountRule(input);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        draft.discountRules.unshift(confirmed);
+        audit("CREATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento creado: ${confirmed.name}.`, {
+          calculationType:confirmed.calculationType,
+          validFrom:confirmed.validFrom,
+          validUntil:confirmed.validUntil,
+          requiresApproval:confirmed.requiresApproval,
+          approverId:confirmed.approverId
+        });
+      });
+      return confirmed;
     };
-    setState((draft) => {
-      draft.discountRules.unshift(rule);
-      audit("CREATE_DISCOUNT_RULE", rule.id, `Perfil de descuento creado: ${rule.name}.`);
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule }).then(commit);
+    return commit();
+  }
+
+  function updateDiscountRule(id, input) {
+    requirePermission("catalogs:write");
+    const existing = state.discountRules.find((candidate) => candidate.id === id);
+    if (!existing) throw new Error("El perfil de descuento no está disponible.");
+    assertCurrentOrganization(existing, "Perfil de descuento");
+    const rule = normalizeDiscountRule(input, existing);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        const index = draft.discountRules.findIndex((candidate) => candidate.id === id);
+        if (index < 0) throw new Error("El perfil de descuento no está disponible.");
+        draft.discountRules[index] = confirmed;
+        audit("UPDATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento actualizado: ${confirmed.name}.`, {
+          calculationType:confirmed.calculationType,
+          validFrom:confirmed.validFrom,
+          validUntil:confirmed.validUntil,
+          status:confirmed.status,
+          requiresApproval:confirmed.requiresApproval,
+          approverId:confirmed.approverId
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule }).then(commit);
+    return commit();
+  }
+
+  function inactivateDiscountRule(id, reason) {
+    requirePermission("catalogs:write");
+    const existing = state.discountRules.find((candidate) => candidate.id === id);
+    if (!existing) throw new Error("El perfil de descuento no está disponible.");
+    const normalizedReason = String(reason || "").trim();
+    if (!normalizedReason) throw new Error("Indique el motivo de inactivación.");
+    const rule = normalizeDiscountRule({ ...existing, status:"INACTIVE" }, existing);
+    const commit = (remote = null) => {
+      const confirmed = remote?.rule ? { ...rule, ...remote.rule } : rule;
+      setState((draft) => {
+        const index = draft.discountRules.findIndex((candidate) => candidate.id === id);
+        draft.discountRules[index] = confirmed;
+        audit("INACTIVATE_DISCOUNT_RULE", confirmed.id, `Perfil de descuento inactivado: ${confirmed.name}.`, { reason:normalizedReason });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("SAVE_DISCOUNT_RULE", { rule, reason:normalizedReason }).then(commit);
+    return commit();
+  }
+
+  function requestDiscountApproval(input) {
+    requirePermission("quotes:write");
+    const rule = state.discountRules.find((candidate) => candidate.id === input.ruleId);
+    if (!rule || !rule.requiresApproval) throw new Error("El perfil seleccionado no requiere una solicitud de aprobación.");
+    const items = validateQuoteItems(input.items || []);
+    const context = {
+      caseId:String(input.caseId || ""),
+      patientId:String(input.patientId || ""),
+      invoiceDate:isoDate(input.invoiceDate, "La fecha de cotización"),
+      items
+    };
+    const eligibility = discountEligibility(rule, context);
+    if (!eligibility.eligible) throw new Error(eligibility.reason);
+    const reason = String(input.reason || "").trim();
+    if (rule.requiresReason && !reason) throw new Error("Indique el motivo del descuento antes de solicitar aprobación.");
+    const fingerprint = discountFingerprint(rule, context);
+    const requestedKey = String(input.requestKey || "").trim() || uid("DARQ");
+    const sameKey = state.discountApprovalRequests.find((candidate) => candidate.requestKey === requestedKey);
+    const requestKey = sameKey && sameKey.fingerprint !== fingerprint ? uid("DARQ") : requestedKey;
+    const existing = state.discountApprovalRequests.find((candidate) => candidate.requestKey === requestKey || (candidate.fingerprint === fingerprint && candidate.status === "PENDING"));
+    if (existing) return existing;
+    const calculation = calculateQuote(items, {
+      type:rule.calculationType === "FIXED" ? "FIXED" : "CATEGORY_PERCENTAGES",
+      categories:rule.categories,
+      value:rule.fixedAmount,
+      fixedAmount:rule.fixedAmount,
+      maxAmount:rule.maxAmount
     });
-    return rule;
+    const request = {
+      id:uid("DAR"),
+      organizationId:state.organization?.id,
+      ruleId:rule.id,
+      caseId:context.caseId,
+      patientId:context.patientId,
+      invoiceDate:context.invoiceDate,
+      items:clone(items),
+      fingerprint,
+      requestKey,
+      reason,
+      status:"PENDING",
+      approverId:rule.approverId,
+      requestedBy:currentUser()?.id || null,
+      requestedAt:nowIso(),
+      decisionAt:null,
+      decisionNote:"",
+      calculatedDiscountAmount:calculation.discountAmount,
+      quoteVersionId:null
+    };
+    const commit = (remote = null) => {
+      const confirmed = remote?.request ? { ...request, ...remote.request } : request;
+      setState((draft) => {
+        draft.discountApprovalRequests.unshift(confirmed);
+        audit("REQUEST_DISCOUNT_APPROVAL", confirmed.id, `Solicitud de aprobación creada para ${rule.name}.`, {
+          ruleId:rule.id,
+          caseId:confirmed.caseId,
+          patientId:confirmed.patientId,
+          requestKey:confirmed.requestKey,
+          calculatedDiscountAmount:confirmed.calculatedDiscountAmount
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("REQUEST_DISCOUNT_APPROVAL", { request }).then(commit);
+    return commit();
+  }
+
+  function approveDiscountRequest(id, note = "") {
+    requirePermission("quotes:write");
+    const request = state.discountApprovalRequests.find((candidate) => candidate.id === id);
+    if (!request) throw new Error("La solicitud de descuento no está disponible.");
+    assertCurrentOrganization(request, "Solicitud de descuento");
+    if (request.status === "APPROVED") return request;
+    if (request.status !== "PENDING") throw new Error("La solicitud de descuento ya no está pendiente.");
+    if (request.approverId !== currentUser()?.id) throw new Error("Sólo el aprobador configurado puede aprobar esta solicitud.");
+    const decisionNote = String(note || "").trim();
+    const decided = { ...request, status:"APPROVED", decidedBy:currentUser()?.id || null, decisionAt:nowIso(), decisionNote };
+    const commit = (remote = null) => {
+      const confirmed = remote?.request ? { ...decided, ...remote.request } : decided;
+      setState((draft) => {
+        const index = draft.discountApprovalRequests.findIndex((candidate) => candidate.id === id);
+        draft.discountApprovalRequests[index] = confirmed;
+        audit("APPROVE_DISCOUNT_REQUEST", confirmed.id, "Solicitud de descuento aprobada.", {
+          ruleId:confirmed.ruleId,
+          requestKey:confirmed.requestKey,
+          decidedBy:confirmed.decidedBy
+        });
+      });
+      return confirmed;
+    };
+    if (adapter.mode === "supabase") return requiredSync("DECIDE_DISCOUNT_APPROVAL", { request:decided }).then(commit);
+    return commit();
   }
 
   function generateDoctorStatements() {
     requirePermission("statements:write");
-    setState((draft) => {
-      for (const statement of draft.doctorStatements) {
-        if (statement.status === "DRAFT") statement.status = "READY_TO_SEND";
-      }
-      audit("GENERATE_DOCTOR_STATEMENTS", "2026-08", "Corte de estados de cuenta generado.");
-    });
+    throw new Error("Generar planilla permanece bloqueado hasta confirmar período, elegibilidad, tarifas, ajustes, aprobación, idempotencia y auditoría financiera.");
   }
 
   function sendDoctorStatement(id, channel = "EMAIL") {
     requirePermission("statements:write");
-    setState((draft) => {
-      const statement = draft.doctorStatements.find((candidate) => candidate.id === id);
-      if (!statement) throw new Error("Estado de cuenta no encontrado.");
-      const doctor = draft.doctors.find((candidate) => candidate.id === statement.doctorId);
-      statement.status = "SENT";
-      statement.sentAt = nowIso();
-      audit("SEND_DOCTOR_STATEMENT", id, `Estado de cuenta enviado por ${channel}.`);
-    });
     const statement = state.doctorStatements.find((candidate) => candidate.id === id);
-    if (statement) queueNotification({
-      templateCode: "DOCTOR_STATEMENT", channel, recipientId: statement.doctorId,
-      relatedEntityType: "DOCTOR_STATEMENT", relatedEntityId: statement.id, idempotencyKey: `NOT:DOCTOR_STATEMENT:${statement.id}:${channel}`
-    });
+    if (!statement) throw new Error("Estado de cuenta no encontrado.");
+    throw new Error(`Enviar por ${channel} permanece bloqueado hasta confirmar el estado financiero remoto y crear el trabajo idempotente en una sola operación auditada.`);
   }
 
   function addNotification(input) {
@@ -1294,12 +2447,14 @@ export async function createAppStore(config) {
     },
     save,
     reset,
-    login,
+    authenticate,
+    recoverPassword,
     logout,
     patientById,
     caseById,
     quoteById,
     createPatient,
+    importPatients,
     updatePatient,
     createCase,
     updateCase,
@@ -1310,8 +2465,11 @@ export async function createAppStore(config) {
     updateQuoteStatus,
     sendQuote,
     createPayment,
+    startAdministrativeExecution,
     reversePayment,
     createClinicalDocument,
+    createClinicalProfile,
+    validateHealthReportRange,
     updateClinicalDocument,
     signClinicalDocument,
     voidClinicalDocument,
@@ -1325,13 +2483,23 @@ export async function createAppStore(config) {
     addNursingNote,
     shareNursingNote,
     createShift,
+    updateShiftAssignment,
     createPurchase,
     createInventoryMovement,
     createInventoryClosure,
     approveInventoryClosure,
     createKit,
     createCatalogItem,
+    updateCatalogItem,
+    inactivateCatalogItem,
+    importCatalogItems,
     createDiscountRule,
+    updateDiscountRule,
+    inactivateDiscountRule,
+    discountEligibility,
+    discountApprovalStatus,
+    requestDiscountApproval,
+    approveDiscountRequest,
     generateDoctorStatements,
     sendDoctorStatement,
     addNotification,

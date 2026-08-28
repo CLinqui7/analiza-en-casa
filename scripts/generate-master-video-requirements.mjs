@@ -115,6 +115,114 @@ function defaultAssessment(feature, chapterId) {
   };
 }
 
+const assessmentOverrides = {
+  "CH12-F01": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Sin impacto clínico directo; la vista minimiza datos y no crea reclamos ficticios.", financial_impact:"Generación, restricciones y limpieza permanecen bloqueadas hasta definir sus efectos.", current_platform_evidence:"app/views.js renderPayables; app/main.js blocked-payables-mutation", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Conservar la superficie y completar Reclamos/acciones sólo tras resolver CH12-Q008–CH12-Q011.", blocked_by_client_information:true, notes:"Tabs, tablas y acciones visibles; las operaciones no demostradas no simulan éxito."
+  },
+  "CH12-F02": {
+    status:"IMPLEMENTED_EXACT", priority:"P1", patient_safety_impact:"La tabla usa únicamente el alcance de organización ya autorizado.", financial_impact:"Separa estado de pago y visita y no inventa una correlación ausente.", current_platform_evidence:"app/views.js renderPayables; app/supabase-adapter.js mapSupabaseBootstrap", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Mantener regresión de filtros, búsqueda, paginación y móvil.", blocked_by_client_information:false, notes:"La selección es local y cualquier efecto grupal continúa bloqueado."
+  },
+  "CH12-F03": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P2", patient_safety_impact:"Debe definirse la minimización de identificadores de paciente en reportes profesionales.", financial_impact:"Contenido, alcance, formato y efecto de edición grupal no están demostrados.", current_platform_evidence:"app/views.js renderPayables; app/main.js blocked-payables-mutation", test_path:"tests/e2e/ch12.spec.mjs", recommended_action:"Resolver CH12-Q001, CH12-Q007 y CH12-Q010 antes de habilitar reportes o edición grupal.", blocked_by_client_information:true, notes:"El control oculto no se nombra como hecho; se presenta como pendiente de confirmar."
+  },
+  "CH12-F04": {
+    status:"IMPLEMENTED_EXACT", priority:"P2", patient_safety_impact:"Sin impacto clínico; los filtros no alteran registros.", financial_impact:"Rango, recurso y estado filtran sólo la vista.", current_platform_evidence:"app/views.js renderPayables; app/main.js apply-payables-filters", test_path:"tests/e2e/ch12.spec.mjs", recommended_action:"Mantener pruebas de combinación, limpieza y paginación.", blocked_by_client_information:false, notes:"Cerrar, Limpiar y Aplicar están implementados."
+  },
+  "CH12-F05": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"La identidad se muestra desde datos autorizados y no se envía por canales inseguros.", financial_impact:"Tarifa, monto, estado y comentario son de sólo lectura hasta aprobar la transición financiera.", current_platform_evidence:"app/main.js openProfessionalServicePayment", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Habilitar edición únicamente mediante RPC auditada después de resolver CH12-Q002–CH12-Q007 y CH12-Q012.", blocked_by_client_information:true, notes:"La composición visual y Cancelar existen; Guardar no finge persistencia."
+  },
+  "CH12-F06": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Los motivos no ejecutan reglas clínicas ni exponen detalles en notificaciones.", financial_impact:"Agregar no cambia saldos hasta definir fórmula, autorización, contabilidad y reversión.", current_platform_evidence:"app/main.js openProfessionalPaymentConcept/blocked-payables-mutation", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Modelar líneas append-only y una RPC idempotente cuando se aprueben CH12-Q005–CH12-Q007.", blocked_by_client_information:true, notes:"Tipo, motivo, monto y comentario reproducen la superficie observada."
+  },
+  "CH12-F07": {
+    status:"IMPLEMENTED_EXACT", priority:"P2", patient_safety_impact:"Los rótulos son documentales y no se interpretan como reglas clínicas.", financial_impact:"No se asigna efecto monetario a ningún motivo.", current_platform_evidence:"app/main.js PROFESSIONAL_ADDITION_REASONS/PROFESSIONAL_DISCOUNT_REASONS", test_path:"tests/ch12-professional-payables.test.mjs; tests/e2e/ch12.spec.mjs", recommended_action:"Mantenerlos configurables y no productivos hasta confirmar CH12-Q005–CH12-Q006.", blocked_by_client_information:false, notes:"Se incluyen todos los rótulos legibles de la evidencia; no se inventan motivos adicionales."
+  },
+  "CH12-F08": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Sin regla clínica inferida; debe limitarse la identificación del paciente en exportaciones.", financial_impact:"Alto: faltan tarifa versionada, estados, aprobación, retenciones, pagos parciales, reversión e idempotencia.", current_platform_evidence:"app/store.js bloquea generateDoctorStatements/sendDoctorStatement; supabase/migrations/202608270008_ch12_professional_payables.sql cierra DML directo", test_path:"tests/ch12-professional-payables.test.mjs", recommended_action:"Aprobar CH12-Q002–CH12-Q012 y luego implementar ledger y RPC transaccionales antes de habilitar cualquier mutación.", blocked_by_client_information:true, notes:"El P0 se contiene cerrando escrituras directas, RLS de ítems, doble inclusión y éxitos local-first."
+  },
+  "CH13-F01": {
+    status:"IMPLEMENTED_EXACT", priority:"P1", patient_safety_impact:"El listado queda limitado por permiso y organización.", financial_impact:"Totales y estados se leen del registro persistido; la exportación es sintética y provisional.", current_platform_evidence:"app/views.js renderPurchases; app/main.js purchase-search/purchase-page/export-purchases", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Mantener regresión de columnas, búsqueda, paginación, exportación y móvil.", blocked_by_client_information:false, notes:"Reproduce las nueve columnas observadas y los controles de tabla."
+  },
+  "CH13-F02": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Una recepción falsa podría afectar disponibilidad operativa.", financial_impact:"Estado y Registro PT pueden disparar contabilidad, pago o inventario aún no definidos.", current_platform_evidence:"app/views.js sólo presenta badges; app/store.js crea exclusivamente DRAFT", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Resolver CH13-Q001, CH13-Q002, CH13-Q009 y CH13-Q010 antes de habilitar transiciones.", blocked_by_client_information:true, notes:"Los rótulos visibles se conservan, pero ninguna transición se infiere."
+  },
+  "CH13-F03": {
+    status:"IMPLEMENTED_EXACT", priority:"P1", patient_safety_impact:"Sin impacto clínico; elegir modalidad no persiste.", financial_impact:"La modalidad define sólo la composición del borrador.", current_platform_evidence:"app/main.js openPurchaseTypeChooser/openPurchaseForm", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Mantener ambas rutas en regresión.", blocked_by_client_information:false, notes:"Usa el rótulo exacto Caja menuda observado en la interfaz."
+  },
+  "CH13-F04": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"El catálogo y proveedor se limitan al tenant.", financial_impact:"Costo es manual; precio histórico y alta de presentación permanecen bloqueados.", current_platform_evidence:"app/main.js openPurchaseForm/purchaseCatalogOptions/blocked-purchase-presentation", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Completar historial y presentaciones sólo después de resolver CH13-Q014.", blocked_by_client_information:true, notes:"Cabecera, catálogo buscable y línea están implementados; no se inventa precio histórico."
+  },
+  "CH13-F05": {
+    status:"IMPLEMENTED_EXACT", priority:"P1", patient_safety_impact:"Sin impacto clínico; las referencias se validan por organización.", financial_impact:"Líneas múltiples se recalculan y rechazan total negativo.", current_platform_evidence:"app/main.js add-purchase-item/remove-purchase-item; app/store.js createPurchase", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Mantener pruebas de múltiples líneas y errores.", blocked_by_client_information:false, notes:"Proveedor, ítem, costo, cantidad, presentación y total aparecen en la tabla."
+  },
+  "CH13-F06": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P0", patient_safety_impact:"El adjunto podría contener datos personales o fiscales y no se carga sin controles.", financial_impact:"Proveedor, factura y montos forman un borrador; el archivo sigue sin persistir.", current_platform_evidence:"app/main.js Nueva compra caja menuda; app/store.js createPurchase", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Implementar Storage privado sólo tras resolver CH13-Q007.", blocked_by_client_information:true, notes:"Impuesto y descuento son montos manuales; se eliminó la tasa 13% inventada."
+  },
+  "CH13-F07": {
+    status:"IMPLEMENTED_EXACT", priority:"P0", patient_safety_impact:"Sin regla clínica; los importes no cambian inventario.", financial_impact:"Subtotal, descuento, extra, impuesto y total se validan en cliente y servidor sin tasa implícita.", current_platform_evidence:"app/main.js purchaseDraftTotals; app/store.js createPurchase; migration 202608270009 create_purchase_draft", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Mantener importes explícitos hasta aprobar política fiscal y redondeo.", blocked_by_client_information:false, notes:"La aritmética usa únicamente montos capturados; no interpreta impuestos."
+  },
+  "CH13-F08": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"El detalle es de sólo lectura y tenant-scoped.", financial_impact:"Muestra el snapshot persistido sin editarlo; acceso al archivo no está habilitado.", current_platform_evidence:"app/main.js openPurchaseDetail", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Habilitar Ver archivo mediante URL firmada sólo tras CH13-Q007.", blocked_by_client_information:true, notes:"Cabecera, líneas y cinco totales están implementados."
+  },
+  "CH13-F09": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P0", patient_safety_impact:"Anulación y edición permanecen bloqueadas para evitar cambios operativos silenciosos.", financial_impact:"Ver e impresión/CSV sintéticos funcionan; editar, copiar y anular no mutan.", current_platform_evidence:"app/views.js purchase-row-menu; app/main.js blocked-purchase-mutation/printPurchase/export-purchase", test_path:"tests/e2e/ch13.spec.mjs", recommended_action:"Resolver CH13-Q010–CH13-Q013 antes de habilitar mutaciones o salidas oficiales.", blocked_by_client_information:true, notes:"Todas las acciones observadas permanecen visibles y ninguna acción incompleta afirma éxito."
+  },
+  "CH13-F10": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Una entrada omitida o duplicada puede afectar disponibilidad de insumos.", financial_impact:"Recepción e inventario deben enlazarse de forma atómica e idempotente.", current_platform_evidence:"app/store.js createPurchase crea sólo DRAFT y no llama createInventoryMovement", test_path:"tests/ch13-purchase-drafts.test.mjs", recommended_action:"Resolver CH13-Q002–CH13-Q003 antes de vincular recepción e inventario.", blocked_by_client_information:true, notes:"La afirmación es verbal; el video no demuestra la recepción."
+  },
+  "CH13-F11": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Adjuntos y recepción pueden afectar privacidad y disponibilidad operativa.", financial_impact:"Faltan reglas fiscales, aprobación, anulación, corrección, impresión y retención.", current_platform_evidence:"migration 202608270009 cierra DML directo y crea sólo borradores; UI bloquea efectos desconocidos", test_path:"tests/ch13-purchase-drafts.test.mjs; tests/e2e/ch13.spec.mjs", recommended_action:"Resolver CH13-Q001–CH13-Q014 antes de ampliar la máquina de compra.", blocked_by_client_information:true, notes:"El P0 previo queda contenido por RPC tenant-safe, idempotencia, auditoría y ausencia de éxito local-first."
+  },
+  "CH14-F01": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"La lista no ejecuta cambios y conserva el alcance del tenant.", financial_impact:"Disponible, comprometido y total se reconcilian con la convención técnica actual; su definición contable sigue pendiente.", current_platform_evidence:"app/views.js renderInventory; app/store.js inventory model", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Completar filtro de bodega y paginación real después de fijar la semántica de comprometido.", blocked_by_client_information:true, notes:"La tabla, búsqueda, CSV y pestañas están presentes; bodega y tamaño de página continúan fijos."
+  },
+  "CH14-F02": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"El historial es de sólo lectura y no altera stock.", financial_impact:"Origen, destino, cantidad y lote se muestran sin afirmar un estado contable no persistido.", current_platform_evidence:"app/main.js inventoryItemHistory", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Implementar rango, referencia, nota y estado sólo desde campos autoritativos.", blocked_by_client_information:true, notes:"Columnas observadas implementadas; rango no operativo y estado visual conservador."
+  },
+  "CH14-F03": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Una reserva o consumo mal interpretado puede desalinear disponibilidad operativa.", financial_impact:"La definición de comprometido afecta cuenta, cierre y reversión.", current_platform_evidence:"app/store.js createInventoryMovement; docs/OPEN_QUESTIONS.md", test_path:"tests/ch14-inventory-boundaries.test.mjs", recommended_action:"Resolver CH14-Q001 antes de ampliar acuses o cierres.", blocked_by_client_information:true, notes:"No se promueve la explicación verbal a una regla productiva."
+  },
+  "CH14-F04": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Los datos se limitan a casos sintéticos autorizados.", financial_impact:"Las pestañas no ejecutan movimientos.", current_platform_evidence:"app/views.js renderCommittedInventory", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Conectar Recursos, No disponible, Solicitudes y Tareas sólo a colecciones autoritativas.", blocked_by_client_information:true, notes:"Pacientes funciona; las otras pestañas muestran vacío explícito."
+  },
+  "CH14-F05": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Editar o eliminar un acuse sin versión/reversión puede borrar trazabilidad de insumos entregados.", financial_impact:"Un acuse puede afectar inventario y cuenta del paciente.", current_platform_evidence:"app/views.js renderCommittedInventory; app/main.js blocked-inventory-action", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q002–CH14-Q003 antes de habilitar cualquier acción.", blocked_by_client_information:true, notes:"Acciones visibles y bloqueadas; no existe éxito simulado."
+  },
+  "CH14-F06": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"La vista no cierra hospitalizaciones ni cambia estados clínicos.", financial_impact:"No aplica conciliación financiera sin aprobación.", current_platform_evidence:"app/views.js renderInventoryClosures; app/store.js createInventoryClosure", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Mantener sólo lectura hasta resolver CH14-Q007.", blocked_by_client_information:true, notes:"Cuatro pestañas y casos visibles; mutaciones cerradas."
+  },
+  "CH14-F07": {
+    status:"IMPLEMENTED_EXACT", priority:"P0", patient_safety_impact:"Cancelar preserva los datos y Aceptar no ejecuta pérdida silenciosa.", financial_impact:"No borra conciliación ni cierre previo.", current_platform_evidence:"app/main.js openClosureWarning", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Mantener bloqueo de Aceptar hasta resolver CH14-Q006.", blocked_by_client_information:true, notes:"Advertencia y ambos controles reproducidos con desviación segura: Aceptar no muta."
+  },
+  "CH14-F08": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Cerrar una hospitalización sin conciliación puede alterar disponibilidad y continuidad operativa.", financial_impact:"Aprobación total puede bloquear o alterar cuenta e inventario.", current_platform_evidence:"app/store.js createInventoryClosure/approveInventoryClosure; migration 202608270010", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q006–CH14-Q007 y crear RPC transaccional antes de habilitar.", blocked_by_client_information:true, notes:"Editar, Aprobar y Cancelar permanecen bloqueados; impresión es provisional."
+  },
+  "CH14-F09": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"Sin impacto clínico directo; el catálogo no se muta.", financial_impact:"Proveedor puede ser referencia de compras y debe conservar historial.", current_platform_evidence:"app/views.js renderSuppliers", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Definir identidad, unicidad y desactivación en CH14-Q008 antes del CRUD.", blocked_by_client_information:true, notes:"Tabla visible con datos sintéticos; alta/edición bloqueadas."
+  },
+  "CH14-F10": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P0", patient_safety_impact:"Una transferencia incorrecta puede ocultar stock disponible en la ubicación real.", financial_impact:"La RPC conserva la suma de existencias y audita el movimiento.", current_platform_evidence:"app/views.js renderWarehouses; app/store.js createInventoryMovement; apply_inventory_movement_v2", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q009 y validar concurrencia/RLS en Supabase real.", blocked_by_client_information:true, notes:"Lista presente; movimiento productivo transaccional; CRUD y acceso directo incompletos."
+  },
+  "CH14-F11": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P0", patient_safety_impact:"La RPC rechaza lote vencido, no disponible o insuficiente; el modo local bloquea ítems trazables.", financial_impact:"Evita divergencia lote–stock en rutas de mutación habilitadas.", current_platform_evidence:"app/views.js renderInventoryLots; app/store.js createInventoryMovement; apply_inventory_movement_v2", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q010–CH14-Q011 y validar migraciones en Supabase real.", blocked_by_client_information:true, notes:"Vista de sólo lectura; se rechaza deliberadamente el defecto de fechas inválidas activas observado."
+  },
+  "CH14-F12": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P1", patient_safety_impact:"La lista no consume componentes.", financial_impact:"No se crean maestros incompletos ni se eliminan referencias históricas.", current_platform_evidence:"app/views.js renderKits; app/store.js createKit", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q012 antes de habilitar CRUD/versionado.", blocked_by_client_information:true, notes:"Catálogo y acciones visibles; mutaciones bloqueadas."
+  },
+  "CH14-F13": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"Una descarga parcial o desde lote incorrecto puede desalinear disponibilidad de insumos.", financial_impact:"El consumo debe ser atómico e idempotente para no duplicar cargos o existencias.", current_platform_evidence:"app/main.js openKitForm; app/store.js createKit", test_path:"tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q012–CH14-Q013 y crear una RPC transaccional.", blocked_by_client_information:true, notes:"Composición visual presente; descarga automática no implementada."
+  },
+  "CH14-F14": {
+    status:"IMPLEMENTED_PARTIAL", priority:"P0", patient_safety_impact:"La captura no descuenta ni reserva stock hasta tener reglas aprobadas.", financial_impact:"No crea cargos o compromisos ficticios.", current_platform_evidence:"app/main.js openAcknowledgementForm/blocked-inventory-action", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q001–CH14-Q005 antes de persistir.", blocked_by_client_information:true, notes:"Campos y acciones observados presentes; Añadir, Vaciar y Plantilla bloqueados."
+  },
+  "CH14-F15": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P0", patient_safety_impact:"La política de faltantes puede afectar disponibilidad y sustitución de insumos.", financial_impact:"No crea compra, acuse o cotización por inferencia.", current_platform_evidence:"app/main.js blocked-inventory-action; docs/OPEN_QUESTIONS.md", test_path:"tests/e2e/ch14.spec.mjs", recommended_action:"Resolver CH14-Q005 antes de habilitar el flujo.", blocked_by_client_information:true, notes:"La evidencia aparece al final sin demostrar resultado."
+  },
+  "CH14-F16": {
+    status:"NEEDS_CLIENT_CONFIRMATION", priority:"P1", patient_safety_impact:"Sin acción clínica automática.", financial_impact:"No se cambia una cotización desde una frase ambigua.", current_platform_evidence:"docs/OPEN_QUESTIONS.md", test_path:"NONE", recommended_action:"Resolver CH14-Q014 con el cliente.", blocked_by_client_information:true, notes:"No existe demostración visual suficiente."
+  }
+};
+
 function defaultSafetyFindings() {
   return [
     {
@@ -206,6 +314,21 @@ function defaultSafetyFindings() {
     recommended_action: "Ejecutar pruebas de concurrencia, RLS, lotes, transferencias y reversión contra Supabase real antes de elevar el estado.",
       blocked_by_client_information: false,
     notes: "Implementado en lote P0 3; available = stock - committed y permanece parcial hasta validación persistente real."
+    },
+    {
+      finding_id: "SAFE-P0-007",
+      module: "Compras",
+      feature: "Borradores financieros transaccionales y referencias tenant-safe",
+      detailed_behavior: "La creación de una compra debe confirmar cabecera y líneas de forma atómica e idempotente, recalcular montos en servidor y validar que proveedor, catálogo y padre pertenezcan a la organización activa.",
+      evidence_paths: ["video-audit-reviews/CH13_compras_y_compras_al_por_mayor/chapter_feature_inventory.json", "app/store.js", "app/supabase-adapter.js", "supabase/migrations/202608270009_ch13_purchase_drafts.sql", "tests/ch13-purchase-drafts.test.mjs"],
+      current_platform_evidence: "createPurchase usa requiredSync en modo Supabase; create_purchase_draft deriva organización, valida referencias, recalcula importes manuales, inserta cabecera/líneas/evento/auditoría y deduplica bajo bloqueo. DML directo queda revocado.",
+      status: "IMPLEMENTED_PARTIAL",
+      priority: "P0",
+      patient_safety_impact: "Una recepción o referencia cruzada incorrecta puede afectar la disponibilidad operativa de insumos.",
+      financial_impact: "Persistencia parcial, importes manipulados o reintentos duplicados pueden desalinear compras, facturas e inventario.",
+      recommended_action: "Aplicar la migración y ejecutar concurrencia/RLS con dos organizaciones en Supabase real; mantener aprobación, recepción, anulación y adjuntos cerrados hasta contar con reglas.",
+      blocked_by_client_information: false,
+      notes: "El P0 está contenido en código y contrato SQL, pero permanece parcial hasta validar la migración en una instancia Supabase real."
     }
   ];
 }
@@ -278,7 +401,7 @@ async function bootstrapCanonical() {
         open_question_ids: questions
           .filter((question) => question.evidence_event_ids.some((eventId) => evidenceEventIds.has(eventId)))
           .map((question) => question.question_id),
-        platform_assessment: priorRequirement?.platform_assessment || defaultAssessment(feature, chapter.chapter_id)
+        platform_assessment: assessmentOverrides[requirementId] || priorRequirement?.platform_assessment || defaultAssessment(feature, chapter.chapter_id)
       });
     }
 
@@ -299,7 +422,12 @@ async function bootstrapCanonical() {
     });
   }
 
-  const platformSafetyFindings = prior?.platform_safety_findings?.length ? prior.platform_safety_findings : defaultSafetyFindings();
+  const priorSafetyFindings = prior?.platform_safety_findings || [];
+  const priorSafetyIds = new Set(priorSafetyFindings.map((finding) => finding.finding_id));
+  const platformSafetyFindings = [
+    ...priorSafetyFindings,
+    ...defaultSafetyFindings().filter((finding) => !priorSafetyIds.has(finding.finding_id))
+  ];
   const canonical = {
     schema_version: 1,
     source_of_truth: "This JSON is the canonical requirement, platform-gap and open-question source. Markdown and CSV files are generated from it.",

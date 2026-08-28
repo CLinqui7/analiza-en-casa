@@ -8,6 +8,22 @@
     "dev": "node scripts/serve.mjs",
     "start": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs",
+    "test:browser:ch01": "playwright test tests/e2e/ch01.spec.mjs",
+    "test:browser:ch02": "playwright test tests/e2e/ch02.spec.mjs",
+    "test:browser:ch03": "playwright test tests/e2e/ch03.spec.mjs",
+    "test:browser:ch04": "playwright test tests/e2e/ch04.spec.mjs",
+    "test:browser:ch05": "playwright test tests/e2e/ch05.spec.mjs",
+    "test:browser:ch06": "playwright test tests/e2e/ch06.spec.mjs",
+    "test:browser:ch07": "playwright test tests/e2e/ch07.spec.mjs",
+    "test:browser:ch08": "playwright test tests/e2e/ch08.spec.mjs",
+    "test:browser:ch09": "playwright test tests/e2e/ch09.spec.mjs",
+    "test:browser:ch10": "playwright test tests/e2e/ch10.spec.mjs",
+    "test:browser:ch11": "playwright test tests/e2e/ch11.spec.mjs",
+    "test:browser:ch12": "playwright test tests/e2e/ch12.spec.mjs",
+    "test:browser:ch13": "playwright test tests/e2e/ch13.spec.mjs",
+    "test:browser:ch14": "playwright test tests/e2e/ch14.spec.mjs",
+    "test:browser:ch15": "playwright test tests/e2e/ch15.spec.mjs",
+    "test:browser:ch16": "playwright test tests/e2e/ch16.spec.mjs",
     "qa": "node scripts/qa-check.mjs",
     "check": "npm test && npm run qa && npm run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
@@ -16,9 +32,13 @@
     "audit:status": "node scripts/audit-status.mjs",
     "audit:verify": "node scripts/verify-video-audit.mjs",
     "audit:master": "node scripts/generate-master-video-requirements.mjs",
-    "audit:master:bootstrap": "node scripts/generate-master-video-requirements.mjs --bootstrap"
+    "audit:master:bootstrap": "node scripts/generate-master-video-requirements.mjs --bootstrap",
+    "parity:generate": "node scripts/generate-exact-parity-matrices.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
   }
 }

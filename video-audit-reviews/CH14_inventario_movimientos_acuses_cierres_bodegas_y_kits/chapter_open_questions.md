@@ -1,43 +1,17 @@
-# Preguntas abiertas · CH14
+# CH14 · Preguntas abiertas
 
-## Q01 · ¿Cuál es la definición contable exacta de Disponible, Comprometido, Reservado y Gastado?
-
-- Evidencia: CH14-E0006 · 00:40:05.400 y transcripción 00:40:10–00:41:30.
-- Motivo: La interfaz y el relato usan estados cercanos, pero no fijan fórmula, precedencia ni reversión.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q02 · ¿Qué datos puede borrar Aceptar en la advertencia de un cierre ya abierto y quién puede autorizarlo?
-
-- Evidencia: CH14-E0046 · 00:42:14.800.
-- Motivo: La advertencia anuncia posible pérdida; hace falta una regla auditable y recuperable.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q03 · ¿Cuáles son las transiciones permitidas entre cierre pendiente, total, aprobado, cerrado y cancelado?
-
-- Evidencia: CH14-E0050 · 00:42:22.800 y transcripción 00:42:11–00:43:18.
-- Motivo: El video demuestra acciones y una etapa editable, no una máquina de estados completa.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q04 · ¿Qué significa Fecha inválida y qué política debe aplicarse a lotes vencidos o sin fecha?
-
-- Evidencia: CH14-E0075 · 00:44:11.400.
-- Motivo: La interfaz resalta fechas, pero no muestra bloqueo, alerta ni corrección.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q05 · ¿El consumo de un kit debe usar FEFO, lote seleccionado, sustitución permitida o bloqueo total si falta un componente?
-
-- Evidencia: CH14-E0091 · 00:44:35.200 y transcripción 00:44:25–00:45:02.
-- Motivo: La descarga automática se afirma verbalmente sin detallar selección de lote, concurrencia o reversión.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q06 · ¿Cuál es el flujo posterior para Items faltantes disponibles y qué significa Acuse creado?
-
-- Evidencia: CH14-E0152 · 00:45:27.400; safety_022 a 00:45:28.
-- Motivo: La tabla aparece al final del capítulo sin mostrar confirmación, compra, sustitución o notificación.
-- Estado: NEEDS_CLIENT_CONFIRMATION
-
-## Q07 · ¿Qué significa la frase 'faltar una cotización' y a qué entidad debería vincularse?
-
-- Evidencia: Transcripción 00:45:10.320–00:45:13.320.
-- Motivo: El audio automático es ambiguo y no existe demostración visual suficiente.
-- Estado: NEEDS_CLIENT_CONFIRMATION
+1. `CH14-Q001` · UNCERTAIN — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.
+2. `CH14-Q002` · UNCERTAIN — aprobar la máquina de estados de acuse, roles, permisos por acción, idempotencia y efectos de Nuevo, Duplicar, Editar, Asignar hospitalización, Eliminar y Registro XPO. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+3. `CH14-Q003` · UNCERTAIN — definir formato, columnas, minimización de datos, permisos y validez del Excel y la impresión de acuses. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
+4. `CH14-Q004` · UNCERTAIN — definir Plantilla y Vaciar, incluida persistencia de borrador, recuperación y confirmación de pérdida. Evidencia: CH14-E0151, 00:45:27.000.
+5. `CH14-Q005` · UNCERTAIN — aprobar el flujo de faltantes, tratamiento de cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152, 00:45:27.400; safety_022 a 00:45:28.
+6. `CH14-Q006` · UNCERTAIN — determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.
+7. `CH14-Q007` · UNCERTAIN — aprobar transiciones entre cierre pendiente, total, aprobado, cerrado y cancelado, campos editables, conciliación, reversión y relación con el cierre administrativo/financiero. Evidencia: CH14-E0050, 00:42:16.400; transcripción 00:42:11–00:43:18.
+8. `CH14-Q008` · UNCERTAIN — definir identificación, unicidad, campos obligatorios, estados, edición y eliminación de proveedores por organización. Evidencia: CH14-E0061, 00:43:24.400.
+9. `CH14-Q009` · UNCERTAIN — aprobar creación/edición de bodegas y reglas de traslado: permisos, bodegas origen/destino, recepción, movimientos, lotes, series, concurrencia y reversión. Evidencia: CH14-E0068, 00:43:28.600; transcripción 00:43:26–00:43:57.
+10. `CH14-Q010` · UNCERTAIN — definir qué significa Fecha inválida y la política para lotes vencidos, sin fecha, en cuarentena o agotados; confirmar FEFO y alertas. Evidencia: CH14-E0082, 00:44:11.400; transcripción 00:44:07–00:44:24.
+11. `CH14-Q011` · UNCERTAIN — aprobar unicidad y ciclo de vida de lote/serie por organización, item y bodega, incluidos ajustes, transferencias y correcciones auditadas. Evidencia: CH14-E0078, 00:44:04.600; CH14-E0092, 00:44:24.400.
+12. `CH14-Q012` · UNCERTAIN — definir versionado, permisos y efectos de Crear, Editar, Duplicar y Eliminar kits, incluida la conservación de usos históricos. Evidencia: CH14-E0095, 00:44:29.400; CH14-E0098–CH14-E0101, 00:44:31.400–00:44:33.000.
+13. `CH14-Q013` · VERBAL — confirmar si el consumo de un kit usa FEFO, lote seleccionado, sustitución o bloqueo total, y exigir atomicidad, idempotencia y reversión de todos sus componentes. Evidencia: CH14-E0104, 00:44:35.200; CH14-E0117, 00:44:44.800; transcripción 00:44:25–00:45:02.
+14. `CH14-Q014` · UNCERTAIN — identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.
+15. `CH14-Q015` · UNCERTAIN — confirmar mensajes, reintentos y recuperación esperados para errores de inventario, acuses, cierres, catálogos y kits; el capítulo no provoca fallos. Evidencia: CH14-E0006–CH14-E0152, sin resultado de error demostrado.

@@ -1,7 +1,7 @@
 {
   "chapter_id":"CH13",
   "chapter":"CH13_compras_y_compras_al_por_mayor",
-  "summary":"Registro y consulta de compras por orden o caja chica, carga de factura, desglose de totales y opciones de exportación/anulación. La relación con inventario se menciona verbalmente, no se demuestra en pantalla.",
+  "summary":"Registro y consulta de compras por orden o caja menuda, carga de factura, desglose de totales y opciones de exportación/anulación. La relación con inventario se menciona verbalmente, no se demuestra en pantalla.",
   "features":[
     {
       "id":"CH13-F01","name":"Listado de compras","description":"Tabla con Acciones, Tipo, Número, Proveedor, Total, # Factura, Fecha, Estado y Registro PT; búsqueda, paginación y exportación Excel.","classification":"VISIBLE","confidence":"HIGH",
@@ -12,7 +12,7 @@
       "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0004","timestamp":"00:36:46.400","path":"event_frames/CH13-E0004_00h36m46s400ms_abrupt_change.jpg","detail_crop":"detail_crops/CH13-E0004_00h36m46s400ms_DETAIL.jpg","transcript":"00:36:42–00:37:10"}]
     },
     {
-      "id":"CH13-F03","name":"Elección de modalidad de compra","description":"Nuevo permite escoger Orden de compra o Caja chica.","classification":"VISIBLE","confidence":"HIGH",
+      "id":"CH13-F03","name":"Elección de modalidad de compra","description":"Nuevo permite escoger Orden de compra o Caja menuda.","classification":"VISIBLE","confidence":"HIGH",
       "evidence":[
         {"chapter_id":"CH13","chapter_event_id":"CH13-E0006","timestamp":"00:36:50.400","path":"event_frames/CH13-E0006_00h36m50s400ms_abrupt_change.jpg","transcript":"00:36:45–00:37:00"},
         {"chapter_id":"CH13","chapter_event_id":"CH13-E0035","timestamp":"00:37:37.800","path":"event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg","transcript":"00:37:30–00:37:45"}
@@ -30,11 +30,11 @@
       ]
     },
     {
-      "id":"CH13-F06","name":"Formulario de compra por caja chica","description":"Fecha, proveedor, factura, archivo de factura con Buscar, observaciones, ítem, presentación, costo, cantidad, impuesto y descuento.","classification":"VISIBLE","confidence":"HIGH",
-      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0052","timestamp":"00:38:22.400","path":"event_frames/CH13-E0052_00h38m22s400ms_settled.jpg","detail_crop":"detail_crops/CH13-E0052_00h38m22s400ms_DETAIL.jpg","transcript":"00:38:00–00:38:35"}]
+      "id":"CH13-F06","name":"Formulario de compra por caja menuda","description":"Fecha, proveedor, factura, archivo de factura con Buscar, observaciones, ítem, presentación, costo, cantidad, impuesto y descuento.","classification":"VISIBLE","confidence":"HIGH",
+      "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0035","timestamp":"00:37:37.800","path":"event_frames/CH13-E0035_00h37m37s800ms_abrupt_change.jpg","detail_crop":"","transcript":"00:37:30–00:38:35"},{"chapter_id":"CH13","chapter_event_id":"CH13-E0052","timestamp":"00:38:22.400","path":"event_frames/CH13-E0052_00h38m22s400ms_settled.jpg","detail_crop":"detail_crops/CH13-E0052_00h38m22s400ms_DETAIL.jpg","transcript":"00:38:00–00:38:35"}]
     },
     {
-      "id":"CH13-F07","name":"Desglose de totales de caja chica","description":"Tabla Ítem, Costo, Cantidad, Presentación, Impuesto, Descuento y Total; resumen Subtotal, Descuentos, Extra, Impuesto y Total. Los valores son datos del ejemplo, no reglas de cálculo confirmadas.","classification":"VISIBLE","confidence":"HIGH",
+      "id":"CH13-F07","name":"Desglose de totales de caja menuda","description":"Tabla Ítem, Costo, Cantidad, Presentación, Impuesto, Descuento y Total; resumen Subtotal, Descuentos, Extra, Impuesto y Total. Los valores son datos del ejemplo, no reglas de cálculo confirmadas.","classification":"VISIBLE","confidence":"HIGH",
       "evidence":[
         {"chapter_id":"CH13","chapter_event_id":"CH13-E0065","timestamp":"00:38:52.400","path":"event_frames/CH13-E0065_00h38m52s400ms_abrupt_change.jpg","transcript":"00:38:45–00:39:10"},
         {"chapter_id":"CH13","chapter_event_id":"CH13-E0069","timestamp":"00:38:58.600","path":"event_frames/CH13-E0069_00h38m58s600ms_stable_change.jpg","transcript":"00:38:45–00:39:10"}
@@ -60,6 +60,6 @@
       "evidence":[{"chapter_id":"CH13","chapter_event_id":"CH13-E0092","timestamp":"00:39:43.000","path":"event_frames/CH13-E0092_00h39m43s000ms_settled.jpg","detail_crop":"detail_crops/CH13-E0092_00h39m43s000ms_DETAIL.jpg","transcript":"00:39:25–00:39:58"}]
     }
   ],
-  "entities":["Compra","Orden de compra","Caja chica","Proveedor","Ítem","Presentación","Factura/adjunto","Impuesto","Descuento","Movimiento de inventario (solo verbal)"],
+  "entities":["Compra","Orden de compra","Caja menuda","Proveedor","Ítem","Presentación","Factura/adjunto","Impuesto","Descuento","Movimiento de inventario (solo verbal)"],
   "open_questions":["Fórmulas fiscales y redondeo", "Estados, recepción, anulación y efecto en inventario", "Permisos y auditoría", "Validación/retención/seguridad de factura adjunta"]
 }

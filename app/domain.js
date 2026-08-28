@@ -115,7 +115,10 @@ export function money(value, currency = "USD", locale = "es-SV") {
 
 export function formatDate(value, withTime = false, locale = "es-SV") {
   if (!value) return "—";
-  const date = new Date(value);
+  const raw = String(value);
+  // A date-only value represents a calendar day, not midnight UTC. Anchoring
+  // it at noon prevents western time zones from rendering the prior day.
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T12:00:00Z` : value);
   if (Number.isNaN(date.getTime())) return String(value);
   const options = withTime
     ? { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }
@@ -142,9 +145,20 @@ export function calculateQuote(items = [], discount = { type: "PERCENT", value: 
   }
 
   let discountAmount = 0;
-  if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || 0));
+  if (discount?.type === "CATEGORY_PERCENTAGES") {
+    discountAmount = Object.entries(categoryTotals).reduce((sum, [category, categoryTotal]) => {
+      const percentage = Math.min(100, Math.max(0, Number(discount.categories?.[category] || 0)));
+      return sum + categoryTotal * percentage / 100;
+    }, 0);
+  } else if (discount?.type === "FIXED") discountAmount = Math.max(0, Number(discount.value || discount.fixedAmount || 0));
   else discountAmount = subtotal * Math.max(0, Number(discount?.value || 0)) / 100;
 
+  const configuredMaximum = discount?.maxAmount === null || discount?.maxAmount === undefined || discount?.maxAmount === ""
+    ? null
+    : Number(discount.maxAmount);
+  if (Number.isFinite(configuredMaximum) && configuredMaximum >= 0) {
+    discountAmount = Math.min(discountAmount, configuredMaximum);
+  }
   discountAmount = Math.min(discountAmount, subtotal);
   const total = roundMoney(subtotal - discountAmount);
   const insurerAmount = roundMoney(Math.min(Math.max(0, Number(insuranceApproved || 0)), total));
@@ -310,7 +324,7 @@ export function roleCan(role, permission) {
     SUPERADMIN: ["*"],
     ADMIN: ["*"],
     NURSE: [
-      "dashboard:read", "patients:read", "patients:write", "cases:read",
+      "dashboard:read", "patients:read", "cases:read",
       "quotes:read", "insurance:read", "clinical:read", "clinical:write",
       "clinical:sign",
       "agenda:read", "inventory:read"

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createAppStore } from "../app/store.js";
+import { createAppStore, DEMO_PASSWORD } from "../app/store.js";
 import { healthReportDocument } from "../app/templates.js";
 import { safeStorage } from "../app/domain.js";
 
@@ -11,16 +11,19 @@ const initialSchemaPath = new URL("../supabase/migrations/202608260001_initial_s
 async function isolatedStore() {
   safeStorage.clear();
   const store = await createAppStore({ dataMode: "mock", notificationsMode: "mock" });
-  store.login("USR-001", "ADMIN");
+  await store.authenticate("admin@analiza.demo", DEMO_PASSWORD);
   return store;
 }
 
-function quoteInput(overrides = {}) {
+function quoteInput(overrides = {}, catalogItem = { id: "CAT-SRV-001", category: "SERVICES", name: "Enfermería domiciliar 12 horas", price: 180 }) {
   return {
     caseId: "HOS-2026-0190",
-    items: [{ category: "SERVICES", name: "Servicio sintético", quantity: 2, unitPrice: 10, discountAmount: 0 }],
+    items: [{ catalogItemId: catalogItem.id, category: catalogItem.category, name: catalogItem.name, quantity: 2, unitPrice: catalogItem.price, discountAmount: 0 }],
     discount: { type: "PERCENT", value: 0, reason: "" },
     insurerAmount: 0,
+    invoiceDate: "2026-08-27",
+    discountGroupId: "REGULAR",
+    referredBy: "Referencia sintética",
     comments: "Cotización sintética de prueba.",
     ...overrides
   };
@@ -34,7 +37,7 @@ test("P0 quote: an authorized draft can change, but a sent version and its items
     comments: "Borrador editado autorizado."
   }));
   assert.equal(edited.status, "DRAFT");
-  assert.equal(edited.total, 30);
+  assert.equal(edited.total, 540);
 
   store.sendQuote(draft.id, "EMAIL");
   const sent = store.quoteById(draft.id);
@@ -115,11 +118,12 @@ test("P0 clinical: drafts edit, signature blocks updates, and corrections preser
 
 test("P0 clinical: unauthorized correction, missing void reason, and cross-organization access are blocked", async () => {
   const store = await isolatedStore();
-  const document = store.createClinicalDocument({ caseId: "HOS-2026-0190", type: "MEDICAL_ORDER", title: "Orden sintética", summary: "Prueba" });
+  const treatingDoctorId = store.getState().doctors.find((item) => item.status === "ACTIVE")?.id;
+  const document = store.createClinicalDocument({ caseId: "HOS-2026-0190", type: "MEDICAL_ORDER", title: "Orden sintética", summary: "Prueba", content: { treatingDoctorId } });
   store.signClinicalDocument(document.id);
-  store.login("USR-003", "NURSE");
+  await store.authenticate("enfermeria@analiza.demo", DEMO_PASSWORD);
   assert.throws(() => store.createClinicalCorrection("CLINICAL_DOCUMENT", document.id, { reason: "Sin permiso" }), /permiso/i);
-  store.login("USR-001", "ADMIN");
+  await store.authenticate("admin@analiza.demo", DEMO_PASSWORD);
   assert.throws(() => store.voidClinicalDocument(document.id, ""), /motivo/i);
   store.getState().clinicalDocuments.find((item) => item.id === document.id).organizationId = "ORG-OTHER";
   assert.throws(() => store.voidClinicalDocument(document.id, "Motivo válido"), /no disponible/i);
@@ -127,15 +131,17 @@ test("P0 clinical: unauthorized correction, missing void reason, and cross-organ
 
 test("P0 clinical: signed nursing notes and medication cards use the same append-only correction flow", async () => {
   const store = await isolatedStore();
-  store.login("USR-003", "NURSE");
+  const treatingDoctorId = store.getState().doctors.find((item) => item.status === "ACTIVE")?.id;
+  await store.authenticate("enfermeria@analiza.demo", DEMO_PASSWORD);
   const note = store.addNursingNote({ caseId: "HOS-2026-0190", text: "Nota sintética", sign: true });
   assert.equal(note.status, "SIGNED");
   const card = store.createMedicationCard({
     caseId: "HOS-2026-0190",
-    items: [{ medication: "Medicamento sintético", dose: "Dato QA", route: "VO", frequency: "Dato QA", schedule: ["08:00"] }]
+    treatingDoctorId,
+    items: [{ medication: "Medicamento sintético", doctorId: treatingDoctorId, dose: "Dato QA", route: "VO", frequency: "Dato QA", schedule: ["08:00"] }]
   });
   store.signMedicationCard(card.id);
-  store.login("USR-001", "ADMIN");
+  await store.authenticate("admin@analiza.demo", DEMO_PASSWORD);
   store.createClinicalCorrection("NURSING_NOTE", note.id, { reason: "Aclaración de prueba", content: { text: "Addendum" } });
   store.createClinicalCorrection("MEDICATION_CARD", card.id, { reason: "Aclaración de tarjeta", content: { text: "Addendum" } });
   assert.equal(store.clinicalRecordStatus("NURSING_NOTE", note.id), "CORRECTED");

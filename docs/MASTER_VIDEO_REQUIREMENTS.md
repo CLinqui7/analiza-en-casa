@@ -5,9 +5,9 @@
 - Capítulos: 17/17
 - Eventos revisados: 1359
 - Requisitos: 210
-- Preguntas abiertas: 73
-- Estados de gap: IMPLEMENTED_EXACT=0, IMPLEMENTED_PARTIAL=176, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=7, NEEDS_CLIENT_CONFIRMATION=27
-- Prioridades: P0=0, P1=176, P2=34, P3=0
+- Preguntas abiertas: 135
+- Estados de gap: IMPLEMENTED_EXACT=13, IMPLEMENTED_PARTIAL=152, MISSING=0, CONFLICTS_WITH_VIDEO=0, NOT_TESTABLE=6, NEEDS_CLIENT_CONFIRMATION=39
+- Prioridades: P0=18, P1=160, P2=32, P3=0
 
 ## Gaps P0 de seguridad e integridad
 
@@ -19,6 +19,7 @@
 | SAFE-P0-004 | Mensajería | Autorización organizacional e idempotencia de notificaciones | IMPLEMENTED_PARTIAL |
 | SAFE-P0-005 | Supabase / acceso multi-organización | Asignación de organización confiable y funciones privilegiadas cerradas | IMPLEMENTED_PARTIAL |
 | SAFE-P0-006 | Pagos e inventario | Contratos persistentes e idempotencia alineados con el esquema | IMPLEMENTED_PARTIAL |
+| SAFE-P0-007 | Compras | Borradores financieros transaccionales y referencias tenant-safe | IMPLEMENTED_PARTIAL |
 
 ## CH01 · Contexto inicial, acceso, dashboard y listado de pacientes
 
@@ -204,14 +205,14 @@ Eventos: 114/114. Requisitos: 10.
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
 | CH10-F01 | Listado de pacientes de Orden Médica | CH10-E0008 @ 00:27:37.600; CH10-E0009 @ 00:27:42.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F02 | Elección de tipo de documento | CH10-E0011 @ 00:27:43.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F03 | Encabezado y tratamientos de tarjeta | CH10-E0013 @ 00:27:55.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F04 | Editor detallado de tratamiento | CH10-E0020 @ 00:27:59.800; CH10-E0050 @ 00:29:08.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F05 | Catálogos visibles de pauta y horarios | CH10-E0021 @ 00:28:00.400; CH10-E0028 @ 00:28:14.000; CH10-E0031 @ 00:28:22.800; CH10-E0034 @ 00:28:26.200; CH10-E0042 @ 00:28:42.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F06 | Derivación aparente de fecha final | CH10-E0035 @ 00:28:27.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH10-F02 | Elección de tipo de documento | CH10-E0011 @ 00:27:43.800 | IMPLEMENTED_EXACT | P1 |
+| CH10-F03 | Encabezado y tratamientos de tarjeta | CH10-E0013 @ 00:27:55.600 | IMPLEMENTED_EXACT | P1 |
+| CH10-F04 | Editor detallado de tratamiento | CH10-E0020 @ 00:27:59.800; CH10-E0050 @ 00:29:08.800 | IMPLEMENTED_PARTIAL | P0 |
+| CH10-F05 | Catálogos visibles de pauta y horarios | CH10-E0021 @ 00:28:00.400; CH10-E0028 @ 00:28:14.000; CH10-E0031 @ 00:28:22.800; CH10-E0034 @ 00:28:26.200; CH10-E0042 @ 00:28:42.400 | NEEDS_CLIENT_CONFIRMATION | P1 |
+| CH10-F06 | Derivación aparente de fecha final | CH10-E0035 @ 00:28:27.200 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH10-F07 | Composición de orden por etiquetas | CH10-E0072 @ 00:29:30.800; CH10-E0073 @ 00:29:31.400; CH10-E0091 @ 00:29:52.400 | IMPLEMENTED_PARTIAL | P1 |
 | CH10-F08 | Consulta de órdenes, tarjetas e historial | CH10-E0109 @ 00:30:13.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH10-F09 | Impresiones de tarjeta de medicamentos | CH10-E0109 @ 00:30:13.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH10-F09 | Impresiones de tarjeta de medicamentos | CH10-E0109 @ 00:30:13.200 | NEEDS_CLIENT_CONFIRMATION | P1 |
 | CH10-F10 | Permisos y corrección clínica | CH10-E0112 @ 00:31:12.200 | NOT_TESTABLE | P2 |
 
 ## CH11 · Agenda y turnos
@@ -220,14 +221,14 @@ Eventos: 71/71. Requisitos: 9.
 
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
-| CH11-F01 | Agenda filtrable por paciente | CH11-E0010 @ 00:31:50.200; CH11-E0015 @ 00:31:55.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F01 | Agenda filtrable por paciente | CH11-E0010 @ 00:31:50.200; CH11-E0015 @ 00:31:55.600 | IMPLEMENTED_EXACT | P1 |
 | CH11-F02 | Navegación y vistas de calendario | CH11-E0010 @ 00:31:50.200 | IMPLEMENTED_PARTIAL | P1 |
 | CH11-F03 | Formulario de creación de visita | CH11-E0022 @ 00:32:03.600; CH11-E0023 @ 00:32:08.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F04 | Clasificación puntual o turno | CH11-E0026 @ 00:32:28.600; CH11-E0027 @ 00:32:29.200 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F05 | Catálogo de tipos de visita | CH11-E0040 @ 00:32:44.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F04 | Clasificación puntual o turno | CH11-E0026 @ 00:32:28.600; CH11-E0027 @ 00:32:29.200 | IMPLEMENTED_EXACT | P1 |
+| CH11-F05 | Catálogo de tipos de visita | CH11-E0040 @ 00:32:44.200 | IMPLEMENTED_EXACT | P1 |
 | CH11-F06 | Detalle de visita finalizada | CH11-E0050 @ 00:32:51.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F07 | Tipo de atención en liquidación | CH11-E0060 @ 00:33:10.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH11-F08 | Ajustes al pago de servicio profesional | CH11-E0055 @ 00:33:00.600; CH11-E0060 @ 00:33:10.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH11-F07 | Tipo de atención en liquidación | CH11-E0060 @ 00:33:10.600 | NEEDS_CLIENT_CONFIRMATION | P1 |
+| CH11-F08 | Ajustes al pago de servicio profesional | CH11-E0055 @ 00:33:00.600; CH11-E0060 @ 00:33:10.600 | NEEDS_CLIENT_CONFIRMATION | P1 |
 | CH11-F09 | Reglas de liquidación y permisos | CH11-E0055 @ 00:33:00.600 | NEEDS_CLIENT_CONFIRMATION | P2 |
 
 ## CH12 · Cuentas por pagar y pagos de servicios
@@ -237,13 +238,13 @@ Eventos: 51/51. Requisitos: 8.
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
 | CH12-F01 | Resumen de cuentas por pagar | CH12-E0004 @ 00:33:30.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F02 | Listado de pagos de servicios | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F03 | Acciones de pagos y reportes | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F04 | Filtro de pagos | CH12-E0010 @ 00:34:02.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH12-F02 | Listado de pagos de servicios | CH12-E0016 @ 00:34:17.000 | IMPLEMENTED_EXACT | P1 |
+| CH12-F03 | Acciones de pagos y reportes | CH12-E0016 @ 00:34:17.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH12-F04 | Filtro de pagos | CH12-E0010 @ 00:34:02.200 | IMPLEMENTED_EXACT | P2 |
 | CH12-F05 | Edición de pago de servicio profesional | CH12-E0022 @ 00:34:42.800; CH12-E0024 @ 00:34:44.600 | IMPLEMENTED_PARTIAL | P1 |
 | CH12-F06 | Conceptos de adición o descuento | CH12-E0025 @ 00:34:47.600; CH12-E0027 @ 00:34:49.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F07 | Catálogo visible de motivos | CH12-E0029 @ 00:34:55.800; CH12-E0034 @ 00:35:02.000; CH12-E0040 @ 00:35:07.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH12-F08 | Reglas financieras de montos y aprobación | CH12-E0022 @ 00:34:42.800 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH12-F07 | Catálogo visible de motivos | CH12-E0029 @ 00:34:55.800; CH12-E0034 @ 00:35:02.000; CH12-E0040 @ 00:35:07.600 | IMPLEMENTED_EXACT | P2 |
+| CH12-F08 | Reglas financieras de montos y aprobación | CH12-E0022 @ 00:34:42.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
 
 ## CH13 · Compras y compras al por mayor
 
@@ -251,17 +252,17 @@ Eventos: 92/92. Requisitos: 11.
 
 | ID | Requisito | Evidencia | Estado en plataforma | Prioridad |
 |---|---|---|---|---|
-| CH13-F01 | Listado de compras | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F02 | Estados visibles de compra | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F03 | Elección de modalidad de compra | CH13-E0006 @ 00:36:50.400; CH13-E0035 @ 00:37:37.800 | IMPLEMENTED_PARTIAL | P1 |
+| CH13-F01 | Listado de compras | CH13-E0004 @ 00:36:46.400 | IMPLEMENTED_EXACT | P1 |
+| CH13-F02 | Estados visibles de compra | CH13-E0004 @ 00:36:46.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH13-F03 | Elección de modalidad de compra | CH13-E0006 @ 00:36:50.400; CH13-E0035 @ 00:37:37.800 | IMPLEMENTED_EXACT | P1 |
 | CH13-F04 | Formulario de orden de compra | CH13-E0007 @ 00:36:54.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F05 | Tabla de ítems de orden | CH13-E0027 @ 00:37:23.000; CH13-E0029 @ 00:37:24.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F06 | Formulario de compra por caja chica | CH13-E0052 @ 00:38:22.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F07 | Desglose de totales de caja chica | CH13-E0065 @ 00:38:52.400; CH13-E0069 @ 00:38:58.600 | IMPLEMENTED_PARTIAL | P1 |
+| CH13-F05 | Tabla de ítems de orden | CH13-E0027 @ 00:37:23.000; CH13-E0029 @ 00:37:24.000 | IMPLEMENTED_EXACT | P1 |
+| CH13-F06 | Formulario de compra por caja menuda | CH13-E0035 @ 00:37:37.800; CH13-E0052 @ 00:38:22.400 | IMPLEMENTED_PARTIAL | P0 |
+| CH13-F07 | Desglose de totales de caja menuda | CH13-E0065 @ 00:38:52.400; CH13-E0069 @ 00:38:58.600 | IMPLEMENTED_EXACT | P0 |
 | CH13-F08 | Detalle de compra y adjuntos | CH13-E0083 @ 00:39:33.000; CH13-E0084 @ 00:39:33.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F09 | Acciones sobre compra | CH13-E0091 @ 00:39:40.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH13-F10 | Relación de compras con inventario | CH13-E0092 @ 00:39:43.000 | NOT_TESTABLE | P2 |
-| CH13-F11 | Reglas fiscales, de anulación y autorización | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH13-F09 | Acciones sobre compra | CH13-E0091 @ 00:39:40.800 | IMPLEMENTED_PARTIAL | P0 |
+| CH13-F10 | Relación de compras con inventario | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH13-F11 | Reglas fiscales, de anulación y autorización | CH13-E0092 @ 00:39:43.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
 
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 
@@ -271,20 +272,20 @@ Eventos: 152/152. Requisitos: 16.
 |---|---|---|---|---|
 | CH14-F01 | Existencias disponibles, comprometidas y totales | CH14-E0006 @ 00:40:05.400 | IMPLEMENTED_PARTIAL | P1 |
 | CH14-F02 | Historial de movimientos por item | CH14-E0016 @ 00:40:37.800; CH14-E0018 @ 00:40:39.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F03 | Inventario comprometido como estado temporal | CH14-E0018 @ 00:40:39.000 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH14-F03 | Inventario comprometido como estado temporal | CH14-E0018 @ 00:40:39.000 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F04 | Panel de acuses por pacientes y recursos | CH14-E0029 @ 00:40:51.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F05 | Gestión y exportación de acuses | CH14-E0032 @ 00:40:53.200; CH14-E0035 @ 00:41:00.800 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F05 | Gestión y exportación de acuses | CH14-E0032 @ 00:40:53.200; CH14-E0035 @ 00:41:00.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F06 | Cierres pendientes, totales y cerrados | CH14-E0041 @ 00:41:38.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F07 | Advertencia de cierre ya abierto | CH14-E0046 @ 00:41:47.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F08 | Aprobación de cierre total | CH14-E0050 @ 00:42:16.400 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F07 | Advertencia de cierre ya abierto | CH14-E0046 @ 00:41:47.400 | IMPLEMENTED_EXACT | P0 |
+| CH14-F08 | Aprobación de cierre total | CH14-E0050 @ 00:42:16.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
 | CH14-F09 | Catálogo de proveedores | CH14-E0061 @ 00:43:24.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F10 | Catálogo de bodegas y traslados | CH14-E0068 @ 00:43:28.600 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F11 | Lotes, números de serie y vencimiento | CH14-E0075 @ 00:43:37.200 | IMPLEMENTED_PARTIAL | P1 |
+| CH14-F10 | Catálogo de bodegas y traslados | CH14-E0068 @ 00:43:28.600 | IMPLEMENTED_PARTIAL | P0 |
+| CH14-F11 | Lotes, números de serie y vencimiento | CH14-E0075 @ 00:43:37.200 | IMPLEMENTED_PARTIAL | P0 |
 | CH14-F12 | Catálogo de kits de insumos | CH14-E0084 @ 00:44:13.600; CH14-E0089 @ 00:44:23.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F13 | Composición cuantificada del kit | CH14-E0091 @ 00:44:23.800; CH14-E0117 @ 00:44:44.800 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F14 | Creación de acuse para hospitalización | CH14-E0151 @ 00:45:27.000 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F15 | Detección de items faltantes | CH14-E0152 @ 00:45:27.400 | IMPLEMENTED_PARTIAL | P1 |
-| CH14-F16 | Vínculo de faltantes con cotización | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P2 |
+| CH14-F13 | Composición cuantificada del kit | CH14-E0091 @ 00:44:23.800; CH14-E0117 @ 00:44:44.800 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH14-F14 | Creación de acuse para hospitalización | CH14-E0151 @ 00:45:27.000 | IMPLEMENTED_PARTIAL | P0 |
+| CH14-F15 | Detección de items faltantes | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P0 |
+| CH14-F16 | Vínculo de faltantes con cotización | CH14-E0152 @ 00:45:27.400 | NEEDS_CLIENT_CONFIRMATION | P1 |
 
 ## CH15 · Acuse de inventario y catálogos de ítems
 
