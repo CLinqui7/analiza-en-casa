@@ -37,8 +37,9 @@ class Patients(unittest.TestCase):
     c.d.quit()
     if SERVER: SERVER.terminate()
  def setUp(s):
-    s.d.get(BASE+'/login'); s.d.execute_script('localStorage.clear()'); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.LABEL_NAME,'Correo'))).send_keys('admin@demo.local'); s.d.find_element(By.LABEL_NAME,'Contraseña').send_keys('demo-admin'); s.d.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); s.w.until(EC.url_contains('/dashboard'))
+    s.d.get(BASE+'/login'); s.d.execute_script('localStorage.clear()'); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Correo')]//input"))).send_keys('admin@demo.local'); s.d.find_element(By.XPATH,"//label[contains(.,'Contraseña')]//input").send_keys('demo-admin'); s.d.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); s.w.until(EC.url_contains('/dashboard'))
  def click(s,x): s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,f'[data-action-id="{x}"]'))).click()
+ def field(s,label): return s.d.find_element(By.XPATH,f"//label[contains(.,'{label}')]//*[self::input or self::select or self::textarea]")
  def test_patient_actions(s):
     d=s.d; d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1')))
     for x in ['PATIENT-TAB-ACTIVE','PATIENT-TAB-INACTIVE','PATIENT-TAB-ACTIVE']: s.click(x)
@@ -46,8 +47,8 @@ class Patients(unittest.TestCase):
     for x in ['PATIENT-SORT-NAME','PATIENT-SORT-NAME','PATIENT-SORT-DOCUMENT','PATIENT-SORT-DOCUMENT']: s.click(x)
     Select(d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGE-SIZE"]')).select_by_value('5'); s.click('PATIENT-PAGE-NEXT'); s.click('PATIENT-PAGE-PREVIOUS'); s.click('PATIENT-PAGINATE')
     s.click('PATIENT-CREATE'); Select(d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DOCUMENT-TYPE"]')).select_by_value('OTHER')
-    for label,value in [('Número de documento','SEL-001'),('Nombre completo','Paciente Selenium'),('Fecha de nacimiento','04/20/1985'),('Teléfono celular','70009001'),('Empresa','Empresa Selenium'),('Dirección','Dirección Selenium'),('Comentario o referencia','Referencia Selenium')]: d.find_element(By.LABEL_NAME,label).send_keys(value)
-    d.find_element(By.LABEL_NAME,'Femenino').click(); Select(d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-INSURANCE-TOGGLE"]')).select_by_value('REGULAR'); s.click('PATIENT-CONTACT-ADD'); s.click('PATIENT-CONTACT-REMOVE'); s.click('PATIENT-ADDRESS-LOOKUP'); s.click('PATIENT-CREATE-SUBMIT')
+    for label,value in [('Número de documento','SEL-001'),('Nombre completo','Paciente Selenium'),('Fecha de nacimiento','04/20/1985'),('Teléfono celular','70009001'),('Empresa','Empresa Selenium'),('Dirección','Dirección Selenium'),('Comentario o referencia','Referencia Selenium')]: s.field(label).send_keys(value)
+    s.field('Femenino').click(); Select(d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-INSURANCE-TOGGLE"]')).select_by_value('REGULAR'); s.click('PATIENT-CONTACT-ADD'); s.click('PATIENT-CONTACT-REMOVE'); s.click('PATIENT-ADDRESS-LOOKUP'); s.click('PATIENT-CREATE-SUBMIT')
     s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Selenium')]"))); d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-SEARCH"]').send_keys('Paciente Selenium'); s.click('PATIENT-DETAIL-NAVIGATE'); s.click('PATIENT-EDIT'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]'))); s.click('PATIENT-EDIT-CANCEL')
     d.get(BASE+'/patients'); s.click('PATIENT-IMPORT'); s.click('PATIENT-IMPORT-CANCEL'); s.click('PATIENT-EXPORT')
 
