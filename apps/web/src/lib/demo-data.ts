@@ -7,6 +7,7 @@ import type {
   Shift,
   Hospitalization,
   Quote,
+  Payment,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -92,6 +93,8 @@ export const demoHospitalizations: Hospitalization[] = [
 export const demoQuotes: Quote[] = [
   { id: 'quote-demo-001', caseId: 'case-demo-001', patientId: 'patient-demo-001', version: 1, status: 'DRAFT', summary: 'Cotización sintética de coordinación; importes pendientes de reglas aprobadas.', createdAt: '2026-08-28T08:00:00.000Z' },
 ];
+
+export const demoPayments: Payment[] = [];
 
 export const demoInventoryMovements: InventoryMovement[] = [
   {

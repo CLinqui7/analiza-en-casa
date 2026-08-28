@@ -80,6 +80,41 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Enviar enlace seguro' })).toHaveCount(0);
 });
 
+test('payment application is idempotent and reversal preserves its reason', async ({ page }) => {
+  await login(page);
+  await page.goto('/quotes');
+  await page.getByRole('button', { name: 'Nueva cotización' }).click();
+  await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
+  await page.getByRole('button', { name: 'Guardar borrador' }).click();
+  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page.getByRole('button', { name: 'Enviar enlace seguro' }).click();
+
+  await page.goto('/payments');
+  await page.getByRole('button', { name: 'Aplicar pago' }).click();
+  await page.getByLabel('Monto ingresado').fill('125.50');
+  await page.getByLabel('Referencia').fill('REF-PAGO-E2E');
+  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
+  await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
+  await expect(page.getByRole('status')).toContainText('Pago aplicado una sola vez');
+  await page.reload();
+  await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Aplicar pago' }).click();
+  await page.getByLabel('Referencia').fill('REF-PAGO-E2E-DUPLICADO');
+  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
+  await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
+  await expect(page.getByText('La clave ya fue aplicada; la operación no se duplicó.')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).first().click();
+
+  await page.getByRole('button', { name: 'Reversar' }).click();
+  await page.getByLabel('Motivo').fill('Corrección de QA sintética.');
+  await page.getByRole('button', { name: 'Confirmar reversión' }).click();
+  await expect(page.getByRole('status')).toContainText('Pago reversado con motivo');
+  await page.reload();
+  await expect(page.getByText('Reversado')).toBeVisible();
+  await expect(page.getByText('Corrección de QA sintética.')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

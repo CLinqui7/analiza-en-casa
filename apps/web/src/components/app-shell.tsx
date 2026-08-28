@@ -15,6 +15,8 @@ const navigation: NavigationGroup[] = [
   { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
   { label: 'Hospitalizaciones', href: '/hospitalizations', permission: 'cases:read', actionId: 'HOSPITALIZATION-NAVIGATE' },
   { label: 'Cotizaciones', href: '/quotes', permission: 'quotes:read', actionId: 'QUOTE-NAVIGATE' },
+  { label: 'Cuentas por cobrar', href: '/receivables', permission: 'payments:read', actionId: 'RECEIVABLES-NAVIGATE' },
+  { label: 'Pagos', href: '/payments', permission: 'payments:read', actionId: 'PAYMENT-NAVIGATE' },
   {
     label: 'Clínico',
     children: [

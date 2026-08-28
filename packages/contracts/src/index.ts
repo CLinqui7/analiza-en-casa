@@ -91,6 +91,17 @@ export const quoteSchema = z.object({
   sentAt: z.string().optional(),
 });
 
+export const paymentSchema = z.object({
+  id: z.string(),
+  quoteId: z.string(),
+  amount: z.number().positive(),
+  reference: z.string().trim().min(1),
+  idempotencyKey: z.string().trim().min(1),
+  status: z.enum(['APPLIED', 'VOIDED']),
+  createdAt: z.string(),
+  voidReason: z.string().trim().optional(),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
@@ -98,4 +109,5 @@ export type NurseHourEntry = z.infer<typeof nurseHourEntrySchema>;
 export type Shift = z.infer<typeof shiftSchema>;
 export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type Quote = z.infer<typeof quoteSchema>;
+export type Payment = z.infer<typeof paymentSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;

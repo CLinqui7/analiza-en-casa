@@ -1,6 +1,6 @@
 'use client';
 
-import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
@@ -36,6 +36,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addHospitalization: (hospitalization: Hospitalization) => void;
   addQuote: (quote: Quote) => void;
   sendQuote: (quoteId: string) => void;
+  addPayment: (payment: Payment) => void;
+  voidPayment: (paymentId: string, reason: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -158,6 +160,24 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current,
           quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', sentAt: new Date().toISOString() } : candidate),
           auditEntries: [audit('Cotización enviada como enlace seguro', quoteId), ...current.auditEntries],
+        };
+      }),
+      addPayment: (payment) => commit((current) => {
+        if (current.payments.some((candidate) => candidate.idempotencyKey === payment.idempotencyKey)) return current;
+        return {
+          ...current,
+          payments: [...current.payments, payment],
+          auditEntries: [audit('Pago aplicado', payment.id), ...current.auditEntries],
+        };
+      }),
+      voidPayment: (paymentId, reason) => commit((current) => {
+        const voidReason = reason.trim();
+        const payment = current.payments.find((candidate) => candidate.id === paymentId);
+        if (!voidReason || payment?.status !== 'APPLIED') return current;
+        return {
+          ...current,
+          payments: current.payments.map((candidate) => candidate.id === paymentId ? { ...candidate, status: 'VOIDED', voidReason } : candidate),
+          auditEntries: [audit('Pago reversado', paymentId), ...current.auditEntries],
         };
       }),
     }),
