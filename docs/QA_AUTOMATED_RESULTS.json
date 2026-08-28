@@ -1,8 +1,8 @@
 {
   "project": "Analiza en Casa · Production QA",
-  "generatedAt": "2026-08-28T05:19:00.624Z",
-  "total": 75,
-  "passed": 75,
+  "generatedAt": "2026-08-28T06:33:05.639Z",
+  "total": 76,
+  "passed": 76,
   "failed": 0,
   "status": "PASSED",
   "checks": [
@@ -127,9 +127,14 @@
       "detail": "SYNTHETIC_DEMO"
     },
     {
-      "name": "seed:17-video-chapters",
+      "name": "parity:17-video-chapters",
       "passed": true,
-      "detail": "17 capítulos"
+      "detail": "17 capítulos de la matriz canónica"
+    },
+    {
+      "name": "parity:no-unresolved-missing",
+      "passed": true,
+      "detail": "0 faltantes no bloqueados"
     },
     {
       "name": "seed:patients",
@@ -189,7 +194,7 @@
     {
       "name": "ui:actions-have-handlers",
       "passed": true,
-      "detail": "71 acciones cubiertas"
+      "detail": "76 acciones cubiertas"
     },
     {
       "name": "ui:route-permission-enforcement",

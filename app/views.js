@@ -13,6 +13,7 @@ import {
   ITEM_CATEGORY_LABELS,
   safeText
 } from "./domain.js";
+import { paritySummary } from "./parity-summary.js";
 
 const QUOTE_ADMIN_LABELS = Object.fromEntries(Object.entries(QUOTE_STATUS_LABELS).map(([key, value]) => [key, value.admin]));
 
@@ -1542,10 +1543,11 @@ function renderAudit(state,store,ui){
 }
 
 function renderQaCoverage(state,store,ui){
-  const total=state.qaCoverage.reduce((s,c)=>s+c.features,0);
-  const implemented=state.qaCoverage.reduce((s,c)=>s+c.implemented,0);
-  const partial=state.qaCoverage.reduce((s,c)=>s+c.partial,0);
-  const missing=state.qaCoverage.reduce((s,c)=>s+c.missing,0);
+  const coverage = paritySummary.chapters;
+  const total=paritySummary.totalRequirements;
+  const implemented=coverage.reduce((s,c)=>s+c.implemented,0);
+  const partial=coverage.reduce((s,c)=>s+c.partial,0);
+  const missing=paritySummary.missing;
   return `
     ${pageHeader("QA de cobertura del video","Matriz capítulo por capítulo para impedir que una función observada quede fuera del producto.",
       `${actionButton("Ejecutar QA interno","run-qa",{kind:"primary",iconName:"check"})}${linkButton("Abrir documentación","#/configuracion",{iconName:"file"})}`)}
@@ -1556,7 +1558,7 @@ function renderQaCoverage(state,store,ui){
       ${metric("Faltantes",missing,"Deben ser cero antes de cierre","alert",missing?"coral":"teal")}
     </div>
     ${card("Cobertura por capítulo",table(["Capítulo","Área funcional","Funciones","Implementadas","Parciales","Faltantes","Cobertura","Estado"],
-      state.qaCoverage.map(ch=>{
+      coverage.map(ch=>{
         const pct=Math.round((ch.implemented+ch.partial*.5)/ch.features*100);
         return `<tr><td><strong>${esc(ch.chapter)}</strong></td><td class="cell-wrap">${esc(ch.title)}</td><td>${ch.features}</td><td>${ch.implemented}</td><td>${ch.partial}</td><td>${ch.missing}</td><td><div class="coverage-cell"><div class="progress"><span style="width:${pct}%"></span></div><strong>${pct}%</strong></div></td><td>${badge(ch.status,ch.status==="PASS"?"Cubierto":ch.status)}</td></tr>`;
       })))}

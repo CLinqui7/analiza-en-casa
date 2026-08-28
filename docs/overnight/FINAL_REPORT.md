@@ -89,3 +89,29 @@ Para operación y rollback consulte `docs/RUNBOOK.md`; para despliegue consulte 
 - `f111350` — mensajería segura, pagos e inventario.
 
 La recomendación de producción es **no aprobar aún**: primero complete la validación real documentada y la revisión legal/operativa del cliente.
+
+---
+
+## Addendum · 2026-08-28 · React, CLIENT-AUDIO y Selenium
+
+Rama de continuación: `codex/client-audio-selenium-hardening`. Se conservó la evidencia de video y el demo heredado como respaldo verificable; el desarrollo y build principal ahora usan `apps/web` con Next.js App Router, React y TypeScript estricto. No se usa iframe, `dangerouslySetInnerHTML` ni se carga el runtime heredado dentro de React.
+
+### Entregado
+
+- Monorepo con `apps/web` y los paquetes `domain`, `contracts`, `ui` y `testing`.
+- Clientes React para pacientes, reporte de salud, acciones operativas, tablero de enfermería, horas de enfermería, seguros con guardas, kárdex y ayuda.
+- CLIENT-AUDIO-001 a CLIENT-AUDIO-011 trazados en `docs/CLIENT_AUDIO_REMEDIATION_MATRIX.md`.
+- Inventario de 722 funciones nombradas y auditoría de 2,664 textos candidatos, generados de forma determinista.
+- Controles contra carga del legado/HTML peligroso y un escaneo local de secretos sin hallazgos.
+- Selenium Chrome sin autenticación (6 casos), Playwright con axe (3 casos) y Vitest (4 casos) para React.
+- Capturas de revisión de escritorio y 390 px en `docs/react/screenshots/`.
+
+### Validación más reciente
+
+- `npm run qa:local`: PASS (98 pruebas heredadas, 76 checks QA, 17/17 capítulos, límites React, tipos, lint, Prettier, Vitest, Playwright/axe y Selenium).
+- `npm run build`: PASS; diez rutas estáticas de React generadas.
+- `npm run security:scan` y `npm run github:preflight`: PASS.
+
+### Riesgo y bloqueo residual
+
+La migración no autoriza el uso con datos reales. Quedan por trasladar con paridad demostrable módulos extensos del demo heredado y por validar contra Supabase real RLS/RPC, roles, contratos de firmas clínicas, reglas de seguros, documentos oficiales, catálogos y proveedores. Esos puntos continúan documentados en `docs/OPEN_QUESTIONS.md`; no se infieren reglas de negocio ni se habilitan integraciones sensibles.

@@ -210,6 +210,14 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `CH16-Q006`: ¿La exclusión global de medicamentos es obligatoria, condicional o negociable por perfil? Evidencia: CH16-E0003 y CH16-E0024, 00:49:45.400–00:50:28.400.
 - `CH16-Q007`: ¿Qué alcance legal, rol y flujo de corrección requiere el bloqueo de edición clínica mencionado durante la navegación al reporte de salud? No se declara firma ni regla clínica legal. Evidencia verbal: CH16-E0003; navegación CH16-E0041 y CH16-E0044, 00:51:11.200–00:51:27.400.
 
+## CH17 · reporte de salud detallado e impresión
+
+- `CH17-Q001`: aprobar plantilla oficial de impresión/PDF, papel, encabezado, numeración, contenido por sección, firmas, metadatos y validez. La salida actual es configurable y explícitamente no declara firma electrónica legal. Evidencia: CH17-E0008, CH17-E0021 y CH17-E0043.
+- `CH17-Q002`: entregar catálogo, permisos, reacción/estado, contradicción con “No registrado”, versionado y auditoría para alergias y antecedentes. La plataforma sólo visualiza datos documentados y no los interpreta. Evidencia: CH17-E0026–CH17-E0031.
+- `CH17-Q003`: definir proveedor, base autorizada, minimización, revisión humana, persistencia, entrenamiento, acceso y auditoría de “Auditar con IA”. La acción no se implementa con contenido clínico. Evidencia: CH17-E0048.
+- `CH17-Q004`: definir proveedor, destinatario, consentimiento, expiración, revocación, retención y auditoría de WhatsApp para notas. La plataforma conserva sólo una notificación de enlace seguro sin contenido clínico. Evidencia verbal: CH17-E0048, 00:54:00–00:54:23.560.
+- `CH17-Q005`: aprobar la matriz definitiva de creación, firma, corrección y anulación por rol, junto con el contrato runtime de Supabase. La política actual es conservadora y la ejecución contra una instancia Supabase real sigue pendiente. Evidencia: CH17-E0047–CH17-E0048.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

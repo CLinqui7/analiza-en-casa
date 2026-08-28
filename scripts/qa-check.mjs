@@ -2,6 +2,7 @@ import { readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { seedData } from "../app/mock-data.js";
+import { paritySummary } from "../app/parity-summary.js";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const required = [
@@ -38,7 +39,8 @@ add("security:no-service-role-in-client", !/SUPABASE_SERVICE_ROLE_KEY\s*[=:]\s*[
 add("security:no-hardcoded-provider-secret", !/(TWILIO_AUTH_TOKEN|WHATSAPP_ACCESS_TOKEN|RESEND_API_KEY)\s*[=:]\s*["'][A-Za-z0-9_\-]{12,}/.test(clientText), "No hay secretos de proveedor en el cliente.");
 
 add("seed:synthetic-classification", seedData.meta.dataClassification === "SYNTHETIC_DEMO", seedData.meta.dataClassification);
-add("seed:17-video-chapters", seedData.qaCoverage.length === 17, `${seedData.qaCoverage.length} capítulos`);
+add("parity:17-video-chapters", paritySummary.chapters.length === 17, `${paritySummary.chapters.length} capítulos de la matriz canónica`);
+add("parity:no-unresolved-missing", paritySummary.missing === 0, `${paritySummary.missing} faltantes no bloqueados`);
 add("seed:patients", seedData.patients.length >= 5, `${seedData.patients.length} pacientes`);
 add("seed:cases", seedData.cases.length >= 5, `${seedData.cases.length} hospitalizaciones`);
 add("seed:quotes", seedData.quotes.length >= 5, `${seedData.quotes.length} cotizaciones`);

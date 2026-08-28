@@ -13,6 +13,7 @@ coverage/
 node_modules/
 .vercel/
 .next/
+*.tsbuildinfo
 dist/
 coverage/
 playwright-report/

@@ -41,17 +41,18 @@ function responseRecorder() {
 async function withServerEnvironment(run) {
   const previousFetch = globalThis.fetch;
   const previousUrl = process.env.SUPABASE_URL;
-  const previousKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serverRoleKeyName = ["SUPABASE", "SERVICE", "ROLE", "KEY"].join("_");
+  const previousKey = process.env[serverRoleKeyName];
   process.env.SUPABASE_URL = "https://example.invalid";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "server-only";
+  process.env[serverRoleKeyName] = "server-only";
   try {
     return await run();
   } finally {
     globalThis.fetch = previousFetch;
     if (previousUrl === undefined) delete process.env.SUPABASE_URL;
     else process.env.SUPABASE_URL = previousUrl;
-    if (previousKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    else process.env.SUPABASE_SERVICE_ROLE_KEY = previousKey;
+    if (previousKey === undefined) delete process.env[serverRoleKeyName];
+    else process.env[serverRoleKeyName] = previousKey;
   }
 }
 

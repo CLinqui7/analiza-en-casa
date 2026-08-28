@@ -3,10 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "description": "Sistema operativo de atención domiciliaria, preparado para Supabase y Vercel, con modo demo local.",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
-    "start": "node scripts/serve.mjs",
+    "dev": "npm run dev --workspace=@analiza/web",
+    "start": "npm run start --workspace=@analiza/web",
+    "dev:legacy": "node scripts/serve.mjs",
+    "start:legacy": "node scripts/serve.mjs",
+    "build": "npm run build --workspace=@analiza/web",
+    "typecheck": "npm run typecheck --workspace=@analiza/web",
+    "lint": "npm run lint --workspace=@analiza/web",
+    "format:check": "prettier --check \"apps/**/*.{ts,tsx,css}\" \"packages/**/*.{ts,tsx}\"",
+    "test:react": "npm run test --workspace=@analiza/web",
     "test": "node --test tests/*.test.mjs",
     "test:browser:ch01": "playwright test tests/e2e/ch01.spec.mjs",
     "test:browser:ch02": "playwright test tests/e2e/ch02.spec.mjs",
@@ -24,8 +35,10 @@
     "test:browser:ch14": "playwright test tests/e2e/ch14.spec.mjs",
     "test:browser:ch15": "playwright test tests/e2e/ch15.spec.mjs",
     "test:browser:ch16": "playwright test tests/e2e/ch16.spec.mjs",
+    "test:browser:react": "playwright test -c apps/web/playwright.config.ts",
+    "test:selenium": "py tests/selenium/smoke.py",
     "qa": "node scripts/qa-check.mjs",
-    "qa:local": "npm run codex:preflight && npm run check && npm run audit:verify",
+    "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
     "codex:preflight": "node scripts/codex-preflight.mjs",
@@ -34,12 +47,17 @@
     "audit:verify": "node scripts/verify-video-audit.mjs",
     "audit:master": "node scripts/generate-master-video-requirements.mjs",
     "audit:master:bootstrap": "node scripts/generate-master-video-requirements.mjs --bootstrap",
-    "parity:generate": "node scripts/generate-exact-parity-matrices.mjs"
+    "parity:generate": "node scripts/generate-exact-parity-matrices.mjs",
+    "inventory:generate": "node scripts/generate-functional-inventories.mjs",
+    "react:boundaries": "node scripts/check-react-boundaries.mjs",
+    "security:scan": "node scripts/security-scan.mjs"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1"
+    "@axe-core/playwright": "^4.11.0",
+    "@playwright/test": "^1.62.1",
+    "prettier": "^3.6.2"
   }
 }
