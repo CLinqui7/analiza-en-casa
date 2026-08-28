@@ -325,6 +325,10 @@ function VitalsPanel({
   readings: VitalReading[];
   patients: { id: string; fullName: string }[];
 }) {
+  const visibleReadings = readings
+    .filter((reading) => patients.some((patient) => patient.id === reading.patientId))
+    .slice()
+    .reverse();
   return (
     <Panel>
       <div className="table-heading">
@@ -332,15 +336,11 @@ function VitalsPanel({
           <h2>Mediciones individuales</h2>
           <p>Valores mostrados por fuente y fecha, sin clasificación automática.</p>
         </div>
-        <StatusTag>{readings.length} registros</StatusTag>
+        <StatusTag>{visibleReadings.length} registros</StatusTag>
       </div>
-      {readings.length ? (
+      {visibleReadings.length ? (
         <div className="reading-list">
-          {readings
-            .filter((reading) => patients.some((patient) => patient.id === reading.patientId))
-            .slice()
-            .reverse()
-            .map((reading) => (
+          {visibleReadings.map((reading) => (
               <article className="reading-card" key={reading.id}>
                 <header>
                   <strong>
@@ -368,7 +368,7 @@ function VitalsPanel({
         </div>
       ) : (
         <EmptyState
-          detail="Use el botón para registrar una medición individual."
+          detail="Ajuste la búsqueda o use el botón para registrar una medición individual."
           title="Sin mediciones"
         />
       )}

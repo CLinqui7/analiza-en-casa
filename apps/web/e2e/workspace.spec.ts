@@ -277,6 +277,17 @@ test('insurance search is normalized and unavailable to nurse role', async ({ pa
   await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol NURSE');
 });
 
+test('health report search filters individual vital records without interpretation', async ({ page }) => {
+  await login(page);
+  await page.goto('/clinical/reports');
+  await page.getByRole('tab', { name: 'Signos vitales' }).click();
+  await page.getByLabel('Buscar paciente en reportes').fill('123456789');
+  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
+  await page.getByLabel('Buscar paciente en reportes').fill('no existe en QA');
+  await expect(page.getByText('Sin mediciones', { exact: true })).toBeVisible();
+  await expect(page.getByText('sin clasificación automática')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {
