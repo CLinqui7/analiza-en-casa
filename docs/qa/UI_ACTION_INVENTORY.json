@@ -240,7 +240,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-CREATE"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -341,7 +341,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-CONTACTS"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -374,7 +374,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-CONTACTS"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -440,7 +440,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-ADDRESS"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -473,7 +473,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-ADDRESS"
       ],
       "playwright_test_ids": [],
       "unit_test_ids": [],
