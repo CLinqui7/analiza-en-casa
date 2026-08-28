@@ -173,6 +173,16 @@ test('audit export is restricted to the audit role set', async ({ page }) => {
   await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol DOCTOR');
 });
 
+test('help search gives deterministic local results and a safe empty state', async ({ page }) => {
+  await login(page);
+  await page.goto('/help');
+  await page.getByLabel('¿Qué necesitas hacer?').fill('movimiento');
+  await expect(page.getByRole('heading', { name: '¿Cómo hago un movimiento?' })).toBeVisible();
+  await page.getByLabel('¿Qué necesitas hacer?').fill('consulta inexistente de QA');
+  await expect(page.getByRole('heading', { name: 'Sin resultados' })).toBeVisible();
+  await expect(page.getByText('no se muestra ni inventa un número')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {
