@@ -3,8 +3,10 @@ import { join, resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const args = new Set(process.argv.slice(2));
-const moduleName = process.argv[process.argv.indexOf('--module') + 1];
-const prefix = process.argv[process.argv.indexOf('--prefix') + 1];
+const moduleIndex = process.argv.indexOf('--module');
+const prefixIndex = process.argv.indexOf('--prefix');
+const moduleName = moduleIndex === -1 ? undefined : process.argv[moduleIndex + 1];
+const prefix = prefixIndex === -1 ? undefined : process.argv[prefixIndex + 1];
 const requireExecuted = args.has('--require-executed');
 
 function files(directory) {
