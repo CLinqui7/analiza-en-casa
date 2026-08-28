@@ -25,6 +25,23 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible();
 });
 
+test('primary navigation requires a session and hides patient access for inventory', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/login/);
+
+  await login(page);
+  await page.locator('[data-action-id="PATIENT-NAVIGATE"]').click();
+  await expect(page).toHaveURL(/\/patients$/);
+  await page.locator('[data-action-id="DASHBOARD-NAVIGATE"]').first().click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'inventory@demo.local', 'demo-inventory');
+  await expect(page.locator('[data-action-id="PATIENT-NAVIGATE"]')).toHaveCount(0);
+  await page.goto('/patients');
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+});
+
 test('patient duplicate validation and individual vital registration are usable', async ({
   page,
 }) => {
