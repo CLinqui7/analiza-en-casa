@@ -38,6 +38,10 @@ export function normalizeDocument(value: string): string {
   return value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
+export function normalizePhone(value: string): string {
+  return value.replace(/\D/g, '');
+}
+
 export function maskDui(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 9);
   return digits.length > 8 ? `${digits.slice(0, 8)}-${digits.slice(8)}` : digits;
@@ -69,11 +73,14 @@ export function findDuplicatePatient(
 
 export function searchPatients(patients: readonly Patient[], query: string): Patient[] {
   const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  const phoneNeedle = normalizePhone(query);
   if (!needle) return [...patients];
   return patients.filter((patient) =>
-    [patient.fullName, patient.documentId, patient.insurer ?? ''].some((value) =>
-      normalizeText(value).includes(needle),
-    ),
+    normalizeText(patient.fullName).includes(needle) ||
+    normalizeText(patient.insurer ?? '').includes(needle) ||
+    normalizeDocument(patient.documentId).includes(documentNeedle) ||
+    (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
   );
 }
 
@@ -84,12 +91,15 @@ export type VitalMetric = {
 };
 
 export const vitalMetrics: readonly VitalMetric[] = [
+  { key: 'heartRate', label: 'FC', unit: 'lpm' },
+  { key: 'respiratoryRate', label: 'FR', unit: 'rpm' },
   { key: 'systolic', label: 'Sistólica', unit: 'mmHg' },
   { key: 'diastolic', label: 'Diastólica', unit: 'mmHg' },
   { key: 'pulse', label: 'Pulso', unit: 'lpm' },
   { key: 'temperature', label: 'Temperatura', unit: '°C' },
-  { key: 'oxygenSaturation', label: 'Saturación O₂', unit: '%' },
-  { key: 'glucose', label: 'Glucosa', unit: 'mg/dL' },
+  { key: 'oxygenSaturation', label: 'SpO₂', unit: '%' },
+  { key: 'pain', label: 'Dolor', unit: 'escala' },
+  { key: 'glucose', label: 'Glicemia', unit: 'mg/dL' },
 ];
 
 export function measuredVitalMetrics(reading: VitalReading) {
@@ -102,8 +112,8 @@ export function measuredVitalMetrics(reading: VitalReading) {
 export type KardexRow = InventoryMovement & { delta: number; balance: number };
 
 export function movementDelta(movement: InventoryMovement): number {
-  if (movement.kind === 'ENTRY') return movement.quantity;
-  if (movement.kind === 'EXIT') return -movement.quantity;
+  if (movement.kind === 'ENTRY' || movement.kind === 'RETURN') return movement.quantity;
+  if (movement.kind === 'EXIT' || movement.kind === 'TRANSFER') return -movement.quantity;
   return movement.adjustmentDirection === 'OUT' ? -movement.quantity : movement.quantity;
 }
 

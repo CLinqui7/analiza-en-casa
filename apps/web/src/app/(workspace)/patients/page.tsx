@@ -13,7 +13,7 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import { useWorkspace } from '@/components/providers';
+import { useAuth, useWorkspace } from '@/components/providers';
 
 const patientFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre para el registro sintético.'),
@@ -27,6 +27,7 @@ type PatientForm = z.infer<typeof patientFormSchema>;
 
 export default function PatientsPage() {
   const { addPatient, patients } = useWorkspace();
+  const { can } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<string | null>(null);
@@ -78,7 +79,8 @@ export default function PatientsPage() {
           <h1>Pacientes</h1>
           <p>La búsqueda normaliza mayúsculas, acentos y espacios en todos los resultados.</p>
         </div>
-        <Button
+        {can('patients:write') ? <Button
+          data-action-id="PATIENT-CREATE"
           onClick={() => {
             setResult(null);
             setIsOpen(true);
@@ -86,7 +88,7 @@ export default function PatientsPage() {
           type="button"
         >
           Agregar paciente
-        </Button>
+        </Button> : null}
       </header>
       {result ? (
         <p className="notice success" role="status">
@@ -99,8 +101,9 @@ export default function PatientsPage() {
         </label>
         <input
           id="patient-search"
+          data-action-id="PATIENT-SEARCH"
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Nombre, documento o aseguradora"
+          placeholder="Nombre, documento, teléfono o aseguradora"
           type="search"
           value={query}
         />

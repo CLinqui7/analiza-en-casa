@@ -50,6 +50,9 @@
     "parity:generate": "node scripts/generate-exact-parity-matrices.mjs",
     "inventory:generate": "node scripts/generate-functional-inventories.mjs",
     "react:boundaries": "node scripts/check-react-boundaries.mjs",
+    "react:parity": "node scripts/verify-react-route-parity.mjs",
+    "qa:inventory": "node scripts/render-ui-action-inventory.mjs",
+    "selenium:coverage": "node scripts/verify-selenium-coverage.mjs",
     "security:scan": "node scripts/security-scan.mjs"
   },
   "engines": {

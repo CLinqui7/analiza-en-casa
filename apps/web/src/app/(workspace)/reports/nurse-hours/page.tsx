@@ -1,207 +1,32 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { type NurseHourEntry } from '@analiza/contracts';
-import { nurseHoursTotal, toCsv } from '@analiza/domain';
-import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import { toCsv } from '@analiza/domain';
+import { Button, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { useWorkspace } from '@/components/providers';
 
-const hoursFormSchema = z.object({
-  resourceId: z.string().min(1, 'Seleccione un recurso.'),
-  date: z.string().min(1, 'Indique la fecha.'),
-  hours: z.coerce.number().positive('Las horas deben ser mayores que cero.'),
-  service: z.string().trim().min(1, 'Describa el servicio de forma operativa.'),
-});
-type HoursFormInput = z.input<typeof hoursFormSchema>;
-type HoursForm = z.output<typeof hoursFormSchema>;
+type Filters = { from: string; to: string; month: string; resourceId: string; status: string };
 
-function downloadCsv(filename: string, content: string) {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
+function scheduledHours(startsAt: string, endsAt: string) {
+  return Math.max(0, (new Date(endsAt).getTime() - new Date(startsAt).getTime()) / 3_600_000);
 }
+function downloadCsv(filename: string, content: string) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8' }); const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
+}
+const statusLabel = { SCHEDULED: 'Programado', CANCELLED: 'Cancelado', COMPLETED: 'Completado' };
 
 export default function NurseHoursPage() {
-  const { addNurseHour, nurseHours, nursingResources } = useWorkspace();
-  const [isOpen, setOpen] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-  const total = nurseHoursTotal(nurseHours);
-  const byResource = useMemo(
-    () =>
-      nursingResources.map((resource) => ({
-        resource,
-        hours: nurseHoursTotal(nurseHours.filter((entry) => entry.resourceId === resource.id)),
-      })),
-    [nurseHours, nursingResources],
-  );
-  const form = useForm<HoursFormInput, unknown, HoursForm>({
-    resolver: zodResolver(hoursFormSchema),
-    defaultValues: {
-      resourceId: nursingResources[0]?.id ?? '',
-      date: '2026-08-28',
-      hours: 1,
-      service: '',
-    },
-  });
-
-  function closeDialog() {
-    setOpen(false);
-    form.reset({
-      resourceId: nursingResources[0]?.id ?? '',
-      date: '2026-08-28',
-      hours: 1,
-      service: '',
-    });
-  }
-  function submit(values: HoursForm) {
-    const entry: NurseHourEntry = { id: crypto.randomUUID(), ...values };
-    addNurseHour(entry);
-    setResult('Hora de enfermería agregada al reporte consolidado.');
-    closeDialog();
-  }
-  function exportReport() {
-    const rows = [
-      ['Recurso', 'Fecha', 'Horas', 'Servicio'],
-      ...nurseHours.map((entry) => [
-        nursingResources.find((resource) => resource.id === entry.resourceId)?.displayName ??
-          'No disponible',
-        entry.date,
-        String(entry.hours),
-        entry.service,
-      ]),
-    ];
-    downloadCsv('reporte-horas-enfermeria-demo.csv', toCsv(rows));
-    setResult('CSV del reporte consolidado generado localmente.');
-  }
-
-  return (
-    <div className="page-stack">
-      <header className="page-header page-header-actions">
-        <div>
-          <p className="eyebrow">Reportes</p>
-          <h1>Horas de enfermería</h1>
-          <p>Consolidado por recurso, con exportación CSV local y trazabilidad del registro.</p>
-        </div>
-        <div className="action-row">
-          <Button className="button-secondary" onClick={exportReport} type="button">
-            Exportar CSV
-          </Button>
-          <Button
-            onClick={() => {
-              setResult(null);
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Agregar horas
-          </Button>
-        </div>
-      </header>
-      {result ? (
-        <p className="notice success" role="status">
-          {result}
-        </p>
-      ) : null}
-      <section className="metric-grid">
-        <Panel>
-          <span>Horas consolidadas</span>
-          <strong>{total}</strong>
-        </Panel>
-        <Panel>
-          <span>Recursos con registro</span>
-          <strong>{byResource.filter((row) => row.hours > 0).length}</strong>
-        </Panel>
-      </section>
-      <Panel>
-        <div className="table-heading">
-          <h2>Resumen por recurso</h2>
-          <StatusTag>{nurseHours.length} entradas</StatusTag>
-        </div>
-        {byResource.length ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Recurso</th>
-                  <th>Territorio</th>
-                  <th>Horas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {byResource.map(({ resource, hours }) => (
-                  <tr key={resource.id}>
-                    <td>{resource.displayName}</td>
-                    <td>{resource.territory}</td>
-                    <td>{hours}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <EmptyState detail="Registre un recurso y sus horas." title="Sin datos" />
-        )}
-      </Panel>
-      <Dialog
-        description="La exportación se compone de las entradas visibles de esta sesión demo."
-        footer={
-          <>
-            <Button className="button-secondary" onClick={closeDialog} type="button">
-              Cancelar
-            </Button>
-            <Button form="hours-form" type="submit">
-              Guardar horas
-            </Button>
-          </>
-        }
-        onClose={closeDialog}
-        open={isOpen}
-        title="Agregar horas de enfermería"
-      >
-        <form className="form-grid" id="hours-form" noValidate onSubmit={form.handleSubmit(submit)}>
-          <label>
-            Recurso
-            <select {...form.register('resourceId')}>
-              {nursingResources.map((resource) => (
-                <option key={resource.id} value={resource.id}>
-                  {resource.displayName}
-                </option>
-              ))}
-            </select>
-            {form.formState.errors.resourceId ? (
-              <span className="field-error">{form.formState.errors.resourceId.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Fecha
-            <input {...form.register('date')} type="date" />
-            {form.formState.errors.date ? (
-              <span className="field-error">{form.formState.errors.date.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Horas
-            <input {...form.register('hours')} min="0.25" step="0.25" type="number" />
-            {form.formState.errors.hours ? (
-              <span className="field-error">{form.formState.errors.hours.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Servicio operativo
-            <input {...form.register('service')} />
-            {form.formState.errors.service ? (
-              <span className="field-error">{form.formState.errors.service.message}</span>
-            ) : null}
-          </label>
-        </form>
-      </Dialog>
-    </div>
-  );
+  const { nursingResources, shifts } = useWorkspace();
+  const [filters, setFilters] = useState<Filters>({ from: '', to: '', month: '', resourceId: '', status: '' });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const rows = useMemo(() => shifts.filter((shift) => {
+    const date = shift.startsAt.slice(0, 10); const month = shift.startsAt.slice(0, 7);
+    return (!filters.from || date >= filters.from) && (!filters.to || date <= filters.to) && (!filters.month || month === filters.month) && (!filters.resourceId || shift.resourceId === filters.resourceId) && (!filters.status || shift.status === filters.status);
+  }).map((shift) => ({ ...shift, hours: scheduledHours(shift.startsAt, shift.endsAt) })), [filters, shifts]);
+  const totals = { shifts: rows.length, scheduled: rows.filter((row) => row.status === 'SCHEDULED').reduce((sum, row) => sum + row.hours, 0), cancelled: rows.filter((row) => row.status === 'CANCELLED').reduce((sum, row) => sum + row.hours, 0), valid: rows.filter((row) => row.status !== 'CANCELLED').reduce((sum, row) => sum + row.hours, 0) };
+  const selected = rows.find((row) => row.id === selectedId);
+  function update(name: keyof Filters, value: string) { setFilters((current) => ({ ...current, [name]: value })); }
+  function reset() { setFilters({ from: '', to: '', month: '', resourceId: '', status: '' }); setSelectedId(null); }
+  function exportReport() { downloadCsv('reporte-horas-programadas.csv', toCsv([['Turno', 'Enfermera', 'Inicio', 'Fin', 'Estado', 'Horas programadas'], ...rows.map((row) => [row.id, nursingResources.find((resource) => resource.id === row.resourceId)?.displayName ?? 'No disponible', row.startsAt, row.endsAt, statusLabel[row.status], String(row.hours)])])); }
+  return <div className="page-stack"><header className="page-header page-header-actions"><div><p className="eyebrow">Reportes</p><h1>Horas de enfermería</h1><p>Derivado de Agenda y turnos. Sin check-in/out, los valores son horas programadas, nunca horas trabajadas.</p></div><Button className="button-secondary" data-action-id="NURSE-HOURS-EXPORT" onClick={exportReport} type="button">Exportar CSV</Button></header><Panel><div className="filter-grid"><label>Desde<input data-action-id="NURSE-HOURS-FILTER-FROM" onChange={(event) => update('from', event.target.value)} type="date" value={filters.from} /></label><label>Hasta<input data-action-id="NURSE-HOURS-FILTER-TO" onChange={(event) => update('to', event.target.value)} type="date" value={filters.to} /></label><label>Mes<input data-action-id="NURSE-HOURS-FILTER-MONTH" onChange={(event) => update('month', event.target.value)} type="month" value={filters.month} /></label><label>Enfermera<select data-action-id="NURSE-HOURS-FILTER-NURSE" onChange={(event) => update('resourceId', event.target.value)} value={filters.resourceId}><option value="">Todas</option>{nursingResources.map((resource) => <option key={resource.id} value={resource.id}>{resource.displayName}</option>)}</select></label><label>Estado<select data-action-id="NURSE-HOURS-FILTER-STATUS" onChange={(event) => update('status', event.target.value)} value={filters.status}><option value="">Todos</option>{Object.entries(statusLabel).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label></div><Button className="button-secondary" data-action-id="NURSE-HOURS-FILTER-RESET" onClick={reset} type="button">Restablecer</Button></Panel><section className="metric-grid"><Panel><span>Turnos</span><strong>{totals.shifts}</strong></Panel><Panel><span>Horas programadas</span><strong>{totals.scheduled}</strong></Panel><Panel><span>Horas canceladas</span><strong>{totals.cancelled}</strong></Panel><Panel><span>Horas válidas programadas</span><strong>{totals.valid}</strong></Panel></section><Panel><div className="table-heading"><h2>Detalle de turnos</h2><StatusTag>{rows.length} visibles</StatusTag></div>{rows.length ? <div className="table-wrap"><table><thead><tr><th>Turno</th><th>Enfermera</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Horas programadas</th><th /></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td>{row.id}</td><td>{nursingResources.find((resource) => resource.id === row.resourceId)?.displayName ?? 'No disponible'}</td><td>{new Date(row.startsAt).toLocaleString('es-SV')}</td><td>{new Date(row.endsAt).toLocaleString('es-SV')}</td><td>{statusLabel[row.status]}</td><td>{row.hours}</td><td><Button className="button-secondary" data-action-id="NURSE-HOURS-DRILL-DOWN" onClick={() => setSelectedId(row.id)} type="button">Ver</Button></td></tr>)}</tbody></table></div> : <EmptyState detail="Ajuste el rango o cree un turno en Agenda." title="Sin turnos" />}</Panel>{selected ? <Panel><h2>Detalle: {selected.id}</h2><p>{selected.note ?? 'Sin notas adicionales.'}</p><p>Este turno registra {selected.hours} horas programadas; no hay evidencia de check-in/out para etiquetarlas como trabajadas.</p></Panel> : null}</div>;
 }

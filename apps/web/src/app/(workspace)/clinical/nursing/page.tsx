@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useWorkspace } from '@/components/providers';
+import { useAuth } from '@/components/providers';
 
 const resourceFormSchema = z.object({
   displayName: z.string().trim().min(1, 'Ingrese el nombre visible.'),
@@ -14,6 +15,7 @@ const resourceFormSchema = z.object({
   shift: z.enum(['MORNING', 'AFTERNOON', 'NIGHT']),
   availability: z.enum(['AVAILABLE', 'ASSIGNED', 'OFF_DUTY']),
   capacity: z.coerce.number().int().nonnegative('La capacidad no puede ser negativa.'),
+  boardRegistrationNumber: z.string().trim().min(1, 'Ingrese el número de Junta o registro profesional.'),
 });
 type ResourceFormInput = z.input<typeof resourceFormSchema>;
 type ResourceForm = z.output<typeof resourceFormSchema>;
@@ -32,6 +34,7 @@ const availabilityTone = {
 
 export default function NursingBoardPage() {
   const { addNursingResource, nursingResources } = useWorkspace();
+  const { can } = useAuth();
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const form = useForm<ResourceFormInput, unknown, ResourceForm>({
@@ -64,7 +67,8 @@ export default function NursingBoardPage() {
           <h1>Tablero de enfermería</h1>
           <p>Disponibilidad, territorio, turno y capacidad operativa, sin datos de pacientes.</p>
         </div>
-        <Button
+        {can('clinical:write') ? <Button
+          data-action-id="NURSING-RESOURCE-CREATE"
           onClick={() => {
             setResult(null);
             setOpen(true);
@@ -72,7 +76,7 @@ export default function NursingBoardPage() {
           type="button"
         >
           Registrar recurso
-        </Button>
+        </Button> : null}
       </header>
       {result ? (
         <p className="notice success" role="status">
@@ -90,6 +94,10 @@ export default function NursingBoardPage() {
                 </StatusTag>
               </div>
               <dl className="definition-list">
+                <div>
+                  <dt>Número de Junta / registro profesional</dt>
+                  <dd>{resource.boardRegistrationNumber}</dd>
+                </div>
                 <div>
                   <dt>Territorio</dt>
                   <dd>{resource.territory}</dd>
@@ -133,6 +141,13 @@ export default function NursingBoardPage() {
           noValidate
           onSubmit={form.handleSubmit(submit)}
         >
+          <label>
+            Número de Junta / registro profesional
+            <input {...form.register('boardRegistrationNumber')} />
+            {form.formState.errors.boardRegistrationNumber ? (
+              <span className="field-error">{form.formState.errors.boardRegistrationNumber.message}</span>
+            ) : null}
+          </label>
           <label>
             Nombre visible
             <input {...form.register('displayName')} />

@@ -5,6 +5,8 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { searchPatients } from '@analiza/domain';
+import { useAuth, useWorkspace } from '@/components/providers';
 
 const actionSchema = z.object({
   title: z.string().trim().min(1, 'Describa la acción operativa.'),
@@ -14,6 +16,10 @@ type ActionForm = z.infer<typeof actionSchema>;
 type Action = ActionForm & { id: string; at: string; status: 'OPEN' | 'DONE' };
 
 export default function ClinicalActionsPage() {
+  const { patients } = useWorkspace();
+  const { can } = useAuth();
+  const [query, setQuery] = useState('');
+  const matchingPatients = searchPatients(patients, query);
   const [actions, setActions] = useState<Action[]>([
     {
       id: 'action-demo-001',
@@ -54,10 +60,24 @@ export default function ClinicalActionsPage() {
             Registro operativo auditable; no se usa para prescribir ni divulgar contenido clínico.
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} type="button">
+        {can('clinical:write') ? <Button data-action-id="MEDICAL-ORDER-CREATE" onClick={() => setOpen(true)} type="button">
           Nueva acción
-        </Button>
+        </Button> : null}
       </header>
+      <Panel>
+        <label className="search-label" htmlFor="medical-order-search">
+          Buscar por paciente
+        </label>
+        <input
+          data-action-id="MEDICAL-ORDER-SEARCH"
+          id="medical-order-search"
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Nombre, documento o teléfono"
+          type="search"
+          value={query}
+        />
+        <p>{matchingPatients.length ? `${matchingPatients.length} paciente(s) coinciden.` : 'Sin pacientes coincidentes.'}</p>
+      </Panel>
       <Panel>
         <div className="table-heading">
           <h2>Acciones operativas</h2>
@@ -75,7 +95,7 @@ export default function ClinicalActionsPage() {
                     {action.owner} · {new Date(action.at).toLocaleString('es-SV')}
                   </span>
                 </div>
-                {action.status === 'OPEN' ? (
+                {action.status === 'OPEN' && can('clinical:write') ? (
                   <Button
                     className="button-secondary"
                     onClick={() => complete(action.id)}

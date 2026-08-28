@@ -4,6 +4,7 @@ import type {
   NursingResource,
   Patient,
   VitalReading,
+  Shift,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -47,6 +48,7 @@ export const demoNursingResources: NursingResource[] = [
     shift: 'MORNING',
     availability: 'AVAILABLE',
     capacity: 3,
+    boardRegistrationNumber: 'REG-DEMO-001',
   },
   {
     id: 'nurse-demo-002',
@@ -55,6 +57,7 @@ export const demoNursingResources: NursingResource[] = [
     shift: 'AFTERNOON',
     availability: 'ASSIGNED',
     capacity: 1,
+    boardRegistrationNumber: 'REG-DEMO-002',
   },
 ];
 
@@ -75,6 +78,11 @@ export const demoNurseHours: NurseHourEntry[] = [
   },
 ];
 
+export const demoShifts: Shift[] = [
+  { id: 'shift-demo-001', resourceId: 'nurse-demo-001', patientId: 'patient-demo-001', startsAt: '2026-08-28T08:00:00.000Z', endsAt: '2026-08-28T14:00:00.000Z', status: 'SCHEDULED', note: 'Turno sintético de QA.' },
+  { id: 'shift-demo-002', resourceId: 'nurse-demo-002', patientId: 'patient-demo-002', startsAt: '2026-08-28T14:00:00.000Z', endsAt: '2026-08-28T18:00:00.000Z', status: 'CANCELLED', note: 'Cancelación sintética de QA.' },
+];
+
 export const demoInventoryMovements: InventoryMovement[] = [
   {
     id: 'movement-demo-001',
@@ -83,6 +91,9 @@ export const demoInventoryMovements: InventoryMovement[] = [
     kind: 'ENTRY',
     quantity: 12,
     reason: 'Carga inicial sintética',
+    warehouseId: 'warehouse-demo-central',
+    reference: 'INIT-001',
+    user: 'Inventario Demo',
   },
   {
     id: 'movement-demo-002',
@@ -91,5 +102,19 @@ export const demoInventoryMovements: InventoryMovement[] = [
     kind: 'EXIT',
     quantity: 2,
     reason: 'Salida demo auditada',
+    warehouseId: 'warehouse-demo-central',
+    reference: 'OUT-001',
+    user: 'Inventario Demo',
+  },
+  {
+    id: 'movement-demo-003',
+    itemId: 'inventory-demo-supplies',
+    createdAt: '2026-08-28T07:00:00.000Z',
+    kind: 'ENTRY',
+    quantity: 30,
+    reason: 'Carga inicial de insumos sintéticos',
+    warehouseId: 'warehouse-demo-north',
+    reference: 'INIT-002',
+    user: 'Inventario Demo',
   },
 ];

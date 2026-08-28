@@ -2,12 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type VitalReading } from '@analiza/contracts';
-import { measuredVitalMetrics } from '@analiza/domain';
+import { measuredVitalMetrics, searchPatients } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useWorkspace } from '@/components/providers';
+import { useAuth, useWorkspace } from '@/components/providers';
 
 const optionalPositiveNumber = z.preprocess(
   (value) => (value === '' || value === undefined ? undefined : Number(value)),
@@ -17,13 +17,20 @@ const optionalPositiveNumber = z.preprocess(
 const vitalFormSchema = z
   .object({
     patientId: z.string().min(1, 'Seleccione un paciente.'),
+    caseId: z.string().trim(),
     measuredAt: z.string().min(1, 'Indique fecha y hora.'),
     source: z.enum(['clinical', 'patient']),
+    heartRate: optionalPositiveNumber,
+    respiratoryRate: optionalPositiveNumber,
     systolic: optionalPositiveNumber,
     diastolic: optionalPositiveNumber,
     pulse: optionalPositiveNumber,
     temperature: optionalPositiveNumber,
     oxygenSaturation: optionalPositiveNumber,
+    pain: z.preprocess(
+      (value) => (value === '' || value === undefined ? undefined : Number(value)),
+      z.number().nonnegative('Use un valor igual o mayor a cero.').optional(),
+    ),
     glucose: optionalPositiveNumber,
     note: z.string().trim(),
   })
@@ -32,9 +39,12 @@ const vitalFormSchema = z
       ![
         value.systolic,
         value.diastolic,
+        value.heartRate,
+        value.respiratoryRate,
         value.pulse,
         value.temperature,
         value.oxygenSaturation,
+        value.pain,
         value.glucose,
       ].some((metric) => metric !== undefined)
     ) {
@@ -62,13 +72,16 @@ type TabName = (typeof tabs)[number];
 
 export default function HealthReportPage() {
   const { addVitalReading, auditEntries, patients, vitalReadings } = useWorkspace();
+  const { can, session } = useAuth();
   const [activeTab, setActiveTab] = useState<TabName>('Antecedentes y evaluaciones');
   const [isVitalDialogOpen, setVitalDialogOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [patientQuery, setPatientQuery] = useState('');
   const form = useForm<VitalFormInput, unknown, VitalForm>({
     resolver: zodResolver(vitalFormSchema),
     defaultValues: {
       patientId: patients[0]?.id ?? '',
+      caseId: '',
       measuredAt: '',
       source: 'clinical',
       note: '',
@@ -77,20 +90,25 @@ export default function HealthReportPage() {
 
   function closeVitalDialog() {
     setVitalDialogOpen(false);
-    form.reset({ patientId: patients[0]?.id ?? '', measuredAt: '', source: 'clinical', note: '' });
+    form.reset({ patientId: patients[0]?.id ?? '', caseId: '', measuredAt: '', source: 'clinical', note: '' });
   }
 
   function saveVitalReading(values: VitalForm) {
     const reading: VitalReading = {
       id: crypto.randomUUID(),
       patientId: values.patientId,
+      caseId: values.caseId || undefined,
       measuredAt: new Date(values.measuredAt).toISOString(),
       source: values.source,
+      professional: session?.role,
+      heartRate: values.heartRate,
+      respiratoryRate: values.respiratoryRate,
       systolic: values.systolic,
       diastolic: values.diastolic,
       pulse: values.pulse,
       temperature: values.temperature,
       oxygenSaturation: values.oxygenSaturation,
+      pain: values.pain,
       glucose: values.glucose,
       note: values.note || undefined,
     };
@@ -108,7 +126,8 @@ export default function HealthReportPage() {
           <h1>Reporte de salud</h1>
           <p>Presentación trazable de datos sintéticos; no emite diagnóstico ni recomendaciones.</p>
         </div>
-        <Button
+        {can('clinical:write') ? <Button
+          data-action-id="VITALS-RECORD"
           onClick={() => {
             setResult(null);
             setVitalDialogOpen(true);
@@ -116,13 +135,17 @@ export default function HealthReportPage() {
           type="button"
         >
           Registrar medición individual
-        </Button>
+        </Button> : null}
       </header>
       {result ? (
         <p className="notice success" role="status">
           {result}
         </p>
       ) : null}
+      <Panel>
+        <label className="search-label" htmlFor="health-report-search">Buscar paciente en reportes</label>
+        <input data-action-id="HEALTH-REPORT-SEARCH" id="health-report-search" onChange={(event) => setPatientQuery(event.target.value)} placeholder="Nombre, documento o teléfono" type="search" value={patientQuery} />
+      </Panel>
       <div aria-label="Secciones del reporte de salud" className="tabs" role="tablist">
         {tabs.map((tab) => (
           <button
@@ -139,7 +162,7 @@ export default function HealthReportPage() {
       </div>
       {activeTab === 'Antecedentes y evaluaciones' ? <BackgroundPanel /> : null}
       {activeTab === 'Signos vitales' ? (
-        <VitalsPanel readings={vitalReadings} patients={patients} />
+        <VitalsPanel readings={vitalReadings} patients={searchPatients(patients, patientQuery)} />
       ) : null}
       {activeTab === 'Perfiles clínicos' ? <ProfilesPanel /> : null}
       {activeTab === 'Notas de evolución' ? (
@@ -197,6 +220,10 @@ export default function HealthReportPage() {
             ) : null}
           </label>
           <label>
+            Caso de atención (opcional)
+            <input {...form.register('caseId')} />
+          </label>
+          <label>
             Fecha y hora
             <input {...form.register('measuredAt')} type="datetime-local" />
             {form.formState.errors.measuredAt ? (
@@ -212,6 +239,14 @@ export default function HealthReportPage() {
           </label>
           <fieldset className="measurement-fieldset">
             <legend>Mediciones individuales</legend>
+            <label>
+              FC (lpm)
+              <input {...form.register('heartRate')} inputMode="decimal" type="number" />
+            </label>
+            <label>
+              FR (rpm)
+              <input {...form.register('respiratoryRate')} inputMode="decimal" type="number" />
+            </label>
             <label>
               Sistólica (mmHg)
               <input {...form.register('systolic')} inputMode="decimal" type="number" />
@@ -234,11 +269,15 @@ export default function HealthReportPage() {
               />
             </label>
             <label>
-              Saturación O₂ (%)
+              SpO₂ (%)
               <input {...form.register('oxygenSaturation')} inputMode="decimal" type="number" />
             </label>
             <label>
-              Glucosa (mg/dL)
+              Dolor (escala registrada)
+              <input {...form.register('pain')} inputMode="decimal" type="number" />
+            </label>
+            <label>
+              Glicemia (mg/dL)
               <input {...form.register('glucose')} inputMode="decimal" step="0.1" type="number" />
             </label>
           </fieldset>
@@ -298,6 +337,7 @@ function VitalsPanel({
       {readings.length ? (
         <div className="reading-list">
           {readings
+            .filter((reading) => patients.some((patient) => patient.id === reading.patientId))
             .slice()
             .reverse()
             .map((reading) => (

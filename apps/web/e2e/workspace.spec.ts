@@ -1,8 +1,16 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+async function login(page: import('@playwright/test').Page) {
+  await page.goto('/login');
+  await page.getByLabel('Correo').fill('admin@demo.local');
+  await page.getByLabel('Contraseña').fill('demo-admin');
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
-  await page.goto('/dashboard');
+  await login(page);
   await page.getByRole('button', { name: 'Clínico' }).click();
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
@@ -10,12 +18,13 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await page.getByRole('button', { name: 'Inventario' }).click();
   await page.getByRole('link', { name: 'Kárdex' }).click();
   await expect(page).toHaveURL(/\/inventory\/kardex$/);
-  await expect(page.getByText('Saldo derivado')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible();
 });
 
 test('patient duplicate validation and individual vital registration are usable', async ({
   page,
 }) => {
+  await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   await page.getByLabel('Nombre completo').fill('Paciente Demo Repetido');
@@ -35,7 +44,7 @@ test('patient duplicate validation and individual vital registration are usable'
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {
-  await page.goto('/dashboard');
+  await login(page);
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations).toEqual([]);
 });

@@ -1,109 +1,97 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, type PropsWithChildren } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState, type PropsWithChildren } from 'react';
+import { useAuth } from '@/components/providers';
+import { permissionForPath, type Permission } from '@/lib/permissions';
 
-type NavigationItem = { label: string; href: string };
-type NavigationGroup = { label: string; href?: string; children?: NavigationItem[] };
+type NavigationItem = { label: string; href: string; permission: Permission; actionId: string };
+type NavigationGroup = { label: string; href?: string; permission?: Permission; actionId?: string; children?: NavigationItem[] };
 
 const navigation: NavigationGroup[] = [
-  { label: 'Inicio', href: '/dashboard' },
-  { label: 'Pacientes', href: '/patients' },
+  { label: 'Inicio', href: '/dashboard', permission: 'dashboard:read', actionId: 'DASHBOARD-NAVIGATE' },
+  { label: 'Pacientes', href: '/patients', permission: 'patients:read', actionId: 'PATIENT-NAVIGATE' },
+  { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
   {
     label: 'Clínico',
     children: [
-      { label: 'Reporte de salud', href: '/clinical/reports' },
-      { label: 'Órdenes y acciones', href: '/clinical/orders' },
-      { label: 'Evoluciones', href: '/clinical/evolutions' },
-      { label: 'Tablero de enfermería', href: '/clinical/nursing' },
+      { label: 'Reporte de salud', href: '/clinical/reports', permission: 'clinical:read', actionId: 'HEALTH-REPORT-NAVIGATE' },
+      { label: 'Órdenes y acciones', href: '/clinical/orders', permission: 'clinical:read', actionId: 'MEDICAL-ORDER-NAVIGATE' },
+      { label: 'Evoluciones', href: '/clinical/evolutions', permission: 'clinical:read', actionId: 'EVOLUTION-NAVIGATE' },
+      { label: 'Tablero de enfermería', href: '/clinical/nursing', permission: 'clinical:read', actionId: 'NURSING-RESOURCE-NAVIGATE' },
     ],
   },
-  { label: 'Seguros', href: '/insurance' },
+  { label: 'Seguros', href: '/insurance', permission: 'insurance:read', actionId: 'INSURANCE-NAVIGATE' },
   {
     label: 'Inventario',
-    children: [{ label: 'Kárdex', href: '/inventory/kardex' }],
+    children: [{ label: 'Kárdex', href: '/inventory/kardex', permission: 'inventory:read', actionId: 'KARDEX-NAVIGATE' }],
   },
   {
     label: 'Reportes',
-    children: [{ label: 'Horas de enfermería', href: '/reports/nurse-hours' }],
+    children: [{ label: 'Horas de enfermería', href: '/reports/nurse-hours', permission: 'reports:read', actionId: 'NURSE-HOURS-NAVIGATE' }],
   },
-  { label: 'Ayuda', href: '/help' },
+  { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
 ];
 
 function isActive(pathname: string, href: string) {
   return pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
 }
 
+function DeniedRoute({ pathname }: { pathname: string }) {
+  const router = useRouter();
+  useEffect(() => {
+    const redirect = window.setTimeout(() => router.replace(`/login?next=${encodeURIComponent(pathname)}`), 0);
+    return () => window.clearTimeout(redirect);
+  }, [pathname, router]);
+  return <main className="access-denied" role="alert">El acceso directo a esta ruta requiere una sesión autorizada.</main>;
+}
+
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const { can, loading, logout, session } = useAuth();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Clínico: pathname.startsWith('/clinical'),
-    Inventario: pathname.startsWith('/inventory'),
-    Reportes: pathname.startsWith('/reports'),
+    Clínico: pathname.startsWith('/clinical'), Inventario: pathname.startsWith('/inventory'), Reportes: pathname.startsWith('/reports'),
   });
+  const required = permissionForPath(pathname);
+  if (loading) return <main className="access-denied" role="status">Validando sesión…</main>;
+  if (!session) return <DeniedRoute pathname={pathname} />;
+  if (required && !can(required)) {
+    return <main className="access-denied" role="alert">Acceso restringido para el rol {session.role}.</main>;
+  }
 
   return (
     <div className="app-shell">
       <aside className="sidebar" aria-label="Navegación principal">
-        <Link className="brand" href="/dashboard">
-          <span className="brand-mark" aria-hidden="true">
-            A
-          </span>
+        <Link className="brand" data-action-id="DASHBOARD-NAVIGATE" href="/dashboard">
+          <span className="brand-mark" aria-hidden="true">A</span>
           <span>Analiza en Casa</span>
         </Link>
-        <p className="environment-label">React · datos sintéticos</p>
+        <p className="environment-label">{session.mode === 'supabase' ? 'Supabase' : 'Demo persistente'} · {session.role}</p>
         <nav>
           <ul className="nav-list">
             {navigation.map((group) => {
-              if (group.href) {
-                return (
-                  <li key={group.href}>
-                    <Link
-                      aria-current={isActive(pathname, group.href) ? 'page' : undefined}
-                      className="nav-link"
-                      href={group.href}
-                    >
-                      {group.label}
-                    </Link>
-                  </li>
-                );
+              if (group.href && group.permission && group.actionId) {
+                if (!can(group.permission)) return null;
+                return <li key={group.href}><Link aria-current={isActive(pathname, group.href) ? 'page' : undefined} className="nav-link" data-action-id={group.actionId} href={group.href}>{group.label}</Link></li>;
               }
+              const children = group.children?.filter((child) => can(child.permission)) ?? [];
+              if (!children.length) return null;
               const open = expanded[group.label] ?? false;
-              const hasCurrentChild = group.children?.some((child) =>
-                isActive(pathname, child.href),
-              );
+              const hasCurrentChild = children.some((child) => isActive(pathname, child.href));
               return (
                 <li key={group.label} className="nav-group">
-                  <button
-                    aria-expanded={open}
-                    className={`nav-group-trigger${hasCurrentChild ? ' current-group' : ''}`}
-                    onClick={() => setExpanded((current) => ({ ...current, [group.label]: !open }))}
-                    type="button"
-                  >
-                    <span>{group.label}</span>
-                    <span aria-hidden="true">{open ? '⌄' : '›'}</span>
-                  </button>
-                  {open ? (
-                    <ul className="nav-sublist">
-                      {group.children?.map((child) => (
-                        <li key={child.href}>
-                          <Link
-                            aria-current={isActive(pathname, child.href) ? 'page' : undefined}
-                            className="nav-sublink"
-                            href={child.href}
-                          >
-                            {child.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
+                  <button aria-expanded={open} className={`nav-group-trigger${hasCurrentChild ? ' current-group' : ''}`} data-action-id={`${group.label.toUpperCase()}-TOGGLE`} onClick={() => setExpanded((current) => ({ ...current, [group.label]: !open }))} type="button"><span>{group.label}</span><span aria-hidden="true">{open ? '⌄' : '›'}</span></button>
+                  {open ? <ul className="nav-sublist">{children.map((child) => <li key={child.href}><Link aria-current={isActive(pathname, child.href) ? 'page' : undefined} className="nav-sublink" data-action-id={child.actionId} href={child.href}>{child.label}</Link></li>)}</ul> : null}
                 </li>
               );
             })}
           </ul>
         </nav>
+        <footer className="sidebar-footer">
+          <p>Desarrollado por Interactive Core</p>
+          <button className="button button-secondary" data-action-id="AUTH-LOGOUT" onClick={() => void logout()} type="button">Cerrar sesión</button>
+        </footer>
       </aside>
       <main className="main-content">{children}</main>
     </div>
