@@ -78,10 +78,19 @@ class Patients(unittest.TestCase):
  def test_insurance(s): pass
  @unittest.skip('Certified in Lot A.')
  def test_edit(s): pass
- @unittest.skip('Future list group.')
- def test_search(s): pass
- @unittest.skip('Future list group.')
- def test_tabs_sort_pagination(s): pass
+ def test_search(s):
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); box=s.a('PATIENT-SEARCH'); t=time.time()
+  for value,expected in (('Aur','Paciente Demo Aurora'),('Paciente Demo Aurora','Paciente Demo Aurora'),('12345678-9','Paciente Demo Aurora'),('0000-0000','Paciente Demo Aurora')):
+   box.clear(); box.send_keys(value); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{expected}')]"))); s.assertEqual(len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr')),1)
+  box.clear(); box.send_keys('sin coincidencia selenium'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Sin resultados')]"))); s.pass_('PATIENT-SEARCH','SEL-PAT-SEARCH',t); t=time.time(); s.click('PATIENT-SEARCH-CLEAR'); s.assertEqual(box.get_attribute('value'),''); s.assertGreater(len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr')),0); s.pass_('PATIENT-SEARCH-CLEAR','SEL-PAT-SEARCH',t)
+ def test_tabs_sort_pagination(s):
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); t=time.time(); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Brisa')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//*[contains(text(),'Paciente Demo Aurora') and self::a]")); s.pass_('PATIENT-TAB-INACTIVE','SEL-PAT-PAGINATION',t); t=time.time(); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Aurora')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//*[contains(text(),'Paciente Demo Brisa') and self::a]")); s.pass_('PATIENT-TAB-ACTIVE','SEL-PAT-PAGINATION',t)
+  def names(): return [x.text for x in s.d.find_elements(By.CSS_SELECTOR,'tbody tr td:first-child a')]
+  t=time.time(); s.click('PATIENT-SORT-NAME'); after=names(); s.assertEqual(after,sorted(after,reverse=True)); s.click('PATIENT-SORT-NAME'); s.assertEqual(names(),sorted(names())); s.pass_('PATIENT-SORT-NAME','SEL-PAT-PAGINATION',t)
+  def docs(): return [x.text.split(': ',1)[-1] for x in s.d.find_elements(By.CSS_SELECTOR,'tbody tr td:nth-child(2)')]
+  t=time.time(); s.click('PATIENT-SORT-DOCUMENT'); after=docs(); s.assertEqual(after,sorted(after)); s.click('PATIENT-SORT-DOCUMENT'); s.assertEqual(docs(),sorted(docs(),reverse=True)); s.pass_('PATIENT-SORT-DOCUMENT','SEL-PAT-PAGINATION',t)
+  from selenium.webdriver.support.select import Select
+  t=time.time(); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('5'); page1=names(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); s.assertLessEqual(len(page1),5); s.assertGreater(len(pages),1); next_t=time.time(); s.click('PATIENT-PAGE-NEXT'); s.w.until(lambda _:names()!=page1); s.pass_('PATIENT-PAGE-NEXT','SEL-PAT-PAGINATION',next_t); paginate_t=time.time(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); pages[-1].click(); s.assertEqual(pages[-1].get_attribute('aria-current'),'page'); s.pass_('PATIENT-PAGINATE','SEL-PAT-PAGINATION',paginate_t); previous_t=time.time(); s.click('PATIENT-PAGE-PREVIOUS'); s.assertEqual(names(),page1); s.pass_('PATIENT-PAGE-PREVIOUS','SEL-PAT-PAGINATION',previous_t); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('10'); s.assertEqual(s.d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"][aria-current="page"]').text,'1'); s.pass_('PATIENT-PAGE-SIZE','SEL-PAT-PAGINATION',t)
  @unittest.skip('Future status group.')
  def test_status_transitions(s): pass
  @unittest.skip('Known pending: PATIENT-IMPORT-*')
