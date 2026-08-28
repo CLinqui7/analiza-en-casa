@@ -14,7 +14,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 ROOT=Path(__file__).resolve().parents[2]; BASE=os.getenv('SELENIUM_BASE_URL','http://127.0.0.1:4174'); SERVER=None
 def ready():
     try: return urlopen(BASE,timeout=1).status<500 # nosec B310 local only
-    except URLError: return False
+    except (URLError, TimeoutError, OSError): return False
 def actions():
     data=json.loads((ROOT/'docs/qa/UI_ACTION_INVENTORY.json').read_text(encoding='utf8'))
     return [x['action_id'] for x in data['actions'] if x['action_id'].startswith('PATIENT-') and x['selenium_required']]
