@@ -158,6 +158,21 @@ test('inventory movements persist and cannot make the derived balance negative',
   await expect(page.getByText('INV-E2E-ENTRY')).toBeVisible();
 });
 
+test('audit export is restricted to the audit role set', async ({ page }) => {
+  await login(page);
+  await page.goto('/audit');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar auditoría' }).click();
+  await expect((await download).suggestedFilename()).toBe('auditoria-sintetica.csv');
+
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await page.getByLabel('Correo').fill('doctor@demo.local');
+  await page.getByLabel('Contraseña').fill('demo-doctor');
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await page.goto('/audit');
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol DOCTOR');
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

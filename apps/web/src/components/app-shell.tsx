@@ -43,6 +43,7 @@ const navigation: NavigationGroup[] = [
     label: 'Reportes',
     children: [{ label: 'Horas de enfermería', href: '/reports/nurse-hours', permission: 'reports:read', actionId: 'NURSE-HOURS-NAVIGATE' }],
   },
+  { label: 'Auditoría', href: '/audit', permission: 'audit:read', actionId: 'AUDIT-NAVIGATE' },
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
 ];
 
