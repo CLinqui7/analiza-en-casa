@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createAppStore, DEMO_PASSWORD, normalizeState } from "../app/store.js";
+import { createAppStore, normalizeState } from "../app/store.js";
+import { DEMO_PASSWORD } from "./helpers/demo-auth.mjs";
 import { roleCan, safeStorage } from "../app/domain.js";
 
 const mockConfig = {

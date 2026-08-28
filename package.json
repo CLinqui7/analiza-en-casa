@@ -25,6 +25,7 @@
     "test:browser:ch15": "playwright test tests/e2e/ch15.spec.mjs",
     "test:browser:ch16": "playwright test tests/e2e/ch16.spec.mjs",
     "qa": "node scripts/qa-check.mjs",
+    "qa:local": "npm run codex:preflight && npm run check && npm run audit:verify",
     "check": "npm test && npm run qa && npm run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
     "codex:preflight": "node scripts/codex-preflight.mjs",

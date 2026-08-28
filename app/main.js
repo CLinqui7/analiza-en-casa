@@ -921,6 +921,7 @@ function openClinicalProfileForm(caseId) {
 }
 
 const HEALTH_REPORT_SECTIONS = [
+  ["main", "Información principal y seguros"],
   ["vitals", "Tabla de Signos Vitales"],
   ["medication", "Tarjeta de medicamentos"],
   ["vitals-chart", "Gráfico Signos Vitales"],
@@ -981,9 +982,22 @@ function healthReportSectionHtml(key, context) {
   const {state, record, patient, profile, range} = context;
   const inRange = (value) => !value || ((!range.start || String(value).slice(0,10) >= range.start) && (!range.end || String(value).slice(0,10) <= range.end));
   const rows = (headers, values) => `<table><thead><tr>${headers.map((value) => `<th>${safeText(value)}</th>`).join("")}</tr></thead><tbody>${values.join("") || `<tr><td colspan="${headers.length}">Sin registros en el período seleccionado.</td></tr>`}</tbody></table>`;
+  if (key === "main") {
+    const insurer = state.insurers.find((candidate) => candidate.id === record.insurerId);
+    const selectedInsuranceIds = new Set(context.printInsuranceIds || []);
+    const insurerRows = insurer && (!selectedInsuranceIds.size || selectedInsuranceIds.has(insurer.id))
+      ? [`<tr><td>${safeText(insurer.name)}</td><td>—</td><td>—</td><td>—</td><td>${safeText(patient?.isPolicyHolder === true ? patient?.fullName : "Titular no confirmado")}</td><td>${safeText(patient?.isPolicyHolder === true ? patient?.document : "—")}</td></tr>`]
+      : [];
+    return `<div class="details-grid"><div><span>Paciente</span><strong>${safeText(patient?.fullName || "—")}</strong></div><div><span>Documento</span><strong>${safeText(patient?.document || "—")}</strong></div><div><span>Hospitalización</span><strong>${safeText(record.id)}</strong></div><div><span>Estado clínico</span><strong>${safeText(profile?.clinicalStatus || "Pendiente")}</strong></div></div><h3>Seguros del paciente</h3>${rows(["Seguro","Póliza","Certificado","Fecha efectiva","Titular","DUI/NIT"], insurerRows)}`;
+  }
   if (key === "vitals") return rows(["Fecha","TA","FC","FR","SpO₂","Temp","Dolor"], state.vitalSigns.filter((item) => item.caseId === record.id && inRange(item.recordedAt)).map((item) => `<tr><td>${safeText(new Date(item.recordedAt).toLocaleString("es-SV"))}</td><td>${safeText(`${item.systolic}/${item.diastolic}`)}</td><td>${safeText(item.heartRate)}</td><td>${safeText(item.respiratoryRate)}</td><td>${safeText(item.spo2)}%</td><td>${safeText(item.temperature)}</td><td>${safeText(item.pain)}</td></tr>`));
   if (key === "medication") return rows(["Tarjeta","Medicamentos","Estado"], state.medicationCards.filter((item) => item.caseId === record.id).map((item) => `<tr><td>${safeText(item.id)}</td><td>${safeText((item.items || []).map((entry) => entry.medication).join(", "))}</td><td>${safeText(item.documentStatus || item.status)}</td></tr>`));
-  if (key === "condition-notes" || key === "nursing" || key === "care") return rows(["Fecha","Autor","Estado","Registro"], state.nursingNotes.filter((item) => item.caseId === record.id && inRange(item.createdAt)).map((item) => `<tr><td>${safeText(new Date(item.createdAt).toLocaleString("es-SV"))}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.status)}</td><td>${safeText(item.text)}</td></tr>`));
+  if (key === "condition-notes" || key === "nursing" || key === "care") {
+    const selectedNoteIds = new Set(context.printNoteIds || []);
+    const allNotes = state.nursingNotes.filter((item) => item.caseId === record.id && inRange(item.createdAt));
+    const notes = key === "nursing" && selectedNoteIds.size ? allNotes.filter((item) => selectedNoteIds.has(item.id)) : allNotes;
+    return rows(["Fecha","Autor","Estado","Registro"], notes.map((item) => `<tr><td>${safeText(new Date(item.createdAt).toLocaleString("es-SV"))}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.status)}</td><td>${safeText(item.text)}</td></tr>`));
+  }
   if (["evidence","prescriptions","orders","assessments","medical-visits","handoffs"].includes(key)) return rows(["Documento","Tipo","Autor","Versión","Estado"], state.clinicalDocuments.filter((item) => item.caseId === record.id && inRange(item.createdAt)).map((item) => `<tr><td>${safeText(item.title)}</td><td>${safeText(item.type)}</td><td>${safeText(item.authorName)}</td><td>${safeText(item.version)}</td><td>${safeText(item.status)}</td></tr>`));
   if (key === "vitals-chart") return `<p>La tabla de signos vitales es la fuente autoritativa. La visualización gráfica no infiere umbrales clínicos.</p>`;
   return `<p>Sin registros para ${safeText(patient?.fullName || record.id)}.</p>`;
@@ -999,7 +1013,7 @@ function printConfiguredHealthReport(caseId) {
   const range = ui.healthReportRange?.caseId === caseId ? ui.healthReportRange : {start: profile?.startDate || record.startDate, end: profile?.endDate || record.endDate || new Date().toISOString().slice(0,10)};
   const config = ensureHealthReportConfig(caseId);
   const titleByKey = Object.fromEntries(HEALTH_REPORT_SECTIONS);
-  const sections = config.selected.map((key) => `<section><h2>${safeText(titleByKey[key] || key)}</h2>${healthReportSectionHtml(key, {state, record, patient, profile, range})}</section>`).join("");
+  const sections = config.selected.map((key) => `<section><h2>${safeText(titleByKey[key] || key)}</h2>${healthReportSectionHtml(key, {state, record, patient, profile, range, printNoteIds: ui.healthReportPrintNoteIds || [], printInsuranceIds: ui.healthReportPrintInsuranceIds || []})}</section>`).join("");
   const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte de salud ${safeText(caseId)}</title><style>body{font:14px Arial,sans-serif;color:#17202a;margin:32px}header{border-bottom:2px solid #0b6b63;margin-bottom:24px}h1{font-size:24px}h2{font-size:17px;margin-top:28px}table{width:100%;border-collapse:collapse}th,td{padding:7px;border:1px solid #ccd5d9;text-align:left;vertical-align:top}small{color:#52606d}@media print{body{margin:12mm}section{break-inside:avoid}}</style></head><body><header><h1>Reporte de salud</h1><p><strong>${safeText(patient.fullName)}</strong> · ${safeText(caseId)}</p><p>Período: ${safeText(range.start)} al ${safeText(range.end)}</p><small>Documento generado desde registros autorizados. No sustituye documentos clínicos firmados.</small></header>${sections}</body></html>`;
   openPrintWindow(html, `Reporte de salud ${caseId}`);
 }
@@ -2423,7 +2437,25 @@ document.addEventListener("click", async (event) => {
       break;
     }
     case "set-health-report-tab": ui.healthReportTab = data.tab || "main"; render(); break;
+    case "set-health-report-assessment-tab": ui.healthReportAssessmentTab = data.tab || "history"; render(); break;
     case "health-report-page": ui.healthReportPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "health-report-nursing-page": ui.healthReportNursingPage = Math.max(1, Number(data.page || 1)); render(); break;
+    case "toggle-health-report-note-print": {
+      const noteId = String(data.id || "");
+      const selected = new Set(ui.healthReportPrintNoteIds || []);
+      if (selected.has(noteId)) selected.delete(noteId); else selected.add(noteId);
+      ui.healthReportPrintNoteIds = [...selected];
+      render();
+      break;
+    }
+    case "toggle-health-report-insurance-print": {
+      const insurerId = String(data.id || "");
+      const selected = new Set(ui.healthReportPrintInsuranceIds || []);
+      if (selected.has(insurerId)) selected.delete(insurerId); else selected.add(insurerId);
+      ui.healthReportPrintInsuranceIds = [...selected];
+      render();
+      break;
+    }
     case "set-medical-order-tab": ui.medicalOrderTab = data.tab || "active"; ui.medicalOrderPage = 1; render(); break;
     case "medical-order-page": ui.medicalOrderPage = Math.max(1, Number(data.page || 1)); render(); break;
     case "open-clinical-creation-choice": openClinicalCreationChoice(data.caseId || ""); break;
@@ -2947,6 +2979,15 @@ document.addEventListener("input", (event) => {
     const position = target.selectionStart;
     render();
     const next = document.querySelector('[data-input="health-report-search"]');
+    if (next) { next.focus(); next.setSelectionRange(position, position); }
+    return;
+  }
+  if (target.matches('[data-input="health-report-nursing-search"]')) {
+    ui.healthReportNursingSearch = target.value;
+    ui.healthReportNursingPage = 1;
+    const position = target.selectionStart;
+    render();
+    const next = document.querySelector('[data-input="health-report-nursing-search"]');
     if (next) { next.focus(); next.setSelectionRange(position, position); }
     return;
   }
