@@ -65,6 +65,21 @@ test('hospitalization creation persists after refresh', async ({ page }) => {
   await expect(page.getByText('Confirmar visita de QA')).toBeVisible();
 });
 
+test('quote draft becomes an immutable sent version', async ({ page }) => {
+  await login(page);
+  await page.goto('/quotes');
+  await page.getByRole('button', { name: 'Nueva cotización' }).click();
+  await page.getByLabel('Resumen operativo').fill('Coordinación sintética para prueba de inmutabilidad.');
+  await page.getByRole('button', { name: 'Guardar borrador' }).click();
+  await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
+  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page.getByRole('button', { name: 'Enviar enlace seguro' }).click();
+  await expect(page.getByRole('status')).toContainText('quedó inmutable');
+  await page.reload();
+  await expect(page.getByText('Enviada e inmutable')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Enviar enlace seguro' })).toHaveCount(0);
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

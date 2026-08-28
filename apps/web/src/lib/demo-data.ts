@@ -6,6 +6,7 @@ import type {
   VitalReading,
   Shift,
   Hospitalization,
+  Quote,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -86,6 +87,10 @@ export const demoShifts: Shift[] = [
 
 export const demoHospitalizations: Hospitalization[] = [
   { id: 'case-demo-001', patientId: 'patient-demo-001', startDate: '2026-08-28', status: 'ACTIVE', accountType: 'Referencia sintética', nextAction: 'Validar coordinación demo' },
+];
+
+export const demoQuotes: Quote[] = [
+  { id: 'quote-demo-001', caseId: 'case-demo-001', patientId: 'patient-demo-001', version: 1, status: 'DRAFT', summary: 'Cotización sintética de coordinación; importes pendientes de reglas aprobadas.', createdAt: '2026-08-28T08:00:00.000Z' },
 ];
 
 export const demoInventoryMovements: InventoryMovement[] = [

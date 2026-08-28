@@ -1,6 +1,6 @@
 'use client';
 
-import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Shift, VitalReading } from '@analiza/contracts';
+import type { Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
@@ -34,6 +34,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addInventoryMovement: (movement: InventoryMovement) => void;
   addShift: (shift: Shift) => void;
   addHospitalization: (hospitalization: Hospitalization) => void;
+  addQuote: (quote: Quote) => void;
+  sendQuote: (quoteId: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -144,6 +146,20 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         hospitalizations: [...current.hospitalizations, hospitalization],
         auditEntries: [audit('Hospitalización registrada', hospitalization.id), ...current.auditEntries],
       })),
+      addQuote: (quote) => commit((current) => ({
+        ...current,
+        quotes: [...current.quotes, quote],
+        auditEntries: [audit('Cotización creada', quote.id), ...current.auditEntries],
+      })),
+      sendQuote: (quoteId) => commit((current) => {
+        const quote = current.quotes.find((candidate) => candidate.id === quoteId);
+        if (!quote || quote.status === 'SENT') return current;
+        return {
+          ...current,
+          quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', sentAt: new Date().toISOString() } : candidate),
+          auditEntries: [audit('Cotización enviada como enlace seguro', quoteId), ...current.auditEntries],
+        };
+      }),
     }),
     [commit, error, loading, provider.mode, snapshot],
   );
