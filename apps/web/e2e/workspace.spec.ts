@@ -53,6 +53,18 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await expect(page.getByText('2222 3333')).toBeVisible();
 });
 
+test('hospitalization creation persists after refresh', async ({ page }) => {
+  await login(page);
+  await page.goto('/hospitalizations');
+  await page.getByRole('button', { name: 'Nueva hospitalización' }).click();
+  await page.getByLabel('Tipo de cuenta').fill('Coordinación de prueba');
+  await page.getByLabel('Siguiente acción (opcional)').fill('Confirmar visita de QA');
+  await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
+  await expect(page.getByRole('status')).toContainText('persistida');
+  await page.reload();
+  await expect(page.getByText('Confirmar visita de QA')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

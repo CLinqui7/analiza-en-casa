@@ -5,6 +5,7 @@ import type {
   Patient,
   VitalReading,
   Shift,
+  Hospitalization,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -81,6 +82,10 @@ export const demoNurseHours: NurseHourEntry[] = [
 export const demoShifts: Shift[] = [
   { id: 'shift-demo-001', resourceId: 'nurse-demo-001', patientId: 'patient-demo-001', startsAt: '2026-08-28T08:00:00.000Z', endsAt: '2026-08-28T14:00:00.000Z', status: 'SCHEDULED', note: 'Turno sintético de QA.' },
   { id: 'shift-demo-002', resourceId: 'nurse-demo-002', patientId: 'patient-demo-002', startsAt: '2026-08-28T14:00:00.000Z', endsAt: '2026-08-28T18:00:00.000Z', status: 'CANCELLED', note: 'Cancelación sintética de QA.' },
+];
+
+export const demoHospitalizations: Hospitalization[] = [
+  { id: 'case-demo-001', patientId: 'patient-demo-001', startDate: '2026-08-28', status: 'ACTIVE', accountType: 'Referencia sintética', nextAction: 'Validar coordinación demo' },
 ];
 
 export const demoInventoryMovements: InventoryMovement[] = [

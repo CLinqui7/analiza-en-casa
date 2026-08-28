@@ -71,9 +71,19 @@ export const shiftSchema = z.object({
   note: z.string().trim().optional(),
 });
 
+export const hospitalizationSchema = z.object({
+  id: z.string(),
+  patientId: z.string(),
+  startDate: z.string(),
+  status: z.enum(['ACTIVE', 'CLOSED']),
+  accountType: z.string().trim().min(1),
+  nextAction: z.string().trim().optional(),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
 export type NurseHourEntry = z.infer<typeof nurseHourEntrySchema>;
 export type Shift = z.infer<typeof shiftSchema>;
+export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;

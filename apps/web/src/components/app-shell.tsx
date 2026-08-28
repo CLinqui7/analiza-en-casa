@@ -13,6 +13,7 @@ const navigation: NavigationGroup[] = [
   { label: 'Inicio', href: '/dashboard', permission: 'dashboard:read', actionId: 'DASHBOARD-NAVIGATE' },
   { label: 'Pacientes', href: '/patients', permission: 'patients:read', actionId: 'PATIENT-NAVIGATE' },
   { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
+  { label: 'Hospitalizaciones', href: '/hospitalizations', permission: 'cases:read', actionId: 'HOSPITALIZATION-NAVIGATE' },
   {
     label: 'Clínico',
     children: [
