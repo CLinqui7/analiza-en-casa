@@ -41,6 +41,18 @@ test('patient duplicate validation and individual vital registration are usable'
   await expect(page.getByText('Pulso: 70 lpm')).toBeVisible();
 });
 
+test('patient detail edits persist after refresh', async ({ page }) => {
+  await login(page);
+  await page.goto('/patients');
+  await page.locator('[data-action-id="PATIENT-DETAIL-NAVIGATE"]').first().click();
+  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByLabel('Teléfono de demo').fill('2222 3333');
+  await page.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(page.getByRole('status')).toContainText('actualizado y persistido');
+  await page.reload();
+  await expect(page.getByText('2222 3333')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

@@ -10,6 +10,7 @@ import {
   validateDocument,
 } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -127,7 +128,11 @@ export default function PatientsPage() {
               <tbody>
                 {visiblePatients.map((patient) => (
                   <tr key={patient.id}>
-                    <td>{patient.fullName}</td>
+                    <td>
+                      <Link data-action-id="PATIENT-DETAIL-NAVIGATE" href={`/patients/${patient.id}`}>
+                        {patient.fullName}
+                      </Link>
+                    </td>
                     <td>
                       {patient.documentType}: {patient.documentId}
                     </td>
