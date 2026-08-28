@@ -245,6 +245,25 @@ test('purchase drafts persist without changing inventory', async ({ page }) => {
   await expect(page.getByText('Borrador sintético de QA.')).toBeVisible();
 });
 
+test('patient portal requires a second factor and keeps invalid access generic', async ({ page }) => {
+  await page.route('**/api/portal-request-code', async (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ message: 'Si el enlace es válido, enviamos un código al canal registrado.' }) }));
+  await page.route('**/api/portal-status', async (route) => {
+    const body = route.request().postDataJSON() as { verificationCode?: string };
+    if (body.verificationCode === '12345678') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ quote_id: 'Q-PORTAL-QA', status: 'SENT', updated_at: '2026-08-28T12:00:00.000Z' }) });
+    return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'No fue posible validar el acceso.' }) });
+  });
+  await page.goto(`/portal/${'x'.repeat(64)}`);
+  await page.getByRole('button', { name: 'Solicitar código' }).click();
+  await expect(page.getByRole('status')).toContainText('Si el enlace es válido');
+  await page.getByLabel('Código de verificación').fill('00000000');
+  await page.getByRole('button', { name: 'Verificar código' }).click();
+  await expect(page.getByRole('status')).toContainText('No fue posible validar el acceso.');
+  await page.getByLabel('Código de verificación').fill('12345678');
+  await page.getByRole('button', { name: 'Verificar código' }).click();
+  await expect(page.getByRole('heading', { name: 'Acceso verificado' })).toBeVisible();
+  await expect(page.getByText('Q-PORTAL-QA')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {
