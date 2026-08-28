@@ -90,6 +90,70 @@ test('patient duplicate validation and individual vital registration are usable'
   await expect(page.getByText('Pulso: 70 lpm')).toBeVisible();
 });
 
+test('patient list supports tabs, search, sorting, pagination, persisted status changes, roles, and mobile', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await login(page);
+  await page.goto('/patients');
+
+  await page.getByRole('tab', { name: /Activos/ }).click();
+  await expect(page.getByText('8 visibles')).toBeVisible();
+  await page.getByLabel('Buscar paciente').fill('Celeste');
+  await expect(page.getByRole('row', { name: /Paciente Demo Celeste/ })).toBeVisible();
+  await page.getByLabel('Buscar paciente').fill('DEMO-005');
+  await expect(page.getByRole('row', { name: /Paciente Demo Estela/ })).toBeVisible();
+  await page.getByLabel('Buscar paciente').fill('7000 0003');
+  await expect(page.getByRole('row', { name: /Paciente Demo Celeste/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
+  await expect(page.getByLabel('Buscar paciente')).toHaveValue('');
+
+  const nameHeader = page.locator('th').filter({ has: page.locator('[data-action-id="PATIENT-SORT-NAME"]') });
+  await page.locator('[data-action-id="PATIENT-SORT-NAME"]').click();
+  await expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
+  await page.locator('[data-action-id="PATIENT-SORT-NAME"]').click();
+  await expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
+  const documentHeader = page.locator('th').filter({ has: page.locator('[data-action-id="PATIENT-SORT-DOCUMENT"]') });
+  await page.locator('[data-action-id="PATIENT-SORT-DOCUMENT"]').click();
+  await expect(documentHeader).toHaveAttribute('aria-sort', 'ascending');
+
+  await page.locator('[data-action-id="PATIENT-PAGE-SIZE"]').selectOption('5');
+  await page.locator('[data-action-id="PATIENT-PAGE-NEXT"]').click();
+  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText('2');
+  await page.locator('[data-action-id="PATIENT-PAGE-PREVIOUS"]').click();
+  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText('1');
+
+  await page.getByLabel('Buscar paciente').fill('sin coincidencia de QA');
+  await expect(page.getByRole('status').filter({ hasText: 'Sin resultados' })).toBeVisible();
+  await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
+  await page.getByRole('row', { name: /Paciente Demo Aurora/ }).getByRole('button', { name: 'Inactivar' }).click();
+  await page.getByRole('tab', { name: /Inactivos/ }).click();
+  await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
+  await page.reload();
+  await page.getByRole('tab', { name: /Inactivos/ }).click();
+  await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
+  await page.getByRole('row', { name: /Paciente Demo Aurora/ }).getByRole('button', { name: 'Reactivar' }).click();
+  await page.getByRole('tab', { name: /Activos/ }).click();
+  await page.reload();
+  await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+
+  await loginAs(page, 'auditor@demo.local', 'demo-auditor');
+  await page.goto('/patients');
+  await expect(page.locator('[data-action-id="PATIENT-INACTIVATE"], [data-action-id="PATIENT-REACTIVATE"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'inventory@demo.local', 'demo-inventory');
+  await page.goto('/patients');
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await context.close();
+
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobilePage = await mobileContext.newPage();
+  await login(mobilePage);
+  await mobilePage.goto('/patients');
+  await expect.poll(() => mobilePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await mobileContext.close();
+});
+
 test('patient detail edits persist after refresh', async ({ page }) => {
   await login(page);
   await page.goto('/patients');

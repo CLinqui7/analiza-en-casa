@@ -31,6 +31,13 @@ export const demoPatients: Patient[] = [
     insurer: 'Sin aseguradora registrada',
     status: 'INACTIVE',
   },
+  { id: 'patient-demo-003', fullName: 'Paciente Demo Celeste', documentType: 'OTHER', documentId: 'DEMO-003', phone: '7000-0003', insurer: 'Aseguradora de demostración', status: 'ACTIVE' },
+  { id: 'patient-demo-004', fullName: 'Paciente Demo Dalia', documentType: 'OTHER', documentId: 'DEMO-004', phone: '7000-0004', status: 'ACTIVE' },
+  { id: 'patient-demo-005', fullName: 'Paciente Demo Estela', documentType: 'OTHER', documentId: 'DEMO-005', phone: '7000-0005', status: 'ACTIVE' },
+  { id: 'patient-demo-006', fullName: 'Paciente Demo Fabián', documentType: 'OTHER', documentId: 'DEMO-006', phone: '7000-0006', status: 'ACTIVE' },
+  { id: 'patient-demo-007', fullName: 'Paciente Demo Gloria', documentType: 'OTHER', documentId: 'DEMO-007', phone: '7000-0007', status: 'ACTIVE' },
+  { id: 'patient-demo-008', fullName: 'Paciente Demo Héctor', documentType: 'OTHER', documentId: 'DEMO-008', phone: '7000-0008', status: 'ACTIVE' },
+  { id: 'patient-demo-009', fullName: 'Paciente Demo Iris', documentType: 'OTHER', documentId: 'DEMO-009', phone: '7000-0009', status: 'ACTIVE' },
 ];
 
 export const demoVitalReadings: VitalReading[] = [

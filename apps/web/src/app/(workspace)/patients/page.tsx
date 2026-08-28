@@ -45,9 +45,10 @@ export default function PatientsPage() {
     defaultValues: { fullName: '', documentType: 'DUI', documentId: '', phone: '', insurer: '' },
   });
   const documentType = useWatch({ control: form.control, name: 'documentType' });
-  const visiblePatients = useMemo(() => searchPatients(patients.filter((patient) => patient.status === tab), query).sort((a, b) => a[sort].localeCompare(b[sort], 'es') * direction), [direction, patients, query, sort, tab]);
+  const visiblePatients = useMemo(() => searchPatients(patients.filter((patient) => patient.status === tab), query).sort((a, b) => a[sort].localeCompare(b[sort], 'es', { numeric: true }) * direction), [direction, patients, query, sort, tab]);
   const pages = Math.max(1, Math.ceil(visiblePatients.length / pageSize));
-  const pageRows = visiblePatients.slice((Math.min(page, pages) - 1) * pageSize, Math.min(page, pages) * pageSize);
+  const currentPage = Math.min(page, pages);
+  const pageRows = visiblePatients.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const documentInput = form.register('documentId');
 
   const linkedDialogOpen = searchParams.get('create') === '1' && can('patients:write') && !dismissedLinkedDialog;
@@ -111,9 +112,12 @@ export default function PatientsPage() {
           {result}
         </p>
       ) : null}
-      <div className="tabs" role="tablist"><Button data-action-id="PATIENT-TAB-ACTIVE" className={tab === 'ACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('ACTIVE'); setPage(1); }} type="button">Activos</Button><Button data-action-id="PATIENT-TAB-INACTIVE" className={tab === 'INACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('INACTIVE'); setPage(1); }} type="button">Inactivos</Button></div>
+      <div aria-label="Estados de pacientes" className="tabs" role="tablist">
+        <Button aria-selected={tab === 'ACTIVE'} data-action-id="PATIENT-TAB-ACTIVE" className={tab === 'ACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('ACTIVE'); setPage(1); }} role="tab" type="button">Activos ({patients.filter((patient) => patient.status === 'ACTIVE').length})</Button>
+        <Button aria-selected={tab === 'INACTIVE'} data-action-id="PATIENT-TAB-INACTIVE" className={tab === 'INACTIVE' ? 'tab active' : 'tab'} onClick={() => { setTab('INACTIVE'); setPage(1); }} role="tab" type="button">Inactivos ({patients.filter((patient) => patient.status === 'INACTIVE').length})</Button>
+      </div>
       <Panel>
-        <div className="table-heading"><div><label className="search-label" htmlFor="patient-search">Buscar paciente</label><input id="patient-search" data-action-id="PATIENT-SEARCH" onChange={(event) => setQuery(event.target.value)} placeholder="Nombre, documento, teléfono o aseguradora" type="search" value={query} /></div>{query ? <Button className="button-secondary" data-action-id="PATIENT-SEARCH-CLEAR" onClick={() => setQuery('')} type="button">Limpiar búsqueda</Button> : null}</div>
+        <div className="table-heading"><div><label className="search-label" htmlFor="patient-search">Buscar paciente</label><input id="patient-search" data-action-id="PATIENT-SEARCH" onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Nombre, documento, teléfono o aseguradora" type="search" value={query} /></div>{query ? <Button className="button-secondary" data-action-id="PATIENT-SEARCH-CLEAR" onClick={() => { setQuery(''); setPage(1); }} type="button">Limpiar búsqueda</Button> : null}</div>
       </Panel>
       <Panel>
         <div className="table-heading">
@@ -125,8 +129,8 @@ export default function PatientsPage() {
             <table>
               <thead>
                 <tr>
-                  <th><Button data-action-id="PATIENT-SORT-NAME" onClick={() => { setDirection(sort === 'fullName' ? (direction * -1) as 1 | -1 : 1); setSort('fullName'); }} type="button">Paciente</Button></th>
-                  <th><Button data-action-id="PATIENT-SORT-DOCUMENT" onClick={() => { setDirection(sort === 'documentId' ? (direction * -1) as 1 | -1 : 1); setSort('documentId'); }} type="button">Documento</Button></th>
+                  <th aria-sort={sort === 'fullName' ? (direction === 1 ? 'ascending' : 'descending') : 'none'}><Button aria-label="Ordenar por paciente" data-action-id="PATIENT-SORT-NAME" onClick={() => { setDirection(sort === 'fullName' ? (direction * -1) as 1 | -1 : 1); setSort('fullName'); setPage(1); }} type="button">Paciente {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : '↕'}</Button></th>
+                  <th aria-sort={sort === 'documentId' ? (direction === 1 ? 'ascending' : 'descending') : 'none'}><Button aria-label="Ordenar por documento" data-action-id="PATIENT-SORT-DOCUMENT" onClick={() => { setDirection(sort === 'documentId' ? (direction * -1) as 1 | -1 : 1); setSort('documentId'); setPage(1); }} type="button">Documento {sort === 'documentId' ? (direction === 1 ? '↑' : '↓') : '↕'}</Button></th>
                   <th>Aseguradora</th>
                   <th>Contacto demo</th>
                   <th>Acción</th>
@@ -158,7 +162,7 @@ export default function PatientsPage() {
           />
         )}
       </Panel>
-      <nav className="pagination" aria-label="Paginación de pacientes"><Button data-action-id="PATIENT-PAGE-PREVIOUS" disabled={page === 1} onClick={() => setPage(page - 1)} type="button">Anterior</Button>{Array.from({ length: pages }, (_, index) => <Button data-action-id="PATIENT-PAGINATE" key={index} onClick={() => setPage(index + 1)} type="button">{index + 1}</Button>)}<Button data-action-id="PATIENT-PAGE-NEXT" disabled={page >= pages} onClick={() => setPage(page + 1)} type="button">Siguiente</Button></nav>
+      <nav className="pagination" aria-label="Paginación de pacientes"><Button data-action-id="PATIENT-PAGE-PREVIOUS" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)} type="button">Anterior</Button>{Array.from({ length: pages }, (_, index) => <Button aria-current={currentPage === index + 1 ? 'page' : undefined} className={currentPage === index + 1 ? 'active' : undefined} data-action-id="PATIENT-PAGINATE" key={index} onClick={() => setPage(index + 1)} type="button">{index + 1}</Button>)}<Button data-action-id="PATIENT-PAGE-NEXT" disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)} type="button">Siguiente</Button></nav>
       <Dialog
         description="Los datos ingresados se mantienen en memoria de este demo y se validan antes de registrar."
         footer={
