@@ -1,9 +1,7 @@
 # Próximo paso
 
-- Punto de reanudación: `CH17-R001`.
-- Antes de editar, comprobar rama y estado, y leer `docs/parity/PROGRESS.md`, la matriz exacta y únicamente la evidencia delimitada de CH17. No reiniciar ni reauditar CH01–CH16.
-- Iniciar CH17 ampliando el generador y la matriz exacta con la raíz de evidencia y los requisitos del capítulo; después implementar cada brecha de forma incremental.
-- Alcance de evidencia ya revisado para CH17: lista y acción del reporte (R001), rango de fechas (R002), pestañas y secciones anidadas (R003), antecedentes y alergias (R004), signos vitales anidados (R005), y notas de enfermería con impresión/acción (R006).
-- Preservar el flujo de documentos firmados y correcciones auditadas; no incluir contenido clínico en canales de mensajería o correo no seguros.
-- Validación requerida: pruebas focales de CH17 y navegador, seguido de `npm run check` y `npm run audit:verify`; actualizar la matriz, progreso y preguntas abiertas antes de hacer commit y push.
-- La validación de migraciones y RLS de Supabase contra una instancia real sigue pendiente: no hay CLI ni proyecto configurado y el daemon local de Docker no está activo.
+- Ejecutar el gate pre-React: resolver `BASE-P1-018` haciendo que la pantalla QA derive sus cifras de `docs/parity/EXACT_VIDEO_PARITY_MATRIX.json`.
+- Ejecutar `npm run check`, `npm run audit:verify` y `npm run codex:preflight`; registrar `PRE_REACT_PARITY_GATE.json` y `PRE_REACT_PARITY_GATE.md`.
+- No reiniciar ni reauditar CH01–CH16. Para CH17, usar únicamente la evidencia y pruebas ya trazadas en la matriz.
+- Mantener bloqueados los puntos `CH17-Q001`–`CH17-Q005`; no inferir plantilla oficial, regla de alergias, IA clínica, WhatsApp ni firma legal.
+- Tras el gate, iniciar la migración productiva a React/Next.js con lógica pura y contratos extraídos antes de retirar el legacy.
