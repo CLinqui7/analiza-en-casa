@@ -137,6 +137,27 @@ test('signed clinical documents remain immutable and corrections create a new ve
   await expect(page.getByText('Motivo: Ajuste sintético de QA.')).toBeVisible();
 });
 
+test('inventory movements persist and cannot make the derived balance negative', async ({ page }) => {
+  await login(page);
+  await page.goto('/inventory/movements');
+  await page.getByRole('button', { name: 'Registrar movimiento' }).click();
+  const movementDialog = page.getByRole('dialog', { name: 'Registrar movimiento de inventario' });
+  await movementDialog.getByLabel('Tipo de movimiento').selectOption('EXIT');
+  await movementDialog.getByLabel('Cantidad').fill('9999');
+  await movementDialog.getByLabel('Motivo').fill('Prueba de saldo negativo.');
+  await page.getByRole('button', { name: 'Guardar movimiento' }).click();
+  await expect(page.getByText('El movimiento dejaría un saldo negativo')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+
+  await page.getByRole('button', { name: 'Registrar movimiento' }).click();
+  await movementDialog.getByLabel('Referencia').fill('INV-E2E-ENTRY');
+  await movementDialog.getByLabel('Motivo').fill('Entrada sintética de QA.');
+  await page.getByRole('button', { name: 'Guardar movimiento' }).click();
+  await expect(page.getByRole('status')).toContainText('Movimiento persistido');
+  await page.reload();
+  await expect(page.getByText('INV-E2E-ENTRY')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

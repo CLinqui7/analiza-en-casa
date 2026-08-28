@@ -33,7 +33,11 @@ const navigation: NavigationGroup[] = [
   { label: 'Seguros', href: '/insurance', permission: 'insurance:read', actionId: 'INSURANCE-NAVIGATE' },
   {
     label: 'Inventario',
-    children: [{ label: 'Kárdex', href: '/inventory/kardex', permission: 'inventory:read', actionId: 'KARDEX-NAVIGATE' }],
+    children: [
+      { label: 'Existencias', href: '/inventory', permission: 'inventory:read', actionId: 'INVENTORY-NAVIGATE' },
+      { label: 'Movimientos', href: '/inventory/movements', permission: 'inventory:read', actionId: 'INVENTORY-MOVEMENTS-NAVIGATE' },
+      { label: 'Kárdex', href: '/inventory/kardex', permission: 'inventory:read', actionId: 'KARDEX-NAVIGATE' },
+    ],
   },
   {
     label: 'Reportes',
