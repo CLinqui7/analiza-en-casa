@@ -118,6 +118,14 @@ export const clinicalDocumentSchema = z.object({
   correctionReason: z.string().trim().optional(),
 });
 
+export const catalogItemSchema = z.object({
+  id: z.string(),
+  sku: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+  status: z.enum(['ACTIVE', 'INACTIVE']),
+  createdAt: z.string(),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
@@ -127,4 +135,5 @@ export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type Quote = z.infer<typeof quoteSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
 export type ClinicalDocument = z.infer<typeof clinicalDocumentSchema>;
+export type CatalogItem = z.infer<typeof catalogItemSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;

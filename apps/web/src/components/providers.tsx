@@ -1,6 +1,6 @@
 'use client';
 
-import type { ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
@@ -41,6 +41,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addClinicalDocument: (document: ClinicalDocument) => void;
   signClinicalDocument: (documentId: string) => void;
   correctClinicalDocument: (documentId: string, reason: string, summary: string, author: string) => void;
+  addCatalogItem: (item: CatalogItem) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -207,6 +208,14 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current,
           clinicalDocuments: [...current.clinicalDocuments, correction],
           auditEntries: [audit('Corrección clínica creada', correction.id), ...current.auditEntries],
+        };
+      }),
+      addCatalogItem: (item) => commit((current) => {
+        if (current.catalogItems.some((candidate) => candidate.sku.toLocaleUpperCase('es') === item.sku.toLocaleUpperCase('es'))) return current;
+        return {
+          ...current,
+          catalogItems: [...current.catalogItems, item],
+          auditEntries: [audit('Ítem de catálogo creado', item.id), ...current.auditEntries],
         };
       }),
     }),

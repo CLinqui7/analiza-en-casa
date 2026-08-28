@@ -213,6 +213,25 @@ test('all six demo roles enforce their route matrix', async ({ browser }) => {
   }
 });
 
+test('catalog items require a unique SKU and persist after refresh', async ({ page }) => {
+  await login(page);
+  await page.goto('/catalogs');
+  await page.getByRole('button', { name: 'Nuevo ítem' }).click();
+  await page.getByLabel('SKU').fill('KIT-DEMO-001');
+  await page.getByLabel('Nombre').fill('Duplicado de QA');
+  await page.getByRole('button', { name: 'Guardar ítem' }).click();
+  await expect(page.getByText('Ya existe un ítem con este SKU.')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+
+  await page.getByRole('button', { name: 'Nuevo ítem' }).click();
+  await page.getByLabel('SKU').fill('QA-CATALOG-001');
+  await page.getByLabel('Nombre').fill('Ítem sintético de QA');
+  await page.getByRole('button', { name: 'Guardar ítem' }).click();
+  await expect(page.getByRole('status')).toContainText('Ítem de catálogo persistido');
+  await page.reload();
+  await expect(page.getByText('QA-CATALOG-001')).toBeVisible();
+});
+
 test('dashboard has no automatically detectable serious accessibility violations', async ({
   page,
 }) => {

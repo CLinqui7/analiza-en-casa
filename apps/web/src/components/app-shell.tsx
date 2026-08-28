@@ -39,6 +39,7 @@ const navigation: NavigationGroup[] = [
       { label: 'Kárdex', href: '/inventory/kardex', permission: 'inventory:read', actionId: 'KARDEX-NAVIGATE' },
     ],
   },
+  { label: 'Catálogos', href: '/catalogs', permission: 'catalogs:read', actionId: 'CATALOG-NAVIGATE' },
   {
     label: 'Reportes',
     children: [{ label: 'Horas de enfermería', href: '/reports/nurse-hours', permission: 'reports:read', actionId: 'NURSE-HOURS-NAVIGATE' }],
