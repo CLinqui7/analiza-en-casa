@@ -69,6 +69,51 @@ test('hospitalization creation persists after refresh', async ({ page }) => {
   await expect(page.getByText('Confirmar visita de QA')).toBeVisible();
 });
 
+test('agenda rejects invalid intervals and persists scheduled shifts', async ({ page }) => {
+  await login(page);
+  await page.goto('/agenda');
+  await page.getByRole('button', { name: 'Nuevo turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await dialog.locator('input[name="startsAt"]').fill('2026-08-30T12:00');
+  await dialog.locator('input[name="endsAt"]').fill('2026-08-30T08:00');
+  await dialog.getByLabel('Notas').fill('Turno inválido de QA.');
+  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
+  await expect(dialog.getByText('El fin debe ser posterior al inicio.')).toBeVisible();
+
+  await dialog.locator('input[name="startsAt"]').fill('2026-08-30T08:00');
+  await dialog.locator('input[name="endsAt"]').fill('2026-08-30T12:00');
+  await dialog.getByLabel('Notas').fill('Turno programado de QA.');
+  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
+  await expect(page.getByRole('status')).toContainText('Turno persistido');
+  await page.reload();
+  await expect(page.getByText('Turno programado de QA.')).toBeVisible();
+});
+
+test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({ page }) => {
+  await login(page);
+  await page.goto('/agenda');
+  await page.getByRole('button', { name: 'Nuevo turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await dialog.getByLabel('Inicio').fill('2026-08-31T08:00');
+  await dialog.getByLabel('Fin').fill('2026-08-31T12:00');
+  await dialog.getByLabel('Notas').fill('Turno para reporte de QA.');
+  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
+
+  await page.goto('/reports/nurse-hours');
+  await page.getByLabel('Desde').fill('2026-08-31');
+  await page.getByLabel('Hasta').fill('2026-08-31');
+  await page.getByLabel('Estado').selectOption('SCHEDULED');
+  await expect(page.getByText('Turno para reporte de QA.')).toHaveCount(0);
+  await expect(page.getByRole('cell', { name: '4', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Ver' }).click();
+  await expect(page.getByText('no hay evidencia de check-in/out')).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar CSV' }).click();
+  await expect((await download).suggestedFilename()).toBe('reporte-horas-programadas.csv');
+  await page.getByRole('button', { name: 'Restablecer' }).click();
+  await expect(page.getByText('Turnos', { exact: true })).toBeVisible();
+});
+
 test('quote draft becomes an immutable sent version', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
