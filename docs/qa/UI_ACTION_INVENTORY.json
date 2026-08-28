@@ -207,7 +207,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-NAVIGATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -275,7 +275,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-DOCUMENT"
       ],
       "playwright_test_ids": [
         "playwright:patient-document-switch-validation"
@@ -308,7 +308,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-INSURANCE"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -407,7 +407,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-CONTACTS"
       ],
       "playwright_test_ids": [
         "playwright:patient-registration-data"
@@ -537,7 +537,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-EDIT"
       ],
       "playwright_test_ids": [
         "playwright:patient-detail-complete-edit"
