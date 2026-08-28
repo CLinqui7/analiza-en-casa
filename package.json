@@ -37,6 +37,7 @@
     "test:browser:ch16": "playwright test tests/e2e/ch16.spec.mjs",
     "test:browser:react": "playwright test -c apps/web/playwright.config.ts",
     "test:selenium": "py tests/selenium/smoke.py",
+    "test:selenium:patients": "py tests/selenium/test_patients.py",
     "qa": "node scripts/qa-check.mjs",
     "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",
@@ -53,6 +54,7 @@
     "react:parity": "node scripts/verify-react-route-parity.mjs",
     "qa:inventory": "node scripts/render-ui-action-inventory.mjs",
     "selenium:coverage": "node scripts/verify-selenium-coverage.mjs",
+    "selenium:coverage:patients": "node scripts/verify-selenium-coverage.mjs --prefix PATIENT- --require-executed",
     "security:scan": "node scripts/security-scan.mjs"
   },
   "engines": {

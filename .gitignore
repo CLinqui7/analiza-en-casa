@@ -19,6 +19,7 @@ coverage/
 playwright-report/
 test-results/
 .codex-log/
+.qa-results/
 *.log
 .DS_Store
 Thumbs.db
