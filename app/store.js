@@ -20,7 +20,9 @@ const VISIT_TYPES = new Set([
   "TERTIARY_LABORATORY","RESPIRATORY_VISIT"
 ]);
 const DISCOUNT_CATEGORIES = ["SERVICES", "STUDIES", "MEDICATIONS", "SUPPLIES", "EQUIPMENT", "FEES", "EXTRAS"];
-export const DEMO_PASSWORD = "Demo2026!";
+// The demo credential is intentionally never kept in clear text in application code.
+// It is valid only when the explicit mock adapter is active; Supabase owns production auth.
+const DEMO_PASSWORD_SHA256 = "dca83b66653fe863d15ee28b02cfbe058cc89505e3587988c7940f6c2362ce6c";
 
 function clone(value) {
   return structuredClone ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -28,6 +30,14 @@ function clone(value) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+async function matchesDemoCredential(value) {
+  if (!globalThis.crypto?.subtle) return false;
+  const bytes = new TextEncoder().encode(String(value || ""));
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+  const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return actual === DEMO_PASSWORD_SHA256;
 }
 
 export function normalizeState(rawState = {}) {
@@ -369,7 +379,7 @@ export async function createAppStore(config) {
     if (!normalizedEmail || !suppliedPassword) throw new Error("Ingresa usuario y contraseña.");
     if (adapter.mode === "mock") {
       const user = state.users.find((candidate) => candidate.email.toLowerCase() === normalizedEmail && candidate.status === "ACTIVE");
-      if (!user || suppliedPassword !== DEMO_PASSWORD) throw new Error("No fue posible iniciar sesión con esas credenciales.");
+      if (!user || !(await matchesDemoCredential(suppliedPassword))) throw new Error("No fue posible iniciar sesión con esas credenciales.");
       establishSession(user);
       return { userId: user.id, role: user.role, mode: "mock" };
     }

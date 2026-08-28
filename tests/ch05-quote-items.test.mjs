@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { createAppStore, DEMO_PASSWORD } from "../app/store.js";
+import { createAppStore } from "../app/store.js";
+import { DEMO_PASSWORD } from "./helpers/demo-auth.mjs";
 import { safeStorage } from "../app/domain.js";
 
 const general = {

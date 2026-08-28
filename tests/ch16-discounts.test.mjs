@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { calculateQuote, safeStorage } from "../app/domain.js";
-import { createAppStore, DEMO_PASSWORD } from "../app/store.js";
+import { createAppStore } from "../app/store.js";
+import { DEMO_PASSWORD } from "./helpers/demo-auth.mjs";
 import { mapSupabaseBootstrap } from "../app/supabase-adapter.js";
 
 const mainPath = new URL("../app/main.js", import.meta.url);
