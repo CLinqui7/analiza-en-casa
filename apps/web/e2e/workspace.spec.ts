@@ -13,6 +13,21 @@ async function login(page: import('@playwright/test').Page) {
   await loginAs(page, 'admin@demo.local', 'demo-admin');
 }
 
+async function fillRequiredPatientData(
+  dialog: import('@playwright/test').Locator,
+  values: { documentId: string; fullName: string; phone: string; email?: string },
+) {
+  await dialog.getByLabel('Número de documento').fill(values.documentId);
+  await dialog.getByLabel('Nombre completo').fill(values.fullName);
+  await dialog.getByLabel('Fecha de nacimiento').fill('1985-04-20');
+  await dialog.getByLabel('Femenino').check();
+  await dialog.getByLabel('Teléfono celular').fill(values.phone);
+  await dialog.getByLabel('Empresa').fill('Empresa QA Sintética');
+  await dialog.getByLabel('Correo').fill(values.email ?? 'paciente.qa@example.test');
+  await dialog.getByLabel('Dirección').fill('Calle sintética 123');
+  await dialog.getByLabel('Comentario o referencia').fill('Referencia sintética para QA');
+}
+
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
   await login(page);
   await page.getByRole('button', { name: 'Clínico' }).click();
@@ -76,8 +91,8 @@ test('patient duplicate validation and individual vital registration are usable'
   await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
-  await page.getByLabel('Nombre completo').fill('Paciente Demo Repetido');
-  await page.getByLabel('Número de documento').fill('123456789');
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await fillRequiredPatientData(dialog, { documentId: '123456789', fullName: 'Paciente Demo Repetido', phone: '7000-9911' });
   await page.getByRole('button', { name: 'Guardar registro' }).click();
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
@@ -88,6 +103,86 @@ test('patient duplicate validation and individual vital registration are usable'
   await page.getByRole('button', { name: 'Guardar medición' }).click();
   await expect(page.getByRole('status')).toContainText('Medición individual registrada');
   await expect(page.getByText('Pulso: 70 lpm')).toBeVisible();
+});
+
+test('patient registration persists complete administrative, insurance, contacts, and address data', async ({ page }) => {
+  await login(page);
+  await page.goto('/patients');
+  await page.getByRole('button', { name: 'Agregar paciente' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByLabel('Tipo de documento').selectOption('OTHER');
+  await fillRequiredPatientData(dialog, { documentId: 'QA-REG-001', fullName: 'Paciente QA Integral', phone: '7000-1111' });
+  await dialog.getByLabel('Teléfono de casa').fill('2200-1111');
+  await dialog.getByLabel('Jubilado').check();
+  await dialog.getByLabel('Tipo de sangre').selectOption('O+');
+  await dialog.getByLabel('Estado civil').fill('Estado civil sintético');
+  await dialog.getByLabel('Nacionalidad').fill('Nacionalidad sintética');
+  await dialog.getByLabel('Ocupación').fill('Ocupación sintética');
+  await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
+  await dialog.getByLabel('Aseguradora').selectOption('Aseguradora de demostración');
+  await dialog.getByLabel('El paciente es el titular').check();
+  await dialog.getByLabel('Número de póliza').fill('POL-QA-001');
+  await dialog.getByLabel('Certificado o unidad').fill('CERT-QA-001');
+  await dialog.getByLabel('Identificación del titular').fill('HOLDER-QA-001');
+  await dialog.getByLabel('Nombre del titular').fill('Titular QA Integral');
+  await dialog.getByLabel('Fecha de nacimiento del titular').fill('1970-01-02');
+  await dialog.getByLabel('Fecha efectiva').fill('2026-08-28');
+  await dialog.getByRole('button', { name: 'Agregar contacto' }).click();
+  await dialog.locator('input[name="contacts.0.fullName"]').fill('Contacto QA Uno');
+  await dialog.locator('input[name="contacts.0.phone"]').fill('7000-2001');
+  await dialog.locator('input[name="contacts.0.email"]').fill('contacto.uno@example.test');
+  await dialog.locator('input[name="contacts.0.relationship"]').fill('Parentesco QA');
+  await dialog.locator('input[name="contacts.0.role"]').fill('Rol QA');
+  await dialog.locator('input[name="contacts.0.country"]').fill('País QA');
+  await dialog.getByRole('button', { name: 'Agregar contacto' }).click();
+  await dialog.locator('input[name="contacts.1.fullName"]').fill('Contacto QA Dos');
+  await dialog.locator('input[name="contacts.1.phone"]').fill('7000-2002');
+  await dialog.getByRole('button', { name: 'Definir principal' }).nth(1).click();
+  await dialog.getByRole('button', { name: 'Agregar contacto' }).click();
+  await dialog.getByRole('button', { name: 'Eliminar contacto' }).last().click();
+  await dialog.getByLabel('Enlace de ubicación').fill('https://example.test/ubicacion-qa');
+  await dialog.getByLabel('Coordenadas').fill('13.7000,-89.2000');
+  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await expect(page.getByRole('status')).toContainText('Paciente QA Integral');
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('Paciente QA Integral');
+  await page.getByRole('link', { name: 'Paciente QA Integral' }).click();
+  await expect(page.getByText('Empresa QA Sintética')).toBeVisible();
+  await expect(page.getByText('POL-QA-001')).toBeVisible();
+  await expect(page.getByText('Contacto QA Uno · 7000-2001 · Secundario')).toBeVisible();
+  await expect(page.getByText('Contacto QA Dos · 7000-2002 · Principal')).toBeVisible();
+  await expect(page.getByText('Calle sintética 123')).toBeVisible();
+  await expect(page.getByText('https://example.test/ubicacion-qa')).toBeVisible();
+});
+
+test('patient document switches clear only document state and form validation is enforced', async ({ page }) => {
+  await login(page);
+  await page.goto('/patients');
+  await page.getByRole('button', { name: 'Agregar paciente' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByLabel('Tipo de documento').selectOption('PASSPORT');
+  await dialog.getByLabel('Número de documento').fill('PAS-QA-001');
+  await dialog.getByLabel('Nombre completo').fill('Paciente Cambio QA');
+  await dialog.getByLabel('Teléfono celular').fill('7000-3001');
+  await dialog.getByLabel('Correo').fill('cambio.qa@example.test');
+  await dialog.getByLabel('Tipo de documento').selectOption('DUI');
+  await expect(dialog.getByLabel('Número de documento')).toHaveValue('');
+  await expect(dialog.getByLabel('Nombre completo')).toHaveValue('Paciente Cambio QA');
+  await expect(dialog.getByLabel('Teléfono celular')).toHaveValue('7000-3001');
+  await dialog.getByLabel('Número de documento').fill('876543210');
+  await dialog.getByLabel('Tipo de documento').selectOption('PASSPORT');
+  await expect(dialog.getByLabel('Número de documento')).toHaveValue('');
+  await expect(dialog.getByLabel('Nombre completo')).toHaveValue('Paciente Cambio QA');
+
+  await fillRequiredPatientData(dialog, { documentId: 'PAS-QA-VALIDATION', fullName: 'Paciente Cambio QA', phone: '7000-3001', email: 'correo-invalido' });
+  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await expect(dialog.getByText('Ingrese un correo electrónico válido.')).toBeVisible();
+  await dialog.getByLabel('Correo').fill('cambio.qa@example.test');
+  await dialog.getByLabel('Número de documento').fill('12345678-9');
+  await dialog.getByLabel('Tipo de documento').selectOption('DUI');
+  await dialog.getByLabel('Número de documento').fill('123456789');
+  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await expect(dialog.getByText('Ya existe un registro con este documento')).toBeVisible();
 });
 
 test('patient list supports tabs, search, sorting, pagination, persisted status changes, roles, and mobile', async ({ browser }) => {

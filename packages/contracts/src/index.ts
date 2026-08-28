@@ -2,6 +2,36 @@ import { z } from 'zod';
 
 export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'OTHER']);
 
+export const patientInsuranceSchema = z.object({
+  status: z.enum(['REGULAR', 'INSURED']).default('REGULAR'),
+  insurer: z.string().trim().optional(),
+  isPolicyHolder: z.boolean().optional(),
+  policyNumber: z.string().trim().optional(),
+  certificateOrUnit: z.string().trim().optional(),
+  holderDocumentId: z.string().trim().optional(),
+  holderFullName: z.string().trim().optional(),
+  holderBirthDate: z.string().optional(),
+  effectiveDate: z.string().optional(),
+});
+
+export const patientContactSchema = z.object({
+  id: z.string(),
+  fullName: z.string().trim().optional(),
+  phone: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+  relationship: z.string().trim().optional(),
+  role: z.string().trim().optional(),
+  country: z.string().trim().optional(),
+  isPrimary: z.boolean().default(false),
+});
+
+export const patientAddressSchema = z.object({
+  line: z.string().trim().optional(),
+  comments: z.string().trim().optional(),
+  coordinates: z.string().trim().optional(),
+  locationUrl: z.string().trim().optional(),
+});
+
 export const patientSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
@@ -9,6 +39,19 @@ export const patientSchema = z.object({
   documentId: z.string().trim().min(1),
   phone: z.string().trim().optional(),
   insurer: z.string().trim().optional(),
+  birthDate: z.string().optional(),
+  sex: z.enum(['M', 'F']).optional(),
+  company: z.string().trim().optional(),
+  homePhone: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+  retired: z.boolean().optional(),
+  bloodType: z.enum(['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']).optional(),
+  civilStatus: z.string().trim().optional(),
+  nationality: z.string().trim().optional(),
+  occupation: z.string().trim().optional(),
+  insurance: patientInsuranceSchema.optional(),
+  contacts: z.array(patientContactSchema).optional(),
+  address: patientAddressSchema.optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).default('ACTIVE'),
 });
 
@@ -137,6 +180,9 @@ export const purchaseSchema = z.object({
 });
 
 export type Patient = z.infer<typeof patientSchema>;
+export type PatientInsurance = z.infer<typeof patientInsuranceSchema>;
+export type PatientContact = z.infer<typeof patientContactSchema>;
+export type PatientAddress = z.infer<typeof patientAddressSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
 export type NurseHourEntry = z.infer<typeof nurseHourEntrySchema>;

@@ -67,7 +67,15 @@ export class MockDataProvider implements DataProvider {
       if (!saved) return defaultSnapshot();
       const parsed = JSON.parse(saved) as WorkspaceSnapshot;
       if (!Array.isArray(parsed.patients) || !Array.isArray(parsed.auditEntries) || !Array.isArray(parsed.shifts) || !Array.isArray(parsed.hospitalizations) || !Array.isArray(parsed.quotes) || !Array.isArray(parsed.payments) || !Array.isArray(parsed.clinicalDocuments) || !Array.isArray(parsed.catalogItems) || !Array.isArray(parsed.purchases)) throw new Error('invalid');
-      return { ...parsed, patients: parsed.patients.map((patient) => ({ ...patient, status: patient.status ?? 'ACTIVE' })) };
+      return {
+        ...parsed,
+        patients: parsed.patients.map((patient) => ({
+          ...patient,
+          status: patient.status ?? 'ACTIVE',
+          retired: patient.retired ?? false,
+          contacts: patient.contacts ?? [],
+        })),
+      };
     } catch {
       window.localStorage.removeItem(storageKey);
       return defaultSnapshot();
