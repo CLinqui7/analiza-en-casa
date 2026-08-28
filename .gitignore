@@ -20,6 +20,7 @@ playwright-report/
 test-results/
 .codex-log/
 .qa-results/
+__pycache__/
 *.log
 .DS_Store
 Thumbs.db
