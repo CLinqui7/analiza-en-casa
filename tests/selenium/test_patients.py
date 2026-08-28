@@ -37,7 +37,7 @@ class Patients(unittest.TestCase):
     c.d.quit()
     if SERVER: SERVER.terminate()
  def setUp(s):
-    s.d.get(BASE+'/login'); s.d.execute_script('localStorage.clear()'); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Correo')]//input"))).send_keys('admin@demo.local'); s.d.find_element(By.CSS_SELECTOR,'input[type="password"]').send_keys('demo-admin'); s.d.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); s.w.until(EC.url_contains('/dashboard'))
+    s.d.get(BASE+'/login'); s.d.execute_script('localStorage.clear()'); s.d.refresh(); email=s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Correo')]//input"))); email.clear(); email.send_keys('admin@demo.local'); password=s.d.find_element(By.CSS_SELECTOR,'input[type="password"]'); password.clear(); password.send_keys('demo-admin'); s.d.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); s.w.until(EC.url_contains('/dashboard'))
  def click(s,x): s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,f'[data-action-id="{x}"]'))).click()
  def field(s,label): return s.d.find_element(By.XPATH,f"//label[contains(.,'{label}')]//*[self::input or self::select or self::textarea]")
  def test_patient_actions(s):
