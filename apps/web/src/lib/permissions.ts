@@ -17,6 +17,7 @@ export type Permission =
   | 'clinical:write'
   | 'clinical:sign'
   | 'nursing:write'
+  | 'medical-orders:write'
   | 'agenda:read'
   | 'agenda:write'
   | 'inventory:read'
@@ -37,7 +38,7 @@ const allRead: Permission[] = [
 ];
 const allWrite: Permission[] = [
   'patients:write', 'cases:write', 'quotes:write', 'insurance:write', 'payments:write',
-  'clinical:write', 'clinical:sign', 'nursing:write', 'agenda:write', 'inventory:write', 'purchases:write',
+  'clinical:write', 'clinical:sign', 'nursing:write', 'medical-orders:write', 'agenda:write', 'inventory:write', 'purchases:write',
   'catalogs:write', 'settings:write',
 ];
 
@@ -46,7 +47,7 @@ const permissions: Record<Role, readonly Permission[]> = {
   DOCTOR: [
     'dashboard:read', 'patients:read', 'patients:write', 'cases:read', 'cases:write',
     'quotes:read', 'quotes:write', 'insurance:read', 'clinical:read', 'clinical:write',
-    'clinical:sign', 'agenda:read', 'reports:read',
+    'clinical:sign', 'medical-orders:write', 'agenda:read', 'reports:read',
   ],
   NURSE: [
     'dashboard:read', 'patients:read', 'patients:write', 'cases:read', 'clinical:read',

@@ -60,7 +60,7 @@ export default function ClinicalActionsPage() {
             Registro operativo auditable; no se usa para prescribir ni divulgar contenido clínico.
           </p>
         </div>
-        {can('clinical:write') ? <Button data-action-id="MEDICAL-ORDER-CREATE" onClick={() => setOpen(true)} type="button">
+        {can('medical-orders:write') ? <Button data-action-id="MEDICAL-ORDER-CREATE" onClick={() => setOpen(true)} type="button">
           Nueva acción
         </Button> : null}
       </header>
@@ -95,7 +95,7 @@ export default function ClinicalActionsPage() {
                     {action.owner} · {new Date(action.at).toLocaleString('es-SV')}
                   </span>
                 </div>
-                {action.status === 'OPEN' && can('clinical:write') ? (
+                {action.status === 'OPEN' && can('medical-orders:write') ? (
                   <Button
                     className="button-secondary"
                     onClick={() => complete(action.id)}
