@@ -70,14 +70,14 @@ class Patients(unittest.TestCase):
   s.open_create(); s.fill('Nombre completo','Paciente Dirección Selenium'); s.fill('Teléfono celular','70005555'); s.fill('Dirección','Calle Selenium 123'); s.fill('Comentario o referencia','Referencia Selenium'); s.fill('Coordenadas','13.7000,-89.2000'); s.fill('Enlace de ubicación','https://example.test/ubicacion'); t=time.time(); s.click('PATIENT-ADDRESS-CLEAR');
   for label in ('Dirección','Comentario o referencia','Coordenadas','Enlace de ubicación'): s.assertEqual(s.field(label).get_attribute('value'),'')
   s.assertEqual(s.field('Nombre completo').get_attribute('value'),'Paciente Dirección Selenium'); s.assertEqual(s.field('Teléfono celular').get_attribute('value'),'70005555'); s.pass_('PATIENT-ADDRESS-CLEAR','SEL-PAT-ADDRESS',t); s.fill('Enlace de ubicación','https://example.test/selenium-map'); t=time.time(); before=s.d.current_url; s.click('PATIENT-ADDRESS-LOOKUP'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'integración de mapas configurada')]"))); s.assertEqual(s.field('Enlace de ubicación').get_attribute('value'),'https://example.test/selenium-map'); s.assertEqual(s.d.current_url,before); s.pass_('PATIENT-ADDRESS-LOOKUP','SEL-PAT-ADDRESS',t)
- @unittest.skip('Certified in Lot A; retained as an independent group placeholder.')
- def test_navigation_and_roles(s): pass
- @unittest.skip('Certified in Lot A.')
- def test_document_type(s): pass
- @unittest.skip('Certified in Lot A.')
- def test_insurance(s): pass
- @unittest.skip('Certified in Lot A.')
- def test_edit(s): pass
+ def test_navigation_and_roles(s):
+  t=time.time(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1'))); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.pass_('PATIENT-NAVIGATE','SEL-PAT-NAVIGATION',t)
+ def test_document_type(s):
+  s.open_create(); t=time.time(); Select(s.a('PATIENT-DOCUMENT-TYPE')).select_by_value('PASSPORT'); s.fill('Número de documento','PAS-SEL-001'); s.fill('Nombre completo','Paciente Documento Selenium'); s.fill('Teléfono celular','70007777'); Select(s.a('PATIENT-DOCUMENT-TYPE')).select_by_value('DUI'); s.assertEqual(s.field('Número de documento').get_attribute('value'),''); s.assertEqual(s.field('Nombre completo').get_attribute('value'),'Paciente Documento Selenium'); s.pass_('PATIENT-DOCUMENT-TYPE','SEL-PAT-DOCUMENT',t)
+ def test_insurance(s):
+  s.open_create(); t=time.time(); Select(s.a('PATIENT-INSURANCE-TOGGLE')).select_by_value('INSURED'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Aseguradora')]"))); s.pass_('PATIENT-INSURANCE-TOGGLE','SEL-PAT-INSURANCE',t)
+ def test_edit(s):
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); t=time.time(); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/')); s.pass_('PATIENT-DETAIL-NAVIGATE','SEL-PAT-EDIT',t); original=s.d.find_element(By.TAG_NAME,'h1').text; t=time.time(); s.click('PATIENT-EDIT'); s.w.until(EC.url_contains('edit=')); s.w.until(lambda _:s.field('Nombre completo').get_attribute('value')==original); s.pass_('PATIENT-EDIT','SEL-PAT-EDIT',t); s.fill('Nombre completo','Temporal Selenium'); t=time.time(); s.click('PATIENT-EDIT-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]'))); s.d.get(BASE+'/patients'); s.click('PATIENT-DETAIL-NAVIGATE'); s.assertIn(original,s.d.find_element(By.TAG_NAME,'body').text); s.assertNotIn('Temporal Selenium',s.d.find_element(By.TAG_NAME,'body').text); s.d.refresh(); s.assertIn(original,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-EDIT-CANCEL','SEL-PAT-EDIT',t)
  def test_search(s):
   s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); box=s.a('PATIENT-SEARCH'); t=time.time()
   for value,expected in (('Aur','Paciente Demo Aurora'),('Paciente Demo Aurora','Paciente Demo Aurora'),('12345678-9','Paciente Demo Aurora'),('0000-0000','Paciente Demo Aurora')):
@@ -91,8 +91,8 @@ class Patients(unittest.TestCase):
   t=time.time(); s.click('PATIENT-SORT-DOCUMENT'); after=docs(); s.assertEqual(after,sorted(after)); s.click('PATIENT-SORT-DOCUMENT'); s.assertEqual(docs(),sorted(docs(),reverse=True)); s.pass_('PATIENT-SORT-DOCUMENT','SEL-PAT-PAGINATION',t)
   from selenium.webdriver.support.select import Select
   t=time.time(); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('5'); page1=names(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); s.assertLessEqual(len(page1),5); s.assertGreater(len(pages),1); next_t=time.time(); s.click('PATIENT-PAGE-NEXT'); s.w.until(lambda _:names()!=page1); s.pass_('PATIENT-PAGE-NEXT','SEL-PAT-PAGINATION',next_t); paginate_t=time.time(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); pages[-1].click(); s.assertEqual(pages[-1].get_attribute('aria-current'),'page'); s.pass_('PATIENT-PAGINATE','SEL-PAT-PAGINATION',paginate_t); previous_t=time.time(); s.click('PATIENT-PAGE-PREVIOUS'); s.assertEqual(names(),page1); s.pass_('PATIENT-PAGE-PREVIOUS','SEL-PAT-PAGINATION',previous_t); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('10'); s.assertEqual(s.d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"][aria-current="page"]').text,'1'); s.pass_('PATIENT-PAGE-SIZE','SEL-PAT-PAGINATION',t)
- @unittest.skip('Future status group.')
- def test_status_transitions(s): pass
+ def test_status_transitions(s):
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); name=s.d.find_element(By.CSS_SELECTOR,'tbody tr td:first-child a').text; t=time.time(); s.click('PATIENT-INACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.click('PATIENT-TAB-INACTIVE'); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-INACTIVATE','SEL-PAT-STATUS',t); t=time.time(); s.click('PATIENT-REACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-REACTIVATE','SEL-PAT-STATUS',t)
  @unittest.skip('Known pending: PATIENT-IMPORT-*')
  def test_import(s): pass
  @unittest.skip('Future export group.')
