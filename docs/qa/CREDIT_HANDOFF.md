@@ -1,8 +1,8 @@
 # Checkpoint de continuación de bajo consumo
 
 - Rama: `codex/react-full-parity-selenium-100`.
-- Último checkpoint: este commit `chore: checkpoint React parity before lower-cost continuation` (obtenga SHA con `git rev-parse --short HEAD`).
-- Acabado ahora: evidencia de roles para navegación, recursos de enfermería y acciones operativas; no se añadió persistencia clínica. `MEDICAL-ORDER-CREATE` sigue siendo estado local y está marcado `PARTIAL`.
+- Último checkpoint: `react: complete dashboard operational parity` (`cda0a87`).
+- Acabado ahora: `ROUTE-DASHBOARD` tiene acciones operativas con permisos, métricas sintéticas sin inferencia clínica, tabla accesible por teclado y evidencia focalizada. No se añadió persistencia clínica. `MEDICAL-ORDER-CREATE` sigue siendo estado local y está marcado `PARTIAL`.
 - Archivos locales de este checkpoint: `docs/qa/REACT_ROLE_MATRIX.json`, `docs/qa/CREDIT_HANDOFF.md`.
 
 ## Estado funcional ya cerrado (sin afirmar paridad exacta)
@@ -11,8 +11,8 @@ Pacientes y detalle, hospitalizaciones, cotizaciones inmutables, pagos idempoten
 
 ## Paridad de rutas
 
-- Totales: 40; `MIGRATED_EXACT`: 1; `MIGRATED_PARTIAL`: 26; `MISSING`: 13; bloqueadas por reglas/confirmación de cliente: 8.
-- Parciales restantes: `ROUTE-DASHBOARD`, `ROUTE-PATIENTS`, `ROUTE-PATIENT-DETAIL`, `ROUTE-PATIENT-EDIT`, `ROUTE-HOSPITALIZATIONS`, `ROUTE-QUOTES`, `ROUTE-INSURANCE`, `ROUTE-RECEIVABLES`, `ROUTE-PAYMENTS`, `ROUTE-CLINICAL-HOME`, `ROUTE-CLINICAL-HOSPITALIZATIONS`, `ROUTE-HEALTH-REPORTS`, `ROUTE-MEDICAL-ORDERS`, `ROUTE-MEDICATION-CARDS`, `ROUTE-CARE-PLANS`, `ROUTE-EVOLUTIONS`, `ROUTE-NURSING-RESOURCES`, `ROUTE-AGENDA`, `ROUTE-NURSE-HOURS`, `ROUTE-PURCHASES`, `ROUTE-INVENTORY`, `ROUTE-INVENTORY-MOVEMENTS`, `ROUTE-KARDEX`, `ROUTE-CATALOGS`, `ROUTE-AUDIT`, `ROUTE-PORTAL`.
+- Totales: 40; `MIGRATED_EXACT`: 2; `MIGRATED_PARTIAL`: 25; `MISSING`: 13; bloqueadas por reglas/confirmación de cliente: 8.
+- Parciales restantes: `ROUTE-PATIENTS`, `ROUTE-PATIENT-DETAIL`, `ROUTE-PATIENT-EDIT`, `ROUTE-HOSPITALIZATIONS`, `ROUTE-QUOTES`, `ROUTE-INSURANCE`, `ROUTE-RECEIVABLES`, `ROUTE-PAYMENTS`, `ROUTE-CLINICAL-HOME`, `ROUTE-CLINICAL-HOSPITALIZATIONS`, `ROUTE-HEALTH-REPORTS`, `ROUTE-MEDICAL-ORDERS`, `ROUTE-MEDICATION-CARDS`, `ROUTE-CARE-PLANS`, `ROUTE-EVOLUTIONS`, `ROUTE-NURSING-RESOURCES`, `ROUTE-AGENDA`, `ROUTE-NURSE-HOURS`, `ROUTE-PURCHASES`, `ROUTE-INVENTORY`, `ROUTE-INVENTORY-MOVEMENTS`, `ROUTE-KARDEX`, `ROUTE-CATALOGS`, `ROUTE-AUDIT`, `ROUTE-PORTAL`.
 - Missing restantes: `ROUTE-PAYABLES`, `ROUTE-INVENTORY-COMMITMENTS`, `ROUTE-INVENTORY-CLOSURES`, `ROUTE-WAREHOUSES`, `ROUTE-KITS`, `ROUTE-LOTS`, `ROUTE-SUPPLIERS`, `ROUTE-DISCOUNTS`, `ROUTE-DOCTORS`, `ROUTE-PROFESSIONAL-STATEMENTS`, `ROUTE-REPORTS`, `ROUTE-SETTINGS`, `ROUTE-QA`.
 
 ## Blockers reales
@@ -26,24 +26,24 @@ Pacientes y detalle, hospitalizaciones, cotizaciones inmutables, pagos idempoten
 
 ## Cobertura Selenium
 
-- Acciones UI totales: 39.
-- Selenium required: 39; cubiertas: 0; pendientes: 39; cobertura: 0.00%.
-- No se amplió Selenium. `npm run selenium:coverage` falla intencionalmente por las 39 acciones sin `selenium_test_ids`.
+- Acciones UI totales: 42.
+- Selenium required: 42; cubiertas: 0; pendientes: 42; cobertura: 0.00%.
+- No se amplió Selenium. `npm run selenium:coverage` falla intencionalmente por las 42 acciones sin `selenium_test_ids`.
 
 ## Última verificación
 
-- Playwright focalizado: `npm run test:browser:react -- --grep "primary navigation requires|nursing resources require|clinical action search"` — 3 passed.
+- Playwright focalizado: `npm run test:browser:react -- --grep "dashboard presents|dashboard has no"` — 2 passed.
 - `npm run typecheck` — passed.
 - `npm run lint` — passed.
 - `npm run build` — passed.
 - `npm run qa:inventory` — passed.
-- `npm run react:parity` — failed esperado: 1 exacta/39 gaps resolubles o bloqueados explícitamente.
-- `npm run selenium:coverage` — failed esperado: 0/39, 0.00%.
+- `npm run react:parity` — failed esperado: 2 exactas/38 gaps resolubles o bloqueados explícitamente.
+- `npm run selenium:coverage` — not re-run; expected 0/42, 0.00%.
 - Bug/gap conocido: crear una acción en `/clinical/orders` no sobrevive a recarga; se mantiene `PARTIAL` y no se afirma como orden clínica.
 
 ## Reanudar
 
-- Primer `route_id`: `ROUTE-DASHBOARD` (primero `MIGRATED_PARTIAL` del manifiesto).
+- Primer `route_id`: `ROUTE-PATIENTS` (primero `MIGRATED_PARTIAL` del manifiesto).
 - Primer `action_id`: `INSURANCE-APPROVE` (primera acción `MISSING`; requiere regla de cliente antes de implementar).
 - Comandos:
 
