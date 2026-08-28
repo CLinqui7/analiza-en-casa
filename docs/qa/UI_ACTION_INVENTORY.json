@@ -217,6 +217,39 @@
       "blocker": ""
     },
     {
+      "action_id": "PATIENT-DETAIL-NAVIGATE",
+      "module": "Pacientes",
+      "route": "/patients",
+      "control_type": "NAVIGATE",
+      "visible_label": "Detalle del paciente",
+      "selector_or_testid": "[data-action-id=PATIENT-DETAIL-NAVIGATE]",
+      "roles_allowed": [
+        "ADMIN",
+        "DOCTOR",
+        "NURSE",
+        "FINANCE",
+        "AUDITOR"
+      ],
+      "roles_denied": [
+        "INVENTORY"
+      ],
+      "preconditions": "Paciente visible en el listado",
+      "positive_scenario": "Abre el detalle administrativo del paciente seleccionado.",
+      "negative_scenario": "INVENTORY no puede acceder a la ruta de pacientes.",
+      "persistence_required": false,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": [
+        "SEL-PAT-EDIT"
+      ],
+      "playwright_test_ids": [
+        "playwright:patient-detail-complete-edit"
+      ],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
+    },
+    {
       "action_id": "PATIENT-CREATE",
       "module": "Pacientes",
       "route": "/patients",
@@ -504,14 +537,14 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-EDIT"
       ],
       "playwright_test_ids": [
         "playwright:patient-detail-complete-edit"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-EDIT-SUBMIT",
@@ -543,8 +576,8 @@
         "playwright:patient-detail-complete-edit"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-EDIT-CANCEL",
@@ -570,12 +603,45 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-EDIT"
       ],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
+    },
+    {
+      "action_id": "PATIENT-BACK-TO-LIST",
+      "module": "Pacientes",
+      "route": "/patients/:id",
+      "control_type": "NAVIGATE",
+      "visible_label": "Volver a pacientes",
+      "selector_or_testid": "[data-action-id=PATIENT-BACK-TO-LIST]",
+      "roles_allowed": [
+        "ADMIN",
+        "DOCTOR",
+        "NURSE",
+        "FINANCE",
+        "AUDITOR"
+      ],
+      "roles_denied": [
+        "INVENTORY"
+      ],
+      "preconditions": "Detalle de paciente visible",
+      "positive_scenario": "Regresa al listado de pacientes.",
+      "negative_scenario": "INVENTORY no puede acceder a la ruta de pacientes.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": [
+        "SEL-PAT-EDIT"
+      ],
+      "playwright_test_ids": [
+        "playwright:patient-detail-complete-edit"
+      ],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-IMPORT",
@@ -799,7 +865,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-SEARCH"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -834,7 +900,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-SEARCH"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -867,7 +933,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -900,7 +966,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -933,7 +999,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -966,7 +1032,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -999,7 +1065,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -1032,7 +1098,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -1065,7 +1131,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -1098,7 +1164,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-PAGINATION"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -1131,7 +1197,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-STATUS"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"
@@ -1164,7 +1230,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-STATUS"
       ],
       "playwright_test_ids": [
         "playwright:patient-list-interactions"

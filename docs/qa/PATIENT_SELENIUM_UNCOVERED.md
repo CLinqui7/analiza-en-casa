@@ -1,19 +1,12 @@
 # Pacientes: evidencia Selenium pendiente
 
-El verificador estricto se ejecutó sobre `89e82088d479d69c4bc3e19d3cf4410f247ddc76` y encontró estas acciones sin evidencia runtime `PASS` asociada al SHA actual:
+El verificador estricto se ejecutó sobre `8138a679ba3d2d13b1a3cf3f3a13f4cde6c71fba` y encontró estas acciones sin evidencia runtime `PASS` asociada al SHA actual:
 
-- `PATIENT-NAVIGATE`
-- `PATIENT-DOCUMENT-TYPE`
-- `PATIENT-INSURANCE-TOGGLE`
-- `PATIENT-CONTACT-PRIMARY`
-- `PATIENT-ADDRESS-CLEAR`
-- `PATIENT-EDIT-SUBMIT`
+- `PATIENT-IMPORT`
 - `PATIENT-IMPORT-FILE`
 - `PATIENT-IMPORT-PREVIEW`
 - `PATIENT-IMPORT-CONFIRM`
-- `PATIENT-SEARCH`
-- `PATIENT-PAGE-SIZE`
-- `PATIENT-INACTIVATE`
-- `PATIENT-REACTIVATE`
+- `PATIENT-IMPORT-CANCEL`
+- `PATIENT-EXPORT`
 
-Estas 13 acciones deben conservarse como pendientes hasta que cada una sea ejecutada, afirmada y registrada individualmente por la suite Selenium.
+Estas seis acciones permanecen pendientes porque corresponden exclusivamente a Import/Export, fuera del alcance del lote D. Las acciones de búsqueda, paginación, transición de estado y edición de pacientes tienen evidencia runtime `PASS` individual.
