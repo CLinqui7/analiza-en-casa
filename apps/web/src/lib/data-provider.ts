@@ -1,6 +1,6 @@
 'use client';
 
-import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { calculateQuoteTotals } from '@analiza/domain';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
@@ -32,6 +32,8 @@ export type WorkspaceSnapshot = {
   clinicalDocuments: ClinicalDocument[];
   catalogItems: CatalogItem[];
   purchases: Purchase[];
+  insuranceRequests: InsuranceRequest[];
+  insuranceEvents: InsuranceEvent[];
   auditEntries: AuditEntry[];
 };
 
@@ -48,6 +50,8 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
   clinicalDocuments: demoClinicalDocuments,
   catalogItems: demoCatalogItems,
   purchases: demoPurchases,
+  insuranceRequests: [],
+  insuranceEvents: [],
   auditEntries: [{ id: 'audit-demo-001', at: '2026-08-28T08:00:00.000Z', action: 'Demo iniciado', subject: 'Aplicación React' }],
 });
 
@@ -106,6 +110,8 @@ export class MockDataProvider implements DataProvider {
           contacts: patient.contacts ?? [],
         })),
         quotes: parsed.quotes.map(normalizeQuote),
+        insuranceRequests: Array.isArray(parsed.insuranceRequests) ? parsed.insuranceRequests : [],
+        insuranceEvents: Array.isArray(parsed.insuranceEvents) ? parsed.insuranceEvents : [],
       };
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -126,13 +132,14 @@ export class SupabaseDataProvider implements DataProvider {
   }
   async load(): Promise<WorkspaceSnapshot> {
     const client = this.client();
-    const [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, catalogItems, purchases, auditEntries] = await Promise.all([
+    const [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, catalogItems, purchases, insuranceRequests, insuranceEvents, auditEntries] = await Promise.all([
       client.from('patients').select('*'), client.from('vital_readings').select('*'),
       client.from('nursing_resources').select('*'), client.from('nurse_hour_entries').select('*'),
       client.from('inventory_movements').select('*'), client.from('shifts').select('*'), client.from('hospitalizations').select('*'), client.from('quotes').select('*'), client.from('payments').select('*'), client.from('clinical_documents').select('*'), client.from('catalog_items').select('*'), client.from('purchases').select('*'),
+      client.from('insurance_requests').select('*'), client.from('insurance_request_events').select('*'),
       client.from('audit_log').select('*'),
     ]);
-    const failed = [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, catalogItems, purchases, auditEntries]
+    const failed = [patients, vitalReadings, nursingResources, nurseHours, inventoryMovements, shifts, hospitalizations, quotes, payments, clinicalDocuments, catalogItems, purchases, insuranceRequests, insuranceEvents, auditEntries]
       .find((result) => result.error);
     if (failed?.error) throw new Error(`No fue posible cargar datos de Supabase: ${failed.error.message}`);
     return {
@@ -146,6 +153,8 @@ export class SupabaseDataProvider implements DataProvider {
       clinicalDocuments: (clinicalDocuments.data ?? []) as ClinicalDocument[],
       catalogItems: (catalogItems.data ?? []) as CatalogItem[],
       purchases: (purchases.data ?? []) as Purchase[],
+      insuranceRequests: (insuranceRequests.data ?? []) as InsuranceRequest[],
+      insuranceEvents: (insuranceEvents.data ?? []) as InsuranceEvent[],
     };
   }
   async save(snapshot: WorkspaceSnapshot): Promise<void> {

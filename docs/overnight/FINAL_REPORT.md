@@ -115,3 +115,7 @@ Rama de continuación: `codex/client-audio-selenium-hardening`. Se conservó la 
 ### Riesgo y bloqueo residual
 
 La migración no autoriza el uso con datos reales. Quedan por trasladar con paridad demostrable módulos extensos del demo heredado y por validar contra Supabase real RLS/RPC, roles, contratos de firmas clínicas, reglas de seguros, documentos oficiales, catálogos y proveedores. Esos puntos continúan documentados en `docs/OPEN_QUESTIONS.md`; no se infieren reglas de negocio ni se habilitan integraciones sensibles.
+
+### Addendum · 2026-08-29 · Seguros y preautorizaciones React
+
+`ROUTE-INSURANCE` ahora registra solicitudes y eventos administrativos append-only en el proveedor de workspace, persiste en modo mock y conserva búsquedas normalizadas, filtro, contexto de cotización, roles, timeline y enlace a la cotización. Registrar un estado no modifica cotizaciones, pagos, agenda ni hospitalizaciones. Email, WhatsApp, envío al seguro y Reclamo permanecen en estado seguro bloqueado. Los bloqueos pendientes son CH07-Q001 a CH07-Q006, CH08-Q002 y el proveedor externo de entrega.

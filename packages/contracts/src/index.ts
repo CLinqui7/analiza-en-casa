@@ -222,6 +222,37 @@ export const purchaseSchema = z.object({
   createdAt: z.string(),
 });
 
+/** Statuses displayed by the legacy preauthorization board. They describe an
+ * observed administrative fact; this enum intentionally does not encode a
+ * transition policy. */
+export const insuranceRequestStatusSchema = z.enum([
+  'SENT_TO_INSURER',
+  'INSURER_REVIEW',
+  'INFO_REQUIRED',
+  'PARTIALLY_APPROVED',
+  'APPROVED',
+  'REJECTED',
+]);
+
+export const insuranceEventSchema = z.object({
+  id: z.string(),
+  requestId: z.string(),
+  status: insuranceRequestStatusSchema,
+  date: z.string(),
+  note: z.string().trim().min(1),
+});
+
+export const insuranceRequestSchema = z.object({
+  id: z.string(),
+  quoteId: z.string(),
+  patientId: z.string(),
+  insurer: z.string().trim().min(1),
+  status: insuranceRequestStatusSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  lastNote: z.string().trim().min(1),
+});
+
 export type Patient = z.infer<typeof patientSchema>;
 export type PatientInsurance = z.infer<typeof patientInsuranceSchema>;
 export type PatientContact = z.infer<typeof patientContactSchema>;
@@ -240,3 +271,6 @@ export type ClinicalDocument = z.infer<typeof clinicalDocumentSchema>;
 export type CatalogItem = z.infer<typeof catalogItemSchema>;
 export type Purchase = z.infer<typeof purchaseSchema>;
 export type InventoryMovement = z.infer<typeof inventoryMovementSchema>;
+export type InsuranceRequestStatus = z.infer<typeof insuranceRequestStatusSchema>;
+export type InsuranceEvent = z.infer<typeof insuranceEventSchema>;
+export type InsuranceRequest = z.infer<typeof insuranceRequestSchema>;

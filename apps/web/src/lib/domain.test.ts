@@ -1,4 +1,4 @@
-import type { Hospitalization, InventoryMovement, Patient, Quote, QuoteItem } from '@analiza/contracts';
+import type { Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, Patient, Quote, QuoteItem } from '@analiza/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   canRecordMovement,
@@ -14,6 +14,10 @@ import {
   calculateQuoteTotals,
   canEditQuote,
   createQuoteRevision,
+  appendInsuranceEvent,
+  hasValidInsuranceRequestContext,
+  isInsuranceRequestStatus,
+  searchInsuranceRequests,
   searchQuotes,
   validateQuoteItem,
 } from '@analiza/domain';
@@ -129,5 +133,43 @@ describe('quote domain', () => {
     expect(searchQuotes([quote], patients, 'case 001')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'áurea')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'draft')).toHaveLength(1);
+  });
+});
+
+describe('insurance domain boundaries', () => {
+  const request: InsuranceRequest = {
+    id: 'INS-001', quoteId: 'QUOTE-001', patientId: 'one', insurer: 'Aseguradora sintética',
+    status: 'SENT_TO_INSURER', createdAt: '2026-08-29T08:00:00.000Z', updatedAt: '2026-08-29T08:00:00.000Z', lastNote: 'Registro inicial sintético.',
+  };
+  const event: InsuranceEvent = { id: 'INE-001', requestId: 'INS-001', status: 'INFO_REQUIRED', date: '2026-08-29T09:00:00.000Z', note: 'Se documentó una solicitud administrativa.' };
+
+  it('searches insurer, quote, name, document and phone with normalized input', () => {
+    const insurancePatients = [{ ...patients[0], phone: '7000-0001' }];
+    expect(searchInsuranceRequests([request], insurancePatients, 'quote 001')).toHaveLength(1);
+    expect(searchInsuranceRequests([request], insurancePatients, 'áurea')).toHaveLength(1);
+    expect(searchInsuranceRequests([request], insurancePatients, '1234 56789')).toHaveLength(1);
+    expect(searchInsuranceRequests([request], insurancePatients, '70000001')).toHaveLength(1);
+    expect(searchInsuranceRequests([request], insurancePatients, 'aseguradora sintetica')).toHaveLength(1);
+  });
+
+  it('accepts only the evidenced administrative status enum', () => {
+    expect(isInsuranceRequestStatus('PARTIALLY_APPROVED')).toBe(true);
+    expect(isInsuranceRequestStatus('PENDING')).toBe(false);
+  });
+
+  it('requires the insurance request to retain the quote and patient relationship', () => {
+    const quoteContext: Quote = { id: 'QUOTE-001', caseId: 'CASE-001', patientId: 'one', version: 1, status: 'DRAFT', summary: 'Contexto sintético', items: [], subtotal: 0, discountAmount: 0, total: 0, insurerAmount: 0, patientAmount: 0, immutable: false, createdAt: '2026-08-29T08:00:00.000Z' };
+    const insuredPatient = { ...patients[0], insurer: 'Aseguradora sintética' };
+    expect(hasValidInsuranceRequestContext(request, [quoteContext], [insuredPatient])).toBe(true);
+    expect(hasValidInsuranceRequestContext({ ...request, patientId: 'two' }, [quoteContext], [insuredPatient])).toBe(false);
+  });
+
+  it('appends an observed event without rewriting history or related records', () => {
+    const result = appendInsuranceEvent(request, [], event);
+    expect(result.request).toMatchObject({ status: 'INFO_REQUIRED', lastNote: event.note, updatedAt: event.date });
+    expect(result.events).toEqual([event]);
+    expect(request.status).toBe('SENT_TO_INSURER');
+    expect(() => appendInsuranceEvent(request, [event], event)).toThrow('ya existe');
+    expect(() => appendInsuranceEvent(request, [], { ...event, requestId: 'INS-OTHER' })).toThrow('no es válida');
   });
 });

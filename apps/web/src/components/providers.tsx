@@ -1,9 +1,9 @@
 'use client';
 
-import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Hospitalization, InsuranceEvent, InsuranceRequest, InsuranceRequestStatus, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
-import { calculateQuoteTotals, canEditQuote } from '@analiza/domain';
+import { appendInsuranceEvent, calculateQuoteTotals, canEditQuote, hasValidInsuranceRequestContext, isInsuranceRequestStatus } from '@analiza/domain';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
 import { can, type Permission, type Role } from '@/lib/permissions';
 import {
@@ -47,6 +47,9 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   correctClinicalDocument: (documentId: string, reason: string, summary: string, author: string) => void;
   addCatalogItem: (item: CatalogItem) => void;
   addPurchase: (purchase: Purchase) => void;
+  addInsuranceRequest: (request: InsuranceRequest) => boolean;
+  addInsuranceEvent: (event: InsuranceEvent) => boolean;
+  recordInsuranceObservation: (input: { quoteId: string; status: InsuranceRequestStatus; note: string; date: string }) => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -280,6 +283,60 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         purchases: [...current.purchases, purchase],
         auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
       })),
+      addInsuranceRequest: (request) => {
+        // Existing Supabase policies deliberately deny browser writes to this
+        // ledger. Until an approved append-only RPC exists, only the mock
+        // provider can persist an observation; never bypass RLS with upsert.
+        if (provider.mode !== 'mock' || !can('insurance:write') || !isInsuranceRequestStatus(request.status) || !request.lastNote.trim()) return false;
+        if (!hasValidInsuranceRequestContext(request, snapshot.quotes, snapshot.patients) || snapshot.insuranceRequests.some((candidate) => candidate.quoteId === request.quoteId)) return false;
+        commit((current) => ({
+          ...current,
+          insuranceRequests: [...current.insuranceRequests, request],
+          auditEntries: [audit('Preautorización registrada', request.id), ...current.auditEntries],
+        }));
+        return true;
+      },
+      addInsuranceEvent: (event) => {
+        if (provider.mode !== 'mock' || !can('insurance:write') || !isInsuranceRequestStatus(event.status) || !event.note.trim()) return false;
+        const request = snapshot.insuranceRequests.find((candidate) => candidate.id === event.requestId);
+        const quote = request && snapshot.quotes.find((candidate) => candidate.id === request.quoteId);
+        if (!request || !quote || quote.patientId !== request.patientId || snapshot.insuranceEvents.some((candidate) => candidate.id === event.id)) return false;
+        try {
+          const appended = appendInsuranceEvent(request, snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id), event);
+          commit((current) => ({
+            ...current,
+            insuranceRequests: current.insuranceRequests.map((candidate) => candidate.id === request.id ? appended.request : candidate),
+            insuranceEvents: [...current.insuranceEvents, event],
+            auditEntries: [audit('Actualización de seguro registrada', event.id), ...current.auditEntries],
+          }));
+          return true;
+        } catch { return false; }
+      },
+      recordInsuranceObservation: (input) => {
+        if (provider.mode !== 'mock' || !can('insurance:write') || !isInsuranceRequestStatus(input.status) || !input.note.trim()) return false;
+        const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
+        const patient = quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
+        const insurer = patient?.insurer ?? patient?.insurance?.insurer;
+        if (!quote || !patient || !insurer) return false;
+        const existing = snapshot.insuranceRequests.find((candidate) => candidate.quoteId === quote.id);
+        const request: InsuranceRequest = existing ?? {
+          id: crypto.randomUUID(), quoteId: quote.id, patientId: patient.id, insurer,
+          status: input.status, createdAt: input.date, updatedAt: input.date, lastNote: input.note.trim(),
+        };
+        const event: InsuranceEvent = { id: crypto.randomUUID(), requestId: request.id, status: input.status, date: input.date, note: input.note.trim() };
+        try {
+          const appended = appendInsuranceEvent(request, snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id), event);
+          commit((current) => ({
+            ...current,
+            insuranceRequests: existing
+              ? current.insuranceRequests.map((candidate) => candidate.id === request.id ? appended.request : candidate)
+              : [...current.insuranceRequests, appended.request],
+            insuranceEvents: [...current.insuranceEvents, event],
+            auditEntries: [audit(existing ? 'Actualización de seguro registrada' : 'Preautorización registrada', existing ? event.id : request.id), ...current.auditEntries],
+          }));
+          return true;
+        } catch { return false; }
+      },
     }),
     [can, commit, error, loading, provider.mode, snapshot],
   );

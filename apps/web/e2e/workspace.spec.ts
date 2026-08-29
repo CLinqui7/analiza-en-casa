@@ -531,9 +531,9 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
-  await expect(page.getByRole('status')).toContainText('quedó inmutable');
+  await expect(page.getByRole('status')).toContainText('enviada e inmutable');
   await page.reload();
-  await expect(page.getByText('Enviada e inmutable')).toBeVisible();
+  await expect(page.getByText('Enviada e inmutable', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Enviar enlace seguro' })).toHaveCount(0);
 });
 
@@ -720,9 +720,9 @@ test('patient portal requires a second factor and keeps invalid access generic',
 test('insurance search is normalized and unavailable to nurse role', async ({ page }) => {
   await login(page);
   await page.goto('/insurance');
-  await page.getByLabel('Buscar por paciente').fill('123456789');
+  await page.getByLabel('Buscar solicitudes').fill('123456789');
   await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
-  await page.getByLabel('Buscar por paciente').fill('no existe en QA');
+  await page.getByLabel('Buscar solicitudes').fill('no existe en QA');
   await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');

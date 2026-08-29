@@ -1,4 +1,5 @@
-import type { Hospitalization, InventoryMovement, NurseHourEntry, Patient, Payment, Quote, QuoteDiscount, QuoteItem, QuoteItemCategory, VitalReading } from '@analiza/contracts';
+import type { Hospitalization, InsuranceEvent, InsuranceRequest, InsuranceRequestStatus, InventoryMovement, NurseHourEntry, Patient, Payment, Quote, QuoteDiscount, QuoteItem, QuoteItemCategory, VitalReading } from '@analiza/contracts';
+import { insuranceEventSchema, insuranceRequestSchema, insuranceRequestStatusSchema } from '@analiza/contracts';
 
 export type DocumentRule = {
   label: string;
@@ -82,6 +83,64 @@ export function searchPatients(patients: readonly Patient[], query: string): Pat
     normalizeDocument(patient.documentId).includes(documentNeedle) ||
     (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
   );
+}
+
+/** Search the preauthorization surface without treating a quote status as an
+ * insurance decision. All visible identifiers use the same normalization as
+ * patient lookup. */
+export function searchInsuranceRequests(
+  requests: readonly InsuranceRequest[],
+  patients: readonly Patient[],
+  query: string,
+): InsuranceRequest[] {
+  const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  const phoneNeedle = normalizePhone(query);
+  if (!needle) return [...requests];
+  return requests.filter((request) => {
+    const patient = patients.find((candidate) => candidate.id === request.patientId);
+    return normalizeText(request.quoteId).includes(needle)
+      || normalizeDocument(request.quoteId).includes(documentNeedle)
+      || normalizeText(request.insurer).includes(needle)
+      || normalizeText(patient?.fullName ?? '').includes(needle)
+      || normalizeDocument(patient?.documentId ?? '').includes(documentNeedle)
+      || (phoneNeedle.length > 0 && normalizePhone(patient?.phone ?? '').includes(phoneNeedle));
+  });
+}
+
+export function isInsuranceRequestStatus(value: unknown): value is InsuranceRequestStatus {
+  return insuranceRequestStatusSchema.safeParse(value).success;
+}
+
+export function hasValidInsuranceRequestContext(
+  request: InsuranceRequest,
+  quotes: readonly Quote[],
+  patients: readonly Patient[],
+): boolean {
+  if (!insuranceRequestSchema.safeParse(request).success) return false;
+  const quote = quotes.find((candidate) => candidate.id === request.quoteId);
+  const patient = patients.find((candidate) => candidate.id === request.patientId);
+  const insurer = patient?.insurer ?? patient?.insurance?.insurer;
+  return Boolean(quote && patient && quote.patientId === patient.id && insurer && insurer === request.insurer);
+}
+
+/** Append a locally observed administrative fact. There is deliberately no
+ * state-machine check here: the client has not approved transition rules. */
+export function appendInsuranceEvent(
+  request: InsuranceRequest,
+  events: readonly InsuranceEvent[],
+  event: InsuranceEvent,
+): { request: InsuranceRequest; events: InsuranceEvent[] } {
+  if (event.requestId !== request.id || !insuranceEventSchema.safeParse(event).success) {
+    throw new Error('La actualización de seguro no es válida.');
+  }
+  if (events.some((candidate) => candidate.id === event.id)) {
+    throw new Error('La actualización de seguro ya existe.');
+  }
+  return {
+    request: { ...request, status: event.status, lastNote: event.note, updatedAt: event.date },
+    events: [...events, event],
+  };
 }
 
 /** Search the fields the legacy hospitalization register exposes, using the

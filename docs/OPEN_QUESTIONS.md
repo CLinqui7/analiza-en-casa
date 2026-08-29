@@ -82,6 +82,7 @@
 - `CH07-Q011`: definir fórmula, alcance y frecuencia del badge `67` de PIC Ejecución. Se conserva `—` para no inventar el indicador. Evidencia: CH07-E0005–CH07-E0006.
 - `CH07-Q012`: identificar la columna final cuyo encabezado sólo deja ver `Co...` en el material y definir su fuente. Evidencia: CH07-E0007.
 - `CH07-Q013`: confirmar si Preadmisión sigue vigente, depende de permiso/feature flag o es un estado transitorio de la interfaz anterior. Evidencia: CH07-E0002–CH07-E0003.
+- `CH07-REACT-TAXONOMY`: la tabla del video expone etiquetas como Pendiente, Pre aprobación, Poner en ejecución, Rechazar y No aplica, mientras el tablero legacy usa `SENT_TO_INSURER`, `INSURER_REVIEW`, `INFO_REQUIRED`, `PARTIALLY_APPROVED`, `APPROVED` y `REJECTED`. React conserva únicamente esta segunda lista para documentar hechos administrativos manuales; no las fusiona ni define una máquina de transición. Evidencia: CH07-E0007 y CH07-E0018.
 
 ## CH08 · decisiones pendientes trazadas
 
