@@ -10,14 +10,7 @@
       "control_type": "OTHER",
       "visible_label": "Iniciar sesión",
       "selector_or_testid": "[data-action-id=AUTH-LOGIN]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "roles_denied": [],
       "preconditions": "Sesión ausente",
       "positive_scenario": "Inicia una sesión sintética autorizada.",
@@ -26,9 +19,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:workspace-login"
-      ],
+      "playwright_test_ids": ["playwright:workspace-login"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -40,14 +31,7 @@
       "control_type": "OTHER",
       "visible_label": "Cerrar sesión",
       "selector_or_testid": "[data-action-id=AUTH-LOGOUT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "roles_denied": [],
       "preconditions": "Sesión activa",
       "positive_scenario": "Elimina la sesión y vuelve a login.",
@@ -68,14 +52,7 @@
       "control_type": "NAVIGATE",
       "visible_label": "Inicio",
       "selector_or_testid": "[data-action-id=DASHBOARD-NAVIGATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "roles_denied": [],
       "preconditions": "Sesión autorizada",
       "positive_scenario": "Abre el dashboard.",
@@ -84,9 +61,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:navigation-session-role-guard"
-      ],
+      "playwright_test_ids": ["playwright:navigation-session-role-guard"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -98,16 +73,8 @@
       "control_type": "NAVIGATE",
       "visible_label": "Nuevo paciente",
       "selector_or_testid": "[data-action-id=DASHBOARD-PATIENT-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Sesión con permiso patients:write",
       "positive_scenario": "Abre el formulario de creación de pacientes existente.",
       "negative_scenario": "Los roles sin permiso no ven la acción.",
@@ -115,9 +82,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:dashboard-operational-actions"
-      ],
+      "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -129,16 +94,8 @@
       "control_type": "NAVIGATE",
       "visible_label": "Nueva cotización",
       "selector_or_testid": "[data-action-id=DASHBOARD-QUOTE-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "FINANCE"],
+      "roles_denied": ["NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Sesión con permiso quotes:write",
       "positive_scenario": "Abre el formulario de creación de cotizaciones existente.",
       "negative_scenario": "Los roles sin permiso no ven la acción.",
@@ -146,9 +103,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:dashboard-operational-actions"
-      ],
+      "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -160,14 +115,7 @@
       "control_type": "NAVIGATE",
       "visible_label": "Ver",
       "selector_or_testid": "[data-action-id=DASHBOARD-HOSPITALIZATION-DETAIL]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "roles_denied": [],
       "preconditions": "Medición individual vinculada a hospitalización existente",
       "positive_scenario": "Abre la hospitalización vinculada sin clasificar la medición.",
@@ -176,9 +124,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:dashboard-operational-actions"
-      ],
+      "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -190,28 +136,16 @@
       "control_type": "NAVIGATE",
       "visible_label": "Pacientes",
       "selector_or_testid": "[data-action-id=PATIENT-NAVIGATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Sesión autorizada",
       "positive_scenario": "Abre la lista de pacientes.",
       "negative_scenario": "INVENTORY recibe acceso denegado.",
       "persistence_required": false,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-NAVIGATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-NAVIGATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -223,28 +157,16 @@
       "control_type": "NAVIGATE",
       "visible_label": "Detalle del paciente",
       "selector_or_testid": "[data-action-id=PATIENT-DETAIL-NAVIGATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Paciente visible en el listado",
       "positive_scenario": "Abre el detalle administrativo del paciente seleccionado.",
       "negative_scenario": "INVENTORY no puede acceder a la ruta de pacientes.",
       "persistence_required": false,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EDIT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-detail-complete-edit"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EDIT"],
+      "playwright_test_ids": ["playwright:patient-detail-complete-edit"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -256,31 +178,17 @@
       "control_type": "CREATE",
       "visible_label": "Agregar paciente",
       "selector_or_testid": "[data-action-id=PATIENT-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Sesión con permiso de escritura",
       "positive_scenario": "Crea un paciente sintético completo y se conserva tras recargar.",
       "negative_scenario": "Documento duplicado, campos obligatorios y correo inválido se rechazan.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-CREATE"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
-      "unit_test_ids": [
-        "domain:findDuplicatePatient"
-      ],
+      "selenium_test_ids": ["SEL-PAT-CREATE"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
+      "unit_test_ids": ["domain:findDuplicatePatient"],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
     },
@@ -291,28 +199,16 @@
       "control_type": "OTHER",
       "visible_label": "Tipo de documento",
       "selector_or_testid": "[data-action-id=PATIENT-DOCUMENT-TYPE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario de paciente abierto",
       "positive_scenario": "Cambia entre DUI, PASAPORTE y OTRO; limpia solo el documento y sus errores.",
       "negative_scenario": "Conserva los demás datos válidos del formulario.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-DOCUMENT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-document-switch-validation"
-      ],
+      "selenium_test_ids": ["SEL-PAT-DOCUMENT"],
+      "playwright_test_ids": ["playwright:patient-document-switch-validation"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -324,28 +220,16 @@
       "control_type": "OTHER",
       "visible_label": "Tipo de paciente",
       "selector_or_testid": "[data-action-id=PATIENT-INSURANCE-TOGGLE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario de paciente abierto",
       "positive_scenario": "Muestra y guarda datos de seguro sintético para paciente asegurado.",
       "negative_scenario": "No inventa reglas de cobertura.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-INSURANCE"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
+      "selenium_test_ids": ["SEL-PAT-INSURANCE"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -357,28 +241,16 @@
       "control_type": "CREATE",
       "visible_label": "Agregar contacto",
       "selector_or_testid": "[data-action-id=PATIENT-CONTACT-ADD]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario de paciente abierto",
       "positive_scenario": "Añade un contacto editable antes de guardar.",
       "negative_scenario": "No crea un estado con múltiples contactos principales.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-CONTACTS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
+      "selenium_test_ids": ["SEL-PAT-CONTACTS"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -390,28 +262,16 @@
       "control_type": "OTHER",
       "visible_label": "Eliminar contacto",
       "selector_or_testid": "[data-action-id=PATIENT-CONTACT-REMOVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Contacto sin guardar presente",
       "positive_scenario": "Elimina el contacto antes de guardar.",
       "negative_scenario": "No modifica contactos ya persistidos hasta guardar el formulario.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-CONTACTS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
+      "selenium_test_ids": ["SEL-PAT-CONTACTS"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -423,28 +283,16 @@
       "control_type": "OTHER",
       "visible_label": "Definir principal",
       "selector_or_testid": "[data-action-id=PATIENT-CONTACT-PRIMARY]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Dos o más contactos sin guardar",
       "positive_scenario": "Marca un único contacto como principal.",
       "negative_scenario": "El formulario rechaza múltiples principales.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-CONTACTS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
+      "selenium_test_ids": ["SEL-PAT-CONTACTS"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -456,28 +304,16 @@
       "control_type": "OTHER",
       "visible_label": "Limpiar dirección",
       "selector_or_testid": "[data-action-id=PATIENT-ADDRESS-CLEAR]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario de paciente abierto",
       "positive_scenario": "Limpia localmente enlace, dirección, coordenadas y referencia.",
       "negative_scenario": "No consulta servicios externos ni finge geocodificación.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-ADDRESS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-registration-data"
-      ],
+      "selenium_test_ids": ["SEL-PAT-ADDRESS"],
+      "playwright_test_ids": ["playwright:patient-registration-data"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -489,25 +325,15 @@
       "control_type": "OTHER",
       "visible_label": "Consultar enlace",
       "selector_or_testid": "[data-action-id=PATIENT-ADDRESS-LOOKUP]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Enlace de ubicación disponible",
       "positive_scenario": "Informa que requiere una integración de mapas configurada y conserva el enlace.",
       "negative_scenario": "No realiza consultas externas inexistentes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-ADDRESS"
-      ],
+      "selenium_test_ids": ["SEL-PAT-ADDRESS"],
       "playwright_test_ids": [],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
@@ -520,28 +346,16 @@
       "control_type": "EDIT",
       "visible_label": "Editar paciente",
       "selector_or_testid": "[data-action-id=PATIENT-EDIT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente existente",
       "positive_scenario": "Abre el formulario completo compartido y conserva los cambios tras recargar.",
       "negative_scenario": "AUDITOR no puede editar.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EDIT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-detail-complete-edit"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EDIT"],
+      "playwright_test_ids": ["playwright:patient-detail-complete-edit"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -553,28 +367,16 @@
       "control_type": "EDIT",
       "visible_label": "Guardar cambios",
       "selector_or_testid": "[data-action-id=PATIENT-EDIT-SUBMIT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario completo válido",
       "positive_scenario": "Guarda datos generales, seguro, contactos y dirección.",
       "negative_scenario": "Rechaza documento de otro paciente.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EDIT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-detail-complete-edit"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EDIT"],
+      "playwright_test_ids": ["playwright:patient-detail-complete-edit"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -586,25 +388,15 @@
       "control_type": "OTHER",
       "visible_label": "Cancelar",
       "selector_or_testid": "[data-action-id=PATIENT-EDIT-CANCEL]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Edición abierta",
       "positive_scenario": "Cierra la edición sin guardar.",
       "negative_scenario": "No modifica datos persistidos.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EDIT"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EDIT"],
       "playwright_test_ids": [],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
@@ -617,28 +409,16 @@
       "control_type": "NAVIGATE",
       "visible_label": "Volver a pacientes",
       "selector_or_testid": "[data-action-id=PATIENT-BACK-TO-LIST]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Detalle de paciente visible",
       "positive_scenario": "Regresa al listado de pacientes.",
       "negative_scenario": "INVENTORY no puede acceder a la ruta de pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EDIT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-detail-complete-edit"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EDIT"],
+      "playwright_test_ids": ["playwright:patient-detail-complete-edit"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -650,28 +430,16 @@
       "control_type": "CREATE",
       "visible_label": "Importar CSV",
       "selector_or_testid": "[data-action-id=PATIENT-IMPORT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Sesión con patients:write",
       "positive_scenario": "Abre importación local CSV.",
       "negative_scenario": "Roles de solo lectura no tienen acceso.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-IMPORT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-import-export"
-      ],
+      "selenium_test_ids": ["SEL-PAT-IMPORT"],
+      "playwright_test_ids": ["playwright:patient-import-export"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -683,28 +451,16 @@
       "control_type": "OTHER",
       "visible_label": "Archivo CSV",
       "selector_or_testid": "[data-action-id=PATIENT-IMPORT-FILE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Importación abierta",
       "positive_scenario": "Lee CSV local y valida sus filas.",
       "negative_scenario": "Archivo vacío, estructura o filas inválidas producen error controlado.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-IMPORT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-import-export"
-      ],
+      "selenium_test_ids": ["SEL-PAT-IMPORT"],
+      "playwright_test_ids": ["playwright:patient-import-export"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -716,28 +472,16 @@
       "control_type": "OTHER",
       "visible_label": "Previsualización de importación",
       "selector_or_testid": "[data-action-id=PATIENT-IMPORT-PREVIEW]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "CSV válido seleccionado",
       "positive_scenario": "Muestra filas válidas antes de confirmar.",
       "negative_scenario": "No permite confirmar si existen errores.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-IMPORT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-import-export"
-      ],
+      "selenium_test_ids": ["SEL-PAT-IMPORT"],
+      "playwright_test_ids": ["playwright:patient-import-export"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -749,28 +493,16 @@
       "control_type": "CREATE",
       "visible_label": "Importar pacientes",
       "selector_or_testid": "[data-action-id=PATIENT-IMPORT-CONFIRM]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Preview sin errores y filas válidas",
       "positive_scenario": "Persiste las filas válidas mediante DataProvider.",
       "negative_scenario": "No importa cuando hay errores.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-IMPORT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-import-export"
-      ],
+      "selenium_test_ids": ["SEL-PAT-IMPORT"],
+      "playwright_test_ids": ["playwright:patient-import-export"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -782,25 +514,15 @@
       "control_type": "OTHER",
       "visible_label": "Cancelar",
       "selector_or_testid": "[data-action-id=PATIENT-IMPORT-CANCEL]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Importación abierta",
       "positive_scenario": "Descarta la preview local.",
       "negative_scenario": "No cambia pacientes persistidos.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-IMPORT"
-      ],
+      "selenium_test_ids": ["SEL-PAT-IMPORT"],
       "playwright_test_ids": [],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
@@ -813,31 +535,17 @@
       "control_type": "OTHER",
       "visible_label": "Exportar CSV",
       "selector_or_testid": "[data-action-id=PATIENT-EXPORT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Listado de pacientes",
       "positive_scenario": "Descarga CSV UTF-8 del tab y filtro actuales.",
       "negative_scenario": "No exporta registros que no coinciden con el filtro.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-EXPORT"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-import-export"
-      ],
-      "unit_test_ids": [
-        "domain:toCsv"
-      ],
+      "selenium_test_ids": ["SEL-PAT-EXPORT"],
+      "playwright_test_ids": ["playwright:patient-import-export"],
+      "unit_test_ids": ["domain:toCsv"],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
     },
@@ -848,31 +556,17 @@
       "control_type": "SEARCH",
       "visible_label": "Buscar paciente",
       "selector_or_testid": "[data-action-id=PATIENT-SEARCH]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Encuentra por nombre, documento o teléfono normalizados.",
       "negative_scenario": "Sin resultados y limpiar búsqueda son visibles.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-SEARCH"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
-      "unit_test_ids": [
-        "domain:searchPatients"
-      ],
+      "selenium_test_ids": ["SEL-PAT-SEARCH"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
+      "unit_test_ids": ["domain:searchPatients"],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
     },
@@ -883,28 +577,16 @@
       "control_type": "SEARCH",
       "visible_label": "Limpiar búsqueda",
       "selector_or_testid": "[data-action-id=PATIENT-SEARCH-CLEAR]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Búsqueda aplicada",
       "positive_scenario": "Restaura el listado de la pestaña actual.",
       "negative_scenario": "No modifica pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-SEARCH"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-SEARCH"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -916,28 +598,16 @@
       "control_type": "OTHER",
       "visible_label": "Activos",
       "selector_or_testid": "[data-action-id=PATIENT-TAB-ACTIVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Muestra solo pacientes ACTIVE y reinicia la página.",
       "negative_scenario": "INVENTORY no puede abrir la ruta.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -949,28 +619,16 @@
       "control_type": "OTHER",
       "visible_label": "Inactivos",
       "selector_or_testid": "[data-action-id=PATIENT-TAB-INACTIVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Muestra solo pacientes INACTIVE y reinicia la página.",
       "negative_scenario": "INVENTORY no puede abrir la ruta.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -982,28 +640,16 @@
       "control_type": "OTHER",
       "visible_label": "Ordenar por paciente",
       "selector_or_testid": "[data-action-id=PATIENT-SORT-NAME]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Alterna orden ascendente y descendente por nombre.",
       "negative_scenario": "No cambia el estado de pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1015,28 +661,16 @@
       "control_type": "OTHER",
       "visible_label": "Ordenar por documento",
       "selector_or_testid": "[data-action-id=PATIENT-SORT-DOCUMENT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Alterna orden ascendente y descendente por documento.",
       "negative_scenario": "No cambia el estado de pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1048,28 +682,16 @@
       "control_type": "OTHER",
       "visible_label": "Mostrar registros",
       "selector_or_testid": "[data-action-id=PATIENT-PAGE-SIZE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Lista cargada",
       "positive_scenario": "Cambia el tamaño de página y vuelve a la primera.",
       "negative_scenario": "No modifica pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1081,28 +703,16 @@
       "control_type": "OTHER",
       "visible_label": "Página de pacientes",
       "selector_or_testid": "[data-action-id=PATIENT-PAGINATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Más de una página de resultados",
       "positive_scenario": "Navega a la página seleccionada.",
       "negative_scenario": "No modifica pacientes.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1114,28 +724,16 @@
       "control_type": "OTHER",
       "visible_label": "Anterior",
       "selector_or_testid": "[data-action-id=PATIENT-PAGE-PREVIOUS]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Página posterior a la primera",
       "positive_scenario": "Muestra la página anterior.",
       "negative_scenario": "Se deshabilita en la primera página.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1147,28 +745,16 @@
       "control_type": "OTHER",
       "visible_label": "Siguiente",
       "selector_or_testid": "[data-action-id=PATIENT-PAGE-NEXT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
       "preconditions": "Página anterior a la última",
       "positive_scenario": "Muestra la página siguiente.",
       "negative_scenario": "Se deshabilita en la última página.",
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-PAGINATION"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-PAGINATION"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1180,28 +766,16 @@
       "control_type": "STATE_TRANSITION",
       "visible_label": "Inactivar",
       "selector_or_testid": "[data-action-id=PATIENT-INACTIVATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente ACTIVE y permiso patients:write",
       "positive_scenario": "Cambia el paciente a INACTIVE y se conserva tras recargar.",
       "negative_scenario": "AUDITOR no recibe el control y INVENTORY no accede a la ruta.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-STATUS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-STATUS"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1213,28 +787,16 @@
       "control_type": "STATE_TRANSITION",
       "visible_label": "Reactivar",
       "selector_or_testid": "[data-action-id=PATIENT-REACTIVATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente INACTIVE y permiso patients:write",
       "positive_scenario": "Cambia el paciente a ACTIVE y se conserva tras recargar.",
       "negative_scenario": "AUDITOR no recibe el control y INVENTORY no accede a la ruta.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [
-        "SEL-PAT-STATUS"
-      ],
-      "playwright_test_ids": [
-        "playwright:patient-list-interactions"
-      ],
+      "selenium_test_ids": ["SEL-PAT-STATUS"],
+      "playwright_test_ids": ["playwright:patient-list-interactions"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1246,119 +808,397 @@
       "control_type": "CREATE",
       "visible_label": "Nueva hospitalización",
       "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente existente",
       "positive_scenario": "Crea una hospitalización sintética persistente.",
       "negative_scenario": "Campos requeridos inválidos no se guardan.",
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:hospitalization-route-parity"
-      ],
+      "selenium_test_ids": ["SEL-HOSP-CREATE"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-CREATE-SUBMIT",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CREATE", "visible_label": "Guardar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-SUBMIT]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de nueva hospitalización abierto", "positive_scenario": "Valida y persiste el registro sintético.", "negative_scenario": "No guarda sin paciente.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "CREATE",
+      "visible_label": "Guardar hospitalización",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-SUBMIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Formulario de nueva hospitalización abierto",
+      "positive_scenario": "Valida y persiste el registro sintético.",
+      "negative_scenario": "No guarda sin paciente.",
+      "persistence_required": true,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-CREATE"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-CREATE-CANCEL",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CANCEL", "visible_label": "Cancelar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-CANCEL]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de nueva hospitalización abierto", "positive_scenario": "Cierra el formulario sin persistir.", "negative_scenario": "No cambia el listado.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "CANCEL",
+      "visible_label": "Cancelar",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-CANCEL]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Formulario de nueva hospitalización abierto",
+      "positive_scenario": "Cierra el formulario sin persistir.",
+      "negative_scenario": "No cambia el listado.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-CREATE"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-SEARCH",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "SEARCH", "visible_label": "Buscar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por nombre, documento o identificador normalizado.", "negative_scenario": "Muestra Sin resultados cuando no hay coincidencia.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": ["vitest:search-hospitalizations"], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "SEARCH",
+      "visible_label": "Buscar hospitalización",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Ruta de hospitalizaciones autorizada",
+      "positive_scenario": "Filtra por nombre, documento o identificador normalizado.",
+      "negative_scenario": "Muestra Sin resultados cuando no hay coincidencia.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-SEARCH"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": ["vitest:search-hospitalizations"],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-SEARCH-CLEAR",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "RESET", "visible_label": "Limpiar búsqueda", "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH-CLEAR]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Búsqueda activa", "positive_scenario": "Restablece todos los resultados de búsqueda.", "negative_scenario": "Permanece inactivo sin consulta.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "RESET",
+      "visible_label": "Limpiar búsqueda",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH-CLEAR]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Búsqueda activa",
+      "positive_scenario": "Restablece todos los resultados de búsqueda.",
+      "negative_scenario": "Permanece inactivo sin consulta.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-SEARCH"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-FILTER-STATE",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Estado administrativo", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-STATE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra ACTIVE, PENDING_CLOSE o CLOSED sin transicionar estados.", "negative_scenario": "Sin coincidencias muestra estado vacío.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "FILTER",
+      "visible_label": "Estado administrativo",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-STATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Ruta de hospitalizaciones autorizada",
+      "positive_scenario": "Filtra ACTIVE, PENDING_CLOSE o CLOSED sin transicionar estados.",
+      "negative_scenario": "Sin coincidencias muestra estado vacío.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-FILTERS"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-FILTER-START-DATE",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Fecha de inicio", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-START-DATE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por fecha de ingreso exacta.", "negative_scenario": "Sin fecha muestra todos los resultados.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "FILTER",
+      "visible_label": "Fecha de inicio",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-START-DATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Ruta de hospitalizaciones autorizada",
+      "positive_scenario": "Filtra por fecha de ingreso exacta.",
+      "negative_scenario": "Sin fecha muestra todos los resultados.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-FILTERS"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-FILTER-ACCOUNT-TYPE",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Tipo de cuenta", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-ACCOUNT-TYPE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por tipo de cuenta presente en el listado.", "negative_scenario": "Sin valor muestra todos los resultados.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "FILTER",
+      "visible_label": "Tipo de cuenta",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-ACCOUNT-TYPE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Ruta de hospitalizaciones autorizada",
+      "positive_scenario": "Filtra por tipo de cuenta presente en el listado.",
+      "negative_scenario": "Sin valor muestra todos los resultados.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-FILTERS"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-FILTER-RESET",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "RESET", "visible_label": "Restablecer filtros", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-RESET]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Filtros activos", "positive_scenario": "Elimina todos los filtros del listado.", "negative_scenario": "No altera datos persistidos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "RESET",
+      "visible_label": "Restablecer filtros",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-RESET]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Filtros activos",
+      "positive_scenario": "Elimina todos los filtros del listado.",
+      "negative_scenario": "No altera datos persistidos.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-FILTERS"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-DETAIL-NAVIGATE",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "NAVIGATE", "visible_label": "Ver", "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-NAVIGATE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Hospitalización existente", "positive_scenario": "Abre el detalle de hospitalización.", "negative_scenario": "Un id inexistente muestra un estado explícito.", "persistence_required": false, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "NAVIGATE",
+      "visible_label": "Ver",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-NAVIGATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Hospitalización existente",
+      "positive_scenario": "Abre el detalle de hospitalización.",
+      "negative_scenario": "Un id inexistente muestra un estado explícito.",
+      "persistence_required": false,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-DETAIL"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-BACK-TO-LIST",
-      "module": "Hospitalizaciones", "route": "/hospitalizations/:id", "control_type": "NAVIGATE", "visible_label": "Volver al listado", "selector_or_testid": "[data-action-id=HOSPITALIZATION-BACK-TO-LIST]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Detalle de hospitalización abierto", "positive_scenario": "Vuelve al listado.", "negative_scenario": "No modifica el registro.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations/:id",
+      "control_type": "NAVIGATE",
+      "visible_label": "Volver al listado",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-BACK-TO-LIST]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Detalle de hospitalización abierto",
+      "positive_scenario": "Vuelve al listado.",
+      "negative_scenario": "No modifica el registro.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-DETAIL"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-EDIT",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "EDIT", "visible_label": "Editar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Hospitalización existente", "positive_scenario": "Abre valores persistidos para edición.", "negative_scenario": "Roles sin cases:write no reciben el control.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "EDIT",
+      "visible_label": "Editar",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Hospitalización existente",
+      "positive_scenario": "Abre valores persistidos para edición.",
+      "negative_scenario": "Roles sin cases:write no reciben el control.",
+      "persistence_required": true,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-EDIT"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-EDIT-SUBMIT",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "EDIT", "visible_label": "Guardar cambios", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-SUBMIT]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de edición abierto", "positive_scenario": "Actualiza y audita la hospitalización persistida.", "negative_scenario": "No persiste si se cancela.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "EDIT",
+      "visible_label": "Guardar cambios",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-SUBMIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Formulario de edición abierto",
+      "positive_scenario": "Actualiza y audita la hospitalización persistida.",
+      "negative_scenario": "No persiste si se cancela.",
+      "persistence_required": true,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-EDIT"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-EDIT-CANCEL",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CANCEL", "visible_label": "Cancelar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-CANCEL]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de edición abierto", "positive_scenario": "Descarta cambios locales.", "negative_scenario": "No modifica datos persistidos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "CANCEL",
+      "visible_label": "Cancelar",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-CANCEL]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Formulario de edición abierto",
+      "positive_scenario": "Descarta cambios locales.",
+      "negative_scenario": "No modifica datos persistidos.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-EDIT"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-NAVIGATE",
-      "module": "Hospitalizaciones", "route": "*", "control_type": "NAVIGATE", "visible_label": "Hospitalizaciones", "selector_or_testid": "[data-action-id=HOSPITALIZATION-NAVIGATE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Sesión autorizada", "positive_scenario": "Abre el listado de hospitalizaciones.", "negative_scenario": "INVENTORY no recibe navegación ni acceso directo.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "*",
+      "control_type": "NAVIGATE",
+      "visible_label": "Hospitalizaciones",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-NAVIGATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Sesión autorizada",
+      "positive_scenario": "Abre el listado de hospitalizaciones.",
+      "negative_scenario": "INVENTORY no recibe navegación ni acceso directo.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-NAVIGATION"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-DETAIL-EDIT",
-      "module": "Hospitalizaciones", "route": "/hospitalizations/:id", "control_type": "EDIT", "visible_label": "Editar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-EDIT]",
-      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Detalle de hospitalización existente", "positive_scenario": "Abre la edición con los valores del detalle.", "negative_scenario": "Roles sin cases:write no reciben el control.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations/:id",
+      "control_type": "EDIT",
+      "visible_label": "Editar hospitalización",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-EDIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+      "preconditions": "Detalle de hospitalización existente",
+      "positive_scenario": "Abre la edición con los valores del detalle.",
+      "negative_scenario": "Roles sin cases:write no reciben el control.",
+      "persistence_required": true,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-EDIT"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-PAGE-SIZE",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Registros por página", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-SIZE]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Más de una hospitalización visible", "positive_scenario": "Cambia el tamaño de página entre 5, 10, 25 y 50.", "negative_scenario": "No altera los datos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "PAGINATE",
+      "visible_label": "Registros por página",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-SIZE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Más de una hospitalización visible",
+      "positive_scenario": "Cambia el tamaño de página entre 5, 10, 25 y 50.",
+      "negative_scenario": "No altera los datos.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-PAGINATION"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-PAGE-PREV",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Anterior", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-PREV]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Página posterior a la primera", "positive_scenario": "Muestra la página previa.", "negative_scenario": "Permanece deshabilitado en la primera página.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "PAGINATE",
+      "visible_label": "Anterior",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-PREV]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Página posterior a la primera",
+      "positive_scenario": "Muestra la página previa.",
+      "negative_scenario": "Permanece deshabilitado en la primera página.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-PAGINATION"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "HOSPITALIZATION-PAGE-NEXT",
-      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Siguiente", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-NEXT]",
-      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Página previa a la última", "positive_scenario": "Muestra la página siguiente.", "negative_scenario": "Permanece deshabilitado en la última página.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+      "module": "Hospitalizaciones",
+      "route": "/hospitalizations",
+      "control_type": "PAGINATE",
+      "visible_label": "Siguiente",
+      "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-NEXT]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
+      "roles_denied": ["INVENTORY"],
+      "preconditions": "Página previa a la última",
+      "positive_scenario": "Muestra la página siguiente.",
+      "negative_scenario": "Permanece deshabilitado en la última página.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-HOSP-PAGINATION"],
+      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "Selenium pendiente."
     },
     {
       "action_id": "QUOTE-CREATE",
@@ -1367,16 +1207,8 @@
       "control_type": "CREATE",
       "visible_label": "Nueva cotización",
       "selector_or_testid": "[data-action-id=QUOTE-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "FINANCE"],
+      "roles_denied": ["NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Hospitalización existente",
       "positive_scenario": "Crea un borrador persistente.",
       "negative_scenario": "Datos inválidos no se guardan.",
@@ -1384,9 +1216,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:quote-immutable-send"
-      ],
+      "playwright_test_ids": ["playwright:quote-immutable-send"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium and role evidence pending; price calculations await client rules."
@@ -1398,16 +1228,8 @@
       "control_type": "STATE_TRANSITION",
       "visible_label": "Enviar cotización",
       "selector_or_testid": "[data-action-id=QUOTE-SEND]",
-      "roles_allowed": [
-        "ADMIN",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Borrador válido",
       "positive_scenario": "Envía una versión y la vuelve inmutable.",
       "negative_scenario": "No permite mutar una versión enviada.",
@@ -1415,9 +1237,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:quote-immutable-send"
-      ],
+      "playwright_test_ids": ["playwright:quote-immutable-send"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium and role evidence pending."
@@ -1429,16 +1249,8 @@
       "control_type": "NAVIGATE",
       "visible_label": "Seguros",
       "selector_or_testid": "[data-action-id=INSURANCE-NAVIGATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "FINANCE", "AUDITOR"],
+      "roles_denied": ["NURSE", "INVENTORY"],
       "preconditions": "Sesión autorizada",
       "positive_scenario": "Abre seguros.",
       "negative_scenario": "Rol denegado no ve datos.",
@@ -1446,9 +1258,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:insurance-search-nurse-denied"
-      ],
+      "playwright_test_ids": ["playwright:insurance-search-nurse-denied"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -1460,16 +1270,8 @@
       "control_type": "SEARCH",
       "visible_label": "Buscar por paciente",
       "selector_or_testid": "[data-action-id=INSURANCE-SEARCH]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "FINANCE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "FINANCE", "AUDITOR"],
+      "roles_denied": ["NURSE", "INVENTORY"],
       "preconditions": "Seguros cargados",
       "positive_scenario": "Busca por nombre, documento y teléfono.",
       "negative_scenario": "Sin coincidencia y limpiar se muestran.",
@@ -1477,12 +1279,8 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:insurance-search-nurse-denied"
-      ],
-      "unit_test_ids": [
-        "domain:searchPatients"
-      ],
+      "playwright_test_ids": ["playwright:insurance-search-nurse-denied"],
+      "unit_test_ids": ["domain:searchPatients"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
     },
@@ -1493,16 +1291,8 @@
       "control_type": "APPROVE",
       "visible_label": "Aprobar preautorización",
       "selector_or_testid": "[data-action-id=INSURANCE-APPROVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Preautorización pendiente",
       "positive_scenario": "Registra transición auditada.",
       "negative_scenario": "AUDITOR no puede aprobar.",
@@ -1522,16 +1312,8 @@
       "control_type": "CREATE",
       "visible_label": "Aplicar pago",
       "selector_or_testid": "[data-action-id=PAYMENT-APPLY]",
-      "roles_allowed": [
-        "ADMIN",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Cotización enviada y reglas financieras externas no requeridas",
       "positive_scenario": "Registra un pago sintético idempotente con referencia y auditoría.",
       "negative_scenario": "Una clave repetida no duplica el pago.",
@@ -1539,9 +1321,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:payment-idempotent-void"
-      ],
+      "playwright_test_ids": ["playwright:payment-idempotent-void"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1553,16 +1333,8 @@
       "control_type": "VOID",
       "visible_label": "Reversar pago",
       "selector_or_testid": "[data-action-id=PAYMENT-VOID]",
-      "roles_allowed": [
-        "ADMIN",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Pago aplicado",
       "positive_scenario": "Conserva el pago original y registra una reversión con motivo y auditoría.",
       "negative_scenario": "Sin motivo no cambia el estado.",
@@ -1570,9 +1342,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:payment-idempotent-void"
-      ],
+      "playwright_test_ids": ["playwright:payment-idempotent-void"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1584,16 +1354,8 @@
       "control_type": "SEARCH",
       "visible_label": "Buscar reporte",
       "selector_or_testid": "[data-action-id=HEALTH-REPORT-SEARCH]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "AUDITOR"],
+      "roles_denied": ["INVENTORY", "FINANCE"],
       "preconditions": "Reportes cargados",
       "positive_scenario": "Busca por nombre, documento y teléfono.",
       "negative_scenario": "Sin resultado muestra un estado vacío y limpiar restaura las coincidencias.",
@@ -1601,12 +1363,8 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:health-report-search"
-      ],
-      "unit_test_ids": [
-        "domain:searchPatients"
-      ],
+      "playwright_test_ids": ["playwright:health-report-search"],
+      "unit_test_ids": ["domain:searchPatients"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
     },
@@ -1617,16 +1375,8 @@
       "control_type": "SEARCH",
       "visible_label": "Buscar orden",
       "selector_or_testid": "[data-action-id=MEDICAL-ORDER-SEARCH]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "AUDITOR"],
+      "roles_denied": ["INVENTORY", "FINANCE"],
       "preconditions": "Pacientes cargados",
       "positive_scenario": "Busca por nombre, documento y teléfono.",
       "negative_scenario": "Sin resultado se muestra de forma explícita.",
@@ -1634,12 +1384,8 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-action-search-role-guard"
-      ],
-      "unit_test_ids": [
-        "domain:searchPatients"
-      ],
+      "playwright_test_ids": ["playwright:clinical-action-search-role-guard"],
+      "unit_test_ids": ["domain:searchPatients"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -1650,16 +1396,8 @@
       "control_type": "CREATE",
       "visible_label": "Nueva orden",
       "selector_or_testid": "[data-action-id=MEDICAL-ORDER-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente y caso existentes",
       "positive_scenario": "Crea una acción operativa local no clínica.",
       "negative_scenario": "Campos requeridos invalidan envío y NURSE no puede crear.",
@@ -1667,9 +1405,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-action-search-role-guard"
-      ],
+      "playwright_test_ids": ["playwright:clinical-action-search-role-guard"],
       "unit_test_ids": [],
       "status": "PARTIAL",
       "blocker": "La acción se conserva solo en estado del componente; falta persistencia auditada y el flujo legado."
@@ -1681,16 +1417,8 @@
       "control_type": "CREATE",
       "visible_label": "Nueva tarjeta",
       "selector_or_testid": "[data-action-id=MEDICATION-CARD-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente y caso existentes",
       "positive_scenario": "Crea una tarjeta persistente.",
       "negative_scenario": "Validación impide crear un registro incompleto.",
@@ -1710,16 +1438,8 @@
       "control_type": "CREATE",
       "visible_label": "Nuevo plan de cuidado",
       "selector_or_testid": "[data-action-id=CARE-PLAN-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Hospitalización existente",
       "positive_scenario": "Crea un borrador sintético persistente.",
       "negative_scenario": "AUDITOR no puede crear.",
@@ -1727,9 +1447,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-document-immutability"
-      ],
+      "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1741,16 +1459,8 @@
       "control_type": "CREATE",
       "visible_label": "Nueva evolución",
       "selector_or_testid": "[data-action-id=EVOLUTION-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Hospitalización existente",
       "positive_scenario": "Crea un borrador sintético persistente.",
       "negative_scenario": "AUDITOR no puede crear.",
@@ -1758,9 +1468,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-document-immutability"
-      ],
+      "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1772,16 +1480,8 @@
       "control_type": "SIGN",
       "visible_label": "Firmar",
       "selector_or_testid": "[data-action-id=CLINICAL-DOCUMENT-SIGN]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Documento en borrador existente",
       "positive_scenario": "Firma y bloquea una versión.",
       "negative_scenario": "La edición directa posterior es denegada.",
@@ -1789,9 +1489,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-document-immutability"
-      ],
+      "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1803,16 +1501,8 @@
       "control_type": "CORRECT",
       "visible_label": "Corregir documento",
       "selector_or_testid": "[data-action-id=CLINICAL-DOCUMENT-CORRECT]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR"
-      ],
-      "roles_denied": [
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR"],
+      "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Documento firmado existente",
       "positive_scenario": "Crea corrección autorizada con motivo y auditoría.",
       "negative_scenario": "No sobrescribe la versión firmada.",
@@ -1820,9 +1510,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:clinical-document-immutability"
-      ],
+      "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1834,16 +1522,8 @@
       "control_type": "CREATE",
       "visible_label": "Registrar signos vitales",
       "selector_or_testid": "[data-action-id=VITALS-RECORD]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
+      "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Paciente y caso existentes",
       "positive_scenario": "Guarda FC, FR, SpO2, sistólica, diastólica, temperatura, dolor o glicemia con metadata.",
       "negative_scenario": "No asigna umbrales clínicos inventados.",
@@ -1851,12 +1531,8 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:patient-vital"
-      ],
-      "unit_test_ids": [
-        "domain:measuredVitalMetrics"
-      ],
+      "playwright_test_ids": ["playwright:patient-vital"],
+      "unit_test_ids": ["domain:measuredVitalMetrics"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -1867,16 +1543,8 @@
       "control_type": "CREATE",
       "visible_label": "Registrar recurso",
       "selector_or_testid": "[data-action-id=NURSING-RESOURCE-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "NURSE"],
+      "roles_denied": ["DOCTOR", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Sesión con permiso de enfermería",
       "positive_scenario": "Registra recurso con número de junta y persiste.",
       "negative_scenario": "Roles sin permiso no pueden crear.",
@@ -1884,9 +1552,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:nursing-resource-persistence-role-guard"
-      ],
+      "playwright_test_ids": ["playwright:nursing-resource-persistence-role-guard"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -1898,16 +1564,8 @@
       "control_type": "CREATE",
       "visible_label": "Nuevo turno",
       "selector_or_testid": "[data-action-id=AGENDA-SHIFT-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "NURSE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "NURSE"],
+      "roles_denied": ["DOCTOR", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Caso y recurso existentes",
       "positive_scenario": "Crea turno persistente.",
       "negative_scenario": "Horario inválido no se crea.",
@@ -1915,12 +1573,8 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:agenda-shift-persistence-validation"
-      ],
-      "unit_test_ids": [
-        "domain:validateShift"
-      ],
+      "playwright_test_ids": ["playwright:agenda-shift-persistence-validation"],
+      "unit_test_ids": ["domain:validateShift"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -1931,16 +1585,8 @@
       "control_type": "FILTER",
       "visible_label": "Filtrar horas",
       "selector_or_testid": "[data-action-id=NURSE-HOURS-FILTER-FROM]",
-      "roles_allowed": [
-        "ADMIN",
-        "NURSE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "INVENTORY",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "NURSE", "AUDITOR"],
+      "roles_denied": ["DOCTOR", "INVENTORY", "FINANCE"],
       "preconditions": "Turnos cargados",
       "positive_scenario": "Filtra por rango, mes, enfermera y estado.",
       "negative_scenario": "Reset restaura la vista.",
@@ -1948,12 +1594,8 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:nurse-hours-filter-export"
-      ],
-      "unit_test_ids": [
-        "domain:nurseHoursTotal"
-      ],
+      "playwright_test_ids": ["playwright:nurse-hours-filter-export"],
+      "unit_test_ids": ["domain:nurseHoursTotal"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -1964,16 +1606,8 @@
       "control_type": "EXPORT",
       "visible_label": "Exportar CSV",
       "selector_or_testid": "[data-action-id=NURSE-HOURS-EXPORT]",
-      "roles_allowed": [
-        "ADMIN",
-        "NURSE",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "INVENTORY",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "NURSE", "AUDITOR"],
+      "roles_denied": ["DOCTOR", "INVENTORY", "FINANCE"],
       "preconditions": "Reporte filtrado",
       "positive_scenario": "Descarga CSV de turnos y horas derivadas.",
       "negative_scenario": "No etiqueta horas programadas como trabajadas.",
@@ -1981,12 +1615,8 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:nurse-hours-filter-export"
-      ],
-      "unit_test_ids": [
-        "domain:toCsv"
-      ],
+      "playwright_test_ids": ["playwright:nurse-hours-filter-export"],
+      "unit_test_ids": ["domain:toCsv"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -1997,16 +1627,8 @@
       "control_type": "CREATE",
       "visible_label": "Nueva compra",
       "selector_or_testid": "[data-action-id=PURCHASE-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "INVENTORY",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "INVENTORY", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "AUDITOR"],
       "preconditions": "Ítem de catálogo existente",
       "positive_scenario": "Crea compra sintética en borrador y persiste.",
       "negative_scenario": "Campos inválidos no se guardan.",
@@ -2014,9 +1636,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:purchase-draft-persistence"
-      ],
+      "playwright_test_ids": ["playwright:purchase-draft-persistence"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -2028,16 +1648,8 @@
       "control_type": "CREATE",
       "visible_label": "Registrar movimiento",
       "selector_or_testid": "[data-action-id=INVENTORY-MOVEMENT-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "INVENTORY"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "INVENTORY"],
+      "roles_denied": ["DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "preconditions": "Ítem y bodega sintéticos existentes",
       "positive_scenario": "Crea movimiento auditado persistente.",
       "negative_scenario": "No permite saldo negativo.",
@@ -2045,12 +1657,8 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:inventory-movement-safety"
-      ],
-      "unit_test_ids": [
-        "domain:canRecordMovement"
-      ],
+      "playwright_test_ids": ["playwright:inventory-movement-safety"],
+      "unit_test_ids": ["domain:canRecordMovement"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -2061,16 +1669,8 @@
       "control_type": "FILTER",
       "visible_label": "Filtrar Kárdex",
       "selector_or_testid": "[data-action-id=KARDEX-FILTER]",
-      "roles_allowed": [
-        "ADMIN",
-        "INVENTORY",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "INVENTORY", "AUDITOR"],
+      "roles_denied": ["DOCTOR", "NURSE", "FINANCE"],
       "preconditions": "Movimientos cargados",
       "positive_scenario": "Filtra por item, fechas, bodega, tipo y referencia.",
       "negative_scenario": "Filtro vacío conserva saldo cronológico reproducible.",
@@ -2079,9 +1679,7 @@
       "selenium_required": true,
       "selenium_test_ids": [],
       "playwright_test_ids": [],
-      "unit_test_ids": [
-        "domain:deriveKardex"
-      ],
+      "unit_test_ids": ["domain:deriveKardex"],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
     },
@@ -2092,16 +1690,8 @@
       "control_type": "APPROVE",
       "visible_label": "Aprobar cierre",
       "selector_or_testid": "[data-action-id=INVENTORY-CLOSURE-APPROVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "INVENTORY"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "INVENTORY"],
+      "roles_denied": ["DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "preconditions": "Cierre pendiente",
       "positive_scenario": "Aprueba cierre auditado.",
       "negative_scenario": "AUDITOR no puede aprobar.",
@@ -2121,16 +1711,8 @@
       "control_type": "CREATE",
       "visible_label": "Nuevo ítem",
       "selector_or_testid": "[data-action-id=CATALOG-CREATE]",
-      "roles_allowed": [
-        "ADMIN",
-        "INVENTORY"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "INVENTORY"],
+      "roles_denied": ["DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "preconditions": "Sesión autorizada",
       "positive_scenario": "Crea ítem sintético con SKU único y persiste.",
       "negative_scenario": "SKU duplicado se rechaza.",
@@ -2138,9 +1720,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:catalog-sku-persistence"
-      ],
+      "playwright_test_ids": ["playwright:catalog-sku-persistence"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia de todos los roles pendientes."
@@ -2152,16 +1732,8 @@
       "control_type": "APPROVE",
       "visible_label": "Aprobar descuento",
       "selector_or_testid": "[data-action-id=DISCOUNT-APPROVE]",
-      "roles_allowed": [
-        "ADMIN",
-        "FINANCE"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "AUDITOR"],
       "preconditions": "Solicitud pendiente",
       "positive_scenario": "Aprueba solicitud persistente y auditada.",
       "negative_scenario": "AUDITOR no puede aprobar.",
@@ -2181,16 +1753,8 @@
       "control_type": "EXPORT",
       "visible_label": "Exportar auditoría",
       "selector_or_testid": "[data-action-id=AUDIT-EXPORT]",
-      "roles_allowed": [
-        "ADMIN",
-        "AUDITOR"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE"
-      ],
+      "roles_allowed": ["ADMIN", "AUDITOR"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "FINANCE"],
       "preconditions": "Auditoría disponible",
       "positive_scenario": "Descarga auditoría sintética acotada al rol.",
       "negative_scenario": "Rol no permitido recibe denegación.",
@@ -2198,9 +1762,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:audit-export-role-guard"
-      ],
+      "playwright_test_ids": ["playwright:audit-export-role-guard"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y evidencia del rol AUDITOR pendientes."
@@ -2212,16 +1774,8 @@
       "control_type": "EDIT",
       "visible_label": "Guardar configuración",
       "selector_or_testid": "[data-action-id=SETTINGS-EDIT]",
-      "roles_allowed": [
-        "ADMIN"
-      ],
-      "roles_denied": [
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN"],
+      "roles_denied": ["DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "ADMIN autenticado",
       "positive_scenario": "Actualiza configuración segura persistente.",
       "negative_scenario": "No expone secretos ni deja configurar canal no aprobado.",
@@ -2241,14 +1795,7 @@
       "control_type": "SEARCH",
       "visible_label": "¿Qué necesitas hacer?",
       "selector_or_testid": "[data-action-id=HELP-SEARCH]",
-      "roles_allowed": [
-        "ADMIN",
-        "DOCTOR",
-        "NURSE",
-        "INVENTORY",
-        "FINANCE",
-        "AUDITOR"
-      ],
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
       "roles_denied": [],
       "preconditions": "Knowledge base local cargada",
       "positive_scenario": "Encuentra respuesta, pasos y enlace de módulo determinísticamente.",
@@ -2257,9 +1804,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:help-search-safe-empty"
-      ],
+      "playwright_test_ids": ["playwright:help-search-safe-empty"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -2280,9 +1825,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:portal-second-factor-generic-errors"
-      ],
+      "playwright_test_ids": ["playwright:portal-second-factor-generic-errors"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y entorno Supabase de integración pendientes."
@@ -2303,9 +1846,7 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:portal-second-factor-generic-errors"
-      ],
+      "playwright_test_ids": ["playwright:portal-second-factor-generic-errors"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium y entorno Supabase de integración pendientes."

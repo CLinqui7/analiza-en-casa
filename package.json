@@ -39,6 +39,8 @@
     "test:selenium": "py tests/selenium/smoke.py",
     "test:selenium:patients": "py tests/selenium/test_patients.py",
     "test:selenium:patients:all": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
+    "test:selenium:hospitalizations": "py tests/selenium/test_hospitalizations.py",
+    "test:selenium:hospitalizations:all": "py -m unittest discover -s tests/selenium -p test_hospitalizations.py -v",
     "qa": "node scripts/qa-check.mjs",
     "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",
@@ -56,6 +58,7 @@
     "qa:inventory": "node scripts/render-ui-action-inventory.mjs",
     "selenium:coverage": "node scripts/verify-selenium-coverage.mjs",
     "selenium:coverage:patients": "node scripts/verify-selenium-coverage.mjs --prefix PATIENT- --require-executed",
+    "selenium:coverage:hospitalizations": "node scripts/verify-selenium-hospitalization-coverage.mjs",
     "security:scan": "node scripts/security-scan.mjs"
   },
   "engines": {
