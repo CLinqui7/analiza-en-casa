@@ -339,13 +339,22 @@ test('patient list supports tabs, search, sorting, pagination, persisted status 
 test('patient detail edits persist after refresh', async ({ page }) => {
   await login(page);
   await page.goto('/patients');
-  await page.locator('[data-action-id="PATIENT-DETAIL-NAVIGATE"]').first().click();
+  await page.getByRole('button', { name: 'Agregar paciente' }).click();
+  const createDialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await createDialog.getByLabel('Tipo de documento').selectOption('OTHER');
+  await fillRequiredPatientData(createDialog, { documentId: 'PATIENT-PLAYWRIGHT-EDIT-001', fullName: 'Paciente Playwright Editable', phone: '7000-9001' });
+  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
+  await page.getByRole('link', { name: 'Paciente Playwright Editable' }).click();
   await page.getByRole('button', { name: 'Editar paciente' }).click();
-  await page.getByLabel('Teléfono de demo').fill('2222 3333');
+  await page.getByLabel('Teléfono celular').fill('2222 3333');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
   await page.reload();
-  await expect(page.getByText('2222 3333')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => {
+    const snapshot = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v2') ?? '{}');
+    return snapshot.patients?.find((patient: { documentId?: string }) => patient.documentId === 'PATIENT-PLAYWRIGHT-EDIT-001')?.phone;
+  })).toBe('2222 3333');
 });
 
 test('hospitalization creation persists after refresh', async ({ page }) => {
