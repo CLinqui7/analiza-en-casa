@@ -12,7 +12,7 @@
 # test-id: SEL-PAT-IMPORT
 # test-id: SEL-PAT-EXPORT
 from __future__ import annotations
-import os, subprocess, time, unittest
+import os, subprocess, tempfile, time, unittest
 from pathlib import Path
 from urllib.request import urlopen
 from urllib.error import URLError
@@ -37,11 +37,17 @@ class Patients(unittest.TestCase):
   for _ in range(60):
    if ready(): break
    time.sleep(1)
-  c.d=webdriver.Chrome(options=(lambda o:(o.add_argument('--headless=new'),o.add_argument('--window-size=1440,1000'),o)[2])(webdriver.ChromeOptions())); c.w=WebDriverWait(c.d,12)
+  c.temp_dir=tempfile.TemporaryDirectory(prefix='analiza-patients-selenium-')
+  c.fixture_dir=Path(c.temp_dir.name)/'fixtures'; c.fixture_dir.mkdir()
+  c.download_dir=Path(c.temp_dir.name)/'downloads'; c.download_dir.mkdir()
+  options=webdriver.ChromeOptions(); options.add_argument('--headless=new'); options.add_argument('--window-size=1440,1000')
+  options.add_experimental_option('prefs',{'download.default_directory':str(c.download_dir),'download.prompt_for_download':False,'download.directory_upgrade':True})
+  c.d=webdriver.Chrome(options=options); c.w=WebDriverWait(c.d,12)
  @classmethod
  def tearDownClass(c):
   c.d.quit()
   if SERVER: SERVER.terminate()
+  c.temp_dir.cleanup()
  def reset_mock_state(s):
   s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.assertTrue(s.d.current_url.startswith(BASE)); s.d.execute_script('localStorage.removeItem("analiza.en.casa.workspace.v2"); localStorage.removeItem("analiza.en.casa.mock-session.v1");'); s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Correo')]//input"))); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'input[type=password]'))); s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id=AUTH-LOGIN]'))); s.assertIn('/login',s.d.current_url)
  def login_as(s,email,password,expected_role):
@@ -58,6 +64,19 @@ class Patients(unittest.TestCase):
  def fill(s,label,value):
   f=s.field(label); f.clear(); f.send_keys(value)
  def pass_(s,x,test,t): record_pass(x,test,t,s.d.current_url)
+ def write_fixture(s,name,contents):
+  path=s.fixture_dir/name; path.write_text(contents,encoding='utf8'); return path
+ def open_import(s):
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
+  s.click('PATIENT-IMPORT'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-FILE"]')))
+ def upload_import(s,path): s.a('PATIENT-IMPORT-FILE').send_keys(str(path.resolve()))
+ def clear_downloads(s):
+  for path in s.download_dir.iterdir(): path.unlink()
+ def wait_download(s,name):
+  def complete(_):
+   target=s.download_dir/name
+   return target if target.exists() and not list(s.download_dir.glob('*.crdownload')) else False
+  return WebDriverWait(s.d,12).until(complete)
  def contact_field(s,index,field): return s.d.find_element(By.CSS_SELECTOR,f'input[name="contacts.{index}.{field}"]')
  def fill_contact(s,index,field,value):
   target=s.contact_field(index,field); target.clear(); target.send_keys(value)
@@ -199,9 +218,75 @@ class Patients(unittest.TestCase):
   t=time.time(); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('5'); page1=names(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); s.assertLessEqual(len(page1),5); s.assertGreater(len(pages),1); next_t=time.time(); s.click('PATIENT-PAGE-NEXT'); s.w.until(lambda _:names()!=page1); s.pass_('PATIENT-PAGE-NEXT','SEL-PAT-PAGINATION',next_t); paginate_t=time.time(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); pages[-1].click(); s.assertEqual(pages[-1].get_attribute('aria-current'),'page'); s.pass_('PATIENT-PAGINATE','SEL-PAT-PAGINATION',paginate_t); previous_t=time.time(); s.click('PATIENT-PAGE-PREVIOUS'); s.assertEqual(names(),page1); s.pass_('PATIENT-PAGE-PREVIOUS','SEL-PAT-PAGINATION',previous_t); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('10'); s.assertEqual(s.d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"][aria-current="page"]').text,'1'); s.pass_('PATIENT-PAGE-SIZE','SEL-PAT-PAGINATION',t)
  def test_status_transitions(s):
   s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); name=s.d.find_element(By.CSS_SELECTOR,'tbody tr td:first-child a').text; t=time.time(); s.click('PATIENT-INACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.click('PATIENT-TAB-INACTIVE'); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-INACTIVATE','SEL-PAT-STATUS',t); t=time.time(); s.click('PATIENT-REACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-REACTIVATE','SEL-PAT-STATUS',t)
- @unittest.skip('Known pending: PATIENT-IMPORT-*')
- def test_import(s): pass
- @unittest.skip('Future export group.')
- def test_export(s): pass
- @unittest.skip('Future mobile group.')
- def test_mobile(s): pass
+ def test_import(s):
+  s.prepare_authenticated_test()
+  valid=s.write_fixture('patients-valid.csv','document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-SEL-001,Importado,Selenium,OTHER,70001234,importado.selenium@example.test,Empresa Selenium,ACTIVE\n')
+  invalid_cases=(
+   ('patients-invalid-headers.csv','foo,bar\nuno,dos\n','Encabezados inválidos'),
+   ('patients-missing-document.csv','document,firstName,lastName,documentType\n,Paciente,SinDocumento,OTHER\n','Fila 2'),
+   ('patients-existing-duplicate.csv','document,firstName,lastName,documentType\nDEMO-003,Duplicado,Demo,OTHER\n','documento duplicado'),
+   ('patients-batch-duplicate.csv','document,firstName,lastName,documentType\nIMPORT-DUP-001,Uno,Duplicado,OTHER\nIMPORT-DUP-001,Dos,Duplicado,OTHER\n','documento duplicado'),
+   ('patients-not-csv.txt','contenido de texto','Seleccione un archivo CSV.'),
+  )
+  for name,contents,error in invalid_cases:
+   s.open_import(); s.upload_import(s.write_fixture(name,contents)); s.w.until(lambda _:error in s.d.find_element(By.TAG_NAME,'body').text)
+   s.assertFalse(s.a('PATIENT-IMPORT-CONFIRM').is_enabled()); s.click('PATIENT-IMPORT-CANCEL')
+   s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-FILE"]')))
+
+  initial_rows=len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr'))
+  import_started=time.time(); s.open_import()
+  s.assertTrue(s.a('PATIENT-IMPORT-FILE').is_displayed()); s.pass_('PATIENT-IMPORT','SEL-PAT-IMPORT',import_started)
+  s.upload_import(valid); s.w.until(lambda _: 'Archivo cargado: patients-valid.csv' in s.d.find_element(By.TAG_NAME,'body').text)
+  s.assertNotIn('Encabezados inválidos',s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-IMPORT-FILE','SEL-PAT-IMPORT',import_started)
+  s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-PREVIEW"]')))
+  s.assert_detail_contains('1 filas válidas de 1.','Importado Selenium','IMPORT-SEL-001')
+  s.assertTrue(s.a('PATIENT-IMPORT-CONFIRM').is_enabled()); s.pass_('PATIENT-IMPORT-PREVIEW','SEL-PAT-IMPORT',import_started)
+  cancel_started=time.time(); s.click('PATIENT-IMPORT-CANCEL')
+  s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-FILE"]')))
+  s.assertEqual(len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr')),initial_rows)
+  s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
+  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('IMPORT-SEL-001')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Sin resultados')]")))
+  s.pass_('PATIENT-IMPORT-CANCEL','SEL-PAT-IMPORT',cancel_started)
+
+  s.open_import(); s.upload_import(valid)
+  s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-PREVIEW"]')))
+  confirm_started=time.time(); s.click('PATIENT-IMPORT-CONFIRM')
+  s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-IMPORT-FILE"]')))
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'1 pacientes sintéticos importados')]")))
+  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('IMPORT-SEL-001')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Importado Selenium')]")))
+  s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
+  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('IMPORT-SEL-001')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Importado Selenium')]")))
+  stored=s.d.execute_script('return JSON.parse(localStorage.getItem("analiza.en.casa.workspace.v2"));')
+  patient=next(item for item in stored['patients'] if item['documentId']=='IMPORT-SEL-001')
+  s.assertEqual(patient['fullName'],'Importado Selenium'); s.assertEqual(patient['status'],'ACTIVE')
+  s.pass_('PATIENT-IMPORT-CONFIRM','SEL-PAT-IMPORT',confirm_started)
+ def test_export(s):
+  s.prepare_authenticated_test(); s.clear_downloads(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
+  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Paciente Demo Aurora')
+  s.w.until(lambda _:len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr'))==1)
+  exported=time.time(); s.click('PATIENT-EXPORT'); active=s.wait_download('pacientes-activos.csv')
+  active_csv=active.read_text(encoding='utf8')
+  for header in ('Tipo de documento','Documento','Nombre completo','Teléfono','Correo','Empresa','Estado'): s.assertIn(header,active_csv)
+  s.assertIn('Paciente Demo Aurora',active_csv); s.assertIn('12345678-9',active_csv); s.assertNotIn('Paciente Demo Celeste',active_csv)
+  s.click('PATIENT-SEARCH-CLEAR'); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Brisa')]")))
+  s.click('PATIENT-EXPORT'); inactive=s.wait_download('pacientes-inactivos.csv')
+  inactive_csv=inactive.read_text(encoding='utf8'); s.assertIn('Paciente Demo Brisa',inactive_csv); s.assertNotIn('Paciente Demo Aurora',inactive_csv)
+  s.pass_('PATIENT-EXPORT','SEL-PAT-EXPORT',exported)
+ def test_mobile(s):
+  s.d.set_window_size(390,844); s.prepare_authenticated_test(); s.d.get(BASE+'/patients')
+  try:
+   s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1'))); s.assertEqual(s.d.find_element(By.TAG_NAME,'h1').text,'Pacientes')
+   s.assertTrue(s.a('PATIENT-TAB-ACTIVE').is_enabled()); s.click('PATIENT-TAB-ACTIVE')
+   search=s.a('PATIENT-SEARCH'); search.send_keys('Aurora'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Aurora')]")))
+   search.clear(); s.click('PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-SUBMIT"]')))
+   form=s.d.find_element(By.ID,'patient-form'); s.d.execute_script('arguments[0].scrollTop=arguments[0].scrollHeight;',form)
+   submit=s.a('PATIENT-CREATE-SUBMIT'); s.d.execute_script('arguments[0].scrollIntoView({block:"center"});',submit); s.assertTrue(submit.is_displayed())
+   s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-SUBMIT"]')))
+   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Aurora'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Demo Aurora')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+   s.assertEqual(s.d.find_element(By.TAG_NAME,'h1').text,'Paciente Demo Aurora')
+   scroll_width,viewport=s.d.execute_script('return [document.documentElement.scrollWidth, window.innerWidth];')
+   s.assertLessEqual(scroll_width,viewport+8,f'critical horizontal overflow: {scroll_width}px > {viewport}px')
+  finally: s.d.set_window_size(1440,1000)

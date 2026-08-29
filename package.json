@@ -38,6 +38,7 @@
     "test:browser:react": "playwright test -c apps/web/playwright.config.ts",
     "test:selenium": "py tests/selenium/smoke.py",
     "test:selenium:patients": "py tests/selenium/test_patients.py",
+    "test:selenium:patients:all": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
     "qa": "node scripts/qa-check.mjs",
     "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",

@@ -281,8 +281,8 @@
       "unit_test_ids": [
         "domain:findDuplicatePatient"
       ],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-DOCUMENT-TYPE",
@@ -314,8 +314,8 @@
         "playwright:patient-document-switch-validation"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-INSURANCE-TOGGLE",
@@ -347,8 +347,8 @@
         "playwright:patient-registration-data"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-CONTACT-ADD",
@@ -380,8 +380,8 @@
         "playwright:patient-registration-data"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-CONTACT-REMOVE",
@@ -413,8 +413,8 @@
         "playwright:patient-registration-data"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-CONTACT-PRIMARY",
@@ -446,8 +446,8 @@
         "playwright:patient-registration-data"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-ADDRESS-CLEAR",
@@ -479,8 +479,8 @@
         "playwright:patient-registration-data"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-ADDRESS-LOOKUP",
@@ -510,8 +510,8 @@
       ],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-EDIT",
@@ -667,14 +667,14 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-IMPORT"
       ],
       "playwright_test_ids": [
         "playwright:patient-import-export"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-IMPORT-FILE",
@@ -700,14 +700,14 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-IMPORT"
       ],
       "playwright_test_ids": [
         "playwright:patient-import-export"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-IMPORT-PREVIEW",
@@ -733,14 +733,14 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-IMPORT"
       ],
       "playwright_test_ids": [
         "playwright:patient-import-export"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-IMPORT-CONFIRM",
@@ -766,14 +766,14 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-IMPORT"
       ],
       "playwright_test_ids": [
         "playwright:patient-import-export"
       ],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-IMPORT-CANCEL",
@@ -799,12 +799,12 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-IMPORT"
       ],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-EXPORT",
@@ -830,7 +830,7 @@
       "refresh_required": false,
       "selenium_required": true,
       "selenium_test_ids": [
-        "SEL-PAT-FLOW"
+        "SEL-PAT-EXPORT"
       ],
       "playwright_test_ids": [
         "playwright:patient-import-export"
@@ -838,8 +838,8 @@
       "unit_test_ids": [
         "domain:toCsv"
       ],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_EXACT",
+      "blocker": ""
     },
     {
       "action_id": "PATIENT-SEARCH",
