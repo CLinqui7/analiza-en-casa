@@ -530,7 +530,7 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
-  await page.getByRole('button', { name: 'Enviar enlace seguro' }).click();
+  await page.getByRole('button', { name: 'Enviar versión' }).click();
   await expect(page.getByRole('status')).toContainText('quedó inmutable');
   await page.reload();
   await expect(page.getByText('Enviada e inmutable')).toBeVisible();
@@ -544,7 +544,7 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
-  await page.getByRole('button', { name: 'Enviar enlace seguro' }).click();
+  await page.getByRole('button', { name: 'Enviar versión' }).click();
 
   await page.goto('/payments');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();

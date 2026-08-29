@@ -103,7 +103,7 @@ export const demoHospitalizations: Hospitalization[] = [
 ];
 
 export const demoQuotes: Quote[] = [
-  { id: 'quote-demo-001', caseId: 'case-demo-001', patientId: 'patient-demo-001', version: 1, status: 'DRAFT', summary: 'Cotización sintética de coordinación; importes pendientes de reglas aprobadas.', createdAt: '2026-08-28T08:00:00.000Z' },
+  { id: 'quote-demo-001', caseId: 'case-demo-001', patientId: 'patient-demo-001', version: 1, status: 'DRAFT', summary: 'Cotización sintética de coordinación.', comments: 'Valores manuales de demostración; no representan tarifas oficiales.', items: [{ id: 'quote-item-demo-001', category: 'SERVICES', name: 'Servicio sintético de demostración', quantity: 1, unitPrice: 100, discountAmount: 0 }], subtotal: 100, discountAmount: 0, total: 100, insurerAmount: 0, patientAmount: 100, immutable: false, createdAt: '2026-08-28T08:00:00.000Z' },
 ];
 
 export const demoPayments: Payment[] = [];

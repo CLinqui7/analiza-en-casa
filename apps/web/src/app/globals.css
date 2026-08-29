@@ -615,6 +615,43 @@ textarea {
   margin-bottom: 14px;
 }
 .filter-grid label { display: grid; gap: 6px; }
+.search-row {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.search-row .search-label { flex: 1; }
+.full-field { grid-column: 1 / -1; }
+.quote-fieldset {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid #d5e2ef;
+  border-radius: 10px;
+}
+.quote-fieldset legend { padding: 0 5px; font-weight: 800; }
+.quote-item-editor { align-items: end; }
+.quote-item-total,
+.quote-item-actions { display: grid; gap: 6px; }
+.quote-item-total span { color: var(--muted); font-size: 0.84rem; }
+.quote-totals {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.quote-totals > div {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #dce7f1;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+.quote-totals span { color: var(--muted); font-size: 0.78rem; }
+.quote-category + .quote-category { margin-top: 22px; }
+.quote-category h3 { margin: 0 0 9px; font-size: 0.95rem; }
 
 @media (max-width: 1024px) {
   .app-shell {
@@ -687,6 +724,8 @@ textarea {
     grid-template-columns: 1fr;
   }
   .filter-grid { grid-template-columns: 1fr; }
+  .search-row { align-items: stretch; flex-direction: column; }
+  .quote-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .definition-list > div {
     display: grid;
     gap: 3px;
@@ -712,4 +751,12 @@ textarea {
     padding-left: 16px;
     padding-right: 16px;
   }
+}
+
+@media print {
+  .sidebar, .no-print, .notice { display: none !important; }
+  .app-shell { display: block; }
+  .main-content { padding: 0; }
+  .panel { box-shadow: none; break-inside: avoid; }
+  body, html { background: white; }
 }

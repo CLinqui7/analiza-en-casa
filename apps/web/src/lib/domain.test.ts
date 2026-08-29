@@ -1,4 +1,4 @@
-import type { Hospitalization, InventoryMovement, Patient } from '@analiza/contracts';
+import type { Hospitalization, InventoryMovement, Patient, Quote, QuoteItem } from '@analiza/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   canRecordMovement,
@@ -10,6 +10,12 @@ import {
   searchHospitalizations,
   toCsv,
   validateDocument,
+  calculateQuoteBalance,
+  calculateQuoteTotals,
+  canEditQuote,
+  createQuoteRevision,
+  searchQuotes,
+  validateQuoteItem,
 } from '@analiza/domain';
 
 const patients: Patient[] = [
@@ -77,5 +83,51 @@ describe('domain boundaries', () => {
 
   it('escapes generated CSV values', () => {
     expect(toCsv([['valor', 'texto "entre comillas"']])).toBe('"valor","texto ""entre comillas"""');
+  });
+});
+
+describe('quote domain', () => {
+  const items: QuoteItem[] = [
+    { id: 'item-1', category: 'SERVICES', name: 'Servicio sintético', quantity: 2, unitPrice: 10.125, discountAmount: 0.25 },
+    { id: 'item-2', category: 'STUDIES', name: 'Estudio sintético', quantity: 1, unitPrice: 5, discountAmount: 0 },
+  ];
+  const quote: Quote = {
+    id: 'Q-001', rootQuoteId: 'Q-001', originalQuoteId: 'Q-001', caseId: 'CASE-001', patientId: 'one', version: 1,
+    status: 'DRAFT', immutable: false, summary: 'Cotización de prueba', items, subtotal: 25.25, discountAmount: 0.25,
+    total: 25, insurerAmount: 5, patientAmount: 20, createdAt: '2026-08-28T08:00:00.000Z',
+  };
+
+  it('calculates manual line and general discounts with 2-decimal money', () => {
+    const totals = calculateQuoteTotals(items, { type: 'PERCENT', value: 10 }, 5);
+    expect(totals).toMatchObject({ subtotal: 25.25, itemDiscountAmount: 0.25, generalDiscountAmount: 2.5, discountAmount: 2.75, total: 22.5, insurerAmount: 5, patientAmount: 17.5 });
+    expect(calculateQuoteTotals(items, { type: 'CATEGORY_PERCENTAGES', categories: { SERVICES: 10, STUDIES: 0, MEDICATIONS: 0, SUPPLIES: 0, EQUIPMENT: 0, FEES: 0, EXTRAS: 0 } }).total).toBe(23);
+  });
+
+  it('rejects invalid manual item amounts and insurer amount beyond total', () => {
+    expect(validateQuoteItem({ ...items[0], name: ' ', quantity: 0, discountAmount: 999 })).toContain('concepto');
+    expect(() => calculateQuoteTotals([{ ...items[0], discountAmount: 99 }], undefined, 0)).toThrow('descuento manual');
+    expect(() => calculateQuoteTotals(items, undefined, 99)).toThrow('aseguradora');
+  });
+
+  it('uses only applied payments for the patient balance', () => {
+    expect(calculateQuoteBalance(quote, [
+      { id: 'pay-1', quoteId: 'Q-001', amount: 8, reference: 'REF-1', idempotencyKey: 'key-1', status: 'APPLIED', createdAt: '2026-08-28T09:00:00.000Z' },
+      { id: 'pay-2', quoteId: 'Q-001', amount: 3, reference: 'REF-2', idempotencyKey: 'key-2', status: 'VOIDED', createdAt: '2026-08-28T10:00:00.000Z' },
+    ])).toEqual({ paid: 8, balance: 12 });
+  });
+
+  it('keeps sent versions non-editable and revisions independent', () => {
+    expect(canEditQuote(quote)).toBe(true);
+    expect(canEditQuote({ ...quote, status: 'SENT', immutable: true })).toBe(false);
+    const revision = createQuoteRevision({ ...quote, status: 'SENT', immutable: true }, 'Q-002', 'Ajuste solicitado', '2026-08-29T08:00:00.000Z');
+    expect(revision).toMatchObject({ id: 'Q-002', rootQuoteId: 'Q-001', originalQuoteId: 'Q-001', version: 2, status: 'DRAFT', immutable: false, revisionReason: 'Ajuste solicitado' });
+    revision.items[0].name = 'Cambio de revisión';
+    expect(quote.items[0].name).toBe('Servicio sintético');
+  });
+
+  it('searches quote id, patient, case and status with normalized text', () => {
+    expect(searchQuotes([quote], patients, 'case 001')).toHaveLength(1);
+    expect(searchQuotes([quote], patients, 'áurea')).toHaveLength(1);
+    expect(searchQuotes([quote], patients, 'draft')).toHaveLength(1);
   });
 });

@@ -64,6 +64,7 @@ npm run build             # build optimizado de Next.js
 npm test                  # regresiones del demo heredado
 npm run test:react        # pruebas Vitest de dominio React
 npm run test:browser:react # Playwright + axe sobre React
+npm run test:browser:quotes # Playwright focalizado de Cotizaciones React
 npm run test:selenium     # Selenium + Chrome sin autenticación
 npm run qa:local          # compuerta local completa
 npm run check             # regresiones heredadas + QA + demo autónoma

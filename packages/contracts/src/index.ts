@@ -130,6 +130,31 @@ export const hospitalizationSchema = z.object({
   devices: z.array(z.string().trim().min(1)).optional(),
 });
 
+export const quoteItemCategorySchema = z.enum([
+  'SERVICES',
+  'STUDIES',
+  'MEDICATIONS',
+  'SUPPLIES',
+  'EQUIPMENT',
+  'FEES',
+  'EXTRAS',
+]);
+
+export const quoteItemSchema = z.object({
+  id: z.string(),
+  category: quoteItemCategorySchema,
+  name: z.string().trim().min(1),
+  quantity: z.number().positive(),
+  unitPrice: z.number().nonnegative(),
+  discountAmount: z.number().nonnegative().default(0),
+});
+
+export const quoteDiscountSchema = z.object({
+  type: z.enum(['PERCENT', 'FIXED', 'CATEGORY_PERCENTAGES']),
+  value: z.number().nonnegative().optional(),
+  categories: z.record(quoteItemCategorySchema, z.number().min(0).max(100)).optional(),
+});
+
 export const quoteSchema = z.object({
   id: z.string(),
   caseId: z.string(),
@@ -137,8 +162,20 @@ export const quoteSchema = z.object({
   version: z.number().int().positive(),
   status: z.enum(['DRAFT', 'SENT']),
   summary: z.string().trim().min(1),
+  comments: z.string().trim().optional(),
+  items: z.array(quoteItemSchema).default([]),
+  discount: quoteDiscountSchema.optional(),
+  subtotal: z.number().nonnegative().default(0),
+  discountAmount: z.number().nonnegative().default(0),
+  total: z.number().nonnegative().default(0),
+  insurerAmount: z.number().nonnegative().default(0),
+  patientAmount: z.number().nonnegative().default(0),
+  immutable: z.boolean().default(false),
   createdAt: z.string(),
   sentAt: z.string().optional(),
+  originalQuoteId: z.string().optional(),
+  rootQuoteId: z.string().optional(),
+  revisionReason: z.string().trim().optional(),
 });
 
 export const paymentSchema = z.object({
@@ -195,6 +232,9 @@ export type NurseHourEntry = z.infer<typeof nurseHourEntrySchema>;
 export type Shift = z.infer<typeof shiftSchema>;
 export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type Quote = z.infer<typeof quoteSchema>;
+export type QuoteItem = z.infer<typeof quoteItemSchema>;
+export type QuoteItemCategory = z.infer<typeof quoteItemCategorySchema>;
+export type QuoteDiscount = z.infer<typeof quoteDiscountSchema>;
 export type Payment = z.infer<typeof paymentSchema>;
 export type ClinicalDocument = z.infer<typeof clinicalDocumentSchema>;
 export type CatalogItem = z.infer<typeof catalogItemSchema>;

@@ -3,6 +3,7 @@
 import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { calculateQuoteTotals, canEditQuote } from '@analiza/domain';
 import { loadSession, login as authenticate, logout as endSession, type AuthSession } from '@/lib/auth';
 import { can, type Permission, type Role } from '@/lib/permissions';
 import {
@@ -37,6 +38,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addHospitalization: (hospitalization: Hospitalization) => void;
   updateHospitalization: (hospitalization: Hospitalization) => void;
   addQuote: (quote: Quote) => void;
+  updateQuote: (quote: Quote) => void;
   sendQuote: (quoteId: string) => void;
   addPayment: (payment: Payment) => void;
   voidPayment: (paymentId: string, reason: string) => void;
@@ -175,17 +177,49 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           };
         });
       },
-      addQuote: (quote) => commit((current) => ({
-        ...current,
-        quotes: [...current.quotes, quote],
-        auditEntries: [audit('Cotización creada', quote.id), ...current.auditEntries],
-      })),
+      addQuote: (quote) => {
+        if (!can('quotes:write')) return;
+        commit((current) => {
+          const hospitalization = current.hospitalizations.find((candidate) => candidate.id === quote.caseId);
+          if (!hospitalization || hospitalization.patientId !== quote.patientId || current.quotes.some((candidate) => candidate.id === quote.id)) return current;
+          try {
+            const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
+            const normalized: Quote = { ...quote, ...totals, immutable: false, status: 'DRAFT', sentAt: undefined };
+            return {
+              ...current,
+              quotes: [...current.quotes, normalized],
+              auditEntries: [audit(quote.version > 1 ? 'Revisión de cotización creada' : 'Cotización creada', quote.id), ...current.auditEntries],
+            };
+          } catch {
+            return current;
+          }
+        });
+      },
+      updateQuote: (quote) => {
+        if (!can('quotes:write')) return;
+        commit((current) => {
+          const original = current.quotes.find((candidate) => candidate.id === quote.id);
+          const hospitalization = current.hospitalizations.find((candidate) => candidate.id === quote.caseId);
+          if (!original || !canEditQuote(original) || !hospitalization || hospitalization.patientId !== quote.patientId) return current;
+          try {
+            const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
+            const updated: Quote = { ...original, ...quote, ...totals, immutable: false, status: 'DRAFT', sentAt: undefined };
+            return {
+              ...current,
+              quotes: current.quotes.map((candidate) => candidate.id === quote.id ? updated : candidate),
+              auditEntries: [audit('Borrador de cotización actualizado', quote.id), ...current.auditEntries],
+            };
+          } catch {
+            return current;
+          }
+        });
+      },
       sendQuote: (quoteId) => commit((current) => {
         const quote = current.quotes.find((candidate) => candidate.id === quoteId);
-        if (!quote || quote.status === 'SENT') return current;
+        if (!can('quotes:write') || !quote || !canEditQuote(quote)) return current;
         return {
           ...current,
-          quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', sentAt: new Date().toISOString() } : candidate),
+          quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() } : candidate),
           auditEntries: [audit('Cotización enviada como enlace seguro', quoteId), ...current.auditEntries],
         };
       }),

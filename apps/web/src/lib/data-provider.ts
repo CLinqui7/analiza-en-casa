@@ -1,6 +1,7 @@
 'use client';
 
 import type { CatalogItem, ClinicalDocument, Hospitalization, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
+import { calculateQuoteTotals } from '@analiza/domain';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
   demoInventoryMovements,
@@ -50,6 +51,35 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
   auditEntries: [{ id: 'audit-demo-001', at: '2026-08-28T08:00:00.000Z', action: 'Demo iniciado', subject: 'Aplicación React' }],
 });
 
+/** Migrates locally persisted quote records from the earlier, minimal React
+ * contract. This keeps mock reloads backward compatible while calculation
+ * fields remain derived rather than trusted from browser storage. */
+function normalizeQuote(quote: Quote): Quote {
+  const items = Array.isArray(quote.items) ? quote.items : [];
+  const insurerAmount = quote.insurerAmount ?? 0;
+  try {
+    const totals = calculateQuoteTotals(items, quote.discount, insurerAmount);
+    return {
+      ...quote,
+      comments: quote.comments ?? undefined,
+      items,
+      ...totals,
+      immutable: quote.immutable ?? quote.status === 'SENT',
+      rootQuoteId: quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+      originalQuoteId: quote.originalQuoteId ?? quote.rootQuoteId ?? quote.id,
+    };
+  } catch {
+    return {
+      ...quote,
+      comments: quote.comments ?? undefined,
+      items: [], subtotal: 0, discountAmount: 0, total: 0, insurerAmount: 0, patientAmount: 0,
+      immutable: quote.immutable ?? quote.status === 'SENT',
+      rootQuoteId: quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+      originalQuoteId: quote.originalQuoteId ?? quote.rootQuoteId ?? quote.id,
+    };
+  }
+}
+
 export interface DataProvider {
   readonly mode: 'mock' | 'supabase';
   load(): Promise<WorkspaceSnapshot>;
@@ -75,6 +105,7 @@ export class MockDataProvider implements DataProvider {
           retired: patient.retired ?? false,
           contacts: patient.contacts ?? [],
         })),
+        quotes: parsed.quotes.map(normalizeQuote),
       };
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -110,7 +141,7 @@ export class SupabaseDataProvider implements DataProvider {
       inventoryMovements: (inventoryMovements.data ?? []) as InventoryMovement[], auditEntries: (auditEntries.data ?? []) as AuditEntry[],
       shifts: (shifts.data ?? []) as Shift[],
       hospitalizations: (hospitalizations.data ?? []) as Hospitalization[],
-      quotes: (quotes.data ?? []) as Quote[],
+      quotes: ((quotes.data ?? []) as Quote[]).map(normalizeQuote),
       payments: (payments.data ?? []) as Payment[],
       clinicalDocuments: (clinicalDocuments.data ?? []) as ClinicalDocument[],
       catalogItems: (catalogItems.data ?? []) as CatalogItem[],

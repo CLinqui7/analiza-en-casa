@@ -36,6 +36,7 @@
     "test:browser:ch15": "playwright test tests/e2e/ch15.spec.mjs",
     "test:browser:ch16": "playwright test tests/e2e/ch16.spec.mjs",
     "test:browser:react": "playwright test -c apps/web/playwright.config.ts",
+    "test:browser:quotes": "playwright test -c apps/web/playwright.config.ts e2e/quotes.spec.ts",
     "test:selenium": "py tests/selenium/smoke.py",
     "test:selenium:patients": "py tests/selenium/test_patients.py",
     "test:selenium:patients:all": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
