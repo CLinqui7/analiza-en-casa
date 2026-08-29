@@ -42,6 +42,8 @@
     "test:selenium:patients:all": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
     "test:selenium:hospitalizations": "py tests/selenium/test_hospitalizations.py",
     "test:selenium:hospitalizations:all": "py -m unittest discover -s tests/selenium -p test_hospitalizations.py -v",
+    "test:selenium:quotes": "py tests/selenium/test_quotes.py",
+    "test:selenium:quotes:all": "py -m unittest discover -s tests/selenium -p test_quotes.py -v",
     "qa": "node scripts/qa-check.mjs",
     "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",
@@ -60,6 +62,7 @@
     "selenium:coverage": "node scripts/verify-selenium-coverage.mjs",
     "selenium:coverage:patients": "node scripts/verify-selenium-coverage.mjs --prefix PATIENT- --require-executed",
     "selenium:coverage:hospitalizations": "node scripts/verify-selenium-hospitalization-coverage.mjs",
+    "selenium:coverage:quotes": "node scripts/verify-selenium-quote-coverage.mjs",
     "security:scan": "node scripts/security-scan.mjs"
   },
   "engines": {

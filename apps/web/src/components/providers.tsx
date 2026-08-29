@@ -220,7 +220,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         return {
           ...current,
           quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() } : candidate),
-          auditEntries: [audit('Cotización enviada como enlace seguro', quoteId), ...current.auditEntries],
+          auditEntries: [audit('Cotización marcada como enviada e inmutable', quoteId), ...current.auditEntries],
         };
       }),
       addPayment: (payment) => commit((current) => {
