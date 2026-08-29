@@ -11,6 +11,7 @@
 # test-id: SEL-PAT-STATUS
 # test-id: SEL-PAT-IMPORT
 # test-id: SEL-PAT-EXPORT
+# test-id: SEL-PAT-PERMISSION-INTEGRITY
 from __future__ import annotations
 import os, subprocess, tempfile, time, unittest
 from pathlib import Path
@@ -58,6 +59,17 @@ class Patients(unittest.TestCase):
  def test_fixture_stability(s):
   for _ in range(3):
    s.prepare_authenticated_test(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.prepare_authenticated_test('inventory@demo.local','demo-inventory','INVENTORY'); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'main[role="alert"]')))
+ def test_permission_integrity_roles(s):
+  s.prepare_authenticated_test('nurse@demo.local','demo-nurse','NURSE'); before=s.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")')
+  s.assertTrue(s.a('DASHBOARD-PATIENT-CREATE').is_displayed()); s.click('DASHBOARD-PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
+  s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
+  s.assertTrue(s.a('PATIENT-CREATE').is_displayed()); started=time.time(); s.click('PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
+  s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
+  s.assertEqual(s.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")'),before); s.pass_('PATIENT-CREATE-CANCEL','SEL-PAT-PERMISSION-INTEGRITY',started)
+  s.prepare_authenticated_test('auditor@demo.local','demo-auditor','AUDITOR'); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
+  s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE"]')); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-INACTIVATE"]')); s.assertIn('Solo lectura',s.d.find_element(By.TAG_NAME,'body').text)
+  s.prepare_authenticated_test('inventory@demo.local','demo-inventory','INVENTORY'); s.d.get(BASE+'/patients'); denied=s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'main[role="alert"]')))
+  s.assertIn('acceso',denied.text.lower()); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE"]'))
  def a(s,x): return s.d.find_element(By.CSS_SELECTOR,f'[data-action-id="{x}"]')
  def click(s,x): s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,f'[data-action-id="{x}"]'))).click()
  def field(s,label): return s.d.find_element(By.XPATH,f"//label[contains(.,'{label}')]//*[self::input or self::select or self::textarea]")
