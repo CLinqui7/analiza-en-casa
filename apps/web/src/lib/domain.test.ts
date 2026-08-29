@@ -1,4 +1,4 @@
-import type { InventoryMovement, Patient } from '@analiza/contracts';
+import type { Hospitalization, InventoryMovement, Patient } from '@analiza/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   canRecordMovement,
@@ -7,6 +7,7 @@ import {
   findDuplicatePatient,
   maskDui,
   searchPatients,
+  searchHospitalizations,
   toCsv,
   validateDocument,
 } from '@analiza/domain';
@@ -16,12 +17,23 @@ const patients: Patient[] = [
   { id: 'two', fullName: 'Brisa Demo', documentType: 'OTHER', documentId: 'DEMO-2', status: 'ACTIVE' },
 ];
 
+const hospitalizations: Hospitalization[] = [
+  { id: 'HOS-2026-0001', patientId: 'one', startDate: '2026-08-28', status: 'ACTIVE', accountType: 'PARTICULAR' },
+  { id: 'HOS-2026-0002', patientId: 'two', startDate: '2026-08-29', status: 'PENDING_CLOSE', accountType: 'EMPRESA' },
+];
+
 describe('domain boundaries', () => {
   it('normalizes patient search and document duplicate checks', () => {
     expect(searchPatients(patients, 'aurea')).toHaveLength(1);
     expect(
       findDuplicatePatient(patients, { documentType: 'DUI', documentId: '123456789' })?.id,
     ).toBe('one');
+  });
+
+  it('normalizes hospitalization search by case, patient name, and document', () => {
+    expect(searchHospitalizations(hospitalizations, patients, 'hos 2026 0001')).toHaveLength(1);
+    expect(searchHospitalizations(hospitalizations, patients, 'aurea')).toHaveLength(1);
+    expect(searchHospitalizations(hospitalizations, patients, '1234 56789')).toHaveLength(1);
   });
 
   it('applies the configured demo DUI mask and error without claiming official validation', () => {

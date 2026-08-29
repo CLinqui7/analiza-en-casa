@@ -119,9 +119,15 @@ export const hospitalizationSchema = z.object({
   id: z.string(),
   patientId: z.string(),
   startDate: z.string(),
-  status: z.enum(['ACTIVE', 'CLOSED']),
+  endDate: z.string().optional(),
+  status: z.enum(['ACTIVE', 'PENDING_CLOSE', 'CLOSED']),
   accountType: z.string().trim().min(1),
+  insurer: z.string().trim().optional(),
+  manager: z.string().trim().optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  diagnosisSummary: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
+  devices: z.array(z.string().trim().min(1)).optional(),
 });
 
 export const quoteSchema = z.object({

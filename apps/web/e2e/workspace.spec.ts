@@ -357,16 +357,78 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   })).toBe('2222 3333');
 });
 
-test('hospitalization creation persists after refresh', async ({ page }) => {
+test('hospitalization route provides legacy listing controls, persistence, detail and edit', async ({ page, browser }) => {
   await login(page);
   await page.goto('/hospitalizations');
+  await expect(page.getByRole('columnheader', { name: 'Documento' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
+  await page.getByLabel('Buscar hospitalización').fill('1234 56789');
+  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
+  await page.locator('[data-action-id="HOSPITALIZATION-SEARCH-CLEAR"]').click();
+  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
+  await page.getByLabel('Estado administrativo').selectOption('ACTIVE');
+  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-START-DATE"]').fill('2026-08-28');
+  await page.getByLabel('Tipo de cuenta').first().selectOption('Referencia sintética');
+  await expect(page.getByText('case-demo-001')).toBeVisible();
+  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-RESET"]').click();
   await page.getByRole('button', { name: 'Nueva hospitalización' }).click();
-  await page.getByLabel('Tipo de cuenta').fill('Coordinación de prueba');
-  await page.getByLabel('Siguiente acción (opcional)').fill('Confirmar visita de QA');
+  const createDialog = page.getByRole('dialog', { name: 'Nueva hospitalización' });
+  await createDialog.getByLabel('Paciente').selectOption('');
+  await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
+  await expect(createDialog.getByText('Seleccione un paciente.')).toBeVisible();
+  await createDialog.getByLabel('Paciente').selectOption('patient-demo-001');
+  await createDialog.getByLabel('Tipo de cuenta').selectOption('EMPRESA');
+  await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
+  await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(page.getByRole('status')).toContainText('persistida');
   await page.reload();
   await expect(page.getByText('Confirmar visita de QA')).toBeVisible();
+  const createdRow = page.locator('tbody tr').filter({ hasText: 'Confirmar visita de QA' });
+  const createdId = await createdRow.locator('td').nth(1).innerText();
+  await createdRow.locator('[data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"]').first().click();
+  await expect(page).toHaveURL(new RegExp(`/hospitalizations/${createdId}$`));
+  await expect(page.getByText('Responsable QA')).toBeVisible();
+  await page.getByRole('button', { name: 'Editar hospitalización' }).click();
+  await expect(page.getByRole('dialog', { name: `Editar ${createdId}` })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await createdRow.locator('[data-action-id="HOSPITALIZATION-EDIT"]').click();
+  const editDialog = page.getByRole('dialog', { name: `Editar ${createdId}` });
+  await editDialog.getByLabel('Responsable administrativo').fill('Responsable QA actualizado');
+  await page.getByRole('button', { name: 'Guardar cambios' }).click();
+  await page.reload();
+  await expect(page.getByText('Responsable QA actualizado')).toBeVisible();
+
+  const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mobilePage = await mobileContext.newPage();
+  await login(mobilePage);
+  await mobilePage.goto('/hospitalizations');
+  await expect.poll(() => mobilePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await mobileContext.close();
+});
+
+test('hospitalization permissions preserve read-only roles and deny inventory', async ({ page }) => {
+  await loginAs(page, 'nurse@demo.local', 'demo-nurse');
+  await page.goto('/hospitalizations');
+  await expect(page.getByRole('heading', { name: 'Hospitalizaciones' })).toBeVisible();
+  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'doctor@demo.local', 'demo-doctor');
+  await page.goto('/hospitalizations');
+  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"]')).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'finance@demo.local', 'demo-finance');
+  await page.goto('/hospitalizations');
+  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'auditor@demo.local', 'demo-auditor');
+  await page.goto('/hospitalizations');
+  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-DETAIL-EDIT"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await loginAs(page, 'inventory@demo.local', 'demo-inventory');
+  await page.goto('/hospitalizations');
+  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
 });
 
 test('agenda rejects invalid intervals and persists scheduled shifts', async ({ page }) => {

@@ -100,10 +100,10 @@
       "selector_or_testid": "[data-action-id=DASHBOARD-PATIENT-CREATE]",
       "roles_allowed": [
         "ADMIN",
-        "DOCTOR",
-        "NURSE"
+        "DOCTOR"
       ],
       "roles_denied": [
+        "NURSE",
         "INVENTORY",
         "FINANCE",
         "AUDITOR"
@@ -1264,11 +1264,101 @@
       "selenium_required": true,
       "selenium_test_ids": [],
       "playwright_test_ids": [
-        "playwright:hospitalization-create"
+        "playwright:hospitalization-route-parity"
       ],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium and role evidence pending."
+      "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-CREATE-SUBMIT",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CREATE", "visible_label": "Guardar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-SUBMIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de nueva hospitalización abierto", "positive_scenario": "Valida y persiste el registro sintético.", "negative_scenario": "No guarda sin paciente.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-CREATE-CANCEL",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CANCEL", "visible_label": "Cancelar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-CREATE-CANCEL]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de nueva hospitalización abierto", "positive_scenario": "Cierra el formulario sin persistir.", "negative_scenario": "No cambia el listado.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-SEARCH",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "SEARCH", "visible_label": "Buscar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por nombre, documento o identificador normalizado.", "negative_scenario": "Muestra Sin resultados cuando no hay coincidencia.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": ["vitest:search-hospitalizations"], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-SEARCH-CLEAR",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "RESET", "visible_label": "Limpiar búsqueda", "selector_or_testid": "[data-action-id=HOSPITALIZATION-SEARCH-CLEAR]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Búsqueda activa", "positive_scenario": "Restablece todos los resultados de búsqueda.", "negative_scenario": "Permanece inactivo sin consulta.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-FILTER-STATE",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Estado administrativo", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-STATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra ACTIVE, PENDING_CLOSE o CLOSED sin transicionar estados.", "negative_scenario": "Sin coincidencias muestra estado vacío.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-FILTER-START-DATE",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Fecha de inicio", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-START-DATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por fecha de ingreso exacta.", "negative_scenario": "Sin fecha muestra todos los resultados.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-FILTER-ACCOUNT-TYPE",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "FILTER", "visible_label": "Tipo de cuenta", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-ACCOUNT-TYPE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Ruta de hospitalizaciones autorizada", "positive_scenario": "Filtra por tipo de cuenta presente en el listado.", "negative_scenario": "Sin valor muestra todos los resultados.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-FILTER-RESET",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "RESET", "visible_label": "Restablecer filtros", "selector_or_testid": "[data-action-id=HOSPITALIZATION-FILTER-RESET]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Filtros activos", "positive_scenario": "Elimina todos los filtros del listado.", "negative_scenario": "No altera datos persistidos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-DETAIL-NAVIGATE",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "NAVIGATE", "visible_label": "Ver", "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-NAVIGATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Hospitalización existente", "positive_scenario": "Abre el detalle de hospitalización.", "negative_scenario": "Un id inexistente muestra un estado explícito.", "persistence_required": false, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-BACK-TO-LIST",
+      "module": "Hospitalizaciones", "route": "/hospitalizations/:id", "control_type": "NAVIGATE", "visible_label": "Volver al listado", "selector_or_testid": "[data-action-id=HOSPITALIZATION-BACK-TO-LIST]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Detalle de hospitalización abierto", "positive_scenario": "Vuelve al listado.", "negative_scenario": "No modifica el registro.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-EDIT",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "EDIT", "visible_label": "Editar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Hospitalización existente", "positive_scenario": "Abre valores persistidos para edición.", "negative_scenario": "Roles sin cases:write no reciben el control.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-EDIT-SUBMIT",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "EDIT", "visible_label": "Guardar cambios", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-SUBMIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de edición abierto", "positive_scenario": "Actualiza y audita la hospitalización persistida.", "negative_scenario": "No persiste si se cancela.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-EDIT-CANCEL",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "CANCEL", "visible_label": "Cancelar", "selector_or_testid": "[data-action-id=HOSPITALIZATION-EDIT-CANCEL]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Formulario de edición abierto", "positive_scenario": "Descarta cambios locales.", "negative_scenario": "No modifica datos persistidos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-NAVIGATE",
+      "module": "Hospitalizaciones", "route": "*", "control_type": "NAVIGATE", "visible_label": "Hospitalizaciones", "selector_or_testid": "[data-action-id=HOSPITALIZATION-NAVIGATE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Sesión autorizada", "positive_scenario": "Abre el listado de hospitalizaciones.", "negative_scenario": "INVENTORY no recibe navegación ni acceso directo.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-DETAIL-EDIT",
+      "module": "Hospitalizaciones", "route": "/hospitalizations/:id", "control_type": "EDIT", "visible_label": "Editar hospitalización", "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-EDIT]",
+      "roles_allowed": ["ADMIN", "DOCTOR"], "roles_denied": ["NURSE", "INVENTORY", "FINANCE", "AUDITOR"], "preconditions": "Detalle de hospitalización existente", "positive_scenario": "Abre la edición con los valores del detalle.", "negative_scenario": "Roles sin cases:write no reciben el control.", "persistence_required": true, "refresh_required": true, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-PAGE-SIZE",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Registros por página", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-SIZE]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Más de una hospitalización visible", "positive_scenario": "Cambia el tamaño de página entre 5, 10, 25 y 50.", "negative_scenario": "No altera los datos.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-PAGE-PREV",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Anterior", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-PREV]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Página posterior a la primera", "positive_scenario": "Muestra la página previa.", "negative_scenario": "Permanece deshabilitado en la primera página.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
+    },
+    {
+      "action_id": "HOSPITALIZATION-PAGE-NEXT",
+      "module": "Hospitalizaciones", "route": "/hospitalizations", "control_type": "PAGINATE", "visible_label": "Siguiente", "selector_or_testid": "[data-action-id=HOSPITALIZATION-PAGE-NEXT]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"], "roles_denied": ["INVENTORY"], "preconditions": "Página previa a la última", "positive_scenario": "Muestra la página siguiente.", "negative_scenario": "Permanece deshabilitado en la última página.", "persistence_required": false, "refresh_required": false, "selenium_required": true, "selenium_test_ids": [], "playwright_test_ids": ["playwright:hospitalization-route-parity"], "unit_test_ids": [], "status": "IMPLEMENTED_UNVERIFIED", "blocker": "Selenium pendiente."
     },
     {
       "action_id": "QUOTE-CREATE",

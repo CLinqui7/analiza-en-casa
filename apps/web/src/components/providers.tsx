@@ -35,6 +35,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addInventoryMovement: (movement: InventoryMovement) => void;
   addShift: (shift: Shift) => void;
   addHospitalization: (hospitalization: Hospitalization) => void;
+  updateHospitalization: (hospitalization: Hospitalization) => void;
   addQuote: (quote: Quote) => void;
   sendQuote: (quoteId: string) => void;
   addPayment: (payment: Payment) => void;
@@ -83,6 +84,7 @@ function AuthProvider({ children }: PropsWithChildren) {
 }
 
 function WorkspaceProvider({ children }: PropsWithChildren) {
+  const { can } = useAuth();
   const [provider] = useState<DataProvider>(() => createDataProvider());
   const [snapshot, setSnapshot] = useState<WorkspaceSnapshot>(defaultSnapshot);
   const [loading, setLoading] = useState(true);
@@ -154,11 +156,25 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         shifts: [...current.shifts, shift],
         auditEntries: [audit('Turno registrado', shift.id), ...current.auditEntries],
       })),
-      addHospitalization: (hospitalization) => commit((current) => ({
-        ...current,
-        hospitalizations: [...current.hospitalizations, hospitalization],
-        auditEntries: [audit('Hospitalización registrada', hospitalization.id), ...current.auditEntries],
-      })),
+      addHospitalization: (hospitalization) => {
+        if (!can('cases:write')) return;
+        commit((current) => ({
+          ...current,
+          hospitalizations: [...current.hospitalizations, hospitalization],
+          auditEntries: [audit('Hospitalización registrada', hospitalization.id), ...current.auditEntries],
+        }));
+      },
+      updateHospitalization: (hospitalization) => {
+        if (!can('cases:write')) return;
+        commit((current) => {
+          if (!current.hospitalizations.some((candidate) => candidate.id === hospitalization.id)) return current;
+          return {
+            ...current,
+            hospitalizations: current.hospitalizations.map((candidate) => candidate.id === hospitalization.id ? hospitalization : candidate),
+            auditEntries: [audit('Hospitalización actualizada', hospitalization.id), ...current.auditEntries],
+          };
+        });
+      },
       addQuote: (quote) => commit((current) => ({
         ...current,
         quotes: [...current.quotes, quote],
@@ -231,7 +247,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
       })),
     }),
-    [commit, error, loading, provider.mode, snapshot],
+    [can, commit, error, loading, provider.mode, snapshot],
   );
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }

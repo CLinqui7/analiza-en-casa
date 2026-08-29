@@ -1,4 +1,4 @@
-import type { InventoryMovement, NurseHourEntry, Patient, VitalReading } from '@analiza/contracts';
+import type { Hospitalization, InventoryMovement, NurseHourEntry, Patient, VitalReading } from '@analiza/contracts';
 
 export type DocumentRule = {
   label: string;
@@ -82,6 +82,31 @@ export function searchPatients(patients: readonly Patient[], query: string): Pat
     normalizeDocument(patient.documentId).includes(documentNeedle) ||
     (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
   );
+}
+
+/** Search the fields the legacy hospitalization register exposes, using the
+ * same accent-, case-, whitespace-, and document-separator-insensitive rules
+ * as patient lookup. */
+export function searchHospitalizations(
+  hospitalizations: readonly Hospitalization[],
+  patients: readonly Patient[],
+  query: string,
+): Hospitalization[] {
+  const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  if (!needle) return [...hospitalizations];
+  return hospitalizations.filter((hospitalization) => {
+    const patient = patients.find((candidate) => candidate.id === hospitalization.patientId);
+    return [
+      normalizeText(hospitalization.id),
+      normalizeText(hospitalization.status),
+      normalizeText(hospitalization.accountType),
+      normalizeText(patient?.fullName ?? ''),
+      normalizeText(patient?.company ?? ''),
+    ].some((value) => value.includes(needle))
+      || normalizeDocument(hospitalization.id).includes(documentNeedle)
+      || normalizeDocument(patient?.documentId ?? '').includes(documentNeedle);
+  });
 }
 
 export type VitalMetric = {
