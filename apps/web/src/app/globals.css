@@ -571,6 +571,20 @@ textarea {
   color: var(--blue-dark);
   font-weight: 800;
 }
+.required-marker { color: var(--danger); }
+.searchable-select { position: relative; display: grid; gap: 5px; }
+.searchable-select-input { display: flex; align-items: center; gap: 4px; }
+.searchable-select-input input { min-width: 0; }
+.searchable-select-input .icon-button { flex: 0 0 34px; }
+.searchable-select-options { position: absolute; z-index: 25; top: 43px; right: 0; left: 0; max-height: 190px; overflow: auto; margin: 0; padding: 5px; border: 1px solid #b8c8da; border-radius: 8px; background: white; box-shadow: 0 10px 28px #12253a22; list-style: none; }
+.searchable-select-options li { padding: 8px 9px; border-radius: 5px; cursor: pointer; }
+.searchable-select-options li:hover, .searchable-select-options li.active { background: #edf5fc; }
+.searchable-select-options li.empty { color: var(--muted); cursor: default; }
+.patient-map-shell { position: relative; display: grid; gap: 8px; grid-column: 1 / -1; }
+.patient-map { min-height: 270px; border: 1px solid #b8c8da; border-radius: 8px; background: #e9eef1; overflow: hidden; }
+.patient-map-controls { position: absolute; z-index: 10; top: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 230px; }
+.patient-map-controls button { min-height: 32px; padding: 5px 8px; border: 1px solid #b8c8da; border-radius: 5px; background: white; color: var(--ink); font-weight: 700; }
+.patient-map-fallback { padding: 14px; border: 1px solid #e2b4aa; border-radius: 8px; background: #fff7f5; color: #9a3412; }
 .sidebar-footer {
   margin-top: auto;
   display: grid;

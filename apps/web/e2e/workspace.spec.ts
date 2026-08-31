@@ -93,7 +93,7 @@ test('patient duplicate validation and individual vital registration are usable'
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await fillRequiredPatientData(dialog, { documentId: '123456789', fullName: 'Paciente Demo Repetido', phone: '7000-9911' });
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
   await page.goto('/clinical/reports');
@@ -142,7 +142,7 @@ test('patient registration persists complete administrative, insurance, contacts
   await dialog.getByRole('button', { name: 'Eliminar contacto' }).last().click();
   await dialog.getByLabel('Enlace de ubicación').fill('https://example.test/ubicacion-qa');
   await dialog.getByLabel('Coordenadas').fill('13.7000,-89.2000');
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('status')).toContainText('Paciente QA Integral');
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Integral');
@@ -163,7 +163,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   const createDialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await createDialog.getByLabel('Tipo de documento').selectOption('OTHER');
   await fillRequiredPatientData(createDialog, { documentId: 'EDIT-QA-001', fullName: 'Paciente QA Editable', phone: '7000-4001' });
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editable');
   await page.getByRole('link', { name: 'Paciente QA Editable' }).click();
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Activo');
@@ -262,13 +262,13 @@ test('patient document switches clear only document state and form validation is
   await expect(dialog.getByLabel('Nombre completo')).toHaveValue('Paciente Cambio QA');
 
   await fillRequiredPatientData(dialog, { documentId: 'PAS-QA-VALIDATION', fullName: 'Paciente Cambio QA', phone: '7000-3001', email: 'correo-invalido' });
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(dialog.getByText('Ingrese un correo electrónico válido.')).toBeVisible();
   await dialog.getByLabel('Correo').fill('cambio.qa@example.test');
   await dialog.getByLabel('Número de documento').fill('12345678-9');
   await dialog.getByLabel('Tipo de documento').selectOption('DUI');
   await dialog.getByLabel('Número de documento').fill('123456789');
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(dialog.getByText('Ya existe un registro con este documento')).toBeVisible();
 });
 
@@ -343,7 +343,7 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   const createDialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await createDialog.getByLabel('Tipo de documento').selectOption('OTHER');
   await fillRequiredPatientData(createDialog, { documentId: 'PATIENT-PLAYWRIGHT-EDIT-001', fullName: 'Paciente Playwright Editable', phone: '7000-9001' });
-  await page.getByRole('button', { name: 'Guardar registro' }).click();
+  await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
   await page.getByRole('link', { name: 'Paciente Playwright Editable' }).click();
   await page.getByRole('button', { name: 'Editar paciente' }).click();

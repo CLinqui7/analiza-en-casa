@@ -93,11 +93,11 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill('7000-0001');
   await dialog.getByLabel('Empresa').fill('Empresa sintética');
-  await dialog.getByLabel('Dirección').fill('Dirección sintética');
-  await dialog.getByLabel('Comentario o referencia').fill('Referencia sintética');
+  await dialog.getByRole('textbox', { name: 'Dirección obligatorio', exact: true }).fill('Dirección sintética');
+  await dialog.getByLabel('Comentarios relevantes de la dirección').fill('Referencia sintética');
   await dialog.getByLabel('Triage administrativo').fill('Pendiente administrativo');
-  await dialog.getByLabel('Consentimiento para notificaciones Botmaker').uncheck();
-  await dialog.getByRole('button', { name: 'Guardar registro' }).click();
+  await dialog.getByLabel('Autoriza notificaciones operativas por WhatsApp').uncheck();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('CH01-CONSENT');
   await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText('No');
