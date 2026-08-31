@@ -1,7 +1,7 @@
 'use client';
 
 import type { CatalogItem, ClinicalDocument, Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
-import { calculateQuoteTotals } from '@analiza/domain';
+import { calculateQuoteTotals, normalizeQuoteInvoiceMetadata } from '@analiza/domain';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
   demoInventoryMovements,
@@ -58,13 +58,14 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
 /** Migrates locally persisted quote records from the earlier, minimal React
  * contract. This keeps mock reloads backward compatible while calculation
  * fields remain derived rather than trusted from browser storage. */
-function normalizeQuote(quote: Quote): Quote {
+export function normalizeQuote(quote: Quote): Quote {
   const items = Array.isArray(quote.items) ? quote.items : [];
   const insurerAmount = quote.insurerAmount ?? 0;
   try {
     const totals = calculateQuoteTotals(items, quote.discount, insurerAmount);
     return {
       ...quote,
+      ...normalizeQuoteInvoiceMetadata(quote),
       comments: quote.comments ?? undefined,
       items,
       ...totals,
@@ -75,6 +76,7 @@ function normalizeQuote(quote: Quote): Quote {
   } catch {
     return {
       ...quote,
+      ...normalizeQuoteInvoiceMetadata(quote),
       comments: quote.comments ?? undefined,
       items: [], subtotal: 0, discountAmount: 0, total: 0, insurerAmount: 0, patientAmount: 0,
       immutable: quote.immutable ?? quote.status === 'SENT',

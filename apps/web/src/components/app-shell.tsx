@@ -13,9 +13,15 @@ const navigation: NavigationGroup[] = [
   { label: 'Inicio', href: '/dashboard', permission: 'dashboard:read', actionId: 'DASHBOARD-NAVIGATE' },
   { label: 'Pacientes', href: '/patients', permission: 'patients:read', actionId: 'PATIENT-NAVIGATE' },
   { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
-  { label: 'Hospitalizaciones', href: '/hospitalizations', permission: 'cases:read', actionId: 'HOSPITALIZATION-NAVIGATE' },
-  { label: 'Cotizaciones', href: '/quotes', permission: 'quotes:read', actionId: 'QUOTE-NAVIGATE' },
-  { label: 'Cuentas por cobrar', href: '/receivables', permission: 'payments:read', actionId: 'RECEIVABLES-NAVIGATE' },
+  {
+    label: 'Financiero',
+    children: [
+      { label: 'Hospitalización', href: '/hospitalizations', permission: 'cases:read', actionId: 'HOSPITALIZATION-NAVIGATE' },
+      { label: 'Cuentas por cobrar', href: '/receivables', permission: 'payments:read', actionId: 'RECEIVABLES-NAVIGATE' },
+      { label: 'Preautorizaciones y reclamos', href: '/insurance', permission: 'insurance:read', actionId: 'INSURANCE-NAVIGATE' },
+      { label: 'Cotizaciones', href: '/quotes', permission: 'quotes:read', actionId: 'QUOTE-NAVIGATE' },
+    ],
+  },
   { label: 'Pagos', href: '/payments', permission: 'payments:read', actionId: 'PAYMENT-NAVIGATE' },
   {
     label: 'Clínico',
@@ -30,7 +36,6 @@ const navigation: NavigationGroup[] = [
       { label: 'Tablero de enfermería', href: '/clinical/nursing', permission: 'clinical:read', actionId: 'NURSING-RESOURCE-NAVIGATE' },
     ],
   },
-  { label: 'Seguros', href: '/insurance', permission: 'insurance:read', actionId: 'INSURANCE-NAVIGATE' },
   {
     label: 'Inventario',
     children: [
@@ -70,7 +75,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userProfileOpen, setUserProfileOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Clínico: pathname.startsWith('/clinical'), Inventario: pathname.startsWith('/inventory'), Reportes: pathname.startsWith('/reports'),
+    Financiero: pathname.startsWith('/hospitalizations') || pathname.startsWith('/receivables') || pathname.startsWith('/insurance') || pathname.startsWith('/quotes'), Clínico: pathname.startsWith('/clinical'), Inventario: pathname.startsWith('/inventory'), Reportes: pathname.startsWith('/reports'),
   });
   const required = permissionForPath(pathname);
   useEffect(() => {

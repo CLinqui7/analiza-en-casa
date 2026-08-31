@@ -164,6 +164,11 @@ export const quoteSchema = z.object({
   version: z.number().int().positive(),
   status: z.enum(['DRAFT', 'SENT']),
   summary: z.string().trim().min(1),
+  /** Administrative invoice fields observed in CH03.  They do not alter totals. */
+  invoiceDate: z.string().optional(),
+  discountGroup: z.string().trim().optional(),
+  referralLabel: z.string().trim().optional(),
+  giftCardCode: z.string().trim().optional(),
   comments: z.string().trim().optional(),
   items: z.array(quoteItemSchema).default([]),
   discount: quoteDiscountSchema.optional(),

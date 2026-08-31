@@ -180,6 +180,34 @@ export function searchHospitalizations(
   });
 }
 
+export type HospitalizationFilters = {
+  status?: Hospitalization['status'] | '';
+  startDate?: string;
+  accountType?: string;
+};
+
+/** Applies only the three filters demonstrated in CH03 as one explicit
+ * operation.  The caller owns when this function is invoked (the UI uses
+ * Aplicar), so choosing a value never changes results prematurely. */
+export function filterHospitalizations(
+  hospitalizations: readonly Hospitalization[],
+  filters: HospitalizationFilters,
+): Hospitalization[] {
+  return hospitalizations.filter((item) =>
+    (!filters.status || item.status === filters.status)
+    && (!filters.startDate || item.startDate === filters.startDate)
+    && (!filters.accountType || item.accountType === filters.accountType));
+}
+
+/** Operational elapsed calendar days from available administrative dates.
+ * It deliberately does not characterize care or a clinical duration. */
+export function hospitalizationDurationDays(item: Pick<Hospitalization, 'startDate' | 'endDate'>, now = new Date()): number | undefined {
+  const start = new Date(`${item.startDate}T00:00:00.000Z`);
+  const end = new Date(`${item.endDate ?? now.toISOString().slice(0, 10)}T00:00:00.000Z`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return undefined;
+  return Math.floor((end.getTime() - start.getTime()) / 86_400_000);
+}
+
 export const quoteCategories: ReadonlyArray<{ value: QuoteItemCategory; label: string }> = [
   { value: 'SERVICES', label: 'Servicios' },
   { value: 'STUDIES', label: 'Estudios diagnósticos' },
@@ -279,6 +307,25 @@ export function searchQuotes(quotes: readonly Quote[], patients: readonly Patien
       || normalizeDocument(quote.id).includes(normalizedNeedle)
       || normalizeDocument(quote.caseId).includes(normalizedNeedle);
   });
+}
+
+export type QuoteListFilters = { status?: Quote['status'] | ''; createdDate?: string };
+
+export function filterQuotes(quotes: readonly Quote[], filters: QuoteListFilters): Quote[] {
+  return quotes.filter((quote) =>
+    (!filters.status || quote.status === filters.status)
+    && (!filters.createdDate || quote.createdAt.slice(0, 10) === filters.createdDate));
+}
+
+/** Backward-compatible defaults for administrative CH03 fields.  No value
+ * returned here is a discount, referral, or gift-card business rule. */
+export function normalizeQuoteInvoiceMetadata(quote: Pick<Quote, 'createdAt' | 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'>): Pick<Quote, 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'> {
+  return {
+    invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
+    discountGroup: quote.discountGroup ?? 'Regular',
+    referralLabel: quote.referralLabel ?? undefined,
+    giftCardCode: quote.giftCardCode ?? undefined,
+  };
 }
 
 export function canEditQuote(quote: Pick<Quote, 'status' | 'immutable'>): boolean {

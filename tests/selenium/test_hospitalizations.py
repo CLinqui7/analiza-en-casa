@@ -85,6 +85,7 @@ class Hospitalizations(unittest.TestCase):
             'localStorage.removeItem("analiza.en.casa.workspace.v2");'
             'localStorage.removeItem("analiza.en.casa.mock-session.v1");',
         )
+        self.d.execute_script("Object.keys(localStorage).filter((key) => key.startsWith('analiza.en.casa.workspace.v3.')).forEach((key) => localStorage.removeItem(key));")
         self.d.get(f'{BASE}/login')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//label[contains(.,'Correo')]//input")))
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[type=password]')))
@@ -129,7 +130,7 @@ class Hospitalizations(unittest.TestCase):
 
     def list_ready(self) -> None:
         self.w.until(EC.visibility_of_element_located((By.TAG_NAME, 'h1')))
-        self.assertEqual(self.d.find_element(By.TAG_NAME, 'h1').text, 'Hospitalizaciones')
+        self.assertEqual(self.d.find_element(By.TAG_NAME, 'h1').text, 'Hospitalización')
         self.w.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'table')))
 
     def case_row(self, marker: str):
@@ -151,19 +152,19 @@ class Hospitalizations(unittest.TestCase):
         self.click('HOSPITALIZATION-CREATE-SUBMIT')
         self.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]')))
         row = self.case_row(marker)
-        return row.find_elements(By.CSS_SELECTOR, 'td')[1].text
+        return row.find_elements(By.CSS_SELECTOR, 'td')[1].text.splitlines()[0]
 
     def open_detail(self, marker: str) -> str:
         row = self.case_row(marker)
-        case_id = row.find_elements(By.CSS_SELECTOR, 'td')[1].text
+        case_id = row.find_elements(By.CSS_SELECTOR, 'td')[1].text.splitlines()[0]
         row.find_element(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"]').click()
         self.w.until(EC.url_contains(f'/hospitalizations/{case_id}'))
         self.assertEqual(self.d.find_element(By.TAG_NAME, 'h1').text, case_id)
         return case_id
 
     def stored_case(self, case_id: str) -> dict:
-        data = json.loads(self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")'))
-        return next(item for item in data['hospitalizations'] if item['id'] == case_id)
+        data = json.loads(self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v3.hospitalizations")'))
+        return next(item for item in data if item['id'] == case_id)
 
     def test_navigation_and_roles(self) -> None:
         started = time.time()
@@ -219,12 +220,13 @@ class Hospitalizations(unittest.TestCase):
         self.d.get(f'{BASE}/hospitalizations')
         self.list_ready()
         state_started = time.time()
-        Select(self.action('HOSPITALIZATION-FILTER-STATE')).select_by_value('ACTIVE')
+        Select(self.action('HOSPITALIZATION-FILTER-STATUS')).select_by_value('ACTIVE')
+        self.click('HOSPITALIZATION-FILTER-APPLY')
         rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertTrue(rows and all('Activo' in row.text for row in rows))
-        self.pass_('HOSPITALIZATION-FILTER-STATE', 'SEL-HOSP-FILTERS', state_started)
+        self.pass_('HOSPITALIZATION-FILTER-STATUS', 'SEL-HOSP-FILTERS', state_started)
         date_started = time.time()
-        date_filter = self.action('HOSPITALIZATION-FILTER-START-DATE')
+        date_filter = self.action('HOSPITALIZATION-FILTER-DATE')
         self.d.execute_script(
             "const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
             "set.call(arguments[0], '2026-08-28');"
@@ -233,25 +235,27 @@ class Hospitalizations(unittest.TestCase):
             date_filter,
         )
         self.assertEqual(date_filter.get_attribute('value'), '2026-08-28')
+        self.click('HOSPITALIZATION-FILTER-APPLY')
         self.w.until(lambda _: len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')) == 1)
         rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertEqual(len(rows), 1)
         self.assertIn('2026-08-28', rows[0].text)
-        self.pass_('HOSPITALIZATION-FILTER-START-DATE', 'SEL-HOSP-FILTERS', date_started)
+        self.pass_('HOSPITALIZATION-FILTER-DATE', 'SEL-HOSP-FILTERS', date_started)
         account_started = time.time()
         Select(self.action('HOSPITALIZATION-FILTER-ACCOUNT-TYPE')).select_by_value('Referencia sintética')
+        self.click('HOSPITALIZATION-FILTER-APPLY')
         rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertEqual(len(rows), 1)
         self.assertIn('Referencia sintética', rows[0].text)
         self.pass_('HOSPITALIZATION-FILTER-ACCOUNT-TYPE', 'SEL-HOSP-FILTERS', account_started)
         reset_started = time.time()
-        self.click('HOSPITALIZATION-FILTER-RESET')
-        self.assertEqual(Select(self.action('HOSPITALIZATION-FILTER-STATE')).first_selected_option.get_attribute('value'), '')
-        self.assertEqual(self.action('HOSPITALIZATION-FILTER-START-DATE').get_attribute('value'), '')
+        self.click('HOSPITALIZATION-FILTER-CLEAR')
+        self.assertEqual(Select(self.action('HOSPITALIZATION-FILTER-STATUS')).first_selected_option.get_attribute('value'), '')
+        self.assertEqual(self.action('HOSPITALIZATION-FILTER-DATE').get_attribute('value'), '')
         self.assertEqual(Select(self.action('HOSPITALIZATION-FILTER-ACCOUNT-TYPE')).first_selected_option.get_attribute('value'), '')
         self.assertIn('Página 1', self.d.find_element(By.TAG_NAME, 'body').text)
         self.assertGreaterEqual(len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')), 1)
-        self.pass_('HOSPITALIZATION-FILTER-RESET', 'SEL-HOSP-FILTERS', reset_started)
+        self.pass_('HOSPITALIZATION-FILTER-CLEAR', 'SEL-HOSP-FILTERS', reset_started)
 
     def test_pagination(self) -> None:
         self.create_fixture('Semilla de paginación Selenium')
@@ -309,7 +313,7 @@ class Hospitalizations(unittest.TestCase):
         self.click('HOSPITALIZATION-CREATE-SUBMIT')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'persistida')]")))
         row = self.case_row('Acción Selenium Hospitalización')
-        case_id = row.find_elements(By.CSS_SELECTOR, 'td')[1].text
+        case_id = row.find_elements(By.CSS_SELECTOR, 'td')[1].text.splitlines()[0]
         self.d.refresh()
         self.case_row('Acción Selenium Hospitalización')
         stored = self.stored_case(case_id)
@@ -405,7 +409,8 @@ class Hospitalizations(unittest.TestCase):
             self.list_ready()
             self.action('HOSPITALIZATION-SEARCH').send_keys('Aurora')
             self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Paciente Demo Aurora')]")))
-            Select(self.action('HOSPITALIZATION-FILTER-STATE')).select_by_value('ACTIVE')
+            Select(self.action('HOSPITALIZATION-FILTER-STATUS')).select_by_value('ACTIVE')
+            self.click('HOSPITALIZATION-FILTER-APPLY')
             self.click('HOSPITALIZATION-CREATE')
             submit = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]')))
             self.d.execute_script('arguments[0].scrollIntoView({block:"center"});', submit)

@@ -9,6 +9,8 @@ import {
   maskDui,
   searchPatients,
   searchHospitalizations,
+  filterHospitalizations,
+  hospitalizationDurationDays,
   toCsv,
   validateDocument,
   calculateQuoteBalance,
@@ -21,6 +23,8 @@ import {
   isInsuranceRequestStatus,
   searchInsuranceRequests,
   searchQuotes,
+  filterQuotes,
+  normalizeQuoteInvoiceMetadata,
   validateQuoteItem,
 } from '@analiza/domain';
 
@@ -46,6 +50,13 @@ describe('domain boundaries', () => {
     expect(searchHospitalizations(hospitalizations, patients, 'hos 2026 0001')).toHaveLength(1);
     expect(searchHospitalizations(hospitalizations, patients, 'aurea')).toHaveLength(1);
     expect(searchHospitalizations(hospitalizations, patients, '1234 56789')).toHaveLength(1);
+  });
+
+  it('combines hospitalization filters only from the supplied applied values and derives operational duration', () => {
+    expect(filterHospitalizations(hospitalizations, { status: 'ACTIVE', startDate: '2026-08-28', accountType: 'PARTICULAR' })).toEqual([hospitalizations[0]]);
+    expect(filterHospitalizations(hospitalizations, {}).map((item) => item.id)).toEqual(['HOS-2026-0001', 'HOS-2026-0002']);
+    expect(hospitalizationDurationDays({ startDate: '2026-08-28' }, new Date('2026-08-31T12:00:00.000Z'))).toBe(3);
+    expect(hospitalizationDurationDays({ startDate: '2026-08-31', endDate: '2026-08-30' })).toBeUndefined();
   });
 
   it('applies the configured demo DUI mask and error without claiming official validation', () => {
@@ -143,6 +154,16 @@ describe('quote domain', () => {
     expect(searchQuotes([quote], patients, 'áurea')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'draft')).toHaveLength(1);
   });
+
+  it('filters quote list status and creation date without changing totals', () => {
+    expect(filterQuotes([quote], { status: 'DRAFT', createdDate: '2026-08-28' })).toEqual([quote]);
+    expect(filterQuotes([quote], { status: 'SENT' })).toEqual([]);
+  });
+
+  it('normalizes old quote invoice metadata without assigning financial behavior', () => {
+    expect(normalizeQuoteInvoiceMetadata(quote)).toEqual({ invoiceDate: '2026-08-28', discountGroup: 'Regular', referralLabel: undefined, giftCardCode: undefined });
+  });
+
 });
 
 describe('insurance domain boundaries', () => {
