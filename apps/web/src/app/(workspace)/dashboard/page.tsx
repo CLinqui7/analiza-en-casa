@@ -1,23 +1,18 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { videoParitySummary } from '@/lib/video-parity-summary';
 
 function displayMetric(value: number | undefined, unit = '') {
   return value === undefined ? '—' : `${value}${unit}`;
 }
 
 export default function DashboardPage() {
-  const { auditEntries, clinicalDocuments, error, hospitalizations, inventoryMovements, loading, nursingResources, patients, vitalReadings } = useWorkspace();
+  const { auditEntries, clinicalDocuments, error, hospitalizations, loading, patients, vitalReadings } = useWorkspace();
   const { can } = useAuth();
-  const parity = useQuery({
-    queryKey: ['video-parity-summary'],
-    queryFn: async () => ({ chapters: 17, unresolvedMissing: 0, source: 'Matriz canónica versionada' }),
-    staleTime: Infinity,
-  });
   const supabaseConfigured = Boolean(getSupabaseBrowserClient());
   const carePlans = clinicalDocuments.filter((document) => document.type === 'CARE_PLAN').length;
   const recentReadings = vitalReadings.slice().sort((left, right) => right.measuredAt.localeCompare(left.measuredAt));
@@ -42,14 +37,11 @@ export default function DashboardPage() {
       {!loading && !error ? <>
         <section className="metric-grid" aria-label="Indicadores operativos">
           <Panel><span>Pacientes con alertas</span><strong>—</strong><small>Requiere umbrales clínicos aprobados.</small></Panel>
-          <Panel><span>Pacientes registrados</span><strong>{patients.length}</strong><small>Registros sintéticos disponibles.</small></Panel>
-          <Panel><span>Mediciones individuales</span><strong>{vitalReadings.length}</strong><small>Sin interpretación automática.</small></Panel>
-          <Panel><span>Hospitalizaciones activas</span><strong>{hospitalizations.filter((item) => item.status === 'ACTIVE').length}</strong><small>Coordinación operativa registrada.</small></Panel>
+          <Panel><span>Pacientes activos</span><strong>{patients.filter((item) => item.status === 'ACTIVE').length}</strong><small>Registros sintéticos activos.</small></Panel>
+          <Panel><span>Tratamientos actualizados</span><strong>—</strong><small>Sin fuente ni regla aprobada.</small></Panel>
+          <Panel><span>Tratamientos por finalizar</span><strong>—</strong><small>Sin fuente ni regla aprobada.</small></Panel>
           <Panel><span>Planes de cuidado</span><strong>{carePlans}</strong><small>Documentos sintéticos no interpretados.</small></Panel>
           <Panel><span>Incidentes</span><strong>—</strong><small>Sin fuente ni regla aprobada.</small></Panel>
-          <Panel><span>Recursos de enfermería</span><strong>{nursingResources.length}</strong><small>Registros operativos disponibles.</small></Panel>
-          <Panel><span>Movimientos de inventario</span><strong>{inventoryMovements.length}</strong><small>Eventos de inventario auditables.</small></Panel>
-          <Panel><span>Eventos auditados</span><strong>{auditEntries.length}</strong><small>Trazabilidad de la sesión demo.</small></Panel>
         </section>
 
         <Panel>
@@ -71,12 +63,15 @@ export default function DashboardPage() {
           <section className="two-column">
             <Panel>
               <h2>Control de migración</h2>
-              {parity.data ? <dl className="definition-list">
-                <div><dt>Capítulos verificados</dt><dd>{parity.data.chapters}/17</dd></div>
-                <div><dt>Faltantes en matriz</dt><dd>{parity.data.unresolvedMissing}</dd></div>
-                <div><dt>Fuente</dt><dd>{parity.data.source}</dd></div>
+              <dl className="definition-list">
+                <div><dt>Requisitos trazados</dt><dd>{videoParitySummary.total}</dd></div>
+                <div><dt>Exactos / parciales / faltantes</dt><dd>{videoParitySummary.EXACT ?? 0} / {videoParitySummary.PARTIAL ?? 0} / {videoParitySummary.MISSING ?? 0}</dd></div>
+                <div><dt>Bloqueados</dt><dd>{(videoParitySummary.BLOCKED_CLIENT ?? 0) + (videoParitySummary.BLOCKED_INTEGRATION ?? 0)}</dd></div>
+                <div><dt>Capítulos verificados</dt><dd>{videoParitySummary.chapters}/17</dd></div>
+                <div><dt>SHA de matriz</dt><dd><code>{videoParitySummary.sourceSha.slice(0, 12)}</code></dd></div>
+                <div><dt>Fecha de generación</dt><dd>{videoParitySummary.generatedAt}</dd></div>
                 <div><dt>Supabase navegador</dt><dd>{supabaseConfigured ? 'Configurado con clave pública' : 'No configurado en demo local'}</dd></div>
-              </dl> : <p>Cargando resumen verificable…</p>}
+              </dl>
             </Panel>
             <Panel>
               <h2>Auditoría reciente</h2>

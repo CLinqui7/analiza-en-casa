@@ -85,6 +85,10 @@ When production dependencies are added, also run the applicable lint, typecheck,
 
 ## Definition of done
 
+## FULL VIDEO PARITY CONTRACT
+
+Every subsequent agent must read `docs/qa/VIDEO_TO_REACT_TRACEABILITY.json`, work the first unclosed requirement in its assigned batch, and never mark a requirement `EXACT` without a passing video-parity gate. Each change must run focused tests, update the matrices, register its verification SHA, preserve safe blocked-integration states, avoid GitHub Actions and merges, and run regression coverage before changing a certified module.
+
 The overnight task is complete only when all of the following are true:
 
 - Baseline behavior still works.
