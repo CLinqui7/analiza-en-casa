@@ -1,6 +1,21 @@
 import { expect, test } from '@playwright/test';
 import XLSX from 'xlsx';
 
+// test-id: playwright:ch01-direct-auth
+// test-id: playwright:ch01-patient-tabs-import
+// test-id: playwright:ch01-patient-video-columns
+// test-id: playwright:ch01-search-pagination
+// test-id: playwright:workspace-loading-empty-error
+// test-id: playwright:ch01-xlsx-export
+// test-id: playwright:ch01-triage-botmaker-status
+// test-id: playwright:workspace-sidebar-accordions
+// test-id: playwright:ch01-dashboard-six-metrics
+// test-id: playwright:ch01-measurements-table
+// test-id: playwright:ch01-user-menu
+// test-id: playwright:ch01-logout
+// test-id: playwright:ch01-login-recovery
+// test-id: playwright:ch01-pwa-install-surface
+
 async function login(page: import('@playwright/test').Page, path = '/dashboard') {
   await page.goto(`/login?next=${encodeURIComponent(path)}`);
   await page.getByLabel('Usuario o correo').fill('admin@demo.local');
@@ -39,6 +54,19 @@ test('CH01-F004 search-pagination filters and pages patient records', async ({ p
   await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
   await page.getByLabel('Buscar paciente').fill('sin coincidencia ch01');
   await expect(page.getByText('Sin resultados')).toBeVisible();
+});
+
+test('CH01-F006 list state represents an empty filtered result safely', async ({ page }) => {
+  await login(page, '/patients');
+  await page.getByLabel('Buscar paciente').fill('resultado inexistente ch01');
+  await expect(page.getByText('Sin resultados')).toBeVisible();
+});
+
+test('CH01-F008 hierarchical menu exposes only live routes', async ({ page }) => {
+  await login(page);
+  await page.getByRole('button', { name: 'Clínico' }).click();
+  await page.getByRole('link', { name: 'Reporte de salud' }).click();
+  await expect(page).toHaveURL(/\/clinical\/reports$/);
 });
 
 test('CH01-F005 xlsx-export creates a valid workbook', async ({ page }) => {

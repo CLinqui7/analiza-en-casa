@@ -53,6 +53,11 @@ try {
   await page.waitForURL('**/dashboard');
   const loginMs = Math.round(performance.now() - loginStarted);
   await page.goto(`${baseURL}/patients`, { waitUntil: 'networkidle' });
+  const dashboardHotStarted = performance.now();
+  await page.goto(`${baseURL}/dashboard`, { waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
+  const dashboardHotNavigationMs = Math.round(performance.now() - dashboardHotStarted);
+  await page.goto(`${baseURL}/patients`, { waitUntil: 'networkidle' });
   await page.evaluate(() => {
     const raw = localStorage.getItem('analiza.en.casa.workspace.v2');
     const snapshot = raw ? JSON.parse(raw) : { patients: [], vitalReadings: [], nursingResources: [], nurseHours: [], inventoryMovements: [], shifts: [], hospitalizations: [], quotes: [], payments: [], clinicalDocuments: [], catalogItems: [], purchases: [], insuranceRequests: [], insuranceEvents: [], auditEntries: [] };
@@ -69,13 +74,14 @@ try {
   await page.locator('[data-action-id="PATIENT-CREATE"]').click();
   await page.getByRole('dialog').waitFor();
   const modalOpenMs = Math.round(performance.now() - modalStarted);
-  const report = { mode, startedAt, baseURL, routes, scenarios: { loginMs, patientSearch1000Ms, modalOpenMs }, notes: ['Production local measurement; LCP/CLS use browser timing when available.', 'Mock provider currently uses workspace.v2 for the 1,000-patient fixture.'] };
+  const report = { mode, startedAt, baseURL, routes, scenarios: { loginMs, dashboardHotNavigationMs, patientSearch1000Ms, modalOpenMs }, budgets: { dashboardHotNavigationMs: 500, dashboardBudgetPass: dashboardHotNavigationMs <= 500 }, notes: ['Production local measurement; LCP/CLS use browser timing when available.', 'Mock provider currently uses workspace.v2 for the 1,000-patient fixture.'] };
   await browser.close();
   await mkdir(resolve('docs/performance'), { recursive: true });
   const json = resolve(`docs/performance/PERFORMANCE_${mode}.json`);
   const markdown = resolve(`docs/performance/PERFORMANCE_${mode}.md`);
   await writeFile(json, `${JSON.stringify(report, null, 2)}\n`);
-  await writeFile(markdown, `# Performance ${mode}\n\n- Generated: ${startedAt}\n- Login: ${loginMs} ms\n- Patient search (1,000): ${patientSearch1000Ms} ms\n- Modal open: ${modalOpenMs} ms\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`);
+  await writeFile(markdown, `# Performance ${mode}\n\n- Generated: ${startedAt}\n- Login: ${loginMs} ms\n- Dashboard hot navigation: ${dashboardHotNavigationMs} ms (budget <= 500 ms)\n- Patient search (1,000): ${patientSearch1000Ms} ms\n- Modal open: ${modalOpenMs} ms\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`);
+  if (!report.budgets.dashboardBudgetPass) throw new Error(`Dashboard hot navigation ${dashboardHotNavigationMs} ms exceeds 500 ms.`);
   console.log(JSON.stringify(report, null, 2));
 } finally {
   server.kill();

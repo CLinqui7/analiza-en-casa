@@ -2,7 +2,7 @@
 
 import { EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
-import { useAuth, useWorkspace } from '@/components/providers';
+import { useAuth, useDashboardWorkspace } from '@/components/providers';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { videoParitySummary } from '@/lib/video-parity-summary';
 
@@ -11,7 +11,7 @@ function displayMetric(value: number | undefined, unit = '') {
 }
 
 export default function DashboardPage() {
-  const { auditEntries, clinicalDocuments, error, hospitalizations, loading, patients, vitalReadings } = useWorkspace();
+  const { auditEntries, clinicalDocuments, error, hospitalizations, loading, patients, vitalReadings } = useDashboardWorkspace();
   const { can } = useAuth();
   const supabaseConfigured = Boolean(getSupabaseBrowserClient());
   const carePlans = clinicalDocuments.filter((document) => document.type === 'CARE_PLAN').length;
@@ -68,7 +68,7 @@ export default function DashboardPage() {
                 <div><dt>Exactos / parciales / faltantes</dt><dd>{videoParitySummary.EXACT ?? 0} / {videoParitySummary.PARTIAL ?? 0} / {videoParitySummary.MISSING ?? 0}</dd></div>
                 <div><dt>Bloqueados</dt><dd>{(videoParitySummary.BLOCKED_CLIENT ?? 0) + (videoParitySummary.BLOCKED_INTEGRATION ?? 0)}</dd></div>
                 <div><dt>Capítulos verificados</dt><dd>{videoParitySummary.chapters}/17</dd></div>
-                <div><dt>SHA de matriz</dt><dd><code>{videoParitySummary.sourceSha.slice(0, 12)}</code></dd></div>
+                <div><dt>SHA de implementación</dt><dd><code>{videoParitySummary.sourceSha?.slice(0, 12) ?? 'pendiente'}</code></dd></div>
                 <div><dt>Fecha de generación</dt><dd>{videoParitySummary.generatedAt}</dd></div>
                 <div><dt>Supabase navegador</dt><dd>{supabaseConfigured ? 'Configurado con clave pública' : 'No configurado en demo local'}</dd></div>
               </dl>

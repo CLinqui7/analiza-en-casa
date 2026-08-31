@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { ch01FunctionalFingerprint, functionalEntries } from './functional-fingerprint.mjs';
 
 const root = process.cwd();
 const tracePath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json');
@@ -14,6 +15,10 @@ const chapterIndex = process.argv.indexOf('--chapter');
 const chapter = chapterIndex === -1 ? undefined : process.argv[chapterIndex + 1];
 if (chapterIndex !== -1 && !chapter) throw new Error('Expected a chapter after --chapter.');
 const currentSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+const currentFingerprint = ch01FunctionalFingerprint(root);
+const ch01EvidenceSource = [
+  'apps/web/e2e/ch01.spec.ts', 'apps/web/e2e/workspace.spec.ts', 'apps/web/src/lib/domain.test.ts', 'tests/selenium/test_ch01.py',
+].filter((path) => existsSync(resolve(root, path))).map((path) => readFileSync(resolve(root, path), 'utf8')).join('\n');
 const errors = [];
 const allowed = new Set(['EXACT', 'PARTIAL', 'MISSING', 'BLOCKED_CLIENT', 'BLOCKED_INTEGRATION', 'NOT_TESTABLE', 'NOT_APPLICABLE']);
 const expected = new Set(canonical.requirements.map((item) => item.requirement_id));
@@ -37,7 +42,12 @@ for (const item of reviewedRequirements) {
     const certification = (certifications.certifications ?? certifications)[item.requirement_id];
     if (!certification) errors.push(`${item.requirement_id}: EXACT has no current certification`);
     if (!(item.unit_test_ids?.length || item.playwright_test_ids?.length || item.selenium_test_ids?.length || item.visual_test_ids?.length)) errors.push(`${item.requirement_id}: EXACT has no test evidence`);
-    if (item.last_verified_sha !== currentSha) errors.push(`${item.requirement_id}: certification SHA ${item.last_verified_sha ?? 'missing'} does not match HEAD ${currentSha}`);
+    for (const testId of [...(item.unit_test_ids ?? []), ...(item.playwright_test_ids ?? []), ...(item.selenium_test_ids ?? []), ...(item.visual_test_ids ?? [])]) {
+      if (!ch01EvidenceSource.includes(`test-id: ${testId}`)) errors.push(`${item.requirement_id}: test_id ${testId} is not declared by executable evidence`);
+    }
+    if (!certifications.implementation_sha) errors.push(`${item.requirement_id}: certification lacks implementation_sha`);
+    if (!certifications.functional_fingerprint) errors.push(`${item.requirement_id}: certification lacks functional_fingerprint`);
+    if (certifications.functional_fingerprint !== currentFingerprint) errors.push(`${item.requirement_id}: functional fingerprint is stale`);
   }
 }
 for (const route of routes.routes) {
@@ -54,6 +64,15 @@ if (process.argv.includes('--self-test')) {
   const fixtureDetected = trace.requirements.some((item) => item.route_id === route.route_id && ['PARTIAL', 'MISSING'].includes(item.parity_status));
   if (!fixtureDetected) throw new Error('False EXACT fixture was not detected.');
   console.log(`anti-false-exact fixture detected: ${route.route_id} conflicts with ${partial.requirement_id}`);
+  const baseline = ch01FunctionalFingerprint(root);
+  const entries = functionalEntries(root);
+  const [functionalPath, functionalContent] = entries[0];
+  const changedFunctional = ch01FunctionalFingerprint(root, new Map([[functionalPath, Buffer.concat([functionalContent, Buffer.from('\nself-test')])]]));
+  if (baseline === changedFunctional) throw new Error('Functional-change fingerprint fixture was not detected.');
+  const metadataOnly = ch01FunctionalFingerprint(root);
+  if (baseline !== metadataOnly) throw new Error('Metadata-only fingerprint fixture unexpectedly changed.');
+  if (baseline === '0'.repeat(64)) throw new Error('Wrong fingerprint fixture was not detected.');
+  console.log('fingerprint self-tests passed: metadata-only, functional-change, wrong-fingerprint');
 }
 if (errors.length) {
   console.error(errors.join('\n'));

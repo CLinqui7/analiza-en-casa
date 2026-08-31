@@ -54,6 +54,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
+type DashboardWorkspace = Pick<WorkspaceContextValue, 'auditEntries' | 'clinicalDocuments' | 'error' | 'hospitalizations' | 'loading' | 'patients' | 'vitalReadings'>;
+const DashboardWorkspaceContext = createContext<DashboardWorkspace | null>(null);
 
 function audit(action: string, subject: string): AuditEntry {
   return { id: crypto.randomUUID(), at: new Date().toISOString(), action, subject };
@@ -349,7 +351,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     }),
     [can, commit, error, loading, provider.mode, snapshot],
   );
-  return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
+  const dashboardValue = useMemo<DashboardWorkspace>(() => ({
+    auditEntries: value.auditEntries, clinicalDocuments: value.clinicalDocuments, error: value.error,
+    hospitalizations: value.hospitalizations, loading: value.loading, patients: value.patients, vitalReadings: value.vitalReadings,
+  }), [value.auditEntries, value.clinicalDocuments, value.error, value.hospitalizations, value.loading, value.patients, value.vitalReadings]);
+  return <WorkspaceContext.Provider value={value}><DashboardWorkspaceContext.Provider value={dashboardValue}>{children}</DashboardWorkspaceContext.Provider></WorkspaceContext.Provider>;
 }
 
 export function AppProviders({ children }: PropsWithChildren) {
@@ -376,5 +382,13 @@ export function useRole(): Role | undefined {
 export function useWorkspace() {
   const context = useContext(WorkspaceContext);
   if (!context) throw new Error('useWorkspace requiere AppProviders.');
+  return context;
+}
+
+/** Narrow dashboard subscription: unrelated workspace commits retain the
+ * dashboard context identity and do not schedule its consumers. */
+export function useDashboardWorkspace() {
+  const context = useContext(DashboardWorkspaceContext);
+  if (!context) throw new Error('useDashboardWorkspace requiere AppProviders.');
   return context;
 }
