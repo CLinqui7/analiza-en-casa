@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 
 const mode = process.argv[2] === 'final' ? 'FINAL' : 'BASELINE';
-const port = 4185;
+const port = 4197;
 const baseURL = `http://127.0.0.1:${port}`;
 const startedAt = new Date().toISOString();
 const server = spawn(process.platform === 'win32' ? 'cmd.exe' : 'npm', process.platform === 'win32'
@@ -46,8 +46,8 @@ try {
     routes[route] = { navigationMs: Math.round(performance.now() - began), ...(await metrics(page)) };
   }
   await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' });
-  await page.getByLabel('Usuario o correo').fill('admin@demo.local');
-  await page.getByLabel('Clave').fill('demo-admin');
+  await page.locator('[data-action-id="AUTH-LOGIN-EMAIL"]').fill('admin@demo.local');
+  await page.locator('[data-action-id="AUTH-LOGIN-PASSWORD"]').fill('demo-admin');
   const loginStarted = performance.now();
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.waitForURL('**/dashboard');
