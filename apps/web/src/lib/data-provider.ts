@@ -87,21 +87,33 @@ function normalizeQuote(quote: Quote): Quote {
 export interface DataProvider {
   readonly mode: 'mock' | 'supabase';
   load(): Promise<WorkspaceSnapshot>;
-  save(snapshot: WorkspaceSnapshot): Promise<void>;
+  saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void>;
 }
 
 const storageKey = 'analiza.en.casa.workspace.v2';
+const storagePrefix = 'analiza.en.casa.workspace.v3.';
+const workspaceKeys = ['patients', 'vitalReadings', 'nursingResources', 'nurseHours', 'inventoryMovements', 'shifts', 'hospitalizations', 'quotes', 'payments', 'clinicalDocuments', 'catalogItems', 'purchases', 'insuranceRequests', 'insuranceEvents', 'auditEntries'] as const satisfies ReadonlyArray<keyof WorkspaceSnapshot>;
 
 export class MockDataProvider implements DataProvider {
   readonly mode = 'mock' as const;
+  private queue: Promise<void> = Promise.resolve();
   async load(): Promise<WorkspaceSnapshot> {
     if (typeof window === 'undefined') return defaultSnapshot();
     try {
+      const segmented = workspaceKeys.map((key) => window.localStorage.getItem(`${storagePrefix}${key}`));
+      if (segmented.some(Boolean)) {
+        const fallback = defaultSnapshot();
+        const next = { ...fallback } as WorkspaceSnapshot;
+        workspaceKeys.forEach((key, index) => {
+          if (segmented[index]) next[key] = JSON.parse(segmented[index]);
+        });
+        return { ...next, patients: next.patients.map((patient) => ({ ...patient, status: patient.status ?? 'ACTIVE', retired: patient.retired ?? false, contacts: patient.contacts ?? [] })), quotes: next.quotes.map(normalizeQuote) };
+      }
       const saved = window.localStorage.getItem(storageKey);
       if (!saved) return defaultSnapshot();
       const parsed = JSON.parse(saved) as WorkspaceSnapshot;
       if (!Array.isArray(parsed.patients) || !Array.isArray(parsed.auditEntries) || !Array.isArray(parsed.shifts) || !Array.isArray(parsed.hospitalizations) || !Array.isArray(parsed.quotes) || !Array.isArray(parsed.payments) || !Array.isArray(parsed.clinicalDocuments) || !Array.isArray(parsed.catalogItems) || !Array.isArray(parsed.purchases)) throw new Error('invalid');
-      return {
+      const migrated = {
         ...parsed,
         patients: parsed.patients.map((patient) => ({
           ...patient,
@@ -113,13 +125,22 @@ export class MockDataProvider implements DataProvider {
         insuranceRequests: Array.isArray(parsed.insuranceRequests) ? parsed.insuranceRequests : [],
         insuranceEvents: Array.isArray(parsed.insuranceEvents) ? parsed.insuranceEvents : [],
       };
-    } catch {
+      await this.saveChanges(migrated);
       window.localStorage.removeItem(storageKey);
+      return migrated;
+    } catch {
       return defaultSnapshot();
     }
   }
-  async save(snapshot: WorkspaceSnapshot): Promise<void> {
-    window.localStorage.setItem(storageKey, JSON.stringify(snapshot));
+  async saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void> {
+    const task = this.queue.then(() => {
+      for (const key of workspaceKeys) {
+        const value = changes[key];
+        if (value !== undefined) window.localStorage.setItem(`${storagePrefix}${key}`, JSON.stringify(value));
+      }
+    });
+    this.queue = task.catch(() => undefined);
+    return task;
   }
 }
 
@@ -157,13 +178,23 @@ export class SupabaseDataProvider implements DataProvider {
       insuranceEvents: (insuranceEvents.data ?? []) as InsuranceEvent[],
     };
   }
-  async save(snapshot: WorkspaceSnapshot): Promise<void> {
+  async saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void> {
     const client = this.client();
-    const results = await Promise.all([
-      client.from('patients').upsert(snapshot.patients), client.from('vital_readings').upsert(snapshot.vitalReadings),
-      client.from('nursing_resources').upsert(snapshot.nursingResources), client.from('nurse_hour_entries').upsert(snapshot.nurseHours),
-      client.from('inventory_movements').upsert(snapshot.inventoryMovements), client.from('shifts').upsert(snapshot.shifts), client.from('hospitalizations').upsert(snapshot.hospitalizations), client.from('quotes').upsert(snapshot.quotes), client.from('payments').upsert(snapshot.payments), client.from('clinical_documents').upsert(snapshot.clinicalDocuments), client.from('catalog_items').upsert(snapshot.catalogItems), client.from('purchases').upsert(snapshot.purchases), client.from('audit_log').upsert(snapshot.auditEntries),
-    ]);
+    const writes = [];
+    if (changes.patients) writes.push(client.from('patients').upsert(changes.patients));
+    if (changes.vitalReadings) writes.push(client.from('vital_readings').upsert(changes.vitalReadings));
+    if (changes.nursingResources) writes.push(client.from('nursing_resources').upsert(changes.nursingResources));
+    if (changes.nurseHours) writes.push(client.from('nurse_hour_entries').upsert(changes.nurseHours));
+    if (changes.inventoryMovements) writes.push(client.from('inventory_movements').upsert(changes.inventoryMovements));
+    if (changes.shifts) writes.push(client.from('shifts').upsert(changes.shifts));
+    if (changes.hospitalizations) writes.push(client.from('hospitalizations').upsert(changes.hospitalizations));
+    if (changes.quotes) writes.push(client.from('quotes').upsert(changes.quotes));
+    if (changes.payments) writes.push(client.from('payments').upsert(changes.payments));
+    if (changes.clinicalDocuments) writes.push(client.from('clinical_documents').upsert(changes.clinicalDocuments));
+    if (changes.catalogItems) writes.push(client.from('catalog_items').upsert(changes.catalogItems));
+    if (changes.purchases) writes.push(client.from('purchases').upsert(changes.purchases));
+    if (changes.auditEntries) writes.push(client.from('audit_log').upsert(changes.auditEntries));
+    const results = await Promise.all(writes);
     const failed = results.find((result) => result.error);
     if (failed?.error) throw new Error(`No fue posible persistir datos en Supabase: ${failed.error.message}`);
   }

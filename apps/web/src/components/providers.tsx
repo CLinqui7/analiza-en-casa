@@ -59,6 +59,14 @@ function audit(action: string, subject: string): AuditEntry {
   return { id: crypto.randomUUID(), at: new Date().toISOString(), action, subject };
 }
 
+function changedSlices(current: WorkspaceSnapshot, next: WorkspaceSnapshot): Partial<WorkspaceSnapshot> {
+  const changes: Partial<WorkspaceSnapshot> = {};
+  for (const key of Object.keys(current) as Array<keyof WorkspaceSnapshot>) {
+    if (current[key] !== next[key]) changes[key] = next[key] as never;
+  }
+  return changes;
+}
+
 function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +115,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot) => {
       setSnapshot((current) => {
         const next = change(current);
-        void provider.save(next).catch((cause: unknown) =>
+        const changes = changedSlices(current, next);
+        if (Object.keys(changes).length) void provider.saveChanges(changes).catch((cause: unknown) =>
           setError(cause instanceof Error ? cause.message : 'Error de persistencia.'),
         );
         return next;

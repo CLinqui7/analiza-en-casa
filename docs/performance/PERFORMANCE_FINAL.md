@@ -1,0 +1,79 @@
+# Performance FINAL
+
+- Generated: 2026-08-31T15:19:04.312Z
+- Login: 69 ms
+- Patient search (1,000): 39 ms
+- Modal open: 54 ms
+
+```json
+{
+  "mode": "FINAL",
+  "startedAt": "2026-08-31T15:19:04.312Z",
+  "baseURL": "http://127.0.0.1:4185",
+  "routes": {
+    "/login": {
+      "navigationMs": 618,
+      "domContentLoadedMs": 39,
+      "loadMs": 106,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    },
+    "/dashboard": {
+      "navigationMs": 592,
+      "domContentLoadedMs": 39,
+      "loadMs": 59,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    },
+    "/patients": {
+      "navigationMs": 566,
+      "domContentLoadedMs": 22,
+      "loadMs": 41,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    },
+    "/hospitalizations": {
+      "navigationMs": 566,
+      "domContentLoadedMs": 21,
+      "loadMs": 40,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    },
+    "/quotes": {
+      "navigationMs": 566,
+      "domContentLoadedMs": 22,
+      "loadMs": 41,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    },
+    "/insurance": {
+      "navigationMs": 563,
+      "domContentLoadedMs": 22,
+      "loadMs": 38,
+      "lcpMs": null,
+      "cls": 0,
+      "longTasksOver500ms": 0,
+      "storageBytes": 0
+    }
+  },
+  "scenarios": {
+    "loginMs": 69,
+    "patientSearch1000Ms": 39,
+    "modalOpenMs": 54
+  },
+  "notes": [
+    "Production local measurement; LCP/CLS use browser timing when available.",
+    "Mock provider currently uses workspace.v2 for the 1,000-patient fixture."
+  ]
+}
+```
