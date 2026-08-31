@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "generated_at": "2026-08-31T11:08:10-06:00",
+  "generated_at": "2026-08-31T11:45:16-06:00",
   "source": "Legacy routes are extracted from app/views.js:renderRoute and navigation; React routes are extracted from apps/web/src/app.",
   "routes": [
     {
@@ -40,7 +40,7 @@
         "playwright:patient-import-export"
       ],
       "route_action_certified_at_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
-      "full_video_parity_status": "PARTIAL"
+      "full_video_parity_status": "NOT_TESTABLE"
     },
     {
       "route_id": "ROUTE-PATIENT-DETAIL",

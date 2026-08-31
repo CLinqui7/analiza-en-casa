@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `c8ed9c52c98448e638da7985c382325b6dc2a8a7`
-SHA de implementación: `c8ed9c52c98448e638da7985c382325b6dc2a8a7`
-Fingerprint funcional CH01: `6215607f15fdea2602fcad8a3dd384abc7327e5cf2f3bdb0e0414998a6fe9a8b`
+Commit generador: `94f4c3a524cab8d3a889c09e884ca730625b2afe`
+SHA de implementación: `94f4c3a524cab8d3a889c09e884ca730625b2afe`
+Fingerprint funcional CH01: `a0596135100da60a0a1b13ee48b6b206d11d6bd7b23172320e0ccdc5fa33f2d3`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -22,22 +22,22 @@ Fingerprint funcional CH01: `6215607f15fdea2602fcad8a3dd384abc7327e5cf2f3bdb0e04
 | CH01-F012 | /patients | EXACT | AUTH-LOGOUT |
 | CH01-F013 | /patients | EXACT | AUTH-LOGIN-EMAIL, AUTH-LOGIN-PASSWORD, AUTH-LOGIN, AUTH-RECOVER-OPEN |
 | CH01-F014 | /patients | EXACT | AUTH-INSTALL |
-| CH02-F001 | /patients | PARTIAL | — |
-| CH02-F002 | /patients | PARTIAL | — |
-| CH02-F003 | /patients | PARTIAL | — |
-| CH02-F004 | /patients | PARTIAL | — |
-| CH02-F005 | /patients | PARTIAL | — |
-| CH02-F006 | /patients | PARTIAL | — |
-| CH02-F007 | /patients | PARTIAL | — |
-| CH02-F008 | /patients | NOT_TESTABLE | — |
-| CH02-F009 | /patients | PARTIAL | — |
-| CH02-F010 | /patients | NOT_TESTABLE | — |
-| CH02-F011 | /patients | PARTIAL | — |
-| CH02-F012 | /patients | PARTIAL | — |
-| CH02-F013 | /patients | PARTIAL | — |
-| CH02-F014 | /patients | PARTIAL | — |
-| CH02-F015 | /patients | PARTIAL | — |
-| CH02-F016 | /patients | PARTIAL | — |
+| CH02-F001 | /patients | EXACT | AUTH-LOGIN, PATIENT-NAVIGATE |
+| CH02-F002 | /patients | EXACT | PATIENT-TAB-ACTIVE, PATIENT-TAB-INACTIVE, PATIENT-TAB-IMPORT, PATIENT-EXPORT-XLSX, PATIENT-CREATE |
+| CH02-F003 | /patients | EXACT | — |
+| CH02-F004 | /patients | EXACT | PATIENT-DOCUMENT-TYPE |
+| CH02-F005 | /patients | EXACT | PATIENT-DOCUMENT-TYPE |
+| CH02-F006 | /patients | EXACT | PATIENT-NATIONALITY-SEARCH, PATIENT-COMPANY-SEARCH |
+| CH02-F007 | /patients | EXACT | PATIENT-BOTMAKER-CONSENT |
+| CH02-F008 | /patients | EXACT | PATIENT-INSURANCE-TOGGLE |
+| CH02-F009 | /patients | EXACT | PATIENT-INSURER-SEARCH |
+| CH02-F010 | /patients | NOT_APPLICABLE | — |
+| CH02-F011 | /patients | EXACT | PATIENT-INSURANCE-HOLDER-YES, PATIENT-INSURANCE-HOLDER-NO, PATIENT-INSURANCE-HOLDER-CANCEL |
+| CH02-F012 | /patients | EXACT | PATIENT-COVERAGE-ADD |
+| CH02-F013 | /patients | EXACT | PATIENT-CONTACT-ADD, PATIENT-CONTACT-REMOVE, PATIENT-CONTACT-PRIMARY |
+| CH02-F014 | /patients | EXACT | PATIENT-ADDRESS-IMPORT, PATIENT-ADDRESS-INFO, PATIENT-ADDRESS-CLEAR |
+| CH02-F015 | /patients | EXACT | PATIENT-MAP-ZOOM-IN, PATIENT-MAP-ZOOM-OUT, PATIENT-MAP-LAYER, PATIENT-MAP-FULLSCREEN, PATIENT-MAP-MARKER |
+| CH02-F016 | /patients | EXACT | PATIENT-BACK, PATIENT-SAVE |
 | CH03-F001 | /hospitalizations | PARTIAL | — |
 | CH03-F002 | /hospitalizations | PARTIAL | — |
 | CH03-F003 | /hospitalizations | NOT_TESTABLE | — |

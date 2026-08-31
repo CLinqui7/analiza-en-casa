@@ -7,6 +7,8 @@ import {
   searchOptions,
 } from './patient-form';
 
+// test-id: vitest:ch02-patient-form
+
 describe('CH02 patient form domain helpers', () => {
   it('searches synthetic insurers without returning unrelated entities', () => {
     expect(searchOptions(insuranceProviderOptions, 'coBerTUra')).toEqual([

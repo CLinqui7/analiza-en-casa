@@ -17,7 +17,7 @@ if (chapterIndex !== -1 && !chapter) throw new Error('Expected a chapter after -
 const currentSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const currentFingerprint = ch01FunctionalFingerprint(root);
 const ch01EvidenceSource = [
-  'apps/web/e2e/ch01.spec.ts', 'apps/web/e2e/workspace.spec.ts', 'apps/web/src/lib/domain.test.ts', 'tests/selenium/test_ch01.py',
+  'apps/web/e2e/ch01.spec.ts', 'apps/web/e2e/ch02.spec.ts', 'apps/web/e2e/workspace.spec.ts', 'apps/web/src/lib/domain.test.ts', 'apps/web/src/lib/patient-form.test.ts', 'tests/selenium/test_ch01.py', 'tests/selenium/test_ch02.py',
 ].filter((path) => existsSync(resolve(root, path))).map((path) => readFileSync(resolve(root, path), 'utf8')).join('\n');
 const errors = [];
 const allowed = new Set(['EXACT', 'PARTIAL', 'MISSING', 'BLOCKED_CLIENT', 'BLOCKED_INTEGRATION', 'NOT_TESTABLE', 'NOT_APPLICABLE']);
