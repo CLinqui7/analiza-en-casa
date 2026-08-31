@@ -1,6 +1,9 @@
 import type { Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, Patient, Quote, QuoteItem } from '@analiza/contracts';
 import { describe, expect, it } from 'vitest';
 // test-id: vitest:age-from-birth-date
+// test-id: vitest:ch03-hospitalization-filters
+// test-id: vitest:ch03-quote-filters
+// test-id: vitest:ch03-quote-metadata
 import {
   canRecordMovement,
   currentInventoryBalance,

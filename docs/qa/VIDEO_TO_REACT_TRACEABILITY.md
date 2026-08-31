@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `6683e4a78909cff5050a36475cc14ddb007d58da`
-SHA de implementación: `94f4c3a524cab8d3a889c09e884ca730625b2afe`
-Fingerprint funcional CH01: `a0596135100da60a0a1b13ee48b6b206d11d6bd7b23172320e0ccdc5fa33f2d3`
+Commit generador: `4349523df4750720308de9059a4e6c5ec2624675`
+SHA de implementación: `4349523df4750720308de9059a4e6c5ec2624675`
+Fingerprint funcional CH01: `6f8a92c8248dcdde8d5db61c5d9afc33a6e99d67a7efdb125610de23cc441cae`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -38,19 +38,19 @@ Fingerprint funcional CH01: `a0596135100da60a0a1b13ee48b6b206d11d6bd7b23172320e0
 | CH02-F014 | /patients | EXACT | PATIENT-ADDRESS-IMPORT, PATIENT-ADDRESS-INFO, PATIENT-ADDRESS-CLEAR |
 | CH02-F015 | /patients | EXACT | PATIENT-MAP-ZOOM-IN, PATIENT-MAP-ZOOM-OUT, PATIENT-MAP-LAYER, PATIENT-MAP-FULLSCREEN, PATIENT-MAP-MARKER |
 | CH02-F016 | /patients | EXACT | PATIENT-BACK, PATIENT-SAVE |
-| CH03-F001 | /hospitalizations | PARTIAL | — |
-| CH03-F002 | /hospitalizations | PARTIAL | — |
+| CH03-F001 | /hospitalizations | EXACT | — |
+| CH03-F002 | /hospitalizations | EXACT | — |
 | CH03-F003 | /hospitalizations | NOT_TESTABLE | — |
-| CH03-F004 | /hospitalizations | PARTIAL | — |
-| CH03-F005 | /hospitalizations | PARTIAL | — |
-| CH03-F006 | /hospitalizations | NOT_TESTABLE | — |
-| CH03-F007 | /hospitalizations | PARTIAL | — |
-| CH03-F008 | /hospitalizations | PARTIAL | — |
-| CH03-F009 | /hospitalizations | PARTIAL | — |
-| CH03-F010 | /hospitalizations | PARTIAL | — |
-| CH03-F011 | /hospitalizations | PARTIAL | — |
-| CH03-F012 | /hospitalizations | PARTIAL | — |
-| CH03-F013 | /hospitalizations | PARTIAL | — |
+| CH03-F004 | /hospitalizations | EXACT | — |
+| CH03-F005 | /hospitalizations | EXACT | — |
+| CH03-F006 | /hospitalizations | BLOCKED_CLIENT | — |
+| CH03-F007 | /hospitalizations | EXACT | — |
+| CH03-F008 | /hospitalizations | NOT_APPLICABLE | — |
+| CH03-F009 | /hospitalizations | EXACT | — |
+| CH03-F010 | /hospitalizations | EXACT | — |
+| CH03-F011 | /hospitalizations | EXACT | — |
+| CH03-F012 | /hospitalizations | EXACT | — |
+| CH03-F013 | /hospitalizations | EXACT | — |
 | CH04-F001 | /quotes | PARTIAL | — |
 | CH04-F002 | /quotes | PARTIAL | — |
 | CH04-F003 | /quotes | NOT_TESTABLE | — |

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-31T11:48:53-06:00",
-  "metadata_generated_from_commit": "6683e4a78909cff5050a36475cc14ddb007d58da",
+  "generated_at": "2026-08-31T12:50:17-06:00",
+  "metadata_generated_from_commit": "4349523df4750720308de9059a4e6c5ec2624675",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-  "functional_fingerprint": "a0596135100da60a0a1b13ee48b6b206d11d6bd7b23172320e0ccdc5fa33f2d3",
+  "implementation_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+  "functional_fingerprint": "6f8a92c8248dcdde8d5db61c5d9afc33a6e99d67a7efdb125610de23cc441cae",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -45,7 +45,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Ruta directa conserva next y exige sesión."
     },
     {
@@ -88,7 +88,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Carga CSV local validada, previsualizada, cancelable y persistida."
     },
     {
@@ -129,7 +129,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Columnas administrativas del video, sin cálculo clínico de triage."
     },
     {
@@ -172,7 +172,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Búsqueda normalizada y paginación local."
     },
     {
@@ -214,7 +214,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Workbook XLSX real, hoja Pacientes; CSV queda como acción secundaria."
     },
     {
@@ -252,7 +252,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Provider expone loading/error y el listado representa resultados vacíos sin inventar datos."
     },
     {
@@ -292,7 +292,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Consentimiento persistido; no se afirma envío de mensajes."
     },
     {
@@ -330,7 +330,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Jerarquía enlaza sólo módulos operativos presentes."
     },
     {
@@ -368,7 +368,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Primera cuadrícula contiene exactamente los seis indicadores observados."
     },
     {
@@ -406,7 +406,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Tabla no clasifica clínicamente sin una regla aprobada."
     },
     {
@@ -449,7 +449,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Menú incluye organización, usuario, salida, click externo y Escape."
     },
     {
@@ -487,7 +487,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Cerrar sesión invalida la sesión local y vuelve a login."
     },
     {
@@ -531,7 +531,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Recuperación muestra bloqueo de integración honesto y no afirma correo enviado."
     },
     {
@@ -572,7 +572,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Manifest y registro SW presentes; el fallback no declara instalación sin evento nativo."
     },
     {
@@ -611,7 +611,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Ruta protegida y acceso autorizado verificados."
     },
     {
@@ -653,7 +653,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada."
     },
     {
@@ -689,7 +689,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Formulario único con cuatro secciones visibles."
     },
     {
@@ -729,7 +729,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Marcadores visuales limitados a campos observados; CH02-Q002 conserva reglas no demostradas."
     },
     {
@@ -772,7 +772,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Cédula y Pasaporte son primarios; OTHER queda explícitamente histórico QA. CH02-Q001 permanece abierto."
     },
     {
@@ -816,7 +816,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Catálogos demo buscables, accesibles y sin pretensión oficial."
     },
     {
@@ -857,7 +857,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Consentimiento operativo persistente, sin contenido sensible; CH02-Q003 abierto."
     },
     {
@@ -896,7 +896,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Regular no exige seguro; asegurado habilita la superficie administrativa."
     },
     {
@@ -939,7 +939,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Búsqueda de proveedores sintéticos, filtrado, teclado, clear y no results."
     },
     {
@@ -976,7 +976,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "No se replica la mezcla anómala de personas y aseguradoras; CH02-Q004 conserva la decisión."
     },
     {
@@ -1022,7 +1022,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Modal accesible Sí/No/Cancelar; la rama no demostrada se documenta en CH02-Q005."
     },
     {
@@ -1067,7 +1067,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Cobertura única staged; no se inventa multiplicidad y CH02-Q005 permanece."
     },
     {
@@ -1109,7 +1109,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Seis campos visibles, agregar/eliminar/principal y persistencia probados; CH02-Q006 abierto."
     },
     {
@@ -1155,7 +1155,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Parser local de coordenadas explícitas; nunca consulta enlaces pegados."
     },
     {
@@ -1203,7 +1203,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Leaflet dinámico con marcador, zoom, capa, fullscreen y fallback; sin geolocalización automática. CH02-Q007 abierto."
     },
     {
@@ -1245,7 +1245,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Atrás descarta y Guardar persiste; el resultado original no observado permanece CH02-Q008."
     },
     {
@@ -1269,20 +1269,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-financial-navigation"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Grupo Financiero con tres rutas reales y permisos existentes."
     },
     {
       "requirement_id": "CH03-F002",
@@ -1307,20 +1309,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-administrative-board"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro."
     },
     {
       "requirement_id": "CH03-F003",
@@ -1345,10 +1349,10 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
@@ -1358,8 +1362,8 @@
         "CH03-Q001"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Preadmisión es una pintura transitoria sin contenido ni comportamiento demostrable (CH03-Q001)."
     },
     {
       "requirement_id": "CH03-F004",
@@ -1383,20 +1387,24 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch03-hospitalization-filters"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch03-administrative-board"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Filtros staged, combinables y explícitamente aplicados/limpiados."
     },
     {
       "requirement_id": "CH03-F005",
@@ -1421,20 +1429,24 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch03-hospitalization-filters"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch03-administrative-board"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Tabla conserva empresa derivada, tipo, estado y duración administrativa derivada."
     },
     {
       "requirement_id": "CH03-F006",
@@ -1458,22 +1470,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
+      "blocker_type": "BLOCKED_CLIENT",
       "blocker_ids": [
         "CH03-Q002"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "La narración no especifica trigger ni transición Activo/Cerrado (CH03-Q002)."
     },
     {
       "requirement_id": "CH03-F007",
@@ -1498,20 +1510,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-administrative-board"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Enlace reutiliza la superficie Inactivos certificada en CH01/CH02."
     },
     {
       "requirement_id": "CH03-F008",
@@ -1535,20 +1549,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "NOT_APPLICABLE",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-administrative-board"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "No reproduce deliberadamente Cargando y vacío contradictorios; estados son mutuamente excluyentes."
     },
     {
       "requirement_id": "CH03-F009",
@@ -1571,20 +1587,24 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch03-quote-filters"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch03-quotes-invoice-metadata"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente."
     },
     {
       "requirement_id": "CH03-F010",
@@ -1610,20 +1630,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-quotes-invoice-metadata"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Superficie de seguimiento distingue No enviado/No configurado y enlaza a seguro sin afirmar envíos."
     },
     {
       "requirement_id": "CH03-F011",
@@ -1647,20 +1669,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-quotes-invoice-metadata"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Fecha de creación y total calculado por calculateQuoteTotals; sin impuesto, moneda ni cobertura inferidos."
     },
     {
       "requirement_id": "CH03-F012",
@@ -1682,20 +1706,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch03-quotes-invoice-metadata"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Paciente buscable/seleccionable; contacto de solo lectura y hospitalización compatible requerida."
     },
     {
       "requirement_id": "CH03-F013",
@@ -1720,20 +1746,24 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch03-quote-metadata"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch03-quotes-invoice-metadata"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
+      "notes": "Metadatos de factura persisten sin afectar los cálculos; reglas profundas quedan en CH03-Q007."
     },
     {
       "requirement_id": "CH04-F001",
@@ -1767,7 +1797,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1803,7 +1833,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1843,7 +1873,7 @@
         "CH04-Q001"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1881,7 +1911,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1919,7 +1949,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1957,7 +1987,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1995,7 +2025,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2035,7 +2065,7 @@
         "CH04-Q005"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2073,7 +2103,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2111,7 +2141,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2148,7 +2178,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2183,7 +2213,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2221,7 +2251,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2256,7 +2286,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2292,7 +2322,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2328,7 +2358,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2365,7 +2395,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2402,7 +2432,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2440,7 +2470,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2478,7 +2508,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2514,7 +2544,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2552,7 +2582,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2588,7 +2618,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2626,7 +2656,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2668,7 +2698,7 @@
         "CH05-Q007"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2706,7 +2736,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2743,7 +2773,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2778,7 +2808,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2814,7 +2844,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2849,7 +2879,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2884,7 +2914,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2921,7 +2951,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2957,7 +2987,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2992,7 +3022,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3027,7 +3057,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3066,7 +3096,7 @@
         "CH06-Q005"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3102,7 +3132,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3138,7 +3168,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3172,7 +3202,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3209,7 +3239,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3243,7 +3273,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3277,7 +3307,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3311,7 +3341,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3349,7 +3379,7 @@
         "CH07-Q002"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3383,7 +3413,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3417,7 +3447,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3453,7 +3483,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3487,7 +3517,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3523,7 +3553,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3560,7 +3590,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3594,7 +3624,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3631,7 +3661,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3665,7 +3695,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3700,7 +3730,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3734,7 +3764,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3768,7 +3798,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3802,7 +3832,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3835,7 +3865,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3868,7 +3898,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3901,7 +3931,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3935,7 +3965,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -3968,7 +3998,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4001,7 +4031,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4035,7 +4065,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4069,7 +4099,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4102,7 +4132,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4135,7 +4165,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4169,7 +4199,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4202,7 +4232,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4236,7 +4266,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4269,7 +4299,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4306,7 +4336,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4339,7 +4369,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4372,7 +4402,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4409,7 +4439,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4457,7 +4487,7 @@
         "CH10-Q005"
       ],
       "blocker_reason": "CH10-Q003 y CH10-Q005.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4495,7 +4525,7 @@
         "CH10-Q004"
       ],
       "blocker_reason": "CH10-Q004; sugerencia inclusiva provisional y editable.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4530,7 +4560,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4568,7 +4598,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4610,7 +4640,7 @@
         "CH10-Q013"
       ],
       "blocker_reason": "CH10-Q009 y CH10-Q010; la composición exacta no aparece visualmente en el video.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4648,7 +4678,7 @@
         "CH10-Q001"
       ],
       "blocker_reason": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4685,7 +4715,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4719,7 +4749,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4755,7 +4785,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4791,7 +4821,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4825,7 +4855,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4863,7 +4893,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4896,7 +4926,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "La superficie es visible para paridad, sin simular efectos clínicos o financieros.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4930,7 +4960,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Motivo, monto y comentario se muestran sin producir una operación financiera falsa.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4963,7 +4993,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "La asignación básica es remota-first, idempotente y auditada; la política de negocio permanece explícitamente abierta.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -4999,7 +5029,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5037,7 +5067,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5079,7 +5109,7 @@
         "CH12-Q003"
       ],
       "blocker_reason": "El control oculto no se nombra como hecho; se presenta como pendiente de confirmar.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5113,7 +5143,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5152,7 +5182,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5189,7 +5219,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5229,7 +5259,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5269,7 +5299,7 @@
         "CH12-Q007"
       ],
       "blocker_reason": "El P0 se contiene cerrando escrituras directas, RLS de ítems, doble inclusión y éxitos local-first.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5307,7 +5337,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5348,7 +5378,7 @@
         "CH13-Q009"
       ],
       "blocker_reason": "Los rótulos visibles se conservan, pero ninguna transición se infiere.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5385,7 +5415,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5419,7 +5449,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5455,7 +5485,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5494,7 +5524,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5531,7 +5561,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5568,7 +5598,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5608,7 +5638,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5649,7 +5679,7 @@
         "CH13-Q003"
       ],
       "blocker_reason": "La afirmación es verbal; el video no demuestra la recepción.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5690,7 +5720,7 @@
         "CH13-Q003"
       ],
       "blocker_reason": "El P0 previo queda contenido por RPC tenant-safe, idempotencia, auditoría y ausencia de éxito local-first.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5726,7 +5756,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5762,7 +5792,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5799,7 +5829,7 @@
         "CH14-Q001"
       ],
       "blocker_reason": "No se promueve la explicación verbal a una regla productiva.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5832,7 +5862,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5872,7 +5902,7 @@
         "CH14-Q003"
       ],
       "blocker_reason": "Acciones visibles y bloqueadas; no existe éxito simulado.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5905,7 +5935,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5940,7 +5970,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -5977,7 +6007,7 @@
         "CH14-Q007"
       ],
       "blocker_reason": "Editar, Aprobar y Cancelar permanecen bloqueados; impresión es provisional.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6012,7 +6042,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6047,7 +6077,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6080,7 +6110,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6114,7 +6144,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6152,7 +6182,7 @@
         "CH14-Q013"
       ],
       "blocker_reason": "Composición visual presente; descarga automática no implementada.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6187,7 +6217,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6228,7 +6258,7 @@
         "CH14-Q015"
       ],
       "blocker_reason": "La evidencia aparece al final sin demostrar resultado.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6269,7 +6299,7 @@
         "CH14-Q015"
       ],
       "blocker_reason": "No existe demostración visual suficiente.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6304,7 +6334,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6339,7 +6369,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6373,7 +6403,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6408,7 +6438,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6442,7 +6472,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6477,7 +6507,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6513,7 +6543,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6548,7 +6578,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6582,7 +6612,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6617,7 +6647,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6652,7 +6682,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6687,7 +6717,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6722,7 +6752,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6757,7 +6787,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6791,7 +6821,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6825,7 +6855,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6857,7 +6887,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6889,7 +6919,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6921,7 +6951,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6952,7 +6982,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -6984,7 +7014,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7015,7 +7045,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7047,7 +7077,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7079,7 +7109,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7110,7 +7140,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7144,7 +7174,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7177,7 +7207,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7210,7 +7240,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7245,7 +7275,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7278,7 +7308,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7311,7 +7341,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7346,7 +7376,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7379,7 +7409,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7413,7 +7443,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7447,7 +7477,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7480,7 +7510,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7514,7 +7544,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7548,7 +7578,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7581,7 +7611,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7614,7 +7644,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7647,7 +7677,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -7680,7 +7710,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "94f4c3a524cab8d3a889c09e884ca730625b2afe",
+      "last_verified_sha": "4349523df4750720308de9059a4e6c5ec2624675",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     }
   ]
