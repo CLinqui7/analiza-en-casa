@@ -49,7 +49,7 @@ export default function DashboardPage() {
             <div><h2>Últimas mediciones individuales</h2><p>Se muestran registros documentados sin etiquetarlos como normales o anormales.</p></div>
             <StatusTag tone="warning">Sin clasificar</StatusTag>
           </div>
-          {recentReadings.length ? <div aria-label="Tabla de últimas mediciones individuales" className="table-wrap" tabIndex={0}><table><thead><tr><th>Acción</th><th>Paciente</th><th>FC</th><th>FR</th><th>Oxígeno</th><th>Sistólica</th><th>Diastólica</th><th>Temperatura</th><th>Dolor</th><th>Glicemia</th><th>Fecha</th><th>Recurso</th></tr></thead><tbody>
+          {recentReadings.length ? <div aria-label="Tabla de últimas mediciones individuales" className="table-wrap" tabIndex={0}><table><thead><tr><th>Acciones</th><th>Paciente</th><th>FC</th><th>FR</th><th>Oxígeno</th><th>Sistólica</th><th>Diastólica</th><th>Temp</th><th>Dolor</th><th>Glicemia</th><th>Fecha</th><th>Recurso</th></tr></thead><tbody>
             {recentReadings.map((reading) => {
               const patient = patients.find((item) => item.id === reading.patientId);
               const hospitalization = reading.caseId ? hospitalizations.find((item) => item.id === reading.caseId) : undefined;

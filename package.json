@@ -61,6 +61,7 @@
     "qa:inventory": "node scripts/render-ui-action-inventory.mjs",
     "qa:video-parity:generate": "node scripts/generate-video-react-traceability.mjs",
     "qa:video-parity": "node scripts/verify-video-react-parity.mjs",
+    "qa:video-parity:chapter": "node scripts/verify-video-react-parity.mjs --chapter",
     "qa:video-parity:report": "node scripts/report-video-react-parity.mjs",
     "perf:baseline": "npm run build && node scripts/perf-production.mjs baseline",
     "perf:check": "npm run build && node scripts/perf-production.mjs final",

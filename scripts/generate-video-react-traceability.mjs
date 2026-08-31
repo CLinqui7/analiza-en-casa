@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -7,6 +8,9 @@ const root = process.cwd();
 const canonical = JSON.parse(await readFile(resolve(root, 'docs/MASTER_VIDEO_REQUIREMENTS.json'), 'utf8'));
 const routes = JSON.parse(await readFile(resolve(root, 'docs/qa/REACT_ROUTE_PARITY.json'), 'utf8'));
 const inventory = JSON.parse(await readFile(resolve(root, 'docs/qa/UI_ACTION_INVENTORY.json'), 'utf8'));
+const certificationPath = resolve(root, 'docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json');
+const certificationDocument = existsSync(certificationPath) ? JSON.parse(await readFile(certificationPath, 'utf8')) : { certifications: {} };
+const certifications = certificationDocument.certifications ?? certificationDocument;
 const sha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const generatedAt = execFileSync('git', ['show', '-s', '--format=%cI', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 
@@ -16,7 +20,7 @@ const chapterRoute = {
 const ch01Actions = {
   'CH01-F001': ['PATIENT-NAVIGATE', 'AUTH-LOGIN'], 'CH01-F002': ['PATIENT-TAB-ACTIVE', 'PATIENT-TAB-INACTIVE', 'PATIENT-TAB-IMPORT', 'PATIENT-IMPORT'],
   'CH01-F003': ['PATIENT-DETAIL-NAVIGATE', 'PATIENT-BOTMAKER-CONSENT'], 'CH01-F004': ['PATIENT-SEARCH', 'PATIENT-PAGE-SIZE', 'PATIENT-PAGINATE', 'PATIENT-PAGE-PREVIOUS', 'PATIENT-PAGE-NEXT'],
-  'CH01-F005': ['PATIENT-EXPORT', 'PATIENT-CREATE'], 'CH01-F007': ['PATIENT-BOTMAKER-CONSENT'], 'CH01-F008': [],
+  'CH01-F005': ['PATIENT-EXPORT-XLSX', 'PATIENT-EXPORT-CSV', 'PATIENT-CREATE'], 'CH01-F007': ['PATIENT-BOTMAKER-CONSENT'], 'CH01-F008': [],
   'CH01-F011': ['USER-MENU-OPEN', 'USER-MENU-CLOSE', 'USER-PROFILE-OPEN'], 'CH01-F012': ['AUTH-LOGOUT'], 'CH01-F013': ['AUTH-LOGIN-EMAIL', 'AUTH-LOGIN-PASSWORD', 'AUTH-LOGIN', 'AUTH-RECOVER-OPEN'], 'CH01-F014': ['AUTH-INSTALL'],
 };
 const status = (assessment) => ({ IMPLEMENTED_EXACT: 'EXACT', IMPLEMENTED_PARTIAL: 'PARTIAL', MISSING: 'MISSING', BLOCKED_CLIENT: 'BLOCKED_CLIENT', BLOCKED_INTEGRATION: 'BLOCKED_INTEGRATION', NOT_TESTABLE: 'NOT_TESTABLE' }[assessment.status] ?? 'NOT_TESTABLE');
@@ -37,7 +41,8 @@ function actionTests(ids) {
 
 const requirements = canonical.requirements.map((requirement) => {
   const route = routes.routes.find((candidate) => candidate.route_id === chapterRoute[requirement.chapter_id]);
-  const parityStatus = status(requirement.platform_assessment);
+  const certification = certifications[requirement.requirement_id];
+  const parityStatus = certification?.parity_status ?? status(requirement.platform_assessment);
   const actionIds = ch01Actions[requirement.requirement_id] ?? [];
   const tests = actionTests(actionIds);
   const blocker = parityStatus.startsWith('BLOCKED') || parityStatus === 'NOT_TESTABLE';
@@ -47,11 +52,11 @@ const requirements = canonical.requirements.map((requirement) => {
     priority: requirement.platform_assessment.priority, evidence_paths: requirement.evidence.flatMap((item) => [item.path, item.detail_path].filter(Boolean)),
     open_question_ids: requirement.open_question_ids, route_id: route?.route_id ?? null, react_route: route?.react_route ?? null,
     react_files: filesFor(route), component_ids: [], action_ids: actionIds, parity_status: parityStatus,
-    functional_status: parityStatus === 'EXACT' ? 'VERIFIED' : 'UNVERIFIED', persistence_status: 'UNVERIFIED', permissions_status: 'UNVERIFIED', performance_status: 'UNVERIFIED',
-    unit_test_ids: tests.unit, playwright_test_ids: tests.playwright, selenium_test_ids: tests.selenium, visual_test_ids: [],
+    functional_status: certification?.functional_status ?? (parityStatus === 'EXACT' ? 'VERIFIED' : 'UNVERIFIED'), persistence_status: certification?.persistence_status ?? 'UNVERIFIED', permissions_status: certification?.permissions_status ?? 'UNVERIFIED', performance_status: certification?.performance_status ?? 'UNVERIFIED',
+    unit_test_ids: certification?.unit_test_ids ?? tests.unit, playwright_test_ids: certification?.playwright_test_ids ?? tests.playwright, selenium_test_ids: certification?.selenium_test_ids ?? tests.selenium, visual_test_ids: certification?.visual_test_ids ?? [],
     blocker_type: blocker ? parityStatus : null, blocker_ids: blocker ? requirement.open_question_ids : [],
-    blocker_reason: blocker ? requirement.platform_assessment.notes : null, last_verified_sha: sha,
-    notes: `Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados.`,
+    blocker_reason: blocker ? requirement.platform_assessment.notes : null, last_verified_sha: certification?.verified_sha ?? certificationDocument.verified_sha ?? sha,
+    notes: certification?.notes ?? `Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.`,
   };
 });
 

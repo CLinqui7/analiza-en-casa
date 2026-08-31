@@ -15,6 +15,7 @@ import {
   canEditQuote,
   createQuoteRevision,
   appendInsuranceEvent,
+  ageFromBirthDate,
   hasValidInsuranceRequestContext,
   isInsuranceRequestStatus,
   searchInsuranceRequests,
@@ -105,6 +106,13 @@ describe('quote domain', () => {
     const totals = calculateQuoteTotals(items, { type: 'PERCENT', value: 10 }, 5);
     expect(totals).toMatchObject({ subtotal: 25.25, itemDiscountAmount: 0.25, generalDiscountAmount: 2.5, discountAmount: 2.75, total: 22.5, insurerAmount: 5, patientAmount: 17.5 });
     expect(calculateQuoteTotals(items, { type: 'CATEGORY_PERCENTAGES', categories: { SERVICES: 10, STUDIES: 0, MEDICATIONS: 0, SUPPLIES: 0, EQUIPMENT: 0, FEES: 0, EXTRAS: 0 } }).total).toBe(23);
+  });
+
+  it('derives administrative age from a valid birth date without timezone drift', () => {
+    expect(ageFromBirthDate('1985-04-20', new Date('2026-04-19T12:00:00.000Z'))).toBe(40);
+    expect(ageFromBirthDate('1985-04-20', new Date('2026-04-20T12:00:00.000Z'))).toBe(41);
+    expect(ageFromBirthDate(undefined, new Date('2026-04-20T12:00:00.000Z'))).toBeUndefined();
+    expect(ageFromBirthDate('2026-02-30', new Date('2026-04-20T12:00:00.000Z'))).toBeUndefined();
   });
 
   it('rejects invalid manual item amounts and insurer amount beyond total', () => {

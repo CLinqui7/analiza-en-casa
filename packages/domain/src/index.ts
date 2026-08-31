@@ -43,6 +43,18 @@ export function normalizePhone(value: string): string {
   return value.replace(/\D/g, '');
 }
 
+/** Returns the completed years for an ISO calendar date without relying on a
+ * clinical interpretation or a browser timezone. */
+export function ageFromBirthDate(birthDate?: string, today = new Date()): number | undefined {
+  if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return undefined;
+  const [year, month, day] = birthDate.split('-').map(Number);
+  const birth = new Date(Date.UTC(year, month - 1, day));
+  if (birth.getUTCFullYear() !== year || birth.getUTCMonth() !== month - 1 || birth.getUTCDate() !== day) return undefined;
+  const age = today.getUTCFullYear() - year;
+  const anniversaryPending = today.getUTCMonth() < month - 1 || (today.getUTCMonth() === month - 1 && today.getUTCDate() < day);
+  return age - Number(anniversaryPending) >= 0 ? age - Number(anniversaryPending) : undefined;
+}
+
 export function maskDui(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 9);
   return digits.length > 8 ? `${digits.slice(0, 8)}-${digits.slice(8)}` : digits;

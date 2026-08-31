@@ -571,12 +571,12 @@
       "blocker": ""
     },
     {
-      "action_id": "PATIENT-EXPORT",
+      "action_id": "PATIENT-EXPORT-CSV",
       "module": "Pacientes",
       "route": "/patients",
       "control_type": "OTHER",
       "visible_label": "Exportar CSV",
-      "selector_or_testid": "[data-action-id=PATIENT-EXPORT]",
+      "selector_or_testid": "[data-action-id=PATIENT-EXPORT-CSV]",
       "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "roles_denied": ["INVENTORY"],
       "preconditions": "Listado de pacientes",
@@ -1937,6 +1937,6 @@
     {"action_id":"USER-PROFILE-OPEN","module":"Usuario","route":"/*","control_type":"OPEN","visible_label":"Mi usuario","status":"IMPLEMENTED_UNVERIFIED"},
     {"action_id":"PATIENT-TAB-IMPORT","module":"Pacientes","route":"/patients","control_type":"TAB","visible_label":"Carga masiva","status":"IMPLEMENTED_UNVERIFIED"},
     {"action_id":"PATIENT-BOTMAKER-CONSENT","module":"Pacientes","route":"/patients","control_type":"UPDATE","visible_label":"Consentimiento Botmaker","status":"IMPLEMENTED_UNVERIFIED"},
-    {"action_id":"PATIENT-EXPORT-XLSX","module":"Pacientes","route":"/patients","control_type":"EXPORT","visible_label":"Exportar Excel","status":"MISSING"}
+    {"action_id":"PATIENT-EXPORT-XLSX","module":"Pacientes","route":"/patients","control_type":"EXPORT","visible_label":"Exportar Excel","selector_or_testid":"[data-action-id=PATIENT-EXPORT-XLSX]","roles_allowed":["ADMIN","DOCTOR","NURSE","FINANCE","AUDITOR"],"roles_denied":["INVENTORY"],"preconditions":"Listado de pacientes","positive_scenario":"Descarga workbook XLSX de la pestaña y filtro actuales.","negative_scenario":"No exporta datos de roles sin permiso de lectura.","persistence_required":false,"refresh_required":false,"selenium_required":false,"selenium_test_ids":[],"playwright_test_ids":["playwright:ch01-xlsx-export"],"unit_test_ids":[],"status":"IMPLEMENTED_EXACT","blocker":""}
   ]
 }

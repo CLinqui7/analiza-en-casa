@@ -68,6 +68,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const { can, loading, logout, session } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userProfileOpen, setUserProfileOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Clínico: pathname.startsWith('/clinical'), Inventario: pathname.startsWith('/inventory'), Reportes: pathname.startsWith('/reports'),
   });
@@ -76,6 +77,11 @@ export function AppShell({ children }: PropsWithChildren) {
     const close = (event: MouseEvent) => { if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setUserMenuOpen(false); };
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
+  }, []);
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') { setUserMenuOpen(false); setUserProfileOpen(false); } };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
   }, []);
   if (loading) return <main className="access-denied" role="status">Validando sesión…</main>;
   if (!session) return <DeniedRoute pathname={pathname} />;
@@ -115,12 +121,13 @@ export function AppShell({ children }: PropsWithChildren) {
           <p>Desarrollado por Interactive Core</p>
           <div ref={userMenuRef} className="user-menu">
             <button aria-expanded={userMenuOpen} className="button button-secondary" data-action-id="USER-MENU-OPEN" onClick={() => setUserMenuOpen((open) => !open)} type="button">Mi cuenta</button>
-            {userMenuOpen ? <div className="user-menu-popover" role="menu"><p><strong>Organización</strong><br />Analiza en Casa · ámbito sintético</p><p><strong>Mi usuario</strong><br />{session.userId} · {session.role}</p><button data-action-id="USER-PROFILE-OPEN" onClick={() => setUserMenuOpen(false)} role="menuitem" type="button">Mi usuario</button><button data-action-id="AUTH-LOGOUT" onClick={() => void logout().then(() => router.replace('/login'))} role="menuitem" type="button">Cerrar sesión</button><button data-action-id="USER-MENU-CLOSE" onClick={() => setUserMenuOpen(false)} type="button">Cerrar menú</button></div> : null}
+            {userMenuOpen ? <div className="user-menu-popover" role="menu"><p><strong>Organización</strong><br />Analiza en Casa · ámbito sintético</p><p><strong>Mi usuario</strong><br />{session.userId} · {session.role}</p><button data-action-id="USER-PROFILE-OPEN" onClick={() => { setUserMenuOpen(false); setUserProfileOpen(true); }} role="menuitem" type="button">Mi usuario</button><button data-action-id="AUTH-LOGOUT" onClick={() => void logout().then(() => router.replace('/login'))} role="menuitem" type="button">Cerrar sesión</button><button data-action-id="USER-MENU-CLOSE" onClick={() => setUserMenuOpen(false)} type="button">Cerrar menú</button></div> : null}
           </div>
           <button className="button button-secondary" data-action-id="AUTH-LOGOUT" onClick={() => void logout().then(() => router.replace('/login'))} type="button">Cerrar sesión</button>
         </footer>
       </aside>
       <main className="main-content">{children}</main>
+      {userProfileOpen ? <div aria-label="Mi usuario" className="dialog-backdrop" role="dialog"><section className="dialog"><h2>Mi usuario</h2><dl className="definition-list"><div><dt>Usuario</dt><dd>{session.userId}</dd></div><div><dt>Rol</dt><dd>{session.role}</dd></div><div><dt>Organización</dt><dd>Analiza en Casa · ámbito sintético</dd></div></dl><button className="button button-secondary" data-action-id="USER-PROFILE-CLOSE" onClick={() => setUserProfileOpen(false)} type="button">Cerrar</button></section></div> : null}
     </div>
   );
 }

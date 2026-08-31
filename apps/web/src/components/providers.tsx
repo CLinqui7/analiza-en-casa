@@ -86,8 +86,8 @@ function AuthProvider({ children }: PropsWithChildren) {
   }, []);
   const logout = useCallback(async () => {
     setError(null);
-    await endSession(session);
     setSession(null);
+    await endSession(session);
   }, [session]);
   const value = useMemo<AuthContextValue>(
     () => ({ session, loading, error, login, logout, can: (permission) => can(session?.role, permission) }),
