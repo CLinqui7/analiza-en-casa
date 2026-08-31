@@ -650,6 +650,9 @@ textarea {
   background: #fbfdff;
 }
 .quote-totals span { color: var(--muted); font-size: 0.78rem; }
+.user-menu { position: relative; }
+.user-menu-popover { background: #fff; border: 1px solid #dce7f1; border-radius: 8px; bottom: calc(100% + 8px); box-shadow: 0 8px 24px #12253a22; display: grid; gap: 8px; left: 0; min-width: 230px; padding: 12px; position: absolute; z-index: 5; }
+.user-menu-popover p { margin: 0; }
 .quote-category + .quote-category { margin-top: 22px; }
 .quote-category h3 { margin: 0 0 9px; font-size: 0.95rem; }
 

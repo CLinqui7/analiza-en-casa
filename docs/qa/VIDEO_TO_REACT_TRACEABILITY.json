@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-29T08:22:50-06:00",
-  "source_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+  "generated_at": "2026-08-31T09:25:31-06:00",
+  "source_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "requirements": [
     {
@@ -46,7 +46,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -93,7 +93,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -134,7 +134,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -189,7 +189,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -211,7 +211,7 @@
       ],
       "component_ids": [],
       "action_ids": [
-        "PATIENT-EXPORT-XLSX",
+        "PATIENT-EXPORT",
         "PATIENT-CREATE"
       ],
       "parity_status": "PARTIAL",
@@ -220,19 +220,22 @@
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [
-        "domain:findDuplicatePatient"
+        "domain:findDuplicatePatient",
+        "domain:toCsv"
       ],
       "playwright_test_ids": [
-        "playwright:patient-registration-data"
+        "playwright:patient-registration-data",
+        "playwright:patient-import-export"
       ],
       "selenium_test_ids": [
-        "SEL-PAT-CREATE"
+        "SEL-PAT-CREATE",
+        "SEL-PAT-EXPORT"
       ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -268,7 +271,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -304,7 +307,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -327,11 +330,7 @@
         "apps/web/src/lib/data-provider.ts"
       ],
       "component_ids": [],
-      "action_ids": [
-        "CLÍNICO-TOGGLE",
-        "INVENTARIO-TOGGLE",
-        "REPORTES-TOGGLE"
-      ],
+      "action_ids": [],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
@@ -344,7 +343,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -380,7 +379,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -416,7 +415,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -455,7 +454,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -491,7 +490,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -533,7 +532,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -570,7 +569,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -604,7 +603,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -638,7 +637,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -672,7 +671,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -708,7 +707,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -745,7 +744,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -780,7 +779,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -817,7 +816,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -852,7 +851,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -887,7 +886,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -926,7 +925,7 @@
         "CH02-Q004"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -962,7 +961,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -999,7 +998,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1035,7 +1034,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1071,7 +1070,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1108,7 +1107,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1145,7 +1144,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1181,7 +1180,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1219,7 +1218,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1258,7 +1257,7 @@
         "CH03-Q001"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1295,7 +1294,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1333,7 +1332,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1372,7 +1371,7 @@
         "CH03-Q002"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1410,7 +1409,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1447,7 +1446,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1483,7 +1482,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1522,7 +1521,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1559,7 +1558,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1594,7 +1593,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1632,7 +1631,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1667,7 +1666,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1703,7 +1702,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1743,7 +1742,7 @@
         "CH04-Q001"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1781,7 +1780,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1819,7 +1818,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1857,7 +1856,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1895,7 +1894,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1935,7 +1934,7 @@
         "CH04-Q005"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -1973,7 +1972,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2011,7 +2010,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2048,7 +2047,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2083,7 +2082,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2121,7 +2120,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2156,7 +2155,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2192,7 +2191,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2228,7 +2227,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2265,7 +2264,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2302,7 +2301,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2340,7 +2339,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2378,7 +2377,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2414,7 +2413,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2452,7 +2451,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2488,7 +2487,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2526,7 +2525,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2568,7 +2567,7 @@
         "CH05-Q007"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2606,7 +2605,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2643,7 +2642,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2678,7 +2677,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2714,7 +2713,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2749,7 +2748,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2784,7 +2783,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2821,7 +2820,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2857,7 +2856,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2892,7 +2891,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2927,7 +2926,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -2966,7 +2965,7 @@
         "CH06-Q005"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3002,7 +3001,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3038,7 +3037,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3072,7 +3071,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3109,7 +3108,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3143,7 +3142,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3177,7 +3176,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3211,7 +3210,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3249,7 +3248,7 @@
         "CH07-Q002"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3283,7 +3282,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3317,7 +3316,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3353,7 +3352,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3387,7 +3386,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3423,7 +3422,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3460,7 +3459,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3494,7 +3493,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3531,7 +3530,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3565,7 +3564,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3600,7 +3599,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3634,7 +3633,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3668,7 +3667,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3702,7 +3701,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3735,7 +3734,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3768,7 +3767,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3801,7 +3800,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3835,7 +3834,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3868,7 +3867,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3901,7 +3900,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3935,7 +3934,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -3969,7 +3968,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4002,7 +4001,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4035,7 +4034,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4069,7 +4068,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4102,7 +4101,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4136,7 +4135,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4169,7 +4168,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4206,7 +4205,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4239,7 +4238,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4272,7 +4271,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4309,7 +4308,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4357,7 +4356,7 @@
         "CH10-Q005"
       ],
       "blocker_reason": "CH10-Q003 y CH10-Q005.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4395,7 +4394,7 @@
         "CH10-Q004"
       ],
       "blocker_reason": "CH10-Q004; sugerencia inclusiva provisional y editable.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4430,7 +4429,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4468,7 +4467,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4510,7 +4509,7 @@
         "CH10-Q013"
       ],
       "blocker_reason": "CH10-Q009 y CH10-Q010; la composición exacta no aparece visualmente en el video.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4548,7 +4547,7 @@
         "CH10-Q001"
       ],
       "blocker_reason": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4585,7 +4584,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4619,7 +4618,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4655,7 +4654,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4691,7 +4690,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4725,7 +4724,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4763,7 +4762,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4796,7 +4795,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "La superficie es visible para paridad, sin simular efectos clínicos o financieros.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4830,7 +4829,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Motivo, monto y comentario se muestran sin producir una operación financiera falsa.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4863,7 +4862,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "La asignación básica es remota-first, idempotente y auditada; la política de negocio permanece explícitamente abierta.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4899,7 +4898,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4937,7 +4936,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -4979,7 +4978,7 @@
         "CH12-Q003"
       ],
       "blocker_reason": "El control oculto no se nombra como hecho; se presenta como pendiente de confirmar.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5013,7 +5012,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5052,7 +5051,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5089,7 +5088,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5129,7 +5128,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5169,7 +5168,7 @@
         "CH12-Q007"
       ],
       "blocker_reason": "El P0 se contiene cerrando escrituras directas, RLS de ítems, doble inclusión y éxitos local-first.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5207,7 +5206,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5248,7 +5247,7 @@
         "CH13-Q009"
       ],
       "blocker_reason": "Los rótulos visibles se conservan, pero ninguna transición se infiere.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5285,7 +5284,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5319,7 +5318,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5355,7 +5354,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5394,7 +5393,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5431,7 +5430,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5468,7 +5467,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5508,7 +5507,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5549,7 +5548,7 @@
         "CH13-Q003"
       ],
       "blocker_reason": "La afirmación es verbal; el video no demuestra la recepción.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5590,7 +5589,7 @@
         "CH13-Q003"
       ],
       "blocker_reason": "El P0 previo queda contenido por RPC tenant-safe, idempotencia, auditoría y ausencia de éxito local-first.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5626,7 +5625,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5662,7 +5661,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5699,7 +5698,7 @@
         "CH14-Q001"
       ],
       "blocker_reason": "No se promueve la explicación verbal a una regla productiva.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5732,7 +5731,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5772,7 +5771,7 @@
         "CH14-Q003"
       ],
       "blocker_reason": "Acciones visibles y bloqueadas; no existe éxito simulado.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5805,7 +5804,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5840,7 +5839,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5877,7 +5876,7 @@
         "CH14-Q007"
       ],
       "blocker_reason": "Editar, Aprobar y Cancelar permanecen bloqueados; impresión es provisional.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5912,7 +5911,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5947,7 +5946,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -5980,7 +5979,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6014,7 +6013,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6052,7 +6051,7 @@
         "CH14-Q013"
       ],
       "blocker_reason": "Composición visual presente; descarga automática no implementada.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6087,7 +6086,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6128,7 +6127,7 @@
         "CH14-Q015"
       ],
       "blocker_reason": "La evidencia aparece al final sin demostrar resultado.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6169,7 +6168,7 @@
         "CH14-Q015"
       ],
       "blocker_reason": "No existe demostración visual suficiente.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6204,7 +6203,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6239,7 +6238,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6273,7 +6272,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6308,7 +6307,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6342,7 +6341,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6377,7 +6376,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6413,7 +6412,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6448,7 +6447,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6482,7 +6481,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6517,7 +6516,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6552,7 +6551,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6587,7 +6586,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6622,7 +6621,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6657,7 +6656,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6691,7 +6690,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6725,7 +6724,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6757,7 +6756,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6789,7 +6788,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6821,7 +6820,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6852,7 +6851,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6884,7 +6883,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6915,7 +6914,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6947,7 +6946,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -6979,7 +6978,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7010,7 +7009,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7044,7 +7043,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7077,7 +7076,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7110,7 +7109,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7145,7 +7144,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7178,7 +7177,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7211,7 +7210,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7246,7 +7245,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7279,7 +7278,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7313,7 +7312,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7347,7 +7346,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7380,7 +7379,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7414,7 +7413,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7448,7 +7447,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7481,7 +7480,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7514,7 +7513,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7547,7 +7546,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     },
     {
@@ -7580,7 +7579,7 @@
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "8ed58e85f6865f38bd8e22ff702864bdc201d1bc",
+      "last_verified_sha": "1c7f4a78c68fcc37323f0fa669d8476fc865dbf9",
       "notes": "Estado recalculado desde MASTER_VIDEO_REQUIREMENTS y superficies React; certificación de acciones y paridad completa son conceptos separados."
     }
   ]

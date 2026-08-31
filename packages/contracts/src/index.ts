@@ -49,6 +49,8 @@ export const patientSchema = z.object({
   civilStatus: z.string().trim().optional(),
   nationality: z.string().trim().optional(),
   occupation: z.string().trim().optional(),
+  triageStatus: z.string().trim().optional(),
+  notifications: z.object({ botmakerConsent: z.boolean().default(true), lastStatus: z.string().trim().optional() }).optional(),
   insurance: patientInsuranceSchema.optional(),
   contacts: z.array(patientContactSchema).optional(),
   address: patientAddressSchema.optional(),

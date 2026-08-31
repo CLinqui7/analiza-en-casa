@@ -2,7 +2,7 @@
 
 > Generado de forma determinista. El estado de paridad no certifica una ruta sólo por tener acciones.
 
-SHA fuente: `8ed58e85f6865f38bd8e22ff702864bdc201d1bc`
+SHA fuente: `1c7f4a78c68fcc37323f0fa669d8476fc865dbf9`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -10,10 +10,10 @@ SHA fuente: `8ed58e85f6865f38bd8e22ff702864bdc201d1bc`
 | CH01-F002 | /patients | PARTIAL | PATIENT-TAB-ACTIVE, PATIENT-TAB-INACTIVE, PATIENT-TAB-IMPORT, PATIENT-IMPORT |
 | CH01-F003 | /patients | PARTIAL | PATIENT-DETAIL-NAVIGATE, PATIENT-BOTMAKER-CONSENT |
 | CH01-F004 | /patients | PARTIAL | PATIENT-SEARCH, PATIENT-PAGE-SIZE, PATIENT-PAGINATE, PATIENT-PAGE-PREVIOUS, PATIENT-PAGE-NEXT |
-| CH01-F005 | /patients | PARTIAL | PATIENT-EXPORT-XLSX, PATIENT-CREATE |
+| CH01-F005 | /patients | PARTIAL | PATIENT-EXPORT, PATIENT-CREATE |
 | CH01-F006 | /patients | PARTIAL | — |
 | CH01-F007 | /patients | PARTIAL | PATIENT-BOTMAKER-CONSENT |
-| CH01-F008 | /patients | PARTIAL | CLÍNICO-TOGGLE, INVENTARIO-TOGGLE, REPORTES-TOGGLE |
+| CH01-F008 | /patients | PARTIAL | — |
 | CH01-F009 | /patients | PARTIAL | — |
 | CH01-F010 | /patients | PARTIAL | — |
 | CH01-F011 | /patients | PARTIAL | USER-MENU-OPEN, USER-MENU-CLOSE, USER-PROFILE-OPEN |

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, type PropsWithChildren } from 'react';
+import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 
@@ -64,11 +64,19 @@ function DeniedRoute({ pathname }: { pathname: string }) {
 
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const router = useRouter();
   const { can, loading, logout, session } = useAuth();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Clínico: pathname.startsWith('/clinical'), Inventario: pathname.startsWith('/inventory'), Reportes: pathname.startsWith('/reports'),
   });
   const required = permissionForPath(pathname);
+  useEffect(() => {
+    const close = (event: MouseEvent) => { if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) setUserMenuOpen(false); };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
   if (loading) return <main className="access-denied" role="status">Validando sesión…</main>;
   if (!session) return <DeniedRoute pathname={pathname} />;
   if (required && !can(required)) {
@@ -105,7 +113,11 @@ export function AppShell({ children }: PropsWithChildren) {
         </nav>
         <footer className="sidebar-footer">
           <p>Desarrollado por Interactive Core</p>
-          <button className="button button-secondary" data-action-id="AUTH-LOGOUT" onClick={() => void logout()} type="button">Cerrar sesión</button>
+          <div ref={userMenuRef} className="user-menu">
+            <button aria-expanded={userMenuOpen} className="button button-secondary" data-action-id="USER-MENU-OPEN" onClick={() => setUserMenuOpen((open) => !open)} type="button">Mi cuenta</button>
+            {userMenuOpen ? <div className="user-menu-popover" role="menu"><p><strong>Organización</strong><br />Analiza en Casa · ámbito sintético</p><p><strong>Mi usuario</strong><br />{session.userId} · {session.role}</p><button data-action-id="USER-PROFILE-OPEN" onClick={() => setUserMenuOpen(false)} role="menuitem" type="button">Mi usuario</button><button data-action-id="AUTH-LOGOUT" onClick={() => void logout().then(() => router.replace('/login'))} role="menuitem" type="button">Cerrar sesión</button><button data-action-id="USER-MENU-CLOSE" onClick={() => setUserMenuOpen(false)} type="button">Cerrar menú</button></div> : null}
+          </div>
+          <button className="button button-secondary" data-action-id="AUTH-LOGOUT" onClick={() => void logout().then(() => router.replace('/login'))} type="button">Cerrar sesión</button>
         </footer>
       </aside>
       <main className="main-content">{children}</main>

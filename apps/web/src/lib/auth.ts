@@ -82,3 +82,7 @@ export async function logout(session: AuthSession | null): Promise<void> {
 }
 
 export const mockCredentialHint = 'admin@demo.local / demo-admin';
+
+export function safeNextPath(next: string | null, fallback = '/dashboard') {
+  return next && next.startsWith('/') && !next.startsWith('//') ? next : fallback;
+}
