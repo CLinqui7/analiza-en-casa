@@ -1,8 +1,10 @@
 # Trazabilidad video → React → prueba
 
-> Generado de forma determinista. El estado de paridad no certifica una ruta sólo por tener acciones.
+> Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-SHA fuente: `4d0fb054023b6b3fe3cecd4dcf61fcf72d857d9d`
+Commit generador: `c8ed9c52c98448e638da7985c382325b6dc2a8a7`
+SHA de implementación: `c8ed9c52c98448e638da7985c382325b6dc2a8a7`
+Fingerprint funcional CH01: `6215607f15fdea2602fcad8a3dd384abc7327e5cf2f3bdb0e0414998a6fe9a8b`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|

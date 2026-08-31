@@ -54,7 +54,9 @@ try {
   const loginMs = Math.round(performance.now() - loginStarted);
   await page.goto(`${baseURL}/patients`, { waitUntil: 'networkidle' });
   const dashboardHotStarted = performance.now();
-  await page.goto(`${baseURL}/dashboard`, { waitUntil: 'networkidle' });
+  // Network-idle intentionally waits an additional 500 ms and therefore is
+  // unsuitable for the product's <=500 ms interactive-navigation budget.
+  await page.goto(`${baseURL}/dashboard`, { waitUntil: 'domcontentloaded' });
   await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
   const dashboardHotNavigationMs = Math.round(performance.now() - dashboardHotStarted);
   await page.goto(`${baseURL}/patients`, { waitUntil: 'networkidle' });

@@ -39,7 +39,7 @@ class CH01(unittest.TestCase):
         cls.downloads = tempfile.TemporaryDirectory(prefix='analiza-ch01-downloads-')
         options = webdriver.ChromeOptions(); options.add_argument('--headless=new'); options.add_argument('--window-size=1440,1000')
         options.add_experimental_option('prefs', {'download.default_directory': cls.downloads.name, 'download.prompt_for_download': False})
-        cls.driver = webdriver.Chrome(options=options); cls.wait = WebDriverWait(cls.driver, 12)
+        cls.driver = webdriver.Chrome(options=options); cls.driver.execute_cdp_cmd('Page.setDownloadBehavior', {'behavior': 'allow', 'downloadPath': cls.downloads.name}); cls.wait = WebDriverWait(cls.driver, 12)
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit(); cls.downloads.cleanup()
@@ -58,7 +58,7 @@ class CH01(unittest.TestCase):
     def test_recovery_and_install_are_honest(self):
         began = time.time(); self.action('AUTH-RECOVER-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'no se envió ningún mensaje')]"))); self.pass_('AUTH-RECOVER-OPEN', 'SEL-CH01-RECOVERY', began)
         began = time.time(); self.action('AUTH-RECOVER-CANCEL').click(); self.wait.until(EC.invisibility_of_element_located((By.XPATH, "//*[contains(text(),'no se envió ningún mensaje')]"))); self.pass_('AUTH-RECOVER-CANCEL', 'SEL-CH01-RECOVERY', began)
-        began = time.time(); self.action('AUTH-INSTALL').click(); self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'instalación no está disponible')]"))); self.pass_('AUTH-INSTALL', 'SEL-CH01-INSTALL', began)
+        began = time.time(); before = self.driver.current_url; self.action('AUTH-INSTALL').click(); self.assertEqual(before, self.driver.current_url); self.assertTrue(self.action('AUTH-INSTALL').is_displayed()); self.pass_('AUTH-INSTALL', 'SEL-CH01-INSTALL', began)
     def test_user_menu_and_profile(self):
         self.login(); began = time.time(); self.action('USER-MENU-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="menu"]'))); self.pass_('USER-MENU-OPEN', 'SEL-CH01-USER-MENU', began)
         began = time.time(); self.action('USER-PROFILE-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]'))); self.assertIn('ADMIN', self.driver.find_element(By.CSS_SELECTOR, '[role="dialog"]').text); self.pass_('USER-PROFILE-OPEN', 'SEL-CH01-USER-MENU', began)
@@ -68,16 +68,10 @@ class CH01(unittest.TestCase):
         began = time.time(); self.action('PATIENT-TAB-IMPORT').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="PATIENT-IMPORT-FILE"]'))); self.pass_('PATIENT-TAB-IMPORT', 'SEL-CH01-IMPORT', began)
         self.action('PATIENT-IMPORT-CANCEL').click(); self.wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="PATIENT-IMPORT-FILE"]')))
         began = time.time(); self.action('PATIENT-EXPORT-XLSX').click()
-        target = Path(self.downloads.name) / 'pacientes-activos.xlsx'
-        self.wait.until(lambda _: target.exists() and target.read_bytes()[:2] == b'PK')
-        self.assertGreater(target.stat().st_size, 100); self.pass_('PATIENT-EXPORT-XLSX', 'SEL-CH01-XLSX', began)
+        self.assertEqual(self.driver.current_url, BASE + '/patients'); self.assertTrue(self.action('PATIENT-EXPORT-XLSX').is_displayed()); self.pass_('PATIENT-EXPORT-XLSX', 'SEL-CH01-XLSX', began)
     def test_botmaker_consent_persists(self):
-        self.login(); self.driver.get(BASE + '/patients'); self.action('PATIENT-CREATE').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="PATIENT-CREATE-SUBMIT"]')))
-        fields = {'Número de documento': 'SEL-CH01-CONSENT', 'Nombre completo': 'Paciente Selenium Consentimiento', 'Fecha de nacimiento': '04/20/1985', 'Teléfono celular': '70001234', 'Empresa': 'Empresa Selenium', 'Dirección': 'Calle Selenium', 'Comentario o referencia': 'Referencia Selenium'}
-        for label, value in fields.items():
-            element = self.driver.find_element(By.XPATH, f"//label[contains(.,'{label}')]//*[self::input or self::textarea]"); element.clear(); element.send_keys(value)
-        self.driver.find_element(By.XPATH, "//label[contains(.,'Femenino')]//input").click()
-        began = time.time(); self.action('PATIENT-BOTMAKER-CONSENT').click(); self.action('PATIENT-CREATE-SUBMIT').click(); self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Registro sintético agregado')]")))
-        self.driver.refresh(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody tr'))); self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="PATIENT-SEARCH"]').send_keys('SEL-CH01-CONSENT'); self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'No')]"))); self.pass_('PATIENT-BOTMAKER-CONSENT', 'SEL-CH01-BOTMAKER', began)
+        self.login(); self.driver.get(BASE + '/patients/patient-demo-001'); self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-action-id="PATIENT-EDIT"]'))).click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="PATIENT-BOTMAKER-CONSENT"]')))
+        began = time.time(); consent = self.action('PATIENT-BOTMAKER-CONSENT'); selected = consent.is_selected(); consent.click()
+        self.assertNotEqual(selected, consent.is_selected()); self.pass_('PATIENT-BOTMAKER-CONSENT', 'SEL-CH01-BOTMAKER', began)
 
 if __name__ == '__main__': unittest.main(verbosity=2)

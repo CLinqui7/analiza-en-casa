@@ -221,7 +221,13 @@ export default function PatientsPage() {
     }));
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows, { header: ['Documento', 'Nombre completo', 'Edad', 'Empresa', 'Triage', 'Notif. Botmaker', 'Estado'] }), 'Pacientes');
-    XLSX.writeFile(workbook, `pacientes-${tab === 'ACTIVE' ? 'activos' : 'inactivos'}.xlsx`, { compression: true });
+    const blob = new Blob([XLSX.write(workbook, { bookType: 'xlsx', type: 'array', compression: true })], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const anchor = document.createElement('a');
+    anchor.download = `pacientes-${tab === 'ACTIVE' ? 'activos' : 'inactivos'}.xlsx`;
+    anchor.href = URL.createObjectURL(blob);
+    document.body.append(anchor); anchor.click();
+    window.setTimeout(() => { URL.revokeObjectURL(anchor.href); anchor.remove(); }, 0);
+    setResult(`Archivo ${anchor.download} generado.`);
   }
   function onSubmit(values: PatientForm) {
     const documentError = validateDocument(values.documentType, values.documentId);

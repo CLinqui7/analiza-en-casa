@@ -55,7 +55,7 @@ const requirements = canonical.requirements.map((requirement) => {
     open_question_ids: requirement.open_question_ids, route_id: route?.route_id ?? null, react_route: route?.react_route ?? null,
     react_files: filesFor(route), component_ids: [], action_ids: actionIds, parity_status: parityStatus,
     functional_status: certification?.functional_status ?? (parityStatus === 'EXACT' ? 'VERIFIED' : 'UNVERIFIED'), persistence_status: certification?.persistence_status ?? 'UNVERIFIED', permissions_status: certification?.permissions_status ?? 'UNVERIFIED', performance_status: certification?.performance_status ?? 'UNVERIFIED',
-    unit_test_ids: certification?.unit_test_ids ?? tests.unit, playwright_test_ids: certification?.playwright_test_ids ?? tests.playwright, selenium_test_ids: certification?.selenium_test_ids ?? tests.selenium, visual_test_ids: certification?.visual_test_ids ?? [],
+    unit_test_ids: certification ? (certification.unit_test_ids ?? []) : tests.unit, playwright_test_ids: certification ? (certification.playwright_test_ids ?? []) : tests.playwright, selenium_test_ids: certification ? (certification.selenium_test_ids ?? []) : tests.selenium, visual_test_ids: certification ? (certification.visual_test_ids ?? []) : [],
     blocker_type: blocker ? parityStatus : null, blocker_ids: blocker ? requirement.open_question_ids : [],
     blocker_reason: blocker ? requirement.platform_assessment.notes : null, last_verified_sha: certification?.implementation_sha ?? certificationDocument.implementation_sha ?? null,
     notes: certification?.notes ?? `Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.`,
