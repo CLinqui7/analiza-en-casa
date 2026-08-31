@@ -46,8 +46,8 @@ try {
     routes[route] = { navigationMs: Math.round(performance.now() - began), ...(await metrics(page)) };
   }
   await page.goto(`${baseURL}/login`, { waitUntil: 'networkidle' });
-  await page.getByLabel('Correo').fill('admin@demo.local');
-  await page.getByLabel('Contraseña').fill('demo-admin');
+  await page.getByLabel('Usuario o correo').fill('admin@demo.local');
+  await page.getByLabel('Clave').fill('demo-admin');
   const loginStarted = performance.now();
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.waitForURL('**/dashboard');
