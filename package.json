@@ -69,6 +69,7 @@
     "selenium:coverage": "node scripts/verify-selenium-coverage.mjs",
     "selenium:coverage:patients": "node scripts/verify-selenium-coverage.mjs --prefix PATIENT- --require-executed",
     "selenium:coverage:ch01": "node scripts/verify-selenium-ch01-coverage.mjs",
+    "selenium:coverage:ch02": "node scripts/verify-selenium-ch02-coverage.mjs",
     "selenium:coverage:hospitalizations": "node scripts/verify-selenium-hospitalization-coverage.mjs",
     "selenium:coverage:quotes": "node scripts/verify-selenium-quote-coverage.mjs",
     "security:scan": "node scripts/security-scan.mjs"
