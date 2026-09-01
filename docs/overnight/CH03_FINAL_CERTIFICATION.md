@@ -14,6 +14,6 @@ non-delivery states; and backwards-compatible invoice metadata that does not
 change financial totals.
 
 Evidence gates passed: `audit:verify`; video-parity chapters CH01, CH02, and
-CH03; and Playwright CH01–CH03 (18 tests). The inherited Selenium
-hospitalization fixture remains under repair for its v2-to-v3 local-storage
-migration and is not represented as passing certification evidence.
+CH03; Playwright CH01–CH03 (18 tests); and two clean Selenium hospitalization
+runs (9/9 each). The Selenium coverage gates report 20/20 actions, zero
+failed/uncovered, and the current functional fingerprint.
