@@ -6,6 +6,7 @@
 # test-id: SEL-HOSP-CREATE
 # test-id: SEL-HOSP-DETAIL
 # test-id: SEL-HOSP-EDIT
+# test-id: SEL-STORAGE-V2-V3-MIGRATION
 
 from __future__ import annotations
 
@@ -25,6 +26,15 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
 from helpers.hospitalization_action_recorder import record_pass, reset
+from helpers.mock_workspace_storage import (
+    append_collection_items,
+    clear_workspace,
+    get_collection,
+    get_collections,
+    get_hospitalizations,
+    legacy_snapshot_exists,
+    set_legacy_snapshot,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -81,21 +91,17 @@ class Hospitalizations(unittest.TestCase):
     def reset_mock_state(self) -> None:
         self.d.get(f'{BASE}/login')
         self.w.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
-        self.d.execute_script(
-            'localStorage.removeItem("analiza.en.casa.workspace.v2");'
-            'localStorage.removeItem("analiza.en.casa.mock-session.v1");',
-        )
-        self.d.execute_script("Object.keys(localStorage).filter((key) => key.startsWith('analiza.en.casa.workspace.v3.')).forEach((key) => localStorage.removeItem(key));")
+        clear_workspace(self.d)
         self.d.get(f'{BASE}/login')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//label[contains(.,'Correo')]//input")))
-        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[type=password]')))
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]')))
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-PASSWORD"]')))
         self.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]')))
 
     def login_as(self, email: str, password: str, role: str) -> None:
-        email_box = self.w.until(EC.visibility_of_element_located((By.XPATH, "//label[contains(.,'Correo')]//input")))
+        email_box = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]')))
         email_box.clear()
         email_box.send_keys(email)
-        password_box = self.d.find_element(By.CSS_SELECTOR, 'input[type=password]')
+        password_box = self.d.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-PASSWORD"]')
         password_box.clear()
         password_box.send_keys(password)
         self.action('AUTH-LOGIN').click()
@@ -134,7 +140,10 @@ class Hospitalizations(unittest.TestCase):
         self.w.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'table')))
 
     def case_row(self, marker: str):
-        return self.w.until(EC.presence_of_element_located((By.XPATH, f"//tbody/tr[td[contains(.,'{marker}')]]")))
+        hospitalizations = get_collection(self.d, 'hospitalizations')
+        matching = [item for item in hospitalizations if item.get('nextAction') == marker] if isinstance(hospitalizations, list) else []
+        needle = matching[0]['id'] if matching else marker
+        return self.w.until(EC.presence_of_element_located((By.XPATH, f"//tbody/tr[td[contains(.,'{needle}')]]")))
 
     def create_fixture(self, marker: str, manager='Responsable Fixture Selenium') -> str:
         self.d.get(f'{BASE}/hospitalizations')
@@ -163,11 +172,13 @@ class Hospitalizations(unittest.TestCase):
         return case_id
 
     def stored_case(self, case_id: str) -> dict:
-        data = json.loads(self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v3.hospitalizations")'))
-        return next(item for item in data if item['id'] == case_id)
+        return next(item for item in get_hospitalizations(self.d) if item['id'] == case_id)
 
     def test_navigation_and_roles(self) -> None:
         started = time.time()
+        financial_toggle = self.action('FINANCIERO-TOGGLE')
+        if financial_toggle.get_attribute('aria-expanded') == 'false':
+            financial_toggle.click()
         self.click('HOSPITALIZATION-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/hospitalizations'))
         self.list_ready()
@@ -188,9 +199,9 @@ class Hospitalizations(unittest.TestCase):
             controls = self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')
             self.assertEqual(bool(controls), can_write)
             if not can_write:
-                before = self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")')
+                before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
                 self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]'))
-                self.assertEqual(self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")'), before)
+                self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
         self.prepare_authenticated_test('inventory@demo.local', 'demo-inventory', 'INVENTORY')
         self.d.get(f'{BASE}/hospitalizations')
         denied = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
@@ -225,6 +236,7 @@ class Hospitalizations(unittest.TestCase):
         rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertTrue(rows and all('Activo' in row.text for row in rows))
         self.pass_('HOSPITALIZATION-FILTER-STATUS', 'SEL-HOSP-FILTERS', state_started)
+        self.pass_('HOSPITALIZATION-FILTER-APPLY', 'SEL-HOSP-FILTERS', state_started)
         date_started = time.time()
         date_filter = self.action('HOSPITALIZATION-FILTER-DATE')
         self.d.execute_script(
@@ -239,7 +251,7 @@ class Hospitalizations(unittest.TestCase):
         self.w.until(lambda _: len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')) == 1)
         rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertEqual(len(rows), 1)
-        self.assertIn('2026-08-28', rows[0].text)
+        self.assertIn('case-demo-001', rows[0].text)
         self.pass_('HOSPITALIZATION-FILTER-DATE', 'SEL-HOSP-FILTERS', date_started)
         account_started = time.time()
         Select(self.action('HOSPITALIZATION-FILTER-ACCOUNT-TYPE')).select_by_value('Referencia sintética')
@@ -259,12 +271,10 @@ class Hospitalizations(unittest.TestCase):
 
     def test_pagination(self) -> None:
         self.create_fixture('Semilla de paginación Selenium')
-        snapshot = json.loads(self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")'))
-        snapshot['hospitalizations'].extend({
+        append_collection_items(self.d, 'hospitalizations', [{
             'id': f'HOS-SEL-PAGE-{number:02d}', 'patientId': 'patient-demo-001', 'startDate': f'2026-08-{number + 1:02d}',
             'status': 'ACTIVE', 'accountType': 'EMPRESA', 'nextAction': f'Página Selenium {number}',
-        } for number in range(1, 8))
-        self.d.execute_script('localStorage.setItem("analiza.en.casa.workspace.v2", arguments[0])', json.dumps(snapshot))
+        } for number in range(1, 8)])
         self.d.get(f'{BASE}/hospitalizations')
         self.list_ready()
         size_started = time.time()
@@ -283,6 +293,30 @@ class Hospitalizations(unittest.TestCase):
         self.click('HOSPITALIZATION-PAGE-PREV')
         self.assertEqual(first_page, [row.text for row in self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')])
         self.pass_('HOSPITALIZATION-PAGE-PREV', 'SEL-HOSP-PAGINATION', previous_started)
+
+    def test_storage_v2_to_v3_migration(self) -> None:
+        """A valid legacy snapshot is migrated once, then remains segmented."""
+        snapshot = {
+            'patients': [{'id': 'patient-demo-001', 'fullName': 'Paciente Demo Aurora', 'documentType': 'DUI', 'documentId': '12345678-9', 'status': 'ACTIVE'}],
+            'vitalReadings': [], 'nursingResources': [], 'nurseHours': [], 'inventoryMovements': [],
+            'shifts': [],
+            'hospitalizations': [{'id': 'HOS-V2-MIGRATION-001', 'patientId': 'patient-demo-001', 'startDate': '2026-08-28', 'status': 'ACTIVE', 'accountType': 'PARTICULAR'}],
+            'quotes': [], 'payments': [], 'clinicalDocuments': [], 'catalogItems': [], 'purchases': [],
+            'insuranceRequests': [], 'insuranceEvents': [],
+            'auditEntries': [{'id': 'audit-v2-migration', 'at': '2026-08-28T00:00:00.000Z', 'action': 'Migración Selenium', 'subject': 'HOS-V2-MIGRATION-001'}],
+        }
+        clear_workspace(self.d, clear_session=False)
+        set_legacy_snapshot(self.d, snapshot)
+        self.d.get(f'{BASE}/login')
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        seeded = snapshot['hospitalizations'][0]
+        self.assertIn(seeded['id'], self.d.find_element(By.TAG_NAME, 'body').text)
+        self.assertTrue(get_hospitalizations(self.d))
+        self.assertFalse(legacy_snapshot_exists(self.d))
+        self.d.refresh()
+        self.list_ready()
+        self.assertIn(seeded['id'], self.d.find_element(By.TAG_NAME, 'body').text)
 
     def test_create_and_validation(self) -> None:
         self.d.get(f'{BASE}/hospitalizations')

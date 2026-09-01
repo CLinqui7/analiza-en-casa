@@ -20,12 +20,14 @@ def reset() -> None:
 def record_pass(action_id: str, test_id: str, started_at: float, url: str) -> None:
     data = json.loads(PATH.read_text(encoding='utf8')) if PATH.exists() else {'results': []}
     sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    fingerprint = subprocess.check_output(['node', 'scripts/print-functional-fingerprint.mjs'], cwd=ROOT, text=True).strip()
     data['results'] = [item for item in data['results'] if item['action_id'] != action_id]
     data['results'].append({
         'action_id': action_id,
         'test_id': test_id,
         'status': 'PASS',
         'git_sha': sha,
+        'functional_fingerprint': fingerprint,
         'executed_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'duration_ms': int((time.time() - started_at) * 1000),
         'url': url,

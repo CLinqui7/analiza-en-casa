@@ -71,6 +71,7 @@
     "selenium:coverage:ch01": "node scripts/verify-selenium-ch01-coverage.mjs",
     "selenium:coverage:ch02": "node scripts/verify-selenium-ch02-coverage.mjs",
     "selenium:coverage:hospitalizations": "node scripts/verify-selenium-hospitalization-coverage.mjs",
+    "selenium:coverage:ch03": "node scripts/verify-selenium-ch03-coverage.mjs",
     "selenium:coverage:quotes": "node scripts/verify-selenium-quote-coverage.mjs",
     "security:scan": "node scripts/security-scan.mjs"
   },
