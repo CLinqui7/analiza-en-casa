@@ -7267,7 +7267,9 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
@@ -7275,9 +7277,9 @@
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "current_platform_evidence": "/catalogs/supplies presenta la anatomía factual vacía de Insumos: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
         "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_supplies.py",
-        "recommended_action": "Mantener la lista de solo lectura mientras no exista una fuente y contrato de escritura aprobados; no fabricar insumos ni reglas clínicas.",
-        "blocked_by_client_information": false,
-        "notes": "CH15-E0067 respalda la anatomía de tabla. CH15-E0068 muestra un formulario, pero no autoriza campos operativos, catálogo fuente, escritura ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe la fuente, el contrato de escritura y el efecto de las banderas observadas; no fabricar insumos ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0067 respalda la anatomía de tabla. CH15-E0068 muestra un formulario, pero CH15-Q004 no define fuente, efecto de Facturable/Descuento/Impuesto/Lotes/Giftcard/Transporte en frío, escritura, validación, auditoría ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7301,17 +7303,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/catalogs/studies presenta la anatomía factual vacía de Estudios Dx: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_studies.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe la fuente, el contrato de escritura y el efecto de Impuesto y Descuento; no fabricar estudios, precios ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0084 respalda la anatomía de tabla. El video muestra filas de estudios, pero no autoriza una fuente sintética, identidad clínica, precios, efectos de Impuesto/Descuento, escritura, validación, auditoría ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {

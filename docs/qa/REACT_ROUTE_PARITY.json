@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "generated_at": "2026-09-02T15:30:15-06:00",
+  "generated_at": "2026-09-02T15:40:35-06:00",
   "source": "Legacy routes are extracted from app/views.js:renderRoute and navigation; React routes are extracted from apps/web/src/app.",
   "routes": [
     {

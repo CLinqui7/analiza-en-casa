@@ -27,7 +27,7 @@
   },
   "blockers": [
     "CH15-Q001/Q002/Q003 block patient-scoped acuse, shortage, warehouse, template and quote-origin behavior.",
-    "CH15-Q004 blocks medication source data, identity, attributes, write roles, validation, audit and clinical semantics. Excel and Nuevo remain disabled.",
+    "CH15-Q004 blocks medication and supplies source data, flag effects, identity, attributes, write roles, validation, audit and clinical semantics. Excel and Nuevo remain disabled.",
     "CH14-Q006 remains unresolved; this batch does not implement closure warning acceptance semantics.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
     "The implementation commit and cached tracking ref are e89a734. Fresh push/fetch remain blocked by unavailable HTTPS credentials and denied .git/FETCH_HEAD writes; the metadata-only follow-up cannot create .git/index.lock."

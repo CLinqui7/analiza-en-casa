@@ -186,7 +186,7 @@
       "description": "Estudios Dx presenta código, nombre, descripción, impuesto, descuento y estado, con búsqueda, paginación, Excel y alta.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH15",
@@ -195,7 +195,7 @@
           "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0084_00h47m20s600ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: buscar un estudio, recorrer páginas, exportar y comprobar acceso al alta según rol."
+      "test_path": "apps/web/e2e/ch15.spec.ts y tests/selenium/test_catalog_studies.py: abrir la lista factual vacía, buscar, comprobar controles deshabilitados y recargar sin mutar auditoría; ADMIN/INVENTORY/AUDITOR permitidos y DOCTOR/NURSE/FINANCE denegados. No se prueban filas, exportación ni alta hasta contar con CH15-Q004."
     },
     {
       "id": "CH15-F10",

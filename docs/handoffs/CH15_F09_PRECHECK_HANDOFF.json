@@ -1,0 +1,33 @@
+{
+  "lot": "CH15_F09_PRECHECK",
+  "source_sha": "50ea475d0215fdc86b8e0d50a0d72333da555847",
+  "base_sha": "50ea475d0215fdc86b8e0d50a0d72333da555847",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
+  "requirements": {
+    "verified_partial": ["CH15-F09"],
+    "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "f09": "CH15-E0084 was opened and shows Items / Estudios Dx with Registros, pagination, search, Excel, Nuevo and the Acciones/Código/Nombre/Descripción/Impuesto/Descuento/Estado columns. The source also shows loaded study rows, but it does not authorize copying or fabricating them. React implements only the factual empty list at /catalogs/studies."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15": "PASS: 18/18 at isolated port 4176; medication, supplies and diagnostic-studies factual lists, search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_studies.py is executable, action-specific source coverage",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS: 87 product source files",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH15-Q004 blocks F09 source-backed rows, export and write behavior: E0084 does not define a source, Impuesto/Descuento effects, prices, write roles, validation, audit or clinical consequences for Estudios Dx.",
+    "No diagnostic-study rows, prices, tax/discount effects, states, clinical rules or mutations were fabricated.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH15_REVIEW"
+}
