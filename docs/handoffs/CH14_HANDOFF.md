@@ -18,7 +18,7 @@ La conciliación F13 quedó comprometida en `bf72a041342fd0cf0ca606f63c48af5dfdc
 
 ## CH14 F14 · Precheck de evidencia y seguridad
 
-Se abrieron `CH14-E0149`–`CH14-E0152`. El menú de una fila de Acuses muestra `Nuevo`; el formulario siguiente contiene Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible, Cantidad a asignar, Vaciar, Plantilla y Añadir. La transición posterior muestra un estado de faltantes, no una confirmación segura de entrega.
+Se abrieron `CH14-E0149`–`CH14-E0152`. El menú de una fila de Acuses muestra `Nuevo`; el formulario siguiente contiene Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible, Cantidad a asignar, Vaciar, Plantilla y Añadir. `CH14-E0152` es sólo la transición oscurecida posterior al formulario; `safety_022` es la evidencia separada del detalle de faltantes para F15.
 
 F14 queda `MISSING`. React conserva Acuses como superficie factual vacía y no obtiene pacientes, hospitalizaciones o datos de casos para este flujo. No se crea un acuse, no se reservan/descargan existencias y no se exponen datos de pacientes. `CH14-Q001`, `CH14-Q002`, `CH14-Q004`, `CH14-Q005` y `CH14-Q016` exigen la fuente tenant-scoped, roles, enlace paciente/hospitalización, validación de cantidades, idempotencia, auditoría y reversión aprobadas antes de cualquier formulario operativo.
 
@@ -27,3 +27,9 @@ F14 queda `MISSING`. React conserva Acuses como superficie factual vacía y no o
 Se abrió `CH14-E0152` y es sólo la transición oscurecida posterior al formulario de Acuse; no permite leer una tabla de faltantes. La evidencia real de detalle es `contact_sheets_safety/safety_022.jpg` a 00:45:28: muestra `Items faltantes disponibles`, `Bodega` y las columnas `Acuse`, `Tipo`, `Código`, `Nombre`, `Disponible`, `Requerido` y `Acuse creado`.
 
 F15 queda `MISSING`. Esa anatomía no define fuente tenant-scoped, cálculo ni tratamiento de faltantes/cantidad insuficiente, roles, sustitución, compra, notificación, estado de `Acuse creado`, idempotencia, auditoría o reversión. La frase sobre “faltar una cotización” sólo aparece en transcripción y no prueba una relación funcional. `CH14-Q005` y `CH14-Q014` permanecen abiertos; React no calcula faltantes, no notifica, no compra, no muta existencias y no expone pacientes.
+
+## CH14 F16 · Precheck de evidencia y ambigüedad
+
+Se reabrió `CH14-E0152`: sólo contiene el formulario de Acuse oscurecido, sin control, estado, enlace ni notificación de cotización. La única señal relacionada es la transcripción ambigua `00:45:10.320–00:45:13.320`: “faltar una cotización”. No identifica una entidad, transición, autorización ni resultado.
+
+F16 queda `NOT_TESTABLE` bajo `CH14-Q014`. React no incorpora acción de cotización, cambio de estado, notificación, enlace entre módulos ni mutación de inventario. Antes de cualquier conducta se requieren significado aprobado, entidad, estado, roles, autorización, auditoría e idempotencia.

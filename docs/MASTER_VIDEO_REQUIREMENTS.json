@@ -6848,7 +6848,7 @@
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": "La transición siguiente queda oscurecida; la evidencia de seguridad asociada muestra faltantes con Disponible y Requerido."
+          "observation": "La transición posterior queda oscurecida; este frame no muestra el detalle de faltantes. safety_022 es la evidencia separada de ese modal para CH14-F15."
         }
       ],
       "open_question_ids": [
@@ -6867,7 +6867,7 @@
         "test_path": "No se implementa formulario ni prueba operativa: no existe una fuente de paciente/hospitalización acotada por organización ni una operación autorizada de reserva, entrega o reversión.",
         "recommended_action": "Resolver CH14-Q001/Q002/Q004/Q005/Q016 antes de diseñar un flujo tenant-scoped que valide cantidades y persista un acuse idempotente, auditado y reversible.",
         "blocked_by_client_information": true,
-        "notes": "Reconciliación: CH14-E0149–E0152 muestran el menú Nuevo, el formulario y la transición de faltantes, pero no definen fuente autorizada de paciente/hospitalización, alcance por organización, roles, validación de cantidad, persistencia, idempotencia, auditoría ni reversión. React no expone este formulario ni datos de pacientes/casos."
+        "notes": "Reconciliación: CH14-E0149–E0151 muestran el menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo su transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para CH14-F15. F14 no define fuente autorizada de paciente/hospitalización, alcance por organización, roles, validación de cantidad, persistencia, idempotencia, auditoría ni reversión. React no expone este formulario ni datos de pacientes/casos."
       }
     },
     {
@@ -6911,7 +6911,7 @@
       "requirement_id": "CH14-F16",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
       "feature": "Vínculo de faltantes con cotización",
-      "detailed_behavior": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "detailed_behavior": "La transcripción menciona de forma ambigua una opción relacionada con ‘faltar una cotización’; no identifica la entidad, el estado, la autorización ni un comportamiento demostrable.",
       "evidence_type": "UNCERTAIN",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
@@ -6924,25 +6924,23 @@
           "timestamp": "00:45:27.400",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
           "detail_path": "",
-          "transcript": "",
-          "observation": ""
+          "transcript": "00:45:10.320–00:45:13.320: ‘También tenía una opción de faltar una cotización’.",
+          "observation": "CH14-E0152 es sólo el formulario de Acuse oscurecido y no contiene control, estado ni vínculo de cotización. La frase de la transcripción es ambigua y no autoriza una relación funcional."
         }
       ],
       "open_question_ids": [
-        "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
         "patient_safety_impact": "Sin acción clínica automática.",
         "financial_impact": "No se cambia una cotización desde una frase ambigua.",
-        "current_platform_evidence": "docs/OPEN_QUESTIONS.md",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no expone una acción ni enlace de cotización desde Inventario; docs/OPEN_QUESTIONS.md",
         "test_path": "NONE",
-        "recommended_action": "Resolver CH14-Q014 con el cliente.",
+        "recommended_action": "Resolver CH14-Q014 con el cliente antes de asociar un faltante con cotización, estado, autorización o auditoría.",
         "blocked_by_client_information": true,
-        "notes": "No existe demostración visual suficiente."
+        "notes": "El frame citado sólo es una transición oscurecida del formulario. La narración no define significado, entidad, estado, roles, notificación, idempotencia, auditoría ni efectos de inventario; no se implementa acción alguna."
       }
     },
     {
@@ -9981,7 +9979,7 @@
       "question_id": "CH14-Q014",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
-      "question": "identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.",
+      "question": "identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización, auditoría e idempotencia requiere. CH14-E0152 sólo muestra una transición oscurecida del formulario; la única mención es la transcripción ambigua 00:45:10.320–00:45:13.320.",
       "evidence_event_ids": [
         "CH14-E0152"
       ],

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T14:15:54-06:00",
-  "metadata_generated_from_commit": "a7d68d87ff35e072a16f2fab063b615ecb2e1657",
-  "source_sha256": "ff3773a512eb91905f2f41f693c15cfa982f9963606a3ae43cb8b873724526db",
+  "generated_at": "2026-09-02T14:28:00-06:00",
+  "metadata_generated_from_commit": "1801eb792563f7a342b2ac1fd7a87a01139f1d20",
+  "source_sha256": "ece88615dfab805b4f6e4e51a3b19ae22aeb1cf2e8e142e2628709eaf1c080c5",
   "implementation_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "functional_fingerprint": "dd4358fd29ccb31a9b62015485c238cb736871338664bc8e89a142d5f4b73d52",
+  "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6893,7 +6893,7 @@
       ],
       "blocker_reason": "No hay fuente autorizada y acotada por organización para paciente/hospitalización ni reglas aprobadas de roles, cantidad disponible/asignada, reserva/entrega, idempotencia, auditoría o reversión. No se expone un formulario ni datos de pacientes/casos.",
       "last_verified_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-      "notes": "CH14-E0149–E0152 muestran menú Nuevo, formulario de acuse y una transición a faltantes. La anatomía visual no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía."
+      "notes": "CH14-E0149–E0151 muestran menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo la transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para F15. La anatomía F14 no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía."
     },
     {
       "requirement_id": "CH14-F15",
@@ -6939,16 +6939,14 @@
       "requirement_id": "CH14-F16",
       "chapter_id": "CH14",
       "feature": "Vínculo de faltantes con cotización",
-      "detailed_behavior": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "detailed_behavior": "La transcripción menciona de forma ambigua una opción relacionada con ‘faltar una cotización’; no identifica la entidad, el estado, la autorización ni un comportamiento demostrable.",
       "classification": "UNCERTAIN",
       "priority": "P1",
       "evidence_paths": [
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
       ],
       "open_question_ids": [
-        "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
@@ -6966,15 +6964,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
+      "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
-        "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
-      "blocker_reason": "No existe demostración visual suficiente.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_reason": "La única mención de ‘faltar una cotización’ es ambigua; CH14-E0152 sólo es la transición oscurecida del formulario. No están definidos significado, entidad, estado, roles, autorización, auditoría, idempotencia, notificación ni efectos de cotización o inventario.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Precheck: la transcripción 00:45:10.320–00:45:13.320 no prueba un enlace de cotización. React no expone una acción, cambio de estado, notificación ni mutación de inventario para este supuesto vínculo."
     },
     {
       "requirement_id": "CH15-F01",

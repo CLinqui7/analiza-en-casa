@@ -1,12 +1,12 @@
 {
-  "lot": "CH14_F15_EVIDENCE_AND_SAFETY_PRECHECK",
+  "lot": "CH14_F16_EVIDENCE_AND_AMBIGUITY_PRECHECK",
   "source_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
   "base_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "PENDING_COMMIT",
   "final_sha": null,
   "remote_sha": null,
-  "functional_fingerprint": "dd4358fd29ccb31a9b62015485c238cb736871338664bc8e89a142d5f4b73d52",
+  "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10", "CH14-F12"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
@@ -23,8 +23,9 @@
     "f11": "Evidence reconciliation opened CH14-E0072, E0075, E0078 and E0079. Each visibly remains Items / Bodegas; E0078 only exposes Lotes / Series as a menu destination. None establishes a lot/serial table, invalid-date display, expiry, allocation or rejection policy. React has no Lotes/Nros de serie surface, so F11 is MISSING under CH14-Q010/Q011 rather than falsely partial.",
     "f12": "CH14-E0084/E0089 were opened and show Lotes y números de serie, not kits. The actual Kit de insumos sequence is CH14-E0095/E0100/E0104: Listado, Excel, Nuevo, search, pagination, Acciones/Nombre/Actualizado por/Fecha actualización, and the Editar/Duplicar/Eliminar row menu. React implements only that list anatomy as a permission-gated factual empty surface; Excel, Nuevo and pagination are visible and disabled, with no kit rows, composition, consumption or mutation. Its implementation checkpoint is 43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb.",
     "f13": "CH14-E0091 was opened and is a Lotes y números de serie table, not a kit editor. CH14-E0106/E0117 are the actual KIT CURACIONES editor frames, showing Nombre, Item, Cantidad, Añadir, an insumos list and remove controls. They do not define persisted composition, authorized roles, auditing or stock-consumption semantics; React intentionally has no editor or stock effect. This reconciliation is committed at bf72a041342fd0cf0ca606f63c48af5dfdc4cb38.",
-    "f14": "CH14-E0149 opens Nuevo from an Acuses row menu. CH14-E0150/E0151 show Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible/asignar, Vaciar, Plantilla and Añadir; E0152 transitions to a shortage state. These frames do not define an authorized tenant-scoped patient/case source, roles, quantity validation, persistence, idempotency, audit or reversal. React intentionally has no acuse form, patient/case source, reservation or stock discharge.",
+    "f14": "CH14-E0149 opens Nuevo from an Acuses row menu. CH14-E0150/E0151 show Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible/asignar, Vaciar, Plantilla and Añadir. E0152 is only the dimmed post-form transition; safety_022 is the separate shortage-detail evidence for F15. These F14 frames do not define an authorized tenant-scoped patient/case source, roles, quantity validation, persistence, idempotency, audit or reversal. React intentionally has no acuse form, patient/case source, reservation or stock discharge.",
     "f15": "CH14-E0152 was opened and is only the dimmed post-form transition. safety_022 at 00:45:28 is the actual shortage-detail evidence: Items faltantes disponibles, Bodega, and Acuse/Tipo/Código/Nombre/Disponible/Requerido/Acuse creado. It does not define tenant-scoped source data, shortage calculation, quantity-insufficient handling, substitutions, purchases, notifications, roles, idempotency, audit, reversal, or the ambiguous quote relation; React intentionally exposes none of those behaviors.",
+    "f16": "CH14-E0152 was opened again and contains only the dimmed Acuse form, with no quote control, quote state, notification, or inventory action. The only quote signal is the ambiguous transcript at 00:45:10.320–00:45:13.320 (‘faltar una cotización’). CH14-Q014 remains open for meaning, entity, state, roles, authorization, audit, idempotency, and any effect; React intentionally exposes no quote linkage or mutation.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
@@ -37,6 +38,7 @@
     "light_mode": "PASS: 83 product source files",
     "audit_verify": "PASS: 17/17 chapters after F15 evidence/safety reconciliation",
     "f15_evidence_precheck": "PASS: CH14-E0152 and safety_022 were opened; E0152 is only a dimmed transition and safety_022 is cited for the factual shortage modal. No shortage operation was implemented.",
+    "f16_evidence_precheck": "PASS: CH14-E0152 and transcript_raw.txt were opened. The frame contains no quote surface and the narration is ambiguous; no quote or inventory behavior was implemented.",
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; source test is executable and action-specific"
   },
   "blockers": [
@@ -52,6 +54,7 @@
     "CH14-F13 remains MISSING under CH14-Q012/Q013: the editor anatomy alone does not authorize a versioned composition, roles, audit, atomic/idempotent stock discharge or reversal.",
     "CH14-F14 remains MISSING under CH14-Q001/Q002/Q004/Q005/Q016: the observed form cannot be exposed without a tenant-scoped patient/hospitalization source, authorization, quantity, idempotency, audit and reversal rules.",
     "CH14-F15 remains MISSING under CH14-Q005/Q014: safety_022 supports only factual modal anatomy; shortage calculation, notifications, purchases, substitutions, stock mutation, patient disclosure and any quote link require approved tenant-scoped and auditable rules.",
+    "CH14-F16 remains NOT_TESTABLE under CH14-Q014: the quote narration is ambiguous and E0152 contains no quote control or outcome. No quote action, state change, notification or inventory mutation is implemented.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"

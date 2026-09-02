@@ -286,7 +286,7 @@
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "No se implementa formulario: CH14-E0149–E0152 sólo prueban la anatomía visual y una transición de faltantes. CH14-Q001/Q002/Q004/Q005/Q016 deben aprobar fuente tenant-scoped, vínculo paciente/hospitalización, roles, validación de cantidad, idempotencia, auditoría y reversión antes de crear o descargar existencias."
+      "test_path": "No se implementa formulario: CH14-E0149–E0151 prueban la anatomía visual y CH14-E0152 sólo la transición posterior oscurecida. safety_022 es la evidencia separada del detalle de faltantes para F15. CH14-Q001/Q002/Q004/Q005/Q016 deben aprobar fuente tenant-scoped, vínculo paciente/hospitalización, roles, validación de cantidad, idempotencia, auditoría y reversión antes de crear o descargar existencias."
     },
     {
       "id": "CH14-F15",
@@ -309,7 +309,7 @@
     {
       "id": "CH14-F16",
       "name": "Vínculo de faltantes con cotización",
-      "description": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "description": "La transcripción menciona de forma ambigua una opción relacionada con ‘faltar una cotización’; CH14-E0152 sólo muestra el formulario de Acuse oscurecido y no demuestra entidad, estado, autorización ni comportamiento.",
       "classification": "UNCERTAIN",
       "confidence": "LOW",
       "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
@@ -321,8 +321,8 @@
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
         }
       ],
-      "transcript_evidence": "00:45:10.320–00:45:13.320: 'También tenía una opción de faltar una cotización'.",
-      "test_path": "Pendiente de definición del cliente; no habilitar automatización hasta acordar significado y estado objetivo."
+      "transcript_evidence": "00:45:10.320–00:45:13.320: 'También tenía una opción de faltar una cotización'. CH14-E0152 fue abierto y sólo es la transición oscurecida del formulario, sin control ni estado de cotización.",
+      "test_path": "No implementar: CH14-Q014 debe definir significado, entidad, estado, roles, autorización, auditoría, idempotencia y cualquier efecto de cotización/inventario antes de habilitar una acción o automatización."
     }
   ]
 }
