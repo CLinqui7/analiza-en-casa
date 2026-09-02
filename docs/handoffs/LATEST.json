@@ -1,6 +1,6 @@
 {
-  "lot": "CH11_CERTIFICATION_SHA_REPAIR",
+  "lot": "CH11_REVIEW",
   "handoff": "docs/handoffs/CH11_HANDOFF.json",
-  "final_sha": "772286245bc8290fbe553b592101d3829c66337b",
+  "final_sha": null,
   "next_batch": "CH11_REVIEW"
 }

@@ -1,17 +1,26 @@
 {
-  "lot": "CH11_CERTIFICATION_SHA_REPAIR",
-  "source_sha": "b19fb3371e2886c796f5abde32a45de6f597492f",
-  "base_sha": "b19fb3371e2886c796f5abde32a45de6f597492f",
-  "verification_status": "VERIFIED_COMMITTED_PUSHED",
-  "final_sha": "772286245bc8290fbe553b592101d3829c66337b",
-  "remote_sha": "772286245bc8290fbe553b592101d3829c66337b",
-  "commits": ["772286245bc8290fbe553b592101d3829c66337b"],
+  "lot": "CH11_REVIEW",
+  "source_sha": "1fc7d87e886772fdf05d34ea1c649d44e4fb4608",
+  "base_sha": "1fc7d87e886772fdf05d34ea1c649d44e4fb4608",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
   "changed_files": [
+    "apps/web/src/lib/video-parity-summary.ts",
+    "apps/web/src/app/(workspace)/agenda/page.tsx",
+    "apps/web/e2e/b3.spec.ts",
+    "apps/web/e2e/ch11.spec.ts",
+    "apps/web/e2e/workspace.spec.ts",
+    "tests/selenium/test_agenda_patient_filter.py",
+    "docs/qa/UI_ACTION_INVENTORY.json",
     "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
     "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
     "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
     "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
-    "apps/web/src/lib/video-parity-summary.ts",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.json",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.csv",
+    "docs/qa/CLIENT_CHANGE_CERTIFICATIONS.json",
     "docs/qa/REACT_ROUTE_PARITY.json",
     "docs/overnight/VIDEO_AUDIT_VERIFY.json",
     "docs/handoffs/CH11_HANDOFF.json",
@@ -25,10 +34,10 @@
     "video_mapping": "CR-010, CR-017 and CR-018 have no CH11-F01 mapping; Puntual and the client-originated series/preset behavior are not evidenced by the patient-filter calendar."
   },
   "requirements": {
-    "verified_partial": ["CH11-F01", "CH11-F02"],
+    "verified_partial": ["CH11-F01", "CH11-F02", "CH11-F03"],
     "corrected_to_partial": ["CH11-F04", "CH11-F05"],
     "not_testable": ["CH11-F07", "CH11-F08", "CH11-F09"],
-    "remaining_partial": ["CH11-F03", "CH11-F06"]
+    "remaining_partial": ["CH11-F06"]
   },
   "tests": [
     "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/ch11.spec.ts",
@@ -46,8 +55,8 @@
     "npm run audit:verify"
   ],
   "gates": {
-    "functional_fingerprint": "PASS: f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424",
-    "playwright_ch11": "PASS: 4/4; patient filtering, DOCTOR calendar view, INVENTORY direct-route denial, and ADMIN navigation/views without mutations",
+    "functional_fingerprint": "PASS: 6ba89ef4ba71806208497384cbc64236b13a9293c4e7dc39d2a203f9053f79c7",
+    "playwright_ch11": "PASS: 5/5; patient filtering, DOCTOR calendar view, INVENTORY direct-route denial, non-mutating patient context, and ADMIN navigation/views",
     "typecheck": "PASS",
     "ch11_parity_self_test": "PASS: 9/9",
     "client_changes_b3": "PASS: 5/32; CR-017 DEMO_CERTIFIED and CR-018 PARTIAL_CLIENT_DEFINITION",
@@ -62,6 +71,7 @@
   "evidence": {
     "ch11_f01": "CH11-E0010/E0015 show the patient criterion, selected patient and colored calendar events. React now searches/selects existing synthetic patients and filters only existing shifts in a calendar/table; no visit data is mutated.",
     "ch11_precheck": "F04/F05 were downgraded from stale EXACT claims because the current React surface does not certify visit classification or the observed visit-type catalog. F07-F09 keep explicit CH11-Q002/Q003/Q006/Q008 blockers.",
+    "ch11_f03": "CH11-E0022 supports the authorized patient-turn dialog with factual read-only document/company context. Playwright proves Cerrar leaves shifts and audit entries unchanged; visit semantics remain blocked.",
     "cr017_cr018": "CR-017 restores multi-date add/remove, duplicate/collision protection and demo-local reload evidence. CR-018 restores only 6h/8h preset evidence, including overnight duration, and records the tested disabled AGENDA-SHIFT-PRESET-PUNTUAL action; Puntual remains blocked by CR-010.",
     "ch11_f02": "CH11-E0010 shows previous/today/next plus Mes, Semana, Lista por semana and Lista por día. React implements them as read-only projections over existing synthetic shifts; Playwright proves period/view changes and confirms disabled Eliminar visitas leaves shifts and audit entries unchanged after reload."
   },

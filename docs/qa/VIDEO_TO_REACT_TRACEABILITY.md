@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `772286245bc8290fbe553b592101d3829c66337b`
-SHA de implementación: `772286245bc8290fbe553b592101d3829c66337b`
-Fingerprint funcional CH01: `f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424`
+Commit generador: `1fc7d87e886772fdf05d34ea1c649d44e4fb4608`
+SHA de implementación: `PENDING_COMMIT`
+Fingerprint funcional CH01: `6ba89ef4ba71806208497384cbc64236b13a9293c4e7dc39d2a203f9053f79c7`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -134,7 +134,7 @@ Fingerprint funcional CH01: `f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5
 | CH10-F10 | /clinical/orders | NOT_TESTABLE | — |
 | CH11-F01 | /agenda | PARTIAL | AGENDA-PATIENT-SEARCH, AGENDA-PATIENT-FILTER |
 | CH11-F02 | /agenda | PARTIAL | AGENDA-CALENDAR-PREV, AGENDA-CALENDAR-TODAY, AGENDA-CALENDAR-NEXT, AGENDA-CALENDAR-VIEW-MONTH, AGENDA-CALENDAR-VIEW-WEEK, AGENDA-CALENDAR-VIEW-LIST-WEEK, AGENDA-CALENDAR-VIEW-LIST-DAY, AGENDA-VISITS-DELETE |
-| CH11-F03 | /agenda | PARTIAL | — |
+| CH11-F03 | /agenda | PARTIAL | AGENDA-SHIFT-CREATE, AGENDA-SHIFT-PATIENT-SELECT |
 | CH11-F04 | /agenda | PARTIAL | — |
 | CH11-F05 | /agenda | PARTIAL | — |
 | CH11-F06 | /agenda | PARTIAL | — |

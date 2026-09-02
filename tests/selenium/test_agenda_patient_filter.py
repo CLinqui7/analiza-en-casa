@@ -1,6 +1,7 @@
 """CH11 factual agenda filter source coverage; records only after visible effects."""
 # test-id: SEL-CH11-AGENDA-PATIENT-FILTER
 # test-id: SEL-CH11-CALENDAR-NAVIGATION-VIEWS
+# test-id: SEL-CH11-AGENDA-PATIENT-CONTEXT
 from __future__ import annotations
 
 import os
@@ -86,6 +87,24 @@ class AgendaPatientFilter(unittest.TestCase):
         self.login('inventory@demo.local', 'demo-inventory')
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('Acceso restringido para el rol INVENTORY', denied.text)
+
+    def test_admin_sees_factual_patient_context_in_shift_form_without_visit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]').click()
+        dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.assertIn('Crear turno a paciente', dialog.text)
+        record_pass('AGENDA-SHIFT-CREATE', 'SEL-CH11-AGENDA-PATIENT-CONTEXT', started, self.driver.current_url)
+        from selenium.webdriver.support.ui import Select
+        Select(dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-PATIENT-SELECT"]')).select_by_value('patient-demo-001')
+        self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Documento del paciente"]').get_attribute('value'), 'DUI 12345678-9')
+        self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Empresa del paciente"]').get_attribute('value'), 'Sin empresa registrada')
+        record_pass('AGENDA-SHIFT-PATIENT-SELECT', 'SEL-CH11-AGENDA-PATIENT-CONTEXT', started, self.driver.current_url)
+        dialog.find_element(By.XPATH, ".//button[normalize-space()='Cerrar']").click()
+        self.wait.until(conditions.invisibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))"))
 
     def test_admin_navigates_existing_calendar_views_without_mutation(self) -> None:
         started = time.time()

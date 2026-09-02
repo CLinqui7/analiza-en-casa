@@ -434,8 +434,8 @@ test('hospitalization permissions preserve read-only roles and deny inventory', 
 test('agenda rejects invalid intervals and persists scheduled shifts', async ({ page }) => {
   await login(page);
   await page.goto('/agenda');
-  await page.getByRole('button', { name: 'Nuevo turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await page.getByRole('button', { name: 'Crear turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
   await dialog.locator('input[name="startsAt"]').fill('2026-08-30T12:00');
   await dialog.locator('input[name="endsAt"]').fill('2026-08-30T08:00');
   await dialog.getByLabel('Notas').fill('Turno inválido de QA.');
@@ -454,8 +454,8 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
 test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({ page }) => {
   await login(page);
   await page.goto('/agenda');
-  await page.getByRole('button', { name: 'Nuevo turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await page.getByRole('button', { name: 'Crear turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
   await dialog.getByLabel('Inicio').fill('2026-08-31T08:00');
   await dialog.getByLabel('Fin').fill('2026-08-31T12:00');
   await dialog.getByLabel('Notas').fill('Turno para reporte de QA.');

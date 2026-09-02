@@ -47,8 +47,8 @@ test('B3 persists multiple admission and discharge periods without accepting att
 
 test('B3 creates persisted multi-day 6h shifts and keeps Puntual blocked', async ({ page }) => {
   await login(page, '/agenda');
-  await page.getByRole('button', { name: 'Nuevo turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await page.getByRole('button', { name: 'Crear turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
   await dialog.getByLabel('Fecha 1').fill('2026-09-24');
   await dialog.getByRole('button', { name: 'Agregar fecha' }).click();
   await dialog.getByRole('textbox', { name: 'Fecha 2' }).fill('2026-09-25');
@@ -61,7 +61,7 @@ test('B3 creates persisted multi-day 6h shifts and keeps Puntual blocked', async
   await expect(dialog.getByText('Finaliza el día siguiente.')).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Puntual (pendiente de definición)' })).toBeDisabled();
   await dialog.getByLabel('Notas').fill('B3 multi-day 6h');
-  await dialog.getByRole('button', { name: 'Guardar turnos' }).click();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();
   await expect(page.getByText('B3 multi-day 6h', { exact: true })).toHaveCount(1);
   const persisted = await page.evaluate(() => JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').filter((shift: { note?: string }) => shift.note === 'B3 multi-day 6h'));
@@ -71,14 +71,14 @@ test('B3 creates persisted multi-day 6h shifts and keeps Puntual blocked', async
 
 test('B3 lets NURSE persist an overnight 8h shift', async ({ page }) => {
   await login(page, '/agenda', 'nurse@demo.local', 'demo-nurse');
-  await page.getByRole('button', { name: 'Nuevo turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Nuevo turno' });
+  await page.getByRole('button', { name: 'Crear turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
   await dialog.getByLabel('Fecha 1').fill('2026-09-26');
   await dialog.getByLabel('Inicio').fill('20:00');
   await dialog.getByRole('button', { name: 'Turno 8 horas' }).click();
   await expect(dialog.getByLabel('Fin')).toHaveValue('04:00');
   await dialog.getByLabel('Notas').fill('B3 nurse overnight 8h');
-  await dialog.getByRole('button', { name: 'Guardar turnos' }).click();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();
   const persisted = await page.evaluate(() => JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').find((shift: { note?: string }) => shift.note === 'B3 nurse overnight 8h'));
   expect(persisted).toBeTruthy();
@@ -88,7 +88,7 @@ test('B3 lets NURSE persist an overnight 8h shift', async ({ page }) => {
 async function expectAgendaWriteDenied(page: import('@playwright/test').Page, email: string, password: string) {
   await login(page, '/agenda', email, password);
   const before = await page.evaluate(() => [localStorage.getItem('analiza.en.casa.workspace.v3.shifts'), localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')]);
-  await expect(page.getByRole('button', { name: 'Nuevo turno' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Crear turno' })).toHaveCount(0);
   await page.reload();
   await expect.poll(() => page.evaluate(() => [localStorage.getItem('analiza.en.casa.workspace.v3.shifts'), localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')])).toEqual(before);
 }

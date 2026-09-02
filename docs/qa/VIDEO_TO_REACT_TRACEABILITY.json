@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T09:14:53-06:00",
-  "metadata_generated_from_commit": "772286245bc8290fbe553b592101d3829c66337b",
+  "generated_at": "2026-09-02T09:23:13-06:00",
+  "metadata_generated_from_commit": "1fc7d87e886772fdf05d34ea1c649d44e4fb4608",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "772286245bc8290fbe553b592101d3829c66337b",
-  "functional_fingerprint": "f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "6ba89ef4ba71806208497384cbc64236b13a9293c4e7dc39d2a203f9053f79c7",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -5144,28 +5144,48 @@
         "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0023_00h32m08s400ms_motion_progress.jpg",
         "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0023_00h32m08s400ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH11-Q001",
+        "CH11-Q003",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
       "route_id": "ROUTE-AGENDA",
       "react_route": "/agenda",
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "AGENDA-SHIFT-DIALOG"
+      ],
+      "action_ids": [
+        "AGENDA-SHIFT-CREATE",
+        "AGENDA-SHIFT-PATIENT-SELECT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-agenda-patient-context"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-AGENDA-PATIENT-CONTEXT"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH11-Q001",
+        "CH11-Q003",
+        "CH11-Q006",
+        "CH11-Q008",
+        "CR-010"
+      ],
+      "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH11-E0022 muestra Crear turno a paciente. El diálogo React autorizado conserva la selección factual de paciente y muestra documento y empresa en solo lectura; Playwright comprueba que Cerrar no muta turnos ni auditoría. Guardar sigue siendo el flujo B3 de turnos sintéticos, no una visita clínica. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH11-F04",
