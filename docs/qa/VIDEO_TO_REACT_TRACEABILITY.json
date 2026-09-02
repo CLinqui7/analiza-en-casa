@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T15:40:35-06:00",
-  "metadata_generated_from_commit": "50ea475d0215fdc86b8e0d50a0d72333da555847",
+  "generated_at": "2026-09-02T16:01:25-06:00",
+  "metadata_generated_from_commit": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
   "source_sha256": "1ff1e48dd0be33540e8d8d0f8af041d8f3c3f93358a85cfffbc5ddda3fa6e049",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
   "functional_fingerprint": "68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
   "requirements": [
     {
@@ -7343,8 +7343,8 @@
         "CH15-Q004"
       ],
       "blocker_reason": "CH15-E0084 muestra la tabla de Estudios Dx, pero CH15-Q004 no define una fuente autorizada, efectos de Impuesto/Descuento, roles de escritura, validación, auditoría, precios ni reglas clínicas. React conserva todas esas operaciones ausentes.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH15-E0084 respalda solamente la tabla de Estudios Dx. React muestra una lista factual vacía en /catalogs/studies, búsqueda local y controles visibles/deshabilitados; no fabrica filas ni habilita fuente, alta, exportación, precios, impuestos, descuentos, estados o reglas clínicas. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
+      "notes": "CH15-E0084 respalda solamente la tabla de Estudios Dx. React muestra una lista factual vacía en /catalogs/studies, búsqueda local y controles visibles/deshabilitados; no fabrica filas ni habilita fuente, alta, exportación, precios, impuestos, descuentos, estados o reglas clínicas. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en 8143d05."
     },
     {
       "requirement_id": "CH15-F10",
