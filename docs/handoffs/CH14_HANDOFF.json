@@ -1,16 +1,16 @@
 {
-  "lot": "CH14_REVIEW",
-  "source_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "base_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
+  "lot": "CH14_F07_EVIDENCE_STATUS_REPAIR",
+  "source_sha": "404bee077762a7a0cc39929d79d48c5086e1b8f1",
+  "base_sha": "404bee077762a7a0cc39929d79d48c5086e1b8f1",
+  "implementation_sha": "PENDING_COMMIT",
   "verification_status": "PENDING_COMMIT",
-  "final_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
+  "final_sha": null,
   "remote_sha": null,
   "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10", "CH14-F12"],
-    "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
-    "not_implemented": ["CH14-F11", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
+    "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F08"],
+    "not_implemented": ["CH14-F07", "CH14-F11", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
   },
   "evidence": {
     "f01": "CH14-E0006 and its opened detail crop show the Items surface, Bodega, Excel, Traslados, pagination/search, and Tipo/Código/Nombre/Disp/Comp/Total columns. React now presents only existing synthetic movement balances; committed/total calculation, bodega rules, transfer, and export remain explicitly blocked.",
@@ -26,12 +26,12 @@
     "f14": "CH14-E0149 opens Nuevo from an Acuses row menu. CH14-E0150/E0151 show Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible/asignar, Vaciar, Plantilla and Añadir. E0152 is only the dimmed post-form transition; safety_022 is the separate shortage-detail evidence for F15. These F14 frames do not define an authorized tenant-scoped patient/case source, roles, quantity validation, persistence, idempotency, audit or reversal. React intentionally has no acuse form, patient/case source, reservation or stock discharge.",
     "f15": "CH14-E0152 was opened and is only the dimmed post-form transition. safety_022 at 00:45:28 is the actual shortage-detail evidence: Items faltantes disponibles, Bodega, and Acuse/Tipo/Código/Nombre/Disponible/Requerido/Acuse creado. It does not define tenant-scoped source data, shortage calculation, quantity-insufficient handling, substitutions, purchases, notifications, roles, idempotency, audit, reversal, or the ambiguous quote relation; React intentionally exposes none of those behaviors.",
     "f16": "CH14-E0152 was opened again and contains only the dimmed Acuse form, with no quote control, quote state, notification, or inventory action. The only quote signal is the ambiguous transcript at 00:45:10.320–00:45:13.320 (‘faltar una cotización’). CH14-Q014 remains open for meaning, entity, state, roles, authorization, audit, idempotency, and any effect; React intentionally exposes no quote linkage or mutation.",
-    "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
+    "f07_correction": "CH14-E0045–E0047 were opened: they show a filtered Cierres table and row menu, not a warning dialog. F07 is NOT_TESTABLE under CH14-Q006; no close-warning or acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 22/22 on isolated port 4177, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
-    "ch14_parity_self_test": "PASS: 16/16 after F15/F16 evidence reconciliations at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
+    "playwright_ch14": "PASS: 22/22 on isolated port 4178, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
+    "ch14_parity_self_test": "PASS: 16/16 after the F07 evidence-status repair at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
@@ -57,5 +57,5 @@
     "CH14-F16 remains NOT_TESTABLE under CH14-Q014: the quote narration is ambiguous and E0152 contains no quote control or outcome. No quote action, state change, notification or inventory mutation is implemented.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
-  "next_batch": "CH15_PRECHECK"
+  "next_batch": "CH14_REVIEW"
 }

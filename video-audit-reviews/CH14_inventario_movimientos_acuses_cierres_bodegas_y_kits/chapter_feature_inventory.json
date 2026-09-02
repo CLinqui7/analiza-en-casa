@@ -125,20 +125,32 @@
     },
     {
       "id": "CH14-F07",
-      "name": "Advertencia de cierre ya abierto",
-      "description": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
-      "classification": "VISIBLE",
-      "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "name": "Advertencia de cierre ya abierto (sin evidencia válida)",
+      "description": "CH14-E0045–E0047 sólo muestran la tabla Pendientes filtrada y el menú de una fila; no prueban Advertencia, Cancelar, Aceptar ni pérdida de datos.",
+      "classification": "UNCERTAIN",
+      "confidence": "LOW",
+      "current_platform_status": "NOT_TESTABLE",
       "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0045",
+          "timestamp": "00:41:46.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg"
+        },
         {
           "chapter_id": "CH14",
           "chapter_event_id": "CH14-E0046",
           "timestamp": "00:41:47.400",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0047",
+          "timestamp": "00:41:57.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: intentar crear un segundo cierre y verificar advertencia, cancelación sin pérdida y aceptación auditada."
+      "test_path": "NONE: los frames citados no contienen diálogo de advertencia ni resultado de aceptación; CH14-Q006 requiere definición y evidencia válidas."
     },
     {
       "id": "CH14-F08",

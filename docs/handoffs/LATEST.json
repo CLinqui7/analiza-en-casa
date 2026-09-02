@@ -1,6 +1,6 @@
 {
-  "lot": "CH14_REVIEW",
+  "lot": "CH14_F07_EVIDENCE_STATUS_REPAIR",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
-  "final_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
-  "next_batch": "CH15_PRECHECK"
+  "final_sha": null,
+  "next_batch": "CH14_REVIEW"
 }

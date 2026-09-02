@@ -186,7 +186,7 @@
 - `CH14-Q003`: definir formato, datos, permisos y validez de Excel e impresión de acuses. Evidencia: CH14-E0032 y CH14-E0035.
 - `CH14-Q004`: definir Plantilla y Vaciar, persistencia del borrador y recuperación. Evidencia: CH14-E0151.
 - `CH14-Q005`: aprobar fuente tenant-scoped, roles, cálculo y tratamiento de faltantes/cantidad insuficiente, sustitución, compra, notificación, significado de Acuse creado, idempotencia, auditoría y reversión. `CH14-E0152` sólo es transición oscurecida; la anatomía factual está en `safety_022` a 00:45:28.
-- `CH14-Q006`: determinar qué borra Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0046.
+- `CH14-Q006`: confirmar si existe una advertencia de cierre abierto y, de existir, definir preservación de datos, recuperación y autorización. CH14-E0045–E0047 sólo muestran filtro y menú de fila, no una advertencia.
 - `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
 - `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
 - `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.

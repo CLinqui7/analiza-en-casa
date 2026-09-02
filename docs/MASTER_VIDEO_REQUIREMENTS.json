@@ -6532,14 +6532,23 @@
     {
       "requirement_id": "CH14-F07",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
-      "feature": "Advertencia de cierre ya abierto",
-      "detailed_behavior": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
-      "evidence_type": "VISIBLE",
+      "feature": "Advertencia de cierre ya abierto (sin evidencia válida)",
+      "detailed_behavior": "CH14-E0045–E0047 muestran una tabla de Cierres filtrada y el menú de una fila; no muestran Advertencia, Cancelar, Aceptar ni una consecuencia de pérdida de datos.",
+      "evidence_type": "UNCERTAIN",
       "chapter_id": "CH14",
-      "classification": "VISIBLE",
-      "confidence": "HIGH",
+      "classification": "UNCERTAIN",
+      "confidence": "LOW",
       "rule_or_limit": "",
       "evidence": [
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0045",
+          "timestamp": "00:41:46.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Tabla Pendientes con búsqueda, paginación, columnas y controles por fila; no hay diálogo de advertencia."
+        },
         {
           "chapter_id": "CH14",
           "event_id": "CH14-E0046",
@@ -6547,22 +6556,31 @@
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "Búsqueda filtrada de Pendientes; no hay diálogo de advertencia."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0047",
+          "timestamp": "00:41:57.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Menú de fila de Cierres visible; no hay Advertencia, Cancelar ni Aceptar."
         }
       ],
       "open_question_ids": [
         "CH14-Q006"
       ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_EXACT",
-        "priority": "P0",
-        "patient_safety_impact": "No existe un flujo de aceptación React: se evita una transición de cierre sin reglas aprobadas.",
+        "status": "NOT_TESTABLE",
+        "priority": "P1",
+        "patient_safety_impact": "No se habilita una transición de cierre ni una advertencia no demostrada.",
         "financial_impact": "No se crean, modifican ni concilian cierres.",
-        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone sólo la anatomía vacía y de solo lectura de Cierres; no contiene advertencia ni aceptación.",
-        "test_path": "No hay prueba de aceptación: CH14-Q006 bloquea un flujo de cierre seguro.",
-        "recommended_action": "Resolver CH14-Q006 antes de implementar advertencia, cancelación o aceptación de cierre.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone sólo anatomía vacía y de solo lectura de Cierres; no contiene advertencia ni aceptación.",
+        "test_path": "NONE: los tres frames citados no muestran una advertencia o resultado que pueda probarse.",
+        "recommended_action": "Resolver CH14-Q006 y obtener evidencia válida antes de implementar advertencia, cancelación o aceptación de cierre.",
         "blocked_by_client_information": true,
-        "notes": "Se corrige el EXACT heredado: la evidencia muestra una advertencia, pero React no implementa sus controles sin una política aprobada de preservación, confirmación, autorización y auditoría."
+        "notes": "Corrección de evidencia: CH14-E0045–E0047 sólo muestran filtro y menú de fila. La advertencia heredada no tiene frame válido y no se implementa."
       }
     },
     {
@@ -9895,9 +9913,11 @@
       "question_id": "CH14-Q006",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
-      "question": "determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.",
+      "question": "confirmar si existe una advertencia de cierre abierto y, de existir, definir preservación de datos, recuperación y autorización. CH14-E0045–E0047 sólo muestran filtro y menú de fila, no una advertencia.",
       "evidence_event_ids": [
-        "CH14-E0046"
+        "CH14-E0045",
+        "CH14-E0046",
+        "CH14-E0047"
       ],
       "status": "OPEN"
     },

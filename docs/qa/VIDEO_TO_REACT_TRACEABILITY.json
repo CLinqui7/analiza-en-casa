@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T14:43:54-06:00",
-  "metadata_generated_from_commit": "3b96a149a65d3b78a71fdf7cb45263766f5f1e7a",
-  "source_sha256": "cb251e07e99ade5af15fa49818cfbcdd00558ffb9319a7dc669eb170b1e63905",
+  "generated_at": "2026-09-02T14:50:29-06:00",
+  "metadata_generated_from_commit": "404bee077762a7a0cc39929d79d48c5086e1b8f1",
+  "source_sha256": "eb69f84c3428d989ef424e1de84c0f1823203ffc6bc2a76e532b03ad09e9a8c0",
   "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
   "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": [
@@ -6535,12 +6535,14 @@
     {
       "requirement_id": "CH14-F07",
       "chapter_id": "CH14",
-      "feature": "Advertencia de cierre ya abierto",
-      "detailed_behavior": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
-      "classification": "VISIBLE",
-      "priority": "P0",
+      "feature": "Advertencia de cierre ya abierto (sin evidencia válida)",
+      "detailed_behavior": "CH14-E0045–E0047 muestran una tabla de Cierres filtrada y el menú de una fila; no muestran Advertencia, Cancelar, Aceptar ni una consecuencia de pérdida de datos.",
+      "classification": "UNCERTAIN",
+      "priority": "P1",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg"
       ],
       "open_question_ids": [
         "CH14-Q006"
@@ -6552,9 +6554,9 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "NOT_TESTABLE",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
@@ -6565,9 +6567,9 @@
       "blocker_ids": [
         "CH14-Q006"
       ],
-      "blocker_reason": "La advertencia de cierre exige una política aprobada de preservación, confirmación, autorización y auditoría; no se certifica una aceptación no mutante como cierre productivo.",
-      "last_verified_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
-      "notes": "Se elimina el EXACT heredado sin certificación actual. La advertencia de cierre queda PARTIAL hasta contar con una política de cierre aprobada y evidencia de persistencia/auditoría."
+      "blocker_reason": "CH14-E0045–E0047 sólo muestran filtro y menú de fila de Cierres; no prueban Advertencia, Cancelar, Aceptar ni una consecuencia de datos. Se requieren evidencia válida y reglas aprobadas de preservación, recuperación y autorización antes de certificar o implementar un flujo.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Corrección de evidencia: se retiró la certificación PARTIAL heredada. React no expone advertencia ni aceptación de cierre y no se añade ese flujo sin una fuente válida."
     },
     {
       "requirement_id": "CH14-F08",
