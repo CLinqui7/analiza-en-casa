@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `e89a734e92c8fddcbe651f4ee6066dd619095df6`
-SHA de implementación: `e89a734e92c8fddcbe651f4ee6066dd619095df6`
-Fingerprint funcional CH01: `725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8`
+Commit generador: `602c952dabdcf4e89fd2f86e2bc411c33b77f39f`
+SHA de implementación: `PENDING_COMMIT`
+Fingerprint funcional CH01: `80a01f52ab1fb5ce5e1c29696a227d9455ad24eb81d0f2ba97b761681ed192e9`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -183,7 +183,7 @@ Fingerprint funcional CH01: `725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748f
 | CH15-F05 | /catalogs | NOT_TESTABLE | — |
 | CH15-F06 | /catalogs/medications | PARTIAL | CATALOG-MEDICATIONS-SEARCH, CATALOG-MEDICATIONS-EXPORT, CATALOG-MEDICATIONS-CREATE, CATALOG-MEDICATIONS-PAGE-SIZE, CATALOG-MEDICATIONS-PAGE-PREV, CATALOG-MEDICATIONS-PAGE-NEXT |
 | CH15-F07 | /catalogs | PARTIAL | — |
-| CH15-F08 | /catalogs | PARTIAL | — |
+| CH15-F08 | /catalogs/supplies | PARTIAL | CATALOG-SUPPLIES-SEARCH, CATALOG-SUPPLIES-EXPORT, CATALOG-SUPPLIES-CREATE, CATALOG-SUPPLIES-PAGE-SIZE, CATALOG-SUPPLIES-PAGE-PREV, CATALOG-SUPPLIES-PAGE-NEXT |
 | CH15-F09 | /catalogs | PARTIAL | — |
 | CH15-F10 | /catalogs | PARTIAL | — |
 | CH15-F11 | /catalogs | PARTIAL | — |

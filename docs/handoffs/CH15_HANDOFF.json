@@ -9,7 +9,7 @@
   "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
   "requirements": {
     "verified_partial": ["CH15-F06"],
-    "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F08", "CH15-F09", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
+    "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F09", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
   },
   "evidence": {
     "precheck": "CH15-E0003/E0009 were opened: Items faltantes disponibles contains patient-scoped acuse rows, available/required comparison and an add action. CH15-E0013/E0017 and CH15-E0020–E0032 likewise require approved patient, warehouse, stock, template or quote-state rules. These remain blocked by CH15-Q001/Q002/Q003 and no patient, acuse, quote or stock operation was added.",

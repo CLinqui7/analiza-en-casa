@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T15:23:55-06:00",
-  "metadata_generated_from_commit": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
-  "source_sha256": "cd3259b371d16797a0e6ad19fd4747e8fcbf2555d7535b7ddf81138cfe056613",
-  "implementation_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
-  "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
+  "generated_at": "2026-09-02T15:30:15-06:00",
+  "metadata_generated_from_commit": "602c952dabdcf4e89fd2f86e2bc411c33b77f39f",
+  "source_sha256": "2947215f7101b4fad62ed978ba3a1a39a276ed4d97d96ea39ad0c29c2a671824",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "80a01f52ab1fb5ce5e1c29696a227d9455ad24eb81d0f2ba97b761681ed192e9",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -7252,27 +7252,42 @@
       ],
       "open_question_ids": [],
       "route_id": "ROUTE-CATALOGS",
-      "react_route": "/catalogs",
+      "react_route": "/catalogs/supplies",
       "react_files": [
         "apps/web/src/app/(workspace)/catalogs/page.tsx",
+        "apps/web/src/app/(workspace)/catalogs/supplies/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "CATALOG-SUPPLIES-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "CATALOG-SUPPLIES-SEARCH",
+        "CATALOG-SUPPLIES-EXPORT",
+        "CATALOG-SUPPLIES-CREATE",
+        "CATALOG-SUPPLIES-PAGE-SIZE",
+        "CATALOG-SUPPLIES-PAGE-PREV",
+        "CATALOG-SUPPLIES-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "NOT_APPLICABLE",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch15-supplies-catalog",
+        "playwright:ch15-supplies-catalog-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH15-SUPPLIES-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH15-E0067 respalda solamente la tabla de Insumos. React muestra una lista factual vacía en /catalogs/supplies, búsqueda local y controles visibles/deshabilitados; no fabrica filas ni habilita fuente, alta, exportación, tipos, fabricante, impuestos, descuentos, lotes, estados o reglas clínicas. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH15-F09",

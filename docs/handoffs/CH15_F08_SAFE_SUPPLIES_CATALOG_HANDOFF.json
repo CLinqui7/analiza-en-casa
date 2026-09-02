@@ -1,0 +1,33 @@
+{
+  "lot": "CH15_F08_SAFE_SUPPLIES_CATALOG",
+  "source_sha": "602c952dabdcf4e89fd2f86e2bc411c33b77f39f",
+  "base_sha": "602c952dabdcf4e89fd2f86e2bc411c33b77f39f",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "80a01f52ab1fb5ce5e1c29696a227d9455ad24eb81d0f2ba97b761681ed192e9",
+  "requirements": {
+    "verified_partial": ["CH15-F08"],
+    "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F09", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "f08": "CH15-E0067 was opened and shows Items / Insumos with Registros, pagination, search, Excel, Nuevo and the Acciones/Código/Nombre/Tipo/Impuesto/Descuento/Lotes/Estado columns. CH15-E0068 was opened and shows a separate new-supply form, but does not authorize its fields, source, write roles, validation, audit or clinical rules. React implements only the factual empty list at /catalogs/supplies."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15": "PASS: 12/12 at isolated port 4176; medication and supplies factual lists, search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_supplies.py is executable, action-specific source coverage",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 80a01f52ab1fb5ce5e1c29696a227d9455ad24eb81d0f2ba97b761681ed192e9",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS: 86 product source files",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH15-F08 is not client-blocked and has no invented open-question ID. Its safe list is implemented; source-backed rows, export and write behavior remain unavailable until their contracts are approved.",
+    "No supply rows, types, manufacturers, taxes, discounts, lots, states, clinical rules or mutations were fabricated.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH15_REVIEW"
+}

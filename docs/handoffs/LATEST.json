@@ -1,6 +1,6 @@
 {
-  "lot": "CH15_PRECHECK",
-  "handoff": "docs/handoffs/CH15_HANDOFF.json",
-  "final_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "lot": "CH15_F08_SAFE_SUPPLIES_CATALOG",
+  "handoff": "docs/handoffs/CH15_F08_SAFE_SUPPLIES_CATALOG_HANDOFF.json",
+  "final_sha": null,
   "next_batch": "CH15_REVIEW"
 }

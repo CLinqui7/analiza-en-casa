@@ -7273,11 +7273,11 @@
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
+        "current_platform_evidence": "/catalogs/supplies presenta la anatomía factual vacía de Insumos: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_supplies.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras no exista una fuente y contrato de escritura aprobados; no fabricar insumos ni reglas clínicas.",
         "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "CH15-E0067 respalda la anatomía de tabla. CH15-E0068 muestra un formulario, pero no autoriza campos operativos, catálogo fuente, escritura ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
