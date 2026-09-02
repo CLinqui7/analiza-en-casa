@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `c01635eb06286d41a8bd7985d8c151731d0bec7d`
+Commit generador: `264d19e2f1aa0b7819985e37eae2e5fbae4f7716`
 SHA de implementación: `c01635eb06286d41a8bd7985d8c151731d0bec7d`
-Fingerprint funcional CH01: `f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef`
+Fingerprint funcional CH01: `f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -188,7 +188,7 @@ Fingerprint funcional CH01: `f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0
 | CH15-F10 | /catalogs/fees | PARTIAL | CATALOG-FEES-SEARCH, CATALOG-FEES-EXPORT, CATALOG-FEES-CREATE, CATALOG-FEES-PAGE-SIZE, CATALOG-FEES-PAGE-PREV, CATALOG-FEES-PAGE-NEXT |
 | CH15-F11 | /catalogs | PARTIAL | — |
 | CH15-F12 | /catalogs | PARTIAL | — |
-| CH15-F13 | /catalogs | PARTIAL | — |
+| CH15-F13 | /catalogs/services | PARTIAL | CATALOG-SERVICES-SEARCH, CATALOG-SERVICES-EXPORT, CATALOG-SERVICES-CREATE, CATALOG-SERVICES-PAGE-SIZE, CATALOG-SERVICES-PAGE-PREV, CATALOG-SERVICES-PAGE-NEXT |
 | CH15-F14 | /catalogs | PARTIAL | — |
 | CH15-F15 | /catalogs | NOT_TESTABLE | — |
 | CH15-F16 | /catalogs | NOT_TESTABLE | — |

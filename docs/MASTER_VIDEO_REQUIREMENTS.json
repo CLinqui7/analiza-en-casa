@@ -7480,17 +7480,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran datos ni se crea un servicio o relación clínica.",
+        "financial_impact": "No se muestran precios ni se ejecuta cálculo de impuesto o descuento.",
+        "current_platform_evidence": "/catalogs/services presenta la anatomía factual vacía de Servicios: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_services.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe fuente, tipos/categorías, banderas, contrato de escritura y efectos clínicos o financieros; no fabricar servicios, precios ni reglas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0122 respalda la tabla de Servicios y CH15-E0128 confirma sus columnas con filas de origen, pero no autoriza copiarlas ni define fuente, tipos, categorías, precios, efectos de Impuesto/Descuento, escritura, validación, auditoría ni efectos clínicos o financieros. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {

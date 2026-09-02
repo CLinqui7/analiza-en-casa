@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T16:26:49-06:00",
-  "metadata_generated_from_commit": "c01635eb06286d41a8bd7985d8c151731d0bec7d",
-  "source_sha256": "240b1002da5398c0821cc2b6716172451db701c35b31d42399b516883e5eb139",
+  "generated_at": "2026-09-02T16:30:24-06:00",
+  "metadata_generated_from_commit": "264d19e2f1aa0b7819985e37eae2e5fbae4f7716",
+  "source_sha256": "866386a224c6b43530646bc7e16e053fbf26fc51a9564322078e95e02d0bf8c6",
   "implementation_sha": "c01635eb06286d41a8bd7985d8c151731d0bec7d",
-  "functional_fingerprint": "f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef",
+  "functional_fingerprint": "f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -7481,29 +7481,46 @@
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0122_00h49m05s800ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0128_00h49m09s000ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CATALOGS",
-      "react_route": "/catalogs",
-      "react_files": [
-        "apps/web/src/app/(workspace)/catalogs/page.tsx",
-        "apps/web/src/components/providers.tsx"
+      "open_question_ids": [
+        "CH15-Q004"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "route_id": "ROUTE-CATALOGS",
+      "react_route": "/catalogs/services",
+      "react_files": [
+        "apps/web/src/app/(workspace)/catalogs/services/page.tsx"
+      ],
+      "component_ids": [
+        "CATALOG-SERVICES-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "CATALOG-SERVICES-SEARCH",
+        "CATALOG-SERVICES-EXPORT",
+        "CATALOG-SERVICES-CREATE",
+        "CATALOG-SERVICES-PAGE-SIZE",
+        "CATALOG-SERVICES-PAGE-PREV",
+        "CATALOG-SERVICES-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "NOT_APPLICABLE",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch15-services-catalog",
+        "playwright:ch15-services-catalog-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH15-SERVICES-CATALOG"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q004"
+      ],
+      "blocker_reason": "CH15-E0122 muestra la tabla de Servicios y CH15-E0128 sus columnas, pero CH15-Q004 no define una fuente autorizada, tipos o categorías, precios, efectos de Impuesto/Descuento, roles de escritura, validación, auditoría ni efectos clínicos o financieros. React conserva esas operaciones ausentes.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "React implementa solamente una lista vacía factual de Servicios en /catalogs/services: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH15-F14",
