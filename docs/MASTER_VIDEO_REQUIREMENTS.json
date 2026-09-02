@@ -7348,17 +7348,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004",
+        "CH15-Q006"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran datos ni se crea un vínculo clínico o de recurso.",
+        "financial_impact": "No se muestran precios ni se ejecuta cálculo, liquidación, impuesto, descuento o Giftcard.",
+        "current_platform_evidence": "/catalogs/fees presenta la anatomía factual vacía de Honorarios: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_fees.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004/Q006 no aprueben la fuente, el recurso elegible, el contrato de escritura y los efectos financieros; no fabricar honorarios, precios ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0094 respalda la anatomía de tabla y CH15-E0097 muestra el formulario, pero no autoriza una fuente sintética, recurso elegible, precios, efectos de Impuesto/Descuento/Giftcard, escritura, validación, auditoría ni liquidación. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {

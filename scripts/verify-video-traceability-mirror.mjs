@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = process.cwd();
-const touchedRequirementIds = ['CH04-F004', 'CH09-F01', 'CH09-F02', 'CH14-F12', 'CH14-F13', 'CH14-F14', 'CH14-F15', 'CH14-F16'];
+const touchedRequirementIds = ['CH04-F004', 'CH09-F01', 'CH09-F02', 'CH14-F12', 'CH14-F13', 'CH14-F14', 'CH14-F15', 'CH14-F16', 'CH15-F06', 'CH15-F08', 'CH15-F09', 'CH15-F10'];
 const traceabilityPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json');
 const certificationPath = resolve(root, 'docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json');
 const csvPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv');
@@ -50,6 +50,17 @@ function parseCsv(source) {
 function serialized(value) {
   if (Array.isArray(value)) return value.join('|');
   return value == null ? '' : String(value);
+}
+
+function duplicateCertificationRequirementKeys(source) {
+  const counts = new Map();
+  for (const match of source.matchAll(/"(CH\d{2}-F\d+)"\s*:/g)) {
+    const requirementId = match[1];
+    counts.set(requirementId, (counts.get(requirementId) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([requirementId]) => requirementId);
 }
 
 function verify({ traceability, certifications, rows }) {
@@ -107,11 +118,22 @@ function verify({ traceability, certifications, rows }) {
 }
 
 const traceability = JSON.parse(readFileSync(traceabilityPath, 'utf8'));
-const certifications = JSON.parse(readFileSync(certificationPath, 'utf8'));
+const rawCertifications = readFileSync(certificationPath, 'utf8');
+const duplicateCertificationKeys = duplicateCertificationRequirementKeys(rawCertifications);
+if (duplicateCertificationKeys.length) {
+  console.error(`Certification verification failed: duplicate raw requirement key(s): ${duplicateCertificationKeys.join(', ')}.`);
+  process.exit(1);
+}
+const certifications = JSON.parse(rawCertifications);
 const rows = parseCsv(readFileSync(csvPath, 'utf8'));
 const errors = verify({ traceability, certifications, rows });
 
 if (process.argv.includes('--self-test')) {
+  const duplicateFixture = '{"certifications":{"CH15-F09":{},"CH15-F09":{}}}';
+  if (!duplicateCertificationRequirementKeys(duplicateFixture).includes('CH15-F09')) {
+    errors.push('Duplicate-certification anti-drift fixture was not detected before JSON parsing.');
+  }
+
   const actionStatusRows = rows.map((row) => [...row]);
   const [header] = actionStatusRows;
   const requirementIndex = header.indexOf('requirement_id');
@@ -149,4 +171,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Traceability mirror verified: ${touchedRequirementIds.join(', ')} JSON/CSV/certification records are consistent${process.argv.includes('--self-test') ? '; action/status and CSV anti-drift self-tests passed' : ''}.`);
+console.log(`Traceability mirror verified: ${touchedRequirementIds.join(', ')} JSON/CSV/certification records are consistent${process.argv.includes('--self-test') ? '; action/status, CSV, and duplicate-certification-key anti-drift self-tests passed' : ''}.`);

@@ -203,7 +203,7 @@
       "description": "Honorarios lista código, nombre, impuesto, descuento y estado; el alta asocia un Recurso y permite Descuento, Impuesto y Giftcard.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH15",
@@ -218,7 +218,7 @@
           "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg"
         }
       ],
-      "test_path": "E2E: crear honorario asociado a un recurso sintético y validar unicidad, permisos y visibilidad de banderas."
+      "test_path": "apps/web/e2e/ch15.spec.ts y tests/selenium/test_catalog_fees.py: abrir la lista factual vacía, buscar, comprobar controles deshabilitados y recargar sin mutar auditoría; ADMIN/INVENTORY/AUDITOR permitidos y DOCTOR/NURSE/FINANCE denegados. No se prueban filas, exportación, alta ni asociación de recurso hasta contar con CH15-Q004/Q006."
     },
     {
       "id": "CH15-F11",

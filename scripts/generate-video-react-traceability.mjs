@@ -10,7 +10,23 @@ const canonical = JSON.parse(await readFile(resolve(root, 'docs/MASTER_VIDEO_REQ
 const routes = JSON.parse(await readFile(resolve(root, 'docs/qa/REACT_ROUTE_PARITY.json'), 'utf8'));
 const inventory = JSON.parse(await readFile(resolve(root, 'docs/qa/UI_ACTION_INVENTORY.json'), 'utf8'));
 const certificationPath = resolve(root, 'docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json');
-const certificationDocument = existsSync(certificationPath) ? JSON.parse(await readFile(certificationPath, 'utf8')) : { certifications: {} };
+function duplicateCertificationRequirementKeys(source) {
+  const counts = new Map();
+  for (const match of source.matchAll(/"(CH\d{2}-F\d+)"\s*:/g)) {
+    const requirementId = match[1];
+    counts.set(requirementId, (counts.get(requirementId) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count > 1)
+    .map(([requirementId]) => requirementId);
+}
+
+const rawCertificationDocument = existsSync(certificationPath) ? await readFile(certificationPath, 'utf8') : '{"certifications":{}}';
+const duplicateCertificationKeys = duplicateCertificationRequirementKeys(rawCertificationDocument);
+if (duplicateCertificationKeys.length) {
+  throw new Error(`Cannot generate traceability from duplicate certification requirement key(s): ${duplicateCertificationKeys.join(', ')}.`);
+}
+const certificationDocument = JSON.parse(rawCertificationDocument);
 const certifications = certificationDocument.certifications ?? certificationDocument;
 const traceabilityPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json');
 const existingTraceability = existsSync(traceabilityPath) ? JSON.parse(await readFile(traceabilityPath, 'utf8')) : { requirements: [] };

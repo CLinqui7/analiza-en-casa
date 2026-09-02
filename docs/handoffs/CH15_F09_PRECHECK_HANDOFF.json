@@ -6,7 +6,7 @@
   "verification_status": "VERIFIED_AT_COMMITTED_SHA",
   "final_sha": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
   "remote_sha": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
-  "functional_fingerprint": "68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
+  "functional_fingerprint": "769111084c6d297608faa07a132926f04d9f05699dd163d0152afcdfd365f9e2",
   "requirements": {
     "verified_partial": ["CH15-F09"],
     "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
@@ -18,9 +18,9 @@
     "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
     "playwright_ch15": "PASS: 18/18 at isolated port 4176; medication, supplies and diagnostic-studies factual lists, search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_studies.py is executable, action-specific source coverage",
-    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 769111084c6d297608faa07a132926f04d9f05699dd163d0152afcdfd365f9e2",
     "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
-    "traceability_mirror": "PASS with negative self-tests",
+    "traceability_mirror": "PASS with action/status, CSV, and raw duplicate-certification-key negative self-tests; CH15-F06/F08/F09 are mirrored",
     "light_mode": "PASS: 87 product source files",
     "audit_verify": "PASS: 17/17 chapters"
   },

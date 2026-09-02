@@ -1,0 +1,34 @@
+{
+  "lot": "CH15_F10_PRECHECK",
+  "source_sha": "21df4dadb3c74a56f5106883443d08dcb5b3f166",
+  "base_sha": "21df4dadb3c74a56f5106883443d08dcb5b3f166",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef",
+  "requirements": {
+    "verified_partial": ["CH15-F10"],
+    "explicitly_blocked": ["CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "f10": "CH15-E0094 and its detail crop were opened: Items / Honorarios visibly shows Registros, pagination, search, Excel, Nuevo and Acciones/Código/Nombre/Impuesto/Descuento/Estado. CH15-E0097 was also opened and shows the separate creation form with Recurso and flags; it does not define authorized resource eligibility, prices, flag effects, audit or settlement rules."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15": "SOURCE_EXECUTED: isolated port 4181 logged all 24 CH15 cases, including the six F10 honorarios flows, without a failure; the worker-owned dev server prevented the runner's final summary.",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_fees.py is executable, action-specific source coverage.",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef",
+    "traceability_mirror": "PASS: normal and self-test; CH15-F06/F08/F09/F10 are mirrored and duplicate raw certification keys fail closed.",
+    "light_mode": "PASS: 88 product source files",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH15-Q004 blocks authoritative honorarios data, Impuesto/Descuento/Giftcard effects, export columns, write roles, validation and audit.",
+    "CH15-Q006 blocks resource eligibility, fee calculation, currency, validity, withholding, distribution, settlement and authorization.",
+    "No honorario rows, resource links, prices, taxes, discounts, gift-card effects, clinical rules or financial mutations were fabricated.",
+    "CH15-F15 and CH15-F16 remain NOT_TESTABLE; Python/Selenium runtime is unavailable and no runtime PASS is claimed."
+  ],
+  "next_batch": "CH15_REVIEW"
+}

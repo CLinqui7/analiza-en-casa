@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `8143d052097aaa1d1cb16cb7d9dd095a2ebb96be`
-SHA de implementación: `8143d052097aaa1d1cb16cb7d9dd095a2ebb96be`
-Fingerprint funcional CH01: `68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b`
+Commit generador: `21df4dadb3c74a56f5106883443d08dcb5b3f166`
+SHA de implementación: `PENDING_COMMIT`
+Fingerprint funcional CH01: `f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -185,7 +185,7 @@ Fingerprint funcional CH01: `68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05f
 | CH15-F07 | /catalogs | PARTIAL | — |
 | CH15-F08 | /catalogs/supplies | PARTIAL | CATALOG-SUPPLIES-SEARCH, CATALOG-SUPPLIES-EXPORT, CATALOG-SUPPLIES-CREATE, CATALOG-SUPPLIES-PAGE-SIZE, CATALOG-SUPPLIES-PAGE-PREV, CATALOG-SUPPLIES-PAGE-NEXT |
 | CH15-F09 | /catalogs/studies | PARTIAL | CATALOG-STUDIES-SEARCH, CATALOG-STUDIES-EXPORT, CATALOG-STUDIES-CREATE, CATALOG-STUDIES-PAGE-SIZE, CATALOG-STUDIES-PAGE-PREV, CATALOG-STUDIES-PAGE-NEXT |
-| CH15-F10 | /catalogs | PARTIAL | — |
+| CH15-F10 | /catalogs | PARTIAL | CATALOG-FEES-SEARCH, CATALOG-FEES-EXPORT, CATALOG-FEES-CREATE, CATALOG-FEES-PAGE-SIZE, CATALOG-FEES-PAGE-PREV, CATALOG-FEES-PAGE-NEXT |
 | CH15-F11 | /catalogs | PARTIAL | — |
 | CH15-F12 | /catalogs | PARTIAL | — |
 | CH15-F13 | /catalogs | PARTIAL | — |

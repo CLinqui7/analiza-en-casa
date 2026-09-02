@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T16:01:25-06:00",
-  "metadata_generated_from_commit": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
-  "source_sha256": "1ff1e48dd0be33540e8d8d0f8af041d8f3c3f93358a85cfffbc5ddda3fa6e049",
-  "implementation_sha": "8143d052097aaa1d1cb16cb7d9dd095a2ebb96be",
-  "functional_fingerprint": "68721a114164b10aeb336fc86c1e4c1601acf141c501f19f05fa2cc8efa2770b",
+  "generated_at": "2026-09-02T16:06:30-06:00",
+  "metadata_generated_from_commit": "21df4dadb3c74a56f5106883443d08dcb5b3f166",
+  "source_sha256": "240b1002da5398c0821cc2b6716172451db701c35b31d42399b516883e5eb139",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "f7439149551adbd1d3ba1115688b091bdf49e4b282750d854b0c4983a6df66ef",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -7357,29 +7357,49 @@
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0094_00h47m31s600ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004",
+        "CH15-Q006"
+      ],
       "route_id": "ROUTE-CATALOGS",
       "react_route": "/catalogs",
       "react_files": [
         "apps/web/src/app/(workspace)/catalogs/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "CATALOG-FEES-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "CATALOG-FEES-SEARCH",
+        "CATALOG-FEES-EXPORT",
+        "CATALOG-FEES-CREATE",
+        "CATALOG-FEES-PAGE-SIZE",
+        "CATALOG-FEES-PAGE-PREV",
+        "CATALOG-FEES-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "NOT_APPLICABLE",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch15-fees-catalog",
+        "playwright:ch15-fees-catalog-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH15-FEES-CATALOG"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q004",
+        "CH15-Q006"
+      ],
+      "blocker_reason": "CH15-E0094 muestra la tabla de Honorarios y CH15-E0097 el formulario, pero CH15-Q004/Q006 no definen una fuente autorizada, recurso elegible, precios, efectos de Impuesto/Descuento/Giftcard, roles de escritura, validación, auditoría ni liquidación. React conserva esas operaciones ausentes.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "React implementa solamente una lista vacía factual de Honorarios en /catalogs/fees: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH15-F11",
