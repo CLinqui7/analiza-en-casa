@@ -174,7 +174,7 @@
         }
       ],
       "transcript_evidence": "00:43:18.500–00:43:33.500: se menciona la creación de proveedores y sus registros.",
-      "test_path": "E2E: crear proveedor sintético, validar campos y encontrarlo con búsqueda bajo el rol autorizado."
+      "test_path": "apps/web/e2e/ch14.spec.ts and tests/selenium/test_inventory.py open the factual empty list, verify headers/search/pagination anatomy, direct NURSE denial, and reload without audit mutation."
     },
     {
       "id": "CH14-F10",

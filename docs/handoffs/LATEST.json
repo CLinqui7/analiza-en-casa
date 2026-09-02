@@ -1,6 +1,6 @@
 {
-  "lot": "CH14_F06_SAFE_CLOSURES_SURFACE",
+  "lot": "CH14_F09_SUPPLIERS_SAFE_LIST",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
-  "final_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
+  "final_sha": null,
   "next_batch": "CH14_REVIEW"
 }

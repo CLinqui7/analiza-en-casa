@@ -6629,8 +6629,8 @@
         "priority": "P1",
         "patient_safety_impact": "Sin impacto clínico directo; el catálogo no se muta.",
         "financial_impact": "Proveedor puede ser referencia de compras y debe conservar historial.",
-        "current_platform_evidence": "app/views.js renderSuppliers",
-        "test_path": "tests/e2e/ch14.spec.mjs",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx renders an empty, read-only Inventario / Proveedores panel with observed table headers, search, and pagination anatomy; it has no supplier source or mutation path.",
+        "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-suppliers); tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-SUPPLIERS, PENDING_RUNTIME).",
         "recommended_action": "Definir identidad, unicidad y desactivación en CH14-Q008 antes del CRUD.",
         "blocked_by_client_information": true,
         "notes": "Tabla visible con datos sintéticos; alta/edición bloqueadas."

@@ -14,7 +14,7 @@ const warehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES';
+type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS';
 type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
 type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
 const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
@@ -72,6 +72,7 @@ export default function InventoryPage() {
   const [acknowledgementTab, setAcknowledgementTab] = useState<AcknowledgementTab>('PATIENTS');
   const [closureTab, setClosureTab] = useState<ClosureTab>('PENDING');
   const [query, setQuery] = useState('');
+  const [supplierQuery, setSupplierQuery] = useState('');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
@@ -148,6 +149,10 @@ export default function InventoryPage() {
     setSurface('CLOSURES');
     setClosureTab('PENDING');
   };
+  const openSuppliers = () => {
+    setSurface('SUPPLIERS');
+    setSupplierQuery('');
+  };
 
   return (
     <div className="page-stack">
@@ -159,6 +164,8 @@ export default function InventoryPage() {
               ? 'Inventario / Acuses'
               : surface === 'CLOSURES'
                 ? 'Inventario / Cierres'
+                : surface === 'SUPPLIERS'
+                  ? 'Inventario / Proveedores'
                 : 'Gestión de inventario'}
           </h1>
           <p>
@@ -166,7 +173,9 @@ export default function InventoryPage() {
               ? 'Superficie factual y de solo lectura. No crea acuses, cambia estados, reserva existencias ni consulta fuentes de pacientes o casos.'
               : surface === 'CLOSURES'
                 ? 'Superficie factual y de solo lectura. No consulta pacientes ni casos, ni crea, aprueba, cancela, concilia o revierte cierres.'
-              : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
+                : surface === 'SUPPLIERS'
+                  ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
+                : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -187,6 +196,17 @@ export default function InventoryPage() {
               type="button"
             >
               Traslados
+            </Button>
+          </div>
+        ) : surface === 'SUPPLIERS' ? (
+          <div className="action-row">
+            <Button
+              aria-describedby="inventory-suppliers-create-help"
+              data-action-id="INVENTORY-SUPPLIERS-CREATE"
+              disabled
+              type="button"
+            >
+              Nuevo
             </Button>
           </div>
         ) : null}
@@ -218,6 +238,15 @@ export default function InventoryPage() {
           type="button"
         >
           Cierres
+        </Button>
+        <Button
+          aria-current={surface === 'SUPPLIERS' ? 'page' : undefined}
+          className={surface === 'SUPPLIERS' ? 'tab active' : 'tab'}
+          data-action-id="INVENTORY-SUPPLIERS-OPEN"
+          onClick={openSuppliers}
+          type="button"
+        >
+          Proveedores
         </Button>
         <Link className="tab" href="/inventory/kardex">
           Movimientos
@@ -403,6 +432,86 @@ export default function InventoryPage() {
             Los estados, acciones, solicitudes y tareas de acuse requieren la política de permisos,
             idempotencia y auditoría aprobada (CH14-Q002).
           </p>
+        </Panel>
+      ) : surface === 'SUPPLIERS' ? (
+        <Panel>
+          <div className="table-heading">
+            <div>
+              <h2>Proveedores</h2>
+              <p className="field-help" id="inventory-suppliers-create-help">
+                Nuevo, edición, desactivación, identidades, unicidad y auditoría de proveedores
+                requieren definición aprobada (CH14-Q008).
+              </p>
+            </div>
+          </div>
+          <div className="filter-grid">
+            <label>
+              Registros
+              <select
+                aria-label="Registros de proveedores por página"
+                data-action-id="INVENTORY-SUPPLIERS-PAGE-SIZE"
+                disabled
+                value="50"
+              >
+                <option value="50">50</option>
+              </select>
+            </label>
+            <div aria-label="Paginación de proveedores" className="action-row">
+              <Button
+                data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV"
+                disabled
+                type="button"
+              >
+                Anterior
+              </Button>
+              <Button
+                data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT"
+                disabled
+                type="button"
+              >
+                Siguiente
+              </Button>
+            </div>
+            <label>
+              Buscar proveedores
+              <input
+                data-action-id="INVENTORY-SUPPLIERS-SEARCH"
+                onChange={(event) => setSupplierQuery(event.target.value)}
+                placeholder="Buscar código, empresa, contacto, teléfono, correo o dirección"
+                type="search"
+                value={supplierQuery}
+              />
+            </label>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Empresa</th>
+                  <th>Contacto</th>
+                  <th>Teléfono</th>
+                  <th>Correo</th>
+                  <th>Dirección</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={6}>
+                    <EmptyState
+                      detail={
+                        supplierQuery
+                          ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
+                          : 'No existe una fuente autorizada de proveedores en el modelo actual.'
+                      }
+                      title="Sin proveedores documentados"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
         </Panel>
       ) : (
         <Panel>

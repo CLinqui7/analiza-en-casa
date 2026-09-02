@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:33:08-06:00",
-  "metadata_generated_from_commit": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
-  "source_sha256": "1e6bb3f0868396d478ec035e00dc911e3ff3cddf680cf2983feba4bbfaff8c16",
-  "implementation_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
-  "functional_fingerprint": "4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
+  "generated_at": "2026-09-02T12:37:12-06:00",
+  "metadata_generated_from_commit": "0bef72190026a030ce7091bb1ab0b95b1441a937",
+  "source_sha256": "be9d9adaaaf6425a5a5ad5222538b57b5d2bbc5a053ab5cb40dcdfc9a3741650",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "045786f8f524aea28adbf94868589ccf423baa22454ddb9d78167ca4c024d569",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6624,22 +6624,38 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-SUPPLIERS-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-SUPPLIERS-OPEN",
+        "INVENTORY-SUPPLIERS-SEARCH",
+        "INVENTORY-SUPPLIERS-PAGE-SIZE",
+        "INVENTORY-SUPPLIERS-PAGE-PREV",
+        "INVENTORY-SUPPLIERS-PAGE-NEXT",
+        "INVENTORY-SUPPLIERS-CREATE"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-suppliers",
+        "playwright:ch14-inventory-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-SUPPLIERS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q008"
+      ],
+      "blocker_reason": "La evidencia no define una fuente autorizada, identificación, unicidad, campos obligatorios, estados, creación, edición, desactivación, eliminación ni auditoría de proveedores por organización.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0061 respalda Proveedores, Registros 50, Anterior/Siguiente, búsqueda y las columnas Código/Empresa/Contacto/Teléfono/Correo/Dirección. React implementa sólo una superficie vacía factual: Buscar cambia la explicación del vacío, paginación y Nuevo son visibles/deshabilitados, y abrir/buscar/recargar no muta auditoría. Selenium queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F10",

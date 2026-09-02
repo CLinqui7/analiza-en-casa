@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-item-history
 // test-id: playwright:ch14-inventory-acknowledgements
 // test-id: playwright:ch14-inventory-closures
+// test-id: playwright:ch14-inventory-suppliers
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -42,6 +43,7 @@ test('CH14 grants factual inventory access to INVENTORY and denies NURSE directl
   await expect(nurse.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')).toHaveCount(0);
   await expect(nurse.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]')).toHaveCount(0);
   await expect(nurse.locator('[data-action-id="INVENTORY-CLOSURES-OPEN"]')).toHaveCount(0);
+  await expect(nurse.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
   await inventory.close();
   await nurse.close();
 });
@@ -131,4 +133,34 @@ test('CH14 exposes read-only Cierres tabs with factual empty sources and no audi
   await expect(page.getByText('Sin recursos de cierre documentados')).toBeVisible();
   await page.reload();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+});
+
+test('CH14 exposes an empty read-only supplier list without supplier mutations', async ({ browser }) => {
+  const admin = await browser.newPage();
+  await login(admin);
+  const auditBefore = await admin.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await admin.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
+  await expect(admin.getByRole('heading', { name: 'Inventario / Proveedores' })).toBeVisible();
+  await expect(admin.getByRole('heading', { name: 'Proveedores', exact: true })).toBeVisible();
+  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-CREATE"]')).toBeDisabled();
+  await expect(admin.getByLabel('Registros de proveedores por página')).toBeDisabled();
+  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV"]')).toBeDisabled();
+  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT"]')).toBeDisabled();
+  await expect(admin.getByRole('columnheader', { name: 'Código' })).toBeVisible();
+  await expect(admin.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
+  await expect(admin.getByRole('columnheader', { name: 'Contacto' })).toBeVisible();
+  await expect(admin.getByRole('columnheader', { name: 'Teléfono' })).toBeVisible();
+  await expect(admin.getByRole('columnheader', { name: 'Correo' })).toBeVisible();
+  await expect(admin.getByRole('columnheader', { name: 'Dirección' })).toBeVisible();
+  await expect(admin.getByText('Sin proveedores documentados')).toBeVisible();
+  await admin.getByLabel('Buscar proveedores').fill('sin-proveedor-ch14');
+  await expect(admin.locator('tbody .empty-state')).toContainText('sin-proveedor-ch14');
+  await admin.reload();
+  await expect.poll(() => admin.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await admin.close();
+  const inventory = await browser.newPage();
+  await login(inventory, 'inventory@demo.local', 'demo-inventory');
+  await inventory.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
+  await expect(inventory.getByText('Sin proveedores documentados')).toBeVisible();
+  await inventory.close();
 });

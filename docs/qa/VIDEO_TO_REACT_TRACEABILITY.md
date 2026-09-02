@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `3334ca38371009f1fc9ea3322b03eb32073eb0e5`
-SHA de implementación: `3334ca38371009f1fc9ea3322b03eb32073eb0e5`
-Fingerprint funcional CH01: `4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6`
+Commit generador: `0bef72190026a030ce7091bb1ab0b95b1441a937`
+SHA de implementación: `PENDING_COMMIT`
+Fingerprint funcional CH01: `045786f8f524aea28adbf94868589ccf423baa22454ddb9d78167ca4c024d569`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -168,7 +168,7 @@ Fingerprint funcional CH01: `4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0be
 | CH14-F06 | /inventory | PARTIAL | INVENTORY-CLOSURES-OPEN, INVENTORY-CLOSURES-TAB-PENDING, INVENTORY-CLOSURES-TAB-TOTALS, INVENTORY-CLOSURES-TAB-CLOSED, INVENTORY-CLOSURES-TAB-RESOURCES |
 | CH14-F07 | /inventory | PARTIAL | — |
 | CH14-F08 | /inventory | NOT_TESTABLE | — |
-| CH14-F09 | /inventory | PARTIAL | — |
+| CH14-F09 | /inventory | PARTIAL | INVENTORY-SUPPLIERS-OPEN, INVENTORY-SUPPLIERS-SEARCH, INVENTORY-SUPPLIERS-PAGE-SIZE, INVENTORY-SUPPLIERS-PAGE-PREV, INVENTORY-SUPPLIERS-PAGE-NEXT, INVENTORY-SUPPLIERS-CREATE |
 | CH14-F10 | /inventory | PARTIAL | — |
 | CH14-F11 | /inventory | PARTIAL | — |
 | CH14-F12 | /inventory | PARTIAL | — |
