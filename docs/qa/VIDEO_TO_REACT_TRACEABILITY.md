@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `30b4f46230201db9043a9cc1291981e5b7e8478f`
+Commit generador: `7912d2930007b1cb843b57c88ccc757e34ec126d`
 SHA de implementación: `30b4f46230201db9043a9cc1291981e5b7e8478f`
-Fingerprint funcional CH01: `ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a`
+Fingerprint funcional CH01: `c9230b06ec30300e2fd2bf90cc85d9a3dc4a5486dfa370a03a6924934c7ebbcf`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -163,7 +163,7 @@ Fingerprint funcional CH01: `ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc
 | CH14-F01 | /inventory | PARTIAL | INVENTORY-ITEM-SEARCH, INVENTORY-ITEM-EXPORT, INVENTORY-TRANSFERS |
 | CH14-F02 | /inventory | PARTIAL | INVENTORY-ITEM-HISTORY-OPEN, INVENTORY-ITEM-HISTORY-FROM, INVENTORY-ITEM-HISTORY-TO |
 | CH14-F03 | /inventory | NOT_TESTABLE | — |
-| CH14-F04 | /inventory | PARTIAL | — |
+| CH14-F04 | /inventory | PARTIAL | INVENTORY-ACKNOWLEDGEMENTS-OPEN, INVENTORY-ACK-AREA, INVENTORY-ACK-TAB-PATIENTS, INVENTORY-ACK-TAB-RESOURCES, INVENTORY-ACK-TAB-UNAVAILABLE, INVENTORY-ACK-TAB-REQUESTS, INVENTORY-ACK-TAB-TASKS |
 | CH14-F05 | /inventory | NOT_TESTABLE | — |
 | CH14-F06 | /inventory | PARTIAL | — |
 | CH14-F07 | /inventory | PARTIAL | — |

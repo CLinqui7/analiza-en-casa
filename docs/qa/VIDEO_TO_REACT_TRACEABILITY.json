@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T11:40:03-06:00",
-  "metadata_generated_from_commit": "30b4f46230201db9043a9cc1291981e5b7e8478f",
+  "generated_at": "2026-09-02T11:47:07-06:00",
+  "metadata_generated_from_commit": "7912d2930007b1cb843b57c88ccc757e34ec126d",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
-  "functional_fingerprint": "ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a",
+  "functional_fingerprint": "c9230b06ec30300e2fd2bf90cc85d9a3dc4a5486dfa370a03a6924934c7ebbcf",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6410,22 +6410,38 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-ACKNOWLEDGEMENTS-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-ACKNOWLEDGEMENTS-OPEN",
+        "INVENTORY-ACK-AREA",
+        "INVENTORY-ACK-TAB-PATIENTS",
+        "INVENTORY-ACK-TAB-RESOURCES",
+        "INVENTORY-ACK-TAB-UNAVAILABLE",
+        "INVENTORY-ACK-TAB-REQUESTS",
+        "INVENTORY-ACK-TAB-TASKS"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-acknowledgements"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q002"
+      ],
+      "blocker_reason": "La máquina de estados, acciones, área, solicitudes, tareas, idempotencia y auditoría de acuses no están definidas; Recursos, No disponible, Solicitudes y Tareas permanecen como fuentes vacías explícitas.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0029 respalda Inventario / Acuses, Tipo Área, las cinco pestañas y las columnas ID/Acciones/Identificación/Paciente/Empresa/Estado. Sólo ADMIN y AUDITOR, con patients:read y cases:read, ven filas sintéticas existentes; INVENTORY-only recibe una exclusión explícita y ninguna acción muta auditoría."
     },
     {
       "requirement_id": "CH14-F05",

@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-factual-list
 // test-id: playwright:ch14-inventory-permissions
 // test-id: playwright:ch14-inventory-item-history
+// test-id: playwright:ch14-inventory-acknowledgements
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -38,6 +39,7 @@ test('CH14 grants factual inventory access to INVENTORY and denies NURSE directl
   await expect(nurse.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol NURSE');
   await expect(nurse.getByRole('heading', { name: 'Gestión de inventario' })).toHaveCount(0);
   await expect(nurse.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')).toHaveCount(0);
+  await expect(nurse.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]')).toHaveCount(0);
   await inventory.close();
   await nurse.close();
 });
@@ -59,4 +61,38 @@ test('CH14 opens an item-scoped factual history and filters existing movement da
   await page.reload();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
   await expect(page.getByRole('dialog', { name: 'Movimientos de item' })).toHaveCount(0);
+});
+
+test('CH14 shows the read-only Acuses anatomy and factual empty sources without mutation', async ({ page }) => {
+  await login(page);
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await page.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click();
+  await expect(page.getByRole('heading', { name: 'Inventario / Acuses' })).toBeVisible();
+  await expect(page.getByLabel('Tipo Área')).toBeDisabled();
+  await expect(page.locator('[data-action-id="INVENTORY-ACK-TAB-PATIENTS"]')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('columnheader', { name: 'ID', exact: true })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Identificación' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-ACK-TAB-RESOURCES"]').click();
+  await expect(page.getByText('Sin recursos documentados')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-ACK-TAB-UNAVAILABLE"]').click();
+  await expect(page.getByText('Sin registros no disponibles')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-ACK-TAB-REQUESTS"]').click();
+  await expect(page.getByText('Sin solicitudes documentadas')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-ACK-TAB-TASKS"]').click();
+  await expect(page.getByText('Sin tareas documentadas')).toBeVisible();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+});
+
+test('CH14 keeps Acuses patient data outside INVENTORY-only scope', async ({ browser }) => {
+  const inventory = await browser.newPage();
+  await login(inventory, 'inventory@demo.local', 'demo-inventory');
+  await inventory.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click();
+  await expect(inventory.getByText('Datos de pacientes no autorizados')).toBeVisible();
+  await expect(inventory.getByRole('columnheader', { name: 'Paciente' })).toHaveCount(0);
+  await inventory.close();
 });

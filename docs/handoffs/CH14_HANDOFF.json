@@ -1,26 +1,27 @@
 {
-  "lot": "CH14_F02_ITEM_HISTORY",
-  "source_sha": "39ab367e9cc41377a5bf5b1bda1d07f145fa53e9",
-  "base_sha": "39ab367e9cc41377a5bf5b1bda1d07f145fa53e9",
-  "implementation_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
-  "verification_status": "VERIFIED_LOCAL_REMOTE",
-  "final_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
-  "remote_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
-  "functional_fingerprint": "ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a",
+  "lot": "CH14_F04_ACKNOWLEDGEMENTS",
+  "source_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
+  "base_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
+  "implementation_sha": null,
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "c9230b06ec30300e2fd2bf90cc85d9a3dc4a5486dfa370a03a6924934c7ebbcf",
   "requirements": {
-    "verified_partial": ["CH14-F01", "CH14-F02"],
+    "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
-    "not_implemented": ["CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
+    "not_implemented": ["CH14-F06", "CH14-F09", "CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
   },
   "evidence": {
     "f01": "CH14-E0006 and its opened detail crop show the Items surface, Bodega, Excel, Traslados, pagination/search, and Tipo/Código/Nombre/Disp/Comp/Total columns. React now presents only existing synthetic movement balances; committed/total calculation, bodega rules, transfer, and export remain explicitly blocked.",
     "permissions": "Playwright proves ADMIN and INVENTORY can read the factual list and NURSE receives direct route denial. Selenium source declares the same action-specific checks but has not executed because Python is unavailable.",
     "f02": "CH14-E0016/E0018 and their opened frames support the Movimientos de item dialog, date range, and Tipo/Fecha/Lote-Serie/Origen/Destino/Cantidad/Movimiento/Estado columns. React filters only existing local movements for the selected item; missing lot, location and state fields are explicitly documented as unavailable.",
+    "f04": "CH14-E0029 supports Inventario / Acuses, Tipo Área, Pacientes/Recursos/No disponible/Solicitudes/Tareas, and the ID/Acciones/Identificación/Paciente/Empresa/Estado table. React is read-only: authorized synthetic patient rows are scoped to patients:read plus cases:read; unavailable sources are factual empty states.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 3/3",
+    "playwright_ch14": "PASS: 5/5",
     "ch14_parity_self_test": "PASS: 16/16",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
     "traceability_generation": "PASS",
@@ -32,7 +33,8 @@
   "blockers": [
     "CH14-Q001: committed/total calculation, reservations, lots, warehouses and transfers require approved definitions, authorization and audit rules.",
     "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
-    "CH14-F02 implementation checkpoint 30b4f46230201db9043a9cc1291981e5b7e8478f was verified locally and against its tracking ref; 39ab367e9cc41377a5bf5b1bda1d07f145fa53e9 remains its pre-F02 base checkpoint.",
+    "CH14-F04 does not implement acknowledgement state, actions, requests, tasks, resource availability, idempotency or audit rules (CH14-Q002).",
+    "The pre-F04 base checkpoint is 7912d2930007b1cb843b57c88ccc757e34ec126d. The F04 review record awaits a distinct implementation commit before a new SHA is claimed.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"

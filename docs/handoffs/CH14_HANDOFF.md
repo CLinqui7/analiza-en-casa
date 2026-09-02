@@ -1,5 +1,5 @@
-# CH14 precheck
+# CH14 F04 · Acuses
 
-CH14-F01 remains the video-evidenced, read-only item-list surface over synthetic movement data. CH14-F02 now adds an item-scoped, read-only history dialog with a factual date range and existing local movement rows. It deliberately does not calculate commitments or totals, create reservations, infer lot/origin/destination/state semantics, move stock, or export data.
+CH14-F04 implements the evidence-backed, read-only `Inventario / Acuses` surface from CH14-E0029. It shows the Tipo Área control, the five observed tabs, and the observed table anatomy. Only roles that already hold both `patients:read` and `cases:read` see existing synthetic patient/case rows; INVENTORY-only receives an explicit access-scoped empty state.
 
-Focused CH14 Playwright passes 3/3; typecheck, CH14 parity, protected parity, traceability generation/mirror, light-only, and audit verification pass against committed checkpoint `30b4f46230201db9043a9cc1291981e5b7e8478f`, whose tracking ref matches. Selenium source is executable but PENDING_RUNTIME because Python is unavailable. `39ab367e9cc41377a5bf5b1bda1d07f145fa53e9` remains the pre-F02 base checkpoint.
+The Acuses panel does not create acknowledgements, change statuses, reserve stock, expose unscoped patient data, or fabricate resources, availability, requests, or tasks. Those sources remain factual empty states under CH14-Q002. Focused CH14 Playwright passes 5/5; typecheck, CH14/protected parity, traceability generation/mirror, light-only, and audit verification pass against the dirty F04 worktree. Selenium source is executable but remains PENDING_RUNTIME because Python is unavailable. The pre-F04 base checkpoint is `7912d2930007b1cb843b57c88ccc757e34ec126d`.

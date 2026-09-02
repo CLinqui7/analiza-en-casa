@@ -1,6 +1,7 @@
 """CH14 factual inventory-list source coverage; no inventory commitment is created."""
 # test-id: SEL-CH14-INVENTORY-LIST
 # test-id: SEL-CH14-INVENTORY-ITEM-HISTORY
+# test-id: SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS
 from __future__ import annotations
 
 import os
@@ -76,9 +77,39 @@ class InventoryList(unittest.TestCase):
         self.driver.refresh()
         self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
 
+    def test_admin_views_read_only_acknowledgements_without_audit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click()
+        main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('Inventario / Acuses', main.text)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-AREA"]').is_enabled())
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Identificación']"))
+        record_pass('INVENTORY-ACKNOWLEDGEMENTS-OPEN', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-PATIENTS"]').click()
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Paciente']"))
+        record_pass('INVENTORY-ACK-TAB-PATIENTS', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-RESOURCES"]').click()
+        self.assertIn('Sin recursos documentados', main.text)
+        record_pass('INVENTORY-ACK-TAB-RESOURCES', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-UNAVAILABLE"]').click()
+        self.assertIn('Sin registros no disponibles', main.text)
+        record_pass('INVENTORY-ACK-TAB-UNAVAILABLE', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-REQUESTS"]').click()
+        self.assertIn('Sin solicitudes documentadas', main.text)
+        record_pass('INVENTORY-ACK-TAB-REQUESTS', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-TASKS"]').click()
+        self.assertIn('Sin tareas documentadas', main.text)
+        record_pass('INVENTORY-ACK-TAB-TASKS', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
     def test_inventory_role_can_read_factual_inventory(self) -> None:
         self.login('inventory@demo.local', 'demo-inventory')
-        self.assertIn('Gestión de inventario', self.driver.find_element(By.TAG_NAME, 'main').text)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click()
+        self.assertIn('Datos de pacientes no autorizados', self.driver.find_element(By.TAG_NAME, 'main').text)
+        self.assertFalse(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Paciente']"))
 
     def test_nurse_is_denied_inventory_direct_route(self) -> None:
         self.login('nurse@demo.local', 'demo-nurse')

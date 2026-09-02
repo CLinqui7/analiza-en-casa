@@ -1,6 +1,6 @@
 {
-  "lot": "CH14_F02_ITEM_HISTORY",
+  "lot": "CH14_F04_ACKNOWLEDGEMENTS",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
-  "final_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
+  "final_sha": null,
   "next_batch": "CH14_REVIEW"
 }
