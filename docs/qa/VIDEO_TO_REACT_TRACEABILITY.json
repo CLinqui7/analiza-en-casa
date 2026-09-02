@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T08:38:16-06:00",
-  "metadata_generated_from_commit": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
+  "generated_at": "2026-09-02T09:00:16-06:00",
+  "metadata_generated_from_commit": "b19fb3371e2886c796f5abde32a45de6f597492f",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": null,
-  "functional_fingerprint": "cd8688b74e2004014691eb13b32bff494ddc29bfbe61095ee6f23d349e5e88b0",
+  "functional_fingerprint": "f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -5082,28 +5082,54 @@
         "references/video-audit/chapters/CH11_agenda_y_turnos/event_frames/CH11-E0010_00h31m50s200ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH11_agenda_y_turnos/detail_crops/CH11-E0010_00h31m50s200ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH11-Q002",
+        "CH11-Q003",
+        "CH11-Q004",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
       "route_id": "ROUTE-AGENDA",
       "react_route": "/agenda",
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "AGENDA-CALENDAR-PREV",
+        "AGENDA-CALENDAR-TODAY",
+        "AGENDA-CALENDAR-NEXT",
+        "AGENDA-CALENDAR-VIEW-MONTH",
+        "AGENDA-CALENDAR-VIEW-WEEK",
+        "AGENDA-CALENDAR-VIEW-LIST-WEEK",
+        "AGENDA-CALENDAR-VIEW-LIST-DAY",
+        "AGENDA-VISITS-DELETE"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-calendar-navigation-views"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-CALENDAR-NAVIGATION-VIEWS"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_ids": [
+        "CH11-Q002",
+        "CH11-Q003",
+        "CH11-Q004",
+        "CH11-Q006",
+        "CH11-Q008",
+        "CR-010"
+      ],
+      "blocker_reason": "Eliminar visitas y cualquier mutación de visita, recurso o liquidación permanecen deshabilitados hasta contar con definiciones y autorizaciones aprobadas.",
+      "last_verified_sha": null,
+      "notes": "CH11-E0010 se cubre con anterior/hoy/siguiente y Mes, Semana, Lista por semana y Lista por día como proyecciones de turnos sintéticos existentes. Playwright verifica los cambios de periodo/vista y que Eliminar visitas permanece deshabilitado sin mutar turnos ni auditoría. Selenium fuente es específico y PENDING_RUNTIME por falta de Python; no se implementan eliminación, disponibilidad, clasificación, liquidación ni Puntual."
     },
     {
       "requirement_id": "CH11-F03",

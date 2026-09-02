@@ -1,5 +1,6 @@
 """CH11 factual agenda filter source coverage; records only after visible effects."""
 # test-id: SEL-CH11-AGENDA-PATIENT-FILTER
+# test-id: SEL-CH11-CALENDAR-NAVIGATION-VIEWS
 from __future__ import annotations
 
 import os
@@ -77,9 +78,43 @@ class AgendaPatientFilter(unittest.TestCase):
     def test_doctor_can_read_filtered_agenda(self) -> None:
         self.login('doctor@demo.local', 'demo-doctor')
         self.assertTrue(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-PATIENT-FILTER"]').is_enabled())
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]').click()
+        self.assertIn('Semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]'))
 
     def test_inventory_is_denied_direct_agenda_route(self) -> None:
         self.login('inventory@demo.local', 'demo-inventory')
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('Acceso restringido para el rol INVENTORY', denied.text)
+
+    def test_admin_navigates_existing_calendar_views_without_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))")
+        period = self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label')
+        self.assertIn('agosto de 2026', period.text.lower())
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-PREV"]').click()
+        self.assertIn('julio de 2026', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text.lower())
+        record_pass('AGENDA-CALENDAR-PREV', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-NEXT"]').click()
+        self.assertIn('agosto de 2026', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text.lower())
+        record_pass('AGENDA-CALENDAR-NEXT', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-TODAY"]').click()
+        self.assertIn('agosto de 2026', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text.lower())
+        record_pass('AGENDA-CALENDAR-TODAY', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-MONTH"]').click()
+        self.assertEqual(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-MONTH"]').get_attribute('aria-pressed'), 'true')
+        record_pass('AGENDA-CALENDAR-VIEW-MONTH', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]').click()
+        self.assertIn('Semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text)
+        record_pass('AGENDA-CALENDAR-VIEW-WEEK', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-LIST-WEEK"]').click()
+        self.assertIn('Lista por semana', self.driver.find_element(By.CSS_SELECTOR, '.agenda-list-view h3').text)
+        record_pass('AGENDA-CALENDAR-VIEW-LIST-WEEK', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-LIST-DAY"]').click()
+        self.assertIn('Lista por día', self.driver.find_element(By.CSS_SELECTOR, '.agenda-list-view h3').text)
+        record_pass('AGENDA-CALENDAR-VIEW-LIST-DAY', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-VISITS-DELETE"]').is_enabled())
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))"))
+        record_pass('AGENDA-VISITS-DELETE', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
