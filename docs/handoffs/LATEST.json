@@ -1,6 +1,6 @@
 {
-  "lot": "CH10_CR019_TRACEABILITY_BLOCKER_REPAIR",
-  "handoff": "docs/handoffs/CH10_HANDOFF.json",
+  "lot": "CH11_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
+  "handoff": "docs/handoffs/CH11_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "CH10_REVIEW"
+  "next_batch": "CH11_REVIEW"
 }

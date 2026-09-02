@@ -966,6 +966,20 @@ textarea {
   font-size: 0.95rem;
 }
 
+.agenda-filters { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 1rem 0; }
+.agenda-patient-summary { background: #eefbf2; border-left: 4px solid #2fbf71; border-radius: .4rem; margin: 0 0 1rem; padding: .75rem 1rem; }
+.agenda-calendar { margin: 1rem 0 1.5rem; overflow-x: auto; }
+.agenda-calendar h3 { margin: 0 0 .75rem; text-align: center; text-transform: capitalize; }
+.agenda-weekdays, .agenda-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(8rem, 1fr)); min-width: 56rem; }
+.agenda-weekdays span { border: 1px solid #dce4e9; border-bottom: 0; color: #4c5d6b; font-weight: 700; padding: .5rem; text-align: center; }
+.agenda-day { border: 1px solid #dce4e9; min-height: 7.5rem; padding: .35rem; }
+.agenda-day > span { color: #4c5d6b; display: block; text-align: right; }
+.agenda-day-muted { background: #f7f9fa; color: #98a4ae; }
+.agenda-event { border-radius: .25rem; font-size: .78rem; line-height: 1.25; margin-top: .3rem; overflow: hidden; padding: .3rem .4rem; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-event-scheduled { background: #e5f8eb; border-left: 3px solid #2fbf71; color: #155b35; }
+.agenda-event-cancelled { background: #f2f4f5; border-left: 3px solid #77848e; color: #43515b; }
+.agenda-event-completed { background: #e6f3ff; border-left: 3px solid #2781c5; color: #19557e; }
+
 @media (max-width: 1024px) {
   .app-shell {
     grid-template-columns: 220px minmax(0, 1fr);
@@ -986,6 +1000,7 @@ textarea {
 }
 
 @media (max-width: 740px) {
+  .agenda-filters { grid-template-columns: 1fr; }
   .app-shell {
     display: block;
   }

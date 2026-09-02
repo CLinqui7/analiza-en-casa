@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T08:29:57-06:00",
-  "metadata_generated_from_commit": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
+  "generated_at": "2026-09-02T08:38:16-06:00",
+  "metadata_generated_from_commit": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": null,
-  "functional_fingerprint": "232ba542e48e2f2bd9c8989f20ec480d236e9334fb5445dc2a982ec5f704b010",
+  "functional_fingerprint": "cd8688b74e2004014691eb13b32bff494ddc29bfbe61095ee6f23d349e5e88b0",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -5048,21 +5048,28 @@
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "EXACT",
+      "action_ids": [
+        "AGENDA-PATIENT-SEARCH",
+        "AGENDA-PATIENT-FILTER"
+      ],
+      "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-agenda-patient-filter"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-AGENDA-PATIENT-FILTER"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "CH11-E0010/E0015 se cubren con búsqueda y selección factual de paciente, contexto seleccionado y calendario ligero con eventos coloreados. No se implementan navegación/vistas, eliminación, Pool, enlaces ni reglas de visita; Selenium queda PENDING_RUNTIME porque Python no está disponible."
     },
     {
       "requirement_id": "CH11-F02",
@@ -5155,8 +5162,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "PARTIAL",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5168,7 +5175,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH11-E0026/E0027 muestran Puntual y Turno, pero la superficie React sólo conserva Puntual como acción bloqueada por CR-010; no se certifica una clasificación de visita ni persistencia clínica."
     },
     {
       "requirement_id": "CH11-F05",
@@ -5189,8 +5196,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "PARTIAL",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5202,7 +5209,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "El catálogo amplio de tipos de visita de CH11-E0040 no está expuesto ni probado en la React actual; no se infieren servicios, reglas clínicas ni tarifas."
     },
     {
       "requirement_id": "CH11-F06",
@@ -5270,7 +5277,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH11-Q002",
+        "CH11-Q003"
+      ],
       "blocker_reason": "La superficie es visible para paridad, sin simular efectos clínicos o financieros.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
@@ -5304,7 +5314,9 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH11-Q003"
+      ],
       "blocker_reason": "Motivo, monto y comentario se muestran sin producir una operación financiera falsa.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
@@ -5337,7 +5349,11 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH11-Q003",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
       "blocker_reason": "La asignación básica es remota-first, idempotente y auditada; la política de negocio permanece explícitamente abierta.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."

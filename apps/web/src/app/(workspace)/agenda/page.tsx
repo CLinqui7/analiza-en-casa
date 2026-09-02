@@ -16,6 +16,23 @@ const shiftSchema = z.object({
 type ShiftForm = z.infer<typeof shiftSchema>;
 const statusLabel = { SCHEDULED: 'Programado', CANCELLED: 'Cancelado', COMPLETED: 'Completado' };
 const initialDate = '2026-08-29';
+const agendaMonth = '2026-08';
+
+function calendarDays(month: string) {
+  const [year, monthIndex] = month.split('-').map(Number);
+  const first = new Date(Date.UTC(year, monthIndex - 1, 1));
+  const weekdayOffset = (first.getUTCDay() + 6) % 7;
+  const start = new Date(first); start.setUTCDate(first.getUTCDate() - weekdayOffset);
+  return Array.from({ length: 35 }, (_, index) => {
+    const date = new Date(start); date.setUTCDate(start.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
+}
+
+function agendaMonthLabel(month: string) {
+  const [year, monthIndex] = month.split('-').map(Number);
+  return new Intl.DateTimeFormat('es-SV', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, monthIndex - 1, 1)));
+}
 
 export default function AgendaPage() {
   const { addShift, nursingResources, patients, shifts } = useWorkspace();
@@ -24,6 +41,8 @@ export default function AgendaPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [dates, setDates] = useState<string[]>([initialDate]);
   const [endDayOffset, setEndDayOffset] = useState<0 | 1>(0);
+  const [patientQuery, setPatientQuery] = useState('');
+  const [patientFilter, setPatientFilter] = useState('');
   const form = useForm<ShiftForm>({ resolver: zodResolver(shiftSchema), defaultValues: { resourceId: nursingResources[0]?.id ?? '', patientId: patients[0]?.id, startTime: '08:00', endTime: '12:00', status: 'SCHEDULED', note: '' } });
   function close() { setOpen(false); setDates([initialDate]); setEndDayOffset(0); form.reset(); }
   function choosePreset(preset: ShiftPreset) { const date = dates.find(Boolean) ?? initialDate; const end = endForPreset(date, form.getValues('startTime'), preset); form.setValue('endTime', end.endTime); setEndDayOffset(end.endDayOffset); }
@@ -35,10 +54,15 @@ export default function AgendaPage() {
       close();
     } catch (error) { form.setError('startTime', { message: error instanceof Error ? error.message : 'No fue posible crear la serie.' }); }
   }
+  const matchingPatients = patients.filter((patient) => `${patient.fullName} ${patient.documentId}`.toLocaleLowerCase('es').includes(patientQuery.toLocaleLowerCase('es')));
+  const selectedPatient = patients.find((patient) => patient.id === patientFilter);
+  const visibleShifts = shifts.filter((shift) => !patientFilter || shift.patientId === patientFilter).slice().sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  const shiftsByDate = new Map<string, typeof visibleShifts>();
+  visibleShifts.forEach((shift) => { const date = shift.startsAt.slice(0, 10); shiftsByDate.set(date, [...(shiftsByDate.get(date) ?? []), shift]); });
   return <div className="page-stack">
     <header className="page-header page-header-actions"><div><p className="eyebrow">Operaciones</p><h1>Agenda y turnos</h1><p>Turnos sintéticos auditables; las horas se derivan de su intervalo programado.</p></div>{can('agenda:write') ? <Button data-action-id="AGENDA-SHIFT-CREATE" onClick={() => { setMessage(null); setOpen(true); }} type="button">Nuevo turno</Button> : null}</header>
     {message ? <p className="notice success" role="status">{message}</p> : null}
-    <Panel><div className="table-heading"><h2>Turnos</h2><StatusTag>{shifts.length} registros</StatusTag></div>{shifts.length ? <div className="table-wrap"><table><thead><tr><th>Inicio</th><th>Fin</th><th>Enfermera</th><th>Paciente</th><th>Estado</th><th>Notas</th></tr></thead><tbody>{shifts.slice().sort((a, b) => a.startsAt.localeCompare(b.startsAt)).map((shift) => <tr key={shift.id}><td>{new Date(shift.startsAt).toLocaleString('es-SV')}</td><td>{new Date(shift.endsAt).toLocaleString('es-SV')}</td><td>{nursingResources.find((resource) => resource.id === shift.resourceId)?.displayName ?? 'No disponible'}</td><td>{patients.find((patient) => patient.id === shift.patientId)?.fullName ?? 'Sin asignar'}</td><td>{statusLabel[shift.status]}</td><td>{shift.note ?? '—'}</td></tr>)}</tbody></table></div> : <EmptyState detail="Cree un turno para iniciar la agenda." title="Sin turnos" />}</Panel>
+    <Panel><div className="table-heading"><div><h2>Agenda por paciente</h2><p className="field-help">Filtra únicamente turnos ya registrados; no crea ni altera visitas.</p></div><StatusTag>{visibleShifts.length} registros</StatusTag></div><div className="agenda-filters"><label>Filtrar por<select aria-label="Filtrar por" disabled value="patient"><option value="patient">Paciente</option></select></label><label>Buscar paciente<input data-action-id="AGENDA-PATIENT-SEARCH" onChange={(event) => setPatientQuery(event.target.value)} placeholder="Nombre o documento" type="search" value={patientQuery} /></label><label>Paciente<select data-action-id="AGENDA-PATIENT-FILTER" onChange={(event) => setPatientFilter(event.target.value)} value={patientFilter}><option value="">Todos los pacientes</option>{matchingPatients.map((patient) => <option key={patient.id} value={patient.id}>{patient.fullName} · {patient.documentId}</option>)}</select></label></div>{selectedPatient ? <p className="agenda-patient-summary" role="status">Paciente seleccionado: <strong>{selectedPatient.fullName}</strong> · {selectedPatient.documentType} {selectedPatient.documentId}</p> : null}<section aria-label={`Calendario de ${agendaMonthLabel(agendaMonth)}`} className="agenda-calendar"><h3>{agendaMonthLabel(agendaMonth)}</h3><div aria-hidden="true" className="agenda-weekdays"><span>lun</span><span>mar</span><span>mié</span><span>jue</span><span>vie</span><span>sáb</span><span>dom</span></div><div className="agenda-calendar-grid">{calendarDays(agendaMonth).map((date) => <div className={`agenda-day${date.startsWith(agendaMonth) ? '' : ' agenda-day-muted'}`} key={date}><span>{Number(date.slice(-2))}</span>{(shiftsByDate.get(date) ?? []).map((shift) => { const patient = patients.find((item) => item.id === shift.patientId); return <div aria-label={`Turno ${patient?.fullName ?? 'sin paciente'} ${statusLabel[shift.status]}`} className={`agenda-event agenda-event-${shift.status.toLowerCase()}`} key={shift.id}>{new Date(shift.startsAt).toLocaleTimeString('es-SV', { hour: '2-digit', minute: '2-digit' })} · {patient?.fullName ?? 'Sin asignar'}</div>; })}</div>)}</div></section>{visibleShifts.length ? <div className="table-wrap"><table><thead><tr><th>Inicio</th><th>Fin</th><th>Enfermera</th><th>Paciente</th><th>Estado</th><th>Notas</th></tr></thead><tbody>{visibleShifts.map((shift) => <tr key={shift.id}><td>{new Date(shift.startsAt).toLocaleString('es-SV')}</td><td>{new Date(shift.endsAt).toLocaleString('es-SV')}</td><td>{nursingResources.find((resource) => resource.id === shift.resourceId)?.displayName ?? 'No disponible'}</td><td>{patients.find((patient) => patient.id === shift.patientId)?.fullName ?? 'Sin asignar'}</td><td>{statusLabel[shift.status]}</td><td>{shift.note ?? '—'}</td></tr>)}</tbody></table></div> : <EmptyState detail="No hay turnos para el paciente seleccionado." title="Sin turnos coincidentes" />}</Panel>
     <Dialog description="Puede crear una serie de días sin duplicados ni colisiones del mismo recurso. Puntual sigue pendiente de definición del cliente." footer={<><Button className="button-secondary" onClick={close} type="button">Cancelar</Button><Button data-action-id="AGENDA-SHIFT-SAVE" form="shift-form" type="submit">Guardar turnos</Button></>} onClose={close} open={open} title="Nuevo turno"><form className="form-grid" id="shift-form" noValidate onSubmit={form.handleSubmit(submit)}>
       <label>Enfermera<select {...form.register('resourceId')}>{nursingResources.map((resource) => <option key={resource.id} value={resource.id}>{resource.displayName}</option>)}</select></label><label>Paciente (opcional)<select {...form.register('patientId')}><option value="">Sin asignar</option>{patients.map((patient) => <option key={patient.id} value={patient.id}>{patient.fullName}</option>)}</select></label>
       <div className="full"><div className="table-heading"><div><h3>Fechas para agendar</h3><p className="field-help">Cada fecha crea un turno independiente con el mismo intervalo.</p></div><Button className="button-secondary" data-action-id="AGENDA-SHIFT-DATE-ADD" onClick={() => setDates((current) => [...current, ''])} type="button">Agregar fecha</Button></div>{dates.map((date, index) => <div className="action-row" key={`${index}-${date}`}><label>Fecha {index + 1}<input data-action-id="AGENDA-SHIFT-DATE" onChange={(event) => setDates((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} type="date" value={date} /></label>{dates.length > 1 ? <Button aria-label={`Quitar fecha ${index + 1}`} className="button-secondary" data-action-id="AGENDA-SHIFT-DATE-REMOVE" onClick={() => setDates((current) => current.filter((_, itemIndex) => itemIndex !== index))} type="button">Quitar fecha</Button> : null}</div>)}</div>

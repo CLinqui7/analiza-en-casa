@@ -1,0 +1,67 @@
+{
+  "lot": "CH11_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
+  "source_sha": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
+  "base_sha": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "apps/web/src/app/(workspace)/agenda/page.tsx",
+    "apps/web/src/app/globals.css",
+    "apps/web/e2e/ch11.spec.ts",
+    "tests/selenium/test_agenda_patient_filter.py",
+    "scripts/functional-fingerprint.mjs",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
+    "apps/web/src/lib/video-parity-summary.ts",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/overnight/VIDEO_AUDIT_VERIFY.json",
+    "docs/handoffs/CH11_HANDOFF.json",
+    "docs/handoffs/CH11_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "verified_partial": ["CH11-F01"],
+    "corrected_to_partial": ["CH11-F04", "CH11-F05"],
+    "not_testable": ["CH11-F07", "CH11-F08", "CH11-F09"],
+    "remaining_partial": ["CH11-F02", "CH11-F03", "CH11-F06"]
+  },
+  "tests": [
+    "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/ch11.spec.ts",
+    "npm --workspace @analiza/web run typecheck",
+    "npm run qa:video-parity:generate",
+    "node scripts/verify-video-react-parity.mjs --chapter CH11 --self-test",
+    "npm run qa:traceability-mirror -- --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "npm run qa:video-parity:chapter -- CH02",
+    "npm run qa:video-parity:chapter -- CH03",
+    "npm run qa:light-mode",
+    "npm run audit:verify"
+  ],
+  "gates": {
+    "functional_fingerprint": "PASS: cd8688b74e2004014691eb13b32bff494ddc29bfbe61095ee6f23d349e5e88b0",
+    "playwright_ch11": "PASS: 3/3; ADMIN factual filter, DOCTOR read access, INVENTORY direct-route denial",
+    "typecheck": "PASS",
+    "ch11_parity_self_test": "PASS: 9/9",
+    "traceability_mirror": "PASS",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
+    "light_mode": "PASS: 79 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable"
+  },
+  "evidence": {
+    "ch11_f01": "CH11-E0010/E0015 show the patient criterion, selected patient and colored calendar events. React now searches/selects existing synthetic patients and filters only existing shifts in a calendar/table; no visit data is mutated.",
+    "ch11_precheck": "F04/F05 were downgraded from stale EXACT claims because the current React surface does not certify visit classification or the observed visit-type catalog. F07-F09 keep explicit CH11-Q002/Q003/Q006/Q008 blockers."
+  },
+  "blockers": [
+    "CR-010 / CH11-Q001-Q003/Q006: Puntual, series semantics, statuses, permissions and financial rules are undefined; no clinical or financial behavior was invented.",
+    "CH11-Q004/Q005/Q007/Q008: deletion, Pool/links, auxiliary operations, notifications and resource-availability rules remain unimplemented.",
+    "Python is unavailable, so assertion-specific Selenium source remains PENDING_RUNTIME.",
+    "Git metadata writes, push credentials and fresh fetch remain unavailable; no stable batch commit or remote SHA is claimed."
+  ],
+  "next_batch": "CH11_REVIEW"
+}
