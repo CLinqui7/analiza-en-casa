@@ -125,32 +125,20 @@
     },
     {
       "id": "CH14-F07",
-      "name": "Advertencia de cierre ya abierto (sin evidencia válida)",
-      "description": "CH14-E0045–E0047 sólo muestran la tabla Pendientes filtrada y el menú de una fila; no prueban Advertencia, Cancelar, Aceptar ni pérdida de datos.",
-      "classification": "UNCERTAIN",
-      "confidence": "LOW",
-      "current_platform_status": "NOT_TESTABLE",
+      "name": "Advertencia de cierre ya abierto",
+      "description": "CH14-E0048 muestra Advertencia: un cierre continúa abierto, podría haber datos guardados y ofrece Cancelar/Aceptar.",
+      "classification": "VISIBLE",
+      "confidence": "HIGH",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0045",
-          "timestamp": "00:41:46.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg"
-        },
-        {
-          "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0046",
-          "timestamp": "00:41:47.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg"
-        },
-        {
-          "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0047",
-          "timestamp": "00:41:57.800",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg"
+          "chapter_event_id": "CH14-E0048",
+          "timestamp": "00:42:14.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0048_00h42m14s200ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "NONE: los frames citados no contienen diálogo de advertencia ni resultado de aceptación; CH14-Q006 requiere definición y evidencia válidas."
+      "test_path": "NONE: React no contiene el modal, aceptación ni resultado; CH14-Q006 bloquea una implementación segura."
     },
     {
       "id": "CH14-F08",

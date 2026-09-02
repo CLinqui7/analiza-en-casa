@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T14:50:29-06:00",
-  "metadata_generated_from_commit": "404bee077762a7a0cc39929d79d48c5086e1b8f1",
-  "source_sha256": "eb69f84c3428d989ef424e1de84c0f1823203ffc6bc2a76e532b03ad09e9a8c0",
-  "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
-  "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
+  "generated_at": "2026-09-02T15:01:49-06:00",
+  "metadata_generated_from_commit": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
+  "source_sha256": "cd3259b371d16797a0e6ad19fd4747e8fcbf2555d7535b7ddf81138cfe056613",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6535,14 +6535,12 @@
     {
       "requirement_id": "CH14-F07",
       "chapter_id": "CH14",
-      "feature": "Advertencia de cierre ya abierto (sin evidencia válida)",
-      "detailed_behavior": "CH14-E0045–E0047 muestran una tabla de Cierres filtrada y el menú de una fila; no muestran Advertencia, Cancelar, Aceptar ni una consecuencia de pérdida de datos.",
-      "classification": "UNCERTAIN",
-      "priority": "P1",
+      "feature": "Advertencia de cierre ya abierto",
+      "detailed_behavior": "CH14-E0048 muestra una Advertencia: un cierre permanece abierto, continuar podría borrar datos guardados y la interfaz ofrece Cancelar y Aceptar.",
+      "classification": "VISIBLE",
+      "priority": "P0",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0045_00h41m46s400ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0047_00h41m57s800ms_DETAIL.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0048_00h42m14s200ms_abrupt_change.jpg"
       ],
       "open_question_ids": [
         "CH14-Q006"
@@ -6554,7 +6552,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6567,9 +6565,9 @@
       "blocker_ids": [
         "CH14-Q006"
       ],
-      "blocker_reason": "CH14-E0045–E0047 sólo muestran filtro y menú de fila de Cierres; no prueban Advertencia, Cancelar, Aceptar ni una consecuencia de datos. Se requieren evidencia válida y reglas aprobadas de preservación, recuperación y autorización antes de certificar o implementar un flujo.",
+      "blocker_reason": "CH14-E0048 muestra Advertencia, posible pérdida de datos guardados y Cancelar/Aceptar; faltan reglas aprobadas de preservación, recuperación, autorización y auditoría. React no expone el modal ni una aceptación segura.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Corrección de evidencia: se retiró la certificación PARTIAL heredada. React no expone advertencia ni aceptación de cierre y no se añade ese flujo sin una fuente válida."
+      "notes": "Corrección de evidencia: E0045–E0047 sólo muestran filtro y menú de fila; E0048 es la única evidencia directa del modal. F07 queda MISSING hasta contar con reglas aprobadas y una implementación verificable."
     },
     {
       "requirement_id": "CH14-F08",
@@ -7123,7 +7121,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0029_00h45m54s400ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q003"
+      ],
       "route_id": "ROUTE-CATALOGS",
       "react_route": "/catalogs",
       "react_files": [
@@ -7141,11 +7141,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q003"
+      ],
+      "blocker_reason": "CH15-E0029 muestra En ejecución y Finalizado como opciones de origen, pero no define cuáles son seleccionables, las transiciones posteriores, roles, auditoría ni efectos de cotización o acuse.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se implementa selector de estado de cotización ni carga de plantilla sin definición aprobada."
     },
     {
       "requirement_id": "CH15-F06",
@@ -7158,29 +7160,48 @@
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0046_00h46m24s600ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0047_00h46m28s400ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "route_id": "ROUTE-CATALOGS",
-      "react_route": "/catalogs",
+      "react_route": "/catalogs/medications",
       "react_files": [
         "apps/web/src/app/(workspace)/catalogs/page.tsx",
+        "apps/web/src/app/(workspace)/catalogs/medications/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "CATALOG-MEDICATIONS-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "CATALOG-MEDICATIONS-SEARCH",
+        "CATALOG-MEDICATIONS-EXPORT",
+        "CATALOG-MEDICATIONS-CREATE",
+        "CATALOG-MEDICATIONS-PAGE-SIZE",
+        "CATALOG-MEDICATIONS-PAGE-PREV",
+        "CATALOG-MEDICATIONS-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "NOT_APPLICABLE",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch15-medication-catalog",
+        "playwright:ch15-medication-catalog-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH15-MEDICATION-CATALOG"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q004"
+      ],
+      "blocker_reason": "CH15-E0046 establece la anatomía del listado y E0047 la del formulario, pero no definen una fuente autorizada, identidad farmacéutica, atributos, roles de escritura, validación, auditoría ni reglas clínicas. React mantiene las filas y las mutaciones ausentes.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "React implementa solamente una lista vacía factual de Medicamentos en /catalogs/medications: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH15-F07",
@@ -7472,7 +7493,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0068_00h46m51s600ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q005"
+      ],
       "route_id": "ROUTE-CATALOGS",
       "react_route": "/catalogs",
       "react_files": [
@@ -7490,11 +7513,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q005"
+      ],
+      "blocker_reason": "La conversación sobre Lotes y uso interno no decide cuándo un lote es obligatorio ni define familia, selección, disponibilidad, consumo, reversión, roles o auditoría.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se implementa captura ni validación de lote para consumos internos."
     },
     {
       "requirement_id": "CH15-F16",
@@ -7506,7 +7531,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/event_frames/CH15-E0097_00h47m42s000ms_stable_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q006"
+      ],
       "route_id": "ROUTE-CATALOGS",
       "react_route": "/catalogs",
       "react_files": [
@@ -7524,11 +7551,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH15-Q006"
+      ],
+      "blocker_reason": "El selector Recurso no define profesional elegible, vigencia, moneda, cálculo, liquidación, retenciones, reparto, roles ni auditoría del honorario.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se crea ni liquida un honorario vinculado a un profesional."
     },
     {
       "requirement_id": "CH16-F01",
