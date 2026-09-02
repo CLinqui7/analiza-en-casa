@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:19:03-06:00",
-  "metadata_generated_from_commit": "a76914d2d76b3e9e3a94c2c5789db33c9b29c42e",
+  "generated_at": "2026-09-02T12:33:08-06:00",
+  "metadata_generated_from_commit": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
   "source_sha256": "1e6bb3f0868396d478ec035e00dc911e3ff3cddf680cf2983feba4bbfaff8c16",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
   "functional_fingerprint": "4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
   "requirements": [
     {
@@ -6440,8 +6440,8 @@
         "CH14-Q002"
       ],
       "blocker_reason": "La máquina de estados, acciones, área, solicitudes, tareas, idempotencia y auditoría de acuses no están definidas; no existe una fuente autorizada de acuses de pacientes/casos y todas las fuentes permanecen vacías explícitas.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0029 respalda Inventario / Acuses, Tipo Área, las cinco pestañas y las columnas ID/Acciones/Identificación/Paciente/Empresa/Estado. La pestaña Pacientes reproduce la anatomía observada como tabla factual vacía para todos los roles: el componente no consulta ni recibe pacientes u hospitalizaciones. Abrir, alternar pestañas y recargar no mutan auditoría."
+      "last_verified_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
+      "notes": "CH14-E0029 respalda Inventario / Acuses, Tipo Área, las cinco pestañas y las columnas ID/Acciones/Identificación/Paciente/Empresa/Estado. La pestaña Pacientes reproduce la anatomía observada como tabla factual vacía para todos los roles: el componente no consulta ni recibe pacientes u hospitalizaciones. Abrir, alternar pestañas y recargar no mutan auditoría. Verificado en 3334ca3; Selenium sigue PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F05",
@@ -6529,8 +6529,8 @@
         "CH14-Q007"
       ],
       "blocker_reason": "La evidencia no define fuente autorizada, roles, transiciones, aprobación, cancelación, conciliación, reversión ni relación administrativa/financiera de cierres; React conserva todos esos comportamientos sin implementar.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0042 inicia Inventario / Cierres y CH14-E0044 muestra Pendientes con las columnas observadas. React reproduce sólo la anatomía de solo lectura: Pendientes, Cierres totales, Cerrados y Recursos presentan fuentes vacías explícitas, no consultan pacientes ni casos y no mutan auditoría tras abrir, alternar o recargar. Selenium queda PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
+      "notes": "CH14-E0042 inicia Inventario / Cierres y CH14-E0044 muestra Pendientes con las columnas observadas. React reproduce sólo la anatomía de solo lectura: Pendientes, Cierres totales, Cerrados y Recursos presentan fuentes vacías explícitas, no consultan pacientes ni casos y no mutan auditoría tras abrir, alternar o recargar. Verificado en 3334ca3; Selenium queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F07",

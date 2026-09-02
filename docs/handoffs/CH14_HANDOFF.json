@@ -2,10 +2,10 @@
   "lot": "CH14_F06_SAFE_CLOSURES_SURFACE",
   "source_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
   "base_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
-  "implementation_sha": null,
-  "verification_status": "PENDING_GIT_WRITE",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
+  "remote_sha": "3334ca38371009f1fc9ea3322b03eb32073eb0e5",
   "functional_fingerprint": "4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06"],
@@ -36,7 +36,7 @@
     "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
     "CH14-F04 does not implement acknowledgement state, actions, requests, tasks, resource availability, idempotency or audit rules (CH14-Q002).",
     "CH14-F06 implements only factual empty Cierres anatomy. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
-    "The pre-F04 base checkpoint is 7912d2930007b1cb843b57c88ccc757e34ec126d. The F04 review record awaits a distinct implementation commit before a new SHA is claimed.",
+    "The pre-F04 base checkpoint is 7912d2930007b1cb843b57c88ccc757e34ec126d. F04/F06 source and focused verification are fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"
