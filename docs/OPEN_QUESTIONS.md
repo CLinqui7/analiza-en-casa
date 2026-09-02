@@ -221,6 +221,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `CH16-Q005`: ¿Qué roles definitivos pueden crear, editar, inactivar, solicitar y decidir perfiles de descuento, y cómo se debe presentar carga/error en producción? La implementación usa permisos configurados y aprobación nominativa sin inferir la política final. Evidencia: CH16-E0035–CH16-E0039, 00:51:00.000–00:51:07.200.
 - `CH16-Q006`: ¿La exclusión global de medicamentos es obligatoria, condicional o negociable por perfil? Evidencia: CH16-E0003 y CH16-E0024, 00:49:45.400–00:50:28.400.
 - `CH16-Q007`: ¿Qué alcance legal, rol y flujo de corrección requiere el bloqueo de edición clínica mencionado durante la navegación al reporte de salud? No se declara firma ni regla clínica legal. Evidencia verbal: CH16-E0003; navegación CH16-E0041 y CH16-E0044, 00:51:11.200–00:51:27.400.
+- `CH16-Q008`: ¿Cuál es la fuente autorizada y con alcance por organización para el Reporte de salud, qué campos sensibles (Cédula, Nombre, Empresa, Hospitalización, Período, Auditoría, Triage y Estatus) puede ver cada rol, y qué filtros, auditoría de acceso, retención, minimización y redacción aplican? La navegación y las columnas visibles no autorizan exponer datos clínicos. Evidencia: CH16-E0041–CH16-E0044, 00:50:54.000–00:51:07.200.
 
 ## CH17 · reporte de salud detallado e impresión
 
@@ -229,6 +230,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `CH17-Q003`: definir proveedor, base autorizada, minimización, revisión humana, persistencia, entrenamiento, acceso y auditoría de “Auditar con IA”. La acción no se implementa con contenido clínico. Evidencia: CH17-E0048.
 - `CH17-Q004`: definir proveedor, destinatario, consentimiento, expiración, revocación, retención y auditoría de WhatsApp para notas. La plataforma conserva sólo una notificación de enlace seguro sin contenido clínico. Evidencia verbal: CH17-E0048, 00:54:00–00:54:23.560.
 - `CH17-Q005`: aprobar la matriz definitiva de creación, firma, corrección y anulación por rol, junto con el contrato runtime de Supabase. La política actual es conservadora y la ejecución contra una instancia Supabase real sigue pendiente. Evidencia: CH17-E0047–CH17-E0048.
+- `CH17-Q006`: definir si la aplicación operativa de enfermería requiere trabajo sin conexión, su fuente autorizada, roles, minimización de campos, sincronización, idempotencia, conflictos, corrección y auditoría. La narración no demuestra un contrato ni una operación segura. Evidencia verbal: CH17, 00:52:34–00:53:44.
 
 ## Datos
 

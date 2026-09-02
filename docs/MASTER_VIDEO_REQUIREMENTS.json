@@ -7926,17 +7926,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/catalogos/descuentos",
-        "test_path": "#/catalogos/descuentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "El reporte muestra campos clínicos y de identificación sensibles; no se deben reutilizar los datos de CH09 ni la ruta existente como una autorización implícita.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "La ruta clínica existente no certifica el Reporte de salud ni su límite de datos/roles.",
+        "test_path": "Pendiente de CH16-Q008: fuente autorizada por organización, roles, minimización, filtros, auditoría de acceso y retención.",
+        "recommended_action": "Mantener el reporte sin implementar hasta recibir el contrato de datos y autorización de CH16-Q008.",
+        "blocked_by_client_information": true,
+        "notes": "CH16-E0041–E0044 sólo prueban la navegación y las columnas visibles; no definen una fuente, campos sensibles permitidos, roles ni el límite auditable de acceso."
       }
     },
     {
@@ -8003,17 +8005,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Cédula, nombre, empresa, hospitalización, período, auditoría, triage y estatus son campos sensibles; no se exponen sin el contrato de CH16-Q008.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva sólo la anatomía de tabla vacía y controles deshabilitados; no consulta pacientes, casos, signos vitales ni auditorías.",
+        "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: anatomía vacía, controles deshabilitados, recarga sin auditoría y denegación de INVENTORY.",
+        "recommended_action": "Mantener la superficie vacía hasta aprobar fuente por organización, roles, minimización, filtros, auditoría de acceso y retención en CH16-Q008.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0001/E0003 demuestran columnas y paginación visibles, no autorización de datos ni semántica de triage/auditoría/estatus."
       }
     },
     {

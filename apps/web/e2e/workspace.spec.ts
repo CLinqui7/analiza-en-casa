@@ -40,7 +40,9 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible();
 });
 
-test('primary navigation requires a session and hides patient access for inventory', async ({ page }) => {
+test('primary navigation requires a session and hides patient access for inventory', async ({
+  page,
+}) => {
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login/);
 
@@ -54,10 +56,14 @@ test('primary navigation requires a session and hides patient access for invento
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await expect(page.locator('[data-action-id="PATIENT-NAVIGATE"]')).toHaveCount(0);
   await page.goto('/patients');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol INVENTORY',
+  );
 });
 
-test('dashboard presents unclassified measurements and opens authorized operational actions', async ({ page }) => {
+test('dashboard presents unclassified measurements and opens authorized operational actions', async ({
+  page,
+}) => {
   await login(page);
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   await expect(page.getByText('Sin clasificar')).toBeVisible();
@@ -92,7 +98,11 @@ test('patient duplicate validation and individual vital registration are usable'
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
-  await fillRequiredPatientData(dialog, { documentId: '123456789', fullName: 'Paciente Demo Repetido', phone: '7000-9911' });
+  await fillRequiredPatientData(dialog, {
+    documentId: '123456789',
+    fullName: 'Paciente Demo Repetido',
+    phone: '7000-9911',
+  });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
@@ -105,13 +115,19 @@ test('patient duplicate validation and individual vital registration are usable'
   await expect(page.getByText('Pulso: 70 lpm')).toBeVisible();
 });
 
-test('patient registration persists complete administrative, insurance, contacts, and address data', async ({ page }) => {
+test('patient registration persists complete administrative, insurance, contacts, and address data', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await dialog.getByLabel('Tipo de documento').selectOption('OTHER');
-  await fillRequiredPatientData(dialog, { documentId: 'QA-REG-001', fullName: 'Paciente QA Integral', phone: '7000-1111' });
+  await fillRequiredPatientData(dialog, {
+    documentId: 'QA-REG-001',
+    fullName: 'Paciente QA Integral',
+    phone: '7000-1111',
+  });
   await dialog.getByLabel('Teléfono de casa').fill('2200-1111');
   await dialog.getByLabel('Jubilado').check();
   await dialog.getByLabel('Tipo de sangre').selectOption('O+');
@@ -162,7 +178,11 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await createDialog.getByLabel('Tipo de documento').selectOption('OTHER');
-  await fillRequiredPatientData(createDialog, { documentId: 'EDIT-QA-001', fullName: 'Paciente QA Editable', phone: '7000-4001' });
+  await fillRequiredPatientData(createDialog, {
+    documentId: 'EDIT-QA-001',
+    fullName: 'Paciente QA Editable',
+    phone: '7000-4001',
+  });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editable');
   await page.getByRole('link', { name: 'Paciente QA Editable' }).click();
@@ -205,18 +225,38 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await duplicateEditDialog.getByLabel('Tipo de documento').selectOption('DUI');
   await duplicateEditDialog.getByLabel('Número de documento').fill('123456789');
   await duplicateEditDialog.getByRole('button', { name: 'Guardar cambios' }).click();
-  await expect(duplicateEditDialog.getByText('Ya existe un registro con este documento')).toBeVisible();
+  await expect(
+    duplicateEditDialog.getByText('Ya existe un registro con este documento'),
+  ).toBeVisible();
 });
 
-test('patient import validates CSV rows, persists valid rows, and exports filtered results', async ({ page }) => {
+test('patient import validates CSV rows, persists valid rows, and exports filtered results', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Importar CSV' }).click();
   const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
-  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({ name: 'invalido.csv', mimeType: 'text/csv', buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento') });
+  await dialog
+    .locator('[data-action-id="PATIENT-IMPORT-FILE"]')
+    .setInputFiles({
+      name: 'invalido.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento'),
+    });
   await expect(dialog.getByRole('alert')).toContainText('Fila 2');
-  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({ name: 'pacientes-validos.csv', mimeType: 'text/csv', buffer: Buffer.from('document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE') });
-  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText('2 filas válidas');
+  await dialog
+    .locator('[data-action-id="PATIENT-IMPORT-FILE"]')
+    .setInputFiles({
+      name: 'pacientes-validos.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(
+        'document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE',
+      ),
+    });
+  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
+    '2 filas válidas',
+  );
   await dialog.getByRole('button', { name: 'Importar pacientes' }).click();
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('Importado Uno');
@@ -239,10 +279,14 @@ test('patient detail keeps auditor read-only and inventory denied', async ({ pag
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await page.goto('/patients/patient-demo-001');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol INVENTORY',
+  );
 });
 
-test('patient document switches clear only document state and form validation is enforced', async ({ page }) => {
+test('patient document switches clear only document state and form validation is enforced', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
@@ -261,7 +305,12 @@ test('patient document switches clear only document state and form validation is
   await expect(dialog.getByLabel('Número de documento')).toHaveValue('');
   await expect(dialog.getByLabel('Nombre completo')).toHaveValue('Paciente Cambio QA');
 
-  await fillRequiredPatientData(dialog, { documentId: 'PAS-QA-VALIDATION', fullName: 'Paciente Cambio QA', phone: '7000-3001', email: 'correo-invalido' });
+  await fillRequiredPatientData(dialog, {
+    documentId: 'PAS-QA-VALIDATION',
+    fullName: 'Paciente Cambio QA',
+    phone: '7000-3001',
+    email: 'correo-invalido',
+  });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(dialog.getByText('Ingrese un correo electrónico válido.')).toBeVisible();
   await dialog.getByLabel('Correo').fill('cambio.qa@example.test');
@@ -272,7 +321,9 @@ test('patient document switches clear only document state and form validation is
   await expect(dialog.getByText('Ya existe un registro con este documento')).toBeVisible();
 });
 
-test('patient list supports tabs, search, sorting, pagination, persisted status changes, roles, and mobile', async ({ browser }) => {
+test('patient list supports tabs, search, sorting, pagination, persisted status changes, roles, and mobile', async ({
+  browser,
+}) => {
   const context = await browser.newContext();
   const page = await context.newPage();
   await login(page);
@@ -289,31 +340,45 @@ test('patient list supports tabs, search, sorting, pagination, persisted status 
   await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
   await expect(page.getByLabel('Buscar paciente')).toHaveValue('');
 
-  const nameHeader = page.locator('th').filter({ has: page.locator('[data-action-id="PATIENT-SORT-NAME"]') });
+  const nameHeader = page
+    .locator('th')
+    .filter({ has: page.locator('[data-action-id="PATIENT-SORT-NAME"]') });
   await page.locator('[data-action-id="PATIENT-SORT-NAME"]').click();
   await expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
   await page.locator('[data-action-id="PATIENT-SORT-NAME"]').click();
   await expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
-  const documentHeader = page.locator('th').filter({ has: page.locator('[data-action-id="PATIENT-SORT-DOCUMENT"]') });
+  const documentHeader = page
+    .locator('th')
+    .filter({ has: page.locator('[data-action-id="PATIENT-SORT-DOCUMENT"]') });
   await page.locator('[data-action-id="PATIENT-SORT-DOCUMENT"]').click();
   await expect(documentHeader).toHaveAttribute('aria-sort', 'ascending');
 
   await page.locator('[data-action-id="PATIENT-PAGE-SIZE"]').selectOption('5');
   await page.locator('[data-action-id="PATIENT-PAGE-NEXT"]').click();
-  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText('2');
+  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText(
+    '2',
+  );
   await page.locator('[data-action-id="PATIENT-PAGE-PREVIOUS"]').click();
-  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText('1');
+  await expect(page.locator('[data-action-id="PATIENT-PAGINATE"][aria-current="page"]')).toHaveText(
+    '1',
+  );
 
   await page.getByLabel('Buscar paciente').fill('sin coincidencia de QA');
   await expect(page.getByRole('status').filter({ hasText: 'Sin resultados' })).toBeVisible();
   await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
-  await page.getByRole('row', { name: /Paciente Demo Aurora/ }).getByRole('button', { name: 'Inactivar' }).click();
+  await page
+    .getByRole('row', { name: /Paciente Demo Aurora/ })
+    .getByRole('button', { name: 'Inactivar' })
+    .click();
   await page.getByRole('tab', { name: /Inactivos/ }).click();
   await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
   await page.reload();
   await page.getByRole('tab', { name: /Inactivos/ }).click();
   await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
-  await page.getByRole('row', { name: /Paciente Demo Aurora/ }).getByRole('button', { name: 'Reactivar' }).click();
+  await page
+    .getByRole('row', { name: /Paciente Demo Aurora/ })
+    .getByRole('button', { name: 'Reactivar' })
+    .click();
   await page.getByRole('tab', { name: /Activos/ }).click();
   await page.reload();
   await expect(page.getByRole('row', { name: /Paciente Demo Aurora/ })).toBeVisible();
@@ -321,18 +386,28 @@ test('patient list supports tabs, search, sorting, pagination, persisted status 
 
   await loginAs(page, 'auditor@demo.local', 'demo-auditor');
   await page.goto('/patients');
-  await expect(page.locator('[data-action-id="PATIENT-INACTIVATE"], [data-action-id="PATIENT-REACTIVATE"]')).toHaveCount(0);
+  await expect(
+    page.locator('[data-action-id="PATIENT-INACTIVATE"], [data-action-id="PATIENT-REACTIVATE"]'),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await page.goto('/patients');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol INVENTORY',
+  );
   await context.close();
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobilePage = await mobileContext.newPage();
   await login(mobilePage);
   await mobilePage.goto('/patients');
-  await expect.poll(() => mobilePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await expect
+    .poll(() =>
+      mobilePage.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    )
+    .toBe(true);
   await mobileContext.close();
 });
 
@@ -342,7 +417,11 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Agregar paciente' });
   await createDialog.getByLabel('Tipo de documento').selectOption('OTHER');
-  await fillRequiredPatientData(createDialog, { documentId: 'PATIENT-PLAYWRIGHT-EDIT-001', fullName: 'Paciente Playwright Editable', phone: '7000-9001' });
+  await fillRequiredPatientData(createDialog, {
+    documentId: 'PATIENT-PLAYWRIGHT-EDIT-001',
+    fullName: 'Paciente Playwright Editable',
+    phone: '7000-9001',
+  });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
   await page.getByRole('link', { name: 'Paciente Playwright Editable' }).click();
@@ -351,13 +430,23 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => {
-    const snapshot = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v2') ?? '{}');
-    return snapshot.patients?.find((patient: { documentId?: string }) => patient.documentId === 'PATIENT-PLAYWRIGHT-EDIT-001')?.phone;
-  })).toBe('2222 3333');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const snapshot = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v2') ?? '{}');
+        return snapshot.patients?.find(
+          (patient: { documentId?: string }) =>
+            patient.documentId === 'PATIENT-PLAYWRIGHT-EDIT-001',
+        )?.phone;
+      }),
+    )
+    .toBe('2222 3333');
 });
 
-test('hospitalization route provides legacy listing controls, persistence, detail and edit', async ({ page, browser }) => {
+test('hospitalization route provides legacy listing controls, persistence, detail and edit', async ({
+  page,
+  browser,
+}) => {
   await login(page);
   await page.goto('/hospitalizations');
   await expect(page.getByRole('columnheader', { name: 'Documento' })).toBeVisible();
@@ -404,15 +493,27 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   const mobilePage = await mobileContext.newPage();
   await login(mobilePage);
   await mobilePage.goto('/hospitalizations');
-  await expect.poll(() => mobilePage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await expect
+    .poll(() =>
+      mobilePage.evaluate(
+        () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+      ),
+    )
+    .toBe(true);
   await mobileContext.close();
 });
 
-test('hospitalization permissions preserve read-only roles and deny inventory', async ({ page }) => {
+test('hospitalization permissions preserve read-only roles and deny inventory', async ({
+  page,
+}) => {
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
   await page.goto('/hospitalizations');
   await expect(page.getByRole('heading', { name: 'Hospitalizaciones' })).toBeVisible();
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')).toHaveCount(0);
+  await expect(
+    page.locator(
+      '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]',
+    ),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'doctor@demo.local', 'demo-doctor');
   await page.goto('/hospitalizations');
@@ -420,15 +521,25 @@ test('hospitalization permissions preserve read-only roles and deny inventory', 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'finance@demo.local', 'demo-finance');
   await page.goto('/hospitalizations');
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')).toHaveCount(0);
+  await expect(
+    page.locator(
+      '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]',
+    ),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'auditor@demo.local', 'demo-auditor');
   await page.goto('/hospitalizations');
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-DETAIL-EDIT"]')).toHaveCount(0);
+  await expect(
+    page.locator(
+      '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-DETAIL-EDIT"]',
+    ),
+  ).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await page.goto('/hospitalizations');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol INVENTORY',
+  );
 });
 
 test('agenda rejects invalid intervals and persists scheduled shifts', async ({ page }) => {
@@ -451,7 +562,9 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
 });
 
-test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({ page }) => {
+test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/agenda');
   await page.getByRole('button', { name: 'Crear turno' }).click();
@@ -476,14 +589,18 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
   await expect(page.getByText('Turnos', { exact: true })).toBeVisible();
 });
 
-test('nursing resources require professional registration, persist, and honor role guards', async ({ page }) => {
+test('nursing resources require professional registration, persist, and honor role guards', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/clinical/nursing');
   await page.getByRole('button', { name: 'Nuevo recurso' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nuevo recurso de enfermería' });
   await dialog.getByLabel('Nombre visible').fill('Recurso sin registro de QA');
   await dialog.getByRole('button', { name: 'Guardar recurso' }).click();
-  await expect(dialog.getByText('Ingrese el número de Junta o registro profesional.')).toBeVisible();
+  await expect(
+    dialog.getByText('Ingrese el número de Junta o registro profesional.'),
+  ).toBeVisible();
 
   await dialog.getByLabel('Número de Junta / registro profesional').fill('JUNTA-QA-001');
   await dialog.getByLabel('Nombre visible').fill('Recurso de enfermería QA');
@@ -504,7 +621,9 @@ test('nursing resources require professional registration, persist, and honor ro
   await expect(page.getByRole('button', { name: 'Nuevo recurso' })).toHaveCount(0);
 });
 
-test('medical-order factual search is normalized and document choice is limited to authorized roles', async ({ page }) => {
+test('medical-order factual search is normalized and document choice is limited to authorized roles', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/clinical/orders');
   await page.getByLabel('Buscar orden médica').fill('123456789');
@@ -528,7 +647,9 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
   await page.getByRole('button', { name: 'Nueva cotización' }).click();
-  await page.getByLabel('Resumen operativo').fill('Coordinación sintética para prueba de inmutabilidad.');
+  await page
+    .getByLabel('Resumen operativo')
+    .fill('Coordinación sintética para prueba de inmutabilidad.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
@@ -562,7 +683,9 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.getByLabel('Referencia').fill('REF-PAGO-E2E-DUPLICADO');
   await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
   await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
-  await expect(page.getByText('La clave ya fue aplicada; la operación no se duplicó.')).toBeVisible();
+  await expect(
+    page.getByText('La clave ya fue aplicada; la operación no se duplicó.'),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).first().click();
 
   await page.getByRole('button', { name: 'Reversar' }).click();
@@ -574,12 +697,16 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await expect(page.getByText('Corrección de QA sintética.')).toBeVisible();
 });
 
-test('signed clinical documents remain immutable and corrections create a new version', async ({ page }) => {
+test('signed clinical documents remain immutable and corrections create a new version', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/clinical/care-plans');
   await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
   await page.getByLabel('Título').fill('Plan sintético de QA');
-  await page.getByLabel('Resumen sintético').fill('Resumen sintético para verificar la inmutabilidad.');
+  await page
+    .getByLabel('Resumen sintético')
+    .fill('Resumen sintético para verificar la inmutabilidad.');
   await page.getByLabel('Autor responsable').fill('Profesional de QA');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByRole('status')).toContainText('persistido como borrador');
@@ -596,7 +723,9 @@ test('signed clinical documents remain immutable and corrections create a new ve
   await expect(page.getByText('Motivo: Ajuste sintético de QA.')).toBeVisible();
 });
 
-test('inventory movements persist and cannot make the derived balance negative', async ({ page }) => {
+test('inventory movements persist and cannot make the derived balance negative', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/inventory/movements');
   await page.getByRole('button', { name: 'Registrar movimiento' }).click();
@@ -629,7 +758,9 @@ test('audit export is restricted to the audit role set', async ({ page }) => {
   await page.getByLabel('Contraseña').fill('demo-doctor');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.goto('/audit');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol DOCTOR');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol DOCTOR',
+  );
 });
 
 test('help search gives deterministic local results and a safe empty state', async ({ page }) => {
@@ -645,10 +776,25 @@ test('help search gives deterministic local results and a safe empty state', asy
 test('all six demo roles enforce their route matrix', async ({ browser }) => {
   const roles = [
     { email: 'admin@demo.local', password: 'demo-admin', allowed: '/audit' },
-    { email: 'doctor@demo.local', password: 'demo-doctor', allowed: '/clinical', denied: '/payments' },
+    {
+      email: 'doctor@demo.local',
+      password: 'demo-doctor',
+      allowed: '/clinical',
+      denied: '/payments',
+    },
     { email: 'nurse@demo.local', password: 'demo-nurse', allowed: '/agenda', denied: '/audit' },
-    { email: 'inventory@demo.local', password: 'demo-inventory', allowed: '/inventory', denied: '/patients' },
-    { email: 'finance@demo.local', password: 'demo-finance', allowed: '/payments', denied: '/clinical' },
+    {
+      email: 'inventory@demo.local',
+      password: 'demo-inventory',
+      allowed: '/inventory',
+      denied: '/patients',
+    },
+    {
+      email: 'finance@demo.local',
+      password: 'demo-finance',
+      allowed: '/payments',
+      denied: '/clinical',
+    },
     { email: 'auditor@demo.local', password: 'demo-auditor', allowed: '/audit' },
   ];
   for (const role of roles) {
@@ -700,12 +846,35 @@ test('purchase drafts persist without changing inventory', async ({ page }) => {
   await expect(page.getByText('Borrador sintético de QA.')).toBeVisible();
 });
 
-test('patient portal requires a second factor and keeps invalid access generic', async ({ page }) => {
-  await page.route('**/api/portal-request-code', async (route) => route.fulfill({ status: 202, contentType: 'application/json', body: JSON.stringify({ message: 'Si el enlace es válido, enviamos un código al canal registrado.' }) }));
+test('patient portal requires a second factor and keeps invalid access generic', async ({
+  page,
+}) => {
+  await page.route('**/api/portal-request-code', async (route) =>
+    route.fulfill({
+      status: 202,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: 'Si el enlace es válido, enviamos un código al canal registrado.',
+      }),
+    }),
+  );
   await page.route('**/api/portal-status', async (route) => {
     const body = route.request().postDataJSON() as { verificationCode?: string };
-    if (body.verificationCode === '12345678') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ quote_id: 'Q-PORTAL-QA', status: 'SENT', updated_at: '2026-08-28T12:00:00.000Z' }) });
-    return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'No fue posible validar el acceso.' }) });
+    if (body.verificationCode === '12345678')
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          quote_id: 'Q-PORTAL-QA',
+          status: 'SENT',
+          updated_at: '2026-08-28T12:00:00.000Z',
+        }),
+      });
+    return route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ error: 'No fue posible validar el acceso.' }),
+    });
   });
   await page.goto(`/portal/${'x'.repeat(64)}`);
   await page.getByRole('button', { name: 'Solicitar código' }).click();
@@ -729,18 +898,19 @@ test('insurance search is normalized and unavailable to nurse role', async ({ pa
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
   await page.goto('/insurance');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol NURSE');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol NURSE',
+  );
 });
 
-test('health report search filters individual vital records without interpretation', async ({ page }) => {
+test('health report does not expose vital records without the approved report-data contract', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/clinical/reports');
-  await page.getByRole('tab', { name: 'Signos vitales' }).click();
-  await page.getByLabel('Buscar paciente en reportes').fill('123456789');
-  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
-  await page.getByLabel('Buscar paciente en reportes').fill('no existe en QA');
-  await expect(page.getByText('Sin mediciones', { exact: true })).toBeVisible();
-  await expect(page.getByText('sin clasificación automática')).toBeVisible();
+  await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
+  await expect(page.locator('[data-action-id="HEALTH-REPORT-SEARCH"]')).toBeDisabled();
+  await expect(page.getByText('CH16-Q008')).toBeVisible();
 });
 
 test('dashboard has no automatically detectable serious accessibility violations', async ({

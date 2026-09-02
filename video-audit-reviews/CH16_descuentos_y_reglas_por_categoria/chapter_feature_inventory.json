@@ -31,7 +31,7 @@
       "description": "Descuentos ofrece selección de registros, búsqueda, tres páginas, navegación Anterior/Siguiente, acciones por fila y Excel.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH16",
@@ -173,7 +173,7 @@
           "path": "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: abrir Reporte de salud con rol autorizado y verificar columnas, carga e aislamiento de organización."
+      "test_path": "Bloqueado por CH16-Q008: definir fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, minimización y retención antes de probar un reporte."
     },
     {
       "id": "CH16-F09",

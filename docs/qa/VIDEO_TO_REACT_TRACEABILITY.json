@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T17:18:16-06:00",
-  "metadata_generated_from_commit": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "source_sha256": "2947c9ea88a3dd655bd016a9a17f4c825eae076a07a537bab667a0b79c76e3e7",
+  "generated_at": "2026-09-02T17:21:35-06:00",
+  "metadata_generated_from_commit": "9b587ce131b965eede19c9755d43a1a07bcfaded",
+  "source_sha256": "319fe32a7f5c1d95f4cc6d393bc28fec49f357b9969fb2e895fc23b0def292d8",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "functional_fingerprint": "94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
+  "functional_fingerprint": "758a01f34f3283cc1e0af0fc4c0e3a78c43d4fdf98152c4f223c9dfecaf3796f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -7958,7 +7958,9 @@
         "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0041_00h50m54s000ms_DETAIL.jpg",
         "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -7977,11 +7979,11 @@
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
-        "CH16-Q007"
+        "CH16-Q008"
       ],
-      "blocker_reason": "El cuadro y los roles del reporte de salud, incluida la información clínica sensible, requieren definición y autorización aprobadas.",
+      "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, campos sensibles permitidos, roles, filtros, auditoría de acceso, retención ni minimización para el Reporte de salud.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH16 sólo aporta una navegación visible; no certifica un reporte clínico."
+      "notes": "CH16 sólo prueba navegación y columnas visibles; la ruta clínica y los datos de CH09 no autorizan ni certifican un reporte clínico; la reparación de trazabilidad espera su SHA de commit."
     },
     {
       "requirement_id": "CH16-F09",
@@ -8029,28 +8031,42 @@
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0001_00h51m10s000ms_DETAIL.jpg",
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0003_00h51m12s400ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+      "open_question_ids": [
+        "CH16-Q008"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
+      ],
+      "component_ids": [
+        "HEALTH-REPORT-EMPTY-LIST"
+      ],
+      "action_ids": [
+        "HEALTH-REPORT-SEARCH",
+        "HEALTH-REPORT-PAGE-PREV",
+        "HEALTH-REPORT-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch17-health-report-empty-surface"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008"
+      ],
+      "blocker_reason": "CH16-Q008 no define fuente autorizada por organización, roles, campos sensibles permitidos, filtros, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH17-E0001/E0003 respaldan sólo la anatomía visible. React no lee ni expone pacientes, casos, signos vitales o auditorías; búsqueda y paginación se muestran deshabilitadas."
     },
     {
       "requirement_id": "CH17-F02",
@@ -8231,7 +8247,9 @@
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0043_00h52m08s400ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q001"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -8248,11 +8266,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q001"
+      ],
+      "blocker_reason": "La evidencia no define la plantilla, campos, firmas, validez ni minimización de la salida imprimible.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se imprime ni exporta contenido clínico."
     },
     {
       "requirement_id": "CH17-F08",
@@ -8466,7 +8486,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0048_00h52m14s800ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q003"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -8483,11 +8505,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q003"
+      ],
+      "blocker_reason": "No se define proveedor, base autorizada, minimización, revisión humana, retención ni auditoría para IA.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se envía contenido clínico a IA."
     },
     {
       "requirement_id": "CH17-F15",
@@ -8499,7 +8523,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q005"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -8516,11 +8542,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q005"
+      ],
+      "blocker_reason": "No están definidos creación, firma, corrección, anulación, razones, versiones y autorización por rol.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se implementa edición clínica."
     },
     {
       "requirement_id": "CH17-F16",
@@ -8532,7 +8560,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q006"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -8549,11 +8579,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q006"
+      ],
+      "blocker_reason": "No existe contrato para fuente, roles, offline, sincronización, idempotencia, conflictos, corrección ni auditoría de la aplicación de enfermería.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se implementa captura o sincronización clínica."
     },
     {
       "requirement_id": "CH17-F17",
@@ -8565,7 +8597,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q004"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -8582,11 +8616,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q004"
+      ],
+      "blocker_reason": "No se definen proveedor, consentimiento, destinatario, expiración, revocación, retención y auditoría; no se envía contenido clínico por WhatsApp.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se comparte una nota clínica."
     }
   ]
 }

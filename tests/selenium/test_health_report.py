@@ -1,0 +1,99 @@
+"""CH17 health-report empty-surface source coverage; no clinical report data is exposed."""
+# test-id: SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE
+from __future__ import annotations
+
+import os
+import subprocess
+import time
+import unittest
+from urllib.error import URLError
+from urllib.request import urlopen
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as conditions
+from selenium.webdriver.support.ui import WebDriverWait
+
+from helpers.action_recorder import record_pass, reset
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE = os.getenv('SELENIUM_BASE_URL', 'http://127.0.0.1:4177')
+SERVER = None
+
+
+def ready() -> bool:
+    try:
+        return urlopen(BASE, timeout=1).status < 500  # nosec B310: local test server only
+    except (URLError, TimeoutError, OSError):
+        return False
+
+
+class Ch17HealthReportEmptySurface(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        global SERVER
+        reset()
+        if not ready():
+            SERVER = subprocess.Popen(
+                ['npm.cmd', 'run', 'dev', '--workspace=@analiza/web', '--', '--port', '4177'],
+                cwd=ROOT,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+            )
+        for _ in range(60):
+            if ready():
+                break
+            time.sleep(1)
+        else:
+            raise RuntimeError('El servidor React local no inició en 60 segundos.')
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless=new')
+        options.add_argument('--window-size=1440,1000')
+        cls.driver = webdriver.Chrome(options=options)
+        cls.wait = WebDriverWait(cls.driver, 12)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.driver.quit()
+        if SERVER:
+            SERVER.terminate()
+
+    def login(self, email: str, password: str) -> None:
+        self.driver.get(f'{BASE}/login?next=%2Fclinical%2Freports')
+        self.driver.execute_script('localStorage.clear()')
+        self.driver.refresh()
+        self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input"))).send_keys(email)
+        self.driver.find_element(By.CSS_SELECTOR, 'input[type=password]').send_keys(password)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]').click()
+
+    def test_admin_reads_only_empty_report_anatomy_without_audit_mutation(self) -> None:
+        self.login('admin@demo.local', 'demo-admin')
+        self.wait.until(conditions.url_contains('/clinical/reports'))
+        audit_before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Cédula']"))
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Hospitalización']"))
+        self.assertIn('Sin registros autorizados para mostrar', self.driver.find_element(By.CSS_SELECTOR, 'tbody .empty-state').text)
+        self.assertIn('CH16-Q008', self.driver.find_element(By.ID, 'health-report-data-boundary').text)
+
+        search_started = time.time()
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SEARCH"]').is_enabled())
+        record_pass('HEALTH-REPORT-SEARCH', 'SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE', search_started, self.driver.current_url)
+
+        previous_started = time.time()
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-PAGE-PREV"]').is_enabled())
+        record_pass('HEALTH-REPORT-PAGE-PREV', 'SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE', previous_started, self.driver.current_url)
+
+        next_started = time.time()
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-PAGE-NEXT"]').is_enabled())
+        record_pass('HEALTH-REPORT-PAGE-NEXT', 'SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE', next_started, self.driver.current_url)
+
+        self.driver.refresh()
+        self.assertIn('Sin registros autorizados para mostrar', self.driver.find_element(By.CSS_SELECTOR, 'tbody .empty-state').text)
+        self.assertEqual(audit_before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_inventory_is_denied_the_direct_clinical_report_route(self) -> None:
+        self.login('inventory@demo.local', 'demo-inventory')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('INVENTORY', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SEARCH"]'))

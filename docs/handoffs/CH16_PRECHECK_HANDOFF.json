@@ -6,26 +6,28 @@
   "verification_status": "VERIFIED_AT_COMMITTED_SHA",
   "final_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "remote_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "functional_fingerprint": "94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
+  "functional_fingerprint": "69952f5801bd6a6a7d0324a0d32241308faf0e6f2fc69b7bb69f842a6d30fdb1",
   "requirements": {
     "verified_partial": ["CH16-F01"],
     "explicitly_blocked": ["CH16-F02", "CH16-F03", "CH16-F04", "CH16-F05", "CH16-F06", "CH16-F07", "CH16-F08", "CH16-F09"]
   },
   "evidence": {
-    "f01": "CH16-E0001 detail crop and CH16-E0018 were opened. They show the Descuentos matrix columns Acciones, Nombre, Descripción, Servicios, Laboratorios, Medicamentos, Equipos, Insumos and Honorarios. Source rows and values are not copied."
+    "f01": "CH16-E0001 detail crop and CH16-E0018 were opened. They show the Descuentos matrix columns Acciones, Nombre, Descripción, Servicios, Laboratorios, Medicamentos, Equipos, Insumos and Honorarios. Source rows and values are not copied.",
+    "f08": "CH16-E0041–CH16-E0044 show Reporte de salud navigation and visible sensitive columns only. They do not define its organization-scoped source, permitted roles, field minimization, filters, audit access, or retention."
   },
   "gates": {
     "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
     "playwright_ch16_f01": "PASS: 6/6 at isolated port 4182; factual empty matrix/search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_ch16_discounts.py is executable, action-specific source coverage",
-    "ch16_parity_self_test": "PASS: 9/9 at fingerprint 94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
-    "traceability_mirror": "PASS: normal and self-test; CH16-F01 is mirrored and duplicate raw certification keys fail closed.",
+    "ch16_parity_self_test": "PASS: 9/9 at fingerprint 69952f5801bd6a6a7d0324a0d32241308faf0e6f2fc69b7bb69f842a6d30fdb1",
+    "traceability_mirror": "PASS: normal and self-test; CH16-F01 and CH16-F08 are mirrored and duplicate raw certification keys fail closed.",
     "light_mode": "PASS: 91 product source files",
     "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
     "audit_verify": "PASS: 17/17 chapters"
   },
   "blockers": [
     "CH16-Q001/Q002/Q003/Q005 block authoritative source data, profile assignment, values, precedence, calculation, write roles, validation and audit.",
+    "CH16-Q008 blocks Reporte de salud data access: no CH09 data or existing clinical route is treated as authorization to expose report fields.",
     "No discount rows, percentages, calculations, price effects, exports or writes were fabricated.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
