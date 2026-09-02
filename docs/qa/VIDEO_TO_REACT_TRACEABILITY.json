@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T16:30:24-06:00",
-  "metadata_generated_from_commit": "264d19e2f1aa0b7819985e37eae2e5fbae4f7716",
+  "generated_at": "2026-09-02T16:40:58-06:00",
+  "metadata_generated_from_commit": "d9d0c33581418a0ba60e2ea77720124790d3c275",
   "source_sha256": "866386a224c6b43530646bc7e16e053fbf26fc51a9564322078e95e02d0bf8c6",
-  "implementation_sha": "c01635eb06286d41a8bd7985d8c151731d0bec7d",
+  "implementation_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
   "functional_fingerprint": "f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a",
   "requirements": [
     {
@@ -7519,8 +7519,8 @@
         "CH15-Q004"
       ],
       "blocker_reason": "CH15-E0122 muestra la tabla de Servicios y CH15-E0128 sus columnas, pero CH15-Q004 no define una fuente autorizada, tipos o categorías, precios, efectos de Impuesto/Descuento, roles de escritura, validación, auditoría ni efectos clínicos o financieros. React conserva esas operaciones ausentes.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "React implementa solamente una lista vacía factual de Servicios en /catalogs/services: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
+      "notes": "React implementa solamente una lista vacía factual de Servicios en /catalogs/services: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en d9d0c33."
     },
     {
       "requirement_id": "CH15-F14",
