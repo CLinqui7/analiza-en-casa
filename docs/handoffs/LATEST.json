@@ -1,6 +1,6 @@
 {
-  "lot": "CH09_TRACEABILITY_GENERATOR_AND_MIRROR_REPAIR",
+  "lot": "RECERTIFY_CHECKPOINT_2002145",
   "handoff": "docs/handoffs/CH09_HANDOFF.json",
-  "final_sha": null,
+  "final_sha": "200214561d26a23510f75623f0292ecdc9c30981",
   "next_batch": "CH09_REVIEW"
 }
