@@ -1,0 +1,17 @@
+{
+  "lot": "B1",
+  "source_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+  "functional_sha": "e42375f43b17c5b704c0076834bf3e19824dd58e76ef0d483ae71969691e1a7a",
+  "final_sha": "61f6600086eb7d9d0a5dba0c69c891d178be6f29",
+  "remote_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+  "commits": ["61f6600086eb7d9d0a5dba0c69c891d178be6f29"],
+  "changed_files": ["packages/contracts/src/index.ts", "packages/domain/src/index.ts", "apps/web/src/app/(workspace)/patients/page.tsx", "supabase/migrations/202609020001_b1_patient_contact_documents.sql", "docs/design/LIGHT_VISUAL_REFERENCE.md", "docs/design/VISUAL_QA_MATRIX.json", "scripts/verify-light-mode.mjs"],
+  "chapters_affected": ["CH01", "CH02"],
+  "client_changes": {"affected": ["CR-002", "CR-004"], "partial": ["CR-002", "CR-004", "CR-012", "CR-031"], "blocked": ["CR-003 export scope", "CR-012/CR-031 multiuser production verification"]},
+  "tests": ["npm test", "npm run test:react", "npm run typecheck", "npm run lint", "npm run build", "npm run qa:light-mode", "npm run qa:video-parity:chapter -- CH01", "npm run qa:video-parity:chapter -- CH02", "npm run qa:client-changes:batch -- B1"],
+  "gates": {"client_changes": "PASS", "ch01": "PASS", "ch02": "PASS", "light_mode": "PASS"},
+  "light_mode_visual_qa": "PARTIAL: source gate passes; desktop/tablet screenshots and axe coverage remain pending.",
+  "failures": [],
+  "blockers": ["React SupabaseDataProvider is schema-incompatible and uses whole-collection writes; it cannot certify multiuser persistence until a mapped, transactional RPC and two-user RLS run exist.", "No authorized source dataset/dictionary was supplied for migration dry-run."],
+  "next_batch": "B2"
+}
