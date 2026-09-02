@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T11:20:22-06:00",
-  "metadata_generated_from_commit": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
+  "generated_at": "2026-09-02T11:28:27-06:00",
+  "metadata_generated_from_commit": "39ab367e9cc41377a5bf5b1bda1d07f145fa53e9",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
-  "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
+  "functional_fingerprint": "ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6327,22 +6327,35 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-ITEM-HISTORY-DIALOG"
+      ],
+      "action_ids": [
+        "INVENTORY-ITEM-HISTORY-OPEN",
+        "INVENTORY-ITEM-HISTORY-FROM",
+        "INVENTORY-ITEM-HISTORY-TO"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-item-history",
+        "playwright:ch14-inventory-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-ITEM-HISTORY"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q001"
+      ],
+      "blocker_reason": "El modelo actual no define lote/serie, origen/destino, estado Disponible/Gastado ni una semántica de compromiso; se muestran explícitamente como no documentados.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0016/E0018 respaldan el modal Movimientos de item, rango de fechas y columnas. React filtra únicamente movimientos locales existentes del ítem seleccionado; abrir, filtrar, recargar y cerrar no mutan existencias ni auditoría."
     },
     {
       "requirement_id": "CH14-F03",

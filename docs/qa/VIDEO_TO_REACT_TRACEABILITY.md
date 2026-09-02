@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `fde8a99a9abbfcbee7725ff4c0174e7681c5da70`
+Commit generador: `39ab367e9cc41377a5bf5b1bda1d07f145fa53e9`
 SHA de implementación: `fde8a99a9abbfcbee7725ff4c0174e7681c5da70`
-Fingerprint funcional CH01: `416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4`
+Fingerprint funcional CH01: `ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -161,7 +161,7 @@ Fingerprint funcional CH01: `416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a
 | CH13-F10 | /purchases | NOT_TESTABLE | — |
 | CH13-F11 | /purchases | NOT_TESTABLE | — |
 | CH14-F01 | /inventory | PARTIAL | INVENTORY-ITEM-SEARCH, INVENTORY-ITEM-EXPORT, INVENTORY-TRANSFERS |
-| CH14-F02 | /inventory | PARTIAL | — |
+| CH14-F02 | /inventory | PARTIAL | INVENTORY-ITEM-HISTORY-OPEN, INVENTORY-ITEM-HISTORY-FROM, INVENTORY-ITEM-HISTORY-TO |
 | CH14-F03 | /inventory | NOT_TESTABLE | — |
 | CH14-F04 | /inventory | PARTIAL | — |
 | CH14-F05 | /inventory | NOT_TESTABLE | — |

@@ -1,5 +1,6 @@
 """CH14 factual inventory-list source coverage; no inventory commitment is created."""
 # test-id: SEL-CH14-INVENTORY-LIST
+# test-id: SEL-CH14-INVENTORY-ITEM-HISTORY
 from __future__ import annotations
 
 import os
@@ -83,3 +84,26 @@ class InventoryList(unittest.TestCase):
         self.login('nurse@demo.local', 'demo-nurse')
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('Acceso restringido para el rol NURSE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]'))
+
+    def test_admin_opens_and_filters_item_history_without_audit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')[0].click()
+        dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.assertIn('Movimientos de item', dialog.text)
+        self.assertEqual(dialog.find_element(By.XPATH, ".//label[contains(., 'Código')]//input").get_attribute('value'), 'KIT-DEMO-001')
+        record_pass('INVENTORY-ITEM-HISTORY-OPEN', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
+        from_input = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-FROM"]')
+        from_input.send_keys('08/28/2026')
+        rows = dialog.find_elements(By.CSS_SELECTOR, 'tbody tr')
+        self.assertEqual(len(rows), 1)
+        self.assertIn('EXIT', rows[0].text)
+        record_pass('INVENTORY-ITEM-HISTORY-FROM', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
+        to_input = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-TO"]')
+        to_input.send_keys('08/27/2026')
+        self.assertIn('Sin movimientos en el rango', dialog.text)
+        record_pass('INVENTORY-ITEM-HISTORY-TO', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))

@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // test-id: playwright:ch14-inventory-factual-list
 // test-id: playwright:ch14-inventory-permissions
+// test-id: playwright:ch14-inventory-item-history
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -36,6 +37,26 @@ test('CH14 grants factual inventory access to INVENTORY and denies NURSE directl
   await login(nurse, 'nurse@demo.local', 'demo-nurse');
   await expect(nurse.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol NURSE');
   await expect(nurse.getByRole('heading', { name: 'Gestión de inventario' })).toHaveCount(0);
+  await expect(nurse.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')).toHaveCount(0);
   await inventory.close();
   await nurse.close();
+});
+
+test('CH14 opens an item-scoped factual history and filters existing movement dates without mutation', async ({ page }) => {
+  await login(page);
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await page.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]').first().click();
+  const dialog = page.getByRole('dialog', { name: 'Movimientos de item' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Código')).toHaveValue('KIT-DEMO-001');
+  for (const header of ['Tipo', 'Fecha', 'Lote / Serie', 'Origen', 'Destino', 'Cantidad', 'Movimiento', 'Estado']) await expect(dialog.getByRole('columnheader', { name: header })).toBeVisible();
+  await expect(dialog.locator('tbody tr')).toHaveCount(2);
+  await dialog.getByLabel('Desde').fill('2026-08-28');
+  await expect(dialog.locator('tbody tr')).toHaveCount(1);
+  await expect(dialog.locator('tbody tr')).toContainText('EXIT');
+  await dialog.getByLabel('Hasta').fill('2026-08-27');
+  await expect(dialog.getByText('Sin movimientos en el rango')).toBeVisible();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect(page.getByRole('dialog', { name: 'Movimientos de item' })).toHaveCount(0);
 });
