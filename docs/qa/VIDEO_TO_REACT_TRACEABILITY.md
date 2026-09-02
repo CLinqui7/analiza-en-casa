@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `d9d0c33581418a0ba60e2ea77720124790d3c275`
+Commit generador: `2079644b3bffb44d021fc59c840ee556280fa3cf`
 SHA de implementación: `d9d0c33581418a0ba60e2ea77720124790d3c275`
-Fingerprint funcional CH01: `f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a`
+Fingerprint funcional CH01: `2b16d3d34e7830e78af11a167efa3fb659200fd86a63a4da851d08d065f87bda`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -189,7 +189,7 @@ Fingerprint funcional CH01: `f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada1
 | CH15-F11 | /catalogs | PARTIAL | — |
 | CH15-F12 | /catalogs | PARTIAL | — |
 | CH15-F13 | /catalogs/services | PARTIAL | CATALOG-SERVICES-SEARCH, CATALOG-SERVICES-EXPORT, CATALOG-SERVICES-CREATE, CATALOG-SERVICES-PAGE-SIZE, CATALOG-SERVICES-PAGE-PREV, CATALOG-SERVICES-PAGE-NEXT |
-| CH15-F14 | /catalogs | PARTIAL | — |
+| CH15-F14 | /catalogs/discounts | PARTIAL | CATALOG-DISCOUNTS-SEARCH, CATALOG-DISCOUNTS-EXPORT, CATALOG-DISCOUNTS-CREATE, CATALOG-DISCOUNTS-PAGE-SIZE, CATALOG-DISCOUNTS-PAGE-PREV, CATALOG-DISCOUNTS-PAGE-NEXT |
 | CH15-F15 | /catalogs | NOT_TESTABLE | — |
 | CH15-F16 | /catalogs | NOT_TESTABLE | — |
 | CH16-F01 | Sin ruta | PARTIAL | — |

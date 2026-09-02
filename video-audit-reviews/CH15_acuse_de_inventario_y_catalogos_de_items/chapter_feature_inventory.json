@@ -295,7 +295,7 @@
       "description": "Descuentos distribuye valores por Servicios, Laboratorios, Medicamentos, Equipos, Insumos y Honorarios; el capítulo sólo demuestra el listado inicial.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH15",
@@ -310,7 +310,7 @@
           "path": "references/video-audit/chapters/CH15_acuse_de_inventario_y_catalogos_de_items/detail_crops/CH15-E0148_00h49m41s400ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: comprobar que cada porcentaje se aplica únicamente a su familia y respeta límites y redondeo configurados."
+      "test_path": "apps/web/e2e/ch15.spec.ts y tests/selenium/test_catalog_discounts.py: abrir la matriz factual vacía, buscar, comprobar controles deshabilitados y recargar sin mutar auditoría; ADMIN/INVENTORY/AUDITOR permitidos y DOCTOR/NURSE/FINANCE denegados. No se prueban perfiles, porcentajes, categorías, cálculos ni efectos de precio hasta contar con CH15-Q004."
     },
     {
       "id": "CH15-F15",

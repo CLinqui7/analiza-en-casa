@@ -1,0 +1,33 @@
+{
+  "lot": "CH15_F14_PRECHECK",
+  "source_sha": "2079644b3bffb44d021fc59c840ee556280fa3cf",
+  "base_sha": "2079644b3bffb44d021fc59c840ee556280fa3cf",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "2b16d3d34e7830e78af11a167efa3fb659200fd86a63a4da851d08d065f87bda",
+  "requirements": {
+    "verified_partial": ["CH15-F14"],
+    "explicitly_blocked": ["CH15-F05", "CH15-F11", "CH15-F12", "CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "f14": "CH15-E0144 and the CH15-E0148 detail crop were opened. They show Descuentos with Registros, pagination, search, Excel and Acciones/Nombre/Descripción/Servicios/Laboratorios/Medicamentos/Equipos/Insumos/Honorarios columns. Loaded source profiles are not copied. React implements only the factual empty matrix at /catalogs/discounts."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15_f14": "PASS: 6/6 at isolated port 4182; factual empty matrix/search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_discounts.py is executable, action-specific source coverage",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 2b16d3d34e7830e78af11a167efa3fb659200fd86a63a4da851d08d065f87bda",
+    "traceability_mirror": "PASS: normal and self-test; CH15-F14 is mirrored and duplicate raw certification keys fail closed.",
+    "light_mode": "PASS: 90 product source files",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH15-Q004 blocks authoritative profiles, categories, percentages, calculations, price effects, export columns, write roles, validation, audit and clinical or financial effects.",
+    "No discount profiles, category values, percentages, calculations, price effects, writes or financial rules were fabricated.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH15_REVIEW"
+}

@@ -7525,17 +7525,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran perfiles ni se crea un efecto clínico.",
+        "financial_impact": "No se muestran porcentajes ni se ejecuta cálculo o cambio de precio.",
+        "current_platform_evidence": "/catalogs/discounts presenta la anatomía factual vacía de Descuentos: columnas, búsqueda, Registros y controles visibles sin perfiles ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_discounts.py",
+        "recommended_action": "Mantener la matriz de solo lectura mientras CH15-Q004 no apruebe fuente, categorías, porcentajes, cálculo, contrato de escritura y efectos de precio; no fabricar perfiles ni reglas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0144 respalda la anatomía de matriz y CH15-E0148 confirma una fila de origen, pero no autoriza copiarla ni define perfiles, categorías, porcentajes, cálculo, efectos sobre precios, escritura, validación, auditoría ni efectos clínicos o financieros. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
