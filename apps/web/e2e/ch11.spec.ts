@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch11-agenda-patient-context
 // test-id: playwright:ch11-agenda-patient-context-save
 // test-id: playwright:ch11-synthetic-shift-detail
+// test-id: playwright:ch11-observed-classification-type-labels
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Fagenda');
@@ -90,6 +91,30 @@ test('CH11 persists only the existing synthetic shift after choosing its factual
   await page.reload();
   await expect(page.getByText('CH11 F03 turno sintético vinculado', { exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').find((shift: { note?: string }) => shift.note === 'CH11 F03 turno sintético vinculado'))).toMatchObject({ patientId: 'patient-demo-001' });
+});
+
+test('CH11 displays observed classification and type labels without allowing visit semantics or mutation', async ({ page }) => {
+  await login(page);
+  const storedBefore = await page.evaluate(() => [localStorage.getItem('analiza.en.casa.workspace.v3.shifts'), localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')]);
+  await page.getByRole('button', { name: 'Crear turno' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
+  const classification = dialog.locator('[data-action-id="AGENDA-SHIFT-CLASSIFICATION-OBSERVED"]');
+  await expect(classification).toContainText('Puntual');
+  await expect(classification).toContainText('Turno');
+  await expect(classification).toContainText('No son seleccionables, no se guardan');
+  const catalog = dialog.locator('[data-action-id="AGENDA-SHIFT-TYPE-OBSERVED-CATALOG"]');
+  await expect(catalog).not.toHaveAttribute('open', '');
+  await catalog.locator('summary').click();
+  await expect(catalog).toHaveAttribute('open', '');
+  await expect(catalog.getByRole('list')).toContainText('Cuidado de enfermería');
+  await expect(catalog.getByRole('list')).toContainText('Visita Espiritual');
+  await expect(catalog.getByRole('list')).toContainText('Cuidados Técnicos de Enfermería');
+  await expect(catalog.getByRole('list')).toContainText('Laboratorio Especial');
+  await expect(catalog.getByRole('list')).toContainText('Visita de Geriatría');
+  await expect(catalog.getByRole('list')).toContainText('Laboratorio Tercerizado');
+  await dialog.locator('[data-action-id="AGENDA-SHIFT-CLOSE"]').click();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => [localStorage.getItem('analiza.en.casa.workspace.v3.shifts'), localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')])).toEqual(storedBefore);
 });
 
 test('CH11 navigates and changes read-only calendar views without mutating shifts', async ({ page }) => {

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T09:38:49-06:00",
-  "metadata_generated_from_commit": "bf814b9f11c4068d22cef49b70abf7fb8d801c73",
+  "generated_at": "2026-09-02T09:59:55-06:00",
+  "metadata_generated_from_commit": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "db8870d320a8a0bd3221866126cee2f356659b4197e79f15819bee934743d0bd",
+  "functional_fingerprint": "6ded7888bb0fcb02d2793027c01e03a50bf0f6ebad826776decc92005226fbf8",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -1808,7 +1808,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Las tres secciones visibles del constructor fueron comprobadas en el flujo de cotización."
     },
     {
       "requirement_id": "CH04-F002",
@@ -1851,7 +1851,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Búsqueda por nombre y selector de documento/nombre quedan asociados al borrador."
     },
     {
       "requirement_id": "CH04-F003",
@@ -1891,7 +1891,7 @@
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH04-Q001 no define la semántica de los registros Cotización de ceros."
     },
     {
       "requirement_id": "CH04-F004",
@@ -1935,7 +1935,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "CH04-E0005: al seleccionar el paciente sintético, DUI/NIT, Teléfono y Correo asociados se muestran como lectura sola. Playwright y Selenium fuente verifican la selección y el autocompletado sin afirmar edición, versionado ni reglas de privacidad no evidenciadas; Selenium runtime permanece PENDING_RUNTIME porque Python no está disponible."
+      "notes": "Documento, teléfono y correo sintéticos de Aurora se muestran como lectura sola al seleccionar."
     },
     {
       "requirement_id": "CH04-F005",
@@ -1979,7 +1979,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Fecha con asterisco y control nativo persiste; no se afirma la navegación/cancelación específica del calendario observado."
     },
     {
       "requirement_id": "CH04-F006",
@@ -2023,7 +2023,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Regular se muestra y persiste sólo como etiqueta administrativa, sin regla de descuento."
     },
     {
       "requirement_id": "CH04-F007",
@@ -2070,7 +2070,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "El borrador sin etiqueta seleccionada se rechaza con alerta accesible; el catálogo es desplazable y la selección/retiro persiste sin atribuir comisión."
+      "notes": "El borrador sin selección se rechaza con alerta accesible; filtro, multiselección y retiro de tags se guardan y recargan sin atribuir comisiones."
     },
     {
       "requirement_id": "CH04-F008",
@@ -2110,7 +2110,7 @@
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH04-Q005 mantiene abierta la semántica heterogénea del catálogo observado."
     },
     {
       "requirement_id": "CH04-F009",
@@ -2154,7 +2154,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Botón verde circular accesible con +, comprobado al abrir/cerrar la superficie desplazable de referidos."
+      "notes": "El botón auxiliar circular verde abre/cierra de forma accesible el catálogo de referidos desplazable."
     },
     {
       "requirement_id": "CH04-F010",
@@ -2201,7 +2201,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Giftcard y Comentarios persisten; no se replica el icono de borrado observado para Giftcard."
     },
     {
       "requirement_id": "CH04-F011",
@@ -2247,7 +2247,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Filtro, socio y servicio sintéticos se prueban sin afirmar stock, precio, reserva ni reglas comerciales reales."
     },
     {
       "requirement_id": "CH05-F001",
@@ -2288,7 +2288,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Las siete pestañas, incluido el rótulo observado “Estudios Dx”, y el cambio de compositor se ejercitan en la regresión CH05; no se infiere contenido ni reglas de las categorías no recorridas."
+      "notes": "Las siete categorías visibles, incluido el rótulo observado Estudios Dx, y el cambio de compositor se ejercitan sin atribuir reglas no demostradas."
     },
     {
       "requirement_id": "CH05-F002",
@@ -2373,7 +2373,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Agregar muestra Procesando... como feedback breve sin afirmar error, reintento ni idempotencia remota."
+      "notes": "Agregar una línea muestra Procesando... como feedback local; no certifica carga de catálogo ni operaciones remotas."
     },
     {
       "requirement_id": "CH05-F004",
@@ -2416,7 +2416,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Búsqueda incremental sobre catálogo sintético; el alcance, códigos y ranking de producción permanecen fuera de esta certificación."
+      "notes": "La búsqueda incremental de servicios sintéticos filtra y permite seleccionar resultados, sin códigos ni alcance de producción."
     },
     {
       "requirement_id": "CH05-F005",
@@ -2501,7 +2501,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Cantidad inicia en 0 y se marca requerida: Agregar rechaza cero sin crear una línea; una cantidad positiva crea una línea que se guarda y recarga. Unidad, límites y relación clínica siguen abiertos en CH05-Q003."
+      "notes": "Cantidad inicia en 0, se marca requerida y se rechaza sin crear línea; una cantidad positiva crea una línea que se guarda y recarga."
     },
     {
       "requirement_id": "CH05-F007",
@@ -2679,7 +2679,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Cambiar a Medicamentos reinicia concepto, búsqueda y socio local; no atribuye persistencia de socio entre categorías."
+      "notes": "Medicamentos abre un compositor separado y restablece concepto, búsqueda y socio locales; no certifica el precio o cantidad inicial observado."
     },
     {
       "requirement_id": "CH05-F011",
@@ -2760,7 +2760,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "No results found aparece y se recupera al corregir la búsqueda de medicamentos sintéticos."
+      "notes": "No results found se muestra para una consulta sintética sin coincidencia y se recupera al corregirla."
     },
     {
       "requirement_id": "CH05-F013",
@@ -2924,7 +2924,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": null,
-      "notes": "Las siete pestañas y el filtro de disponibilidad sintético se ejercitan en navegadores. El filtro no afirma inventario real ni cambia precios."
+      "notes": "Las siete pestañas y el filtro de disponibilidad sintético se ejercitan sin afirmar existencias, reservas ni precios reales."
     },
     {
       "requirement_id": "CH06-F02",
@@ -3323,7 +3323,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data."
     },
     {
       "requirement_id": "CH07-F02",
@@ -3362,7 +3362,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "The observed table columns and pending, not-sent and not-applicable labels are visible; no insurer decision is claimed."
     },
     {
       "requirement_id": "CH07-F03",
@@ -3399,7 +3399,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "A specific synthetic quote number reduces the result list to one row."
     },
     {
       "requirement_id": "CH07-F04",
@@ -3424,10 +3424,10 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
@@ -3436,7 +3436,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "The related quote and insurance surfaces remain available, while document variants, duplication, deletion and role matrix require CH07-Q004/Q008."
     },
     {
       "requirement_id": "CH07-F05",
@@ -3458,19 +3458,21 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:insurance-route-parity"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Email and WhatsApp remain visible safe blocked channels; no content or delivery is claimed."
     },
     {
       "requirement_id": "CH07-F06",
@@ -3506,7 +3508,7 @@
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "The video does not establish direct PDF generation or WhatsApp delivery."
     },
     {
       "requirement_id": "CH07-F07",
@@ -3528,10 +3530,10 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
@@ -3540,7 +3542,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Observed administrative observations are recorded append-only; the video does not establish a business state machine."
     },
     {
       "requirement_id": "CH07-F08",
@@ -3574,11 +3576,11 @@
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [
-        "CH07-Q002"
+        "CH07-Q003"
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "Saved-versus-activated semantics are verbal and undefined."
     },
     {
       "requirement_id": "CH07-F09",
@@ -3614,7 +3616,7 @@
       ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "The state menu outcome is not demonstrated."
     },
     {
       "requirement_id": "CH08-F01",
@@ -3665,7 +3667,7 @@
       ],
       "blocker_reason": "La tabla hospitalizations no admite administrativeProfile. La persistencia remota exige la RPC auditada start_administrative_execution con cotización y versión vinculadas, que este formulario no define.",
       "last_verified_sha": null,
-      "notes": "El flujo de abrir/guardar/cancelar está verificado únicamente en modo mock-local. En modo Supabase se muestra una explicación accesible y no hay controles de abrir/guardar ni mutación de hospitalización/auditoría; el proveedor rechaza el payload antes de cualquier upsert genérico. Regresiones directas verifican ADMIN/DOCTOR, lectura sin controles/mutación para NURSE/FINANCE/AUDITOR y denegación para INVENTORY."
+      "notes": "El perfil se verifica sólo en modo mock-local. Supabase muestra el bloqueo accesible y no expone abrir/guardar; el proveedor rechaza cualquier payload antes de un upsert genérico."
     },
     {
       "requirement_id": "CH08-F02",
@@ -3718,7 +3720,7 @@
       ],
       "blocker_reason": "La integración segura requiere la RPC auditada y valores vinculados que el formulario no puede inventar; también faltan catálogos, obligatoriedad, dependencias y responsabilidad aprobadas.",
       "last_verified_sha": null,
-      "notes": "Los campos observados se muestran en modo mock-local, pero no se persisten a Supabase por upsert genérico. Los catálogos, obligatoriedad, dependencias y distribución de responsabilidad continúan abiertos (CH08-Q002/Q007)."
+      "notes": "Los campos son demo-locales; no se envían a Supabase sin la RPC auditada y los valores vinculados requeridos. No se inventan catálogos ni reglas."
     },
     {
       "requirement_id": "CH08-F03",
@@ -3767,7 +3769,7 @@
       ],
       "blocker_reason": "No se debe simular una transición remota: start_administrative_execution requiere la RPC auditada, cotización y versión vinculadas que este formulario no define.",
       "last_verified_sha": null,
-      "notes": "Guardar y la confirmación accesible son mock-locales. En modo Supabase el flujo queda bloqueado con explicación accesible y sin escritura, hasta integrar y certificar la RPC auditada."
+      "notes": "No se simula una transición remota de Procesando. La confirmación existe sólo en mock-local hasta la integración RPC auditada."
     },
     {
       "requirement_id": "CH08-F04",
@@ -4153,7 +4155,7 @@
       ],
       "blocker_reason": "La evidencia no define máquina de estados, activación, roles o catálogos de servicio/atención. Los controles se muestran deshabilitados y no aplican reglas locales.",
       "last_verified_sha": null,
-      "notes": "CH09-E0009: factual filters are the second table-header row. Every field performs case-insensitive matching on its corresponding already displayed value; Playwright and Selenium source each assert a match and non-match for all nine fields. Aplicar and Activos are visible disabled controls under CH09-Q002/Q004. Pagination remains PARTIAL because page size and ordering are undefined."
+      "notes": "Playwright 3/3 verifies the table-header layout, all nine factual column filter matches/non-matches, disabled Aplicar/Activos, DOCTOR detail navigation, and INVENTORY denial. Selenium source mirrors the action-specific assertions; runtime remains pending. Aplicar/Activos remain blocked by CH09-Q002/Q004; pagination remains PARTIAL pending source-defined ordering and page size."
     },
     {
       "requirement_id": "CH09-F02",
@@ -4203,7 +4205,7 @@
       ],
       "blocker_reason": "CH09-Q006 no define la semántica, fuente, permisos ni auditoría de Relevos, Reingresos, Reinfecciones, Ulceraciones o Near miss; tampoco define el modelo/autorización del perfil clínico.",
       "last_verified_sha": null,
-      "notes": "CH09-E0016: la columna izquierda Acciones contiene el botón verde de menú y una celda de filtro vacía. Ver cotizaciones navega a una cotización existente vinculada al caso; el enlace exige clinical:read más quotes:read y NURSE no puede exponerlo. Perfil clínico, Doc de Relevos, Reingresos, Reinfecciones, Ulceraciones y Near miss permanecen visibles y deshabilitados bajo CH09-Q006. Selenium conserva evidencia de fuente PENDING_RUNTIME porque Python no está disponible."
+      "notes": "The CH09-E0016 left Acciones column has its matching blank filter cell and green accessible row-menu toggle. Playwright verifies the existing case-scoped quote URL and quote detail, NURSE omission without quotes:read, and Profile, Doc de Relevos, Reingresos, Reinfecciones, Ulceraciones and Near miss as visible disabled items under CH09-Q006. Selenium source mirrors the assertion sequence; runtime remains pending because Python is unavailable."
     },
     {
       "requirement_id": "CH09-F03",
@@ -4673,7 +4675,7 @@
       ],
       "blocker_reason": "Tratamientos con cambios y Actualizaciones no tienen unidad de versionado definida; Registro XPO no tiene contrato, permisos ni auditoría definidos.",
       "last_verified_sha": null,
-      "notes": "CH10-E0008/E0009: lista factual sintética con pestañas Activos/Inactivos, búsqueda, paginación y menú de fila. Ver Órdenes y Registro XPO no mutan datos; el selector Nuevo no inicia documentos. Playwright cubre las seis cuentas demo; Selenium queda PENDING_RUNTIME por Python no disponible."
+      "notes": "CH10-E0008/E0009 factual list behavior is covered without deriving triage or starting clinical records. Read roles are exercised distinctly; inventory and finance direct routes are denied. Visible version/history and XPO actions remain blocked; Selenium runtime is pending."
     },
     {
       "requirement_id": "CH10-F02",
@@ -5082,10 +5084,12 @@
       ],
       "visual_test_ids": [],
       "blocker_type": null,
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH11-Q004"
+      ],
       "blocker_reason": null,
       "last_verified_sha": "772286245bc8290fbe553b592101d3829c66337b",
-      "notes": "CH11-E0010/E0015 se cubren con búsqueda y selección factual de paciente, contexto seleccionado y calendario ligero con eventos coloreados. No se implementan navegación/vistas, eliminación, Pool, enlaces ni reglas de visita; Selenium queda PENDING_RUNTIME porque Python no está disponible."
+      "notes": "La búsqueda y selección de pacientes existentes filtran calendario y tabla sin crear ni modificar turnos. ADMIN y DOCTOR son cubiertos de forma directa; INVENTORY recibe denegación directa. Selenium fuente es específico y PENDING_RUNTIME por falta de Python. Navegación/vistas y acciones observadas no se atribuyen a F01."
     },
     {
       "requirement_id": "CH11-F02",
@@ -5145,7 +5149,7 @@
       ],
       "blocker_reason": "Eliminar visitas y cualquier mutación de visita, recurso o liquidación permanecen deshabilitados hasta contar con definiciones y autorizaciones aprobadas.",
       "last_verified_sha": "772286245bc8290fbe553b592101d3829c66337b",
-      "notes": "CH11-E0010 se cubre con anterior/hoy/siguiente y Mes, Semana, Lista por semana y Lista por día como proyecciones de turnos sintéticos existentes. Playwright verifica los cambios de periodo/vista y que Eliminar visitas permanece deshabilitado sin mutar turnos ni auditoría. Selenium fuente es específico y PENDING_RUNTIME por falta de Python; no se implementan eliminación, disponibilidad, clasificación, liquidación ni Puntual."
+      "notes": "Anterior/hoy/siguiente y Mes, Semana, Lista por semana y Lista por día son proyecciones read-only de turnos sintéticos existentes. Playwright comprueba cada cambio de periodo/vista y la ausencia de mutación tras recargar; Eliminar visitas permanece deshabilitado con explicación accesible. Selenium fuente es específico y PENDING_RUNTIME por falta de Python. No se implementan eliminación, clasificación, disponibilidad, liquidación ni Puntual."
     },
     {
       "requirement_id": "CH11-F03",
@@ -5205,7 +5209,7 @@
       ],
       "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH11-E0022 muestra Crear turno a paciente, Cerrar y Guardar. El diálogo React autorizado conserva la selección factual de paciente y muestra documento y empresa en solo lectura; Playwright comprueba que Cerrar no muta turnos ni auditoría y que Guardar persiste/recarga sólo el turno sintético B3 con su vínculo de paciente. No certifica una visita clínica. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "notes": "El diálogo autorizado Crear turno a paciente muestra únicamente el paciente seleccionado y sus datos factuales de documento y empresa como lectura sola. Cerrar no crea turnos, visitas ni auditoría; Guardar persiste y recarga sólo el turno sintético B3 con su vínculo factual de paciente. Frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad y toda semántica de visita quedan bloqueados."
     },
     {
       "requirement_id": "CH11-F04",
@@ -5226,22 +5230,36 @@
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "AGENDA-SHIFT-OBSERVED-LABELS"
+      ],
+      "action_ids": [
+        "AGENDA-SHIFT-CLASSIFICATION-OBSERVED"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-observed-classification-type-labels"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-OBSERVED-CLASSIFICATION-TYPE-LABELS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "CH11-E0026/E0027 muestran Puntual y Turno, pero la superficie React sólo conserva Puntual como acción bloqueada por CR-010; no se certifica una clasificación de visita ni persistencia clínica."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CR-010",
+        "CH11-Q001",
+        "CH11-Q003",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
+      "blocker_reason": "CH11-E0026/E0027 sólo muestran las etiquetas Puntual y Turno; no definen entidad, duración, frecuencia, autorización, transición, descuento, disponibilidad, tarifa ni persistencia de una visita.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica."
     },
     {
       "requirement_id": "CH11-F05",
@@ -5260,22 +5278,35 @@
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "AGENDA-SHIFT-OBSERVED-LABELS"
+      ],
+      "action_ids": [
+        "AGENDA-SHIFT-TYPE-OBSERVED-CATALOG"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-observed-classification-type-labels"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-OBSERVED-CLASSIFICATION-TYPE-LABELS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "El catálogo amplio de tipos de visita de CH11-E0040 no está expuesto ni probado en la React actual; no se infieren servicios, reglas clínicas ni tarifas."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH11-Q001",
+        "CH11-Q003",
+        "CH11-Q006",
+        "CH11-Q008"
+      ],
+      "blocker_reason": "CH11-E0040 sólo permite certificar seis etiquetas visibles como catálogo factual; no define el catálogo completo, selección autorizada, servicio, atención, disponibilidad, tarifas, descuentos ni persistencia.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Espiritual, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría."
     },
     {
       "requirement_id": "CH11-F06",
@@ -5298,22 +5329,38 @@
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "AGENDA-SHIFT-DETAIL-DIALOG"
+      ],
+      "action_ids": [
+        "AGENDA-SHIFT-DETAIL-OPEN",
+        "AGENDA-SHIFT-DETAIL-UPDATES",
+        "AGENDA-SHIFT-DETAIL-CLOSE"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-synthetic-shift-detail"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-SYNTHETIC-SHIFT-DETAIL"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH11-Q002",
+        "CH11-Q004",
+        "CH11-Q006",
+        "CH11-Q008",
+        "CR-010"
+      ],
+      "blocker_reason": "La evidencia no define estados/transiciones de visita finalizada, actualizaciones, eliminación, roles del detalle, disponibilidad o liquidación. Se conserva sólo una vista de agenda factual y de lectura sola para turnos sintéticos existentes.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH11-E0050 respalda una vista factual Agenda de inicio/fin, paciente y recurso para un turno sintético ya persistido. Playwright verifica apertura/cierre por DOCTOR sin mutar turnos ni auditoría, e INVENTORY no recibe acceso de ruta. Actualizaciones permanece visible y deshabilitada por CH11-Q002/Q006. No se certifican estado finalizado, observaciones clínicas, eliminación, pagos, disponibilidad ni otra semántica de visita."
     },
     {
       "requirement_id": "CH11-F07",

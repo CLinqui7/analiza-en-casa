@@ -59,7 +59,7 @@ const requirements = canonical.requirements.map((requirement) => {
   const route = routes.routes.find((candidate) => candidate.route_id === chapterRoute[requirement.chapter_id]);
   const certification = certifications[requirement.requirement_id];
   const parityStatus = certification?.parity_status ?? status(requirement.platform_assessment);
-  const actionIds = ch01Actions[requirement.requirement_id] ?? [];
+  const actionIds = certification?.action_ids ?? ch01Actions[requirement.requirement_id] ?? [];
   const tests = actionTests(actionIds);
   const blocker = parityStatus.startsWith('BLOCKED') || parityStatus === 'NOT_TESTABLE';
   const generated = {
@@ -67,11 +67,11 @@ const requirements = canonical.requirements.map((requirement) => {
     detailed_behavior: requirement.detailed_behavior, classification: requirement.classification,
     priority: requirement.platform_assessment.priority, evidence_paths: requirement.evidence.flatMap((item) => [item.path, item.detail_path].filter(Boolean)),
     open_question_ids: requirement.open_question_ids, route_id: route?.route_id ?? null, react_route: route?.react_route ?? null,
-    react_files: filesFor(route), component_ids: [], action_ids: actionIds, parity_status: parityStatus,
+    react_files: filesFor(route), component_ids: certification?.component_ids ?? [], action_ids: actionIds, parity_status: parityStatus,
     functional_status: certification?.functional_status ?? (parityStatus === 'EXACT' ? 'VERIFIED' : 'UNVERIFIED'), persistence_status: certification?.persistence_status ?? 'UNVERIFIED', permissions_status: certification?.permissions_status ?? 'UNVERIFIED', performance_status: certification?.performance_status ?? 'UNVERIFIED',
     unit_test_ids: certification ? (certification.unit_test_ids ?? []) : tests.unit, playwright_test_ids: certification ? (certification.playwright_test_ids ?? []) : tests.playwright, selenium_test_ids: certification ? (certification.selenium_test_ids ?? []) : tests.selenium, visual_test_ids: certification ? (certification.visual_test_ids ?? []) : [],
-    blocker_type: blocker ? parityStatus : null, blocker_ids: blocker ? requirement.open_question_ids : [],
-    blocker_reason: blocker ? requirement.platform_assessment.notes : null, last_verified_sha: certification?.implementation_sha ?? certificationDocument.implementation_sha ?? null,
+    blocker_type: certification?.blocker_type ?? (blocker ? parityStatus : null), blocker_ids: certification?.blocker_ids ?? (blocker ? requirement.open_question_ids : []),
+    blocker_reason: certification?.blocker_reason ?? (blocker ? requirement.platform_assessment.notes : null), last_verified_sha: certification?.last_verified_sha ?? certification?.implementation_sha ?? certificationDocument.implementation_sha ?? null,
     notes: certification?.notes ?? `Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.`,
   };
   const reviewed = reviewedRequirements.get(requirement.requirement_id);
@@ -79,7 +79,10 @@ const requirements = canonical.requirements.map((requirement) => {
   const preserved = Object.fromEntries(reviewedMetadataFields
     .filter((field) => Object.hasOwn(reviewed, field))
     .map((field) => [field, reviewed[field]]));
-  return { ...generated, ...preserved };
+  const certified = Object.fromEntries(reviewedMetadataFields
+    .filter((field) => certification && Object.hasOwn(certification, field))
+    .map((field) => [field, certification[field]]));
+  return { ...generated, ...preserved, ...certified };
 });
 
 const output = { schema_version: 2, generated_at: generatedAt, metadata_generated_from_commit: sha, source_sha256: createHash('sha256').update(JSON.stringify(canonical.requirements)).digest('hex'), implementation_sha: certificationDocument.implementation_sha ?? null, functional_fingerprint: functionalFingerprint, requirements };

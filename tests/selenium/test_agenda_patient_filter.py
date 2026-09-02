@@ -4,6 +4,7 @@
 # test-id: SEL-CH11-AGENDA-PATIENT-CONTEXT
 # test-id: SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE
 # test-id: SEL-CH11-SYNTHETIC-SHIFT-DETAIL
+# test-id: SEL-CH11-OBSERVED-CLASSIFICATION-TYPE-LABELS
 from __future__ import annotations
 
 import os
@@ -150,6 +151,33 @@ class AgendaPatientFilter(unittest.TestCase):
         self.assertIsNotNone(persisted)
         self.assertEqual(persisted['patientId'], 'patient-demo-001')
         record_pass('AGENDA-SHIFT-SAVE', 'SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE', started, self.driver.current_url)
+
+    def test_admin_reads_observed_classification_and_type_labels_without_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]').click()
+        dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        classification = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CLASSIFICATION-OBSERVED"]')
+        self.assertIn('Puntual', classification.text)
+        self.assertIn('Turno', classification.text)
+        self.assertIn('No son seleccionables, no se guardan', classification.text)
+        record_pass('AGENDA-SHIFT-CLASSIFICATION-OBSERVED', 'SEL-CH11-OBSERVED-CLASSIFICATION-TYPE-LABELS', started, self.driver.current_url)
+        catalog = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-TYPE-OBSERVED-CATALOG"]')
+        self.assertIsNone(catalog.get_attribute('open'))
+        catalog.find_element(By.TAG_NAME, 'summary').click()
+        self.assertEqual(catalog.get_attribute('open'), 'true')
+        self.assertIn('Cuidado de enfermería', catalog.text)
+        self.assertIn('Visita Espiritual', catalog.text)
+        self.assertIn('Cuidados Técnicos de Enfermería', catalog.text)
+        self.assertIn('Laboratorio Especial', catalog.text)
+        self.assertIn('Visita de Geriatría', catalog.text)
+        self.assertIn('Laboratorio Tercerizado', catalog.text)
+        record_pass('AGENDA-SHIFT-TYPE-OBSERVED-CATALOG', 'SEL-CH11-OBSERVED-CLASSIFICATION-TYPE-LABELS', started, self.driver.current_url)
+        dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CLOSE"]').click()
+        self.wait.until(conditions.invisibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))"))
 
     def test_admin_navigates_existing_calendar_views_without_mutation(self) -> None:
         started = time.time()

@@ -124,6 +124,22 @@ export default function AgendaPage() {
       <div className="full"><div className="table-heading"><div><h3>Fechas para agendar</h3><p className="field-help">Cada fecha crea un turno independiente con el mismo intervalo.</p></div><Button className="button-secondary" data-action-id="AGENDA-SHIFT-DATE-ADD" onClick={() => setDates((current) => [...current, ''])} type="button">Agregar fecha</Button></div>{dates.map((date, index) => <div className="action-row" key={`${index}-${date}`}><label>Fecha {index + 1}<input data-action-id="AGENDA-SHIFT-DATE" onChange={(event) => setDates((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} type="date" value={date} /></label>{dates.length > 1 ? <Button aria-label={`Quitar fecha ${index + 1}`} className="button-secondary" data-action-id="AGENDA-SHIFT-DATE-REMOVE" onClick={() => setDates((current) => current.filter((_, itemIndex) => itemIndex !== index))} type="button">Quitar fecha</Button> : null}</div>)}</div>
       <label>Inicio<input {...form.register('startTime', { onChange: () => setEndDayOffset(0) })} type="time" />{form.formState.errors.startTime ? <span className="field-error" role="alert">{form.formState.errors.startTime.message}</span> : null}</label><label>Fin<input {...form.register('endTime', { onChange: () => setEndDayOffset(0) })} type="time" />{endDayOffset ? <span className="field-help">Finaliza el día siguiente.</span> : null}</label>
       <div className="full action-row"><Button className="button-secondary" data-action-id="AGENDA-SHIFT-PRESET-6H" onClick={() => choosePreset('SIX_HOURS')} type="button">Turno 6 horas</Button><Button className="button-secondary" data-action-id="AGENDA-SHIFT-PRESET-8H" onClick={() => choosePreset('EIGHT_HOURS')} type="button">Turno 8 horas</Button><Button data-action-id="AGENDA-SHIFT-PRESET-PUNTUAL" disabled title="Requiere definición del cliente" type="button">Puntual (pendiente de definición)</Button></div>
+      <section aria-labelledby="agenda-observed-classification-title" className="full" data-action-id="AGENDA-SHIFT-CLASSIFICATION-OBSERVED">
+        <h3 id="agenda-observed-classification-title">Clasificación observada</h3>
+        <p><strong>Puntual</strong> · <strong>Turno</strong></p>
+        <p className="field-help" id="agenda-observed-classification-help">Etiquetas visibles de CH11-E0026/E0027. No son seleccionables, no se guardan y no definen una visita, frecuencia, disponibilidad, descuento ni estado (CR-010; CH11-Q001/Q003/Q006/Q008).</p>
+        <details data-action-id="AGENDA-SHIFT-TYPE-OBSERVED-CATALOG">
+          <summary>Tipos observados (sin selección)</summary>
+          <ul aria-describedby="agenda-observed-classification-help" aria-label="Tipos de visita observados">
+            <li>Cuidado de enfermería</li>
+            <li>Visita Espiritual</li>
+            <li>Cuidados Técnicos de Enfermería</li>
+            <li>Laboratorio Especial</li>
+            <li>Visita de Geriatría</li>
+            <li>Laboratorio Tercerizado</li>
+          </ul>
+        </details>
+      </section>
       <label>Estado<select {...form.register('status')}><option value="SCHEDULED">Programado</option><option value="CANCELLED">Cancelado</option><option value="COMPLETED">Completado</option></select></label><label>Notas<input {...form.register('note')} /></label>
     </form></Dialog>
   </div>;
