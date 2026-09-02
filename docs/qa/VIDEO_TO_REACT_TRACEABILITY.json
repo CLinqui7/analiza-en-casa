@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T10:43:53-06:00",
-  "metadata_generated_from_commit": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "generated_at": "2026-09-02T10:46:28-06:00",
+  "metadata_generated_from_commit": "a61bc0a85cb4fc92944963687647dabf29a8090d",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
   "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
   "requirements": [
     {
@@ -5258,7 +5258,7 @@
         "CH11-Q008"
       ],
       "blocker_reason": "CH11-E0026/E0027 sólo muestran las etiquetas Puntual y Turno; no definen entidad, duración, frecuencia, autorización, transición, descuento, disponibilidad, tarifa ni persistencia de una visita.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica."
     },
     {
@@ -5305,7 +5305,7 @@
         "CH11-Q008"
       ],
       "blocker_reason": "CH11-E0040 sólo permite certificar seis etiquetas visibles como catálogo factual; no define el catálogo completo, selección autorizada, servicio, atención, disponibilidad, tarifas, descuentos ni persistencia.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría."
     },
     {
@@ -5359,7 +5359,7 @@
         "CR-010"
       ],
       "blocker_reason": "La evidencia no define estados/transiciones de visita finalizada, actualizaciones, eliminación, roles del detalle, disponibilidad o liquidación. Se conserva sólo una vista de agenda factual y de lectura sola para turnos sintéticos existentes.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "CH11-E0050 respalda una vista factual Agenda de inicio/fin, paciente y recurso para un turno sintético ya persistido. Playwright verifica apertura/cierre por DOCTOR sin mutar turnos ni auditoría, e INVENTORY no recibe acceso de ruta. Actualizaciones permanece visible y deshabilitada por CH11-Q002/Q006. No se certifican estado finalizado, observaciones clínicas, eliminación, pagos, disponibilidad ni otra semántica de visita."
     },
     {
@@ -5571,7 +5571,7 @@
         "CH12-Q003"
       ],
       "blocker_reason": "La evidencia no define el origen autorizado de visitas, recursos, estados ni montos de los pagos de servicio; el listado no se inventa a partir de datos clínicos o financieros sintéticos.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "La pestaña observada permanece visible y deshabilitada en CH12-F01. No se certifica listado, búsqueda, selección, paginación, estado ni correlación financiera."
     },
     {
@@ -5651,7 +5651,7 @@
         "CH12-Q003"
       ],
       "blocker_reason": "No existe un listado de pagos autorizado sobre el que aplicar rango, recurso o estado; habilitar filtros aparentes derivaría estados y criterios financieros no aprobados.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "No se implementan filtros financieros sin fuente de pagos, semántica de estado, roles y alcance aprobados."
     },
     {
@@ -5771,7 +5771,7 @@
         "CH12-Q007"
       ],
       "blocker_reason": "Los rótulos de adición o descuento no autorizan un catálogo operativo ni definen efecto monetario, auditoría, aprobación o reversión.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
       "notes": "No se reproduce un catálogo de motivos ni se atribuye una regla financiera hasta contar con definición cliente aprobada."
     },
     {

@@ -1,11 +1,12 @@
 {
-  "lot": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
-  "source_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
-  "base_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
-  "verification_status": "PENDING_REMOTE_VERIFICATION",
-  "final_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
-  "remote_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
-  "commits": ["c371d47f43096b76b26d2eadc5dbfa48924322a6"],
+  "lot": "CH12_SELENIUM_SOURCE_REPAIR",
+  "source_sha": "a61bc0a85cb4fc92944963687647dabf29a8090d",
+  "base_sha": "a61bc0a85cb4fc92944963687647dabf29a8090d",
+  "implementation_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": ["c371d47f43096b76b26d2eadc5dbfa48924322a6", "a61bc0a85cb4fc92944963687647dabf29a8090d"],
   "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
   "changed_files": [
     "apps/web/src/app/(workspace)/payables/page.tsx",
@@ -27,7 +28,8 @@
   },
   "evidence": {
     "ch12_f01": "CH12-E0004 and its detail crop were opened. They support the Cuentas por pagar heading, Resumen/Pagos de Servicio tabs, Facturas/Reclamos, search and four visible controls. React provides an authorized, factual empty summary only; it generates no financial data, planilla, restriction, download, deletion, claim, payment or audit entry.",
-    "permissions": "payments:read permits ADMIN, FINANCE and AUDITOR. Focused Playwright proves ADMIN and FINANCE can read the surface and INVENTORY receives direct-route denial."
+    "permissions": "payments:read permits ADMIN, FINANCE and AUDITOR. Focused Playwright proves ADMIN and FINANCE can read the surface and INVENTORY receives direct-route denial.",
+    "selenium_source_repair": "SEL-CH12-PAYABLES-SUMMARY now locates tbody .empty-state and asserts the rendered title Sin facturas documentadas plus the actual query-specific no-record message before recording PAYABLES-INVOICE-SEARCH."
   },
   "gates": {
     "typecheck": "PASS",
@@ -47,5 +49,5 @@
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
     "The implementation checkpoint is c371d47f43096b76b26d2eadc5dbfa48924322a6. Its local tracking ref matches, but fresh remote fetch verification is blocked by unavailable Windows Schannel credentials."
   ],
-  "next_batch": "CH12_REVIEW"
+  "next_batch": "CH13_PRECHECK"
 }

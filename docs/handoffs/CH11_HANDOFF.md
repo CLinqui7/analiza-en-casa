@@ -15,6 +15,6 @@ CH11-F01–F06 are verified only as safe, factual partials at functional fingerp
 - CR-018 is restored as `PARTIAL_CLIENT_DEFINITION`: only the 6h/8h presets, including overnight duration, are certified. Its tested disabled `AGENDA-SHIFT-PRESET-PUNTUAL` action is explicitly registered; Puntual remains blocked by CR-010.
 - CR-010, CR-017, and CR-018 have no CH11-F01 mapping: they are client-originated agenda behavior, not evidence of the CH11 patient-filter calendar.
 
-The prior implementation checkpoint `772286245bc8290fbe553b592101d3829c66337b` remains verified; this CH11-F03 review checkpoint is awaiting its own commit and remote verification.
+The F05 evidence-label repair is included in implementation checkpoint `c371d47f43096b76b26d2eadc5dbfa48924322a6`; its local tracking ref matches. A fresh remote fetch remains pending because Windows Schannel credentials are unavailable.
 
 CR-010 and CH11-Q001–Q008 remain explicit. No Puntual entity, clinical visit transition, tariff, payment adjustment, deletion, Pool/link behavior, or availability rule was inferred. Selenium remains `PENDING_RUNTIME` because Python is unavailable.
