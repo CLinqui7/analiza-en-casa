@@ -1,5 +1,5 @@
 {
-  "lot": "CH10_REVIEW_AND_FIRST_SAFE_REQUIREMENT",
+  "lot": "CH10_CR019_TRACEABILITY_BLOCKER_REPAIR",
   "source_sha": "dede609449bcb467bdf8e14abc3b46de1439abc3",
   "base_sha": "dede609449bcb467bdf8e14abc3b46de1439abc3",
   "verification_status": "PENDING_GIT_WRITE",
@@ -16,6 +16,12 @@
     "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
     "apps/web/src/lib/video-parity-summary.ts",
     "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.json",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.csv",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.md",
+    "docs/qa/CLIENT_CHANGE_CERTIFICATIONS.json",
+    "docs/OPEN_QUESTIONS.md",
+    "scripts/generate-client-change-registry.mjs",
     "docs/handoffs/CH10_HANDOFF.json",
     "docs/handoffs/CH10_HANDOFF.md",
     "docs/handoffs/LATEST.json"
@@ -24,11 +30,13 @@
     "verified_partial": ["CH10-F01", "CH10-F02"],
     "corrected_to_partial": ["CH10-F03"],
     "not_testable": ["CH10-F05", "CH10-F06", "CH10-F09", "CH10-F10"],
-    "remaining_partial": ["CH10-F04", "CH10-F07", "CH10-F08"]
+    "remaining_partial": ["CH10-F04", "CH10-F07", "CH10-F08"],
+    "client_blocked": ["CR-019"]
   },
   "tests": [
     "PLAYWRIGHT_PORT=4321 npx playwright test -c apps/web/playwright.config.ts e2e/ch10.spec.ts",
     "npm --workspace @analiza/web run typecheck",
+    "npm run qa:client-changes:batch -- B5",
     "npm run qa:video-parity:generate",
     "node scripts/verify-video-react-parity.mjs --chapter CH10 --self-test",
     "npm run qa:traceability-mirror -- --self-test",
@@ -44,6 +52,7 @@
     "playwright_ch10": "PASS: 7/7; factual behavior plus ADMIN, DOCTOR, NURSE, AUDITOR, INVENTORY and FINANCE roles",
     "typecheck": "PASS",
     "ch10_parity_self_test": "PASS: 10/10",
+    "client_changes_b5": "PASS: 2/32 for B5; CR-019 is NOT_CERTIFIED/BLOCKED_CLIENT/CLINICAL_APPROVAL/NEEDS_CLIENT_DEFINITION",
     "traceability_mirror": "PASS",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13; CH04 11/11",
     "light_mode": "PASS: 78 product source files",
@@ -52,11 +61,13 @@
   },
   "evidence": {
     "ch10_f01": "CH10-E0008/E0009 show the factual list and row menu. The React list uses only existing synthetic patient/hospitalization values; it does not derive triage, order state, treatment, or workflow. Search, Active/Inactive tabs, pagination, menu, direct-route role guards, and disabled controls are browser-tested.",
-    "ch10_f02_f03": "CH10-E0011 confirms the visible two-type choice, but both choices are deliberately disabled. CH10-E0013 confirms a medication-card form in the video; the React application has no such form, so F03 is PARTIAL rather than falsely EXACT."
+    "ch10_f02_f03": "CH10-E0011 confirms the visible two-type choice, but both choices are deliberately disabled. CH10-E0013 confirms a medication-card form in the video; the React application has no such form, so F03 is PARTIAL rather than falsely EXACT.",
+    "cr019": "CR-019 retains its source request and now maps to CH10-F04 / CH10-E0050 (Indicaciones and Mostrar diluciones), not CH10-F01. It is BLOCKED_CLIENT/CLINICAL_APPROVAL with no editable clinical field or inferred dilution/dosing rule."
   },
   "blockers": [
     "CH10-Q001: clinical document authorization, data, signature and audit rules are undefined; the type selector does not create a record.",
     "CH10-Q003/Q005/Q006: medication catalogs, relationships and treatment-editor rules remain unimplemented and clinically blocked.",
+    "CR-019-Q001: medication-card form versioning, item-versus-general observation scope, authorized roles, audit/version/correction/signing policy, and safe handling of dilution/special-care text require client clinical approval.",
     "CH10-Q011/Q012: version/history and Registro XPO semantics remain visible but disabled and non-mutating.",
     "CH10-Q002/Q004/Q007/Q008/Q009/Q010/Q013 preserve their existing PMC, date, composition, print and administration blockers.",
     "Python is unavailable, so assertion-specific Selenium source remains PENDING_RUNTIME.",

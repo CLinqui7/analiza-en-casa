@@ -127,6 +127,7 @@
 - `CH10-Q004`: confirmar aritmética inclusiva/exclusiva inicio–duración–fin, zona horaria y comportamiento crónico. La UI ofrece una sugerencia editable que reproduce el único ejemplo, sin imponerla como regla clínica. Evidencia: CH10-E0035 y CH10-E0038.
 - `CH10-Q005`: definir fuente maestra, deduplicación y permisos de alta inline para medicamentos y prescriptores. Evidencia: CH10-E0021–CH10-E0026.
 - `CH10-Q006`: definir el efecto de Crónico y si Mostrar diluciones sólo captura texto o ejecuta una regla. No se calcula ninguna dilución. Evidencia: CH10-E0039 y CH10-E0050.
+- `CR-019-Q001`: aprobar el formulario versionado de tarjeta de medicamentos para observaciones de diluciones o cuidados especiales; confirmar si la observación pertenece a cada ítem o a la tarjeta general, los roles autorizados, y la política de auditoría, versionado, corrección y firma. Definir el manejo seguro de ese texto clínico antes de capturarlo. Evidencia: CH10-E0050.
 - `CH10-Q007`: entregar catálogo oficial de etiquetas y permisos para crear, quitar y reordenar. La implementación conserva secciones observadas configurables. Evidencia: CH10-E0075–CH10-E0086.
 - `CH10-Q008`: definir sanitización, obligatoriedad, firma y política de secciones clínicas vacías. Evidencia: CH10-E0088–CH10-E0093.
 - `CH10-Q009`: aprobar contenido, encabezados, firmas, papel y validez de tarjeta completa, simple y conteo presencial. Conteo se marca expresamente provisional. Evidencia: CH10-E0109.

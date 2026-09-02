@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T08:13:36-06:00",
-  "metadata_generated_from_commit": "dede609449bcb467bdf8e14abc3b46de1439abc3",
+  "generated_at": "2026-09-02T08:29:57-06:00",
+  "metadata_generated_from_commit": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": null,
   "functional_fingerprint": "232ba542e48e2f2bd9c8989f20ec480d236e9334fb5445dc2a982ec5f704b010",
@@ -4758,7 +4758,8 @@
         "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0050_00h29m08s800ms_DETAIL.jpg"
       ],
       "open_question_ids": [
-        "CH10-Q006"
+        "CH10-Q006",
+        "CR-019-Q001"
       ],
       "route_id": "ROUTE-MEDICAL-ORDERS",
       "react_route": "/clinical/orders",
@@ -4776,11 +4777,16 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_ids": [
+        "CH10-Q003",
+        "CH10-Q005",
+        "CH10-Q006",
+        "CR-019-Q001"
+      ],
+      "blocker_reason": "CR-019 requiere un formulario versionado de tarjeta de medicamentos, alcance por ítem/general, roles autorizados y política de auditoría, versionado, corrección y firma antes de capturar texto clínico de diluciones o cuidados especiales.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH10-E0050 muestra Indicaciones y Mostrar diluciones. CR-019 se asocia a este editor, no a la lista factual CH10-F01; permanece BLOCKED_CLIENT/CLINICAL_APPROVAL sin capturar ni interpretar texto de diluciones o cuidados especiales."
     },
     {
       "requirement_id": "CH10-F05",

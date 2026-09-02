@@ -22,7 +22,7 @@ Fuente inmutable: `docs/client-change-requests/source/cambiosparte1analizacasa_A
 | CR-016 | 17 | Dashboard | MISSING | Métrica/gráfica con datos de seguro y permisos |
 | CR-017 | 18 | Agenda y turnos | MISSING | Crear serie definida de turnos sin duplicados o colisiones |
 | CR-018 | 19 | Agenda y turnos | MISSING | Presets 6h/8h y Puntual sujeto a regla aprobada |
-| CR-019 | 20 | Tarjeta de medicamentos | MISSING | Observaciones por ítem/general en tarjeta clínica autorizada |
+| CR-019 | 20 | Tarjeta de medicamentos | BLOCKED_CLIENT | Observaciones por ítem/general en tarjeta clínica autorizada |
 | CR-020 | 21 | Clínica | MISSING | Entradas append-only por turno, totales 24h y cierre auditado |
 | CR-021 | 22 | Clínica · Escalas | MISSING | Escala EVA con versión institucional aprobada y selección única |
 | CR-022 | 23 | Clínica · Escalas | MISSING | Escala de Glasgow confirmada, versionada y con suma configurada |
