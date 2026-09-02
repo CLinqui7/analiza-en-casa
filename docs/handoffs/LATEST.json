@@ -1,5 +1,5 @@
 {
-  "lot": "CH11_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
+  "lot": "CH11_CLIENT_REGISTRY_RESTORE_CR017_CR018",
   "handoff": "docs/handoffs/CH11_HANDOFF.json",
   "final_sha": null,
   "next_batch": "CH11_REVIEW"

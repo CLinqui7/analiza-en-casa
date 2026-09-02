@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "implementation_sha": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
+  "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
+      "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
       "functional_fingerprint": "8c10993c4c6728fe3fb527d52ec1b6ae24db55eceded9411b82c2993f30c06a5",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -87,7 +87,7 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
+      "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
       "functional_fingerprint": "df0362d9138b356a67fdbbaf7f617835486ad7007495c16922bc574ad3afa141",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -96,7 +96,7 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "33eba19ed7c4a8af9b02fb0c829da26711bbdd59",
+      "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
       "functional_fingerprint": "780ed1a406a48bda9c7ab65d259aedd6aacdbdb7df896781b6de82632af0c260",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -133,18 +133,30 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Agenda sólo crea un intervalo."
+      "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
+      "functional_fingerprint": "53e6f5a9d24f543b491d193d8de93de5479757ccb6f5c01b5037c6d818bc7d14",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "vitest:cr017-multi-day-shifts",
+        "playwright:cr017-multi-day-shifts",
+        "SEL-B3-AGENDA-SERIES"
+      ],
+      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
     },
     "CR-018": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existen visitType ni presets; Puntual depende de CR-010."
+      "implementation_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
+      "functional_fingerprint": "53e6f5a9d24f543b491d193d8de93de5479757ccb6f5c01b5037c6d818bc7d14",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
+      "production_status": "PARTIAL",
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "test_ids": [
+        "vitest:cr018-shift-presets",
+        "playwright:cr018-shift-presets",
+        "SEL-B3-AGENDA-SERIES"
+      ],
+      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010."
     },
     "CR-019": {
       "implementation_sha": null,

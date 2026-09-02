@@ -1,7 +1,7 @@
 {
-  "lot": "CH11_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
-  "source_sha": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
-  "base_sha": "f42d1d90f5c0d0bb3f3c300d4dbb9fd50e9e83ef",
+  "lot": "CH11_CLIENT_REGISTRY_RESTORE_CR017_CR018",
+  "source_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
+  "base_sha": "60db001bc7a3f5c7267b254c3205964a17073900",
   "verification_status": "PENDING_GIT_WRITE",
   "final_sha": null,
   "remote_sha": null,
@@ -24,6 +24,12 @@
     "docs/handoffs/CH11_HANDOFF.md",
     "docs/handoffs/LATEST.json"
   ],
+  "client_changes": {
+    "implemented_demo_only": ["CR-017"],
+    "partial": ["CR-018"],
+    "blocked": ["CR-010 Puntual client definition"],
+    "video_mapping": "CR-017 and CR-018 have no CH11-F01 mapping; their client-originated series/preset behavior is not evidenced by the patient-filter calendar."
+  },
   "requirements": {
     "verified_partial": ["CH11-F01"],
     "corrected_to_partial": ["CH11-F04", "CH11-F05"],
@@ -33,6 +39,9 @@
   "tests": [
     "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/ch11.spec.ts",
     "npm --workspace @analiza/web run typecheck",
+    "npm run qa:client-changes:batch -- B3",
+    "npm --workspace @analiza/web exec vitest run src/lib/agenda-series.test.ts",
+    "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/b3.spec.ts",
     "npm run qa:video-parity:generate",
     "node scripts/verify-video-react-parity.mjs --chapter CH11 --self-test",
     "npm run qa:traceability-mirror -- --self-test",
@@ -47,6 +56,9 @@
     "playwright_ch11": "PASS: 3/3; ADMIN factual filter, DOCTOR read access, INVENTORY direct-route denial",
     "typecheck": "PASS",
     "ch11_parity_self_test": "PASS: 9/9",
+    "client_changes_b3": "PASS: 5/32; CR-017 DEMO_CERTIFIED and CR-018 PARTIAL_CLIENT_DEFINITION",
+    "agenda_series_unit": "PASS: 3/3",
+    "playwright_b3": "PASS: 7/7; series persistence, overnight presets and discrete write-denial roles",
     "traceability_mirror": "PASS",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
     "light_mode": "PASS: 79 product source files",
@@ -55,7 +67,8 @@
   },
   "evidence": {
     "ch11_f01": "CH11-E0010/E0015 show the patient criterion, selected patient and colored calendar events. React now searches/selects existing synthetic patients and filters only existing shifts in a calendar/table; no visit data is mutated.",
-    "ch11_precheck": "F04/F05 were downgraded from stale EXACT claims because the current React surface does not certify visit classification or the observed visit-type catalog. F07-F09 keep explicit CH11-Q002/Q003/Q006/Q008 blockers."
+    "ch11_precheck": "F04/F05 were downgraded from stale EXACT claims because the current React surface does not certify visit classification or the observed visit-type catalog. F07-F09 keep explicit CH11-Q002/Q003/Q006/Q008 blockers.",
+    "cr017_cr018": "CR-017 restores multi-date add/remove, duplicate/collision protection and demo-local reload evidence. CR-018 restores only 6h/8h preset evidence, including overnight duration; Puntual remains blocked by CR-010."
   },
   "blockers": [
     "CR-010 / CH11-Q001-Q003/Q006: Puntual, series semantics, statuses, permissions and financial rules are undefined; no clinical or financial behavior was invented.",
