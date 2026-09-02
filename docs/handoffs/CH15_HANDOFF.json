@@ -2,10 +2,10 @@
   "lot": "CH15_PRECHECK",
   "source_sha": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
   "base_sha": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "remote_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
   "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
   "requirements": {
     "verified_partial": ["CH15-F06"],
@@ -21,14 +21,16 @@
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_medications.py is executable, action-specific source coverage",
     "ch15_parity_self_test": "PASS: 16/16 at fingerprint 725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
     "traceability_mirror": "PASS with negative self-tests",
-    "light_mode": "PASS: 85 product source files"
+    "light_mode": "PASS: 85 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "git_sync": "CACHED tracking ref equals e89a734; fresh push/fetch could not run because HTTPS credentials are unavailable and .git/FETCH_HEAD is write-protected"
   },
   "blockers": [
     "CH15-Q001/Q002/Q003 block patient-scoped acuse, shortage, warehouse, template and quote-origin behavior.",
     "CH15-Q004 blocks medication source data, identity, attributes, write roles, validation, audit and clinical semantics. Excel and Nuevo remain disabled.",
     "CH14-Q006 remains unresolved; this batch does not implement closure warning acceptance semantics.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
-    "Git metadata writes remain unavailable until .git/index.lock can be created."
+    "The implementation commit and cached tracking ref are e89a734. Fresh push/fetch remain blocked by unavailable HTTPS credentials and denied .git/FETCH_HEAD writes; the metadata-only follow-up cannot create .git/index.lock."
   ],
   "next_batch": "CH15_REVIEW"
 }

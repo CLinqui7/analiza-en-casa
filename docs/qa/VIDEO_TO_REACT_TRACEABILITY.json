@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T15:01:49-06:00",
-  "metadata_generated_from_commit": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
+  "generated_at": "2026-09-02T15:23:55-06:00",
+  "metadata_generated_from_commit": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
   "source_sha256": "cd3259b371d16797a0e6ad19fd4747e8fcbf2555d7535b7ddf81138cfe056613",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
   "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
   "requirements": [
     {
@@ -7200,8 +7200,8 @@
         "CH15-Q004"
       ],
       "blocker_reason": "CH15-E0046 establece la anatomía del listado y E0047 la del formulario, pero no definen una fuente autorizada, identidad farmacéutica, atributos, roles de escritura, validación, auditoría ni reglas clínicas. React mantiene las filas y las mutaciones ausentes.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "React implementa solamente una lista vacía factual de Medicamentos en /catalogs/medications: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+      "notes": "React implementa solamente una lista vacía factual de Medicamentos en /catalogs/medications: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en e89a734."
     },
     {
       "requirement_id": "CH15-F07",
