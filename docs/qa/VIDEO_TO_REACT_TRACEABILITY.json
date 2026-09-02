@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:47:17-06:00",
-  "metadata_generated_from_commit": "128176be95c4585a28b75761b1fae0dc3cce633c",
-  "source_sha256": "aa5de168b267ffce34ec1645ac7f460c6f73c96016640b34e50d230438446ea2",
+  "generated_at": "2026-09-02T12:55:06-06:00",
+  "metadata_generated_from_commit": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
+  "source_sha256": "95db38233563b079f58a51bf5d370152134e72d48ca62ef41c955785d28eb568",
   "implementation_sha": "PENDING_COMMIT",
   "functional_fingerprint": "3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
   "requirements": [
@@ -6655,8 +6655,8 @@
         "CH14-Q008"
       ],
       "blocker_reason": "La evidencia no define una fuente autorizada, identificación, unicidad, campos obligatorios, estados, creación, edición, desactivación, eliminación ni auditoría de proveedores por organización.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0061 respalda Proveedores, Registros 50, Anterior/Siguiente, búsqueda y las columnas Código/Empresa/Contacto/Teléfono/Correo/Dirección. React implementa sólo una superficie vacía factual: Buscar cambia la explicación del vacío, paginación y Nuevo son visibles/deshabilitados, y abrir/buscar/recargar no muta auditoría. Playwright verifica por separado acceso ADMIN, INVENTORY y AUDITOR, y denegación directa para NURSE, DOCTOR y FINANCE. Selenium declara los mismos flujos y queda PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
+      "notes": "CH14-E0061 respalda Proveedores, Registros 50, Anterior/Siguiente, búsqueda y las columnas Código/Empresa/Contacto/Teléfono/Correo/Dirección. React implementa sólo una superficie vacía factual: Buscar cambia la explicación del vacío, paginación y Nuevo son visibles/deshabilitados, y abrir/buscar/recargar no muta auditoría. Playwright verifica por separado acceso ADMIN, INVENTORY y AUDITOR, y denegación directa para NURSE, DOCTOR y FINANCE. Selenium declara los mismos flujos y queda PENDING_RUNTIME por falta de Python. Verificado en b90334b."
     },
     {
       "requirement_id": "CH14-F10",
@@ -6666,7 +6666,8 @@
       "classification": "VISIBLE",
       "priority": "P0",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0068_00h43m28s600ms_settled.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0071_00h43m33s400ms_DETAIL.jpg"
       ],
       "open_question_ids": [
         "CH14-Q009"
@@ -6687,11 +6688,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q009"
+      ],
+      "blocker_reason": "La evidencia visible no define una fuente autorizada, identidad, permisos, CRUD, concurrencia, bodega origen/destino, recepción, movimientos, lotes, series ni reversión de traslados.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Reconciliación de evidencia: CH14-E0071 muestra Items / Bodegas, Activo, búsqueda, paginación y Nombre/Descripción/Fecha de creación. CH14-E0068 pertenece a Proveedores y no respalda Bodegas. React no implementa catálogo, filas, CRUD ni traslados de bodega."
     },
     {
       "requirement_id": "CH14-F11",

@@ -1,7 +1,7 @@
-# CH14 F09 · Lista segura de Proveedores
+# CH14 F10 · Reconciliación de evidencia de Bodegas
 
-CH14-F04 and CH14-F06 remain the evidence-backed, read-only empty Acuses/Cierres surfaces certified at `3334ca38371009f1fc9ea3322b03eb32073eb0e5`. Neither queries patients/cases or mutates state.
+F09 remains PARTIAL under CH14-Q008 and is verified at `b90334b52751179d3104abe0cbf06bde3fb3fdcf`; it still has no supplier rows, CRUD, lifecycle or audit mutations.
 
-`CH14-E0061` shows `Inventario / Proveedores`: Registros 50, Anterior/Siguiente, search, and Código/Empresa/Contacto/Teléfono/Correo/Dirección. React now implements only this permission-gated factual empty anatomy. Search changes the explicit empty explanation; Nuevo and pagination remain disabled. The route never reads a supplier source or creates, edits, deactivates, or audits a supplier. F09 is PARTIAL under CH14-Q008.
+`CH14-E0068` is `Inventario / Proveedores` with loaded supplier contact data. The actual Bodegas evidence is `CH14-E0071` at `00:43:33.400`, which visibly shows `Items / Bodegas`, Activo, Registros, pagination, search, and Nombre/Descripción/Fecha de creación. Canonical, review-ledger, and traceability mappings now cite E0071.
 
-Typecheck, focused CH14 Playwright (7/7 on isolated port 4175), CH14 and protected parity, traceability generation/mirror, light-only and audit verification pass. F09 awaits a distinct implementation commit before a new SHA is claimed. Selenium remains PENDING_RUNTIME because Python is unavailable.
+No warehouse surface, rows, CRUD, transfer, source, or audit behavior was added. F10 remains PARTIAL/UNVERIFIED under CH14-Q009 pending approved source, roles, identity, origin/destination, movement, concurrency, receipt, lot/series, and reversal rules. Selenium remains PENDING_RUNTIME because Python is unavailable.

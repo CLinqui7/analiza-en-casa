@@ -25,7 +25,7 @@
       "description": "Ver movimientos abre un historial con rango de fechas, lote/serie, origen, destino, cantidad, Entrada/Salida y estado Disponible/Gastado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -186,13 +186,13 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0068",
-          "timestamp": "00:43:28.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0068_00h43m28s600ms_settled.jpg"
+          "chapter_event_id": "CH14-E0071",
+          "timestamp": "00:43:33.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg"
         }
       ],
       "transcript_evidence": "00:43:26.500–00:43:57.500: se describen bodegas y traslados cuando un recurso no está en la ubicación esperada.",
-      "test_path": "Integración: traslado transaccional conserva suma de existencias y genera dos movimientos auditados."
+      "test_path": "Sin prueba de Bodegas o traslado: CH14-E0071 sólo fundamenta la anatomía visible y CH14-Q009 mantiene fuente, permisos y transferencias bloqueados."
     },
     {
       "id": "CH14-F11",
