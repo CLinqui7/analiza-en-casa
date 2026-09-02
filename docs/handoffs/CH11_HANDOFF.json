@@ -1,7 +1,7 @@
 {
   "lot": "CH11_F04_F05_EVIDENCE_REVIEW",
-  "source_sha": "bf814b9f11c4068d22cef49b70abf7fb8d801c73",
-  "base_sha": "bf814b9f11c4068d22cef49b70abf7fb8d801c73",
+  "source_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
+  "base_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
   "verification_status": "PENDING_GIT_WRITE",
   "final_sha": null,
   "remote_sha": null,
@@ -55,7 +55,7 @@
     "npm run audit:verify"
   ],
   "gates": {
-    "functional_fingerprint": "PASS: 6ded7888bb0fcb02d2793027c01e03a50bf0f6ebad826776decc92005226fbf8",
+    "functional_fingerprint": "PASS: a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
     "playwright_ch11": "PASS: 8/8; patient filtering, DOCTOR calendar/detail view, INVENTORY direct-route denial, non-mutating patient context, persisted/reloaded B3 synthetic shift patient linkage, observed labels without mutation, and ADMIN navigation/views",
     "typecheck": "PASS",
     "ch11_parity_self_test": "PASS: 9/9; F04/F05 show only observed non-selectable labels",
@@ -70,8 +70,8 @@
   },
   "evidence": {
     "ch11_f01": "CH11-E0010/E0015 show the patient criterion, selected patient and colored calendar events. React now searches/selects existing synthetic patients and filters only existing shifts in a calendar/table; no visit data is mutated.",
-    "ch11_precheck": "F04/F05 exact frames and detail crops were opened before implementation. F04 shows Puntual/Turno; F05 shows six readable labels: Cuidado de enfermería, Visita Espiritual, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría and Laboratorio Tercerizado.",
-    "ch11_f04_f05": "React exposes only those observed labels in the authorized shift dialog: F04 as non-selectable factual text and F05 as a non-selectable disclosure. Focused Playwright expands the disclosure and verifies reload leaves shifts/audit unchanged. No type/classification is saved or used to create a clinical visit, service, rate, discount, availability or state.",
+    "ch11_precheck": "F04/F05 exact frames and detail crops were opened before implementation. F04 shows Puntual/Turno; F05 shows six readable labels: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría and Laboratorio Tercerizado.",
+    "ch11_f04_f05": "React exposes only frame-cited observed labels in the authorized shift dialog: F04 as non-selectable factual text and F05 as a non-selectable disclosure. F05 is constrained to CH11-E0040, including Visita Respiratoria General rather than the adjacent-frame label Visita Espiritual. Focused Playwright expands the disclosure and verifies reload leaves shifts/audit unchanged. No type/classification is saved or used to create a clinical visit, service, rate, discount, availability or state.",
     "ch11_f03": "CH11-E0022 supports the authorized patient-turn dialog with factual read-only document/company context and Cerrar/Guardar controls. Playwright proves Cerrar leaves shifts and audit entries unchanged, while Guardar persists and reloads only the existing B3 synthetic shift with its selected factual patient linkage; visit semantics remain blocked.",
     "ch11_f06": "CH11-E0050 visibly supports Agenda/Actualizaciones and factual start/end, patient and assigned-resource detail. React exposes only a read-only synthetic-shift detail: DOCTOR opens/closes it without state mutation and INVENTORY is denied the route; Actualizaciones remains visibly disabled under CH11-Q002/Q006. Finalization, observations, availability, deletion, payments and clinical semantics remain blocked.",
     "cr017_cr018": "CR-017 restores multi-date add/remove, duplicate/collision protection and demo-local reload evidence. CR-018 restores only 6h/8h preset evidence, including overnight duration, and records the tested disabled AGENDA-SHIFT-PRESET-PUNTUAL action; Puntual remains blocked by CR-010.",

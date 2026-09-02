@@ -1,6 +1,6 @@
 {
-  "lot": "CH11_F04_F05_EVIDENCE_REVIEW",
-  "handoff": "docs/handoffs/CH11_HANDOFF.json",
+  "lot": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
+  "handoff": "docs/handoffs/CH12_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT"
+  "next_batch": "CH12_REVIEW"
 }

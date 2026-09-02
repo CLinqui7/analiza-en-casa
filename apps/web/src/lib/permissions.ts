@@ -80,6 +80,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/insurance', permission: 'insurance:read' },
   { prefix: '/receivables', permission: 'payments:read' },
   { prefix: '/payments', permission: 'payments:read' },
+  { prefix: '/payables', permission: 'payments:read' },
   { prefix: '/clinical', permission: 'clinical:read' },
   { prefix: '/agenda', permission: 'agenda:read' },
   { prefix: '/inventory', permission: 'inventory:read' },

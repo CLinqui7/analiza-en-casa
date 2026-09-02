@@ -107,7 +107,7 @@ test('CH11 displays observed classification and type labels without allowing vis
   await catalog.locator('summary').click();
   await expect(catalog).toHaveAttribute('open', '');
   await expect(catalog.getByRole('list')).toContainText('Cuidado de enfermería');
-  await expect(catalog.getByRole('list')).toContainText('Visita Espiritual');
+  await expect(catalog.getByRole('list')).toContainText('Visita Respiratoria General');
   await expect(catalog.getByRole('list')).toContainText('Cuidados Técnicos de Enfermería');
   await expect(catalog.getByRole('list')).toContainText('Laboratorio Especial');
   await expect(catalog.getByRole('list')).toContainText('Visita de Geriatría');

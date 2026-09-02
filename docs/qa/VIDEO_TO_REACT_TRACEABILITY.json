@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T09:59:55-06:00",
-  "metadata_generated_from_commit": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
+  "generated_at": "2026-09-02T10:18:01-06:00",
+  "metadata_generated_from_commit": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "6ded7888bb0fcb02d2793027c01e03a50bf0f6ebad826776decc92005226fbf8",
+  "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -5306,7 +5306,7 @@
       ],
       "blocker_reason": "CH11-E0040 sólo permite certificar seis etiquetas visibles como catálogo factual; no define el catálogo completo, selección autorizada, servicio, atención, disponibilidad, tarifas, descuentos ni persistencia.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Espiritual, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría."
+      "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría."
     },
     {
       "requirement_id": "CH11-F06",
@@ -5490,22 +5490,47 @@
       "react_files": [
         "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "PAYABLES-SUMMARY-SURFACE"
+      ],
+      "action_ids": [
+        "PAYABLES-SUMMARY-TAB",
+        "PAYABLES-SERVICE-PAYMENTS-TAB",
+        "PAYABLES-STATEMENT-GENERATE",
+        "PAYABLES-RESTRICTIONS",
+        "PAYABLES-DOWNLOAD",
+        "PAYABLES-CLEAR-TABLE",
+        "PAYABLES-INVOICE-SEARCH"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch12-payables-summary",
+        "playwright:ch12-payables-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH12-PAYABLES-SUMMARY",
+        "SEL-CH12-PAYABLES-PERMISSIONS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH12-Q001",
+        "CH12-Q002",
+        "CH12-Q003",
+        "CH12-Q007",
+        "CH12-Q008",
+        "CH12-Q009",
+        "CH12-Q010",
+        "CH12-Q011"
+      ],
+      "blocker_reason": "CH12-E0004 evidencia la superficie, no el período, estados, montos, reglas de pago, restricciones, exportación, eliminación, reclamos, autorización ni auditoría necesarios para una operación financiera.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH12-E0004 respalda Resumen, Pagos de Servicio, Facturas, Reclamos, búsqueda y las cuatro acciones visibles. React implementa sólo el resumen factual vacío y búsqueda local sin datos financieros sintéticos; Pagos de Servicio y toda acción financiera siguen visibles, deshabilitados y explicados. Playwright verifica ADMIN, FINANCE, denegación directa de INVENTORY y recarga sin auditoría. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH12-F02",
@@ -5530,8 +5555,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "PARTIAL",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5539,11 +5564,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH12-Q001",
+        "CH12-Q002",
+        "CH12-Q003"
+      ],
+      "blocker_reason": "La evidencia no define el origen autorizado de visitas, recursos, estados ni montos de los pagos de servicio; el listado no se inventa a partir de datos clínicos o financieros sintéticos.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "La pestaña observada permanece visible y deshabilitada en CH12-F01. No se certifica listado, búsqueda, selección, paginación, estado ni correlación financiera."
     },
     {
       "requirement_id": "CH12-F03",
@@ -5606,8 +5635,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5615,11 +5644,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH12-Q001",
+        "CH12-Q002",
+        "CH12-Q003"
+      ],
+      "blocker_reason": "No existe un listado de pagos autorizado sobre el que aplicar rango, recurso o estado; habilitar filtros aparentes derivaría estados y criterios financieros no aprobados.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se implementan filtros financieros sin fuente de pagos, semántica de estado, roles y alcance aprobados."
     },
     {
       "requirement_id": "CH12-F05",
@@ -5722,8 +5755,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5731,11 +5764,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH12-Q005",
+        "CH12-Q006",
+        "CH12-Q007"
+      ],
+      "blocker_reason": "Los rótulos de adición o descuento no autorizan un catálogo operativo ni definen efecto monetario, auditoría, aprobación o reversión.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "No se reproduce un catálogo de motivos ni se atribuye una regla financiera hasta contar con definición cliente aprobada."
     },
     {
       "requirement_id": "CH12-F08",

@@ -132,7 +132,7 @@ export default function AgendaPage() {
           <summary>Tipos observados (sin selección)</summary>
           <ul aria-describedby="agenda-observed-classification-help" aria-label="Tipos de visita observados">
             <li>Cuidado de enfermería</li>
-            <li>Visita Espiritual</li>
+            <li>Visita Respiratoria General</li>
             <li>Cuidados Técnicos de Enfermería</li>
             <li>Laboratorio Especial</li>
             <li>Visita de Geriatría</li>

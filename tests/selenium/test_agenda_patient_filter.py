@@ -168,7 +168,7 @@ class AgendaPatientFilter(unittest.TestCase):
         catalog.find_element(By.TAG_NAME, 'summary').click()
         self.assertEqual(catalog.get_attribute('open'), 'true')
         self.assertIn('Cuidado de enfermería', catalog.text)
-        self.assertIn('Visita Espiritual', catalog.text)
+        self.assertIn('Visita Respiratoria General', catalog.text)
         self.assertIn('Cuidados Técnicos de Enfermería', catalog.text)
         self.assertIn('Laboratorio Especial', catalog.text)
         self.assertIn('Visita de Geriatría', catalog.text)

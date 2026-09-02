@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c`
+Commit generador: `9ba208fd7faafca628743d3f50fe37f4ece09d1a`
 SHA de implementación: `PENDING_COMMIT`
-Fingerprint funcional CH01: `6ded7888bb0fcb02d2793027c01e03a50bf0f6ebad826776decc92005226fbf8`
+Fingerprint funcional CH01: `a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -141,13 +141,13 @@ Fingerprint funcional CH01: `6ded7888bb0fcb02d2793027c01e03a50bf0f6ebad826776dec
 | CH11-F07 | /agenda | NOT_TESTABLE | — |
 | CH11-F08 | /agenda | NOT_TESTABLE | — |
 | CH11-F09 | /agenda | NOT_TESTABLE | — |
-| CH12-F01 | /clinical/nursing | PARTIAL | — |
-| CH12-F02 | /clinical/nursing | EXACT | — |
+| CH12-F01 | /clinical/nursing | PARTIAL | PAYABLES-SUMMARY-TAB, PAYABLES-SERVICE-PAYMENTS-TAB, PAYABLES-STATEMENT-GENERATE, PAYABLES-RESTRICTIONS, PAYABLES-DOWNLOAD, PAYABLES-CLEAR-TABLE, PAYABLES-INVOICE-SEARCH |
+| CH12-F02 | /clinical/nursing | PARTIAL | — |
 | CH12-F03 | /clinical/nursing | NOT_TESTABLE | — |
-| CH12-F04 | /clinical/nursing | EXACT | — |
+| CH12-F04 | /clinical/nursing | BLOCKED_CLIENT | — |
 | CH12-F05 | /clinical/nursing | PARTIAL | — |
 | CH12-F06 | /clinical/nursing | PARTIAL | — |
-| CH12-F07 | /clinical/nursing | EXACT | — |
+| CH12-F07 | /clinical/nursing | BLOCKED_CLIENT | — |
 | CH12-F08 | /clinical/nursing | NOT_TESTABLE | — |
 | CH13-F01 | /purchases | EXACT | — |
 | CH13-F02 | /purchases | NOT_TESTABLE | — |
