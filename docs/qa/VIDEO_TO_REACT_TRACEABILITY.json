@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T14:28:00-06:00",
-  "metadata_generated_from_commit": "1801eb792563f7a342b2ac1fd7a87a01139f1d20",
-  "source_sha256": "ece88615dfab805b4f6e4e51a3b19ae22aeb1cf2e8e142e2628709eaf1c080c5",
-  "implementation_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+  "generated_at": "2026-09-02T14:35:05-06:00",
+  "metadata_generated_from_commit": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
+  "source_sha256": "cb251e07e99ade5af15fa49818cfbcdd00558ffb9319a7dc669eb170b1e63905",
+  "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
   "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": [
     {
@@ -6932,7 +6932,7 @@
         "CH14-Q014"
       ],
       "blocker_reason": "safety_022 muestra únicamente la anatomía factual de faltantes; no hay fuente tenant-scoped, roles, cálculo, cantidad insuficiente, sustitución, compra, notificación, significado de Acuse creado, idempotencia, auditoría o reversión aprobados. La frase sobre cotización es ambigua y no define una relación funcional.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
       "notes": "CH14-E0152 fue abierto y es sólo la transición oscurecida posterior al formulario. safety_022 a 00:45:28 muestra Items faltantes disponibles, Bodega y las columnas Acuse/Tipo/Código/Nombre/Disponible/Requerido/Acuse creado. React no calcula faltantes ni muestra esa superficie; no se implementa ninguna operación de inventario, compra, notificación o exposición de pacientes."
     },
     {
@@ -6969,7 +6969,7 @@
         "CH14-Q014"
       ],
       "blocker_reason": "La única mención de ‘faltar una cotización’ es ambigua; CH14-E0152 sólo es la transición oscurecida del formulario. No están definidos significado, entidad, estado, roles, autorización, auditoría, idempotencia, notificación ni efectos de cotización o inventario.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
       "notes": "Precheck: la transcripción 00:45:10.320–00:45:13.320 no prueba un enlace de cotización. React no expone una acción, cambio de estado, notificación ni mutación de inventario para este supuesto vínculo."
     },
     {

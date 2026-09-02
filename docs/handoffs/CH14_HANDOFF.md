@@ -33,3 +33,9 @@ F15 queda `MISSING`. Esa anatomía no define fuente tenant-scoped, cálculo ni t
 Se reabrió `CH14-E0152`: sólo contiene el formulario de Acuse oscurecido, sin control, estado, enlace ni notificación de cotización. La única señal relacionada es la transcripción ambigua `00:45:10.320–00:45:13.320`: “faltar una cotización”. No identifica una entidad, transición, autorización ni resultado.
 
 F16 queda `NOT_TESTABLE` bajo `CH14-Q014`. React no incorpora acción de cotización, cambio de estado, notificación, enlace entre módulos ni mutación de inventario. Antes de cualquier conducta se requieren significado aprobado, entidad, estado, roles, autorización, auditoría e idempotencia.
+
+## CH14 review
+
+La reconciliación F15/F16 y sus artefactos fueron implementados en `87ff0da40d1feb43102cbf8ca967f887b333e54c`. La revisión completa conserva F01/F02/F04/F06/F09/F10/F12 como `PARTIAL`; F03/F05/F08 como no implementables con sus preguntas abiertas; F07 como `PARTIAL` bajo `CH14-Q006`; F11/F13/F14/F15 como `MISSING`; y F16 como `NOT_TESTABLE`. Se corrigió además la deriva de inventario de revisión: F01 ya no figura falsamente como `MISSING` y F07 ya no figura falsamente como `IMPLEMENTED_EXACT`.
+
+No queda trabajo CH14 que sea seguro sin una definición aprobada: no se añadieron enlaces de cotización, acuses operativos, efectos de stock, cierres, proveedores, bodegas, lotes, kits ni datos de pacientes. El commit de esta actualización de procedencia queda pendiente porque las escrituras de `.git/index.lock` están denegadas; Selenium sigue `PENDING_RUNTIME` por falta de Python.

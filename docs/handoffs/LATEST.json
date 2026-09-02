@@ -1,6 +1,6 @@
 {
-  "lot": "CH14_F16_EVIDENCE_AND_AMBIGUITY_PRECHECK",
+  "lot": "CH14_REVIEW",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "CH14_REVIEW"
+  "next_batch": "CH15_PRECHECK"
 }

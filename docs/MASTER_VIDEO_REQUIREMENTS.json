@@ -4803,7 +4803,7 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_EXACT",
+        "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "La elección conserva el caso autorizado y no crea datos antes de guardar.",
         "financial_impact": "Sin impacto financiero directo.",
@@ -6556,13 +6556,13 @@
       "platform_assessment": {
         "status": "IMPLEMENTED_EXACT",
         "priority": "P0",
-        "patient_safety_impact": "Cancelar preserva los datos y Aceptar no ejecuta pérdida silenciosa.",
-        "financial_impact": "No borra conciliación ni cierre previo.",
-        "current_platform_evidence": "app/main.js openClosureWarning",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Mantener bloqueo de Aceptar hasta resolver CH14-Q006.",
+        "patient_safety_impact": "No existe un flujo de aceptación React: se evita una transición de cierre sin reglas aprobadas.",
+        "financial_impact": "No se crean, modifican ni concilian cierres.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone sólo la anatomía vacía y de solo lectura de Cierres; no contiene advertencia ni aceptación.",
+        "test_path": "No hay prueba de aceptación: CH14-Q006 bloquea un flujo de cierre seguro.",
+        "recommended_action": "Resolver CH14-Q006 antes de implementar advertencia, cancelación o aceptación de cierre.",
         "blocked_by_client_information": true,
-        "notes": "Advertencia y ambos controles reproducidos con desviación segura: Aceptar no muta."
+        "notes": "Se corrige el EXACT heredado: la evidencia muestra una advertencia, pero React no implementa sus controles sin una política aprobada de preservación, confirmación, autorización y auditoría."
       }
     },
     {

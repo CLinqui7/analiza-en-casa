@@ -1,8 +1,8 @@
 {
-  "lot": "CH14_F16_EVIDENCE_AND_AMBIGUITY_PRECHECK",
+  "lot": "CH14_REVIEW",
   "source_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
   "base_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
   "verification_status": "PENDING_COMMIT",
   "final_sha": null,
   "remote_sha": null,
@@ -31,8 +31,8 @@
   "gates": {
     "typecheck": "PASS",
     "playwright_ch14": "PASS: 22/22 on isolated port 4175, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
-    "ch14_parity_self_test": "PASS: 16/16 after F12 evidence reconciliation and safe list implementation",
-    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint dd4358fd29ccb31a9b62015485c238cb736871338664bc8e89a142d5f4b73d52",
+    "ch14_parity_self_test": "PASS: 16/16 after F15/F16 evidence reconciliations at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
     "light_mode": "PASS: 83 product source files",
@@ -57,5 +57,5 @@
     "CH14-F16 remains NOT_TESTABLE under CH14-Q014: the quote narration is ambiguous and E0152 contains no quote control or outcome. No quote action, state change, notification or inventory mutation is implemented.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
-  "next_batch": "CH14_REVIEW"
+  "next_batch": "CH15_PRECHECK"
 }

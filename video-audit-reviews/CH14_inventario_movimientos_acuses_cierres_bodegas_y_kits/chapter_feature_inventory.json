@@ -8,7 +8,7 @@
       "description": "Gestión de inventario lista items por bodega y separa disponible, comprometido y total; ofrece búsqueda, paginación, Excel y Traslados.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "MISSING",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -129,7 +129,7 @@
       "description": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_EXACT",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
