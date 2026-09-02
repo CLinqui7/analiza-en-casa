@@ -2,10 +2,10 @@
   "lot": "CH14_F02_ITEM_HISTORY",
   "source_sha": "39ab367e9cc41377a5bf5b1bda1d07f145fa53e9",
   "base_sha": "39ab367e9cc41377a5bf5b1bda1d07f145fa53e9",
-  "implementation_sha": null,
-  "verification_status": "PENDING_GIT_WRITE",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
+  "verification_status": "VERIFIED_LOCAL_REMOTE",
+  "final_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
+  "remote_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
   "functional_fingerprint": "ad370c2adcdc3e58b59d96a1f5c75780c04967e4fdf345f20bc9715d1991e54a",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02"],
@@ -32,7 +32,7 @@
   "blockers": [
     "CH14-Q001: committed/total calculation, reservations, lots, warehouses and transfers require approved definitions, authorization and audit rules.",
     "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
-    "The pre-F02 base checkpoint is 39ab367e9cc41377a5bf5b1bda1d07f145fa53e9. The F02 review record awaits a distinct implementation commit before a new SHA is claimed.",
+    "CH14-F02 implementation checkpoint 30b4f46230201db9043a9cc1291981e5b7e8478f was verified locally and against its tracking ref; 39ab367e9cc41377a5bf5b1bda1d07f145fa53e9 remains its pre-F02 base checkpoint.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"
