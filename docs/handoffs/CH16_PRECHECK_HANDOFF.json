@@ -1,0 +1,33 @@
+{
+  "lot": "CH16_PRECHECK",
+  "source_sha": "923d82f13716060d1d8d76cfe08bc7fc99a22665",
+  "base_sha": "923d82f13716060d1d8d76cfe08bc7fc99a22665",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
+  "requirements": {
+    "verified_partial": ["CH16-F01"],
+    "explicitly_blocked": ["CH16-F02", "CH16-F03", "CH16-F04", "CH16-F05", "CH16-F06", "CH16-F07", "CH16-F08", "CH16-F09"]
+  },
+  "evidence": {
+    "f01": "CH16-E0001 detail crop and CH16-E0018 were opened. They show the Descuentos matrix columns Acciones, Nombre, Descripción, Servicios, Laboratorios, Medicamentos, Equipos, Insumos and Honorarios. Source rows and values are not copied."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch16_f01": "PASS: 6/6 at isolated port 4182; factual empty matrix/search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_ch16_discounts.py is executable, action-specific source coverage",
+    "ch16_parity_self_test": "PASS: 9/9 at fingerprint 94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
+    "traceability_mirror": "PASS: normal and self-test; CH16-F01 is mirrored and duplicate raw certification keys fail closed.",
+    "light_mode": "PASS: 91 product source files",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH16-Q001/Q002/Q003/Q005 block authoritative source data, profile assignment, values, precedence, calculation, write roles, validation and audit.",
+    "No discount rows, percentages, calculations, price effects, exports or writes were fabricated.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH16_REVIEW"
+}

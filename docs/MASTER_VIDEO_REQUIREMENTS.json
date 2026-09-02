@@ -7638,17 +7638,22 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q001",
+        "CH16-Q002",
+        "CH16-Q003",
+        "CH16-Q005"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/catalogos/descuentos",
-        "test_path": "#/catalogos/descuentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran perfiles ni se deriva una decisión clínica.",
+        "financial_impact": "No se muestran porcentajes ni se ejecuta cálculo, cambio de precio o persistencia financiera.",
+        "current_platform_evidence": "/catalogs/discounts presenta sólo la anatomía factual vacía: columnas, búsqueda local, Registros y controles visibles/deshabilitados.",
+        "test_path": "apps/web/e2e/ch16.spec.ts; tests/selenium/test_ch16_discounts.py",
+        "recommended_action": "Mantener la matriz vacía de sólo lectura hasta aprobar fuente, perfiles, porcentajes, precedencia, cálculo, roles de escritura y auditoría.",
+        "blocked_by_client_information": true,
+        "notes": "CH16-E0001/E0018 respaldan las columnas de la matriz, pero no autorizan copiar sus perfiles o valores ni definen fuente, categorías, porcentajes, cálculo, efectos financieros, roles o auditoría."
       }
     },
     {

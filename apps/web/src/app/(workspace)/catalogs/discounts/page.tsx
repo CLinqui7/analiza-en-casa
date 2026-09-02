@@ -17,7 +17,7 @@ export default function DiscountsCatalogPage() {
           <p className="eyebrow">Items</p>
           <h1>Descuentos</h1>
           <p>
-            Superficie factual de solo lectura basada en CH15-E0144. No carga perfiles ni define
+            Superficie factual de solo lectura basada en la evidencia de Descuentos de CH15 y CH16. No carga perfiles ni define
             categorías, porcentajes, cálculos, precios, impuestos o efectos aguas abajo.
           </p>
         </div>

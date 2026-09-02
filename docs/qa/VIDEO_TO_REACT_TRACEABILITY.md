@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `9919de2d721af24edb9cd2341ea923efecda048d`
-SHA de implementación: `9919de2d721af24edb9cd2341ea923efecda048d`
-Fingerprint funcional CH01: `2b16d3d34e7830e78af11a167efa3fb659200fd86a63a4da851d08d065f87bda`
+Commit generador: `923d82f13716060d1d8d76cfe08bc7fc99a22665`
+SHA de implementación: `PENDING_COMMIT`
+Fingerprint funcional CH01: `94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -192,14 +192,14 @@ Fingerprint funcional CH01: `2b16d3d34e7830e78af11a167efa3fb659200fd86a63a4da851
 | CH15-F14 | /catalogs/discounts | PARTIAL | CATALOG-DISCOUNTS-SEARCH, CATALOG-DISCOUNTS-EXPORT, CATALOG-DISCOUNTS-CREATE, CATALOG-DISCOUNTS-PAGE-SIZE, CATALOG-DISCOUNTS-PAGE-PREV, CATALOG-DISCOUNTS-PAGE-NEXT |
 | CH15-F15 | /catalogs | NOT_TESTABLE | — |
 | CH15-F16 | /catalogs | NOT_TESTABLE | — |
-| CH16-F01 | Sin ruta | PARTIAL | — |
-| CH16-F02 | Sin ruta | PARTIAL | — |
-| CH16-F03 | Sin ruta | PARTIAL | — |
-| CH16-F04 | Sin ruta | PARTIAL | — |
-| CH16-F05 | Sin ruta | PARTIAL | — |
+| CH16-F01 | /catalogs/discounts | PARTIAL | CATALOG-DISCOUNTS-SEARCH, CATALOG-DISCOUNTS-EXPORT, CATALOG-DISCOUNTS-CREATE, CATALOG-DISCOUNTS-PAGE-SIZE, CATALOG-DISCOUNTS-PAGE-PREV, CATALOG-DISCOUNTS-PAGE-NEXT |
+| CH16-F02 | /catalogs/discounts | MISSING | — |
+| CH16-F03 | /catalogs/discounts | MISSING | — |
+| CH16-F04 | /catalogs/discounts | MISSING | — |
+| CH16-F05 | /catalogs/discounts | MISSING | — |
 | CH16-F06 | Sin ruta | NOT_TESTABLE | — |
-| CH16-F07 | Sin ruta | PARTIAL | — |
-| CH16-F08 | Sin ruta | PARTIAL | — |
+| CH16-F07 | /catalogs/discounts | MISSING | — |
+| CH16-F08 | /clinical/hospitalizations | MISSING | — |
 | CH16-F09 | Sin ruta | NOT_TESTABLE | — |
 | CH17-F01 | /clinical/hospitalizations | PARTIAL | — |
 | CH17-F02 | /clinical/hospitalizations | PARTIAL | — |
