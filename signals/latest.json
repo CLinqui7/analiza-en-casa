@@ -1,0 +1,7 @@
+﻿{
+    "event_id":  "274fd0cc-f1cd-4be4-920e-20dbddce3906",
+    "message":  "Analiza Brain v3 signal channel ready.",
+    "detected_at":  "2026-09-01T23:59:37.6070779-06:00",
+    "type":  "SUPERVISOR_READY",
+    "needs_review":  false
+}
