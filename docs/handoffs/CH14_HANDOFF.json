@@ -4,7 +4,7 @@
   "base_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
   "implementation_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
   "verification_status": "PENDING_COMMIT",
-  "final_sha": null,
+  "final_sha": "87ff0da40d1feb43102cbf8ca967f887b333e54c",
   "remote_sha": null,
   "functional_fingerprint": "f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
   "requirements": {
@@ -30,7 +30,7 @@
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 22/22 on isolated port 4175, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
+    "playwright_ch14": "PASS: 22/22 on isolated port 4177, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
     "ch14_parity_self_test": "PASS: 16/16 after F15/F16 evidence reconciliations at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint f05217d545ea605fc33a17b1b66e66c72e31216be4af8c04a23a4e2697579e6f",
     "traceability_generation": "PASS",
