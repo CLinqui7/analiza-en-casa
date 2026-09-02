@@ -5,6 +5,7 @@
 # test-id: SEL-CH14-INVENTORY-CLOSURES
 # test-id: SEL-CH14-INVENTORY-SUPPLIERS
 # test-id: SEL-CH14-INVENTORY-WAREHOUSES
+# test-id: SEL-CH14-INVENTORY-KITS
 from __future__ import annotations
 
 import os
@@ -284,3 +285,59 @@ class InventoryList(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('FINANCE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]'))
+
+    def test_admin_reads_empty_kits_without_audit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]').click()
+        main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('Inventario / Kit de insumos', main.text)
+        self.assertIn('Sin kits documentados', main.text)
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Actualizado por']"))
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Fecha actualización']"))
+        record_pass('INVENTORY-KITS-OPEN', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-EXPORT"]').is_enabled())
+        record_pass('INVENTORY-KITS-EXPORT', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-CREATE"]').is_enabled())
+        record_pass('INVENTORY-KITS-CREATE', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-PAGE-SIZE"]').is_enabled())
+        record_pass('INVENTORY-KITS-PAGE-SIZE', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-PAGE-PREV"]').is_enabled())
+        record_pass('INVENTORY-KITS-PAGE-PREV', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-PAGE-NEXT"]').is_enabled())
+        record_pass('INVENTORY-KITS-PAGE-NEXT', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-SEARCH"]').send_keys('sin-kit-ch14')
+        self.assertIn('sin-kit-ch14', main.text)
+        record_pass('INVENTORY-KITS-SEARCH', 'SEL-CH14-INVENTORY-KITS', started, self.driver.current_url)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_inventory_role_reads_empty_kits(self) -> None:
+        self.login('inventory@demo.local', 'demo-inventory')
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]').click()
+        self.assertIn('Sin kits documentados', self.driver.find_element(By.TAG_NAME, 'main').text)
+
+    def test_auditor_searches_empty_kits(self) -> None:
+        self.login('auditor@demo.local', 'demo-auditor')
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]').click()
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-SEARCH"]').send_keys('sin-kit-auditor')
+        self.assertIn('sin-kit-auditor', self.driver.find_element(By.TAG_NAME, 'main').text)
+
+    def test_doctor_is_denied_inventory_kits_direct_route(self) -> None:
+        self.login('doctor@demo.local', 'demo-doctor')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('DOCTOR', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]'))
+
+    def test_nurse_is_denied_inventory_kits_direct_route(self) -> None:
+        self.login('nurse@demo.local', 'demo-nurse')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('NURSE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]'))
+
+    def test_finance_is_denied_inventory_kits_direct_route(self) -> None:
+        self.login('finance@demo.local', 'demo-finance')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('FINANCE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]'))

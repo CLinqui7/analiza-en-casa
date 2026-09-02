@@ -9,6 +9,8 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-supplier-permissions
 // test-id: playwright:ch14-inventory-warehouses
 // test-id: playwright:ch14-inventory-warehouse-permissions
+// test-id: playwright:ch14-inventory-kits
+// test-id: playwright:ch14-inventory-kit-permissions
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -240,4 +242,57 @@ test('CH14 denies FINANCE direct inventory warehouse access', async ({ page }) =
   await login(page, 'finance@demo.local', 'demo-finance');
   await expect(page.locator('main[role="alert"]')).toContainText('FINANCE');
   await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]')).toHaveCount(0);
+});
+
+test('CH14 renders the read-only empty Kit de insumos anatomy without audit mutation', async ({ page }) => {
+  await login(page);
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await page.locator('[data-action-id="INVENTORY-KITS-OPEN"]').click();
+  await expect(page.getByRole('heading', { name: 'Inventario / Kit de insumos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Listado', exact: true })).toBeVisible();
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-EXPORT"]')).toBeDisabled();
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-CREATE"]')).toBeDisabled();
+  await expect(page.getByLabel('Registros de kits por página')).toBeDisabled();
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-PAGE-PREV"]')).toBeDisabled();
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-PAGE-NEXT"]')).toBeDisabled();
+  await expect(page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Nombre' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Actualizado por' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Fecha actualización' })).toBeVisible();
+  await expect(page.getByText('Sin kits documentados')).toBeVisible();
+  await page.getByLabel('Buscar kits').fill('sin-kit-ch14');
+  await expect(page.locator('tbody .empty-state')).toContainText('sin-kit-ch14');
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+});
+
+test('CH14 lets INVENTORY open the empty Kit de insumos surface', async ({ page }) => {
+  await login(page, 'inventory@demo.local', 'demo-inventory');
+  await page.locator('[data-action-id="INVENTORY-KITS-OPEN"]').click();
+  await expect(page.getByText('Sin kits documentados')).toBeVisible();
+});
+
+test('CH14 lets AUDITOR search the empty Kit de insumos surface', async ({ page }) => {
+  await login(page, 'auditor@demo.local', 'demo-auditor');
+  await page.locator('[data-action-id="INVENTORY-KITS-OPEN"]').click();
+  await page.getByLabel('Buscar kits').fill('sin-kit-auditor');
+  await expect(page.locator('tbody .empty-state')).toContainText('sin-kit-auditor');
+});
+
+test('CH14 denies DOCTOR direct inventory kit access', async ({ page }) => {
+  await login(page, 'doctor@demo.local', 'demo-doctor');
+  await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-OPEN"]')).toHaveCount(0);
+});
+
+test('CH14 denies NURSE direct inventory kit access', async ({ page }) => {
+  await login(page, 'nurse@demo.local', 'demo-nurse');
+  await expect(page.locator('main[role="alert"]')).toContainText('NURSE');
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-OPEN"]')).toHaveCount(0);
+});
+
+test('CH14 denies FINANCE direct inventory kit access', async ({ page }) => {
+  await login(page, 'finance@demo.local', 'demo-finance');
+  await expect(page.locator('main[role="alert"]')).toContainText('FINANCE');
+  await expect(page.locator('[data-action-id="INVENTORY-KITS-OPEN"]')).toHaveCount(0);
 });

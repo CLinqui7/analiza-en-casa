@@ -222,18 +222,18 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0084",
-          "timestamp": "00:44:13.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg"
+          "chapter_event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg"
         },
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0089",
-          "timestamp": "00:44:23.000",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg"
+          "chapter_event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg"
         }
       ],
-      "test_path": "E2E: crear, duplicar, editar, exportar y eliminar un kit sintético con control de permisos."
+      "test_path": "Playwright/Selenium fuente: abrir/buscar/recargar la anatomía factual vacía sin mutación; Excel, Nuevo y paginación permanecen visibles/deshabilitados. No se crean, editan, duplican, eliminan o consumen kits hasta resolver CH14-Q012/Q013/Q015."
     },
     {
       "id": "CH14-F13",

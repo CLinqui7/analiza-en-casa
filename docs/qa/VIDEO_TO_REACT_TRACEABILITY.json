@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T13:18:01-06:00",
-  "metadata_generated_from_commit": "12411c6194d585d74b7f20c9a2816f497cf55a46",
-  "source_sha256": "8d3289fbe738f8112ca976bd927b25ba7acfd8bfa34bfd8f2f3d5f8d50f8b8ce",
+  "generated_at": "2026-09-02T13:28:37-06:00",
+  "metadata_generated_from_commit": "739e5b4b4263ec0a568de9f3021ac15924957ad8",
+  "source_sha256": "a7169db346cb02105747a63b029241f9c05622ee6e2181ff7c8912785a59f3b8",
   "implementation_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
-  "functional_fingerprint": "67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
+  "functional_fingerprint": "acb7369f7332df4610a51279455d74e7d0249d4ff8cd519d7bda4f940b79aa6f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6746,8 +6746,8 @@
         "CH14-Q011"
       ],
       "blocker_reason": "No hay una asignación de evidencia verificada para Lotes/Nros de serie y faltan la política de vencimiento, FEFO, cuarentena, agotamiento, unicidad, ciclo de vida y correcciones auditadas.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Reconciliación de evidencia: CH14-E0072, E0075, E0078 y E0079 se abrieron y muestran Items / Bodegas, no una tabla de Lotes/Nros de serie. React no implementa esa superficie. No se deriva Fecha inválida, vencimiento, asignación, rechazo ni alerta desde la evidencia desalineada."
+      "last_verified_sha": "739e5b4b4263ec0a568de9f3021ac15924957ad8",
+      "notes": "Reconciliación de evidencia: CH14-E0072, E0075, E0078 y E0079 se abrieron y muestran Items / Bodegas, no una tabla de Lotes/Nros de serie. React no implementa esa superficie. No se deriva Fecha inválida, vencimiento, asignación, rechazo ni alerta desde la evidencia desalineada. La reconciliación quedó registrada en el checkpoint 739e5b4."
     },
     {
       "requirement_id": "CH14-F12",
@@ -6757,31 +6757,54 @@
       "classification": "VISIBLE",
       "priority": "P1",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg",
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q012",
+        "CH14-Q013",
+        "CH14-Q015"
+      ],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-KITS-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-KITS-OPEN",
+        "INVENTORY-KITS-EXPORT",
+        "INVENTORY-KITS-CREATE",
+        "INVENTORY-KITS-PAGE-SIZE",
+        "INVENTORY-KITS-PAGE-PREV",
+        "INVENTORY-KITS-PAGE-NEXT",
+        "INVENTORY-KITS-SEARCH"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-kits",
+        "playwright:ch14-inventory-kit-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-KITS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q012",
+        "CH14-Q013",
+        "CH14-Q015"
+      ],
+      "blocker_reason": "La evidencia visible no define una fuente autorizada, composición, consumo, roles, versionado, historial, exportación, idempotencia, reversión ni auditoría de kits; no se habilitan acciones operativas.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0084/E0089 fueron abiertos y son Lotes y números de serie; CH14-E0095/E0100/E0104 son la secuencia real Kit de insumos. React reproduce únicamente Listado, columnas, búsqueda y paginación como superficie factual vacía. Excel y Nuevo permanecen visibles/deshabilitados; no hay filas, composición, consumo ni mutaciones. Playwright verifica ADMIN, INVENTORY y AUDITOR permitidos, y DOCTOR, NURSE y FINANCE denegados. Selenium fuente es específica y queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F13",

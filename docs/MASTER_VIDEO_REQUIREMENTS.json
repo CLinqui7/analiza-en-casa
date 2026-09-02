@@ -6722,34 +6722,38 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0084",
-          "timestamp": "00:44:13.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg",
+          "event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
         },
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0089",
-          "timestamp": "00:44:23.000",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg",
+          "event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q012",
+        "CH14-Q013",
+        "CH14-Q015"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "La lista no consume componentes.",
         "financial_impact": "No se crean maestros incompletos ni se eliminan referencias históricas.",
-        "current_platform_evidence": "app/views.js renderKits; app/store.js createKit",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q012 antes de habilitar CRUD/versionado.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx: superficie Inventario / Kit de insumos factual vacía, sin fuente, filas, composición ni mutaciones.",
+        "test_path": "apps/web/e2e/ch14.spec.ts; tests/selenium/test_inventory.py: abre, busca y recarga la lista vacía sin mutar auditoría; Excel/Nuevo/paginación quedan deshabilitados.",
+        "recommended_action": "Mantener la anatomía factual vacía y resolver CH14-Q012/Q013/Q015 antes de habilitar exportación, CRUD, composición, consumo o versionado.",
         "blocked_by_client_information": true,
-        "notes": "Catálogo y acciones visibles; mutaciones bloqueadas."
+        "notes": "Reconciliación: CH14-E0084/E0089 se abrieron y muestran Lotes y números de serie, no kits. CH14-E0095, E0100 y E0104 son la secuencia real Kit de insumos: Listado, Excel, Nuevo, búsqueda, paginación, columnas Acciones/Nombre/Actualizado por/Fecha actualización y el menú Editar/Duplicar/Eliminar. React reproduce únicamente la anatomía vacía de solo lectura; no fabrica filas ni habilita operaciones."
       }
     },
     {

@@ -14,7 +14,7 @@ const warehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES';
+type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'KITS';
 type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
 type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
 const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
@@ -74,6 +74,7 @@ export default function InventoryPage() {
   const [query, setQuery] = useState('');
   const [supplierQuery, setSupplierQuery] = useState('');
   const [warehouseQuery, setWarehouseQuery] = useState('');
+  const [kitQuery, setKitQuery] = useState('');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
@@ -158,6 +159,10 @@ export default function InventoryPage() {
     setSurface('WAREHOUSES');
     setWarehouseQuery('');
   };
+  const openKits = () => {
+    setSurface('KITS');
+    setKitQuery('');
+  };
 
   return (
     <div className="page-stack">
@@ -173,6 +178,8 @@ export default function InventoryPage() {
                   ? 'Inventario / Proveedores'
                   : surface === 'WAREHOUSES'
                     ? 'Items / Bodegas'
+                    : surface === 'KITS'
+                      ? 'Inventario / Kit de insumos'
                     : 'Gestión de inventario'}
           </h1>
           <p>
@@ -184,6 +191,8 @@ export default function InventoryPage() {
                   ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
                   : surface === 'WAREHOUSES'
                     ? 'Superficie factual y de solo lectura. No consulta ni crea bodegas; la fuente, los permisos y los traslados requieren definición aprobada.'
+                    : surface === 'KITS'
+                      ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
                     : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
           </p>
         </div>
@@ -212,6 +221,26 @@ export default function InventoryPage() {
             <Button
               aria-describedby="inventory-suppliers-create-help"
               data-action-id="INVENTORY-SUPPLIERS-CREATE"
+              disabled
+              type="button"
+            >
+              Nuevo
+            </Button>
+          </div>
+        ) : surface === 'KITS' ? (
+          <div className="action-row">
+            <Button
+              aria-describedby="inventory-kits-export-help"
+              className="button-secondary"
+              data-action-id="INVENTORY-KITS-EXPORT"
+              disabled
+              type="button"
+            >
+              Excel
+            </Button>
+            <Button
+              aria-describedby="inventory-kits-create-help"
+              data-action-id="INVENTORY-KITS-CREATE"
               disabled
               type="button"
             >
@@ -265,6 +294,15 @@ export default function InventoryPage() {
           type="button"
         >
           Bodegas
+        </Button>
+        <Button
+          aria-current={surface === 'KITS' ? 'page' : undefined}
+          className={surface === 'KITS' ? 'tab active' : 'tab'}
+          data-action-id="INVENTORY-KITS-OPEN"
+          onClick={openKits}
+          type="button"
+        >
+          Kit de insumos
         </Button>
         <Link className="tab" href="/inventory/kardex">
           Movimientos
@@ -604,6 +642,79 @@ export default function InventoryPage() {
                           : 'No existe una fuente autorizada de bodegas en el modelo actual.'
                       }
                       title="Sin bodegas documentadas"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
+        </Panel>
+      ) : surface === 'KITS' ? (
+        <Panel>
+          <div className="table-heading">
+            <div>
+              <h2>Listado</h2>
+              <p className="field-help" id="inventory-kits-create-help">
+                Nuevo, Editar, Duplicar y Eliminar requieren versión, permisos, efectos y
+                preservación de usos históricos aprobados (CH14-Q012).
+              </p>
+            </div>
+          </div>
+          <p className="field-help" id="inventory-kits-export-help">
+            Excel requiere columnas, minimización y autorización aprobadas (CH14-Q015).
+          </p>
+          <div className="filter-grid">
+            <label>
+              Registros
+              <select
+                aria-label="Registros de kits por página"
+                data-action-id="INVENTORY-KITS-PAGE-SIZE"
+                disabled
+                value="50"
+              >
+                <option value="50">50</option>
+              </select>
+            </label>
+            <div aria-label="Paginación de kits" className="action-row">
+              <Button data-action-id="INVENTORY-KITS-PAGE-PREV" disabled type="button">
+                Anterior
+              </Button>
+              <Button data-action-id="INVENTORY-KITS-PAGE-NEXT" disabled type="button">
+                Siguiente
+              </Button>
+            </div>
+            <label>
+              Buscar kits
+              <input
+                data-action-id="INVENTORY-KITS-SEARCH"
+                onChange={(event) => setKitQuery(event.target.value)}
+                placeholder="Buscar nombre de kit"
+                type="search"
+                value={kitQuery}
+              />
+            </label>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Acciones</th>
+                  <th>Nombre</th>
+                  <th>Actualizado por</th>
+                  <th>Fecha actualización</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={4}>
+                    <EmptyState
+                      detail={
+                        kitQuery
+                          ? `No hay kits documentados que coincidan con “${kitQuery}”.`
+                          : 'No existe una fuente autorizada de kits en el modelo actual.'
+                      }
+                      title="Sin kits documentados"
                     />
                   </td>
                 </tr>
