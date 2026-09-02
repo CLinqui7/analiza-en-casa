@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T13:56:04-06:00",
-  "metadata_generated_from_commit": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "source_sha256": "6eb725274a69960ee00ea3a66f84966dcfb213793751961ddf0c85ddbe95e3e5",
+  "generated_at": "2026-09-02T14:15:54-06:00",
+  "metadata_generated_from_commit": "a7d68d87ff35e072a16f2fab063b615ecb2e1657",
+  "source_sha256": "ff3773a512eb91905f2f41f693c15cfa982f9963606a3ae43cb8b873724526db",
   "implementation_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-  "functional_fingerprint": "2ceee6c4732d7d8d37a297af878bedb83af8da4631bec0499891f61a4418163f",
+  "functional_fingerprint": "dd4358fd29ccb31a9b62015485c238cb736871338664bc8e89a142d5f4b73d52",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6899,16 +6899,16 @@
       "requirement_id": "CH14-F15",
       "chapter_id": "CH14",
       "feature": "Detección de items faltantes",
-      "detailed_behavior": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "detailed_behavior": "La hoja de seguridad safety_022 muestra el modal Items faltantes disponibles con Bodega y las columnas Acuse, Tipo, Código, Nombre, Disponible, Requerido y Acuse creado; CH14-E0152 sólo conserva la transición oscurecida del formulario.",
       "classification": "VISIBLE",
       "priority": "P0",
       "evidence_paths": [
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg"
       ],
       "open_question_ids": [
         "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
@@ -6917,7 +6917,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6926,15 +6926,14 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
+      "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
         "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
-      "blocker_reason": "La evidencia aparece al final sin demostrar resultado.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_reason": "safety_022 muestra únicamente la anatomía factual de faltantes; no hay fuente tenant-scoped, roles, cálculo, cantidad insuficiente, sustitución, compra, notificación, significado de Acuse creado, idempotencia, auditoría o reversión aprobados. La frase sobre cotización es ambigua y no define una relación funcional.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0152 fue abierto y es sólo la transición oscurecida posterior al formulario. safety_022 a 00:45:28 muestra Items faltantes disponibles, Bodega y las columnas Acuse/Tipo/Código/Nombre/Disponible/Requerido/Acuse creado. React no calcula faltantes ni muestra esa superficie; no se implementa ninguna operación de inventario, compra, notificación o exposición de pacientes."
     },
     {
       "requirement_id": "CH14-F16",

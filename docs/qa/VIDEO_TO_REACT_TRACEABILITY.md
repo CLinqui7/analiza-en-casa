@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `bf72a041342fd0cf0ca606f63c48af5dfdc4cb38`
+Commit generador: `a7d68d87ff35e072a16f2fab063b615ecb2e1657`
 SHA de implementación: `bf72a041342fd0cf0ca606f63c48af5dfdc4cb38`
-Fingerprint funcional CH01: `2ceee6c4732d7d8d37a297af878bedb83af8da4631bec0499891f61a4418163f`
+Fingerprint funcional CH01: `dd4358fd29ccb31a9b62015485c238cb736871338664bc8e89a142d5f4b73d52`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -174,7 +174,7 @@ Fingerprint funcional CH01: `2ceee6c4732d7d8d37a297af878bedb83af8da4631bec049989
 | CH14-F12 | /inventory | PARTIAL | INVENTORY-KITS-OPEN, INVENTORY-KITS-EXPORT, INVENTORY-KITS-CREATE, INVENTORY-KITS-PAGE-SIZE, INVENTORY-KITS-PAGE-PREV, INVENTORY-KITS-PAGE-NEXT, INVENTORY-KITS-SEARCH |
 | CH14-F13 | /inventory | MISSING | — |
 | CH14-F14 | /inventory | MISSING | — |
-| CH14-F15 | /inventory | NOT_TESTABLE | — |
+| CH14-F15 | /inventory | MISSING | — |
 | CH14-F16 | /inventory | NOT_TESTABLE | — |
 | CH15-F01 | /catalogs | PARTIAL | — |
 | CH15-F02 | /catalogs | PARTIAL | — |

@@ -6874,7 +6874,7 @@
       "requirement_id": "CH14-F15",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
       "feature": "Detección de items faltantes",
-      "detailed_behavior": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "detailed_behavior": "La hoja de seguridad safety_022 muestra el modal Items faltantes disponibles con Bodega y las columnas Acuse, Tipo, Código, Nombre, Disponible, Requerido y Acuse creado; CH14-E0152 sólo conserva la transición oscurecida del formulario.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH14",
       "classification": "VISIBLE",
@@ -6885,27 +6885,26 @@
           "chapter_id": "CH14",
           "event_id": "CH14-E0152",
           "timestamp": "00:45:27.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
-          "detail_path": "",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
           "transcript": "",
-          "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
+          "observation": "CH14-E0152 es sólo la transición oscurecida posterior al formulario. safety_022 a 00:45:28 muestra el detalle de faltantes y la comparación factual Disponible/Requerido."
         }
       ],
       "open_question_ids": [
         "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P0",
         "patient_safety_impact": "La política de faltantes puede afectar disponibilidad y sustitución de insumos.",
         "financial_impact": "No crea compra, acuse o cotización por inferencia.",
-        "current_platform_evidence": "app/main.js blocked-inventory-action; docs/OPEN_QUESTIONS.md",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q005 antes de habilitar el flujo.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no calcula faltantes ni muestra una superficie de faltantes; docs/OPEN_QUESTIONS.md",
+        "test_path": "NONE: no se implementa un cálculo, notificación, compra, sustitución, acuse ni mutación de existencias sin las definiciones aprobadas.",
+        "recommended_action": "Resolver CH14-Q005 y CH14-Q014 antes de habilitar cualquier comportamiento de faltantes.",
         "blocked_by_client_information": true,
-        "notes": "La evidencia aparece al final sin demostrar resultado."
+        "notes": "safety_022 respalda sólo la anatomía factual del modal. No define cálculo de faltantes, notificaciones, compras, sustituciones, stock, paciente, autorización, idempotencia, auditoría o reversión."
       }
     },
     {

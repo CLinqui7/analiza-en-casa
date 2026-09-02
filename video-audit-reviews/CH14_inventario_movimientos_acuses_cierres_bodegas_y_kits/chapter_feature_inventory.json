@@ -291,7 +291,7 @@
     {
       "id": "CH14-F15",
       "name": "Detección de items faltantes",
-      "description": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "description": "safety_022 muestra Items faltantes disponibles con Bodega y las columnas Acuse, Tipo, Código, Nombre, Disponible, Requerido y Acuse creado; CH14-E0152 sólo muestra la transición oscurecida posterior al formulario.",
       "classification": "VISIBLE",
       "confidence": "MEDIUM",
       "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
@@ -301,10 +301,10 @@
           "chapter_event_id": "CH14-E0152",
           "timestamp": "00:45:27.400",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
-          "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
+          "observation": "CH14-E0152 es la transición oscurecida; safety_022 a 00:45:28 muestra el detalle factual de faltantes y Disponible/Requerido."
         }
       ],
-      "test_path": "E2E: solicitar cantidad insuficiente y comprobar modal, totales correctos y ausencia de stock negativo."
+      "test_path": "No implementar: CH14-Q005 y CH14-Q014 deben aprobar cálculo tenant-scoped, roles, manejo de cantidad insuficiente, significado de Acuse creado, sustitución, compra, notificación, idempotencia, auditoría y reversión antes de cualquier flujo operativo."
     },
     {
       "id": "CH14-F16",

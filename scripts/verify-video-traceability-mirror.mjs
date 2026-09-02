@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = process.cwd();
-const touchedRequirementIds = ['CH04-F004', 'CH09-F01', 'CH09-F02', 'CH14-F12', 'CH14-F13', 'CH14-F14'];
+const touchedRequirementIds = ['CH04-F004', 'CH09-F01', 'CH09-F02', 'CH14-F12', 'CH14-F13', 'CH14-F14', 'CH14-F15'];
 const traceabilityPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json');
 const certificationPath = resolve(root, 'docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json');
 const csvPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv');

@@ -185,7 +185,7 @@
 - `CH14-Q002`: aprobar máquina de estados, roles, idempotencia y efectos de todas las acciones de acuse y Registro XPO. Evidencia: CH14-E0032 y CH14-E0035.
 - `CH14-Q003`: definir formato, datos, permisos y validez de Excel e impresión de acuses. Evidencia: CH14-E0032 y CH14-E0035.
 - `CH14-Q004`: definir Plantilla y Vaciar, persistencia del borrador y recuperación. Evidencia: CH14-E0151.
-- `CH14-Q005`: aprobar el flujo de faltantes, cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152 y safety_022.
+- `CH14-Q005`: aprobar fuente tenant-scoped, roles, cálculo y tratamiento de faltantes/cantidad insuficiente, sustitución, compra, notificación, significado de Acuse creado, idempotencia, auditoría y reversión. `CH14-E0152` sólo es transición oscurecida; la anatomía factual está en `safety_022` a 00:45:28.
 - `CH14-Q006`: determinar qué borra Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0046.
 - `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
 - `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
@@ -194,7 +194,7 @@
 - `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
 - `CH14-Q012`: definir la composición versionada de kits, roles autorizados, auditoría, duplicación y eliminación preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0106–CH14-E0117.
 - `CH14-Q013`: confirmar selección de lotes, sustitución, descarga de existencias atómica e idempotente y reversión al consumir kits. Evidencia: CH14-E0106 y CH14-E0117.
-- `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
+- `CH14-Q014`: identificar qué significa “faltar una cotización”, qué entidad/estado afecta y qué autorización y auditoría requiere. La frase sólo aparece en la transcripción 00:45:10.320–00:45:13.320; `CH14-E0152` no prueba una relación funcional.
 - `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
 - `CH14-Q016`: aprobar la fuente de paciente/hospitalización acotada por organización, roles de creación/consulta, vínculo del acuse, validación de cantidad disponible/asignada, idempotencia, auditoría append-only y reversión. Evidencia: CH14-E0149–CH14-E0152.
 
