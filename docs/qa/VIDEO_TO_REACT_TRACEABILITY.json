@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T10:55:02-06:00",
-  "metadata_generated_from_commit": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
+  "generated_at": "2026-09-02T11:20:22-06:00",
+  "metadata_generated_from_commit": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "implementation_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
   "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
   "requirements": [
     {
@@ -6305,8 +6305,8 @@
         "CH14-Q015"
       ],
       "blocker_reason": "La evidencia no define el cálculo de comprometido/total, reservas, bodega, traslado ni el formato y autorización de exportación.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0006 respalda las columnas y búsqueda de items. React muestra sólo saldos cronológicos sintéticos; Comprometido y Total se declaran no definidos/no calculables y Excel/Traslados permanecen deshabilitados."
+      "last_verified_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
+      "notes": "CH14-E0006 respalda las columnas y búsqueda de items. React muestra sólo saldos cronológicos sintéticos; Comprometido y Total se declaran no definidos/no calculables y Excel/Traslados permanecen deshabilitados. Revalidado en fde8a99: Playwright 2/2, typecheck, light-mode, parity, mirror y audit PASS."
     },
     {
       "requirement_id": "CH14-F02",
@@ -6521,7 +6521,7 @@
         "CH14-Q006"
       ],
       "blocker_reason": "La advertencia de cierre exige una política aprobada de preservación, confirmación, autorización y auditoría; no se certifica una aceptación no mutante como cierre productivo.",
-      "last_verified_sha": "PENDING_COMMIT",
+      "last_verified_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
       "notes": "Se elimina el EXACT heredado sin certificación actual. La advertencia de cierre queda PARTIAL hasta contar con una política de cierre aprobada y evidencia de persistencia/auditoría."
     },
     {

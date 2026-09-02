@@ -2,10 +2,10 @@
   "lot": "CH14_PRECHECK",
   "source_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
   "base_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
-  "implementation_sha": null,
-  "verification_status": "PENDING_GIT_WRITE",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
+  "verification_status": "VERIFIED_LOCAL_REMOTE",
+  "final_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
+  "remote_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
   "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
   "requirements": {
     "verified_partial": ["CH14-F01"],
@@ -31,8 +31,8 @@
   "blockers": [
     "CH14-Q001: committed/total calculation, reservations, lots, warehouses and transfers require approved definitions, authorization and audit rules.",
     "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
-    "Git metadata writes and remote authentication are unavailable, so no implementation/final/remote SHA is claimed.",
+    "The reviewed implementation checkpoint is fde8a99a9abbfcbee7725ff4c0174e7681c5da70; local HEAD and the tracking ref were equal when verified.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
-  "next_batch": "CH14_REVIEW"
+  "next_batch": "CH15_PRECHECK"
 }
