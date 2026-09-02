@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T13:28:37-06:00",
-  "metadata_generated_from_commit": "739e5b4b4263ec0a568de9f3021ac15924957ad8",
-  "source_sha256": "a7169db346cb02105747a63b029241f9c05622ee6e2181ff7c8912785a59f3b8",
-  "implementation_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
-  "functional_fingerprint": "acb7369f7332df4610a51279455d74e7d0249d4ff8cd519d7bda4f940b79aa6f",
+  "generated_at": "2026-09-02T13:41:42-06:00",
+  "metadata_generated_from_commit": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
+  "source_sha256": "ba86c85ee4684f2305422377415fc52644ba85f75091ac9dbdbe7e016bf96fc8",
+  "implementation_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
+  "functional_fingerprint": "93b04b9794d93c80a68331164cba5b518172e524c7355fbd4899e6a23125decb",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6803,8 +6803,8 @@
         "CH14-Q015"
       ],
       "blocker_reason": "La evidencia visible no define una fuente autorizada, composición, consumo, roles, versionado, historial, exportación, idempotencia, reversión ni auditoría de kits; no se habilitan acciones operativas.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0084/E0089 fueron abiertos y son Lotes y números de serie; CH14-E0095/E0100/E0104 son la secuencia real Kit de insumos. React reproduce únicamente Listado, columnas, búsqueda y paginación como superficie factual vacía. Excel y Nuevo permanecen visibles/deshabilitados; no hay filas, composición, consumo ni mutaciones. Playwright verifica ADMIN, INVENTORY y AUDITOR permitidos, y DOCTOR, NURSE y FINANCE denegados. Selenium fuente es específica y queda PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
+      "notes": "CH14-E0084/E0089 fueron abiertos y son Lotes y números de serie; CH14-E0095/E0100/E0104 son la secuencia real Kit de insumos. React reproduce únicamente Listado, columnas, búsqueda y paginación como superficie factual vacía. Excel y Nuevo permanecen visibles/deshabilitados; no hay filas, composición, consumo ni mutaciones. Playwright verifica ADMIN, INVENTORY y AUDITOR permitidos, y DOCTOR, NURSE y FINANCE denegados. Selenium fuente es específica y queda PENDING_RUNTIME por falta de Python. Verificado en el checkpoint de implementación 43d8dad."
     },
     {
       "requirement_id": "CH14-F13",
@@ -6814,10 +6814,11 @@
       "classification": "VISIBLE",
       "priority": "P0",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0117_00h44m44s800ms_abrupt_change.jpg"
       ],
       "open_question_ids": [
+        "CH14-Q012",
         "CH14-Q013"
       ],
       "route_id": "ROUTE-INVENTORY",
@@ -6827,7 +6828,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6836,13 +6837,14 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
+      "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
+        "CH14-Q012",
         "CH14-Q013"
       ],
-      "blocker_reason": "Composición visual presente; descarga automática no implementada.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_reason": "La evidencia sólo muestra el editor visual; faltan composición versionada, roles, auditoría, selección/sustitución, descarga atómica e idempotente y reversión. No se expone un editor ni una operación de existencias.",
+      "last_verified_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
+      "notes": "Reconciliación: CH14-E0091 es lotes/números de serie y no respalda composición. CH14-E0106/E0117 muestran Nombre, Item, Cantidad, Añadir, insumos y quitar, pero no definen reglas persistentes ni de consumo. React no implementa esa superficie."
     },
     {
       "requirement_id": "CH14-F14",

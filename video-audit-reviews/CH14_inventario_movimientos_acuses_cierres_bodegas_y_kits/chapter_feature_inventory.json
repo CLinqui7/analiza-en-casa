@@ -48,7 +48,7 @@
       "description": "La conversación explica que lo enviado al domicilio queda comprometido en la cuenta del paciente hasta cerrar o contabilizar el servicio; no demuestra la fórmula de reserva.",
       "classification": "VERBAL",
       "confidence": "MEDIUM",
-      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -245,9 +245,9 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0091",
-          "timestamp": "00:44:23.800",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg"
+        "chapter_event_id": "CH14-E0106",
+        "timestamp": "00:44:39.600",
+        "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg"
         },
         {
           "chapter_id": "CH14",
@@ -257,7 +257,7 @@
         }
       ],
       "transcript_evidence": "00:44:25.720–00:45:02.720: se describe el contenido de un kit y la descarga automática de sus componentes.",
-      "test_path": "Integración: consumir kit descuenta cada componente de forma atómica e idempotente o revierte toda la operación."
+    "test_path": "No se implementa editor ni consumo: CH14-E0106/E0117 sólo justifican la anatomía visual. CH14-Q012 debe aprobar composición versionada, roles y auditoría; CH14-Q013 debe aprobar selección/sustitución, descarga atómica e idempotente, y reversión antes de cualquier operación."
     },
     {
       "id": "CH14-F14",

@@ -192,8 +192,8 @@
 - `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.
 - `CH14-Q010`: definir Fecha inválida, vencimiento, ausencia de fecha, cuarentena, agotamiento, FEFO y alertas. Evidencia: CH14-E0082.
 - `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
-- `CH14-Q012`: definir versionado, permisos, duplicación y eliminación de kits preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0098–CH14-E0101.
-- `CH14-Q013`: confirmar selección de lotes, sustitución, atomicidad, idempotencia y reversión al consumir kits. Evidencia: CH14-E0104 y CH14-E0117.
+- `CH14-Q012`: definir la composición versionada de kits, roles autorizados, auditoría, duplicación y eliminación preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0106–CH14-E0117.
+- `CH14-Q013`: confirmar selección de lotes, sustitución, descarga de existencias atómica e idempotente y reversión al consumir kits. Evidencia: CH14-E0106 y CH14-E0117.
 - `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
 - `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
 

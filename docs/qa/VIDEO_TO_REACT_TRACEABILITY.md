@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `739e5b4b4263ec0a568de9f3021ac15924957ad8`
-SHA de implementación: `12411c6194d585d74b7f20c9a2816f497cf55a46`
-Fingerprint funcional CH01: `acb7369f7332df4610a51279455d74e7d0249d4ff8cd519d7bda4f940b79aa6f`
+Commit generador: `43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb`
+SHA de implementación: `43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb`
+Fingerprint funcional CH01: `93b04b9794d93c80a68331164cba5b518172e524c7355fbd4899e6a23125decb`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -172,7 +172,7 @@ Fingerprint funcional CH01: `acb7369f7332df4610a51279455d74e7d0249d4ff8cd519d7bd
 | CH14-F10 | /inventory | PARTIAL | INVENTORY-WAREHOUSES-OPEN, INVENTORY-WAREHOUSES-ACTIVE-FILTER, INVENTORY-WAREHOUSES-PAGE-SIZE, INVENTORY-WAREHOUSES-PAGE-PREV, INVENTORY-WAREHOUSES-PAGE-NEXT, INVENTORY-WAREHOUSES-SEARCH |
 | CH14-F11 | /inventory | MISSING | — |
 | CH14-F12 | /inventory | PARTIAL | INVENTORY-KITS-OPEN, INVENTORY-KITS-EXPORT, INVENTORY-KITS-CREATE, INVENTORY-KITS-PAGE-SIZE, INVENTORY-KITS-PAGE-PREV, INVENTORY-KITS-PAGE-NEXT, INVENTORY-KITS-SEARCH |
-| CH14-F13 | /inventory | NOT_TESTABLE | — |
+| CH14-F13 | /inventory | MISSING | — |
 | CH14-F14 | /inventory | PARTIAL | — |
 | CH14-F15 | /inventory | NOT_TESTABLE | — |
 | CH14-F16 | /inventory | NOT_TESTABLE | — |

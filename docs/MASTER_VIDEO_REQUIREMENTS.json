@@ -6769,9 +6769,9 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0091",
-          "timestamp": "00:44:23.800",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg",
+        "event_id": "CH14-E0106",
+        "timestamp": "00:44:39.600",
+        "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
@@ -6787,18 +6787,19 @@
         }
       ],
       "open_question_ids": [
-        "CH14-Q013"
+      "CH14-Q012",
+      "CH14-Q013"
       ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+      "status": "MISSING",
         "priority": "P0",
         "patient_safety_impact": "Una descarga parcial o desde lote incorrecto puede desalinear disponibilidad de insumos.",
         "financial_impact": "El consumo debe ser atómico e idempotente para no duplicar cargos o existencias.",
-        "current_platform_evidence": "app/main.js openKitForm; app/store.js createKit",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q012–CH14-Q013 y crear una RPC transaccional.",
+      "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx ofrece únicamente el listado factual vacío de F12; no existe editor ni composición de kits.",
+      "test_path": "No se crea una prueba de editor: no hay superficie React que pueda seleccionar ítems, editar cantidades, quitar componentes o consumir existencias sin reglas aprobadas.",
+      "recommended_action": "Resolver CH14-Q012–CH14-Q013 antes de diseñar una composición versionada con roles autorizados, auditoría y una operación de consumo transaccional, idempotente y reversible.",
         "blocked_by_client_information": true,
-        "notes": "Composición visual presente; descarga automática no implementada."
+      "notes": "Reconciliación: CH14-E0091 es una tabla de lotes/series y no prueba composición. CH14-E0106/E0117 muestran visualmente el editor de KIT CURACIONES (Nombre, Item, Cantidad, Añadir, lista de insumos y quitar), pero no autorizan composición persistente ni descarga de existencias. React no implementa ese editor."
       }
     },
     {
