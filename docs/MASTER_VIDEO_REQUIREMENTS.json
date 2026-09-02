@@ -560,7 +560,8 @@
         "CH14-Q012",
         "CH14-Q013",
         "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q015",
+        "CH14-Q016"
       ]
     },
     {
@@ -6815,27 +6816,58 @@
       "evidence": [
         {
           "chapter_id": "CH14",
+          "event_id": "CH14-E0149",
+          "timestamp": "00:45:23.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg",
+          "detail_path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0149_00h45m23s800ms_DETAIL.jpg",
+          "transcript": "",
+          "observation": "El menú de la fila expone Nuevo antes de abrir el formulario."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0150",
+          "timestamp": "00:45:26.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0150_00h45m26s600ms_abrupt_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Acuse nuevo muestra las secciones Información del Acuse e Información del Items a entregar."
+        },
+        {
+          "chapter_id": "CH14",
           "event_id": "CH14-E0151",
           "timestamp": "00:45:27.000",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "Paciente, fecha y hospitalización se muestran junto con Bodega, Item, cantidades y controles Vaciar, Plantilla y Añadir."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "La transición siguiente queda oscurecida; la evidencia de seguridad asociada muestra faltantes con Disponible y Requerido."
         }
       ],
       "open_question_ids": [
-        "CH14-Q004"
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q004",
+        "CH14-Q005",
+        "CH14-Q016"
       ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P0",
         "patient_safety_impact": "La captura no descuenta ni reserva stock hasta tener reglas aprobadas.",
         "financial_impact": "No crea cargos o compromisos ficticios.",
-        "current_platform_evidence": "app/main.js openAcknowledgementForm/blocked-inventory-action",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q001–CH14-Q005 antes de persistir.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone únicamente Acuses como superficie factual vacía y no consulta pacientes/casos ni abre un formulario de acuse.",
+        "test_path": "No se implementa formulario ni prueba operativa: no existe una fuente de paciente/hospitalización acotada por organización ni una operación autorizada de reserva, entrega o reversión.",
+        "recommended_action": "Resolver CH14-Q001/Q002/Q004/Q005/Q016 antes de diseñar un flujo tenant-scoped que valide cantidades y persista un acuse idempotente, auditado y reversible.",
         "blocked_by_client_information": true,
-        "notes": "Campos y acciones observados presentes; Añadir, Vaciar y Plantilla bloqueados."
+        "notes": "Reconciliación: CH14-E0149–E0152 muestran el menú Nuevo, el formulario y la transición de faltantes, pero no definen fuente autorizada de paciente/hospitalización, alcance por organización, roles, validación de cantidad, persistencia, idempotencia, auditoría ni reversión. React no expone este formulario ni datos de pacientes/casos."
       }
     },
     {

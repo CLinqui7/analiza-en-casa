@@ -1,12 +1,12 @@
 {
-  "lot": "CH14_F13_EVIDENCE_AND_SAFETY_PRECHECK",
-  "source_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
-  "base_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
+  "lot": "CH14_F14_EVIDENCE_AND_SAFETY_PRECHECK",
+  "source_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+  "base_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "PENDING_COMMIT",
   "final_sha": null,
   "remote_sha": null,
-  "functional_fingerprint": "93b04b9794d93c80a68331164cba5b518172e524c7355fbd4899e6a23125decb",
+  "functional_fingerprint": "2ceee6c4732d7d8d37a297af878bedb83af8da4631bec0499891f61a4418163f",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10", "CH14-F12"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
@@ -22,14 +22,15 @@
     "f10": "CH14-E0071 at 00:43:33.400 is the actual Items / Bodegas frame: Activo, Registros, pagination, search and Nombre/Descripción/Fecha de creación are visible. React implements only this permission-gated, factual empty anatomy: it contains no warehouse rows, source query, CRUD or transfers. Playwright separately verifies ADMIN, INVENTORY and AUDITOR access plus direct DOCTOR, NURSE and FINANCE denials, search and reload without audit mutation. Selenium declares the same assertion-specific flows and remains PENDING_RUNTIME because Python is unavailable.",
     "f11": "Evidence reconciliation opened CH14-E0072, E0075, E0078 and E0079. Each visibly remains Items / Bodegas; E0078 only exposes Lotes / Series as a menu destination. None establishes a lot/serial table, invalid-date display, expiry, allocation or rejection policy. React has no Lotes/Nros de serie surface, so F11 is MISSING under CH14-Q010/Q011 rather than falsely partial.",
     "f12": "CH14-E0084/E0089 were opened and show Lotes y números de serie, not kits. The actual Kit de insumos sequence is CH14-E0095/E0100/E0104: Listado, Excel, Nuevo, search, pagination, Acciones/Nombre/Actualizado por/Fecha actualización, and the Editar/Duplicar/Eliminar row menu. React implements only that list anatomy as a permission-gated factual empty surface; Excel, Nuevo and pagination are visible and disabled, with no kit rows, composition, consumption or mutation. Its implementation checkpoint is 43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb.",
-    "f13": "CH14-E0091 was opened and is a Lotes y números de serie table, not a kit editor. CH14-E0106/E0117 are the actual KIT CURACIONES editor frames, showing Nombre, Item, Cantidad, Añadir, an insumos list and remove controls. They do not define persisted composition, authorized roles, auditing or stock-consumption semantics; React intentionally has no editor or stock effect.",
+    "f13": "CH14-E0091 was opened and is a Lotes y números de serie table, not a kit editor. CH14-E0106/E0117 are the actual KIT CURACIONES editor frames, showing Nombre, Item, Cantidad, Añadir, an insumos list and remove controls. They do not define persisted composition, authorized roles, auditing or stock-consumption semantics; React intentionally has no editor or stock effect. This reconciliation is committed at bf72a041342fd0cf0ca606f63c48af5dfdc4cb38.",
+    "f14": "CH14-E0149 opens Nuevo from an Acuses row menu. CH14-E0150/E0151 show Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible/asignar, Vaciar, Plantilla and Añadir; E0152 transitions to a shortage state. These frames do not define an authorized tenant-scoped patient/case source, roles, quantity validation, persistence, idempotency, audit or reversal. React intentionally has no acuse form, patient/case source, reservation or stock discharge.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
     "playwright_ch14": "PASS: 22/22 on isolated port 4175, including empty read-only Kit de insumos open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials",
     "ch14_parity_self_test": "PASS: 16/16 after F12 evidence reconciliation and safe list implementation",
-    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 93b04b9794d93c80a68331164cba5b518172e524c7355fbd4899e6a23125decb",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 2ceee6c4732d7d8d37a297af878bedb83af8da4631bec0499891f61a4418163f",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
     "light_mode": "PASS: 83 product source files",
@@ -44,9 +45,10 @@
     "CH14-F09 implements only a factual empty Proveedores anatomy. CH14-Q008 still requires an authorized source, identities, uniqueness, mandatory fields, states, create/edit/deactivate/delete behavior and audit; no supplier behavior is claimed.",
     "CH14-F10 implements only the factual empty Bodegas anatomy under CH14-Q009: the source, operational roles, CRUD, origin/destination, transfers, concurrency, receipt, movement, lot/series and reversal rules have not been approved.",
     "CH14-F11 is MISSING: CH14-E0072/E0075/E0078/E0079 were opened and show Bodegas, not a Lotes/Nros de serie table. CH14-Q010/Q011 still require an approved expiry/invalid-date policy and lot/serial lifecycle before implementation.",
-    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 is verified at b90334b52751179d3104abe0cbf06bde3fb3fdcf; F10 is implemented, verified and synchronized at 12411c6194d585d74b7f20c9a2816f497cf55a46. F11 evidence reconciliation is registered at 739e5b4b4263ec0a568de9f3021ac15924957ad8; F12 awaits this batch's commit SHA.",
+    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 is verified at b90334b52751179d3104abe0cbf06bde3fb3fdcf; F10 is implemented, verified and synchronized at 12411c6194d585d74b7f20c9a2816f497cf55a46. F11 evidence reconciliation is registered at 739e5b4b4263ec0a568de9f3021ac15924957ad8; F12 is verified at 43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb and F13 at bf72a041342fd0cf0ca606f63c48af5dfdc4cb38.",
     "CH14-F12 implements only the factual empty list under CH14-Q012/Q013/Q015. Versioning, roles, Excel output, kit CRUD, composition, automatic stock discharge, idempotency, reversal and audit behavior remain blocked.",
     "CH14-F13 remains MISSING under CH14-Q012/Q013: the editor anatomy alone does not authorize a versioned composition, roles, audit, atomic/idempotent stock discharge or reversal.",
+    "CH14-F14 remains MISSING under CH14-Q001/Q002/Q004/Q005/Q016: the observed form cannot be exposed without a tenant-scoped patient/hospitalization source, authorization, quantity, idempotency, audit and reversal rules.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"

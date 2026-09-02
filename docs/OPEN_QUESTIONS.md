@@ -196,6 +196,7 @@
 - `CH14-Q013`: confirmar selección de lotes, sustitución, descarga de existencias atómica e idempotente y reversión al consumir kits. Evidencia: CH14-E0106 y CH14-E0117.
 - `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
 - `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
+- `CH14-Q016`: aprobar la fuente de paciente/hospitalización acotada por organización, roles de creación/consulta, vínculo del acuse, validación de cantidad disponible/asignada, idempotencia, auditoría append-only y reversión. Evidencia: CH14-E0149–CH14-E0152.
 
 ## CH15 · decisiones pendientes trazadas
 

@@ -8,7 +8,7 @@
       "description": "Gestión de inventario lista items por bodega y separa disponible, comprometido y total; ofrece búsqueda, paginación, Excel y Traslados.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -241,7 +241,7 @@
       "description": "El editor permite nombrar el kit, seleccionar item y cantidad, añadir componentes, modificar cantidades y quitarlos; el relato indica descarga automática al usar un kit.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -265,16 +265,28 @@
       "description": "Acuse nuevo captura paciente, fecha, hospitalización, bodega, item, cantidad disponible y cantidad a asignar, con Vaciar, Plantilla y Añadir.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0149",
+          "timestamp": "00:45:23.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg"
+        },
         {
           "chapter_id": "CH14",
           "chapter_event_id": "CH14-E0151",
           "timestamp": "00:45:27.000",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: crear acuse con item disponible; validar cantidades, hospitalización y prevención de doble envío."
+      "test_path": "No se implementa formulario: CH14-E0149–E0152 sólo prueban la anatomía visual y una transición de faltantes. CH14-Q001/Q002/Q004/Q005/Q016 deben aprobar fuente tenant-scoped, vínculo paciente/hospitalización, roles, validación de cantidad, idempotencia, auditoría y reversión antes de crear o descargar existencias."
     },
     {
       "id": "CH14-F15",

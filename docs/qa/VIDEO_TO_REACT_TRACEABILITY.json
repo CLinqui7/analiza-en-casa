@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T13:41:42-06:00",
-  "metadata_generated_from_commit": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
-  "source_sha256": "ba86c85ee4684f2305422377415fc52644ba85f75091ac9dbdbe7e016bf96fc8",
-  "implementation_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
-  "functional_fingerprint": "93b04b9794d93c80a68331164cba5b518172e524c7355fbd4899e6a23125decb",
+  "generated_at": "2026-09-02T13:56:04-06:00",
+  "metadata_generated_from_commit": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+  "source_sha256": "6eb725274a69960ee00ea3a66f84966dcfb213793751961ddf0c85ddbe95e3e5",
+  "implementation_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+  "functional_fingerprint": "2ceee6c4732d7d8d37a297af878bedb83af8da4631bec0499891f61a4418163f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6843,8 +6843,8 @@
         "CH14-Q013"
       ],
       "blocker_reason": "La evidencia sólo muestra el editor visual; faltan composición versionada, roles, auditoría, selección/sustitución, descarga atómica e idempotente y reversión. No se expone un editor ni una operación de existencias.",
-      "last_verified_sha": "43d8dadd5e16f7c5d4c60a6495a7fa2d221f2edb",
-      "notes": "Reconciliación: CH14-E0091 es lotes/números de serie y no respalda composición. CH14-E0106/E0117 muestran Nombre, Item, Cantidad, Añadir, insumos y quitar, pero no definen reglas persistentes ni de consumo. React no implementa esa superficie."
+      "last_verified_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+      "notes": "Reconciliación: CH14-E0091 es lotes/números de serie y no respalda composición. CH14-E0106/E0117 muestran Nombre, Item, Cantidad, Añadir, insumos y quitar, pero no definen reglas persistentes ni de consumo. React no implementa esa superficie. Reconciliado y certificado como MISSING en bf72a04."
     },
     {
       "requirement_id": "CH14-F14",
@@ -6854,10 +6854,18 @@
       "classification": "VISIBLE",
       "priority": "P0",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0149_00h45m23s800ms_DETAIL.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0150_00h45m26s600ms_abrupt_change.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
       ],
       "open_question_ids": [
-        "CH14-Q004"
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q004",
+        "CH14-Q005",
+        "CH14-Q016"
       ],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
@@ -6866,7 +6874,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6875,11 +6883,17 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q004",
+        "CH14-Q005",
+        "CH14-Q016"
+      ],
+      "blocker_reason": "No hay fuente autorizada y acotada por organización para paciente/hospitalización ni reglas aprobadas de roles, cantidad disponible/asignada, reserva/entrega, idempotencia, auditoría o reversión. No se expone un formulario ni datos de pacientes/casos.",
+      "last_verified_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
+      "notes": "CH14-E0149–E0152 muestran menú Nuevo, formulario de acuse y una transición a faltantes. La anatomía visual no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía."
     },
     {
       "requirement_id": "CH14-F15",

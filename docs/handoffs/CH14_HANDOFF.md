@@ -13,3 +13,11 @@ F12 quedó implementado y verificado en el checkpoint `43d8dadd5e16f7c5d4c60a649
 `CH14-E0091` fue abierto y corresponde a una tabla de lotes/números de serie, por lo que no puede respaldar composición de kits. Los frames correctos son `CH14-E0106` y `CH14-E0117`: muestran el editor visual de `KIT CURACIONES` con Nombre, Item, Cantidad, Añadir, lista de insumos y controles para quitar.
 
 F13 permanece `MISSING`. La evidencia visual no define una composición versionada, roles autorizados, auditoría, selección o sustitución de existencias, ni la descarga atómica, idempotente y reversible de componentes. React no expone editor de composición ni mutación de stock. `CH14-Q012` y `CH14-Q013` quedan explícitos hasta recibir esas definiciones aprobadas.
+
+La conciliación F13 quedó comprometida en `bf72a041342fd0cf0ca606f63c48af5dfdc4cb38`.
+
+## CH14 F14 · Precheck de evidencia y seguridad
+
+Se abrieron `CH14-E0149`–`CH14-E0152`. El menú de una fila de Acuses muestra `Nuevo`; el formulario siguiente contiene Paciente, Fecha, Hospitalización, Bodega, Item, Cantidad disponible, Cantidad a asignar, Vaciar, Plantilla y Añadir. La transición posterior muestra un estado de faltantes, no una confirmación segura de entrega.
+
+F14 queda `MISSING`. React conserva Acuses como superficie factual vacía y no obtiene pacientes, hospitalizaciones o datos de casos para este flujo. No se crea un acuse, no se reservan/descargan existencias y no se exponen datos de pacientes. `CH14-Q001`, `CH14-Q002`, `CH14-Q004`, `CH14-Q005` y `CH14-Q016` exigen la fuente tenant-scoped, roles, enlace paciente/hospitalización, validación de cantidades, idempotencia, auditoría y reversión aprobadas antes de cualquier formulario operativo.
