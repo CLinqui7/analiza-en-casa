@@ -1,0 +1,66 @@
+{
+  "lot": "CH10_REVIEW_AND_FIRST_SAFE_REQUIREMENT",
+  "source_sha": "dede609449bcb467bdf8e14abc3b46de1439abc3",
+  "base_sha": "dede609449bcb467bdf8e14abc3b46de1439abc3",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "apps/web/e2e/ch10.spec.ts",
+    "tests/selenium/test_medical_orders.py",
+    "scripts/functional-fingerprint.mjs",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
+    "apps/web/src/lib/video-parity-summary.ts",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/handoffs/CH10_HANDOFF.json",
+    "docs/handoffs/CH10_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "verified_partial": ["CH10-F01", "CH10-F02"],
+    "corrected_to_partial": ["CH10-F03"],
+    "not_testable": ["CH10-F05", "CH10-F06", "CH10-F09", "CH10-F10"],
+    "remaining_partial": ["CH10-F04", "CH10-F07", "CH10-F08"]
+  },
+  "tests": [
+    "PLAYWRIGHT_PORT=4321 npx playwright test -c apps/web/playwright.config.ts e2e/ch10.spec.ts",
+    "npm --workspace @analiza/web run typecheck",
+    "npm run qa:video-parity:generate",
+    "node scripts/verify-video-react-parity.mjs --chapter CH10 --self-test",
+    "npm run qa:traceability-mirror -- --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "npm run qa:video-parity:chapter -- CH02",
+    "npm run qa:video-parity:chapter -- CH03",
+    "npm run qa:video-parity:chapter -- CH04",
+    "npm run qa:light-mode",
+    "npm run audit:verify"
+  ],
+  "gates": {
+    "functional_fingerprint": "PASS: 232ba542e48e2f2bd9c8989f20ec480d236e9334fb5445dc2a982ec5f704b010",
+    "playwright_ch10": "PASS: 7/7; factual behavior plus ADMIN, DOCTOR, NURSE, AUDITOR, INVENTORY and FINANCE roles",
+    "typecheck": "PASS",
+    "ch10_parity_self_test": "PASS: 10/10",
+    "traceability_mirror": "PASS",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13; CH04 11/11",
+    "light_mode": "PASS: 78 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable"
+  },
+  "evidence": {
+    "ch10_f01": "CH10-E0008/E0009 show the factual list and row menu. The React list uses only existing synthetic patient/hospitalization values; it does not derive triage, order state, treatment, or workflow. Search, Active/Inactive tabs, pagination, menu, direct-route role guards, and disabled controls are browser-tested.",
+    "ch10_f02_f03": "CH10-E0011 confirms the visible two-type choice, but both choices are deliberately disabled. CH10-E0013 confirms a medication-card form in the video; the React application has no such form, so F03 is PARTIAL rather than falsely EXACT."
+  },
+  "blockers": [
+    "CH10-Q001: clinical document authorization, data, signature and audit rules are undefined; the type selector does not create a record.",
+    "CH10-Q003/Q005/Q006: medication catalogs, relationships and treatment-editor rules remain unimplemented and clinically blocked.",
+    "CH10-Q011/Q012: version/history and Registro XPO semantics remain visible but disabled and non-mutating.",
+    "CH10-Q002/Q004/Q007/Q008/Q009/Q010/Q013 preserve their existing PMC, date, composition, print and administration blockers.",
+    "Python is unavailable, so assertion-specific Selenium source remains PENDING_RUNTIME.",
+    "Git metadata writes, push credentials and fresh fetch remain unavailable; no stable batch commit or remote SHA is claimed."
+  ],
+  "next_batch": "CH10_REVIEW"
+}

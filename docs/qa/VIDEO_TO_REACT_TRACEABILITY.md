@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `200214561d26a23510f75623f0292ecdc9c30981`
-SHA de implementación: `200214561d26a23510f75623f0292ecdc9c30981`
-Fingerprint funcional CH01: `bdb9e7e8a69dba8e6532f6aec0b0944cc837a220f93e200cfdc4243b28acf823`
+Commit generador: `dede609449bcb467bdf8e14abc3b46de1439abc3`
+SHA de implementación: `pendiente`
+Fingerprint funcional CH01: `232ba542e48e2f2bd9c8989f20ec480d236e9334fb5445dc2a982ec5f704b010`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -122,9 +122,9 @@ Fingerprint funcional CH01: `bdb9e7e8a69dba8e6532f6aec0b0944cc837a220f93e200cfdc
 | CH09-F12 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH09-F13 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH09-F14 | /clinical/hospitalizations | NOT_TESTABLE | — |
-| CH10-F01 | /clinical/orders | PARTIAL | — |
-| CH10-F02 | /clinical/orders | EXACT | — |
-| CH10-F03 | /clinical/orders | EXACT | — |
+| CH10-F01 | /clinical/orders | PARTIAL | MEDICAL-ORDER-TAB-ACTIVE, MEDICAL-ORDER-TAB-INACTIVE, MEDICAL-ORDER-TAB-CHANGES, MEDICAL-ORDER-TAB-UPDATES, MEDICAL-ORDER-SEARCH, MEDICAL-ORDER-MENU-OPEN, MEDICAL-ORDER-CREATE, MEDICAL-ORDER-VIEW, MEDICAL-ORDER-XPO, MEDICAL-ORDER-PAGE-PREV, MEDICAL-ORDER-PAGE-NEXT |
+| CH10-F02 | /clinical/orders | PARTIAL | MEDICAL-ORDER-CREATE |
+| CH10-F03 | /clinical/orders | PARTIAL | — |
 | CH10-F04 | /clinical/orders | PARTIAL | — |
 | CH10-F05 | /clinical/orders | NOT_TESTABLE | — |
 | CH10-F06 | /clinical/orders | NOT_TESTABLE | — |

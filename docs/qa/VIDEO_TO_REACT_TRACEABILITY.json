@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T07:53:18-06:00",
-  "metadata_generated_from_commit": "200214561d26a23510f75623f0292ecdc9c30981",
+  "generated_at": "2026-09-02T08:13:36-06:00",
+  "metadata_generated_from_commit": "dede609449bcb467bdf8e14abc3b46de1439abc3",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "200214561d26a23510f75623f0292ecdc9c30981",
-  "functional_fingerprint": "bdb9e7e8a69dba8e6532f6aec0b0944cc837a220f93e200cfdc4243b28acf823",
+  "implementation_sha": null,
+  "functional_fingerprint": "232ba542e48e2f2bd9c8989f20ec480d236e9334fb5445dc2a982ec5f704b010",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -4623,21 +4623,41 @@
         "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "MEDICAL-ORDER-TAB-ACTIVE",
+        "MEDICAL-ORDER-TAB-INACTIVE",
+        "MEDICAL-ORDER-TAB-CHANGES",
+        "MEDICAL-ORDER-TAB-UPDATES",
+        "MEDICAL-ORDER-SEARCH",
+        "MEDICAL-ORDER-MENU-OPEN",
+        "MEDICAL-ORDER-CREATE",
+        "MEDICAL-ORDER-VIEW",
+        "MEDICAL-ORDER-XPO",
+        "MEDICAL-ORDER-PAGE-PREV",
+        "MEDICAL-ORDER-PAGE-NEXT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch10-medical-order-list",
+        "playwright:ch10-medical-order-menu-and-guards"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH10-MEDICAL-ORDER-LIST"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_ids": [
+        "CH10-Q011",
+        "CH10-Q012"
+      ],
+      "blocker_reason": "Tratamientos con cambios y Actualizaciones no tienen unidad de versionado definida; Registro XPO no tiene contrato, permisos ni auditoría definidos.",
+      "last_verified_sha": null,
+      "notes": "CH10-E0008/E0009: lista factual sintética con pestañas Activos/Inactivos, búsqueda, paginación y menú de fila. Ver Órdenes y Registro XPO no mutan datos; el selector Nuevo no inicia documentos. Playwright cubre las seis cuentas demo; Selenium queda PENDING_RUNTIME por Python no disponible."
     },
     {
       "requirement_id": "CH10-F02",
@@ -4649,28 +4669,38 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0011_00h27m43s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q001"
+      ],
       "route_id": "ROUTE-MEDICAL-ORDERS",
       "react_route": "/clinical/orders",
       "react_files": [
         "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "EXACT",
+      "action_ids": [
+        "MEDICAL-ORDER-CREATE"
+      ],
+      "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch10-medical-order-menu-and-guards"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH10-MEDICAL-ORDER-LIST"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_ids": [
+        "CH10-Q001"
+      ],
+      "blocker_reason": "El video no define autorización, datos, firma ni auditoría para iniciar documentos clínicos.",
+      "last_verified_sha": null,
+      "notes": "CH10-E0011: el selector de dos tipos es visible y está cubierto, pero ambas opciones se mantienen deshabilitadas sin crear registros clínicos hasta cerrar CH10-Q001."
     },
     {
       "requirement_id": "CH10-F03",
@@ -4682,7 +4712,12 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH10-Q001",
+        "CH10-Q003",
+        "CH10-Q005",
+        "CH10-Q006"
+      ],
       "route_id": "ROUTE-MEDICAL-ORDERS",
       "react_route": "/clinical/orders",
       "react_files": [
@@ -4690,8 +4725,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "PARTIAL",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -4700,10 +4735,15 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_ids": [
+        "CH10-Q001",
+        "CH10-Q003",
+        "CH10-Q005",
+        "CH10-Q006"
+      ],
+      "blocker_reason": "La tarjeta clínica, sus catálogos, reglas y autorización no se pueden derivar del video; el flujo React actual no expone un formulario de tarjeta.",
+      "last_verified_sha": null,
+      "notes": "CH10-E0013 se conserva como evidencia visible. Se retiró la certificación EXACT: el flujo React no expone encabezado de tarjeta, tratamientos, Guardar ni Atrás."
     },
     {
       "requirement_id": "CH10-F04",
