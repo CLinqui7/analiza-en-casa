@@ -1,0 +1,38 @@
+{
+  "lot": "CH14_PRECHECK",
+  "source_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
+  "base_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
+  "implementation_sha": null,
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
+  "requirements": {
+    "verified_partial": ["CH14-F01"],
+    "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
+    "not_implemented": ["CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
+  },
+  "evidence": {
+    "f01": "CH14-E0006 and its opened detail crop show the Items surface, Bodega, Excel, Traslados, pagination/search, and Tipo/Código/Nombre/Disp/Comp/Total columns. React now presents only existing synthetic movement balances; committed/total calculation, bodega rules, transfer, and export remain explicitly blocked.",
+    "permissions": "Playwright proves ADMIN and INVENTORY can read the factual list and NURSE receives direct route denial. Selenium source declares the same action-specific checks but has not executed because Python is unavailable.",
+    "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
+  },
+  "gates": {
+    "typecheck": "PASS",
+    "playwright_ch14": "PASS: 2/2",
+    "ch14_parity_self_test": "PASS: 16/16",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
+    "traceability_generation": "PASS",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS: 83 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; source test is executable and action-specific"
+  },
+  "blockers": [
+    "CH14-Q001: committed/total calculation, reservations, lots, warehouses and transfers require approved definitions, authorization and audit rules.",
+    "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
+    "Git metadata writes and remote authentication are unavailable, so no implementation/final/remote SHA is claimed.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH14_REVIEW"
+}

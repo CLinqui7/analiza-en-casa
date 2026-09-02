@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T10:46:28-06:00",
-  "metadata_generated_from_commit": "a61bc0a85cb4fc92944963687647dabf29a8090d",
+  "generated_at": "2026-09-02T10:55:02-06:00",
+  "metadata_generated_from_commit": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
-  "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
+  "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -5835,22 +5835,35 @@
         "apps/web/src/app/(workspace)/purchases/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "EXACT",
+      "component_ids": [
+        "PURCHASE-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "PURCHASE-LIST-SEARCH",
+        "PURCHASE-LIST-EXPORT"
+      ],
+      "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch13-factual-purchase-list"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH13-PURCHASE-LIST"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q001",
+        "CH13-Q009",
+        "CH13-Q012"
+      ],
+      "blocker_reason": "La evidencia no autoriza proveedor, factura, total, recepción, estado, Registro PT ni exportación como datos o reglas productivas.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH13-E0004 respalda sólo la estructura factual de Listado, columnas, búsqueda y exportación visible. React no fabrica filas financieras; Excel queda deshabilitado y la búsqueda local no muta auditoría."
     },
     {
       "requirement_id": "CH13-F02",
@@ -5915,8 +5928,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5924,11 +5937,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q008"
+      ],
+      "blocker_reason": "La modalidad requiere reglas aprobadas de factura, unicidad, numeración y concurrencia.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "No se certifica selector de modalidad sin reglas de factura, unicidad y concurrencia aprobadas."
     },
     {
       "requirement_id": "CH13-F04",
@@ -5985,8 +6000,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -5994,11 +6009,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q001",
+        "CH13-Q004",
+        "CH13-Q014"
+      ],
+      "blocker_reason": "Las líneas requieren estados, impuesto manual autorizado, catálogo tenant-safe y precio histórico aprobados.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "No se certifican líneas, costo, cantidad, presentación ni total sin catálogo, precio histórico y reglas financieras aprobadas."
     },
     {
       "requirement_id": "CH13-F06",
@@ -6061,8 +6080,8 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
+      "parity_status": "BLOCKED_CLIENT",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
@@ -6070,11 +6089,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q004",
+        "CH13-Q005",
+        "CH13-Q006"
+      ],
+      "blocker_reason": "El desglose requiere política fiscal, conceptos Extra/Descuento y redondeo aprobados.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "No se certifica desglose ni aritmética financiera sin política fiscal, conceptos y redondeo aprobados."
     },
     {
       "requirement_id": "CH13-F08",
@@ -6254,22 +6277,36 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-FACTUAL-LIST"
+      ],
+      "action_ids": [
+        "INVENTORY-ITEM-SEARCH",
+        "INVENTORY-ITEM-EXPORT",
+        "INVENTORY-TRANSFERS"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-factual-list",
+        "playwright:ch14-inventory-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-LIST"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q001",
+        "CH14-Q015"
+      ],
+      "blocker_reason": "La evidencia no define el cálculo de comprometido/total, reservas, bodega, traslado ni el formato y autorización de exportación.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH14-E0006 respalda las columnas y búsqueda de items. React muestra sólo saldos cronológicos sintéticos; Comprometido y Total se declaran no definidos/no calculables y Excel/Traslados permanecen deshabilitados."
     },
     {
       "requirement_id": "CH14-F02",
@@ -6470,20 +6507,22 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "EXACT",
-      "functional_status": "VERIFIED",
-      "persistence_status": "UNVERIFIED",
+      "parity_status": "PARTIAL",
+      "functional_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q006"
+      ],
+      "blocker_reason": "La advertencia de cierre exige una política aprobada de preservación, confirmación, autorización y auditoría; no se certifica una aceptación no mutante como cierre productivo.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Se elimina el EXACT heredado sin certificación actual. La advertencia de cierre queda PARTIAL hasta contar con una política de cierre aprobada y evidencia de persistencia/auditoría."
     },
     {
       "requirement_id": "CH14-F08",

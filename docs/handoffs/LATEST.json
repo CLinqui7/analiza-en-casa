@@ -1,6 +1,6 @@
 {
-  "lot": "CH12_SELENIUM_SOURCE_REPAIR",
-  "handoff": "docs/handoffs/CH12_HANDOFF.json",
+  "lot": "CH14_PRECHECK",
+  "handoff": "docs/handoffs/CH14_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "CH13_PRECHECK"
+  "next_batch": "CH14_REVIEW"
 }

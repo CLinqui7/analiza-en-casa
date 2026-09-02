@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `a61bc0a85cb4fc92944963687647dabf29a8090d`
+Commit generador: `fdc6fd723e55301c67b24f57fecdefb0d5d535fa`
 SHA de implementación: `c371d47f43096b76b26d2eadc5dbfa48924322a6`
-Fingerprint funcional CH01: `a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c`
+Fingerprint funcional CH01: `416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -149,24 +149,24 @@ Fingerprint funcional CH01: `a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d
 | CH12-F06 | /clinical/nursing | PARTIAL | — |
 | CH12-F07 | /clinical/nursing | BLOCKED_CLIENT | — |
 | CH12-F08 | /clinical/nursing | NOT_TESTABLE | — |
-| CH13-F01 | /purchases | EXACT | — |
+| CH13-F01 | /purchases | PARTIAL | PURCHASE-LIST-SEARCH, PURCHASE-LIST-EXPORT |
 | CH13-F02 | /purchases | NOT_TESTABLE | — |
-| CH13-F03 | /purchases | EXACT | — |
+| CH13-F03 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F04 | /purchases | PARTIAL | — |
-| CH13-F05 | /purchases | EXACT | — |
+| CH13-F05 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F06 | /purchases | PARTIAL | — |
-| CH13-F07 | /purchases | EXACT | — |
+| CH13-F07 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F08 | /purchases | PARTIAL | — |
 | CH13-F09 | /purchases | PARTIAL | — |
 | CH13-F10 | /purchases | NOT_TESTABLE | — |
 | CH13-F11 | /purchases | NOT_TESTABLE | — |
-| CH14-F01 | /inventory | PARTIAL | — |
+| CH14-F01 | /inventory | PARTIAL | INVENTORY-ITEM-SEARCH, INVENTORY-ITEM-EXPORT, INVENTORY-TRANSFERS |
 | CH14-F02 | /inventory | PARTIAL | — |
 | CH14-F03 | /inventory | NOT_TESTABLE | — |
 | CH14-F04 | /inventory | PARTIAL | — |
 | CH14-F05 | /inventory | NOT_TESTABLE | — |
 | CH14-F06 | /inventory | PARTIAL | — |
-| CH14-F07 | /inventory | EXACT | — |
+| CH14-F07 | /inventory | PARTIAL | — |
 | CH14-F08 | /inventory | NOT_TESTABLE | — |
 | CH14-F09 | /inventory | PARTIAL | — |
 | CH14-F10 | /inventory | PARTIAL | — |

@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test';
 
 async function loginAs(page: import('@playwright/test').Page, email: string, password: string) {
   await page.goto('/login');
-  await page.getByLabel('Correo').fill(email);
-  await page.getByLabel('Contraseña').fill(password);
+  await page.getByLabel(/Usuario o correo|Correo/).fill(email);
+  await page.getByLabel(/Clave|Contraseña/).fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }
