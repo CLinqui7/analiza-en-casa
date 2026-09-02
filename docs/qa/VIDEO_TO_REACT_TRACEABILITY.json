@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T09:23:13-06:00",
-  "metadata_generated_from_commit": "1fc7d87e886772fdf05d34ea1c649d44e4fb4608",
+  "generated_at": "2026-09-02T09:38:49-06:00",
+  "metadata_generated_from_commit": "bf814b9f11c4068d22cef49b70abf7fb8d801c73",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "6ba89ef4ba71806208497384cbc64236b13a9293c4e7dc39d2a203f9053f79c7",
+  "functional_fingerprint": "db8870d320a8a0bd3221866126cee2f356659b4197e79f15819bee934743d0bd",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -2568,22 +2568,38 @@
         "apps/web/src/app/(workspace)/quotes/[id]/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "AGENDA-SHIFT-DETAIL-DIALOG"
+      ],
+      "action_ids": [
+        "AGENDA-SHIFT-DETAIL-OPEN",
+        "AGENDA-SHIFT-DETAIL-UPDATES",
+        "AGENDA-SHIFT-DETAIL-CLOSE"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch11-synthetic-shift-detail"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH11-SYNTHETIC-SHIFT-DETAIL"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH11-Q002",
+        "CH11-Q004",
+        "CH11-Q006",
+        "CH11-Q008",
+        "CR-010"
+      ],
+      "blocker_reason": "La evidencia no define estados/transiciones de visita finalizada, actualizaciones, eliminación, roles del detalle, disponibilidad o liquidación. Se conserva sólo una vista de agenda factual y de lectura sola para turnos sintéticos existentes.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH11-E0050 muestra Agenda/Actualizaciones, inicio/fin, paciente y recurso asignado. Playwright prueba que DOCTOR abre/cierra el detalle factual de un turno sintético sin mutar turnos ni auditoría; INVENTORY no recibe la acción por denegación de ruta. Actualizaciones se mantiene visible y deshabilitada bajo CH11-Q002/Q006. No se etiqueta el turno como visita finalizada ni se exponen observaciones clínicas, pagos, disponibilidad o mutaciones. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH05-F009",
@@ -5160,19 +5176,23 @@
       ],
       "action_ids": [
         "AGENDA-SHIFT-CREATE",
-        "AGENDA-SHIFT-PATIENT-SELECT"
+        "AGENDA-SHIFT-PATIENT-SELECT",
+        "AGENDA-SHIFT-SAVE",
+        "AGENDA-SHIFT-CLOSE"
       ],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [
-        "playwright:ch11-agenda-patient-context"
+        "playwright:ch11-agenda-patient-context",
+        "playwright:ch11-agenda-patient-context-save"
       ],
       "selenium_test_ids": [
-        "SEL-CH11-AGENDA-PATIENT-CONTEXT"
+        "SEL-CH11-AGENDA-PATIENT-CONTEXT",
+        "SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE"
       ],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -5185,7 +5205,7 @@
       ],
       "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH11-E0022 muestra Crear turno a paciente. El diálogo React autorizado conserva la selección factual de paciente y muestra documento y empresa en solo lectura; Playwright comprueba que Cerrar no muta turnos ni auditoría. Guardar sigue siendo el flujo B3 de turnos sintéticos, no una visita clínica. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "notes": "CH11-E0022 muestra Crear turno a paciente, Cerrar y Guardar. El diálogo React autorizado conserva la selección factual de paciente y muestra documento y empresa en solo lectura; Playwright comprueba que Cerrar no muta turnos ni auditoría y que Guardar persiste/recarga sólo el turno sintético B3 con su vínculo de paciente. No certifica una visita clínica. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH11-F04",

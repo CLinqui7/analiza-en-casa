@@ -2,6 +2,8 @@
 # test-id: SEL-CH11-AGENDA-PATIENT-FILTER
 # test-id: SEL-CH11-CALENDAR-NAVIGATION-VIEWS
 # test-id: SEL-CH11-AGENDA-PATIENT-CONTEXT
+# test-id: SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE
+# test-id: SEL-CH11-SYNTHETIC-SHIFT-DETAIL
 from __future__ import annotations
 
 import os
@@ -88,6 +90,27 @@ class AgendaPatientFilter(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('Acceso restringido para el rol INVENTORY', denied.text)
 
+    def test_doctor_reads_existing_synthetic_shift_detail_without_mutation(self) -> None:
+        started = time.time()
+        self.login('doctor@demo.local', 'demo-doctor')
+        before = self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))")
+        self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DETAIL-OPEN"]')[0].click()
+        dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.assertIn('Detalle del turno sintético', dialog.text)
+        self.assertIn('Inicio', dialog.text)
+        self.assertIn('Fin', dialog.text)
+        self.assertIn('Paciente', dialog.text)
+        self.assertIn('Recurso asignado', dialog.text)
+        self.assertIn('Estado registrado', dialog.text)
+        self.assertFalse(dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DETAIL-UPDATES"]').is_enabled())
+        record_pass('AGENDA-SHIFT-DETAIL-OPEN', 'SEL-CH11-SYNTHETIC-SHIFT-DETAIL', started, self.driver.current_url)
+        record_pass('AGENDA-SHIFT-DETAIL-UPDATES', 'SEL-CH11-SYNTHETIC-SHIFT-DETAIL', started, self.driver.current_url)
+        dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DETAIL-CLOSE"]').click()
+        self.wait.until(conditions.invisibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))"))
+        record_pass('AGENDA-SHIFT-DETAIL-CLOSE', 'SEL-CH11-SYNTHETIC-SHIFT-DETAIL', started, self.driver.current_url)
+
     def test_admin_sees_factual_patient_context_in_shift_form_without_visit_mutation(self) -> None:
         started = time.time()
         self.login('admin@demo.local', 'demo-admin')
@@ -101,10 +124,32 @@ class AgendaPatientFilter(unittest.TestCase):
         self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Documento del paciente"]').get_attribute('value'), 'DUI 12345678-9')
         self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Empresa del paciente"]').get_attribute('value'), 'Sin empresa registrada')
         record_pass('AGENDA-SHIFT-PATIENT-SELECT', 'SEL-CH11-AGENDA-PATIENT-CONTEXT', started, self.driver.current_url)
-        dialog.find_element(By.XPATH, ".//button[normalize-space()='Cerrar']").click()
+        dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CLOSE"]').click()
         self.wait.until(conditions.invisibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
         self.driver.refresh()
         self.assertEqual(before, self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))"))
+        record_pass('AGENDA-SHIFT-CLOSE', 'SEL-CH11-AGENDA-PATIENT-CONTEXT', started, self.driver.current_url)
+
+    def test_admin_persists_selected_patient_on_existing_synthetic_shift_flow(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]').click()
+        dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+        self.assertIn('Crear turno a paciente', dialog.text)
+        record_pass('AGENDA-SHIFT-CREATE', 'SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE', started, self.driver.current_url)
+        from selenium.webdriver.support.ui import Select
+        Select(dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-PATIENT-SELECT"]')).select_by_value('patient-demo-001')
+        self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Documento del paciente"]').get_attribute('value'), 'DUI 12345678-9')
+        self.assertEqual(dialog.find_element(By.CSS_SELECTOR, '[aria-label="Empresa del paciente"]').get_attribute('value'), 'Sin empresa registrada')
+        record_pass('AGENDA-SHIFT-PATIENT-SELECT', 'SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE', started, self.driver.current_url)
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Notas')]//input").send_keys('CH11 F03 turno sintético Selenium')
+        dialog.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-SAVE"]').click()
+        self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="status"]')))
+        self.driver.refresh()
+        persisted = self.driver.execute_script("return JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') || '[]').find((shift) => shift.note === 'CH11 F03 turno sintético Selenium')")
+        self.assertIsNotNone(persisted)
+        self.assertEqual(persisted['patientId'], 'patient-demo-001')
+        record_pass('AGENDA-SHIFT-SAVE', 'SEL-CH11-AGENDA-PATIENT-CONTEXT-SAVE', started, self.driver.current_url)
 
     def test_admin_navigates_existing_calendar_views_without_mutation(self) -> None:
         started = time.time()

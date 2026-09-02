@@ -1,9 +1,10 @@
 # CH11 review checkpoint
 
-CH11-F01/F02/F03 are verified as safe, factual partials at functional fingerprint `6ba89ef4ba71806208497384cbc64236b13a9293c4e7dc39d2a203f9053f79c7`.
+CH11-F01/F02/F03/F06 are verified as safe, factual partials at functional fingerprint `dc4e47941a4806b75603d91c2fcea2f72fee86242864ef20093e46f83b38f3b6`.
 
 - CH11-E0010/E0015 support the searchable patient criterion, selected-patient context, and colored calendar events. The React implementation filters existing synthetic shifts only; it creates, edits, deletes, or classifies no visit.
-- CH11-E0022 supports the observed patient-turn form. The authorized dialog shows only document and company already held by the selected synthetic patient as read-only factual context; Cerrar leaves shifts and audit entries unchanged. No visit, frequency, classification, type, discount, availability, or financial behavior is introduced.
+- CH11-E0022 supports the observed patient-turn form. The authorized dialog shows only document and company already held by the selected synthetic patient as read-only factual context; Cerrar leaves shifts and audit entries unchanged, while Guardar persists and reloads only the existing B3 synthetic shift with its selected patient linkage. No visit, frequency, classification, type, discount, availability, or financial behavior is introduced.
+- CH11-E0050 supports the observed Agenda/Actualizaciones detail layout. The React detail is limited to factual timing, patient and assigned-resource values from an existing synthetic shift; DOCTOR opens/closes it without mutation and the Actualizaciones tab remains visibly disabled under CH11-Q002/Q006. It does not label a visit final, collect clinical observations, or expose deletion, payments, or availability behavior.
 - CH11-E0010 supports previous/today/next and Mes, Semana, Lista por semana and Lista por día. These now project only existing synthetic shifts; focused Playwright passed 4/4 for patient filtering, DOCTOR view access, INVENTORY direct-route denial, and every F02 view/navigation control without mutation after reload.
 - Eliminar visitas is visible but disabled with an accessible CH11-Q004/Q006 explanation. No deletion, clinical classification, availability, settlement, billing, or Puntual behavior was created.
 - Selenium source coverage is action-specific but remains `PENDING_RUNTIME` because Python is unavailable.
