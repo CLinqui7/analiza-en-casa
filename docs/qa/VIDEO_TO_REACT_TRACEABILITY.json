@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T10:18:01-06:00",
-  "metadata_generated_from_commit": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
+  "generated_at": "2026-09-02T10:43:53-06:00",
+  "metadata_generated_from_commit": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
   "implementation_sha": "PENDING_COMMIT",
   "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",

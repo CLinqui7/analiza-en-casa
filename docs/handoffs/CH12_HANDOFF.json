@@ -2,10 +2,10 @@
   "lot": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
   "source_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
   "base_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
-  "verification_status": "PENDING_GIT_WRITE",
-  "final_sha": null,
-  "remote_sha": null,
-  "commits": [],
+  "verification_status": "PENDING_REMOTE_VERIFICATION",
+  "final_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "remote_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "commits": ["c371d47f43096b76b26d2eadc5dbfa48924322a6"],
   "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
   "changed_files": [
     "apps/web/src/app/(workspace)/payables/page.tsx",
@@ -45,7 +45,7 @@
   "blockers": [
     "CH12-Q001/Q002/Q003/Q005/Q006/Q007/Q008/Q009/Q010/Q011: payment records, financial states, period, amounts, authorization, report/export, clearing, claims, reason catalog and audit/reversal rules require approved client definitions.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
-    "Git metadata writes are denied by the workspace sandbox, so this checkpoint has no implementation or remote SHA yet."
+    "The implementation checkpoint is c371d47f43096b76b26d2eadc5dbfa48924322a6. Its local tracking ref matches, but fresh remote fetch verification is blocked by unavailable Windows Schannel credentials."
   ],
   "next_batch": "CH12_REVIEW"
 }

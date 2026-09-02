@@ -1,6 +1,6 @@
 {
   "lot": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT",
   "handoff": "docs/handoffs/CH12_HANDOFF.json",
-  "final_sha": null,
+  "final_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
   "next_batch": "CH12_REVIEW"
 }
