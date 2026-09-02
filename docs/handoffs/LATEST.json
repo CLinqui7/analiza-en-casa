@@ -1,6 +1,6 @@
 {
   "lot": "CH16_PRECHECK",
   "handoff": "docs/handoffs/CH16_PRECHECK_HANDOFF.json",
-  "final_sha": null,
+  "final_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "next_batch": "CH16_REVIEW"
 }

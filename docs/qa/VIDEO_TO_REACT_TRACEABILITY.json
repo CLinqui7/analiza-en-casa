@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T16:59:40-06:00",
-  "metadata_generated_from_commit": "923d82f13716060d1d8d76cfe08bc7fc99a22665",
+  "generated_at": "2026-09-02T17:18:16-06:00",
+  "metadata_generated_from_commit": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "source_sha256": "2947c9ea88a3dd655bd016a9a17f4c825eae076a07a537bab667a0b79c76e3e7",
-  "implementation_sha": "PENDING_COMMIT",
+  "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "94e78fc11f173fe811781bcc5abf12554c4b36d36dd69e88077ebb8d0e9d925f",
   "requirements": [
     {
@@ -7704,8 +7704,8 @@
         "CH16-Q005"
       ],
       "blocker_reason": "CH16-E0001/E0018 muestran la matriz y sus seis familias, pero CH16-Q001/Q002/Q003/Q005 no definen fuente autorizada, perfiles, categorías, valores, precedencia, cálculo, roles de escritura, validación ni auditoría. React no copia filas ni aplica efectos financieros.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "React reutiliza sólo la matriz factual vacía de /catalogs/discounts: columnas, búsqueda local y controles visibles/deshabilitados. Playwright cubre lectura ADMIN/INVENTORY/AUDITOR y denegación directa de DOCTOR/NURSE/FINANCE; Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "last_verified_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
+      "notes": "React reutiliza sólo la matriz factual vacía de /catalogs/discounts: columnas, búsqueda local y controles visibles/deshabilitados. Playwright cubre lectura ADMIN/INVENTORY/AUDITOR y denegación directa de DOCTOR/NURSE/FINANCE; Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en 02c901a."
     },
     {
       "requirement_id": "CH16-F02",
