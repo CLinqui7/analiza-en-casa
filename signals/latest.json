@@ -1,7 +1,23 @@
-﻿{
-    "event_id":  "274fd0cc-f1cd-4be4-920e-20dbddce3906",
-    "message":  "Analiza Brain v3 signal channel ready.",
-    "detected_at":  "2026-09-01T23:59:37.6070779-06:00",
-    "type":  "SUPERVISOR_READY",
-    "needs_review":  false
+{
+  "event_id": "05427bdb-cbc2-4d4a-b19a-0fb7a44d45af",
+  "type": "BLOCKED_GLOBAL",
+  "detected_at": "2026-09-02T06:01:53.069Z",
+  "needs_review": true,
+  "development_branch": "codex/react-full-parity-selenium-100",
+  "dev_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "batch": "B1 checkpoint",
+  "problems": [
+    {
+      "severity": "critical",
+      "requirement_ids": [],
+      "client_change_ids": [],
+      "files": [
+        "S:\\Usuarios\\Carlos\\carlo\\Analiza_Brain\\supervisor\\BRAIN_POLICY.md",
+        "S:\\Usuarios\\Carlos\\carlo\\Analiza_Brain\\analiza-en-casa"
+      ],
+      "evidence": "`Get-Content` and `Get-ChildItem` on the policy/repository paths return AccessDenied/PathNotFound; commands execute from C:\\ rather than the supplied S:\\ workspace. Consequently git reports no repository.",
+      "instruction": "Restore read access and correct the supervisor shell working-directory mapping, then rerun this checkpoint. Do not treat B1 as approved from its handoff alone."
+    }
+  ],
+  "message": "Independent review cannot begin: the read-only sandbox denies access to the required policy and repository paths, and ignores the supplied workspace working directory. I therefore cannot inspect the actual code, diff, tests, certifications, or video/client contracts as required."
 }
