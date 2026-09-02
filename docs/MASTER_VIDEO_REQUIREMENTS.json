@@ -6498,25 +6498,34 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0041",
-          "timestamp": "00:41:38.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg",
+          "event_id": "CH14-E0042",
+          "timestamp": "00:41:43.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0042_00h41m43s000ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "La transición desde Acuses abre Inventario / Cierres con las pestañas Pendientes, Cierres totales, Cerrados y Recursos; Pendientes muestra el encabezado Pacientes activos y las columnas observadas."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0044",
+          "timestamp": "00:41:44.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0044_00h41m44s200ms_stable_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Pendientes presenta filas de pacientes activos con Acciones, DUI/NIT, Paciente, Empresa, Estado y Fecha de inicio."
         }
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
         "patient_safety_impact": "La vista no cierra hospitalizaciones ni cambia estados clínicos.",
         "financial_impact": "No aplica conciliación financiera sin aprobación.",
-        "current_platform_evidence": "app/views.js renderInventoryClosures; app/store.js createInventoryClosure",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Mantener sólo lectura hasta resolver CH14-Q007.",
+        "current_platform_evidence": "No existe una superficie React de Cierres ni una ruta React equivalente; /inventory actualmente cubre Items, historial factual y Acuses.",
+        "test_path": "Sin prueba React aplicable hasta implementar una superficie factual de Cierres.",
+        "recommended_action": "Primero implementar una superficie de solo lectura y sin datos de pacientes/casos; mantener todas las transiciones cerradas hasta resolver CH14-Q007.",
         "blocked_by_client_information": true,
-        "notes": "Cuatro pestañas y casos visibles; mutaciones cerradas."
+        "notes": "CH14-E0041 fue revisado y corresponde a Acuses, no a Cierres. La evidencia correcta de la anatomía de Cierres es CH14-E0042/E0044; no hay implementación React actual."
       }
     },
     {

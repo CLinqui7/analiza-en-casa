@@ -1,5 +1,7 @@
-# CH14 F04 · Acuses
+# CH14 F06 · Reconciliación de evidencia de Cierres
 
-CH14-F04 implements the evidence-backed, read-only `Inventario / Acuses` surface from CH14-E0029. It shows the Tipo Área control, the five observed tabs, and the observed table anatomy. Only roles that already hold both `patients:read` and `cases:read` see existing synthetic patient/case rows; INVENTORY-only receives an explicit access-scoped empty state.
+CH14-F04 remains the evidence-backed, read-only `Inventario / Acuses` surface from CH14-E0029. Its Pacientes tab is a factual empty table for every inventory reader: the component does not query or receive patient/case collections.
 
-The Acuses panel does not create acknowledgements, change statuses, reserve stock, expose unscoped patient data, or fabricate resources, availability, requests, or tasks. Those sources remain factual empty states under CH14-Q002. Focused CH14 Playwright passes 5/5; typecheck, CH14/protected parity, traceability generation/mirror, light-only, and audit verification pass against the dirty F04 worktree. Selenium source is executable but remains PENDING_RUNTIME because Python is unavailable. The pre-F04 base checkpoint is `7912d2930007b1cb843b57c88ccc757e34ec126d`.
+CH14-F06 evidence was reconciled without changing immutable video files. `CH14-E0041` is Acuses, so it was removed from F06. `CH14-E0042` opens `Inventario / Cierres` with Pendientes, Cierres totales, Cerrados and Recursos; `CH14-E0044` shows the Pendientes factual table. There is no React Cierres surface, so F06 is explicitly MISSING and unverified under CH14-Q007. No patient/case source, closure transition, approval, cancellation, reconciliation or financial behavior was introduced.
+
+Typecheck, CH14 and protected parity, traceability generation/mirror, light-only and audit verification pass. Selenium remains PENDING_RUNTIME because Python is unavailable. Git metadata writes remain unavailable, so this combined F04/F06 worktree has no claimed implementation SHA.

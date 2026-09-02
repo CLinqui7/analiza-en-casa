@@ -76,6 +76,8 @@ test('CH14 shows the read-only Acuses anatomy and factual empty sources without 
   await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
+  await expect(page.getByText('Sin pacientes documentados')).toBeVisible();
+  await expect(page.getByText('Paciente Demo Aurora')).toHaveCount(0);
   await page.locator('[data-action-id="INVENTORY-ACK-TAB-RESOURCES"]').click();
   await expect(page.getByText('Sin recursos documentados')).toBeVisible();
   await page.locator('[data-action-id="INVENTORY-ACK-TAB-UNAVAILABLE"]').click();
@@ -88,11 +90,18 @@ test('CH14 shows the read-only Acuses anatomy and factual empty sources without 
   await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
 });
 
-test('CH14 keeps Acuses patient data outside INVENTORY-only scope', async ({ browser }) => {
+test('CH14 Acuses does not source patient or case data for any inventory reader', async ({ browser }) => {
+  const admin = await browser.newPage();
+  await login(admin);
+  await admin.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click();
+  await expect(admin.getByText('Sin pacientes documentados')).toBeVisible();
+  await expect(admin.getByText('Paciente Demo Aurora')).toHaveCount(0);
+  await admin.close();
   const inventory = await browser.newPage();
   await login(inventory, 'inventory@demo.local', 'demo-inventory');
   await inventory.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]').click();
-  await expect(inventory.getByText('Datos de pacientes no autorizados')).toBeVisible();
-  await expect(inventory.getByRole('columnheader', { name: 'Paciente' })).toHaveCount(0);
+  await expect(inventory.getByText('Sin pacientes documentados')).toBeVisible();
+  await expect(inventory.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
+  await expect(inventory.getByText('Paciente Demo Aurora')).toHaveCount(0);
   await inventory.close();
 });

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T11:47:07-06:00",
-  "metadata_generated_from_commit": "7912d2930007b1cb843b57c88ccc757e34ec126d",
-  "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "30b4f46230201db9043a9cc1291981e5b7e8478f",
-  "functional_fingerprint": "c9230b06ec30300e2fd2bf90cc85d9a3dc4a5486dfa370a03a6924934c7ebbcf",
+  "generated_at": "2026-09-02T12:01:43-06:00",
+  "metadata_generated_from_commit": "f991e6f7e030162ebfdd5d3a8664085df0b6529a",
+  "source_sha256": "a00cf7f8f1f38fdfbae7aca5d9080b66fc144b14b48622fd5d8e17de4e6d2707",
+  "implementation_sha": "PENDING_COMMIT",
+  "functional_fingerprint": "6d729eafd38ded0ff4814b6895213250a2643e9f1663a11c9589173699fb6317",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6439,9 +6439,9 @@
       "blocker_ids": [
         "CH14-Q002"
       ],
-      "blocker_reason": "La máquina de estados, acciones, área, solicitudes, tareas, idempotencia y auditoría de acuses no están definidas; Recursos, No disponible, Solicitudes y Tareas permanecen como fuentes vacías explícitas.",
+      "blocker_reason": "La máquina de estados, acciones, área, solicitudes, tareas, idempotencia y auditoría de acuses no están definidas; no existe una fuente autorizada de acuses de pacientes/casos y todas las fuentes permanecen vacías explícitas.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0029 respalda Inventario / Acuses, Tipo Área, las cinco pestañas y las columnas ID/Acciones/Identificación/Paciente/Empresa/Estado. Sólo ADMIN y AUDITOR, con patients:read y cases:read, ven filas sintéticas existentes; INVENTORY-only recibe una exclusión explícita y ninguna acción muta auditoría."
+      "notes": "CH14-E0029 respalda Inventario / Acuses, Tipo Área, las cinco pestañas y las columnas ID/Acciones/Identificación/Paciente/Empresa/Estado. La pestaña Pacientes reproduce la anatomía observada como tabla factual vacía para todos los roles: el componente no consulta ni recibe pacientes u hospitalizaciones. Abrir, alternar pestañas y recargar no mutan auditoría."
     },
     {
       "requirement_id": "CH14-F05",
@@ -6491,7 +6491,8 @@
       "classification": "VISIBLE",
       "priority": "P1",
       "evidence_paths": [
-        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg"
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0042_00h41m43s000ms_abrupt_change.jpg",
+        "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0044_00h41m44s200ms_stable_change.jpg"
       ],
       "open_question_ids": [],
       "route_id": "ROUTE-INVENTORY",
@@ -6501,7 +6502,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6510,11 +6511,13 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH14-Q007"
+      ],
+      "blocker_reason": "La evidencia muestra la superficie de Cierres, pero no define fuente autorizada, roles, transiciones, aprobación, cancelación, conciliación, reversión ni relación administrativa/financiera. No existe todavía una superficie React de Cierres.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Corrección de evidencia: CH14-E0041 es Acuses y no respalda este requisito. CH14-E0042 inicia Inventario / Cierres y CH14-E0044 muestra Pendientes con sus columnas. No se implementó ni certificó comportamiento de cierres durante la reconciliación."
     },
     {
       "requirement_id": "CH14-F07",
