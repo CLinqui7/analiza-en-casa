@@ -1,5 +1,8 @@
 import { defineConfig } from '@playwright/test';
 
+const port = process.env.PLAYWRIGHT_PORT ?? '4174';
+const baseURL = `http://127.0.0.1:${port}`;
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
@@ -7,7 +10,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['line']],
   use: {
-    baseURL: 'http://127.0.0.1:4174',
+    baseURL,
     browserName: 'chromium',
     channel: 'chrome',
     headless: true,
@@ -15,8 +18,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run dev --workspace=@analiza/web -- --port 4174',
-    url: 'http://127.0.0.1:4174',
+    command: `npm run dev --workspace=@analiza/web -- --port ${port}`,
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 60_000,
   },

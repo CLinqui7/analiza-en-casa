@@ -12,6 +12,9 @@ const inventory = JSON.parse(await readFile(resolve(root, 'docs/qa/UI_ACTION_INV
 const certificationPath = resolve(root, 'docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json');
 const certificationDocument = existsSync(certificationPath) ? JSON.parse(await readFile(certificationPath, 'utf8')) : { certifications: {} };
 const certifications = certificationDocument.certifications ?? certificationDocument;
+const traceabilityPath = resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json');
+const existingTraceability = existsSync(traceabilityPath) ? JSON.parse(await readFile(traceabilityPath, 'utf8')) : { requirements: [] };
+const reviewedRequirements = new Map((existingTraceability.requirements ?? []).map((item) => [item.requirement_id, item]));
 const sha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const generatedAt = execFileSync('git', ['show', '-s', '--format=%cI', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const functionalFingerprint = ch01FunctionalFingerprint(root);
@@ -32,7 +35,13 @@ const ch01Actions = {
 };
 const status = (assessment) => ({ IMPLEMENTED_EXACT: 'EXACT', IMPLEMENTED_PARTIAL: 'PARTIAL', MISSING: 'MISSING', BLOCKED_CLIENT: 'BLOCKED_CLIENT', BLOCKED_INTEGRATION: 'BLOCKED_INTEGRATION', NOT_TESTABLE: 'NOT_TESTABLE' }[assessment.status] ?? 'NOT_TESTABLE');
 const csv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
-const columns = ['requirement_id','chapter_id','feature','detailed_behavior','classification','priority','evidence_paths','open_question_ids','route_id','react_route','react_files','component_ids','action_ids','parity_status','functional_status','persistence_status','permissions_status','performance_status','unit_test_ids','playwright_test_ids','selenium_test_ids','visual_test_ids','blocker_type','blocker_ids','blocker_reason','last_verified_sha','notes'];
+const columns = ['requirement_id','chapter_id','feature','detailed_behavior','classification','priority','evidence_paths','open_question_ids','route_id','react_route','react_files','component_ids','action_ids','parity_status','functional_status','persistence_status','permissions_status','performance_status','unit_test_ids','playwright_test_ids','selenium_test_ids','visual_test_ids','blocker_type','blocker_ids','blocker_reason','last_verified_sha','functional_fingerprint','notes'];
+const reviewedMetadataFields = [
+  'open_question_ids', 'route_id', 'react_route', 'react_files', 'component_ids', 'action_ids',
+  'parity_status', 'functional_status', 'persistence_status', 'permissions_status', 'performance_status',
+  'unit_test_ids', 'playwright_test_ids', 'selenium_test_ids', 'visual_test_ids', 'blocker_type',
+  'blocker_ids', 'blocker_reason', 'last_verified_sha', 'notes',
+];
 
 function filesFor(route) {
   return (route?.evidence ?? []).filter((value) => value.startsWith('apps/web/'));
@@ -53,7 +62,7 @@ const requirements = canonical.requirements.map((requirement) => {
   const actionIds = ch01Actions[requirement.requirement_id] ?? [];
   const tests = actionTests(actionIds);
   const blocker = parityStatus.startsWith('BLOCKED') || parityStatus === 'NOT_TESTABLE';
-  return {
+  const generated = {
     requirement_id: requirement.requirement_id, chapter_id: requirement.chapter_id, feature: requirement.feature,
     detailed_behavior: requirement.detailed_behavior, classification: requirement.classification,
     priority: requirement.platform_assessment.priority, evidence_paths: requirement.evidence.flatMap((item) => [item.path, item.detail_path].filter(Boolean)),
@@ -65,6 +74,12 @@ const requirements = canonical.requirements.map((requirement) => {
     blocker_reason: blocker ? requirement.platform_assessment.notes : null, last_verified_sha: certification?.implementation_sha ?? certificationDocument.implementation_sha ?? null,
     notes: certification?.notes ?? `Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.`,
   };
+  const reviewed = reviewedRequirements.get(requirement.requirement_id);
+  if (!reviewed) return generated;
+  const preserved = Object.fromEntries(reviewedMetadataFields
+    .filter((field) => Object.hasOwn(reviewed, field))
+    .map((field) => [field, reviewed[field]]));
+  return { ...generated, ...preserved };
 });
 
 const output = { schema_version: 2, generated_at: generatedAt, metadata_generated_from_commit: sha, source_sha256: createHash('sha256').update(JSON.stringify(canonical.requirements)).digest('hex'), implementation_sha: certificationDocument.implementation_sha ?? null, functional_fingerprint: functionalFingerprint, requirements };
@@ -87,8 +102,12 @@ const correctedRoutes = {
   }),
 };
 const markdown = ['# Trazabilidad video → React → prueba', '', '> Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.', '', `Commit generador: \`${sha}\``, `SHA de implementación: \`${certificationDocument.implementation_sha ?? 'pendiente'}\``, `Fingerprint funcional CH01: \`${functionalFingerprint}\``, '', '| Requisito | Ruta | Estado | Acciones |', '|---|---|---|---|', ...requirements.map((item) => `| ${item.requirement_id} | ${item.react_route ?? 'Sin ruta'} | ${item.parity_status} | ${item.action_ids.join(', ') || '—'} |`), ''].join('\n');
-const values = (item) => columns.map((column) => csv(Array.isArray(item[column]) ? item[column].join('|') : item[column])).join(',');
-const appSummary = `// Generated by qa:video-parity:generate. Do not edit manually.\nexport const videoParitySummary = ${JSON.stringify({ generatedAt, sourceSha: certificationDocument.implementation_sha ?? null, functionalFingerprint, chapters: canonical.chapters.length, ...summary }, null, 2)} as const;\n`;
+const values = (item) => columns.map((column) => {
+  const value = column === 'functional_fingerprint' ? functionalFingerprint : item[column];
+  return csv(Array.isArray(value) ? value.join('|') : value);
+}).join(',');
+const appSummaryPayload = JSON.stringify({ generatedAt, sourceSha: certificationDocument.implementation_sha ?? null, functionalFingerprint, chapters: canonical.chapters.length, ...summary }, null, 2);
+const appSummary = `// Generated by qa:video-parity:generate. Do not edit manually.\nexport const videoParitySummary = ${appSummaryPayload.replace(/"sourceSha": (null|"[^"]*")/, '"sourceSha": $1 as string | null')} as const;\n`;
 
 await Promise.all([
   writeFile(resolve(root, 'docs/qa/VIDEO_TO_REACT_TRACEABILITY.json'), `${JSON.stringify(output, null, 2)}\n`),

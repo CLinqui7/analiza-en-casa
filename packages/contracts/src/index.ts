@@ -88,6 +88,25 @@ export const nursingResourceSchema = z.object({
   boardRegistrationNumber: z.string().trim().min(1),
 });
 
+export const doctorAttachmentSchema = z.object({
+  id: z.string(),
+  name: z.string().trim().min(1),
+  mimeType: z.string().trim().optional(),
+  size: z.number().int().nonnegative(),
+});
+
+export const doctorSchema = z.object({
+  id: z.string(),
+  fullName: z.string().trim().min(1),
+  jvpm: z.string().trim().min(1),
+  documentId: z.string().trim().min(1),
+  specialty: z.string().trim().min(1),
+  phone: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+  address: z.string().trim().min(1),
+  attachments: z.array(doctorAttachmentSchema).default([]),
+});
+
 export const nurseHourEntrySchema = z.object({
   id: z.string(),
   resourceId: z.string(),
@@ -124,6 +143,10 @@ export const hospitalizationSchema = z.object({
   patientId: z.string(),
   startDate: z.string(),
   endDate: z.string().optional(),
+  admissionPeriods: z.array(z.object({
+    admissionDate: z.string(),
+    dischargeDate: z.string().optional(),
+  })).min(1).optional(),
   status: z.enum(['ACTIVE', 'PENDING_CLOSE', 'CLOSED']),
   accountType: z.string().trim().min(1),
   insurer: z.string().trim().optional(),
@@ -132,6 +155,26 @@ export const hospitalizationSchema = z.object({
   diagnosisSummary: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
   devices: z.array(z.string().trim().min(1)).optional(),
+  /**
+   * Administrative execution-profile fields observed in CH08. They are
+   * descriptive only and never create insurance, billing, coverage, tax, or
+   * clinical rules.
+   */
+  administrativeProfile: z.object({
+    healthManager: z.string().trim().optional(),
+    referredBy: z.string().trim().optional(),
+    revenueType: z.string().trim().optional(),
+    type: z.string().trim().optional(),
+    startDate: z.string().trim().optional(),
+    durationDays: z.string().trim().optional(),
+    paymentMethod: z.string().trim().optional(),
+    insurer: z.string().trim().optional(),
+    requestType: z.string().trim().optional(),
+    majorCategory: z.string().trim().optional(),
+    subcategory: z.string().trim().optional(),
+    originatingHospital: z.string().trim().optional(),
+    patientClass: z.string().trim().optional(),
+  }).optional(),
 });
 
 export const quoteItemCategorySchema = z.enum([
@@ -148,6 +191,10 @@ export const quoteItemSchema = z.object({
   id: z.string(),
   category: quoteItemCategorySchema,
   name: z.string().trim().min(1),
+  doctorId: z.string().trim().optional(),
+  doctorName: z.string().trim().optional(),
+  /** Administrative label selected in the quote UI; never a rate or coverage rule. */
+  businessPartnerLabel: z.string().trim().optional(),
   quantity: z.number().positive(),
   unitPrice: z.number().nonnegative(),
   discountAmount: z.number().nonnegative().default(0),
@@ -170,6 +217,8 @@ export const quoteSchema = z.object({
   invoiceDate: z.string().optional(),
   discountGroup: z.string().trim().optional(),
   referralLabel: z.string().trim().optional(),
+  /** Multiple administrative referral labels observed in CH04; no attribution rule is implied. */
+  referralSelections: z.array(z.string().trim().min(1)).optional(),
   giftCardCode: z.string().trim().optional(),
   comments: z.string().trim().optional(),
   items: z.array(quoteItemSchema).default([]),
@@ -268,6 +317,8 @@ export type PatientContact = z.infer<typeof patientContactSchema>;
 export type PatientAddress = z.infer<typeof patientAddressSchema>;
 export type VitalReading = z.infer<typeof vitalReadingSchema>;
 export type NursingResource = z.infer<typeof nursingResourceSchema>;
+export type DoctorAttachment = z.infer<typeof doctorAttachmentSchema>;
+export type Doctor = z.infer<typeof doctorSchema>;
 export type NurseHourEntry = z.infer<typeof nurseHourEntrySchema>;
 export type Shift = z.infer<typeof shiftSchema>;
 export type Hospitalization = z.infer<typeof hospitalizationSchema>;

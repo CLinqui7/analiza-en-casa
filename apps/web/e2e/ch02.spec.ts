@@ -7,6 +7,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch02-contacts-address-map-back-save
 // test-id: playwright:ch02-mobile-form-modal-map
 // test-id: playwright:cr002-resident-card
+// test-id: playwright:cr004-contact-document-pair
 
 async function login(page: import('@playwright/test').Page, path = '/patients') {
   await page.goto(`/login?next=${encodeURIComponent(path)}`);
@@ -24,8 +25,9 @@ async function openForm(page: import('@playwright/test').Page) {
 async function fillRequired(
   dialog: ReturnType<import('@playwright/test').Page['getByRole']>,
   suffix: string,
+  documentType: 'OTHER' | 'RESIDENT_CARD' = 'OTHER',
 ) {
-  await dialog.getByLabel('Tipo de documento').selectOption('OTHER');
+  await dialog.getByLabel('Tipo de documento').selectOption(documentType);
   await dialog.getByLabel('Número de documento').fill(`CH02-${suffix}`);
   await dialog.getByLabel('Nombre completo').fill(`Paciente CH02 ${suffix}`);
   await dialog.getByLabel('Fecha de nacimiento').fill('1990-01-01');
@@ -82,12 +84,84 @@ test('CH02-F006-F012 searchable demographics, consent, insurer holder modal and 
   await expect(dialog.getByRole('status')).toContainText('Cobertura única preparada');
 });
 
-test('CR-002 admits a resident-card identifier without inventing its format', async ({ page }) => {
+test('CR-002 saves, reloads, and edits a resident-card identifier without inventing its format', async ({ page }) => {
   await login(page);
   const dialog = await openForm(page);
-  await dialog.getByLabel('Tipo de documento').selectOption('RESIDENT_CARD');
-  await dialog.getByLabel('Número de documento').fill('RES-QA-001');
+  await fillRequired(dialog, 'RESIDENT-001', 'RESIDENT_CARD');
   await expect(dialog.getByText(/Formato oficial pendiente/)).toBeVisible();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page).toHaveURL(/\/patients$/);
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('CH02-RESIDENT-001');
+  await page.getByRole('row', { name: /Paciente CH02 RESIDENT-001/ }).getByRole('link', { name: 'Detalle' }).click();
+  await expect(page.getByText('RESIDENT_CARD', { exact: true })).toBeVisible();
+  await expect(page.getByText('CH02-RESIDENT-001', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
+  await expect(editDialog.getByLabel('Tipo de documento')).toHaveValue('RESIDENT_CARD');
+  await expect(editDialog.getByLabel('Número de documento')).toHaveValue('CH02-RESIDENT-001');
+  await editDialog.getByLabel('Número de documento').fill('RES-QA-EDIT-001');
+  await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(editDialog).toHaveCount(0);
+  await expect(page).toHaveURL(/\/patients$/);
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('RES-QA-EDIT-001');
+  await page.getByRole('row', { name: /Paciente CH02 RESIDENT-001/ }).getByRole('link', { name: 'Detalle' }).click();
+  await expect(page.getByText('RES-QA-EDIT-001', { exact: true })).toBeVisible();
+});
+
+test('CR-004 rejects partial responsible-contact documents and persists a completed pair through edit', async ({ page }) => {
+  await login(page);
+  const dialog = await openForm(page);
+  await fillRequired(dialog, 'CONTACT-DOCUMENT');
+  await dialog.getByRole('button', { name: 'Agregar contacto' }).click();
+  const contact = dialog.getByRole('group', { name: 'Contacto 1' });
+  await contact.getByLabel('Nombre', { exact: true }).fill('Responsable CH02');
+  await contact.getByLabel('Número de documento del contacto').fill('CONTACT-CH02-001');
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole('status')).toHaveCount(0);
+  await expect(contact.getByRole('alert')).toHaveText(
+    'Seleccione el tipo de documento del contacto.',
+  );
+  await dialog.getByRole('button', { name: 'Atrás' }).click();
+
+  const validDialog = await openForm(page);
+  await fillRequired(validDialog, 'CONTACT-DOCUMENT');
+  await validDialog.getByRole('button', { name: 'Agregar contacto' }).click();
+  const validContact = validDialog.getByRole('group', { name: 'Contacto 1' });
+  await validContact.getByLabel('Nombre', { exact: true }).fill('Responsable CH02');
+  await validContact.getByLabel('Tipo de documento del contacto').selectOption('DUI');
+  await validContact.getByLabel('Número de documento del contacto').fill('CONTACT-CH02-001');
+  await validDialog.getByRole('button', { name: 'Guardar' }).click();
+  await expect(validDialog).toHaveCount(0);
+  await expect(page).toHaveURL(/\/patients$/);
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('CH02-CONTACT-DOCUMENT');
+  await page.getByRole('row', { name: /Paciente CH02 CONTACT-DOCUMENT/ }).getByRole('link', { name: 'Detalle' }).click();
+  await expect(page.getByText('CONTACT-CH02-001', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
+  const editContact = editDialog.getByRole('group', { name: 'Contacto 1' });
+  await expect(editContact.getByLabel('Tipo de documento del contacto')).toHaveValue('DUI');
+  await expect(editContact.getByLabel('Número de documento del contacto')).toHaveValue('CONTACT-CH02-001');
+  await editContact.getByLabel('Número de documento del contacto').fill('CONTACT-CH02-EDIT');
+  await expect(editContact.getByLabel('Número de documento del contacto')).toHaveValue('CONTACT-CH02-EDIT');
+  await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(editDialog).toHaveCount(0);
+  await expect(page).toHaveURL(/\/patients$/);
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('CH02-CONTACT-DOCUMENT');
+  await page.getByRole('row', { name: /Paciente CH02 CONTACT-DOCUMENT/ }).getByRole('link', { name: 'Detalle' }).click();
+  await expect(page.getByText('CONTACT-CH02-EDIT', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  const reopenedDialog = page.getByRole('dialog', { name: 'Editar paciente' });
+  const reopenedContact = reopenedDialog.getByRole('group', { name: 'Contacto 1' });
+  await expect(reopenedContact.getByLabel('Tipo de documento del contacto')).toHaveValue('DUI');
+  await expect(reopenedContact.getByLabel('Número de documento del contacto')).toHaveValue(
+    'CONTACT-CH02-EDIT',
+  );
 });
 
 test('CH02-F013-F016 contacts, safe link import, map, back and persistence', async ({ page }) => {

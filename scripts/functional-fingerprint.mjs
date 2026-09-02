@@ -26,6 +26,7 @@ export const ch01Scope = [
   'docs/qa/UI_ACTION_INVENTORY.json',
   'scripts/generate-video-react-traceability.mjs',
   'scripts/verify-video-react-parity.mjs',
+  'scripts/verify-video-traceability-mirror.mjs',
   'scripts/functional-fingerprint.mjs',
   'scripts/print-functional-fingerprint.mjs',
 ];

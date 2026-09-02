@@ -1,6 +1,6 @@
 'use client';
 
-import type { CatalogItem, ClinicalDocument, Hospitalization, InsuranceEvent, InsuranceRequest, InsuranceRequestStatus, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Doctor, Hospitalization, InsuranceEvent, InsuranceRequest, InsuranceRequestStatus, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { appendInsuranceEvent, calculateQuoteTotals, canEditQuote, hasValidInsuranceRequestContext, isInsuranceRequestStatus } from '@analiza/domain';
@@ -32,6 +32,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   updatePatient: (patient: Patient) => void;
   addVitalReading: (reading: VitalReading) => void;
   addNursingResource: (resource: NursingResource) => void;
+  addDoctor: (doctor: Doctor) => void;
+  updateDoctor: (doctor: Doctor) => void;
   addNurseHour: (entry: NurseHourEntry) => void;
   addInventoryMovement: (movement: InventoryMovement) => void;
   addShift: (shift: Shift) => void;
@@ -157,6 +159,25 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         nursingResources: [...current.nursingResources, resource],
         auditEntries: [audit('Recurso de enfermería registrado', resource.id), ...current.auditEntries],
       })),
+      addDoctor: (doctor) => {
+        if (!can('settings:write')) return;
+        commit((current) => ({
+          ...current,
+          doctors: [...current.doctors, doctor],
+          auditEntries: [audit('Médico registrado', doctor.id), ...current.auditEntries],
+        }));
+      },
+      updateDoctor: (doctor) => {
+        if (!can('settings:write')) return;
+        commit((current) => {
+          if (!current.doctors.some((candidate) => candidate.id === doctor.id)) return current;
+          return {
+            ...current,
+            doctors: current.doctors.map((candidate) => candidate.id === doctor.id ? doctor : candidate),
+            auditEntries: [audit('Médico actualizado', doctor.id), ...current.auditEntries],
+          };
+        });
+      },
       addNurseHour: (entry) => commit((current) => ({
         ...current,
         nurseHours: [...current.nurseHours, entry],
@@ -167,11 +188,14 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         inventoryMovements: [...current.inventoryMovements, movement],
         auditEntries: [audit('Movimiento de inventario registrado', movement.id), ...current.auditEntries],
       })),
-      addShift: (shift) => commit((current) => ({
-        ...current,
-        shifts: [...current.shifts, shift],
-        auditEntries: [audit('Turno registrado', shift.id), ...current.auditEntries],
-      })),
+      addShift: (shift) => {
+        if (!can('agenda:write')) return;
+        commit((current) => ({
+          ...current,
+          shifts: [...current.shifts, shift],
+          auditEntries: [audit('Turno registrado', shift.id), ...current.auditEntries],
+        }));
+      },
       addHospitalization: (hospitalization) => {
         if (!can('cases:write')) return;
         commit((current) => ({

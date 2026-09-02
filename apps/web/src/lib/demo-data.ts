@@ -2,6 +2,7 @@ import type {
   InventoryMovement,
   NurseHourEntry,
   NursingResource,
+  Doctor,
   Patient,
   VitalReading,
   Shift,
@@ -20,6 +21,7 @@ export const demoPatients: Patient[] = [
     documentType: 'DUI',
     documentId: '12345678-9',
     phone: '0000-0000',
+    email: 'aurora.demo@example.test',
     insurer: 'Aseguradora de demostración',
     status: 'ACTIVE',
   },
@@ -75,6 +77,8 @@ export const demoNursingResources: NursingResource[] = [
     boardRegistrationNumber: 'REG-DEMO-002',
   },
 ];
+
+export const demoDoctors: Doctor[] = [];
 
 export const demoNurseHours: NurseHourEntry[] = [
   {

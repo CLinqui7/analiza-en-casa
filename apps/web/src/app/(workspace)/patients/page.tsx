@@ -9,6 +9,7 @@ import {
   maskDui,
   searchPatients,
   toCsv,
+  validateContactDocumentPair,
   validateDocument,
 } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
@@ -50,7 +51,7 @@ const contactFormSchema = z.object({
   relationship: z.string().trim(),
   role: z.string().trim(),
   country: z.string().trim(),
-  documentType: patientDocumentTypeSchema.optional(),
+  documentType: z.union([patientDocumentTypeSchema, z.literal('')]).optional(),
   documentId: z.string().trim(),
   isPrimary: z.boolean(),
 });
@@ -113,6 +114,15 @@ const patientFormSchema = z
         path: ['contacts'],
       });
     }
+    values.contacts.forEach((contact, index) => {
+      const documentPairError = validateContactDocumentPair(contact.documentType, contact.documentId);
+      if (!documentPairError) return;
+      context.addIssue({
+        code: 'custom',
+        message: documentPairError,
+        path: ['contacts', index, contact.documentType ? 'documentId' : 'documentType'],
+      });
+    });
   });
 
 type PatientForm = z.infer<typeof patientFormSchema>;
@@ -558,7 +568,11 @@ export default function PatientsPage() {
       occupation: values.occupation || undefined,
       triageStatus: values.triageStatus || undefined,
       insurance,
-      contacts: values.contacts,
+      contacts: values.contacts.map(({ documentType: contactDocumentType, documentId: contactDocumentId, ...contact }) => ({
+        ...contact,
+        documentType: contactDocumentType || undefined,
+        documentId: contactDocumentId.trim() || undefined,
+      })),
       address: values.address,
       status: editingPatient?.status ?? 'ACTIVE',
       notifications: { botmakerConsent: values.botmakerConsent },
@@ -572,7 +586,6 @@ export default function PatientsPage() {
     );
     closeDialog();
   }
-
   return (
     <div className="page-stack">
       <header className="page-header page-header-actions">
@@ -1269,17 +1282,33 @@ export default function PatientsPage() {
                 </label>
                 <label>
                   Tipo de documento del contacto
-                  <select data-action-id="PATIENT-CONTACT-DOCUMENT-TYPE" {...form.register(`contacts.${index}.documentType`)}>
+                  <select
+                    data-action-id="PATIENT-CONTACT-DOCUMENT-TYPE"
+                    {...form.register(`contacts.${index}.documentType`)}
+                  >
                     <option value="">Sin registrar</option>
                     <option value="DUI">DUI</option>
                     <option value="PASSPORT">Pasaporte</option>
                     <option value="RESIDENT_CARD">Carnet de residente</option>
                     <option value="OTHER">Otro documento</option>
                   </select>
+                  {form.formState.errors.contacts?.[index]?.documentType ? (
+                    <span className="field-error" role="alert">
+                      {form.formState.errors.contacts[index].documentType.message}
+                    </span>
+                  ) : null}
                 </label>
                 <label>
                   Número de documento del contacto
-                  <input data-action-id="PATIENT-CONTACT-DOCUMENT-ID" {...form.register(`contacts.${index}.documentId`)} />
+                  <input
+                    data-action-id="PATIENT-CONTACT-DOCUMENT-ID"
+                    {...form.register(`contacts.${index}.documentId`)}
+                  />
+                  {form.formState.errors.contacts?.[index]?.documentId ? (
+                    <span className="field-error" role="alert">
+                      {form.formState.errors.contacts[index].documentId.message}
+                    </span>
+                  ) : null}
                 </label>
                 <p>{contacts[index]?.isPrimary ? 'Contacto principal' : 'Contacto secundario'}</p>
                 <Button

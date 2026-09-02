@@ -1,6 +1,7 @@
 """Isolated Selenium patient groups; action evidence follows assertions, never clicks."""
 # test-id: SEL-PAT-NAVIGATION
 # test-id: SEL-PAT-DOCUMENT
+# test-id: SEL-PAT-CONTACT-DOCUMENT
 # test-id: SEL-PAT-INSURANCE
 # test-id: SEL-PAT-CONTACTS
 # test-id: SEL-PAT-ADDRESS
@@ -149,6 +150,29 @@ class Patients(unittest.TestCase):
   t=time.time(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1'))); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.pass_('PATIENT-NAVIGATE','SEL-PAT-NAVIGATION',t)
  def test_document_type(s):
   s.open_create(); t=time.time(); Select(s.a('PATIENT-DOCUMENT-TYPE')).select_by_value('PASSPORT'); s.fill('Número de documento','PAS-SEL-001'); s.fill('Nombre completo','Paciente Documento Selenium'); s.fill('Teléfono celular','70007777'); Select(s.a('PATIENT-DOCUMENT-TYPE')).select_by_value('DUI'); s.assertEqual(s.field('Número de documento').get_attribute('value'),''); s.assertEqual(s.field('Nombre completo').get_attribute('value'),'Paciente Documento Selenium'); s.pass_('PATIENT-DOCUMENT-TYPE','SEL-PAT-DOCUMENT',t)
+ def test_contact_document_pair_persists_through_reload_and_edit(s):
+  s.open_create(); s.fill_required('Paciente Contacto Documento Selenium','CONTACT-DOC-SEL-001','70007666'); s.click('PATIENT-CONTACT-ADD')
+  Select(s.d.find_element(By.CSS_SELECTOR,'select[name="contacts.0.documentType"]')).select_by_value('DUI')
+  partial_started=time.time(); s.click('PATIENT-CREATE-SUBMIT')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Ingrese el número de documento del contacto')]")))
+  s.assertIn('Ingrese el número de documento del contacto',s.d.find_element(By.TAG_NAME,'body').text)
+  s.pass_('PATIENT-CONTACT-DOCUMENT-TYPE','SEL-PAT-CONTACT-DOCUMENT',partial_started)
+  s.fill_contact(0,'documentId','CONTACT-DOC-SEL-001')
+  submit_started=time.time(); s.click('PATIENT-CREATE-SUBMIT'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-SUBMIT"]')))
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Registro sintético agregado')]")))
+  s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1')))
+  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('CONTACT-DOC-SEL-001')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Contacto Documento Selenium')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  s.assert_detail_contains('DUI','CONTACT-DOC-SEL-001')
+  s.click('PATIENT-EDIT'); s.w.until(EC.url_contains('edit=')); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))
+  s.assertEqual(Select(s.d.find_element(By.CSS_SELECTOR,'select[name="contacts.0.documentType"]')).first_selected_option.get_attribute('value'),'DUI')
+  s.assertEqual(s.contact_field(0,'documentId').get_attribute('value'),'CONTACT-DOC-SEL-001')
+  s.fill_contact(0,'documentId','CONTACT-DOC-SEL-EDIT')
+  s.click('PATIENT-EDIT-SUBMIT'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'actualizado y persistido')]")))
+  s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1'))); search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('CONTACT-DOC-SEL-001')
+  s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Contacto Documento Selenium')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  s.assert_detail_contains('CONTACT-DOC-SEL-EDIT'); s.pass_('PATIENT-CONTACT-DOCUMENT-ID','SEL-PAT-CONTACT-DOCUMENT',submit_started)
  def test_insurance(s):
   s.open_create(); t=time.time(); Select(s.a('PATIENT-INSURANCE-TOGGLE')).select_by_value('INSURED'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Aseguradora')]"))); s.pass_('PATIENT-INSURANCE-TOGGLE','SEL-PAT-INSURANCE',t)
  def test_edit(s):

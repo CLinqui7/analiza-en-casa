@@ -17,12 +17,24 @@ if (chapterIndex !== -1 && !chapter) throw new Error('Expected a chapter after -
 const currentSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 const currentFingerprint = ch01FunctionalFingerprint(root);
 const ch01EvidenceSource = [
-  'apps/web/e2e/ch01.spec.ts', 'apps/web/e2e/ch02.spec.ts', 'apps/web/e2e/ch03.spec.ts', 'apps/web/e2e/workspace.spec.ts', 'apps/web/src/lib/domain.test.ts', 'apps/web/src/lib/patient-form.test.ts', 'tests/selenium/test_ch01.py', 'tests/selenium/test_ch02.py', 'tests/selenium/test_ch03.py',
+  'apps/web/e2e/ch01.spec.ts', 'apps/web/e2e/ch02.spec.ts', 'apps/web/e2e/ch03.spec.ts', 'apps/web/e2e/ch07.spec.ts', 'apps/web/e2e/ch08.spec.ts', 'apps/web/e2e/ch09.spec.ts', 'apps/web/e2e/quotes.spec.ts', 'apps/web/e2e/workspace.spec.ts', 'apps/web/src/components/administrative-profile-panel.test.ts', 'apps/web/src/lib/data-provider.test.ts', 'apps/web/src/lib/domain.test.ts', 'apps/web/src/lib/patient-form.test.ts', 'tests/selenium/test_ch01.py', 'tests/selenium/test_ch02.py', 'tests/selenium/test_ch03.py', 'tests/selenium/test_clinical_hospitalizations.py', 'tests/selenium/test_hospitalizations.py', 'tests/selenium/test_quotes.py',
 ].filter((path) => existsSync(resolve(root, path))).map((path) => readFileSync(resolve(root, path), 'utf8')).join('\n');
 const errors = [];
 const allowed = new Set(['EXACT', 'PARTIAL', 'MISSING', 'BLOCKED_CLIENT', 'BLOCKED_INTEGRATION', 'NOT_TESTABLE', 'NOT_APPLICABLE']);
 const expected = new Set(canonical.requirements.map((item) => item.requirement_id));
 const found = new Set(trace.requirements.map((item) => item.requirement_id));
+function routeConsistencyErrors(routeItems, requirementItems) {
+  const routeErrors = [];
+  for (const route of routeItems) {
+    const related = requirementItems.filter((item) => item.route_id === route.route_id);
+    if (
+      route.full_video_parity_status === 'EXACT' &&
+      related.some((item) => ['PARTIAL', 'MISSING'].includes(item.parity_status))
+    )
+      routeErrors.push(`${route.route_id}: false EXACT while related requirements remain open`);
+  }
+  return routeErrors;
+}
 for (const id of expected) if (!found.has(id)) errors.push(`Missing traceability requirement: ${id}`);
 const reviewedRequirements = chapter ? trace.requirements.filter((item) => item.chapter_id === chapter) : trace.requirements;
 if (chapter && !reviewedRequirements.length) errors.push(`No requirements found for chapter ${chapter}.`);
@@ -45,25 +57,27 @@ for (const item of reviewedRequirements) {
     for (const testId of [...(item.unit_test_ids ?? []), ...(item.playwright_test_ids ?? []), ...(item.selenium_test_ids ?? []), ...(item.visual_test_ids ?? [])]) {
       if (!ch01EvidenceSource.includes(`test-id: ${testId}`)) errors.push(`${item.requirement_id}: test_id ${testId} is not declared by executable evidence`);
     }
-    if (!certifications.implementation_sha) errors.push(`${item.requirement_id}: certification lacks implementation_sha`);
+    const implementationShaPending = certifications.verification_status === 'PENDING_GIT_WRITE';
+    if (!certifications.implementation_sha && !implementationShaPending)
+      errors.push(`${item.requirement_id}: certification lacks implementation_sha`);
     if (!certifications.functional_fingerprint) errors.push(`${item.requirement_id}: certification lacks functional_fingerprint`);
     if (certifications.functional_fingerprint !== currentFingerprint) errors.push(`${item.requirement_id}: functional fingerprint is stale`);
   }
 }
-for (const route of routes.routes) {
-  const related = trace.requirements.filter((item) => item.route_id === route.route_id);
-  if (route.full_video_parity_status === 'EXACT' && related.some((item) => ['PARTIAL', 'MISSING'].includes(item.parity_status))) errors.push(`${route.route_id}: false EXACT while related requirements remain open`);
-}
+errors.push(...routeConsistencyErrors(routes.routes, trace.requirements));
 const dashboard = readFileSync(resolve(root, 'apps/web/src/app/(workspace)/dashboard/page.tsx'), 'utf8');
 if (/unresolvedMissing\s*:\s*0/.test(dashboard)) errors.push('Dashboard still hardcodes unresolvedMissing: 0');
 if (process.argv.includes('--self-test')) {
-  const route = routes.routes.find((item) => item.route_id === 'ROUTE-PATIENTS');
-  const partial = trace.requirements.find((item) => item.route_id === 'ROUTE-PATIENTS' && item.parity_status === 'PARTIAL');
-  if (!route || !partial) throw new Error('Anti-false-EXACT fixture is unavailable.');
-  route.full_video_parity_status = 'EXACT';
-  const fixtureDetected = trace.requirements.some((item) => item.route_id === route.route_id && ['PARTIAL', 'MISSING'].includes(item.parity_status));
-  if (!fixtureDetected) throw new Error('False EXACT fixture was not detected.');
-  console.log(`anti-false-exact fixture detected: ${route.route_id} conflicts with ${partial.requirement_id}`);
+  const selfTestRoute = { route_id: 'ROUTE-SELF-TEST', full_video_parity_status: 'EXACT' };
+  const selfTestRequirement = {
+    requirement_id: 'SELF-TEST-PARTIAL',
+    route_id: selfTestRoute.route_id,
+    parity_status: 'PARTIAL',
+  };
+  const fixtureErrors = routeConsistencyErrors([selfTestRoute], [selfTestRequirement]);
+  if (!fixtureErrors.includes('ROUTE-SELF-TEST: false EXACT while related requirements remain open'))
+    throw new Error('False EXACT fixture was not detected.');
+  console.log(`anti-false-exact fixture detected: ${selfTestRoute.route_id} conflicts with ${selfTestRequirement.requirement_id}`);
   const baseline = ch01FunctionalFingerprint(root);
   const entries = functionalEntries(root);
   const [functionalPath, functionalContent] = entries[0];

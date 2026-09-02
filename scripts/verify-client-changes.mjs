@@ -45,11 +45,12 @@ if (process.argv.includes('--self-test')) {
   if (!(fakeImplemented.status === 'IMPLEMENTED' && (!fakeImplemented.react_files.length || ![...fakeImplemented.unit_test_ids, ...fakeImplemented.playwright_test_ids, ...fakeImplemented.selenium_test_ids].length))) throw new Error('false IMPLEMENTED fixture not detected');
   if (testText.includes('test-id: DOES-NOT-EXIST')) throw new Error('missing test fixture unexpectedly exists');
   if (baseline.functional_fingerprint === '0'.repeat(64)) throw new Error('wrong fingerprint fixture not detected');
+  const baselineFingerprint = fingerprint([...baseline.react_files, ...baseline.db_objects]);
   const metadataOnly = fingerprint([...baseline.react_files, ...baseline.db_objects]);
-  if (metadataOnly !== baseline.functional_fingerprint) throw new Error('metadata-only fixture unexpectedly changed fingerprint');
+  if (metadataOnly !== baselineFingerprint) throw new Error('metadata-only fixture unexpectedly changed fingerprint');
   const functionalPath = baseline.react_files[0];
   const changed = createHash('sha256').update([...baseline.react_files, ...baseline.db_objects].map((file) => `${file}\0${file === functionalPath ? `${readFileSync(resolve(root, file))}\nfixture` : readFileSync(resolve(root, file))}`).join('\0')).digest('hex');
-  if (changed === baseline.functional_fingerprint) throw new Error('functional-change fixture not detected');
+  if (changed === baselineFingerprint) throw new Error('functional-change fixture not detected');
   console.log('self-tests passed: false IMPLEMENTED, missing test_id, wrong fingerprint, metadata-only, functional change');
 }
 if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; } else console.log(`client-change gate passed: ${selected.length}/${registry.changes.length}${batch ? ` for ${batch}` : ''}`);

@@ -75,7 +75,7 @@ export default function NursingBoardPage() {
           }}
           type="button"
         >
-          Registrar recurso
+          Nuevo recurso
         </Button> : null}
       </header>
       {result ? (
@@ -133,7 +133,7 @@ export default function NursingBoardPage() {
         }
         onClose={closeDialog}
         open={isOpen}
-        title="Registrar recurso de enfermería"
+        title="Nuevo recurso de enfermería"
       >
         <form
           className="form-grid"

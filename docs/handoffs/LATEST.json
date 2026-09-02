@@ -1,6 +1,6 @@
 {
-  "lot": "B1",
-  "handoff": "docs/handoffs/B1_HANDOFF.json",
-  "final_sha": "61f6600086eb7d9d0a5dba0c69c891d178be6f29",
-  "next_batch": "B2"
+  "lot": "CH09_TRACEABILITY_GENERATOR_AND_MIRROR_REPAIR",
+  "handoff": "docs/handoffs/CH09_HANDOFF.json",
+  "final_sha": null,
+  "next_batch": "CH09_REVIEW"
 }

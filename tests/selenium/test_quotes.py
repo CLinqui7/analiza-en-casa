@@ -11,6 +11,11 @@
 # test-id: SEL-QUOTE-PRINT
 # test-id: SEL-QUOTE-RELATED
 # test-id: SEL-QUOTE-MOBILE
+# test-id: SEL-B4-DOCTOR-FEE
+# test-id: SEL-QUOTE-METADATA
+# test-id: SEL-CH04-QUOTE-GENERAL
+# test-id: SEL-CH05-QUOTE-CATALOG
+# test-id: SEL-CH06-QUOTE-CATALOG
 
 from __future__ import annotations
 
@@ -142,12 +147,33 @@ class Quotes(unittest.TestCase):
         self.click('QUOTE-CREATE')
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-CREATE-SUBMIT"]')))
 
+    def create_doctor_fixture(self) -> None:
+        """Creates the synthetic doctor needed only to exercise a fee association."""
+        self.d.get(f'{BASE}/doctors')
+        self.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-action-id="DOCTOR-CREATE"]'))).click()
+        self.fill('Nombre completo', 'Médica Selenium Honorarios')
+        self.fill('JVPM', 'JVPM-SEL-FEE')
+        self.fill('DUI', 'DUI-SEL-FEE')
+        specialty = self.d.find_element(By.CSS_SELECTOR, '[data-action-id="DOCTOR-SPECIALTY-SELECT"]')
+        specialty.send_keys('Nutri')
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Nutricionista']"))).click()
+        self.fill('Dirección', 'Dirección sintética Selenium')
+        self.click('DOCTOR-SAVE')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Médica Selenium Honorarios registrado')]")))
+
     def add_line(self, category: str, name: str, quantity='1', price='10', discount='0') -> None:
         self.w.until(EC.element_to_be_clickable((By.XPATH, f"//button[@role='tab' and normalize-space(.)='{category}']"))).click()
-        self.fill('Concepto', name); self.fill('Cantidad', quantity)
-        self.fill('Precio manual', price); self.fill('Descuento manual', discount)
+        self.fill('Concepto', name)
+        if category == 'Honorarios':
+            Select(self.action('QUOTE-FEE-DOCTOR-SELECT')).select_by_index(1)
+        self.fill('Cantidad', quantity)
+        self.fill('Honorario médico (manual)' if category == 'Honorarios' else 'Precio manual', price); self.fill('Descuento manual', discount)
         self.click('QUOTE-ITEM-ADD')
         self.w.until(EC.visibility_of_element_located((By.XPATH, f"//tbody/tr[contains(.,'{name}')]")))
+
+    def select_administrative_referral(self, label='Redes Sociales') -> None:
+        self.fill('Referido por', label.split(' ')[0])
+        self.w.until(EC.element_to_be_clickable((By.XPATH, f"//*[@role='option' and normalize-space()='{label}']"))).click()
 
     def create_fixture(self, marker: str, items=True) -> str:
         """Create through the UI; it is a fixture precondition and never records coverage."""
@@ -174,30 +200,42 @@ class Quotes(unittest.TestCase):
         self.click('QUOTE-SEND')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and contains(.,'inmutable')]")))
 
-    def test_navigation_and_roles(self) -> None:
+    def assert_quote_access(self, email: str, password: str, role: str, can_write: bool) -> None:
+        self.prepare_authenticated_test(email, password, role)
+        self.d.get(f'{BASE}/quotes'); self.quotes_ready()
+        self.assertEqual(bool(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-CREATE"]')), can_write)
+        self.action('QUOTE-DETAIL-NAVIGATE').click()
+        self.w.until(EC.url_contains('/quotes/'))
+        self.assertEqual(bool(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT"], [data-action-id="QUOTE-SEND"]')), can_write)
+
+    def test_admin_can_navigate_and_write_quotes(self) -> None:
         started = time.time()
         self.click('QUOTE-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/quotes')); self.quotes_ready()
         self.d.refresh(); self.quotes_ready()
+        self.assertTrue(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-CREATE"]'))
         self.pass_('QUOTE-NAVIGATE', 'SEL-QUOTE-NAVIGATION', started)
 
-        for email, password, role, can_write in [
-            ('admin@demo.local', 'demo-admin', 'ADMIN', True),
-            ('doctor@demo.local', 'demo-doctor', 'DOCTOR', True),
-            ('finance@demo.local', 'demo-finance', 'FINANCE', True),
-            ('auditor@demo.local', 'demo-auditor', 'AUDITOR', False),
-        ]:
-            self.prepare_authenticated_test(email, password, role)
-            self.d.get(f'{BASE}/quotes'); self.quotes_ready()
-            self.assertEqual(bool(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-CREATE"]')), can_write)
-            self.action('QUOTE-DETAIL-NAVIGATE').click()
-            self.w.until(EC.url_contains('/quotes/'))
-            self.assertEqual(bool(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT"], [data-action-id="QUOTE-SEND"]')), can_write)
-        for email, password, role in [('nurse@demo.local', 'demo-nurse', 'NURSE'), ('inventory@demo.local', 'demo-inventory', 'INVENTORY')]:
-            self.prepare_authenticated_test(email, password, role)
-            self.d.get(f'{BASE}/quotes')
-            denied = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
-            self.assertIn(f'Acceso restringido para el rol {role}', denied.text)
+    def test_doctor_can_write_quotes(self) -> None:
+        self.assert_quote_access('doctor@demo.local', 'demo-doctor', 'DOCTOR', True)
+
+    def test_finance_can_write_quotes(self) -> None:
+        self.assert_quote_access('finance@demo.local', 'demo-finance', 'FINANCE', True)
+
+    def test_auditor_is_read_only_for_quotes(self) -> None:
+        self.assert_quote_access('auditor@demo.local', 'demo-auditor', 'AUDITOR', False)
+
+    def test_nurse_is_denied_quotes_route(self) -> None:
+        self.prepare_authenticated_test('nurse@demo.local', 'demo-nurse', 'NURSE')
+        self.d.get(f'{BASE}/quotes')
+        denied = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('Acceso restringido para el rol NURSE', denied.text)
+
+    def test_inventory_is_denied_quotes_route(self) -> None:
+        self.prepare_authenticated_test('inventory@demo.local', 'demo-inventory', 'INVENTORY')
+        self.d.get(f'{BASE}/quotes')
+        denied = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('Acceso restringido para el rol INVENTORY', denied.text)
 
     def test_search_and_clear(self) -> None:
         self.d.get(f'{BASE}/quotes'); self.quotes_ready()
@@ -227,7 +265,7 @@ class Quotes(unittest.TestCase):
         self.d.refresh(); self.quotes_ready(); self.assertNotIn('No persistir Selenium', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('QUOTE-CREATE-CANCEL', 'SEL-QUOTE-CREATE', cancel_started)
         submit_started = time.time(); marker = 'Crear y validar Selenium'
-        self.open_new_quote(); self.fill('Resumen operativo', marker); self.add_line('Servicios', 'Servicio crear Selenium', price='12')
+        self.open_new_quote(); self.fill('Resumen operativo', marker); self.select_administrative_referral(); self.add_line('Servicios', 'Servicio crear Selenium', price='12')
         self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         self.w.until(lambda _: any(q['summary'] == marker for q in self.snapshot()['quotes']))
         quote = next(q for q in self.snapshot()['quotes'] if q['summary'] == marker)
@@ -236,25 +274,310 @@ class Quotes(unittest.TestCase):
         self.pass_('QUOTE-CREATE-SUBMIT', 'SEL-QUOTE-CREATE', submit_started)
 
     def test_items_and_calculations(self) -> None:
+        self.create_doctor_fixture()
         self.open_new_quote()
-        for category in ('Servicios', 'Estudios diagnósticos', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'):
+        marker = 'Categorías Selenium persistidas'
+        self.fill('Resumen operativo', marker)
+        self.select_administrative_referral()
+        self.select_administrative_referral()
+        for category in ('Servicios', 'Estudios Dx', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'):
             self.add_line(category, f'Concepto {category}', discount='1')
         add_started = time.time(); self.assertEqual(len(self.d.find_elements(By.XPATH, "//tbody/tr[contains(.,'Concepto ')]")), 1)
-        self.pass_('QUOTE-ITEM-ADD', 'SEL-QUOTE-ITEMS', add_started)
         self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Servicios']"))).click()
         edit_started = time.time(); self.d.find_element(By.XPATH, "//tbody/tr[contains(.,'Concepto Servicios')]//button[normalize-space(.)='Editar']").click()
         self.fill('Cantidad', '2'); self.click('QUOTE-ITEM-EDIT')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Concepto Servicios') and contains(.,'2')]")))
-        self.pass_('QUOTE-ITEM-EDIT', 'SEL-QUOTE-ITEMS', edit_started)
-        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Extras']"))).click()
-        remove_started = time.time(); self.click('QUOTE-ITEM-REMOVE')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'No hay conceptos en esta categoría')]")))
-        self.pass_('QUOTE-ITEM-REMOVE', 'SEL-QUOTE-ITEMS', remove_started)
         discount_started = time.time(); Select(self.action('QUOTE-DISCOUNT-UPDATE')).select_by_value('PERCENT')
         self.fill('Porcentaje de descuento', '10'); self.fill('Responsabilidad explícita de aseguradora', '5')
         totals = self.d.find_element(By.CSS_SELECTOR, '[aria-label="Totales de cotización"]').text
-        self.assertIn('USD 57.60', totals)
+        self.assertIn('USD 65.70', totals)
+        self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
+        self.d.refresh(); self.open_detail(quote['id'])
+        body = self.d.find_element(By.TAG_NAME, 'body').text
+        for category in ('Servicios', 'Estudios Dx', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'):
+            self.assertIn(category, body); self.assertIn(f'Concepto {category}', body)
+        self.pass_('QUOTE-ITEM-ADD', 'SEL-QUOTE-ITEMS', add_started)
+        self.pass_('QUOTE-ITEM-EDIT', 'SEL-QUOTE-ITEMS', edit_started)
         self.pass_('QUOTE-DISCOUNT-UPDATE', 'SEL-QUOTE-DISCOUNT', discount_started)
+        self.click('QUOTE-EDIT'); self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Extras']"))).click()
+        remove_started = time.time(); self.click('QUOTE-ITEM-REMOVE')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'No hay conceptos en esta categoría')]")))
+        self.click('QUOTE-EDIT-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        self.d.refresh(); self.open_detail(quote['id'])
+        body = self.d.find_element(By.TAG_NAME, 'body').text
+        self.assertNotIn('Concepto Extras', body); self.assertIn('Concepto Honorarios', body)
+        self.pass_('QUOTE-ITEM-REMOVE', 'SEL-QUOTE-ITEMS', remove_started)
+
+    def test_doctor_fee_persists_after_reload(self) -> None:
+        self.create_doctor_fixture()
+        self.open_new_quote()
+        self.fill('Resumen operativo', 'Honorario médico Selenium B4')
+        self.select_administrative_referral()
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Honorarios']"))).click()
+        doctor = Select(self.action('QUOTE-FEE-DOCTOR-SELECT'))
+        doctor.select_by_index(1)
+        doctor_name = doctor.first_selected_option.text
+        self.fill('Concepto', 'Honorario Selenium B4')
+        self.fill('Cantidad', '1')
+        self.fill('Honorario médico (manual)', '55')
+        started = time.time()
+        self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, f"//tbody/tr[contains(.,'Médico: {doctor_name}')]")))
+        self.click('QUOTE-CREATE-SUBMIT')
+        self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == 'Honorario médico Selenium B4')
+        item = next(item for item in quote['items'] if item['name'] == 'Honorario Selenium B4')
+        self.assertEqual(item['doctorName'], doctor_name)
+        self.assertEqual(item['unitPrice'], 55)
+        self.open_detail(quote['id'])
+        self.d.refresh()
+        self.assertIn(f'Médico: {doctor_name}', self.d.find_element(By.TAG_NAME, 'body').text)
+        self.pass_('QUOTE-FEE-DOCTOR-SELECT', 'SEL-B4-DOCTOR-FEE', started)
+        self.pass_('QUOTE-FEE-AMOUNT', 'SEL-B4-DOCTOR-FEE', started)
+
+    def test_quote_metadata_filters_and_pagination_have_persisted_or_visible_effects(self) -> None:
+        self.open_new_quote()
+        marker = 'Metadatos Selenium B4'
+        patient_search_started = time.time()
+        self.fill('Buscar paciente', 'Aurora')
+        self.assertEqual(self.d.find_element(By.CSS_SELECTOR, '#quote-patient-options option').get_attribute('value'), 'Paciente Demo Aurora')
+        self.pass_('QUOTE-PATIENT-SEARCH', 'SEL-QUOTE-METADATA', patient_search_started)
+        patient_select_started = time.time()
+        Select(self.action('QUOTE-PATIENT-SELECT')).select_by_value('patient-demo-001')
+        self.fill('Resumen operativo', marker)
+        invoice_date = time.strftime('%Y-%m-%d')
+        invoice_date_started = time.time()
+        self.action('QUOTE-INVOICE-DATE').clear(); self.action('QUOTE-INVOICE-DATE').send_keys(invoice_date)
+        discount_group_started = time.time()
+        Select(self.action('QUOTE-DISCOUNT-GROUP')).select_by_value('Regular')
+        referral_started = time.time()
+        self.select_administrative_referral()
+        giftcard_started = time.time()
+        self.fill('Giftcard', 'GIFT-SEL-B4')
+        comments_started = time.time()
+        self.fill('Comentarios', 'Comentarios Selenium B4')
+        self.add_line('Servicios', 'Servicio metadatos Selenium', price='10')
+        self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
+        self.assertEqual(quote['patientId'], 'patient-demo-001')
+        self.assertEqual(quote['invoiceDate'], invoice_date)
+        self.assertEqual(quote['referralSelections'], ['Redes Sociales'])
+        self.assertEqual(quote['giftCardCode'], 'GIFT-SEL-B4')
+        self.assertEqual(quote['comments'], 'Comentarios Selenium B4')
+        self.d.refresh(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
+        self.assertEqual(self.action('QUOTE-PATIENT-SELECT').get_attribute('value'), 'patient-demo-001')
+        self.pass_('QUOTE-PATIENT-SELECT', 'SEL-QUOTE-METADATA', patient_select_started)
+        self.assertEqual(self.action('QUOTE-INVOICE-DATE').get_attribute('value'), invoice_date)
+        self.pass_('QUOTE-INVOICE-DATE', 'SEL-QUOTE-METADATA', invoice_date_started)
+        self.assertEqual(self.action('QUOTE-DISCOUNT-GROUP').get_attribute('value'), 'Regular')
+        self.pass_('QUOTE-DISCOUNT-GROUP', 'SEL-QUOTE-METADATA', discount_group_started)
+        self.assertIn('Redes Sociales', self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]').text)
+        self.pass_('QUOTE-REFERRAL', 'SEL-QUOTE-METADATA', referral_started)
+        self.assertEqual(self.action('QUOTE-GIFTCARD').get_attribute('value'), 'GIFT-SEL-B4')
+        self.pass_('QUOTE-GIFTCARD', 'SEL-QUOTE-METADATA', giftcard_started)
+        self.assertEqual(self.action('QUOTE-COMMENTS').get_attribute('value'), 'Comentarios Selenium B4')
+        self.pass_('QUOTE-COMMENTS', 'SEL-QUOTE-METADATA', comments_started)
+        self.click('QUOTE-EDIT-CANCEL'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        sent_quote_id = self.create_fixture('Filtro enviada Selenium')
+        self.open_detail(sent_quote_id); self.click('QUOTE-SEND')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and contains(.,'inmutable')]")))
+        self.assertEqual(self.quote_data(sent_quote_id)['status'], 'SENT')
+        self.d.refresh(); self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-SEND"]'))
+        for index in range(10):
+            self.create_fixture(f'Paginación Selenium {index}', items=False)
+        self.d.get(f'{BASE}/quotes'); self.quotes_ready()
+        status_filter_started = time.time()
+        Select(self.action('QUOTE-FILTER-STATUS')).select_by_value('SENT')
+        self.click('QUOTE-FILTER-APPLY')
+        sent_rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
+        self.assertEqual(len(sent_rows), 1); self.assertIn('Enviada', sent_rows[0].text); self.assertNotIn('Borrador', sent_rows[0].text)
+        Select(self.action('QUOTE-FILTER-STATUS')).select_by_value('DRAFT')
+        self.click('QUOTE-FILTER-APPLY')
+        draft_rows = self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')
+        self.assertEqual(len(draft_rows), 10); self.assertTrue(all('Borrador' in row.text and 'Enviada' not in row.text for row in draft_rows))
+        self.pass_('QUOTE-FILTER-STATUS', 'SEL-QUOTE-METADATA', status_filter_started)
+        date_filter_started = time.time()
+        self.action('QUOTE-FILTER-CREATED-DATE').send_keys('12/31/2099')
+        filter_apply_started = time.time()
+        self.click('QUOTE-FILTER-APPLY')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='Sin cotizaciones']")))
+        self.pass_('QUOTE-FILTER-CREATED-DATE', 'SEL-QUOTE-METADATA', date_filter_started)
+        self.pass_('QUOTE-FILTER-APPLY', 'SEL-QUOTE-METADATA', filter_apply_started)
+        filter_clear_started = time.time()
+        self.click('QUOTE-FILTER-CLEAR')
+        self.assertEqual(self.action('QUOTE-FILTER-STATUS').get_attribute('value'), '')
+        self.assertEqual(self.action('QUOTE-FILTER-CREATED-DATE').get_attribute('value'), '')
+        self.assertTrue(self.d.find_elements(By.XPATH, "//tbody/tr[contains(.,'Enviada')]") and self.d.find_elements(By.XPATH, "//tbody/tr[contains(.,'Borrador')]"))
+        self.pass_('QUOTE-FILTER-CLEAR', 'SEL-QUOTE-METADATA', filter_clear_started)
+        self.assertTrue(self.action('QUOTE-PAGE-NEXT').is_enabled())
+        page_next_started = time.time(); self.click('QUOTE-PAGE-NEXT'); self.assertIn('Página 2 de 2', self.d.find_element(By.TAG_NAME, 'body').text)
+        self.pass_('QUOTE-PAGE-NEXT', 'SEL-QUOTE-METADATA', page_next_started)
+        page_prev_started = time.time(); self.click('QUOTE-PAGE-PREV'); self.assertIn('Página 1 de 2', self.d.find_element(By.TAG_NAME, 'body').text)
+        self.pass_('QUOTE-PAGE-PREV', 'SEL-QUOTE-METADATA', page_prev_started)
+
+    def test_ch04_referral_tags_and_bounded_service_catalog_persist_without_pricing_rules(self) -> None:
+        self.open_new_quote()
+        Select(self.action('QUOTE-PATIENT-SELECT')).select_by_value('patient-demo-001')
+        self.assertNotEqual(self.field('Documento').get_attribute('value'), 'No disponible')
+        self.assertNotEqual(self.field('Teléfono').get_attribute('value'), 'No disponible')
+        self.assertNotEqual(self.field('Correo').get_attribute('value'), 'No disponible')
+        required_marker = 'CH04 referido obligatorio Selenium'
+        self.fill('Resumen operativo', required_marker); self.click('QUOTE-CREATE-SUBMIT')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='alert' and normalize-space()='Seleccione al menos un referido.']")))
+        self.assertTrue(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-CREATE-SUBMIT"]'))
+        self.assertFalse(any(quote['summary'] == required_marker for quote in self.snapshot()['quotes']))
+        referral_catalog_started = time.time(); self.click('QUOTE-REFERRAL-CATALOG')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '#quote-referral-catalog')))
+        self.assertEqual(self.action('QUOTE-REFERRAL-CATALOG').get_attribute('aria-expanded'), 'true')
+        catalog = self.d.find_element(By.CSS_SELECTOR, '#quote-referral-catalog')
+        catalog_metrics = self.d.execute_script('const style = getComputedStyle(arguments[0]); return { overflowY: style.overflowY, scrollHeight: arguments[0].scrollHeight, clientHeight: arguments[0].clientHeight };', catalog)
+        self.assertEqual(catalog_metrics['overflowY'], 'auto'); self.assertGreater(catalog_metrics['scrollHeight'], catalog_metrics['clientHeight'])
+        self.assertEqual(self.d.execute_script('return getComputedStyle(arguments[0]).backgroundColor;', self.action('QUOTE-REFERRAL-CATALOG')), 'rgb(23, 131, 79)')
+        self.pass_('QUOTE-REFERRAL-CATALOG', 'SEL-CH04-QUOTE-GENERAL', referral_catalog_started)
+        referral_add_started = time.time(); self.fill('Referido por', 'Redes')
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Redes Sociales']"))).click()
+        self.fill('Referido por', 'Amigos')
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Amigos & Familia']"))).click()
+        self.assertIn('Redes Sociales', self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]').text)
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '#quote-referral-error'))
+        referral_remove_started = time.time()
+        self.d.find_element(By.XPATH, "//button[@aria-label='Quitar Amigos & Familia']").click()
+        self.assertNotIn('Amigos & Familia', self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]').text)
+        inventory_started = time.time(); self.click('QUOTE-INVENTORY-ONLY')
+        services = Select(self.action('QUOTE-SERVICE-CATALOG'))
+        self.assertEqual([option.text for option in services.options], ['Seleccione un servicio', 'Servicio sintético disponible'])
+        self.pass_('QUOTE-INVENTORY-ONLY', 'SEL-CH04-QUOTE-GENERAL', inventory_started)
+        business_partner_started = time.time(); Select(self.action('QUOTE-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético A')
+        service_started = time.time(); services.select_by_visible_text('Servicio sintético disponible')
+        self.fill('Cantidad', '1'); self.fill('Precio manual', '10'); self.click('QUOTE-ITEM-ADD')
+        marker = 'CH04 Selenium secciones generales'; self.fill('Resumen operativo', marker); self.click('QUOTE-CREATE-SUBMIT')
+        self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(q for q in self.snapshot()['quotes'] if q['summary'] == marker)
+        self.d.refresh(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
+        self.assertEqual(self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]').text, 'Redes Sociales×')
+        self.assertEqual(Select(self.action('QUOTE-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético A')
+        self.assertEqual(Select(self.action('QUOTE-SERVICE-CATALOG')).first_selected_option.text, 'Servicio sintético disponible')
+        self.assertEqual(self.field('Precio manual').get_attribute('value'), '10')
+        self.pass_('QUOTE-REFERRAL-ADD', 'SEL-CH04-QUOTE-GENERAL', referral_add_started)
+        self.pass_('QUOTE-REFERRAL-REMOVE', 'SEL-CH04-QUOTE-GENERAL', referral_remove_started)
+        self.pass_('QUOTE-BUSINESS-PARTNER', 'SEL-CH04-QUOTE-GENERAL', business_partner_started)
+        self.pass_('QUOTE-SERVICE-CATALOG', 'SEL-CH04-QUOTE-GENERAL', service_started)
+        self.click('QUOTE-EDIT-CANCEL')
+
+    def test_ch05_service_and_medication_catalogs_search_reset_and_persist_manual_amounts(self) -> None:
+        self.open_new_quote()
+        marker = 'CH05 catálogos Selenium persistidos'
+        self.fill('Resumen operativo', marker); self.select_administrative_referral()
+        self.assertEqual([tab.text for tab in self.d.find_elements(By.XPATH, "//*[@role='tab']")], ['Servicios', 'Estudios Dx', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'])
+        service_search_started = time.time(); self.fill('Buscar servicios', 'disponible')
+        service_option = self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@aria-label='Resultados de servicios']//*[@role='option' and normalize-space()='Servicio sintético disponible']")))
+        self.assertTrue(service_option.is_displayed()); self.pass_('QUOTE-SERVICE-SEARCH', 'SEL-CH05-QUOTE-CATALOG', service_search_started)
+        service_select_started = time.time(); service_option.click()
+        self.assertEqual(self.field('Concepto').get_attribute('value'), 'Servicio sintético disponible')
+        Select(self.action('QUOTE-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético A')
+        self.assertEqual(self.field('Cantidad').get_attribute('value'), '0')
+        self.assertEqual(self.field('Cantidad').get_attribute('aria-required'), 'true')
+        self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='alert' and normalize-space()='La cantidad debe ser mayor que cero.']")))
+        self.assertFalse(self.d.find_elements(By.XPATH, "//tbody/tr[contains(.,'Servicio sintético disponible')]"))
+        self.fill('Cantidad', '2'); self.fill('Precio manual', '12'); self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.quote-processing')))
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Servicio sintético disponible')]")))
+        medication_category_started = time.time(); self.click('QUOTE-MEDICATION-CATEGORY')
+        self.assertEqual(self.field('Concepto').get_attribute('value'), '')
+        self.assertEqual(self.field('Buscar medicamentos').get_attribute('value'), '')
+        self.assertEqual(Select(self.action('QUOTE-MEDICATION-BUSINESS-PARTNER')).first_selected_option.get_attribute('value'), '')
+        self.pass_('QUOTE-MEDICATION-CATEGORY', 'SEL-CH05-QUOTE-CATALOG', medication_category_started)
+        medication_inventory_started = time.time(); self.click('QUOTE-MEDICATION-INVENTORY-ONLY')
+        self.assertTrue(self.action('QUOTE-MEDICATION-INVENTORY-ONLY').is_selected())
+        self.pass_('QUOTE-MEDICATION-INVENTORY-ONLY', 'SEL-CH05-QUOTE-CATALOG', medication_inventory_started)
+        medication_search_started = time.time(); self.fill('Buscar medicamentos', 'sin coincidencia')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and normalize-space()='No results found']")))
+        self.fill('Buscar medicamentos', 'disponible')
+        medication_option = self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@aria-label='Resultados de medicamentos']//*[@role='option' and normalize-space()='Medicamento sintético disponible']")))
+        self.assertTrue(medication_option.is_displayed()); self.pass_('QUOTE-MEDICATION-SEARCH', 'SEL-CH05-QUOTE-CATALOG', medication_search_started)
+        medication_select_started = time.time(); medication_option.click()
+        self.assertEqual(self.field('Concepto').get_attribute('value'), 'Medicamento sintético disponible')
+        medication_partner_started = time.time(); Select(self.action('QUOTE-MEDICATION-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético B')
+        self.fill('Cantidad', '1'); self.fill('Precio manual', '9'); self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.quote-processing')))
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Medicamento sintético disponible')]")))
+        self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
+        self.d.refresh(); self.open_detail(quote['id'])
+        body = self.d.find_element(By.TAG_NAME, 'body').text
+        self.assertIn('Servicio sintético disponible', body); self.assertIn('Medicamento sintético disponible', body)
+        self.assertEqual([(item['name'], item['unitPrice']) for item in self.quote_data(quote['id'])['items']], [('Servicio sintético disponible', 12), ('Medicamento sintético disponible', 9)])
+        self.pass_('QUOTE-SERVICE-SELECT', 'SEL-CH05-QUOTE-CATALOG', service_select_started)
+        self.pass_('QUOTE-MEDICATION-SELECT', 'SEL-CH05-QUOTE-CATALOG', medication_select_started)
+        self.pass_('QUOTE-MEDICATION-BUSINESS-PARTNER', 'SEL-CH05-QUOTE-CATALOG', medication_partner_started)
+
+    def test_ch06_supply_study_and_fee_catalogs_persist_only_manual_amounts(self) -> None:
+        self.create_doctor_fixture()
+        self.open_new_quote()
+        marker = 'CH06 catálogos Selenium persistidos'
+        self.fill('Resumen operativo', marker); self.select_administrative_referral()
+
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Insumos']"))).click()
+        supply_inventory_started = time.time(); self.click('QUOTE-SUPPLY-INVENTORY-ONLY')
+        self.assertTrue(self.action('QUOTE-SUPPLY-INVENTORY-ONLY').is_selected())
+        self.assertFalse(self.d.find_elements(By.XPATH, "//*[@aria-label='Resultados de insumos']//*[contains(.,'sin disponibilidad configurada')]"))
+        supply_partner_started = time.time(); Select(self.action('QUOTE-SUPPLY-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético A')
+        self.assertEqual(Select(self.action('QUOTE-SUPPLY-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético A')
+        supply_search_started = time.time(); self.fill('Buscar insumos', 'sin coincidencia')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and normalize-space()='No results found']")))
+        self.fill('Buscar insumos', 'INS-SYN-001')
+        supply_option = self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@aria-label='Resultados de insumos']//*[@role='option' and contains(.,'Insumo sintético disponible')]")))
+        self.assertTrue(supply_option.is_displayed())
+        supply_select_started = time.time(); supply_option.click()
+        self.assertIn('INS-SYN-001', self.field('Concepto').get_attribute('value'))
+        self.fill('Cantidad', '2'); self.fill('Precio manual', '12'); self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'INS-SYN-001')]")))
+
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Estudios Dx']"))).click()
+        study_inventory_started = time.time(); self.click('QUOTE-STUDY-INVENTORY-ONLY')
+        self.assertTrue(self.action('QUOTE-STUDY-INVENTORY-ONLY').is_selected())
+        study_partner_started = time.time(); Select(self.action('QUOTE-STUDY-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético B')
+        self.assertEqual(Select(self.action('QUOTE-STUDY-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético B')
+        study_search_started = time.time(); self.fill('Buscar estudios', 'hemoglobina')
+        study_option = self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@aria-label='Resultados de estudios']//*[@role='option' and normalize-space()='Estudio sintético de hemoglobina disponible']")))
+        self.assertTrue(study_option.is_displayed())
+        study_select_started = time.time(); study_option.click()
+        self.assertEqual(self.field('Concepto').get_attribute('value'), 'Estudio sintético de hemoglobina disponible')
+        self.fill('Cantidad', '1'); self.fill('Precio manual', '9'); self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Estudio sintético de hemoglobina disponible')]")))
+
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Honorarios']"))).click()
+        fee_partner_started = time.time(); Select(self.action('QUOTE-FEE-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético A')
+        self.assertEqual(Select(self.action('QUOTE-FEE-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético A')
+        fee_service_started = time.time(); Select(self.action('QUOTE-FEE-SERVICE-CATALOG')).select_by_visible_text('Seguimiento sintético disponible')
+        self.assertEqual(self.field('Concepto').get_attribute('value'), 'Seguimiento sintético disponible')
+        Select(self.action('QUOTE-FEE-DOCTOR-SELECT')).select_by_index(1)
+        self.fill('Cantidad', '1'); self.fill('Honorario médico (manual)', '15'); self.click('QUOTE-ITEM-ADD')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Seguimiento sintético disponible')]")))
+        self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
+        self.d.refresh(); self.open_detail(quote['id'])
+        persisted = self.quote_data(quote['id'])['items']
+        self.assertEqual([(item['name'], item['unitPrice']) for item in persisted], [
+            ('INS-SYN-001 | Insumo sintético disponible — Fabricante sintético (1)', 12),
+            ('Estudio sintético de hemoglobina disponible', 9),
+            ('Seguimiento sintético disponible', 15),
+        ])
+        self.pass_('QUOTE-SUPPLY-INVENTORY-ONLY', 'SEL-CH06-QUOTE-CATALOG', supply_inventory_started)
+        self.pass_('QUOTE-SUPPLY-BUSINESS-PARTNER', 'SEL-CH06-QUOTE-CATALOG', supply_partner_started)
+        self.pass_('QUOTE-SUPPLY-SEARCH', 'SEL-CH06-QUOTE-CATALOG', supply_search_started)
+        self.pass_('QUOTE-SUPPLY-SELECT', 'SEL-CH06-QUOTE-CATALOG', supply_select_started)
+        self.pass_('QUOTE-STUDY-INVENTORY-ONLY', 'SEL-CH06-QUOTE-CATALOG', study_inventory_started)
+        self.pass_('QUOTE-STUDY-BUSINESS-PARTNER', 'SEL-CH06-QUOTE-CATALOG', study_partner_started)
+        self.pass_('QUOTE-STUDY-SEARCH', 'SEL-CH06-QUOTE-CATALOG', study_search_started)
+        self.pass_('QUOTE-STUDY-SELECT', 'SEL-CH06-QUOTE-CATALOG', study_select_started)
+        self.pass_('QUOTE-FEE-BUSINESS-PARTNER', 'SEL-CH06-QUOTE-CATALOG', fee_partner_started)
+        self.pass_('QUOTE-FEE-SERVICE-CATALOG', 'SEL-CH06-QUOTE-CATALOG', fee_service_started)
 
     def test_detail_navigation_and_back(self) -> None:
         quote_id = self.create_fixture('Detalle Selenium')

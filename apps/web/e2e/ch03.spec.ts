@@ -46,7 +46,7 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   await login(page);
   await page.getByRole('tab', { name: 'Cotizaciones' }).click();
   for (const column of ['Paciente', 'DUI/NIT', 'Nro.', 'Estado', 'Envío preautorización', 'Respuesta seguro', 'Envío de reclamo', 'Creación', 'Total']) await expect(page.getByRole('columnheader', { name: column, exact: true })).toBeVisible();
-  await expect(page.getByText('No configurado').first()).toBeVisible();
+  await expect(page.getByText('No aplica').first()).toBeVisible();
   await page.getByRole('link', { name: '+ Nuevo' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await expect(dialog).toBeVisible();

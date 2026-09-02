@@ -6,6 +6,10 @@
 # test-id: SEL-HOSP-CREATE
 # test-id: SEL-HOSP-DETAIL
 # test-id: SEL-HOSP-EDIT
+# test-id: SEL-B3-HOSPITALIZATION-PERIODS
+# test-id: SEL-CH07-HOSPITALIZATION-QUOTES
+# test-id: SEL-CH08-ADMINISTRATIVE-PROFILE
+# test-id: SEL-CH08-ADMINISTRATIVE-PROFILE-PERMISSIONS
 # test-id: SEL-STORAGE-V2-V3-MIGRATION
 
 from __future__ import annotations
@@ -25,7 +29,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 
-from helpers.hospitalization_action_recorder import record_pass, reset
+from helpers.hospitalization_action_recorder import complete, record_pass, reset
 from helpers.mock_workspace_storage import (
     append_collection_items,
     clear_workspace,
@@ -77,13 +81,16 @@ class Hospitalizations(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.d.quit()
-        if SERVER is not None:
-            SERVER.terminate()
-            try:
-                SERVER.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                SERVER.kill()
+        try:
+            cls.d.quit()
+        finally:
+            complete()
+            if SERVER is not None:
+                SERVER.terminate()
+                try:
+                    SERVER.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    SERVER.kill()
 
     def setUp(self) -> None:
         self.prepare_authenticated_test()
@@ -174,7 +181,7 @@ class Hospitalizations(unittest.TestCase):
     def stored_case(self, case_id: str) -> dict:
         return next(item for item in get_hospitalizations(self.d) if item['id'] == case_id)
 
-    def test_navigation_and_roles(self) -> None:
+    def test_navigation(self) -> None:
         started = time.time()
         financial_toggle = self.action('FINANCIERO-TOGGLE')
         if financial_toggle.get_attribute('aria-expanded') == 'false':
@@ -186,22 +193,42 @@ class Hospitalizations(unittest.TestCase):
         self.list_ready()
         self.pass_('HOSPITALIZATION-NAVIGATE', 'SEL-HOSP-NAVIGATION', started)
 
-        role_cases = [
-            ('doctor@demo.local', 'demo-doctor', 'DOCTOR', True),
-            ('nurse@demo.local', 'demo-nurse', 'NURSE', False),
-            ('finance@demo.local', 'demo-finance', 'FINANCE', False),
-            ('auditor@demo.local', 'demo-auditor', 'AUDITOR', False),
-        ]
-        for email, password, role, can_write in role_cases:
-            self.prepare_authenticated_test(email, password, role)
-            self.d.get(f'{BASE}/hospitalizations')
-            self.list_ready()
-            controls = self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]')
-            self.assertEqual(bool(controls), can_write)
-            if not can_write:
-                before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
-                self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]'))
-                self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_doctor_can_open_hospitalization_write_controls(self) -> None:
+        self.prepare_authenticated_test('doctor@demo.local', 'demo-doctor', 'DOCTOR')
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        self.assertTrue(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"]'))
+        self.assertTrue(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-EDIT"]'))
+
+    def test_nurse_cannot_alter_hospitalizations_or_audit_entries(self) -> None:
+        self.prepare_authenticated_test('nurse@demo.local', 'demo-nurse', 'NURSE')
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_finance_cannot_alter_hospitalizations_or_audit_entries(self) -> None:
+        self.prepare_authenticated_test('finance@demo.local', 'demo-finance', 'FINANCE')
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_auditor_cannot_alter_hospitalizations_or_audit_entries(self) -> None:
+        self.prepare_authenticated_test('auditor@demo.local', 'demo-auditor', 'AUDITOR')
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"], [data-action-id="HOSPITALIZATION-CREATE-SUBMIT"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_inventory_is_denied_hospitalizations_route(self) -> None:
         self.prepare_authenticated_test('inventory@demo.local', 'demo-inventory', 'INVENTORY')
         self.d.get(f'{BASE}/hospitalizations')
         denied = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
@@ -357,6 +384,43 @@ class Hospitalizations(unittest.TestCase):
         self.pass_('HOSPITALIZATION-CREATE', 'SEL-HOSP-CREATE', create_started)
         self.pass_('HOSPITALIZATION-CREATE-SUBMIT', 'SEL-HOSP-CREATE', create_started)
 
+    def test_admission_periods_persist_without_attachment_bytes(self) -> None:
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        started = time.time()
+        self.click('HOSPITALIZATION-CREATE')
+        Select(self.field('Paciente')).select_by_value('patient-demo-001')
+        self.fill('Fecha de ingreso', '2026-09-10')
+        self.fill('Fecha de egreso (opcional)', '2026-09-12')
+        self.click('HOSPITALIZATION-ADMISSION-PERIOD-ADD')
+        self.fill('Ingreso adicional 1', '2026-09-20')
+        self.fill('Egreso adicional 1', '2026-09-21')
+        self.click('HOSPITALIZATION-ADMISSION-PERIOD-ADD')
+        self.fill('Ingreso adicional 2', '2026-09-25')
+        self.fill('Egreso adicional 2', '2026-09-26')
+        self.d.find_element(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMISSION-PERIOD-REMOVE"]').click()
+        self.assertEqual(self.field('Ingreso adicional 1').get_attribute('value'), '2026-09-25')
+        self.assertEqual(self.field('Egreso adicional 1').get_attribute('value'), '2026-09-26')
+        self.assertFalse(self.d.find_elements(By.XPATH, "//label[contains(., 'Ingreso adicional 2')]//input"))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, 'input[type="file"]'))
+        self.fill('Próxima acción', 'Períodos B3 Selenium')
+        self.click('HOSPITALIZATION-CREATE-SUBMIT')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'persistida')]")))
+        self.d.refresh()
+        row = self.case_row('Períodos B3 Selenium')
+        row.find_element(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-EDIT"]').click()
+        self.assertEqual(self.field('Fecha de ingreso').get_attribute('value'), '2026-09-10')
+        self.assertEqual(self.field('Fecha de egreso (opcional)').get_attribute('value'), '2026-09-12')
+        self.assertEqual(self.field('Ingreso adicional 1').get_attribute('value'), '2026-09-25')
+        self.assertEqual(self.field('Egreso adicional 1').get_attribute('value'), '2026-09-26')
+        self.assertFalse(self.d.find_elements(By.XPATH, "//label[contains(., 'Ingreso adicional 2')]//input"))
+        self.pass_('HOSPITALIZATION-ADMISSION-DATE', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+        self.pass_('HOSPITALIZATION-DISCHARGE-DATE', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+        self.pass_('HOSPITALIZATION-ADMISSION-PERIOD-ADD', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+        self.pass_('HOSPITALIZATION-ADMISSION-PERIOD-DATE', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+        self.pass_('HOSPITALIZATION-DISCHARGE-PERIOD-DATE', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+        self.pass_('HOSPITALIZATION-ADMISSION-PERIOD-REMOVE', 'SEL-B3-HOSPITALIZATION-PERIODS', started)
+
     def test_detail_navigation(self) -> None:
         marker = 'Acción detalle Selenium'
         self.create_fixture(marker)
@@ -381,7 +445,7 @@ class Hospitalizations(unittest.TestCase):
         self.w.until(EC.url_contains(f'/hospitalizations?edit={case_id}'))
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-EDIT-SUBMIT"]')))
         self.assertEqual(Select(self.field('Paciente')).first_selected_option.get_attribute('value'), 'patient-demo-001')
-        self.assertRegex(self.field('Fecha de inicio').get_attribute('value'), r'^20\d{2}-\d{2}-\d{2}$')
+        self.assertRegex(self.field('Fecha de ingreso').get_attribute('value'), r'^20\d{2}-\d{2}-\d{2}$')
         self.assertEqual(Select(self.field('Tipo de cuenta')).first_selected_option.get_attribute('value'), 'EMPRESA')
         self.assertEqual(self.field('Responsable administrativo').get_attribute('value'), 'Responsable Fixture Selenium')
         self.assertEqual(Select(self.field('Prioridad')).first_selected_option.get_attribute('value'), 'HIGH')
@@ -435,6 +499,177 @@ class Hospitalizations(unittest.TestCase):
         self.d.refresh()
         self.assertIn('Próxima Acción Selenium Editada', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('HOSPITALIZATION-EDIT-SUBMIT', 'SEL-HOSP-EDIT', submit_started)
+
+    def test_ch08_administrative_profile_saves_and_cancellation_does_not_persist(self) -> None:
+        marker = 'Perfil administrativo CH08 Selenium'
+        case_id = self.create_fixture(marker)
+        self.open_detail(marker)
+
+        open_started = time.time()
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-OPEN')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
+        self.assertEqual(self.field('Fecha de inicio').get_attribute('value')[:10], self.stored_case(case_id)['startDate'])
+        self.pass_('HOSPITALIZATION-ADMIN-PROFILE-OPEN', 'SEL-CH08-ADMINISTRATIVE-PROFILE', open_started)
+
+        cancel_started = time.time()
+        self.fill('Health manager', 'No persistir CH08 Selenium')
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-CANCEL')
+        self.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
+        self.d.refresh()
+        self.assertNotIn('No persistir CH08 Selenium', self.d.find_element(By.TAG_NAME, 'body').text)
+        self.pass_('HOSPITALIZATION-ADMIN-PROFILE-CANCEL', 'SEL-CH08-ADMINISTRATIVE-PROFILE', cancel_started)
+
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-OPEN')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
+        self.fill('Health manager', 'Coordinación Selenium CH08')
+        self.fill('Referido por', 'Referencia Selenium CH08')
+        self.fill('Tipo Revenue', 'Recurrente')
+        profile_dialog = self.d.find_elements(By.CSS_SELECTOR, '[role="dialog"]')[-1]
+        profile_dialog.find_element(By.XPATH, ".//label[normalize-space()='Tipo']/input").send_keys('Normal')
+        self.fill('Días de duración', '5')
+        self.fill('Forma de pago', 'Aseguradora')
+        self.fill('Aseguradora', 'Aseguradora sintética Selenium')
+        self.fill('Tipo de solicitud', 'Reclamo')
+        self.fill('Categoría mayor', 'Hospitalización')
+        self.fill('Subcategoría', 'Aplicación')
+        self.fill('Hospital de origen', 'Origen sintético')
+        self.fill('Clase de paciente', 'Regular')
+        save_started = time.time()
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-SAVE')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Perfil administrativo de ejecución guardado')]")))
+        self.d.refresh()
+        body = self.d.find_element(By.TAG_NAME, 'body').text
+        for value in ('Coordinación Selenium CH08', 'Referencia Selenium CH08', 'Recurrente', 'Aseguradora sintética Selenium'):
+            self.assertIn(value, body)
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-OPEN')
+        self.assertEqual(self.field('Días de duración').get_attribute('value'), '5')
+        self.assertEqual(self.field('Hospital de origen').get_attribute('value'), 'Origen sintético')
+        self.pass_('HOSPITALIZATION-ADMIN-PROFILE-SAVE', 'SEL-CH08-ADMINISTRATIVE-PROFILE', save_started)
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-CANCEL')
+
+    def test_ch08_admin_can_open_profile_on_direct_detail_route(self) -> None:
+        self.prepare_authenticated_test()
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h1[normalize-space()='case-demo-001']")))
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-OPEN')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
+        self.assertEqual(self.field('Health manager').tag_name, 'input')
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-CANCEL')
+
+    def test_ch08_doctor_can_open_profile_on_direct_detail_route(self) -> None:
+        self.prepare_authenticated_test('doctor@demo.local', 'demo-doctor', 'DOCTOR')
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h1[normalize-space()='case-demo-001']")))
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-OPEN')
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
+        self.assertEqual(self.field('Health manager').tag_name, 'input')
+        self.click('HOSPITALIZATION-ADMIN-PROFILE-CANCEL')
+
+    def test_ch08_nurse_direct_detail_has_no_profile_controls_or_mutation(self) -> None:
+        self.prepare_authenticated_test('nurse@demo.local', 'demo-nurse', 'NURSE')
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h1[normalize-space()='case-demo-001']")))
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-OPEN"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-CANCEL"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_ch08_finance_direct_detail_has_no_profile_controls_or_mutation(self) -> None:
+        self.prepare_authenticated_test('finance@demo.local', 'demo-finance', 'FINANCE')
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h1[normalize-space()='case-demo-001']")))
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-OPEN"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-CANCEL"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_ch08_auditor_direct_detail_has_no_profile_controls_or_mutation(self) -> None:
+        self.prepare_authenticated_test('auditor@demo.local', 'demo-auditor', 'AUDITOR')
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h1[normalize-space()='case-demo-001']")))
+        before = get_collections(self.d, ['hospitalizations', 'auditEntries'])
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-OPEN"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]'))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-CANCEL"]'))
+        self.d.refresh()
+        self.assertEqual(get_collections(self.d, ['hospitalizations', 'auditEntries']), before)
+
+    def test_ch08_inventory_is_denied_direct_hospitalization_detail_route(self) -> None:
+        self.prepare_authenticated_test('inventory@demo.local', 'demo-inventory', 'INVENTORY')
+        self.d.get(f'{BASE}/hospitalizations/case-demo-001')
+        alert = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('Acceso restringido para el rol INVENTORY', alert.text)
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-OPEN"]'))
+
+    def test_ch07_quote_tracking_filters_search_and_pages_without_insurance_mutation(self) -> None:
+        self.d.get(f'{BASE}/hospitalizations')
+        self.list_ready()
+        quotes = get_collection(self.d, 'quotes')
+        self.assertTrue(isinstance(quotes, list) and quotes)
+        base = quotes[0]
+        fixtures = [
+            {**base, 'id': 'quote-ch07-sel-1', 'createdAt': '2026-09-01T12:00:00.000Z', 'status': 'DRAFT'},
+            {**base, 'id': 'quote-ch07-sel-2', 'createdAt': '2026-09-02T12:00:00.000Z', 'status': 'DRAFT'},
+            {**base, 'id': 'quote-ch07-sel-3', 'createdAt': '2026-09-03T12:00:00.000Z', 'status': 'DRAFT'},
+            {**base, 'id': 'quote-ch07-sel-4', 'createdAt': '2026-09-04T12:00:00.000Z', 'status': 'DRAFT'},
+            {**base, 'id': 'quote-ch07-sel-5', 'createdAt': '2026-09-05T12:00:00.000Z', 'status': 'DRAFT'},
+            {**base, 'id': 'quote-ch07-sel-6', 'createdAt': '2026-09-06T12:00:00.000Z', 'status': 'SENT'},
+        ]
+        append_collection_items(self.d, 'quotes', fixtures)
+        self.d.refresh()
+        tab_started = time.time()
+        self.click('HOSPITALIZATION-TAB-QUOTES')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h2[normalize-space(.)='Cotizaciones']")))
+        self.assertTrue(self.d.find_elements(By.XPATH, "//th[normalize-space(.)='Respuesta seguro']"))
+        self.pass_('HOSPITALIZATION-TAB-QUOTES', 'SEL-CH07-HOSPITALIZATION-QUOTES', tab_started)
+
+        status_started = time.time()
+        Select(self.action('HOSPITALIZATION-QUOTE-FILTER-STATUS')).select_by_value('SENT')
+        self.assertEqual(Select(self.action('HOSPITALIZATION-QUOTE-FILTER-STATUS')).first_selected_option.get_attribute('value'), 'SENT')
+        self.pass_('HOSPITALIZATION-QUOTE-FILTER-STATUS', 'SEL-CH07-HOSPITALIZATION-QUOTES', status_started)
+        apply_started = time.time()
+        self.click('HOSPITALIZATION-QUOTE-FILTER-APPLY')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[td[contains(.,'quote-ch07-sel-6')]]")))
+        self.assertEqual(len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')), 1)
+        self.pass_('HOSPITALIZATION-QUOTE-FILTER-APPLY', 'SEL-CH07-HOSPITALIZATION-QUOTES', apply_started)
+
+        date_started = time.time()
+        date = self.action('HOSPITALIZATION-QUOTE-FILTER-DATE')
+        self.d.execute_script("arguments[0].value='2000-01-01'; arguments[0].dispatchEvent(new Event('input', {bubbles:true})); arguments[0].dispatchEvent(new Event('change', {bubbles:true}));", date)
+        self.assertEqual(date.get_attribute('value'), '2000-01-01')
+        self.pass_('HOSPITALIZATION-QUOTE-FILTER-DATE', 'SEL-CH07-HOSPITALIZATION-QUOTES', date_started)
+        self.click('HOSPITALIZATION-QUOTE-FILTER-APPLY')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space(.)='Sin cotizaciones']")))
+
+        clear_started = time.time()
+        self.click('HOSPITALIZATION-QUOTE-FILTER-CLEAR')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[td[contains(.,'quote-ch07-sel-1')]]")))
+        self.assertEqual(Select(self.action('HOSPITALIZATION-QUOTE-FILTER-STATUS')).first_selected_option.get_attribute('value'), '')
+        self.assertEqual(self.action('HOSPITALIZATION-QUOTE-FILTER-DATE').get_attribute('value'), '')
+        self.pass_('HOSPITALIZATION-QUOTE-FILTER-CLEAR', 'SEL-CH07-HOSPITALIZATION-QUOTES', clear_started)
+
+        size_started = time.time()
+        Select(self.action('HOSPITALIZATION-QUOTE-PAGE-SIZE')).select_by_value('5')
+        self.assertEqual(len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')), 5)
+        self.pass_('HOSPITALIZATION-QUOTE-PAGE-SIZE', 'SEL-CH07-HOSPITALIZATION-QUOTES', size_started)
+        next_started = time.time()
+        self.click('HOSPITALIZATION-QUOTE-PAGE-NEXT')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[td[contains(.,'quote-ch07-sel-5')]]")))
+        self.pass_('HOSPITALIZATION-QUOTE-PAGE-NEXT', 'SEL-CH07-HOSPITALIZATION-QUOTES', next_started)
+        previous_started = time.time()
+        self.click('HOSPITALIZATION-QUOTE-PAGE-PREV')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[td[contains(.,'quote-ch07-sel-1')]]")))
+        self.pass_('HOSPITALIZATION-QUOTE-PAGE-PREV', 'SEL-CH07-HOSPITALIZATION-QUOTES', previous_started)
+        search_started = time.time()
+        search = self.action('HOSPITALIZATION-QUOTE-SEARCH')
+        search.send_keys('quote-ch07-sel-6')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[td[contains(.,'quote-ch07-sel-6')]]")))
+        self.assertEqual(len(self.d.find_elements(By.CSS_SELECTOR, 'tbody tr')), 1)
+        self.pass_('HOSPITALIZATION-QUOTE-SEARCH', 'SEL-CH07-HOSPITALIZATION-QUOTES', search_started)
 
     def test_mobile(self) -> None:
         self.d.set_window_size(390, 844)

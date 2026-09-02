@@ -1,10 +1,12 @@
 {
   "schema_version": 1,
-  "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+  "implementation_sha": null,
+  "verification_status": "PENDING_GIT_WRITE",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "59636c2fb63619edf420901e4e2a166a41fbd6fc66847c144237bde4cd35b501",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "bafa40c2283848fde4b1446d7f798bebd295e786b43629e612a7d8db61c7a328",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -14,12 +16,14 @@
     },
     "CR-002": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "52a77b7abd4c00763c2f3af547ef403347ca195175edf3e69ad11b3aa54565af",
+      "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
-        "vitest:cr002-resident-card"
+        "vitest:cr002-resident-card",
+        "playwright:cr002-resident-card"
       ],
-      "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
+      "notes": "Carnet de residente se guarda, recarga y edita en el proveedor demo; la persistencia multiusuario sigue sin certificación."
     },
     "CR-003": {
       "implementation_sha": null,
@@ -32,52 +36,65 @@
     },
     "CR-004": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "d780b756dc91f6d5e5b52b1a71078fb40914e587dca5a483fb2b22ef6a1dc00f",
+      "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
-        "SEL-PAT-CONTACTS"
+        "vitest:cr004-contact-document-pair",
+        "playwright:cr004-contact-document-pair",
+        "SEL-PAT-CONTACTS",
+        "SEL-PAT-CONTACT-DOCUMENT"
       ],
-      "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
+      "notes": "El formulario rechaza pares incompletos y conserva tipo/número administrativo tras guardar, recargar y abrir edición en demo; falta certificación multiusuario de Supabase."
     },
     "CR-005": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "0f950276e7b753bf030320cfb9470be60dc05b3f935a0603054b5f7e2cb6fcaf",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["vitest:b2-doctors-admin-only", "playwright:cr005-independent-doctor-resource", "playwright:b2-doctors-admin-only", "SEL-DOCTOR-LIFECYCLE", "SEL-DOCTOR-ADMIN-ONLY"],
+      "notes": "Médico y recurso tienen altas separadas; ambas persisten en el proveedor demo y la ruta administrativa es exclusiva de ADMIN."
     },
     "CR-006": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "00e7cfedaac0c099b32e3bd2a5f0b60951fff856935857eb6171fc4d3c9b473d",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["vitest:cr006-doctor-attachment-metadata", "vitest:b2-doctors-admin-only", "playwright:cr006-doctor-save-reload-edit", "playwright:b2-doctors-admin-only", "SEL-DOCTOR-LIFECYCLE", "SEL-DOCTOR-ADMIN-ONLY"],
+      "notes": "JVPM, DUI, dirección, edición y metadatos de archivo persisten en demo; la superficie que los expone es exclusiva de ADMIN. Los bytes y descargas privadas de Supabase siguen bloqueados."
     },
     "CR-007": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe el catálogo ni selector."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "423a1013df73afdd16a47f3af61180bf575b5b5e2dd655b7263db19676c93bd5",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["vitest:cr007-professional-specialties", "playwright:cr007-professional-specialties", "SEL-DOCTOR-LIFECYCLE"],
+      "notes": "Las ocho categorías solicitadas se pueden buscar y la selección persiste con el médico demo."
     },
     "CR-008": {
       "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
       "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "certification_status": "BLOCKED_INTEGRATION",
       "test_ids": [
+        "playwright:cr008-private-attachment-blocked",
         "SEL-HOSP-CREATE"
       ],
-      "notes": "Hay tablas destino, sin UI, Storage privado ni descarga segura."
+      "notes": "La UI no permite bytes ni descargas en navegador; Storage privado, RLS organizacional y auditoría integrada siguen bloqueados."
     },
     "CR-009": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "e9d205e1bde41164ef51d97ffda52c6f3a6de0568d900bf0ca139b7280897228",
+      "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch03-hospitalization-filters",
-        "SEL-HOSP-CREATE"
+        "vitest:cr009-admission-periods",
+        "playwright:cr009-admission-periods",
+        "SEL-HOSP-CREATE",
+        "SEL-B3-HOSPITALIZATION-PERIODS"
       ],
-      "notes": "El contrato tiene start/end opcional, la UI sólo presenta fecha de inicio."
+      "notes": "Fecha de ingreso y períodos administrativos adicionales persisten tras recarga en demo; integración multiusuario queda pendiente."
     },
     "CR-010": {
       "implementation_sha": null,
@@ -87,17 +104,20 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "492021435e128121d8025be45f2ad3675da457ce55350259264be2270eb967be",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "218912ac717332a3e9c6469e9ce6b47c420b7bc6866eb6fcf8323406ce30e0fb",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
+        "playwright:cr011-quote-categories",
         "SEL-QUOTE-ITEMS"
       ],
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Playwright guarda, recarga y verifica las siete categorías/líneas; en un flujo separado guarda, recarga y verifica la eliminación de Extras. Selenium declara las mismas aserciones después de persistencia, pero su ejecución queda pendiente de Python; no hay certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "08421073b8269fc34c91677959fd14909b95f29a584df8f4ff76057588d30416",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -106,10 +126,11 @@
     },
     "CR-013": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Existe categoría genérica, no médico ni honorario asociado."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "f8860002209d2b1b7f47587044385fe2f7af1a55c50b7e04f85b9b0020f3b30b",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["vitest:cr013-doctor-fee-reference", "playwright:cr013-doctor-fee", "SEL-B4-DOCTOR-FEE"],
+      "notes": "La línea Honorarios conserva el médico seleccionado y su importe manual tras guardar/recargar en demo; no se infiere tarifa ni cobertura. Selenium de esta evidencia queda pendiente de Python y producción de Supabase no está certificada."
     },
     "CR-014": {
       "implementation_sha": null,
@@ -127,24 +148,27 @@
     },
     "CR-016": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "El dato existe en Patient; Dashboard no lo muestra."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "640e81d6fa352d19694b345aa939d3ca0fa79a2386dee725059a6bcbaa0eebc8",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["playwright:cr016-patient-coverage-counts"],
+      "notes": "Dashboard muestra recuentos separados de pacientes con aseguradora registrada y particulares a partir de datos sintéticos persistidos en demo; no define estados mensuales, facturación ni cobertura."
     },
     "CR-017": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Agenda sólo crea un intervalo."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "5f5fd3be18c02cf72a56b59991c5f9d86bcce4a58126e5de867b08a01bebcfc1",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": ["vitest:cr017-multi-day-shifts", "playwright:cr017-multi-day-shifts", "SEL-B3-AGENDA-SERIES"],
+      "notes": "ADMIN y NURSE persisten una serie por fecha en demo; los demás roles no alteran turnos ni auditoría. Se rechazan duplicados o colisiones del recurso."
     },
     "CR-018": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existen visitType ni presets; Puntual depende de CR-010."
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "5f5fd3be18c02cf72a56b59991c5f9d86bcce4a58126e5de867b08a01bebcfc1",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
+      "test_ids": ["vitest:cr018-shift-presets", "playwright:cr018-shift-presets", "SEL-B3-AGENDA-SERIES"],
+      "notes": "Los presets 6h/8h conservan su duración al cruzar medianoche; Puntual sigue bloqueado por la definición pendiente de CR-010."
     },
     "CR-019": {
       "implementation_sha": null,

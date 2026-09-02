@@ -57,9 +57,10 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "59636c2fb63619edf420901e4e2a166a41fbd6fc66847c144237bde4cd35b501",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "bafa40c2283848fde4b1446d7f798bebd295e786b43629e612a7d8db61c7a328",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
@@ -87,7 +88,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-3"
       ],
       "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "production_status": "BLOCKED_INTEGRATION",
       "route_ids": [
         "ROUTE-PATIENTS"
       ],
@@ -105,7 +106,9 @@
       "unit_test_ids": [
         "vitest:cr002-resident-card"
       ],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:cr002-resident-card"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B1"
@@ -115,13 +118,14 @@
       "client_question": null,
       "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "52a77b7abd4c00763c2f3af547ef403347ca195175edf3e69ad11b3aa54565af",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
+      "notes": "Carnet de residente se guarda, recarga y edita en el proveedor demo; la persistencia multiusuario sigue sin certificación."
     },
     {
       "change_id": "CR-003",
@@ -161,15 +165,15 @@
         "PATIENT-EXPORT-XLSX"
       ],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": ["playwright:cr008-private-attachment-blocked"],
       "selenium_test_ids": [
         "SEL-PAT-EXPORT"
       ],
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "El contenido de archivos privados requiere Storage privado de Supabase, RLS con alcance organizacional y evidencia de integración; no se almacenan bytes ni se ofrecen descargas en el navegador.",
       "client_question": null,
       "acceptance_criteria": "Definir alcance y exportar pacientes autorizados ordenados",
       "implementation_sha": null,
@@ -217,10 +221,16 @@
         "supabase/migrations/202609020001_b1_patient_contact_documents.sql"
       ],
       "action_ids": [
-        "PATIENT-CONTACT-ADD"
+        "PATIENT-CONTACT-ADD",
+        "PATIENT-CONTACT-DOCUMENT-TYPE",
+        "PATIENT-CONTACT-DOCUMENT-ID"
       ],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:cr004-contact-document-pair"
+      ],
+      "playwright_test_ids": [
+        "playwright:cr004-contact-document-pair"
+      ],
       "selenium_test_ids": [
         "SEL-PAT-CONTACTS"
       ],
@@ -232,13 +242,14 @@
       "client_question": null,
       "acceptance_criteria": "Guardar tipo y número de documento del responsable",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "d780b756dc91f6d5e5b52b1a71078fb40914e587dca5a483fb2b22ef6a1dc00f",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
+      "notes": "El formulario rechaza pares incompletos y conserva tipo/número administrativo tras guardar, recargar y abrir edición en demo; falta certificación multiusuario de Supabase."
     },
     {
       "change_id": "CR-005",
@@ -260,20 +271,23 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-6"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx",
+        "apps/web/src/components/app-shell.tsx",
+        "apps/web/src/lib/permissions.ts"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": ["DOCTOR-NAVIGATE", "DOCTOR-RESOURCE-CREATE", "DOCTOR-CREATE", "NURSING-RESOURCE-CREATE"],
+      "unit_test_ids": ["vitest:b2-doctors-admin-only"],
+      "playwright_test_ids": ["playwright:cr005-independent-doctor-resource", "playwright:b2-doctors-admin-only"],
+      "selenium_test_ids": ["SEL-DOCTOR-LIFECYCLE", "SEL-DOCTOR-ADMIN-ONLY"],
       "dependency_ids": [
         "B2"
       ],
@@ -282,13 +296,14 @@
       "client_question": null,
       "acceptance_criteria": "Separar altas, rutas y modelos de médico y recurso",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "0f950276e7b753bf030320cfb9470be60dc05b3f935a0603054b5f7e2cb6fcaf",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+      "technical_status": "RESOLVABLE",
+      "notes": "Médicos y recursos tienen altas independientes en demo y persisten tras recarga; /doctors y su navegación son exclusivos de ADMIN. La integración de Supabase sigue pendiente."
     },
     {
       "change_id": "CR-006",
@@ -311,36 +326,39 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-7"
       ],
       "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "production_status": "BLOCKED_INTEGRATION",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+        "packages/contracts/src/index.ts",
+        "apps/web/src/lib/doctor-catalog.ts",
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/lib/data-provider.ts"
       ],
-      "db_objects": [
-        "supabase/migrations/202608260001_initial_schema.sql"
-      ],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "db_objects": [],
+      "action_ids": ["DOCTOR-CREATE", "DOCTOR-ATTACHMENTS", "DOCTOR-EDIT", "DOCTOR-SAVE", "DOCTOR-EDIT-SAVE"],
+      "unit_test_ids": ["vitest:cr006-doctor-attachment-metadata", "vitest:b2-doctors-admin-only"],
+      "playwright_test_ids": ["playwright:cr006-doctor-save-reload-edit", "playwright:b2-doctors-admin-only"],
+      "selenium_test_ids": ["SEL-DOCTOR-LIFECYCLE", "SEL-DOCTOR-ADMIN-ONLY"],
       "dependency_ids": [
         "B2"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "Falta el mapeo organizacional de Supabase y el bucket privado con RLS para almacenar bytes y descargar adjuntos de médico.",
       "client_question": null,
       "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "00e7cfedaac0c099b32e3bd2a5f0b60951fff856935857eb6171fc4d3c9b473d",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "technical_status": "RESOLVABLE",
+      "notes": "Alta/edición demo conserva JVPM, DUI, dirección, selección y metadatos de archivos tras recarga. No afirma persistencia de bytes ni adjuntos privados en Supabase."
     },
     {
       "change_id": "CR-007",
@@ -362,20 +380,21 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-8"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "packages/contracts/src/index.ts"
+        "apps/web/src/lib/doctor-catalog.ts",
+        "apps/web/src/app/(workspace)/doctors/page.tsx"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": ["DOCTOR-SPECIALTY-SELECT"],
+      "unit_test_ids": ["vitest:cr007-professional-specialties"],
+      "playwright_test_ids": ["playwright:cr007-professional-specialties"],
+      "selenium_test_ids": ["SEL-DOCTOR-LIFECYCLE"],
       "dependency_ids": [
         "B2"
       ],
@@ -384,13 +403,14 @@
       "client_question": null,
       "acceptance_criteria": "Catálogo buscable y persistente de especialidades/profesiones",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "423a1013df73afdd16a47f3af61180bf575b5b5e2dd655b7263db19676c93bd5",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe el catálogo ni selector."
+      "technical_status": "RESOLVABLE",
+      "notes": "El selector buscable contiene las ocho categorías solicitadas y conserva la elección con el médico demo."
     },
     {
       "change_id": "CR-008",
@@ -413,7 +433,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-9"
       ],
       "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "production_status": "BLOCKED_INTEGRATION",
       "route_ids": [
         "ROUTE-HOSPITALIZATIONS"
       ],
@@ -430,15 +450,15 @@
         "HOSPITALIZATION-CREATE"
       ],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": ["playwright:cr008-private-attachment-blocked"],
       "selenium_test_ids": [
         "SEL-HOSP-CREATE"
       ],
       "dependency_ids": [
         "B3"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "El contenido de archivos privados requiere Storage privado de Supabase, RLS con alcance organizacional y evidencia de integración; no se almacenan bytes ni se ofrecen descargas en el navegador.",
       "client_question": null,
       "acceptance_criteria": "Adjuntar archivo privado a hospitalización con auditoría",
       "implementation_sha": null,
@@ -447,8 +467,8 @@
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "Hay tablas destino, sin UI, Storage privado ni descarga segura."
+      "technical_status": "BLOCKED_INTEGRATION",
+      "notes": "La UI explica el bloqueo y no presenta carga, bytes ni descargas. Las tablas base no sustituyen Storage privado/RLS ni auditoría integrada."
     },
     {
       "change_id": "CR-009",
@@ -470,8 +490,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-10"
       ],
-      "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-HOSPITALIZATIONS"
       ],
@@ -481,18 +501,23 @@
       ],
       "react_files": [
         "packages/contracts/src/index.ts",
-        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
+        "apps/web/src/lib/hospitalization-periods.ts"
       ],
       "db_objects": [],
       "action_ids": [
-        "HOSPITALIZATION-CREATE"
+        "HOSPITALIZATION-CREATE",
+        "HOSPITALIZATION-ADMISSION-DATE",
+        "HOSPITALIZATION-ADMISSION-PERIOD-ADD"
       ],
       "unit_test_ids": [
-        "vitest:ch03-hospitalization-filters"
+        "vitest:ch03-hospitalization-filters",
+        "vitest:cr009-admission-periods"
       ],
-      "playwright_test_ids": [],
+      "playwright_test_ids": ["playwright:cr009-admission-periods"],
       "selenium_test_ids": [
-        "SEL-HOSP-CREATE"
+        "SEL-HOSP-CREATE",
+        "SEL-B3-HOSPITALIZATION-PERIODS"
       ],
       "dependency_ids": [
         "B3"
@@ -502,13 +527,14 @@
       "client_question": null,
       "acceptance_criteria": "Ingreso/egreso; períodos múltiples sólo tras definición",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "e9d205e1bde41164ef51d97ffda52c6f3a6de0568d900bf0ca139b7280897228",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "El contrato tiene start/end opcional, la UI sólo presenta fecha de inicio."
+      "technical_status": "RESOLVABLE",
+      "notes": "La UI usa Fecha de ingreso, admite períodos administrativos adicionales de ingreso/egreso, rechaza duplicados/egresos previos y persiste tras recarga en demo."
     },
     {
       "change_id": "CR-010",
@@ -535,9 +561,7 @@
       "route_ids": [
         "ROUTE-AGENDA"
       ],
-      "video_requirement_ids": [
-        "CH11-F001"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
       ],
@@ -599,7 +623,9 @@
         "QUOTE-CREATE"
       ],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:cr011-quote-categories"
+      ],
       "selenium_test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
@@ -610,8 +636,9 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "492021435e128121d8025be45f2ad3675da457ce55350259264be2270eb967be",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "218912ac717332a3e9c6469e9ce6b47c420b7bc6866eb6fcf8323406ce30e0fb",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -667,8 +694,9 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
-      "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
+      "implementation_sha": null,
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "08421073b8269fc34c91677959fd14909b95f29a584df8f4ff76057588d30416",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -696,23 +724,32 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-14"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-QUOTES",
         "ROUTE-DOCTORS"
       ],
-      "video_requirement_ids": [
-        "CH06-F005"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/quotes/page.tsx"
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/quotes/page.tsx",
+        "apps/web/src/app/(workspace)/quotes/[id]/page.tsx"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "QUOTE-FEE-DOCTOR-SELECT",
+        "QUOTE-FEE-AMOUNT"
+      ],
+      "unit_test_ids": [
+        "vitest:cr013-doctor-fee-reference"
+      ],
+      "playwright_test_ids": [
+        "playwright:cr013-doctor-fee"
+      ],
+      "selenium_test_ids": [
+        "SEL-B4-DOCTOR-FEE"
+      ],
       "dependency_ids": [
         "B4"
       ],
@@ -721,13 +758,14 @@
       "client_question": null,
       "acceptance_criteria": "Vincular médico y honorario trazable a línea FEES",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "f8860002209d2b1b7f47587044385fe2f7af1a55c50b7e04f85b9b0020f3b30b",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Existe categoría genérica, no médico ni honorario asociado."
+      "notes": "Honorarios conserva médico e importe manual por línea en el proveedor demo; no se infiere tarifa, cobertura ni existe persistencia Supabase certificada. La petición es client-originated y no se vincula artificialmente a CH06-F05."
     },
     {
       "change_id": "CR-014",
@@ -807,11 +845,10 @@
         "ROUTE-AGENDA",
         "ROUTE-DOCTORS"
       ],
-      "video_requirement_ids": [
-        "CH11-F001"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/agenda/page.tsx"
+        "apps/web/src/app/(workspace)/agenda/page.tsx",
+        "apps/web/src/lib/agenda-series.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -854,8 +891,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-17"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-DASHBOARD"
       ],
@@ -868,7 +905,9 @@
       "db_objects": [],
       "action_ids": [],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:cr016-patient-coverage-counts"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B4"
@@ -878,13 +917,14 @@
       "client_question": null,
       "acceptance_criteria": "Métrica/gráfica con datos de seguro y permisos",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "640e81d6fa352d19694b345aa939d3ca0fa79a2386dee725059a6bcbaa0eebc8",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "El dato existe en Patient; Dashboard no lo muestra."
+      "technical_status": "DEMO_CERTIFIED",
+      "notes": "Dashboard separa los pacientes sintéticos con aseguradora registrada de los particulares; la métrica no define facturación, estados mensuales ni cobertura."
     },
     {
       "change_id": "CR-017",
@@ -906,22 +946,21 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-18"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-AGENDA"
       ],
-      "video_requirement_ids": [
-        "CH11-F001"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/agenda/page.tsx"
+        "apps/web/src/app/(workspace)/agenda/page.tsx",
+        "apps/web/src/lib/agenda-series.ts"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": ["AGENDA-SHIFT-DATE-ADD", "AGENDA-SHIFT-SAVE"],
+      "unit_test_ids": ["vitest:cr017-multi-day-shifts"],
+      "playwright_test_ids": ["playwright:cr017-multi-day-shifts"],
+      "selenium_test_ids": ["SEL-B3-AGENDA-SERIES"],
       "dependency_ids": [
         "B3"
       ],
@@ -930,13 +969,14 @@
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "5f5fd3be18c02cf72a56b59991c5f9d86bcce4a58126e5de867b08a01bebcfc1",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "Agenda sólo crea un intervalo."
+      "technical_status": "RESOLVABLE",
+      "notes": "La agenda crea un turno por fecha seleccionada, persiste la serie en demo y rechaza fechas duplicadas o colisiones del mismo recurso."
     },
     {
       "change_id": "CR-018",
@@ -958,37 +998,37 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-19"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-AGENDA"
       ],
-      "video_requirement_ids": [
-        "CH11-F001"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/agenda/page.tsx"
+        "apps/web/src/app/(workspace)/agenda/page.tsx",
+        "apps/web/src/lib/agenda-series.ts"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": ["AGENDA-SHIFT-PRESET-6H", "AGENDA-SHIFT-PRESET-8H", "AGENDA-SHIFT-PRESET-PUNTUAL"],
+      "unit_test_ids": ["vitest:cr018-shift-presets"],
+      "playwright_test_ids": ["playwright:cr018-shift-presets"],
+      "selenium_test_ids": ["SEL-B3-AGENDA-SERIES"],
       "dependency_ids": [
         "B3"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "Puntual permanece bloqueado por CR-010: no se definieron entidad, campos, duración, estados ni relación.",
       "client_question": null,
       "acceptance_criteria": "Presets 6h/8h y Puntual sujeto a regla aprobada",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "verification_status": "PENDING_GIT_WRITE",
+      "functional_fingerprint": "5f5fd3be18c02cf72a56b59991c5f9d86bcce4a58126e5de867b08a01bebcfc1",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "No existen visitType ni presets; Puntual depende de CR-010."
+      "technical_status": "PARTIAL_CLIENT_DEFINITION",
+      "notes": "Los presets 6h y 8h preservan su duración también al cruzar medianoche; Puntual se muestra deshabilitado y depende de CR-010."
     },
     {
       "change_id": "CR-019",

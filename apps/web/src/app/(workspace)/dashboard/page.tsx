@@ -16,6 +16,8 @@ export default function DashboardPage() {
   const supabaseConfigured = Boolean(getSupabaseBrowserClient());
   const carePlans = clinicalDocuments.filter((document) => document.type === 'CARE_PLAN').length;
   const recentReadings = vitalReadings.slice().sort((left, right) => right.measuredAt.localeCompare(left.measuredAt));
+  const insuredPatients = patients.filter((patient) => Boolean(patient.insurance?.insurer ?? patient.insurer));
+  const privatePatients = patients.length - insuredPatients.length;
 
   return (
     <div className="page-stack">
@@ -38,6 +40,8 @@ export default function DashboardPage() {
         <section className="metric-grid" aria-label="Indicadores operativos">
           <Panel><span>Pacientes con alertas</span><strong>—</strong><small>Requiere umbrales clínicos aprobados.</small></Panel>
           <Panel><span>Pacientes activos</span><strong>{patients.filter((item) => item.status === 'ACTIVE').length}</strong><small>Registros sintéticos activos.</small></Panel>
+          <Panel><span>Pacientes particulares</span><strong data-testid="dashboard-private-patients">{privatePatients}</strong><small>Sin aseguradora registrada.</small></Panel>
+          <Panel><span>Pacientes asegurados</span><strong data-testid="dashboard-insured-patients">{insuredPatients.length}</strong><small>Con aseguradora registrada.</small></Panel>
           <Panel><span>Tratamientos actualizados</span><strong>—</strong><small>Sin fuente ni regla aprobada.</small></Panel>
           <Panel><span>Tratamientos por finalizar</span><strong>—</strong><small>Sin fuente ni regla aprobada.</small></Panel>
           <Panel><span>Planes de cuidado</span><strong>{carePlans}</strong><small>Documentos sintéticos no interpretados.</small></Panel>

@@ -19,7 +19,7 @@ test("CH16 administra perfiles de descuento con búsqueda, matriz y auditoría",
   await login(page);
   await page.goto("/#/catalogos/descuentos");
   await expect(page.getByRole("heading", { name:"Descuentos y convenios", exact:true })).toBeVisible();
-  for (const label of ["Perfil", "Cálculo", "Servicios", "Estudios diagnósticos", "Medicamentos", "Insumos", "Equipos", "Honorarios", "Extras", "Elegibilidad", "Vigencia", "Control", "Estado", "Acciones"])
+  for (const label of ["Perfil", "Cálculo", "Servicios", "Estudios Dx", "Medicamentos", "Insumos", "Equipos", "Honorarios", "Extras", "Elegibilidad", "Vigencia", "Control", "Estado", "Acciones"])
     await expect(page.getByRole("columnheader", { name:label, exact:true })).toBeVisible();
 
   await page.getByRole("button", { name:"Nuevo perfil", exact:true }).click();

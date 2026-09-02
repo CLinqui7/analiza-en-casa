@@ -479,8 +479,8 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
 test('nursing resources require professional registration, persist, and honor role guards', async ({ page }) => {
   await login(page);
   await page.goto('/clinical/nursing');
-  await page.getByRole('button', { name: 'Registrar recurso' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Registrar recurso de enfermería' });
+  await page.getByRole('button', { name: 'Nuevo recurso' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nuevo recurso de enfermería' });
   await dialog.getByLabel('Nombre visible').fill('Recurso sin registro de QA');
   await dialog.getByRole('button', { name: 'Guardar recurso' }).click();
   await expect(dialog.getByText('Ingrese el número de Junta o registro profesional.')).toBeVisible();
@@ -497,29 +497,31 @@ test('nursing resources require professional registration, persist, and honor ro
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
   await page.goto('/clinical/nursing');
-  await expect(page.getByRole('button', { name: 'Registrar recurso' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Nuevo recurso' })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'doctor@demo.local', 'demo-doctor');
   await page.goto('/clinical/nursing');
-  await expect(page.getByRole('button', { name: 'Registrar recurso' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Nuevo recurso' })).toHaveCount(0);
 });
 
-test('clinical action search is normalized and creation is limited to authorized roles', async ({ page }) => {
+test('medical-order factual search is normalized and document choice is limited to authorized roles', async ({ page }) => {
   await login(page);
   await page.goto('/clinical/orders');
-  await page.getByLabel('Buscar por paciente').fill('123456789');
-  await expect(page.getByText('1 paciente(s) coinciden.')).toBeVisible();
-  await page.getByLabel('Buscar por paciente').fill('sin coincidencia QA');
-  await expect(page.getByText('Sin pacientes coincidentes.')).toBeVisible();
+  await page.getByLabel('Buscar orden médica').fill('123456789');
+  await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
+  await page.getByLabel('Buscar orden médica').fill('sin coincidencia QA');
+  await expect(page.getByText('No hay registros disponibles')).toBeVisible();
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'doctor@demo.local', 'demo-doctor');
   await page.goto('/clinical/orders');
-  await expect(page.getByRole('button', { name: 'Nueva acción' })).toBeVisible();
+  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
+  await expect(page.getByRole('button', { name: 'Nuevo' })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
   await page.goto('/clinical/orders');
-  await expect(page.getByRole('button', { name: 'Nueva acción' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
+  await expect(page.getByRole('button', { name: 'Nuevo' })).toHaveCount(0);
 });
 
 test('quote draft becomes an immutable sent version', async ({ page }) => {

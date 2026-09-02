@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-01T23:24:33-06:00",
-  "metadata_generated_from_commit": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+  "generated_at": "2026-09-01T23:45:03-06:00",
+  "metadata_generated_from_commit": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-  "functional_fingerprint": "e42375f43b17c5b704c0076834bf3e19824dd58e76ef0d483ae71969691e1a7a",
+  "implementation_sha": null,
+  "functional_fingerprint": "7e255a0f3b152209528a060a4c123bf5649dafdde2c8576930bd64e31e6a7853",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -58,7 +58,10 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH01_contexto_inicial_acceso_dashboard_y_listado_de_pacientes/event_frames/CH01-E0009_00h00m56s200ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q002",
+        "CH09-Q004"
+      ],
       "route_id": "ROUTE-PATIENTS",
       "react_route": "/patients",
       "react_files": [
@@ -1784,20 +1787,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-PATIENT-SEARCH",
+        "QUOTE-PATIENT-SELECT"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1820,20 +1830,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-PATIENT-SEARCH",
+        "QUOTE-PATIENT-SELECT"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1898,21 +1915,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-PATIENT-SELECT"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "CH04-E0005: al seleccionar el paciente sintético, DUI/NIT, Teléfono y Correo asociados se muestran como lectura sola. Playwright y Selenium fuente verifican la selección y el autocompletado sin afirmar edición, versionado ni reglas de privacidad no evidenciadas; Selenium runtime permanece PENDING_RUNTIME porque Python no está disponible."
     },
     {
       "requirement_id": "CH04-F005",
@@ -1936,20 +1959,26 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-INVOICE-DATE"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -1974,20 +2003,26 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-DISCOUNT-GROUP"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2012,21 +2047,30 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-REFERRAL",
+        "QUOTE-REFERRAL-CATALOG",
+        "QUOTE-REFERRAL-ADD",
+        "QUOTE-REFERRAL-REMOVE"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "El borrador sin etiqueta seleccionada se rechaza con alerta accesible; el catálogo es desplazable y la selección/retiro persiste sin atribuir comisión."
     },
     {
       "requirement_id": "CH04-F008",
@@ -2090,21 +2134,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-REFERRAL-CATALOG"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Botón verde circular accesible con +, comprobado al abrir/cerrar la superficie desplazable de referidos."
     },
     {
       "requirement_id": "CH04-F010",
@@ -2128,20 +2178,29 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-GIFTCARD",
+        "QUOTE-COMMENTS"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:quotes-metadata-filters-pagination",
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-QUOTE-METADATA",
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2165,20 +2224,29 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-INVENTORY-ONLY",
+        "QUOTE-BUSINESS-PARTNER",
+        "QUOTE-SERVICE-CATALOG",
+        "QUOTE-ITEM-ADD"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch04-quote-general-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH04-QUOTE-GENERAL"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": null,
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
@@ -2200,21 +2268,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-MEDICATION-CATEGORY"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Las siete pestañas, incluido el rótulo observado “Estudios Dx”, y el cambio de compositor se ejercitan en la regresión CH05; no se infiere contenido ni reglas de las categorías no recorridas."
     },
     {
       "requirement_id": "CH05-F002",
@@ -2238,21 +2312,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-ITEM-ADD"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Socio sintético puede guardarse junto a una línea; obligatoriedad, listas de precios, elegibilidad, vigencia y moneda siguen abiertas en CH05-Q001."
     },
     {
       "requirement_id": "CH05-F003",
@@ -2273,21 +2353,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-ITEM-ADD"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Agregar muestra Procesando... como feedback breve sin afirmar error, reintento ni idempotencia remota."
     },
     {
       "requirement_id": "CH05-F004",
@@ -2309,21 +2395,28 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-SERVICE-SEARCH",
+        "QUOTE-SERVICE-SELECT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Búsqueda incremental sobre catálogo sintético; el alcance, códigos y ranking de producción permanecen fuera de esta certificación."
     },
     {
       "requirement_id": "CH05-F005",
@@ -2345,21 +2438,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-ITEM-ADD"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "El selector conserva un concepto sintético, pero el precio queda deliberadamente manual: los valores observados no autorizan un tarifario."
     },
     {
       "requirement_id": "CH05-F006",
@@ -2382,21 +2481,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-ITEM-ADD"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Cantidad inicia en 0 y se marca requerida: Agregar rechaza cero sin crear una línea; una cantidad positiva crea una línea que se guarda y recarga. Unidad, límites y relación clínica siguen abiertos en CH05-Q003."
     },
     {
       "requirement_id": "CH05-F007",
@@ -2419,21 +2524,28 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-MEDICATION-SEARCH",
+        "QUOTE-MEDICATION-SELECT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Las líneas manuales persisten por categoría, pero no se reproduce el ledger agrupado ni las columnas Tipo/Código/Impuesto sin reglas autorizadas."
     },
     {
       "requirement_id": "CH05-F008",
@@ -2531,21 +2643,27 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-MEDICATION-CATEGORY"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Cambiar a Medicamentos reinicia concepto, búsqueda y socio local; no atribuye persistencia de socio entre categorías."
     },
     {
       "requirement_id": "CH05-F011",
@@ -2605,21 +2723,28 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-MEDICATION-SEARCH",
+        "QUOTE-MEDICATION-SELECT"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "No results found aparece y se recupera al corregir la búsqueda de medicamentos sintéticos."
     },
     {
       "requirement_id": "CH05-F013",
@@ -2760,21 +2885,30 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "action_ids": [
+        "QUOTE-SUPPLY-INVENTORY-ONLY",
+        "QUOTE-STUDY-INVENTORY-ONLY"
+      ],
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch05-quote-services-medications",
+        "playwright:ch06-synthetic-catalogs"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH05-QUOTE-CATALOG",
+        "SEL-CH06-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Las siete pestañas y el filtro de disponibilidad sintético se ejercitan en navegadores. El filtro no afirma inventario real ni cambia precios."
     },
     {
       "requirement_id": "CH06-F02",
@@ -2795,21 +2929,29 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-SUPPLY-BUSINESS-PARTNER",
+        "QUOTE-STUDY-BUSINESS-PARTNER",
+        "QUOTE-FEE-BUSINESS-PARTNER"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch06-synthetic-catalogs"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH06-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Los selectores de socio sintéticos se ejercitan y persisten con las líneas; los socios, sus listas y reglas de precio de producción siguen sin fuente aprobada."
     },
     {
       "requirement_id": "CH06-F03",
@@ -2831,21 +2973,29 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-SUPPLY-INVENTORY-ONLY",
+        "QUOTE-SUPPLY-SEARCH",
+        "QUOTE-SUPPLY-SELECT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch06-synthetic-catalogs"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH06-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "El catálogo sintético muestra código, descripción, fabricante y marcador de disponibilidad, permite búsqueda/estado vacío/selección y persiste un importe manual. No certifica existencias ni precio autocompletado reales."
     },
     {
       "requirement_id": "CH06-F04",
@@ -2866,21 +3016,29 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-STUDY-INVENTORY-ONLY",
+        "QUOTE-STUDY-SEARCH",
+        "QUOTE-STUDY-SELECT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch06-synthetic-catalogs"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH06-QUOTE-CATALOG"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "El flujo sintético buscable de hemoglobina se selecciona y persiste con cantidad e importe manual; no implementa catálogo clínico ni precio de producción."
     },
     {
       "requirement_id": "CH06-F05",
@@ -2901,21 +3059,32 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-FEE-BUSINESS-PARTNER",
+        "QUOTE-FEE-SERVICE-CATALOG",
+        "QUOTE-FEE-DOCTOR-SELECT",
+        "QUOTE-FEE-AMOUNT"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch06-synthetic-catalogs",
+        "playwright:cr013-doctor-fee"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH06-QUOTE-CATALOG",
+        "SEL-B4-DOCTOR-FEE"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": null,
+      "notes": "Socio, servicio de seguimiento sintético, médico e importe manual se guardan y recargan. No se infiere tarifa profesional, cobertura ni reglas financieras."
     },
     {
       "requirement_id": "CH06-F06",
@@ -3055,8 +3224,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH06-Q006"
+      ],
+      "blocker_reason": "La evidencia verbal no muestra el resultado de Guardar ni el contrato de versiones; CH06-Q006 requiere confirmación antes de clasificarlo como paridad exacta.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -3112,22 +3283,25 @@
       "open_question_ids": [
         "CH07-Q004"
       ],
-      "route_id": "ROUTE-INSURANCE",
-      "react_route": "/insurance",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations",
       "react_files": [
-        "apps/web/src/app/(workspace)/insurance/page.tsx",
-        "apps/web/src/components/providers.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch07-hospitalization-quote-tracking"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH07-HOSPITALIZATION-QUOTES"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
@@ -3148,22 +3322,25 @@
       "open_question_ids": [
         "CH07-Q002"
       ],
-      "route_id": "ROUTE-INSURANCE",
-      "react_route": "/insurance",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations",
       "react_files": [
-        "apps/web/src/app/(workspace)/insurance/page.tsx",
-        "apps/web/src/components/providers.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch07-hospitalization-quote-tracking"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH07-HOSPITALIZATION-QUOTES"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
@@ -3182,22 +3359,25 @@
         "references/video-audit/chapters/CH07_preautorizacion_seguro_y_reclamo/event_frames/CH07-E0008_00h14m44s400ms_abrupt_change.jpg"
       ],
       "open_question_ids": [],
-      "route_id": "ROUTE-INSURANCE",
-      "react_route": "/insurance",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations",
       "react_files": [
-        "apps/web/src/app/(workspace)/insurance/page.tsx",
-        "apps/web/src/components/providers.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "parity_status": "EXACT",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch07-hospitalization-quote-tracking"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH07-HOSPITALIZATION-QUOTES"
+      ],
       "visual_test_ids": [],
       "blocker_type": null,
       "blocker_ids": [],
@@ -3305,7 +3485,9 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH07-Q005"
+      ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
@@ -3411,7 +3593,9 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
+      "blocker_ids": [
+        "CH07-Q002"
+      ],
       "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
@@ -3427,28 +3611,45 @@
         "references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0002_00h16m16s400ms_abrupt_change.jpg"
       ],
       "open_question_ids": [],
-      "route_id": "ROUTE-RECEIVABLES",
-      "react_route": "/receivables",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations/:id",
       "react_files": [
-        "apps/web/src/app/(workspace)/receivables/page.tsx",
-        "apps/web/src/components/payments-page.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+        "packages/contracts/src/index.ts",
+        "apps/web/src/components/administrative-profile-panel.tsx",
+        "apps/web/src/lib/data-provider.ts"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "HOSPITALIZATION-ADMIN-PROFILE-OPEN",
+        "HOSPITALIZATION-ADMIN-PROFILE-SAVE",
+        "HOSPITALIZATION-ADMIN-PROFILE-CANCEL"
+      ],
+      "parity_status": "BLOCKED_INTEGRATION",
+      "functional_status": "DEMO_LOCAL_VERIFIED",
+      "persistence_status": "DEMO_LOCAL_VERIFIED",
+      "permissions_status": "DEMO_LOCAL_VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch08-supabase-profile-ui-block",
+        "vitest:ch08-supabase-profile-guard"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch08-administrative-profile",
+        "playwright:ch08-administrative-profile-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH08-ADMINISTRATIVE-PROFILE",
+        "SEL-CH08-ADMINISTRATIVE-PROFILE-PERMISSIONS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "BLOCKED_INTEGRATION",
+      "blocker_ids": [
+        "CH08-SUPABASE-ADMINISTRATIVE-EXECUTION-RPC"
+      ],
+      "blocker_reason": "La tabla hospitalizations no admite administrativeProfile. La persistencia remota exige la RPC auditada start_administrative_execution con cotización y versión vinculadas, que este formulario no define.",
+      "last_verified_sha": null,
+      "notes": "El flujo de abrir/guardar/cancelar está verificado únicamente en modo mock-local. En modo Supabase se muestra una explicación accesible y no hay controles de abrir/guardar ni mutación de hospitalización/auditoría; el proveedor rechaza el payload antes de cualquier upsert genérico. Regresiones directas verifican ADMIN/DOCTOR, lectura sin controles/mutación para NURSE/FINANCE/AUDITOR y denegación para INVENTORY."
     },
     {
       "requirement_id": "CH08-F02",
@@ -3463,28 +3664,45 @@
       "open_question_ids": [
         "CH08-Q002"
       ],
-      "route_id": "ROUTE-RECEIVABLES",
-      "react_route": "/receivables",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations/:id",
       "react_files": [
-        "apps/web/src/app/(workspace)/receivables/page.tsx",
-        "apps/web/src/components/payments-page.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+        "packages/contracts/src/index.ts",
+        "apps/web/src/components/administrative-profile-panel.tsx",
+        "apps/web/src/lib/data-provider.ts"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "HOSPITALIZATION-ADMIN-PROFILE-SAVE"
+      ],
+      "parity_status": "BLOCKED_INTEGRATION",
+      "functional_status": "DEMO_LOCAL_VERIFIED",
+      "persistence_status": "DEMO_LOCAL_VERIFIED",
+      "permissions_status": "DEMO_LOCAL_VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch08-supabase-profile-ui-block",
+        "vitest:ch08-supabase-profile-guard"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch08-administrative-profile",
+        "playwright:ch08-administrative-profile-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH08-ADMINISTRATIVE-PROFILE",
+        "SEL-CH08-ADMINISTRATIVE-PROFILE-PERMISSIONS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "BLOCKED_INTEGRATION",
+      "blocker_ids": [
+        "CH08-SUPABASE-ADMINISTRATIVE-EXECUTION-RPC",
+        "CH08-Q002",
+        "CH08-Q007"
+      ],
+      "blocker_reason": "La integración segura requiere la RPC auditada y valores vinculados que el formulario no puede inventar; también faltan catálogos, obligatoriedad, dependencias y responsabilidad aprobadas.",
+      "last_verified_sha": null,
+      "notes": "Los campos observados se muestran en modo mock-local, pero no se persisten a Supabase por upsert genérico. Los catálogos, obligatoriedad, dependencias y distribución de responsabilidad continúan abiertos (CH08-Q002/Q007)."
     },
     {
       "requirement_id": "CH08-F03",
@@ -3497,28 +3715,43 @@
         "references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0021_00h16m46s200ms_stable_change.jpg"
       ],
       "open_question_ids": [],
-      "route_id": "ROUTE-RECEIVABLES",
-      "react_route": "/receivables",
+      "route_id": "ROUTE-HOSPITALIZATIONS",
+      "react_route": "/hospitalizations/:id",
       "react_files": [
-        "apps/web/src/app/(workspace)/receivables/page.tsx",
-        "apps/web/src/components/payments-page.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/components/administrative-profile-panel.tsx",
+        "apps/web/src/lib/data-provider.ts"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "HOSPITALIZATION-ADMIN-PROFILE-SAVE"
+      ],
+      "parity_status": "BLOCKED_INTEGRATION",
+      "functional_status": "DEMO_LOCAL_VERIFIED",
+      "persistence_status": "DEMO_LOCAL_VERIFIED",
+      "permissions_status": "DEMO_LOCAL_VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:ch08-supabase-profile-ui-block",
+        "vitest:ch08-supabase-profile-guard"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch08-administrative-profile",
+        "playwright:ch08-administrative-profile-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH08-ADMINISTRATIVE-PROFILE",
+        "SEL-CH08-ADMINISTRATIVE-PROFILE-PERMISSIONS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "BLOCKED_INTEGRATION",
+      "blocker_ids": [
+        "CH08-SUPABASE-ADMINISTRATIVE-EXECUTION-RPC"
+      ],
+      "blocker_reason": "No se debe simular una transición remota: start_administrative_execution requiere la RPC auditada, cotización y versión vinculadas que este formulario no define.",
+      "last_verified_sha": null,
+      "notes": "Guardar y la confirmación accesible son mock-locales. En modo Supabase el flujo queda bloqueado con explicación accesible y sin escritura, hasta integrar y certificar la RPC auditada."
     },
     {
       "requirement_id": "CH08-F04",
@@ -3777,7 +4010,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/event_frames/CH08-E0087_00h19m52s000ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH08-Q001"
+      ],
       "route_id": "ROUTE-RECEIVABLES",
       "react_route": "/receivables",
       "react_files": [
@@ -3796,8 +4031,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH08-Q001"
+      ],
+      "blocker_reason": "El capítulo no define si el pendiente negativo es crédito, anticipo, reasignación, devolución u otra figura aprobada.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -3811,7 +4048,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH08_perfil_administrativo_cuentas_por_cobrar_y_pagos/detail_crops/CH08-E0095_00h20m59s600ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH08-Q010"
+      ],
       "route_id": "ROUTE-RECEIVABLES",
       "react_route": "/receivables",
       "react_files": [
@@ -3830,8 +4069,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH08-Q010"
+      ],
+      "blocker_reason": "El diálogo verbal no demuestra evento, programación, canal seguro, consentimiento, destinatario ni reintentos de una automatización.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -3845,28 +4086,58 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0009_00h21m12s200ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q002",
+        "CH09-Q004"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
         "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "CLINICAL-HOSPITALIZATION-STATUS-FILTER",
+        "CLINICAL-HOSPITALIZATION-ACTIVATOR-FILTER",
+        "CLINICAL-HOSPITALIZATION-SERVICE-FILTER",
+        "CLINICAL-HOSPITALIZATION-CARE-FILTER",
+        "CLINICAL-HOSPITALIZATION-ACTIVES-FILTER",
+        "CLINICAL-HOSPITALIZATION-FILTER-APPLY",
+        "CLINICAL-HOSPITALIZATION-SEARCH",
+        "CLINICAL-HOSPITALIZATION-PATIENT-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-DOCUMENT-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-CASE-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-TRIAGE-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-COMPANY-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-CLINICIAN-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-START-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-END-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-DURATION-COLUMN-FILTER",
+        "CLINICAL-HOSPITALIZATION-DETAIL"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch09-clinical-hospitalization-list",
+        "playwright:ch09-clinical-hospitalization-permissions",
+        "playwright:ch09-clinical-hospitalization-column-filters"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH09-CLINICAL-HOSPITALIZATION-LIST"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "BLOCKED_CLIENT",
+      "blocker_ids": [
+        "CH09-Q002",
+        "CH09-Q004"
+      ],
+      "blocker_reason": "La evidencia no define máquina de estados, activación, roles o catálogos de servicio/atención. Los controles se muestran deshabilitados y no aplican reglas locales.",
+      "last_verified_sha": null,
+      "notes": "CH09-E0009: factual filters are the second table-header row. Every field performs case-insensitive matching on its corresponding already displayed value; Playwright and Selenium source each assert a match and non-match for all nine fields. Aplicar and Activos are visible disabled controls under CH09-Q002/Q004. Pagination remains PARTIAL because page size and ordering are undefined."
     },
     {
       "requirement_id": "CH09-F02",
@@ -3878,28 +4149,45 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0016_00h21m34s800ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q006"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
         "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "CLINICAL-HOSPITALIZATION-ACTIONS-MENU",
+        "CLINICAL-HOSPITALIZATION-QUOTE-VIEW",
+        "CLINICAL-HOSPITALIZATION-PROFILE-OPEN",
+        "CLINICAL-HOSPITALIZATION-RELIEF-DOCUMENT-OPEN",
+        "CLINICAL-HOSPITALIZATION-READMISSION-OPEN",
+        "CLINICAL-HOSPITALIZATION-REINFECTION-OPEN",
+        "CLINICAL-HOSPITALIZATION-ULCERATION-OPEN",
+        "CLINICAL-HOSPITALIZATION-NEAR-MISS-OPEN"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch09-clinical-hospitalization-row-menu"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH09-CLINICAL-HOSPITALIZATION-LIST"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "BLOCKED_CLIENT",
+      "blocker_ids": [
+        "CH09-Q006"
+      ],
+      "blocker_reason": "CH09-Q006 no define la semántica, fuente, permisos ni auditoría de Relevos, Reingresos, Reinfecciones, Ulceraciones o Near miss; tampoco define el modelo/autorización del perfil clínico.",
+      "last_verified_sha": null,
+      "notes": "CH09-E0016: la columna izquierda Acciones contiene el botón verde de menú y una celda de filtro vacía. Ver cotizaciones navega a una cotización existente vinculada al caso; el enlace exige clinical:read más quotes:read y NURSE no puede exponerlo. Perfil clínico, Doc de Relevos, Reingresos, Reinfecciones, Ulceraciones y Near miss permanecen visibles y deshabilitados bajo CH09-Q006. Selenium conserva evidencia de fuente PENDING_RUNTIME porque Python no está disponible."
     },
     {
       "requirement_id": "CH09-F03",
@@ -4212,7 +4500,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0127_00h24m28s000ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q010"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -4230,8 +4520,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH09-Q010"
+      ],
+      "blocker_reason": "El video no demuestra si Imprimir descarga, abre vista previa o envía a impresora; no se implementa una salida clínica sin definición aprobada.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -4246,7 +4538,9 @@
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0129_00h24m47s200ms_DETAIL.jpg",
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/event_frames/CH09-E0130_00h27m13s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q011"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -4264,8 +4558,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH09-Q011"
+      ],
+      "blocker_reason": "El salto visual no demuestra un estado ni una impresión intermedios.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -4279,7 +4575,9 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH09_hospitalizacion_clinica_y_reporte_de_salud/detail_crops/CH09-E0129_00h24m47s200ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH09-Q013"
+      ],
       "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
       "react_route": "/clinical/hospitalizations",
       "react_files": [
@@ -4297,8 +4595,10 @@
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_ids": [
+        "CH09-Q013"
+      ],
+      "blocker_reason": "El contenido y orden del expediente se describen verbalmente, pero no hay documento legible ni reglas de acceso demostradas.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },

@@ -1,6 +1,6 @@
 'use client';
 
-import type { CatalogItem, ClinicalDocument, Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
+import type { CatalogItem, ClinicalDocument, Doctor, Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, NurseHourEntry, NursingResource, Patient, Payment, Purchase, Quote, Shift, VitalReading } from '@analiza/contracts';
 import { calculateQuoteTotals, normalizeQuoteInvoiceMetadata } from '@analiza/domain';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
@@ -9,6 +9,7 @@ import {
   demoQuotes,
   demoPayments,
   demoClinicalDocuments,
+  demoDoctors,
   demoCatalogItems,
   demoPurchases,
   demoNurseHours,
@@ -23,6 +24,7 @@ export type WorkspaceSnapshot = {
   patients: Patient[];
   vitalReadings: VitalReading[];
   nursingResources: NursingResource[];
+  doctors: Doctor[];
   nurseHours: NurseHourEntry[];
   inventoryMovements: InventoryMovement[];
   shifts: Shift[];
@@ -41,6 +43,7 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
   patients: demoPatients,
   vitalReadings: demoVitalReadings,
   nursingResources: demoNursingResources,
+  doctors: demoDoctors,
   nurseHours: demoNurseHours,
   inventoryMovements: demoInventoryMovements,
   shifts: demoShifts,
@@ -92,9 +95,19 @@ export interface DataProvider {
   saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void>;
 }
 
+/**
+ * Execution profiles use the audited `start_administrative_execution` RPC,
+ * not a JSON field on `public.hospitalizations`.  Keeping this guard at the
+ * provider boundary prevents a future caller from accidentally turning a
+ * mock-only profile into an optimistic, unsupported table upsert.
+ */
+export function hasAdministrativeProfilePayload(hospitalizations: readonly Hospitalization[]): boolean {
+  return hospitalizations.some((hospitalization) => Object.hasOwn(hospitalization, 'administrativeProfile'));
+}
+
 const storageKey = 'analiza.en.casa.workspace.v2';
 const storagePrefix = 'analiza.en.casa.workspace.v3.';
-const workspaceKeys = ['patients', 'vitalReadings', 'nursingResources', 'nurseHours', 'inventoryMovements', 'shifts', 'hospitalizations', 'quotes', 'payments', 'clinicalDocuments', 'catalogItems', 'purchases', 'insuranceRequests', 'insuranceEvents', 'auditEntries'] as const satisfies ReadonlyArray<keyof WorkspaceSnapshot>;
+const workspaceKeys = ['patients', 'vitalReadings', 'nursingResources', 'doctors', 'nurseHours', 'inventoryMovements', 'shifts', 'hospitalizations', 'quotes', 'payments', 'clinicalDocuments', 'catalogItems', 'purchases', 'insuranceRequests', 'insuranceEvents', 'auditEntries'] as const satisfies ReadonlyArray<keyof WorkspaceSnapshot>;
 
 export class MockDataProvider implements DataProvider {
   readonly mode = 'mock' as const;
@@ -109,7 +122,7 @@ export class MockDataProvider implements DataProvider {
         workspaceKeys.forEach((key, index) => {
           if (segmented[index]) next[key] = JSON.parse(segmented[index]);
         });
-        return { ...next, patients: next.patients.map((patient) => ({ ...patient, status: patient.status ?? 'ACTIVE', retired: patient.retired ?? false, contacts: patient.contacts ?? [] })), quotes: next.quotes.map(normalizeQuote) };
+        return { ...next, doctors: Array.isArray(next.doctors) ? next.doctors : [], patients: next.patients.map((patient) => ({ ...patient, status: patient.status ?? 'ACTIVE', retired: patient.retired ?? false, contacts: patient.contacts ?? [] })), quotes: next.quotes.map(normalizeQuote) };
       }
       const saved = window.localStorage.getItem(storageKey);
       if (!saved) return defaultSnapshot();
@@ -124,6 +137,7 @@ export class MockDataProvider implements DataProvider {
           contacts: patient.contacts ?? [],
         })),
         quotes: parsed.quotes.map(normalizeQuote),
+        doctors: Array.isArray(parsed.doctors) ? parsed.doctors : [],
         insuranceRequests: Array.isArray(parsed.insuranceRequests) ? parsed.insuranceRequests : [],
         insuranceEvents: Array.isArray(parsed.insuranceEvents) ? parsed.insuranceEvents : [],
       };
@@ -148,8 +162,9 @@ export class MockDataProvider implements DataProvider {
 
 export class SupabaseDataProvider implements DataProvider {
   readonly mode = 'supabase' as const;
+  constructor(private readonly clientFactory: typeof getSupabaseBrowserClient = getSupabaseBrowserClient) {}
   private client() {
-    const client = getSupabaseBrowserClient();
+    const client = this.clientFactory();
     if (!client) throw new Error('Supabase no está configurado; no se permite usar datos mock como reemplazo.');
     return client;
   }
@@ -168,6 +183,7 @@ export class SupabaseDataProvider implements DataProvider {
     return {
       patients: (patients.data ?? []) as Patient[], vitalReadings: (vitalReadings.data ?? []) as VitalReading[],
       nursingResources: (nursingResources.data ?? []) as NursingResource[], nurseHours: (nurseHours.data ?? []) as NurseHourEntry[],
+      doctors: [],
       inventoryMovements: (inventoryMovements.data ?? []) as InventoryMovement[], auditEntries: (auditEntries.data ?? []) as AuditEntry[],
       shifts: (shifts.data ?? []) as Shift[],
       hospitalizations: (hospitalizations.data ?? []) as Hospitalization[],
@@ -181,11 +197,15 @@ export class SupabaseDataProvider implements DataProvider {
     };
   }
   async saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void> {
+    if (changes.hospitalizations && hasAdministrativeProfilePayload(changes.hospitalizations)) {
+      throw new Error('El perfil administrativo de ejecuciÃ³n requiere la RPC segura y no se envÃ­a mediante hospitalizations.');
+    }
     const client = this.client();
     const writes = [];
     if (changes.patients) writes.push(client.from('patients').upsert(changes.patients));
     if (changes.vitalReadings) writes.push(client.from('vital_readings').upsert(changes.vitalReadings));
     if (changes.nursingResources) writes.push(client.from('nursing_resources').upsert(changes.nursingResources));
+    if (changes.doctors) throw new Error('El registro de médicos requiere la integración segura de Supabase pendiente.');
     if (changes.nurseHours) writes.push(client.from('nurse_hour_entries').upsert(changes.nurseHours));
     if (changes.inventoryMovements) writes.push(client.from('inventory_movements').upsert(changes.inventoryMovements));
     if (changes.shifts) writes.push(client.from('shifts').upsert(changes.shifts));

@@ -88,6 +88,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/reports', permission: 'reports:read' },
   { prefix: '/audit', permission: 'audit:read' },
   { prefix: '/settings', permission: 'settings:read' },
+  { prefix: '/doctors', permission: 'settings:write' },
   { prefix: '/dashboard', permission: 'dashboard:read' },
 ];
 

@@ -1,10 +1,12 @@
-import type { Hospitalization, InsuranceEvent, InsuranceRequest, InventoryMovement, Patient, Quote, QuoteItem } from '@analiza/contracts';
+import { quoteItemSchema, type Hospitalization, type InsuranceEvent, type InsuranceRequest, type InventoryMovement, type Patient, type Quote, type QuoteItem } from '@analiza/contracts';
 import { describe, expect, it } from 'vitest';
 // test-id: vitest:age-from-birth-date
 // test-id: vitest:ch03-hospitalization-filters
 // test-id: vitest:ch03-quote-filters
 // test-id: vitest:ch03-quote-metadata
 // test-id: vitest:cr002-resident-card
+// test-id: vitest:cr004-contact-document-pair
+// test-id: vitest:cr013-doctor-fee-reference
 import {
   canRecordMovement,
   currentInventoryBalance,
@@ -17,6 +19,7 @@ import {
   hospitalizationDurationDays,
   toCsv,
   validateDocument,
+  validateContactDocumentPair,
   calculateQuoteBalance,
   calculateQuoteTotals,
   canEditQuote,
@@ -68,6 +71,13 @@ describe('domain boundaries', () => {
     expect(validateDocument('DUI', '12345678-9')).toBeUndefined();
     expect(validateDocument('DUI', '123')).toContain('configuración demo');
     expect(validateDocument('RESIDENT_CARD', ' RES-123 ')).toBeUndefined();
+  });
+
+  it('requires the optional contact document type and number to be provided together', () => {
+    expect(validateContactDocumentPair(undefined, undefined)).toBeUndefined();
+    expect(validateContactDocumentPair('DUI', 'CONTACT-001')).toBeUndefined();
+    expect(validateContactDocumentPair('DUI', '   ')).toContain('número');
+    expect(validateContactDocumentPair('', 'CONTACT-001')).toContain('tipo');
   });
 
   it('derives kardex balance chronologically and prevents a negative exit', () => {
@@ -134,8 +144,14 @@ describe('quote domain', () => {
 
   it('rejects invalid manual item amounts and insurer amount beyond total', () => {
     expect(validateQuoteItem({ ...items[0], name: ' ', quantity: 0, discountAmount: 999 })).toContain('concepto');
+    expect(validateQuoteItem({ ...items[0], quantity: 0 })).toBe('La cantidad debe ser mayor que cero.');
     expect(() => calculateQuoteTotals([{ ...items[0], discountAmount: 99 }], undefined, 0)).toThrow('descuento manual');
     expect(() => calculateQuoteTotals(items, undefined, 99)).toThrow('aseguradora');
+  });
+
+  it('preserves an optional doctor reference for a manual fee without inferring a rate', () => {
+    const fee = quoteItemSchema.parse({ id: 'fee-1', category: 'FEES', name: 'Honorario sintético', doctorId: 'doctor-1', doctorName: 'Médica Demo', quantity: 1, unitPrice: 55, discountAmount: 0 });
+    expect(fee).toMatchObject({ doctorId: 'doctor-1', doctorName: 'Médica Demo', unitPrice: 55 });
   });
 
   it('uses only applied payments for the patient balance', () => {

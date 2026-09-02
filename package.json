@@ -63,6 +63,7 @@
     "qa:video-parity": "node scripts/verify-video-react-parity.mjs",
     "qa:video-parity:chapter": "node scripts/verify-video-react-parity.mjs --chapter",
     "qa:video-parity:report": "node scripts/report-video-react-parity.mjs",
+    "qa:traceability-mirror": "node scripts/verify-video-traceability-mirror.mjs",
     "qa:client-changes:generate": "node scripts/generate-client-change-registry.mjs",
     "qa:client-changes": "node scripts/verify-client-changes.mjs --self-test",
     "qa:client-changes:report": "node scripts/report-client-changes.mjs",

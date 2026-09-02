@@ -95,7 +95,7 @@ class ReactUnauthenticatedSmoke(unittest.TestCase):
 
     def test_nursing_board_registers_an_operational_resource(self) -> None:
         self.driver.get(f"{BASE_URL}/clinical/nursing")
-        self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Registrar recurso']"))).click()
+        self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Nuevo recurso']"))).click()
         self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Nombre visible')]//input"))).send_keys("Enfermería Demo Sur")
         self.driver.find_element(By.XPATH, "//label[contains(., 'Territorio')]//input").send_keys("Zona demo sur")
         capacity = self.driver.find_element(By.XPATH, "//label[contains(., 'Capacidad disponible')]//input")

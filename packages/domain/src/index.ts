@@ -76,6 +76,20 @@ export function validateDocument(
   return undefined;
 }
 
+/** Administrative contact documents are optional, but the type and number are
+ * one record. This mirrors the database pair constraint without claiming a
+ * format for documents whose authoritative validation rule is still pending. */
+export function validateContactDocumentPair(
+  documentType: Patient['documentType'] | '' | undefined,
+  documentId: string | undefined,
+): string | undefined {
+  const hasType = Boolean(documentType);
+  const hasDocumentId = Boolean(documentId?.trim());
+  if (hasType && !hasDocumentId) return 'Ingrese el número de documento del contacto.';
+  if (!hasType && hasDocumentId) return 'Seleccione el tipo de documento del contacto.';
+  return undefined;
+}
+
 export function findDuplicatePatient(
   patients: readonly Patient[],
   candidate: Pick<Patient, 'documentType' | 'documentId'>,
@@ -214,7 +228,7 @@ export function hospitalizationDurationDays(item: Pick<Hospitalization, 'startDa
 
 export const quoteCategories: ReadonlyArray<{ value: QuoteItemCategory; label: string }> = [
   { value: 'SERVICES', label: 'Servicios' },
-  { value: 'STUDIES', label: 'Estudios diagnósticos' },
+  { value: 'STUDIES', label: 'Estudios Dx' },
   { value: 'MEDICATIONS', label: 'Medicamentos' },
   { value: 'SUPPLIES', label: 'Insumos' },
   { value: 'EQUIPMENT', label: 'Equipos' },

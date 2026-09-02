@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "generated_at": "2026-09-01T23:24:33-06:00",
+  "generated_at": "2026-09-01T23:45:03-06:00",
   "source": "Legacy routes are extracted from app/views.js:renderRoute and navigation; React routes are extracted from apps/web/src/app.",
   "routes": [
     {
@@ -560,13 +560,19 @@
       "route_id": "ROUTE-DOCTORS",
       "legacy_route": "#/medicos",
       "legacy_module": "Médicos",
-      "react_route": null,
-      "status": "MISSING",
-      "blocker": "Technically resolvable.",
+      "react_route": "/doctors",
+      "status": "MIGRATED_PARTIAL",
+      "blocker": "La alta/edición demo y el catálogo están operativos; el mapeo de organización y Storage privado/RLS para bytes de archivos siguen pendientes.",
       "evidence": [
-        "app/views.js:1719"
+        "app/views.js:1719",
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/lib/doctor-catalog.ts"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "playwright:cr005-independent-doctor-resource",
+        "playwright:cr006-doctor-save-reload-edit",
+        "playwright:cr007-professional-specialties"
+      ],
       "route_action_certified_at_sha": null,
       "full_video_parity_status": "NOT_TESTABLE"
     },

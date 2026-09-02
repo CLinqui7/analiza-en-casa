@@ -45,6 +45,13 @@ const navigation: NavigationGroup[] = [
     ],
   },
   { label: 'Catálogos', href: '/catalogs', permission: 'catalogs:read', actionId: 'CATALOG-NAVIGATE' },
+  {
+    label: 'Administración',
+    children: [
+      { label: 'Médicos y recursos', href: '/doctors', permission: 'settings:write', actionId: 'DOCTOR-NAVIGATE' },
+      { label: 'Recursos de enfermería', href: '/clinical/nursing', permission: 'clinical:read', actionId: 'NURSING-RESOURCE-NAVIGATE' },
+    ],
+  },
   { label: 'Compras', href: '/purchases', permission: 'purchases:read', actionId: 'PURCHASE-NAVIGATE' },
   {
     label: 'Reportes',
