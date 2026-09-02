@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+  "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
-      "functional_fingerprint": "f9dab01c4d83117186fbc4ff1bf746b1ee4d7acf825b2d2f8960e029302a4f43",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+      "functional_fingerprint": "59636c2fb63619edf420901e4e2a166a41fbd6fc66847c144237bde4cd35b501",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -16,8 +16,10 @@
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "El contrato sólo admite DUI, PASSPORT y OTHER."
+      "test_ids": [
+        "vitest:cr002-resident-card"
+      ],
+      "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
     },
     "CR-003": {
       "implementation_sha": null,
@@ -35,7 +37,7 @@
       "test_ids": [
         "SEL-PAT-CONTACTS"
       ],
-      "notes": "Los contactos no tienen datos de documento."
+      "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
     },
     "CR-005": {
       "implementation_sha": null,
@@ -85,8 +87,8 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
-      "functional_fingerprint": "9e290971a1594efd8d3542fec50e4896a908ca1e5b9d86f025cdd067f53cbaff",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+      "functional_fingerprint": "492021435e128121d8025be45f2ad3675da457ce55350259264be2270eb967be",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -94,7 +96,7 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
       "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [

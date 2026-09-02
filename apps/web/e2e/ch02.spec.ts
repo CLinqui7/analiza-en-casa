@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch02-botmaker-insurance-insurer-holder-coverage
 // test-id: playwright:ch02-contacts-address-map-back-save
 // test-id: playwright:ch02-mobile-form-modal-map
+// test-id: playwright:cr002-resident-card
 
 async function login(page: import('@playwright/test').Page, path = '/patients') {
   await page.goto(`/login?next=${encodeURIComponent(path)}`);
@@ -79,6 +80,14 @@ test('CH02-F006-F012 searchable demographics, consent, insurer holder modal and 
   await dialog.getByLabel('Número de póliza').fill('POL-CH02');
   await dialog.getByRole('button', { name: 'Agregar', exact: true }).click();
   await expect(dialog.getByRole('status')).toContainText('Cobertura única preparada');
+});
+
+test('CR-002 admits a resident-card identifier without inventing its format', async ({ page }) => {
+  await login(page);
+  const dialog = await openForm(page);
+  await dialog.getByLabel('Tipo de documento').selectOption('RESIDENT_CARD');
+  await dialog.getByLabel('Número de documento').fill('RES-QA-001');
+  await expect(dialog.getByText(/Formato oficial pendiente/)).toBeVisible();
 });
 
 test('CH02-F013-F016 contacts, safe link import, map, back and persistence', async ({ page }) => {

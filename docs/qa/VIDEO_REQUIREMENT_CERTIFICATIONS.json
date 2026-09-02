@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "implementation_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-  "functional_fingerprint": "9f313df54e72e8396e193eeb474429e909bb9a0a1114b9dee6c7ec6789ad8c67",
+  "functional_fingerprint": "e42375f43b17c5b704c0076834bf3e19824dd58e76ef0d483ae71969691e1a7a",
   "certification_created_at": "2026-08-31T18:20:00-06:00",
   "certification_test_evidence": "CH01 regression, CH02 Playwright and two Selenium CH02 focal runs were executed against the implementation SHA.",
   "certifications": {

@@ -5,9 +5,9 @@ Fuente inmutable: `docs/client-change-requests/source/cambiosparte1analizacasa_A
 | Cambio | Filas | Módulo | Estado | Interpretación normalizada |
 |---|---:|---|---|---|
 | CR-001 | 2 | Pacientes | IMPLEMENTED_DEMO_ONLY | DUI en la plantilla de nuevo paciente |
-| CR-002 | 3 | Pacientes | MISSING | Agregar tipo de documento Carnet de residente |
+| CR-002 | 3 | Pacientes | PARTIAL | Agregar tipo de documento Carnet de residente |
 | CR-003 | 4 | Pacientes · Exportación | PARTIAL | Definir alcance y exportar pacientes autorizados ordenados |
-| CR-004 | 5 | Pacientes · Contactos | MISSING | Guardar tipo y número de documento del responsable |
+| CR-004 | 5 | Pacientes · Contactos | PARTIAL | Guardar tipo y número de documento del responsable |
 | CR-005 | 6 | Administración · Médicos y recursos | MISSING | Separar altas, rutas y modelos de médico y recurso |
 | CR-006 | 7 | Administración · Médicos | PARTIAL | Alta/edición de médico con adjuntos privados y auditoría |
 | CR-007 | 8 | Administración · Profesionales | MISSING | Catálogo buscable y persistente de especialidades/profesiones |

@@ -67,6 +67,7 @@
     "qa:client-changes": "node scripts/verify-client-changes.mjs --self-test",
     "qa:client-changes:report": "node scripts/report-client-changes.mjs",
     "qa:client-changes:batch": "node scripts/verify-client-changes.mjs --self-test --batch",
+    "qa:light-mode": "node scripts/verify-light-mode.mjs",
     "perf:baseline": "npm run build && node scripts/perf-production.mjs baseline",
     "perf:check": "npm run build && node scripts/perf-production.mjs final",
     "perf:report": "npm run build && node scripts/perf-production.mjs final",

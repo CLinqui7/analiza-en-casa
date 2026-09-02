@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 // test-id: vitest:ch03-hospitalization-filters
 // test-id: vitest:ch03-quote-filters
 // test-id: vitest:ch03-quote-metadata
+// test-id: vitest:cr002-resident-card
 import {
   canRecordMovement,
   currentInventoryBalance,
@@ -66,6 +67,7 @@ describe('domain boundaries', () => {
     expect(maskDui('123456789')).toBe('12345678-9');
     expect(validateDocument('DUI', '12345678-9')).toBeUndefined();
     expect(validateDocument('DUI', '123')).toContain('configuración demo');
+    expect(validateDocument('RESIDENT_CARD', ' RES-123 ')).toBeUndefined();
   });
 
   it('derives kardex balance chronologically and prevents a negative exit', () => {

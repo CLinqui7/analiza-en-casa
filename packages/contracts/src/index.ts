@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'OTHER']);
+export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER']);
 
 export const patientInsuranceSchema = z.object({
   status: z.enum(['REGULAR', 'INSURED']).default('REGULAR'),
@@ -22,6 +22,8 @@ export const patientContactSchema = z.object({
   relationship: z.string().trim().optional(),
   role: z.string().trim().optional(),
   country: z.string().trim().optional(),
+  documentType: patientDocumentTypeSchema.optional(),
+  documentId: z.string().trim().optional(),
   isPrimary: z.boolean().default(false),
 });
 

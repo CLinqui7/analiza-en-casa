@@ -244,7 +244,7 @@
       "roles_allowed": ["ADMIN", "DOCTOR", "NURSE"],
       "roles_denied": ["INVENTORY", "FINANCE", "AUDITOR"],
       "preconditions": "Formulario de paciente abierto",
-      "positive_scenario": "Cambia entre DUI, PASAPORTE y OTRO; limpia solo el documento y sus errores.",
+      "positive_scenario": "Cambia entre DUI, PASAPORTE, Carnet de residente y OTRO; limpia solo el documento y sus errores.",
       "negative_scenario": "Conserva los demás datos válidos del formulario.",
       "persistence_required": false,
       "refresh_required": false,

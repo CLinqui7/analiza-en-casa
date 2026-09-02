@@ -50,6 +50,8 @@ const contactFormSchema = z.object({
   relationship: z.string().trim(),
   role: z.string().trim(),
   country: z.string().trim(),
+  documentType: patientDocumentTypeSchema.optional(),
+  documentId: z.string().trim(),
   isPrimary: z.boolean(),
 });
 
@@ -137,6 +139,8 @@ function createContact(isPrimary: boolean): PatientForm['contacts'][number] {
     relationship: '',
     role: '',
     country: '',
+    documentType: undefined,
+    documentId: '',
     isPrimary,
   };
 }
@@ -210,8 +214,10 @@ function previewPatientImport(
     const documentType =
       record.documentType?.toUpperCase() === 'PASAPORTE'
         ? 'PASSPORT'
+        : ['CARNET DE RESIDENTE', 'CARNET_DE_RESIDENTE'].includes(record.documentType?.toUpperCase())
+          ? 'RESIDENT_CARD'
         : record.documentType?.toUpperCase() || 'DUI';
-    if (!['DUI', 'PASSPORT', 'OTHER'].includes(documentType)) {
+    if (!['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER'].includes(documentType)) {
       errors.push(`Fila ${rowNumber}: tipo de documento inválido.`);
       return;
     }
@@ -910,6 +916,7 @@ export default function PatientsPage() {
               >
                 <option value="DUI">Cédula</option>
                 <option value="PASSPORT">Pasaporte</option>
+                <option value="RESIDENT_CARD">Carnet de residente</option>
                 <option value="OTHER">Otro documento (histórico QA)</option>
               </select>
             </label>
@@ -1259,6 +1266,20 @@ export default function PatientsPage() {
                 <label>
                   País
                   <input {...form.register(`contacts.${index}.country`)} />
+                </label>
+                <label>
+                  Tipo de documento del contacto
+                  <select data-action-id="PATIENT-CONTACT-DOCUMENT-TYPE" {...form.register(`contacts.${index}.documentType`)}>
+                    <option value="">Sin registrar</option>
+                    <option value="DUI">DUI</option>
+                    <option value="PASSPORT">Pasaporte</option>
+                    <option value="RESIDENT_CARD">Carnet de residente</option>
+                    <option value="OTHER">Otro documento</option>
+                  </select>
+                </label>
+                <label>
+                  Número de documento del contacto
+                  <input data-action-id="PATIENT-CONTACT-DOCUMENT-ID" {...form.register(`contacts.${index}.documentId`)} />
                 </label>
                 <p>{contacts[index]?.isPrimary ? 'Contacto principal' : 'Contacto secundario'}</p>
                 <Button

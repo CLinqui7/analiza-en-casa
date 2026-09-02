@@ -3,7 +3,7 @@
   "canonical_source": {
     "path": "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx",
     "sha256": "d3a3f872b296aa9f722085f44f8ea11e364669ace3c26707d346a10b022aa6b3",
-    "source_head": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+    "source_head": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
     "worksheet": "Hoja1"
   },
   "changes": [
@@ -57,8 +57,8 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
-      "functional_fingerprint": "f9dab01c4d83117186fbc4ff1bf746b1ee4d7acf825b2d2f8960e029302a4f43",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+      "functional_fingerprint": "59636c2fb63619edf420901e4e2a166a41fbd6fc66847c144237bde4cd35b501",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -86,8 +86,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-3"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-PATIENTS"
       ],
@@ -99,8 +99,12 @@
         "apps/web/src/app/(workspace)/patients/page.tsx"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
+      "action_ids": [
+        "PATIENT-DOCUMENT-TYPE"
+      ],
+      "unit_test_ids": [
+        "vitest:cr002-resident-card"
+      ],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "dependency_ids": [
@@ -117,7 +121,7 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El contrato sólo admite DUI, PASSPORT y OTHER."
+      "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
     },
     {
       "change_id": "CR-003",
@@ -197,8 +201,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-5"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-PATIENTS"
       ],
@@ -209,7 +213,9 @@
         "packages/contracts/src/index.ts",
         "apps/web/src/app/(workspace)/patients/page.tsx"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "supabase/migrations/202609020001_b1_patient_contact_documents.sql"
+      ],
       "action_ids": [
         "PATIENT-CONTACT-ADD"
       ],
@@ -232,7 +238,7 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Los contactos no tienen datos de documento."
+      "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
     },
     {
       "change_id": "CR-005",
@@ -604,8 +610,8 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
-      "functional_fingerprint": "9e290971a1594efd8d3542fec50e4896a908ca1e5b9d86f025cdd067f53cbaff",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
+      "functional_fingerprint": "492021435e128121d8025be45f2ad3675da457ce55350259264be2270eb967be",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -661,7 +667,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "implementation_sha": "b20bd491d5156b3f3c989681c5aecd30b8dbebde",
       "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,

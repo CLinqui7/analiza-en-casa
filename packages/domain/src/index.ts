@@ -20,6 +20,10 @@ export const documentRules: Record<Patient['documentType'], DocumentRule> = {
     label: 'Pasaporte',
     help: 'Formato oficial pendiente de configuración por el cliente.',
   },
+  RESIDENT_CARD: {
+    label: 'Carnet de residente',
+    help: 'Formato oficial pendiente de configuración por el cliente; se requiere un identificador no vacío.',
+  },
   OTHER: {
     label: 'Otro documento',
     help: 'Indique el identificador tal como aparece en el documento.',
