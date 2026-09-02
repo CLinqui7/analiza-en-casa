@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:01:43-06:00",
-  "metadata_generated_from_commit": "f991e6f7e030162ebfdd5d3a8664085df0b6529a",
-  "source_sha256": "a00cf7f8f1f38fdfbae7aca5d9080b66fc144b14b48622fd5d8e17de4e6d2707",
+  "generated_at": "2026-09-02T12:19:03-06:00",
+  "metadata_generated_from_commit": "a76914d2d76b3e9e3a94c2c5789db33c9b29c42e",
+  "source_sha256": "1e6bb3f0868396d478ec035e00dc911e3ff3cddf680cf2983feba4bbfaff8c16",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "6d729eafd38ded0ff4814b6895213250a2643e9f1663a11c9589173699fb6317",
+  "functional_fingerprint": "4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6500,24 +6500,37 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "component_ids": [
+        "INVENTORY-CLOSURES-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-CLOSURES-OPEN",
+        "INVENTORY-CLOSURES-TAB-PENDING",
+        "INVENTORY-CLOSURES-TAB-TOTALS",
+        "INVENTORY-CLOSURES-TAB-CLOSED",
+        "INVENTORY-CLOSURES-TAB-RESOURCES"
+      ],
+      "parity_status": "PARTIAL",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-closures",
+        "playwright:ch14-inventory-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-CLOSURES"
+      ],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
         "CH14-Q007"
       ],
-      "blocker_reason": "La evidencia muestra la superficie de Cierres, pero no define fuente autorizada, roles, transiciones, aprobación, cancelación, conciliación, reversión ni relación administrativa/financiera. No existe todavía una superficie React de Cierres.",
+      "blocker_reason": "La evidencia no define fuente autorizada, roles, transiciones, aprobación, cancelación, conciliación, reversión ni relación administrativa/financiera de cierres; React conserva todos esos comportamientos sin implementar.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Corrección de evidencia: CH14-E0041 es Acuses y no respalda este requisito. CH14-E0042 inicia Inventario / Cierres y CH14-E0044 muestra Pendientes con sus columnas. No se implementó ni certificó comportamiento de cierres durante la reconciliación."
+      "notes": "CH14-E0042 inicia Inventario / Cierres y CH14-E0044 muestra Pendientes con las columnas observadas. React reproduce sólo la anatomía de solo lectura: Pendientes, Cierres totales, Cerrados y Recursos presentan fuentes vacías explícitas, no consultan pacientes ni casos y no mutan auditoría tras abrir, alternar o recargar. Selenium queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F07",

@@ -6517,13 +6517,13 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "MISSING",
+        "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "La vista no cierra hospitalizaciones ni cambia estados clínicos.",
         "financial_impact": "No aplica conciliación financiera sin aprobación.",
-        "current_platform_evidence": "No existe una superficie React de Cierres ni una ruta React equivalente; /inventory actualmente cubre Items, historial factual y Acuses.",
-        "test_path": "Sin prueba React aplicable hasta implementar una superficie factual de Cierres.",
-        "recommended_action": "Primero implementar una superficie de solo lectura y sin datos de pacientes/casos; mantener todas las transiciones cerradas hasta resolver CH14-Q007.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx renders Inventory / Cierres as a local read-only surface with explicit empty sources and no patient or case reads.",
+        "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-closures); tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-CLOSURES, PENDING_RUNTIME).",
+        "recommended_action": "Keep all transitions closed until CH14-Q007 is resolved; only the factual empty anatomy is implemented.",
         "blocked_by_client_information": true,
         "notes": "CH14-E0041 fue revisado y corresponde a Acuses, no a Cierres. La evidencia correcta de la anatomía de Cierres es CH14-E0042/E0044; no hay implementación React actual."
       }

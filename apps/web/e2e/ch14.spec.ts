@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-permissions
 // test-id: playwright:ch14-inventory-item-history
 // test-id: playwright:ch14-inventory-acknowledgements
+// test-id: playwright:ch14-inventory-closures
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -40,6 +41,7 @@ test('CH14 grants factual inventory access to INVENTORY and denies NURSE directl
   await expect(nurse.getByRole('heading', { name: 'Gestión de inventario' })).toHaveCount(0);
   await expect(nurse.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')).toHaveCount(0);
   await expect(nurse.locator('[data-action-id="INVENTORY-ACKNOWLEDGEMENTS-OPEN"]')).toHaveCount(0);
+  await expect(nurse.locator('[data-action-id="INVENTORY-CLOSURES-OPEN"]')).toHaveCount(0);
   await inventory.close();
   await nurse.close();
 });
@@ -104,4 +106,29 @@ test('CH14 Acuses does not source patient or case data for any inventory reader'
   await expect(inventory.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
   await expect(inventory.getByText('Paciente Demo Aurora')).toHaveCount(0);
   await inventory.close();
+});
+
+test('CH14 exposes read-only Cierres tabs with factual empty sources and no audit mutation', async ({ page }) => {
+  await login(page);
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await page.locator('[data-action-id="INVENTORY-CLOSURES-OPEN"]').click();
+  await expect(page.getByRole('heading', { name: 'Inventario / Cierres' })).toBeVisible();
+  await expect(page.locator('[data-action-id="INVENTORY-CLOSURES-TAB-PENDING"]')).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('heading', { name: 'Pacientes activos' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'DUI/NIT' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Fecha de inicio' })).toBeVisible();
+  await expect(page.getByText('Sin cierres documentados')).toBeVisible();
+  await expect(page.getByText('Paciente Demo Aurora')).toHaveCount(0);
+  await page.locator('[data-action-id="INVENTORY-CLOSURES-TAB-TOTALS"]').click();
+  await expect(page.getByText('Sin cierres totales documentados')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-CLOSURES-TAB-CLOSED"]').click();
+  await expect(page.getByText('Sin cierres cerrados documentados')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-CLOSURES-TAB-RESOURCES"]').click();
+  await expect(page.getByText('Sin recursos de cierre documentados')).toBeVisible();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
 });

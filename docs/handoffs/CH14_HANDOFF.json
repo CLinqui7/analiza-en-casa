@@ -1,30 +1,30 @@
 {
-  "lot": "CH14_F06_EVIDENCE_RECONCILIATION",
+  "lot": "CH14_F06_SAFE_CLOSURES_SURFACE",
   "source_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
   "base_sha": "7912d2930007b1cb843b57c88ccc757e34ec126d",
   "implementation_sha": null,
   "verification_status": "PENDING_GIT_WRITE",
   "final_sha": null,
   "remote_sha": null,
-  "functional_fingerprint": "6d729eafd38ded0ff4814b6895213250a2643e9f1663a11c9589173699fb6317",
+  "functional_fingerprint": "4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
   "requirements": {
-    "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04"],
+    "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
-    "not_implemented": ["CH14-F06", "CH14-F09", "CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
+    "not_implemented": ["CH14-F09", "CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
   },
   "evidence": {
     "f01": "CH14-E0006 and its opened detail crop show the Items surface, Bodega, Excel, Traslados, pagination/search, and Tipo/Código/Nombre/Disp/Comp/Total columns. React now presents only existing synthetic movement balances; committed/total calculation, bodega rules, transfer, and export remain explicitly blocked.",
     "permissions": "Playwright proves ADMIN and INVENTORY can read the factual list and NURSE receives direct route denial. Selenium source declares the same action-specific checks but has not executed because Python is unavailable.",
     "f02": "CH14-E0016/E0018 and their opened frames support the Movimientos de item dialog, date range, and Tipo/Fecha/Lote-Serie/Origen/Destino/Cantidad/Movimiento/Estado columns. React filters only existing local movements for the selected item; missing lot, location and state fields are explicitly documented as unavailable.",
     "f04": "CH14-E0029 supports Inventario / Acuses, Tipo Área, Pacientes/Recursos/No disponible/Solicitudes/Tareas, and the ID/Acciones/Identificación/Paciente/Empresa/Estado table. React is read-only: Pacientes is the evidenced factual empty table for every inventory reader, and the component does not query or receive patient/case collections; all unavailable sources are explicit empty states.",
-    "f06": "Evidence reconciliation opened CH14-E0041, CH14-E0042 and CH14-E0044. E0041 is Inventario / Acuses and cannot support Cierres. E0042 begins Inventario / Cierres with Pendientes/Cierres totales/Cerrados/Recursos; E0044 shows Pendientes rows and the observed factual columns. React has no Cierres surface, so F06 remains MISSING and unverified under CH14-Q007.",
+    "f06": "CH14-E0042/E0044 support Inventario / Cierres, its four tabs, Pacientes activos and the Pendientes headers. React renders precisely that read-only anatomy with explicit empty sources; it never receives or queries patients/cases, creates counts, or changes a closure state. Playwright 6/6 proves open/tab/empty/reload-no-audit behavior; Selenium source is assertion-specific and PENDING_RUNTIME.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 5/5 (including no patient/case data sourced for ADMIN and INVENTORY Acuses readers)",
-    "ch14_parity_self_test": "PASS: 16/16 after F06 evidence reconciliation",
-    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 6d729eafd38ded0ff4814b6895213250a2643e9f1663a11c9589173699fb6317",
+    "playwright_ch14": "PASS: 6/6 on isolated port 4175 (including read-only Cierres open/tab/empty/reload-no-audit behavior and NURSE route denial)",
+    "ch14_parity_self_test": "PASS: 16/16 after F06 safe-surface implementation",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 4bdfc11e6d595f7f95011d38c466e11747d470a08c11cd3e0bef2ee592fb00d6",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
     "light_mode": "PASS: 83 product source files",
@@ -35,7 +35,7 @@
     "CH14-Q001: committed/total calculation, reservations, lots, warehouses and transfers require approved definitions, authorization and audit rules.",
     "CH14-Q015: inventory export format, columns, minimization and authorization are undefined.",
     "CH14-F04 does not implement acknowledgement state, actions, requests, tasks, resource availability, idempotency or audit rules (CH14-Q002).",
-    "CH14-F06 has no React Cierres surface. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
+    "CH14-F06 implements only factual empty Cierres anatomy. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
     "The pre-F04 base checkpoint is 7912d2930007b1cb843b57c88ccc757e34ec126d. The F04 review record awaits a distinct implementation commit before a new SHA is claimed.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],

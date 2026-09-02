@@ -2,6 +2,7 @@
 # test-id: SEL-CH14-INVENTORY-LIST
 # test-id: SEL-CH14-INVENTORY-ITEM-HISTORY
 # test-id: SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS
+# test-id: SEL-CH14-INVENTORY-CLOSURES
 from __future__ import annotations
 
 import os
@@ -120,6 +121,7 @@ class InventoryList(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('Acceso restringido para el rol NURSE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]'))
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-OPEN"]'))
 
     def test_admin_opens_and_filters_item_history_without_audit_mutation(self) -> None:
         started = time.time()
@@ -140,5 +142,34 @@ class InventoryList(unittest.TestCase):
         to_input.send_keys('08/27/2026')
         self.assertIn('Sin movimientos en el rango', dialog.text)
         record_pass('INVENTORY-ITEM-HISTORY-TO', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_admin_views_read_only_closures_without_audit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-OPEN"]').click()
+        main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('Inventario / Cierres', main.text)
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//h2[normalize-space()='Pacientes activos']"))
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='DUI/NIT']"))
+        self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Fecha de inicio']"))
+        self.assertIn('Sin cierres documentados', main.text)
+        self.assertNotIn('Paciente Demo Aurora', main.text)
+        record_pass('INVENTORY-CLOSURES-OPEN', 'SEL-CH14-INVENTORY-CLOSURES', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-TAB-PENDING"]').click()
+        self.assertEqual(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-TAB-PENDING"]').get_attribute('aria-selected'), 'true')
+        self.assertIn('Sin cierres documentados', main.text)
+        record_pass('INVENTORY-CLOSURES-TAB-PENDING', 'SEL-CH14-INVENTORY-CLOSURES', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-TAB-TOTALS"]').click()
+        self.assertIn('Sin cierres totales documentados', main.text)
+        record_pass('INVENTORY-CLOSURES-TAB-TOTALS', 'SEL-CH14-INVENTORY-CLOSURES', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-TAB-CLOSED"]').click()
+        self.assertIn('Sin cierres cerrados documentados', main.text)
+        record_pass('INVENTORY-CLOSURES-TAB-CLOSED', 'SEL-CH14-INVENTORY-CLOSURES', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-TAB-RESOURCES"]').click()
+        self.assertIn('Sin recursos de cierre documentados', main.text)
+        record_pass('INVENTORY-CLOSURES-TAB-RESOURCES', 'SEL-CH14-INVENTORY-CLOSURES', started, self.driver.current_url)
         self.driver.refresh()
         self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
