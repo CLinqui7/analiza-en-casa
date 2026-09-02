@@ -6,6 +6,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-acknowledgements
 // test-id: playwright:ch14-inventory-closures
 // test-id: playwright:ch14-inventory-suppliers
+// test-id: playwright:ch14-inventory-supplier-permissions
 
 async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
   await page.goto('/login?next=%2Finventory');
@@ -163,4 +164,27 @@ test('CH14 exposes an empty read-only supplier list without supplier mutations',
   await inventory.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
   await expect(inventory.getByText('Sin proveedores documentados')).toBeVisible();
   await inventory.close();
+});
+
+test('CH14 lets AUDITOR search the empty supplier surface without mutation', async ({ page }) => {
+  await login(page, 'auditor@demo.local', 'demo-auditor');
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  await page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
+  await expect(page.getByRole('heading', { name: 'Inventario / Proveedores' })).toBeVisible();
+  await page.getByLabel('Buscar proveedores').fill('sin-proveedor-auditor');
+  await expect(page.locator('tbody .empty-state')).toContainText('sin-proveedor-auditor');
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+});
+
+test('CH14 denies DOCTOR direct inventory supplier access', async ({ page }) => {
+  await login(page, 'doctor@demo.local', 'demo-doctor');
+  await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
+  await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
+});
+
+test('CH14 denies FINANCE direct inventory supplier access', async ({ page }) => {
+  await login(page, 'finance@demo.local', 'demo-finance');
+  await expect(page.locator('main[role="alert"]')).toContainText('FINANCE');
+  await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
 });

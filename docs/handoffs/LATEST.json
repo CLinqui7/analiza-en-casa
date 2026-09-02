@@ -1,5 +1,5 @@
 {
-  "lot": "CH14_F09_SUPPLIERS_SAFE_LIST",
+  "lot": "CH14_F09_PERMISSION_AND_EVIDENCE_REPAIR",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
   "final_sha": null,
   "next_batch": "CH14_REVIEW"

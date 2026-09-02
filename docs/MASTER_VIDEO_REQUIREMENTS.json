@@ -6633,7 +6633,7 @@
         "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-suppliers); tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-SUPPLIERS, PENDING_RUNTIME).",
         "recommended_action": "Definir identidad, unicidad y desactivación en CH14-Q008 antes del CRUD.",
         "blocked_by_client_information": true,
-        "notes": "Tabla visible con datos sintéticos; alta/edición bloqueadas."
+        "notes": "React implementa la anatomía visible como una lista factual vacía; no fabrica filas sintéticas de proveedores. Alta, edición, desactivación, identidades, unicidad y auditoría permanecen bloqueadas por CH14-Q008."
       }
     },
     {

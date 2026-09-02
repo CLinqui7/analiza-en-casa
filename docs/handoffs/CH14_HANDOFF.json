@@ -1,12 +1,12 @@
 {
-  "lot": "CH14_F09_SUPPLIERS_SAFE_LIST",
-  "source_sha": "0bef72190026a030ce7091bb1ab0b95b1441a937",
-  "base_sha": "0bef72190026a030ce7091bb1ab0b95b1441a937",
+  "lot": "CH14_F09_PERMISSION_AND_EVIDENCE_REPAIR",
+  "source_sha": "128176be95c4585a28b75761b1fae0dc3cce633c",
+  "base_sha": "128176be95c4585a28b75761b1fae0dc3cce633c",
   "implementation_sha": null,
   "verification_status": "PENDING_GIT_WRITE",
   "final_sha": null,
   "remote_sha": null,
-  "functional_fingerprint": "045786f8f524aea28adbf94868589ccf423baa22454ddb9d78167ca4c024d569",
+  "functional_fingerprint": "3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
@@ -18,14 +18,14 @@
     "f02": "CH14-E0016/E0018 and their opened frames support the Movimientos de item dialog, date range, and Tipo/Fecha/Lote-Serie/Origen/Destino/Cantidad/Movimiento/Estado columns. React filters only existing local movements for the selected item; missing lot, location and state fields are explicitly documented as unavailable.",
     "f04": "CH14-E0029 supports Inventario / Acuses, Tipo Área, Pacientes/Recursos/No disponible/Solicitudes/Tareas, and the ID/Acciones/Identificación/Paciente/Empresa/Estado table. React is read-only: Pacientes is the evidenced factual empty table for every inventory reader, and the component does not query or receive patient/case collections; all unavailable sources are explicit empty states.",
     "f06": "CH14-E0042/E0044 support Inventario / Cierres, its four tabs, Pacientes activos and the Pendientes headers. React renders precisely that read-only anatomy with explicit empty sources; it never receives or queries patients/cases, creates counts, or changes a closure state. Playwright 6/6 proves open/tab/empty/reload-no-audit behavior; Selenium source is assertion-specific and PENDING_RUNTIME.",
-    "f09": "CH14-E0061 supports Inventario / Proveedores, Registros 50, Anterior/Siguiente, search, and Código/Empresa/Contacto/Teléfono/Correo/Dirección. React presents the same anatomy as a permission-gated factual empty list; search changes only the empty explanation, Nuevo and pagination controls remain disabled, and no provider source or mutation exists. Playwright 7/7 proves ADMIN/INVENTORY access, NURSE direct denial and reload-no-audit behavior; Selenium source is action-specific and PENDING_RUNTIME.",
+    "f09": "CH14-E0061 supports Inventario / Proveedores, Registros 50, Anterior/Siguiente, search, and Código/Empresa/Contacto/Teléfono/Correo/Dirección. React presents the same anatomy as a permission-gated factual empty list; search changes only the empty explanation, Nuevo and pagination controls remain disabled, and no provider source or mutation exists. Playwright 10/10 separately proves ADMIN, INVENTORY and AUDITOR access plus NURSE, DOCTOR and FINANCE direct denial; Selenium source declares the same action-specific scenarios and remains PENDING_RUNTIME.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 7/7 on isolated port 4175 (including empty read-only Proveedores open/search/reload-no-audit behavior, INVENTORY access and NURSE route denial)",
+    "playwright_ch14": "PASS: 10/10 on isolated port 4175 (including empty read-only Proveedores open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials)",
     "ch14_parity_self_test": "PASS: 16/16 after F09 safe-supplier implementation",
-    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 045786f8f524aea28adbf94868589ccf423baa22454ddb9d78167ca4c024d569",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
     "light_mode": "PASS: 83 product source files",
@@ -38,7 +38,7 @@
     "CH14-F04 does not implement acknowledgement state, actions, requests, tasks, resource availability, idempotency or audit rules (CH14-Q002).",
     "CH14-F06 implements only factual empty Cierres anatomy. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
     "CH14-F09 implements only a factual empty Proveedores anatomy. CH14-Q008 still requires an authorized source, identities, uniqueness, mandatory fields, states, create/edit/deactivate/delete behavior and audit; no supplier behavior is claimed.",
-    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 awaits a distinct implementation commit before a new SHA is claimed.",
+    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 permission/evidence repair awaits a distinct implementation commit before a new SHA is claimed.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:37:12-06:00",
-  "metadata_generated_from_commit": "0bef72190026a030ce7091bb1ab0b95b1441a937",
-  "source_sha256": "be9d9adaaaf6425a5a5ad5222538b57b5d2bbc5a053ab5cb40dcdfc9a3741650",
+  "generated_at": "2026-09-02T12:47:17-06:00",
+  "metadata_generated_from_commit": "128176be95c4585a28b75761b1fae0dc3cce633c",
+  "source_sha256": "aa5de168b267ffce34ec1645ac7f460c6f73c96016640b34e50d230438446ea2",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "045786f8f524aea28adbf94868589ccf423baa22454ddb9d78167ca4c024d569",
+  "functional_fingerprint": "3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6643,6 +6643,7 @@
       "unit_test_ids": [],
       "playwright_test_ids": [
         "playwright:ch14-inventory-suppliers",
+        "playwright:ch14-inventory-supplier-permissions",
         "playwright:ch14-inventory-permissions"
       ],
       "selenium_test_ids": [
@@ -6655,7 +6656,7 @@
       ],
       "blocker_reason": "La evidencia no define una fuente autorizada, identificación, unicidad, campos obligatorios, estados, creación, edición, desactivación, eliminación ni auditoría de proveedores por organización.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH14-E0061 respalda Proveedores, Registros 50, Anterior/Siguiente, búsqueda y las columnas Código/Empresa/Contacto/Teléfono/Correo/Dirección. React implementa sólo una superficie vacía factual: Buscar cambia la explicación del vacío, paginación y Nuevo son visibles/deshabilitados, y abrir/buscar/recargar no muta auditoría. Selenium queda PENDING_RUNTIME por falta de Python."
+      "notes": "CH14-E0061 respalda Proveedores, Registros 50, Anterior/Siguiente, búsqueda y las columnas Código/Empresa/Contacto/Teléfono/Correo/Dirección. React implementa sólo una superficie vacía factual: Buscar cambia la explicación del vacío, paginación y Nuevo son visibles/deshabilitados, y abrir/buscar/recargar no muta auditoría. Playwright verifica por separado acceso ADMIN, INVENTORY y AUDITOR, y denegación directa para NURSE, DOCTOR y FINANCE. Selenium declara los mismos flujos y queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F10",

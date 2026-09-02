@@ -207,3 +207,27 @@ class InventoryList(unittest.TestCase):
         main = self.driver.find_element(By.TAG_NAME, 'main')
         self.assertIn('Inventario / Proveedores', main.text)
         self.assertIn('Sin proveedores documentados', main.text)
+
+    def test_auditor_searches_empty_supplier_list_without_audit_mutation(self) -> None:
+        self.login('auditor@demo.local', 'demo-auditor')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click()
+        search = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-SEARCH"]')
+        search.send_keys('sin-proveedor-auditor')
+        main = self.driver.find_element(By.TAG_NAME, 'main')
+        self.assertIn('Inventario / Proveedores', main.text)
+        self.assertIn('sin-proveedor-auditor', main.text)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_doctor_is_denied_inventory_direct_route(self) -> None:
+        self.login('doctor@demo.local', 'demo-doctor')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('DOCTOR', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-OPEN"]'))
+
+    def test_finance_is_denied_inventory_direct_route(self) -> None:
+        self.login('finance@demo.local', 'demo-finance')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('FINANCE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-OPEN"]'))
