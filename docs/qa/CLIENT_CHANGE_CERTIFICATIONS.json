@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+  "certifications": {
+    "CR-001": {
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "f9dab01c4d83117186fbc4ff1bf746b1ee4d7acf825b2d2f8960e029302a4f43",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "vitest:ch02-patient-form",
+        "SEL-PAT-DOCUMENT"
+      ],
+      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
+    },
+    "CR-002": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El contrato sólo admite DUI, PASSPORT y OTHER."
+    },
+    "CR-003": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-PAT-EXPORT"
+      ],
+      "notes": "CSV/XLSX exporta la vista filtrada/ordenada, no el conjunto autorizado completo."
+    },
+    "CR-004": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-PAT-CONTACTS"
+      ],
+      "notes": "Los contactos no tienen datos de documento."
+    },
+    "CR-005": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+    },
+    "CR-006": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+    },
+    "CR-007": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe el catálogo ni selector."
+    },
+    "CR-008": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-HOSP-CREATE"
+      ],
+      "notes": "Hay tablas destino, sin UI, Storage privado ni descarga segura."
+    },
+    "CR-009": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "vitest:ch03-hospitalization-filters",
+        "SEL-HOSP-CREATE"
+      ],
+      "notes": "El contrato tiene start/end opcional, la UI sólo presenta fecha de inicio."
+    },
+    "CR-010": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
+    },
+    "CR-011": {
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "9e290971a1594efd8d3542fec50e4896a908ca1e5b9d86f025cdd067f53cbaff",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "SEL-QUOTE-ITEMS"
+      ],
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+    },
+    "CR-012": {
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "SEL-QUOTE-CREATE"
+      ],
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+    },
+    "CR-013": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Existe categoría genérica, no médico ni honorario asociado."
+    },
+    "CR-014": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere."
+    },
+    "CR-015": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existen médicos, metas ni fórmula aprobada."
+    },
+    "CR-016": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El dato existe en Patient; Dashboard no lo muestra."
+    },
+    "CR-017": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Agenda sólo crea un intervalo."
+    },
+    "CR-018": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existen visitType ni presets; Puntual depende de CR-010."
+    },
+    "CR-019": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "La ruta se bloquea explícitamente hasta contrato clínico."
+    },
+    "CR-020": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+    },
+    "CR-021": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+    },
+    "CR-022": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+    },
+    "CR-023": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni formulario aprobado."
+    },
+    "CR-024": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+    },
+    "CR-025": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+    },
+    "CR-026": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+    },
+    "CR-027": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni versión aprobada."
+    },
+    "CR-028": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+    },
+    "CR-029": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+    },
+    "CR-030": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El texto dice Branden y la imagen parece Braden."
+    },
+    "CR-031": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-PAT-CREATE"
+      ],
+      "notes": "Supabase/RLS existe, pero demo usa localStorage por navegador y no hay E2E de dos usuarios."
+    },
+    "CR-032": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+    }
+  }
+}

@@ -1,0 +1,1701 @@
+{
+  "schema_version": 1,
+  "canonical_source": {
+    "path": "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx",
+    "sha256": "d3a3f872b296aa9f722085f44f8ea11e364669ace3c26707d346a10b022aa6b3",
+    "source_head": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+    "worksheet": "Hoja1"
+  },
+  "changes": [
+    {
+      "change_id": "CR-001",
+      "source_rows": [
+        2
+      ],
+      "excel_id": "1",
+      "module": "Pacientes",
+      "source_text": "Agregar documento DUI",
+      "source_request": "Agregar documento DUI",
+      "normalized_interpretation": "DUI en la plantilla de nuevo paciente",
+      "normalized_request": "DUI en la plantilla de nuevo paciente",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-2"
+      ],
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
+      "route_ids": [
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH02-F005"
+      ],
+      "react_files": [
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/patients/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [
+        "PATIENT-DOCUMENT-TYPE"
+      ],
+      "unit_test_ids": [
+        "vitest:ch02-patient-form"
+      ],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-PAT-DOCUMENT"
+      ],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "f9dab01c4d83117186fbc4ff1bf746b1ee4d7acf825b2d2f8960e029302a4f43",
+      "certification_status": "DEMO_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
+    },
+    {
+      "change_id": "CR-002",
+      "source_rows": [
+        3
+      ],
+      "excel_id": "2",
+      "module": "Pacientes",
+      "source_text": "Agregar carnet de residente",
+      "source_request": "Agregar carnet de residente",
+      "normalized_interpretation": "Agregar tipo de documento Carnet de residente",
+      "normalized_request": "Agregar tipo de documento Carnet de residente",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-3"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH02-F005"
+      ],
+      "react_files": [
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/patients/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "El contrato sólo admite DUI, PASSPORT y OTHER."
+    },
+    {
+      "change_id": "CR-003",
+      "source_rows": [
+        4
+      ],
+      "excel_id": "3",
+      "module": "Pacientes · Exportación",
+      "source_text": "que se visualicen en orden todos los pacientes",
+      "source_request": "que se visualicen en orden todos los pacientes",
+      "normalized_interpretation": "Definir alcance y exportar pacientes autorizados ordenados",
+      "normalized_request": "Definir alcance y exportar pacientes autorizados ordenados",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-4"
+      ],
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
+      "route_ids": [
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH01-F005",
+        "CH02-F002"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/patients/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [
+        "PATIENT-EXPORT-CSV",
+        "PATIENT-EXPORT-XLSX"
+      ],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-PAT-EXPORT"
+      ],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Definir alcance y exportar pacientes autorizados ordenados",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": false,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "CSV/XLSX exporta la vista filtrada/ordenada, no el conjunto autorizado completo."
+    },
+    {
+      "change_id": "CR-004",
+      "source_rows": [
+        5
+      ],
+      "excel_id": "4",
+      "module": "Pacientes · Contactos",
+      "source_text": "agregar el documento del responsable (DUI)",
+      "source_request": "agregar el documento del responsable (DUI)",
+      "normalized_interpretation": "Guardar tipo y número de documento del responsable",
+      "normalized_request": "Guardar tipo y número de documento del responsable",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-5"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH02-F013"
+      ],
+      "react_files": [
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/patients/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [
+        "PATIENT-CONTACT-ADD"
+      ],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-PAT-CONTACTS"
+      ],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Guardar tipo y número de documento del responsable",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Los contactos no tienen datos de documento."
+    },
+    {
+      "change_id": "CR-005",
+      "source_rows": [
+        6
+      ],
+      "excel_id": "5",
+      "module": "Administración · Médicos y recursos",
+      "source_text": "cambiar +nuevo profesional a nuevo recurso y agregar + médico",
+      "source_request": "cambiar +nuevo profesional a nuevo recurso y agregar + médico",
+      "normalized_interpretation": "Separar altas, rutas y modelos de médico y recurso",
+      "normalized_request": "Separar altas, rutas y modelos de médico y recurso",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-6"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B2"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Separar altas, rutas y modelos de médico y recurso",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+    },
+    {
+      "change_id": "CR-006",
+      "source_rows": [
+        7
+      ],
+      "excel_id": "6",
+      "module": "Administración · Médicos",
+      "source_text": "JVPM, DUI, archivos, dirección y edición de médico",
+      "source_request": "JVPM, DUI, archivos, dirección y edición de médico",
+      "normalized_interpretation": "Alta/edición de médico con adjuntos privados y auditoría",
+      "normalized_request": "Alta/edición de médico con adjuntos privados y auditoría",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-7"
+      ],
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
+      "route_ids": [
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+      ],
+      "db_objects": [
+        "supabase/migrations/202608260001_initial_schema.sql"
+      ],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B2"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+    },
+    {
+      "change_id": "CR-007",
+      "source_rows": [
+        8
+      ],
+      "excel_id": "7",
+      "module": "Administración · Profesionales",
+      "source_text": "agregar categorías de especialidades solicitadas",
+      "source_request": "agregar categorías de especialidades solicitadas",
+      "normalized_interpretation": "Catálogo buscable y persistente de especialidades/profesiones",
+      "normalized_request": "Catálogo buscable y persistente de especialidades/profesiones",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-8"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "packages/contracts/src/index.ts"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B2"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Catálogo buscable y persistente de especialidades/profesiones",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe el catálogo ni selector."
+    },
+    {
+      "change_id": "CR-008",
+      "source_rows": [
+        9
+      ],
+      "excel_id": "8",
+      "module": "Hospitalización",
+      "source_text": "agregar archivo, ej. Orden médica",
+      "source_request": "agregar archivo, ej. Orden médica",
+      "normalized_interpretation": "Adjuntar archivo privado a hospitalización con auditoría",
+      "normalized_request": "Adjuntar archivo privado a hospitalización con auditoría",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-9"
+      ],
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
+      "route_ids": [
+        "ROUTE-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [
+        "CH03-F005"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
+      ],
+      "db_objects": [
+        "supabase/migrations/202608260001_initial_schema.sql"
+      ],
+      "action_ids": [
+        "HOSPITALIZATION-CREATE"
+      ],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-HOSP-CREATE"
+      ],
+      "dependency_ids": [
+        "B3"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Adjuntar archivo privado a hospitalización con auditoría",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Hay tablas destino, sin UI, Storage privado ni descarga segura."
+    },
+    {
+      "change_id": "CR-009",
+      "source_rows": [
+        10
+      ],
+      "excel_id": "9",
+      "module": "Hospitalización",
+      "source_text": "cambiar fecha de inicio por fecha de ingreso y marcar más de una fecha",
+      "source_request": "cambiar fecha de inicio por fecha de ingreso y marcar más de una fecha",
+      "normalized_interpretation": "Ingreso/egreso; períodos múltiples sólo tras definición",
+      "normalized_request": "Ingreso/egreso; períodos múltiples sólo tras definición",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-10"
+      ],
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
+      "route_ids": [
+        "ROUTE-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [
+        "CH03-F004",
+        "CH03-F005"
+      ],
+      "react_files": [
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [
+        "HOSPITALIZATION-CREATE"
+      ],
+      "unit_test_ids": [
+        "vitest:ch03-hospitalization-filters"
+      ],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-HOSP-CREATE"
+      ],
+      "dependency_ids": [
+        "B3"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Ingreso/egreso; períodos múltiples sólo tras definición",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "El contrato tiene start/end opcional, la UI sólo presenta fecha de inicio."
+    },
+    {
+      "change_id": "CR-010",
+      "source_rows": [
+        11
+      ],
+      "excel_id": "10",
+      "module": "Operación",
+      "source_text": "Agregar puntual con plantilla de hospitalización",
+      "source_request": "Agregar puntual con plantilla de hospitalización",
+      "normalized_interpretation": "Definir entidad Puntual, campos, duración, estados y relación",
+      "normalized_request": "Definir entidad Puntual, campos, duración, estados y relación",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-11"
+      ],
+      "status": "BLOCKED_CLIENT",
+      "production_status": "BLOCKED_CLIENT",
+      "route_ids": [
+        "ROUTE-AGENDA"
+      ],
+      "video_requirement_ids": [
+        "CH11-F001"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/agenda/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B3"
+      ],
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "¿Qué entidad es Puntual y cuáles son sus campos, duración y estados?",
+      "client_question": "¿Qué entidad es Puntual y cuáles son sus campos, duración y estados?",
+      "acceptance_criteria": "Definir entidad Puntual, campos, duración, estados y relación",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
+    },
+    {
+      "change_id": "CR-011",
+      "source_rows": [
+        12
+      ],
+      "excel_id": "11",
+      "module": "Cotizaciones",
+      "source_text": "clasifique por categorías",
+      "source_request": "clasifique por categorías",
+      "normalized_interpretation": "Conservar categoría por línea de cotización",
+      "normalized_request": "Conservar categoría por línea de cotización",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-12"
+      ],
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
+      "route_ids": [
+        "ROUTE-QUOTES"
+      ],
+      "video_requirement_ids": [
+        "CH04-F011"
+      ],
+      "react_files": [
+        "packages/contracts/src/index.ts",
+        "apps/web/src/app/(workspace)/quotes/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [
+        "QUOTE-CREATE"
+      ],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-QUOTE-ITEMS"
+      ],
+      "dependency_ids": [
+        "B4"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Conservar categoría por línea de cotización",
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "9e290971a1594efd8d3542fec50e4896a908ca1e5b9d86f025cdd067f53cbaff",
+      "certification_status": "DEMO_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+    },
+    {
+      "change_id": "CR-012",
+      "source_rows": [
+        13
+      ],
+      "excel_id": "12",
+      "module": "Cotizaciones · Paciente",
+      "source_text": "actualice el listado de pacientes ya creados o nuevos",
+      "source_request": "actualice el listado de pacientes ya creados o nuevos",
+      "normalized_interpretation": "Refrescar pacientes autorizados, incluso creados por otro usuario",
+      "normalized_request": "Refrescar pacientes autorizados, incluso creados por otro usuario",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-13"
+      ],
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
+      "route_ids": [
+        "ROUTE-QUOTES",
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH03-F012",
+        "CH04-F002"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/quotes/page.tsx",
+        "apps/web/src/lib/data-provider.ts"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-QUOTE-CREATE"
+      ],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
+      "implementation_sha": "d6b17572d82872e2045c8247abdc7e76a2d367b7",
+      "functional_fingerprint": "78b546f3be83bea95edb81333a0b2495c7f4beb0b787321550bacf99b959207d",
+      "certification_status": "DEMO_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": true,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+    },
+    {
+      "change_id": "CR-013",
+      "source_rows": [
+        14
+      ],
+      "excel_id": "13",
+      "module": "Cotizaciones · Honorarios",
+      "source_text": "Agregar Honorario Médico debajo del nombre del médico",
+      "source_request": "Agregar Honorario Médico debajo del nombre del médico",
+      "normalized_interpretation": "Vincular médico y honorario trazable a línea FEES",
+      "normalized_request": "Vincular médico y honorario trazable a línea FEES",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-14"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-QUOTES",
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [
+        "CH06-F005"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/quotes/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B4"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Vincular médico y honorario trazable a línea FEES",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Existe categoría genérica, no médico ni honorario asociado."
+    },
+    {
+      "change_id": "CR-014",
+      "source_rows": [
+        15
+      ],
+      "excel_id": "14",
+      "module": "Dashboard",
+      "source_text": "Datos/gráficas de facturación y pacientes por mes",
+      "source_request": "Datos/gráficas de facturación y pacientes por mes",
+      "normalized_interpretation": "Definir fuente de facturación y estados mensuales antes de gráficas",
+      "normalized_request": "Definir fuente de facturación y estados mensuales antes de gráficas",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-15"
+      ],
+      "status": "BLOCKED_CLIENT",
+      "production_status": "BLOCKED_CLIENT",
+      "route_ids": [
+        "ROUTE-DASHBOARD"
+      ],
+      "video_requirement_ids": [
+        "CH01-F008"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/dashboard/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B4"
+      ],
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "¿Cuál evento persistido define facturación y activo/inactivo mensual?",
+      "client_question": "¿Cuál evento persistido define facturación y activo/inactivo mensual?",
+      "acceptance_criteria": "Definir fuente de facturación y estados mensuales antes de gráficas",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": false,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere."
+    },
+    {
+      "change_id": "CR-015",
+      "source_rows": [
+        16
+      ],
+      "excel_id": "15",
+      "module": "Dashboard",
+      "source_text": "visitas a médico por mes y cumplimiento de metas",
+      "source_request": "visitas a médico por mes y cumplimiento de metas",
+      "normalized_interpretation": "Definir visita válida, meta, período y fórmula de cumplimiento",
+      "normalized_request": "Definir visita válida, meta, período y fórmula de cumplimiento",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-16"
+      ],
+      "status": "BLOCKED_CLIENT",
+      "production_status": "BLOCKED_CLIENT",
+      "route_ids": [
+        "ROUTE-AGENDA",
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [
+        "CH11-F001"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/agenda/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B4"
+      ],
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "¿Qué cuenta como visita, cuál es la meta y cómo se calcula cumplimiento?",
+      "client_question": "¿Qué cuenta como visita, cuál es la meta y cómo se calcula cumplimiento?",
+      "acceptance_criteria": "Definir visita válida, meta, período y fórmula de cumplimiento",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": false,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "notes": "No existen médicos, metas ni fórmula aprobada."
+    },
+    {
+      "change_id": "CR-016",
+      "source_rows": [
+        17
+      ],
+      "excel_id": "16",
+      "module": "Dashboard",
+      "source_text": "cuántos pacientes particulares y aseguradoras",
+      "source_request": "cuántos pacientes particulares y aseguradoras",
+      "normalized_interpretation": "Métrica/gráfica con datos de seguro y permisos",
+      "normalized_request": "Métrica/gráfica con datos de seguro y permisos",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-17"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-DASHBOARD"
+      ],
+      "video_requirement_ids": [
+        "CH02-F008"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/dashboard/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B4"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Métrica/gráfica con datos de seguro y permisos",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": false,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "El dato existe en Patient; Dashboard no lo muestra."
+    },
+    {
+      "change_id": "CR-017",
+      "source_rows": [
+        18
+      ],
+      "excel_id": "17",
+      "module": "Agenda y turnos",
+      "source_text": "seleccionar más de un día",
+      "source_request": "seleccionar más de un día",
+      "normalized_interpretation": "Crear serie definida de turnos sin duplicados o colisiones",
+      "normalized_request": "Crear serie definida de turnos sin duplicados o colisiones",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-18"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-AGENDA"
+      ],
+      "video_requirement_ids": [
+        "CH11-F001"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/agenda/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B3"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Agenda sólo crea un intervalo."
+    },
+    {
+      "change_id": "CR-018",
+      "source_rows": [
+        19
+      ],
+      "excel_id": null,
+      "module": "Agenda y turnos",
+      "source_text": "agregar turno 6 horas, 8 horas, puntual",
+      "source_request": "agregar turno 6 horas, 8 horas, puntual",
+      "normalized_interpretation": "Presets 6h/8h y Puntual sujeto a regla aprobada",
+      "normalized_request": "Presets 6h/8h y Puntual sujeto a regla aprobada",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-19"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-AGENDA"
+      ],
+      "video_requirement_ids": [
+        "CH11-F001"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/agenda/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B3"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Presets 6h/8h y Puntual sujeto a regla aprobada",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "No existen visitType ni presets; Puntual depende de CR-010."
+    },
+    {
+      "change_id": "CR-019",
+      "source_rows": [
+        20
+      ],
+      "excel_id": null,
+      "module": "Tarjeta de medicamentos",
+      "source_text": "campo observaciones para diluciones o cuidados especiales",
+      "source_request": "campo observaciones para diluciones o cuidados especiales",
+      "normalized_interpretation": "Observaciones por ítem/general en tarjeta clínica autorizada",
+      "normalized_request": "Observaciones por ítem/general en tarjeta clínica autorizada",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Media",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-20"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-MEDICAL-ORDERS"
+      ],
+      "video_requirement_ids": [
+        "CH10-F001"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/medication-cards/page.tsx"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B5"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Observaciones por ítem/general en tarjeta clínica autorizada",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "La ruta se bloquea explícitamente hasta contrato clínico."
+    },
+    {
+      "change_id": "CR-020",
+      "source_rows": [
+        21
+      ],
+      "excel_id": null,
+      "module": "Clínica",
+      "source_text": "Agregar Balance Hídrico",
+      "source_request": "Agregar Balance Hídrico",
+      "normalized_interpretation": "Entradas append-only por turno, totales 24h y cierre auditado",
+      "normalized_request": "Entradas append-only por turno, totales 24h y cierre auditado",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-21"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [
+        "CH17-F011"
+      ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B5"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
+      "client_question": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
+      "acceptance_criteria": "Entradas append-only por turno, totales 24h y cierre auditado",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+    },
+    {
+      "change_id": "CR-021",
+      "source_rows": [
+        22
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de EVA",
+      "source_request": "Escala de EVA",
+      "normalized_interpretation": "Escala EVA con versión institucional aprobada y selección única",
+      "normalized_request": "Escala EVA con versión institucional aprobada y selección única",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-22"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Aportar formulario/versionado institucional aprobado.",
+      "client_question": "Aportar formulario/versionado institucional aprobado.",
+      "acceptance_criteria": "Escala EVA con versión institucional aprobada y selección única",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+    },
+    {
+      "change_id": "CR-022",
+      "source_rows": [
+        23
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "ESCALA DE GASGLOW",
+      "source_request": "ESCALA DE GASGLOW",
+      "normalized_interpretation": "Escala de Glasgow confirmada, versionada y con suma configurada",
+      "normalized_request": "Escala de Glasgow confirmada, versionada y con suma configurada",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-23"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Confirmar Glasgow y proporcionar formulario/versionado aprobado.",
+      "client_question": "Confirmar Glasgow y proporcionar formulario/versionado aprobado.",
+      "acceptance_criteria": "Escala de Glasgow confirmada, versionada y con suma configurada",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+    },
+    {
+      "change_id": "CR-023",
+      "source_rows": [
+        24
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de Ramsay",
+      "source_request": "Escala de Ramsay",
+      "normalized_interpretation": "Escala Ramsay con formulario aprobado y selección única",
+      "normalized_request": "Escala Ramsay con formulario aprobado y selección única",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-24"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "acceptance_criteria": "Escala Ramsay con formulario aprobado y selección única",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe motor ni formulario aprobado."
+    },
+    {
+      "change_id": "CR-024",
+      "source_rows": [
+        25
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Esacala Ecof",
+      "source_request": "Esacala Ecof",
+      "normalized_interpretation": "Escala ECOG confirmada, versionada y con selección única",
+      "normalized_request": "Escala ECOG confirmada, versionada y con selección única",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-25"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Confirmar ECOG y proporcionar formulario/versionado aprobado.",
+      "client_question": "Confirmar ECOG y proporcionar formulario/versionado aprobado.",
+      "acceptance_criteria": "Escala ECOG confirmada, versionada y con selección única",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+    },
+    {
+      "change_id": "CR-025",
+      "source_rows": [
+        26
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de ESAS",
+      "source_request": "Escala de ESAS",
+      "normalized_interpretation": "ESAS con dominios 0–10 según formulario aprobado",
+      "normalized_request": "ESAS con dominios 0–10 según formulario aprobado",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-26"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "acceptance_criteria": "ESAS con dominios 0–10 según formulario aprobado",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+    },
+    {
+      "change_id": "CR-026",
+      "source_rows": [
+        27
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de karnofky",
+      "source_request": "Escala de karnofky",
+      "normalized_interpretation": "Escala Karnofsky confirmada y versionada",
+      "normalized_request": "Escala Karnofsky confirmada y versionada",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-27"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Confirmar Karnofsky y proporcionar formulario/versionado aprobado.",
+      "client_question": "Confirmar Karnofsky y proporcionar formulario/versionado aprobado.",
+      "acceptance_criteria": "Escala Karnofsky confirmada y versionada",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+    },
+    {
+      "change_id": "CR-027",
+      "source_rows": [
+        28
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de Dowton",
+      "source_request": "Escala de Dowton",
+      "normalized_interpretation": "Escala Downton con formulario y cálculo aprobados",
+      "normalized_request": "Escala Downton con formulario y cálculo aprobados",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-28"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "acceptance_criteria": "Escala Downton con formulario y cálculo aprobados",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "No existe motor ni versión aprobada."
+    },
+    {
+      "change_id": "CR-028",
+      "source_rows": [
+        29
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de Dowton",
+      "source_request": "Escala de Dowton",
+      "normalized_interpretation": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
+      "normalized_request": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
+      "source_conflict": {
+        "detected": true,
+        "detail": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-29"
+      ],
+      "status": "SOURCE_CONFLICT",
+      "production_status": "SOURCE_CONFLICT",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "SOURCE_CONFLICT",
+      "blocker_reason": "¿La solicitud es Norton o Downton? Aportar versión/formulario institucional.",
+      "client_question": "¿La solicitud es Norton o Downton? Aportar versión/formulario institucional.",
+      "acceptance_criteria": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+    },
+    {
+      "change_id": "CR-029",
+      "source_rows": [
+        30
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "(sin nombre; captura adjunta)",
+      "source_request": "(sin nombre; captura adjunta)",
+      "normalized_interpretation": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
+      "normalized_request": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
+      "source_conflict": {
+        "detected": true,
+        "detail": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-30"
+      ],
+      "status": "SOURCE_CONFLICT",
+      "production_status": "SOURCE_CONFLICT",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "SOURCE_CONFLICT",
+      "blocker_reason": "Confirmar Índice Barthel y versión/puntuación institucional.",
+      "client_question": "Confirmar Índice Barthel y versión/puntuación institucional.",
+      "acceptance_criteria": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+    },
+    {
+      "change_id": "CR-030",
+      "source_rows": [
+        31
+      ],
+      "excel_id": null,
+      "module": "Clínica · Escalas",
+      "source_text": "Escala de Branden",
+      "source_request": "Escala de Branden",
+      "normalized_interpretation": "Escala Braden confirmada y versionada",
+      "normalized_request": "Escala Braden confirmada y versionada",
+      "source_conflict": {
+        "detected": true,
+        "detail": "El texto dice Branden y la imagen parece Braden."
+      },
+      "confirmation_required": true,
+      "priority": "Baja",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-31"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-CLINICAL-HOSPITALIZATIONS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical"
+      ],
+      "db_objects": [],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B6"
+      ],
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Confirmar Braden y proporcionar formulario/versionado aprobado.",
+      "client_question": "Confirmar Braden y proporcionar formulario/versionado aprobado.",
+      "acceptance_criteria": "Escala Braden confirmada y versionada",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": true,
+      "technical_status": "UNASSESSED",
+      "notes": "El texto dice Branden y la imagen parece Braden."
+    },
+    {
+      "change_id": "CR-031",
+      "source_rows": [
+        33,
+        34
+      ],
+      "excel_id": null,
+      "module": "Pacientes · Multiusuario",
+      "source_text": "pacientes creados visibles para otros usuarios con permisos",
+      "source_request": "pacientes creados visibles para otros usuarios con permisos",
+      "normalized_interpretation": "Persistencia multiusuario por organización, RLS, refetch/Realtime y auditoría",
+      "normalized_request": "Persistencia multiusuario por organización, RLS, refetch/Realtime y auditoría",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": false,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-33-34"
+      ],
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
+      "route_ids": [
+        "ROUTE-PATIENTS"
+      ],
+      "video_requirement_ids": [
+        "CH02-F002"
+      ],
+      "react_files": [
+        "apps/web/src/lib/data-provider.ts"
+      ],
+      "db_objects": [
+        "supabase/migrations/202608260002_security_rls_functions.sql"
+      ],
+      "action_ids": [
+        "PATIENT-CREATE"
+      ],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [
+        "SEL-PAT-CREATE"
+      ],
+      "dependency_ids": [
+        "B1"
+      ],
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
+      "acceptance_criteria": "Persistencia multiusuario por organización, RLS, refetch/Realtime y auditoría",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": true,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Supabase/RLS existe, pero demo usa localStorage por navegador y no hay E2E de dos usuarios."
+    },
+    {
+      "change_id": "CR-032",
+      "source_rows": [
+        35
+      ],
+      "excel_id": null,
+      "module": "Migración de datos",
+      "source_text": "Integrar/importar base existente de médicos y expedientes",
+      "source_request": "Integrar/importar base existente de médicos y expedientes",
+      "normalized_interpretation": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
+      "normalized_request": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
+      "source_conflict": {
+        "detected": false,
+        "detail": null
+      },
+      "confirmation_required": true,
+      "priority": "Alta",
+      "source_attachments": [
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-35"
+      ],
+      "status": "MISSING",
+      "production_status": "MISSING",
+      "route_ids": [
+        "ROUTE-DOCTORS"
+      ],
+      "video_requirement_ids": [],
+      "react_files": [],
+      "db_objects": [
+        "supabase/migrations/202608260001_initial_schema.sql"
+      ],
+      "action_ids": [],
+      "unit_test_ids": [],
+      "playwright_test_ids": [],
+      "selenium_test_ids": [],
+      "dependency_ids": [
+        "B7"
+      ],
+      "blocker_type": "SOURCE_DATA",
+      "blocker_reason": "Entregar export/dump autorizado y diccionario de la fuente para un dry-run.",
+      "client_question": "Entregar export/dump autorizado y diccionario de la fuente para un dry-run.",
+      "acceptance_criteria": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "write_required": true,
+      "multiuser_required": false,
+      "clinical_change": false,
+      "technical_status": "UNASSESSED",
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+    }
+  ]
+}

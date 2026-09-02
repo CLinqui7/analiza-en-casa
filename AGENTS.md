@@ -85,6 +85,10 @@ When production dependencies are added, also run the applicable lint, typecheck,
 
 ## Definition of done
 
+## CLIENT CHANGE CONTRACT
+
+Todo agente debe leer `docs/qa/CLIENT_CHANGE_REQUESTS.json` antes de iniciar un lote. Cada cambio debe conservar su texto fuente, actualizar código, pruebas y certificación juntos, y nunca considerarse completo sólo porque exista una UI. Mantén los gates CH01–CH03 y continúa también `docs/qa/VIDEO_TO_REACT_TRACEABILITY.json`. Las solicitudes con conflicto de fuente, definición clínica, integración o datos fuente permanecen abiertas hasta contar con la confirmación/evidencia correspondiente.
+
 ## FULL VIDEO PARITY CONTRACT
 
 Every subsequent agent must read `docs/qa/VIDEO_TO_REACT_TRACEABILITY.json`, work the first unclosed requirement in its assigned batch, and never mark a requirement `EXACT` without a passing video-parity gate. Each change must run focused tests, update the matrices, register its verification SHA, preserve safe blocked-integration states, avoid GitHub Actions and merges, and run regression coverage before changing a certified module.

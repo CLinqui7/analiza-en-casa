@@ -1,5 +1,14 @@
 # Preguntas abiertas y bloqueadores
 
+## B0 · Cambios del cliente (Excel auditado)
+
+- `CR-010` / `CR-018`: definir qué entidad representa “Puntual”, sus campos, duración, estados y relación con Hospitalización o Agenda.
+- `CR-014` / `CR-015`: aprobar las fuentes, períodos, permisos y fórmulas de facturación, pacientes mensuales, visitas médicas y cumplimiento de metas; no se usarán cotizaciones ni datos demo como sustituto.
+- `CR-020`–`CR-030`: entregar formularios institucionales versionados y aprobados, reglas de corrección y permisos antes de construir Balance hídrico o escalas clínicas.
+- `CR-022`: confirmar que “Gasglow” corresponde a Glasgow; `CR-024`: que “Ecof” corresponde a ECOG; `CR-026`: que “karnofky” corresponde a Karnofsky.
+- `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.
+- `CR-032`: aportar export/dump autorizado y diccionario de datos de médicos y expedientes para preparar un dry-run idempotente, conciliable y reversible.
+
 ## CH01 · decisiones pendientes trazadas
 
 - `CH01-Q001`: confirmar si el enlace histórico `/pacientes.php` debe conservar una ruta de retorno después del login. El SPA aplica guardia de sesión; no se inventó una regla de redirección heredada.
