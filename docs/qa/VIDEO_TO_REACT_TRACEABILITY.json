@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T12:55:06-06:00",
-  "metadata_generated_from_commit": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
-  "source_sha256": "95db38233563b079f58a51bf5d370152134e72d48ca62ef41c955785d28eb568",
+  "generated_at": "2026-09-02T13:02:26-06:00",
+  "metadata_generated_from_commit": "c7a0e4a93dd62e9fcd8080595f41d62f275dea97",
+  "source_sha256": "03d1d830215339e165059bc5568f4c93e0c4ee9b2f15d36f22785162ee80f3f2",
   "implementation_sha": "PENDING_COMMIT",
-  "functional_fingerprint": "3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
+  "functional_fingerprint": "67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -6677,16 +6677,30 @@
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "INVENTORY-WAREHOUSES-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-WAREHOUSES-OPEN",
+        "INVENTORY-WAREHOUSES-ACTIVE-FILTER",
+        "INVENTORY-WAREHOUSES-PAGE-SIZE",
+        "INVENTORY-WAREHOUSES-PAGE-PREV",
+        "INVENTORY-WAREHOUSES-PAGE-NEXT",
+        "INVENTORY-WAREHOUSES-SEARCH"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-warehouses",
+        "playwright:ch14-inventory-warehouse-permissions"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH14-INVENTORY-WAREHOUSES"
+      ],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
@@ -6694,7 +6708,7 @@
       ],
       "blocker_reason": "La evidencia visible no define una fuente autorizada, identidad, permisos, CRUD, concurrencia, bodega origen/destino, recepción, movimientos, lotes, series ni reversión de traslados.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Reconciliación de evidencia: CH14-E0071 muestra Items / Bodegas, Activo, búsqueda, paginación y Nombre/Descripción/Fecha de creación. CH14-E0068 pertenece a Proveedores y no respalda Bodegas. React no implementa catálogo, filas, CRUD ni traslados de bodega."
+      "notes": "CH14-E0071 respalda Items / Bodegas, Activo, Registros, búsqueda, paginación y Nombre/Descripción/Fecha de creación. React reproduce sólo una superficie factual vacía, permission-gated y de solo lectura: no consulta una fuente, no fabrica filas y no permite CRUD o traslados. Playwright verifica por separado acceso ADMIN, INVENTORY y AUDITOR, denegación directa para DOCTOR, NURSE y FINANCE, búsqueda y recarga sin mutación de auditoría. Selenium declara los mismos flujos y queda PENDING_RUNTIME por falta de Python."
     },
     {
       "requirement_id": "CH14-F11",

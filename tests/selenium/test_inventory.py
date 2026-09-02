@@ -4,6 +4,7 @@
 # test-id: SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS
 # test-id: SEL-CH14-INVENTORY-CLOSURES
 # test-id: SEL-CH14-INVENTORY-SUPPLIERS
+# test-id: SEL-CH14-INVENTORY-WAREHOUSES
 from __future__ import annotations
 
 import os
@@ -231,3 +232,55 @@ class InventoryList(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('FINANCE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-OPEN"]'))
+
+    def test_admin_reads_empty_warehouses_without_audit_mutation(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]').click()
+        main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('Items / Bodegas', main.text)
+        self.assertIn('Sin bodegas documentadas', main.text)
+        record_pass('INVENTORY-WAREHOUSES-OPEN', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-ACTIVE-FILTER"]').is_enabled())
+        record_pass('INVENTORY-WAREHOUSES-ACTIVE-FILTER', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-PAGE-SIZE"]').is_enabled())
+        record_pass('INVENTORY-WAREHOUSES-PAGE-SIZE', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-PAGE-PREV"]').is_enabled())
+        record_pass('INVENTORY-WAREHOUSES-PAGE-PREV', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-PAGE-NEXT"]').is_enabled())
+        record_pass('INVENTORY-WAREHOUSES-PAGE-NEXT', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-SEARCH"]').send_keys('sin-bodega-ch14')
+        self.assertIn('sin-bodega-ch14', main.text)
+        record_pass('INVENTORY-WAREHOUSES-SEARCH', 'SEL-CH14-INVENTORY-WAREHOUSES', started, self.driver.current_url)
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_inventory_role_reads_empty_warehouses(self) -> None:
+        self.login('inventory@demo.local', 'demo-inventory')
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]').click()
+        self.assertIn('Sin bodegas documentadas', self.driver.find_element(By.TAG_NAME, 'main').text)
+
+    def test_auditor_searches_empty_warehouses(self) -> None:
+        self.login('auditor@demo.local', 'demo-auditor')
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]').click()
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-SEARCH"]').send_keys('sin-bodega-auditor')
+        self.assertIn('sin-bodega-auditor', self.driver.find_element(By.TAG_NAME, 'main').text)
+
+    def test_doctor_is_denied_inventory_warehouse_direct_route(self) -> None:
+        self.login('doctor@demo.local', 'demo-doctor')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('DOCTOR', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]'))
+
+    def test_nurse_is_denied_inventory_warehouse_direct_route(self) -> None:
+        self.login('nurse@demo.local', 'demo-nurse')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('NURSE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]'))
+
+    def test_finance_is_denied_inventory_warehouse_direct_route(self) -> None:
+        self.login('finance@demo.local', 'demo-finance')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('FINANCE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-WAREHOUSES-OPEN"]'))

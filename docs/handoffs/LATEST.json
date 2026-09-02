@@ -1,5 +1,5 @@
 {
-  "lot": "CH14_F10_EVIDENCE_RECONCILIATION",
+  "lot": "CH14_F10_SAFE_WAREHOUSES_LIST",
   "handoff": "docs/handoffs/CH14_HANDOFF.json",
   "final_sha": null,
   "next_batch": "CH14_REVIEW"

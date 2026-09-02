@@ -1,16 +1,16 @@
 {
-  "lot": "CH14_F10_EVIDENCE_RECONCILIATION",
+  "lot": "CH14_F10_SAFE_WAREHOUSES_LIST",
   "source_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
   "base_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
   "implementation_sha": null,
   "verification_status": "PENDING_GIT_WRITE",
   "final_sha": null,
   "remote_sha": null,
-  "functional_fingerprint": "3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
+  "functional_fingerprint": "67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
   "requirements": {
-    "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09"],
+    "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10"],
     "explicitly_blocked": ["CH14-F03", "CH14-F05", "CH14-F07", "CH14-F08"],
-    "not_implemented": ["CH14-F10", "CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
+    "not_implemented": ["CH14-F11", "CH14-F12", "CH14-F13", "CH14-F14", "CH14-F15", "CH14-F16"]
   },
   "evidence": {
     "f01": "CH14-E0006 and its opened detail crop show the Items surface, Bodega, Excel, Traslados, pagination/search, and Tipo/Código/Nombre/Disp/Comp/Total columns. React now presents only existing synthetic movement balances; committed/total calculation, bodega rules, transfer, and export remain explicitly blocked.",
@@ -19,14 +19,14 @@
     "f04": "CH14-E0029 supports Inventario / Acuses, Tipo Área, Pacientes/Recursos/No disponible/Solicitudes/Tareas, and the ID/Acciones/Identificación/Paciente/Empresa/Estado table. React is read-only: Pacientes is the evidenced factual empty table for every inventory reader, and the component does not query or receive patient/case collections; all unavailable sources are explicit empty states.",
     "f06": "CH14-E0042/E0044 support Inventario / Cierres, its four tabs, Pacientes activos and the Pendientes headers. React renders precisely that read-only anatomy with explicit empty sources; it never receives or queries patients/cases, creates counts, or changes a closure state. Playwright 6/6 proves open/tab/empty/reload-no-audit behavior; Selenium source is assertion-specific and PENDING_RUNTIME.",
     "f09": "CH14-E0061 supports Inventario / Proveedores, Registros 50, Anterior/Siguiente, search, and Código/Empresa/Contacto/Teléfono/Correo/Dirección. React presents the same anatomy as a permission-gated factual empty list; search changes only the empty explanation, Nuevo and pagination controls remain disabled, and no provider source or mutation exists. Playwright 10/10 separately proves ADMIN, INVENTORY and AUDITOR access plus NURSE, DOCTOR and FINANCE direct denial; Selenium source declares the same action-specific scenarios and remains PENDING_RUNTIME.",
-    "f10": "CH14-E0071 at 00:43:33.400 is the actual Items / Bodegas frame: Activo, Registros, pagination, search and Nombre/Descripción/Fecha de creación are visible. CH14-E0068 is Inventario / Proveedores with loaded contact data and is no longer mapped to F10. This reconciliation adds no warehouse UI, rows, CRUD or transfers.",
+    "f10": "CH14-E0071 at 00:43:33.400 is the actual Items / Bodegas frame: Activo, Registros, pagination, search and Nombre/Descripción/Fecha de creación are visible. React implements only this permission-gated, factual empty anatomy: it contains no warehouse rows, source query, CRUD or transfers. Playwright separately verifies ADMIN, INVENTORY and AUDITOR access plus direct DOCTOR, NURSE and FINANCE denials, search and reload without audit mutation. Selenium declares the same assertion-specific flows and remains PENDING_RUNTIME because Python is unavailable.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
-    "playwright_ch14": "PASS: 10/10 on isolated port 4175 (including empty read-only Proveedores open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials)",
-    "ch14_parity_self_test": "PASS: 16/16 after F10 evidence reconciliation",
-    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f",
+    "playwright_ch14": "PASS: 16/16 on isolated port 4175 (including empty read-only Bodegas open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials)",
+    "ch14_parity_self_test": "PASS: 16/16 after the safe F10 Bodegas implementation",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
     "light_mode": "PASS: 83 product source files",
@@ -39,7 +39,7 @@
     "CH14-F04 does not implement acknowledgement state, actions, requests, tasks, resource availability, idempotency or audit rules (CH14-Q002).",
     "CH14-F06 implements only factual empty Cierres anatomy. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
     "CH14-F09 implements only a factual empty Proveedores anatomy. CH14-Q008 still requires an authorized source, identities, uniqueness, mandatory fields, states, create/edit/deactivate/delete behavior and audit; no supplier behavior is claimed.",
-    "CH14-F10 remains unimplemented under CH14-Q009: the source, roles, CRUD, origin/destination, transfers, concurrency, receipt, movement, lot/series and reversal rules have not been approved.",
+    "CH14-F10 implements only the factual empty Bodegas anatomy under CH14-Q009: the source, operational roles, CRUD, origin/destination, transfers, concurrency, receipt, movement, lot/series and reversal rules have not been approved.",
     "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 permission/evidence repair is committed and pushed at b90334b52751179d3104abe0cbf06bde3fb3fdcf; F10 reconciliation awaits its own metadata commit.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],

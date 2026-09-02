@@ -8,7 +8,7 @@
       "description": "Gestión de inventario lista items por bodega y separa disponible, comprometido y total; ofrece búsqueda, paginación, Excel y Traslados.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "MISSING",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -25,7 +25,7 @@
       "description": "Ver movimientos abre un historial con rango de fechas, lote/serie, origen, destino, cantidad, Entrada/Salida y estado Disponible/Gastado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "MISSING",
+      "current_platform_status": "IMPLEMENTED_PARTIAL",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -192,7 +192,7 @@
         }
       ],
       "transcript_evidence": "00:43:26.500–00:43:57.500: se describen bodegas y traslados cuando un recurso no está en la ubicación esperada.",
-      "test_path": "Sin prueba de Bodegas o traslado: CH14-E0071 sólo fundamenta la anatomía visible y CH14-Q009 mantiene fuente, permisos y transferencias bloqueados."
+      "test_path": "apps/web/e2e/ch14.spec.ts y tests/selenium/test_inventory.py abren la anatomía vacía, prueban ADMIN/INVENTORY/AUDITOR, denegación directa para DOCTOR/NURSE/FINANCE, búsqueda y recarga sin mutación. CH14-E0071 fundamenta sólo la anatomía visible; CH14-Q009 mantiene fuente, permisos operativos y transferencias bloqueados."
     },
     {
       "id": "CH14-F11",

@@ -6665,11 +6665,11 @@
         "priority": "P0",
         "patient_safety_impact": "Una transferencia incorrecta puede ocultar stock disponible en la ubicación real.",
         "financial_impact": "La RPC conserva la suma de existencias y audita el movimiento.",
-        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx sólo muestra etiquetas de bodega derivadas de movimientos sintéticos; no expone un catálogo Bodegas ni una transferencia.",
-        "test_path": "Sin prueba de Bodegas/traslados: no se certifica una superficie ni movimiento inexistente.",
-        "recommended_action": "Resolver CH14-Q009 antes de implementar fuente, permisos, CRUD o traslados de bodega.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone Items / Bodegas como superficie factual vacía y de solo lectura: Activo, Registros, paginación, búsqueda y columnas Nombre/Descripción/Fecha de creación. No consulta una fuente, fabrica filas ni expone transferencias.",
+        "test_path": "apps/web/e2e/ch14.spec.ts y tests/selenium/test_inventory.py verifican apertura, roles, búsqueda, controles bloqueados y recarga sin mutación de auditoría.",
+        "recommended_action": "Resolver CH14-Q009 antes de implementar fuente, permisos operativos, CRUD o traslados de bodega.",
         "blocked_by_client_information": true,
-        "notes": "CH14-E0071, no E0068, respalda el catálogo Bodegas visible. React no fabrica un catálogo, filas, CRUD ni traslados; las etiquetas de bodega existentes no constituyen esa funcionalidad."
+        "notes": "CH14-E0071, no E0068, respalda la anatomía visible de Bodegas. React no fabrica filas, CRUD ni traslados; la superficie vacía no constituye un catálogo ni una operación de bodega."
       }
     },
     {

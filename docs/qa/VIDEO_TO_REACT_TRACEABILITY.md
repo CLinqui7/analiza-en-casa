@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `b90334b52751179d3104abe0cbf06bde3fb3fdcf`
+Commit generador: `c7a0e4a93dd62e9fcd8080595f41d62f275dea97`
 SHA de implementación: `PENDING_COMMIT`
-Fingerprint funcional CH01: `3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d0d10b284ab03f`
+Fingerprint funcional CH01: `67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -169,7 +169,7 @@ Fingerprint funcional CH01: `3b50ea8d5f7d08671abf41587001ec048ee29bf6fdd729bc66d
 | CH14-F07 | /inventory | PARTIAL | — |
 | CH14-F08 | /inventory | NOT_TESTABLE | — |
 | CH14-F09 | /inventory | PARTIAL | INVENTORY-SUPPLIERS-OPEN, INVENTORY-SUPPLIERS-SEARCH, INVENTORY-SUPPLIERS-PAGE-SIZE, INVENTORY-SUPPLIERS-PAGE-PREV, INVENTORY-SUPPLIERS-PAGE-NEXT, INVENTORY-SUPPLIERS-CREATE |
-| CH14-F10 | /inventory | PARTIAL | — |
+| CH14-F10 | /inventory | PARTIAL | INVENTORY-WAREHOUSES-OPEN, INVENTORY-WAREHOUSES-ACTIVE-FILTER, INVENTORY-WAREHOUSES-PAGE-SIZE, INVENTORY-WAREHOUSES-PAGE-PREV, INVENTORY-WAREHOUSES-PAGE-NEXT, INVENTORY-WAREHOUSES-SEARCH |
 | CH14-F11 | /inventory | PARTIAL | — |
 | CH14-F12 | /inventory | PARTIAL | — |
 | CH14-F13 | /inventory | NOT_TESTABLE | — |

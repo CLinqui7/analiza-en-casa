@@ -14,7 +14,7 @@ const warehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS';
+type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES';
 type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
 type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
 const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
@@ -73,6 +73,7 @@ export default function InventoryPage() {
   const [closureTab, setClosureTab] = useState<ClosureTab>('PENDING');
   const [query, setQuery] = useState('');
   const [supplierQuery, setSupplierQuery] = useState('');
+  const [warehouseQuery, setWarehouseQuery] = useState('');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
@@ -153,6 +154,10 @@ export default function InventoryPage() {
     setSurface('SUPPLIERS');
     setSupplierQuery('');
   };
+  const openWarehouses = () => {
+    setSurface('WAREHOUSES');
+    setWarehouseQuery('');
+  };
 
   return (
     <div className="page-stack">
@@ -166,7 +171,9 @@ export default function InventoryPage() {
                 ? 'Inventario / Cierres'
                 : surface === 'SUPPLIERS'
                   ? 'Inventario / Proveedores'
-                : 'Gestión de inventario'}
+                  : surface === 'WAREHOUSES'
+                    ? 'Items / Bodegas'
+                    : 'Gestión de inventario'}
           </h1>
           <p>
             {surface === 'ACKNOWLEDGEMENTS'
@@ -175,7 +182,9 @@ export default function InventoryPage() {
                 ? 'Superficie factual y de solo lectura. No consulta pacientes ni casos, ni crea, aprueba, cancela, concilia o revierte cierres.'
                 : surface === 'SUPPLIERS'
                   ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
-                : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
+                  : surface === 'WAREHOUSES'
+                    ? 'Superficie factual y de solo lectura. No consulta ni crea bodegas; la fuente, los permisos y los traslados requieren definición aprobada.'
+                    : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -247,6 +256,15 @@ export default function InventoryPage() {
           type="button"
         >
           Proveedores
+        </Button>
+        <Button
+          aria-current={surface === 'WAREHOUSES' ? 'page' : undefined}
+          className={surface === 'WAREHOUSES' ? 'tab active' : 'tab'}
+          data-action-id="INVENTORY-WAREHOUSES-OPEN"
+          onClick={openWarehouses}
+          type="button"
+        >
+          Bodegas
         </Button>
         <Link className="tab" href="/inventory/kardex">
           Movimientos
@@ -505,6 +523,87 @@ export default function InventoryPage() {
                           : 'No existe una fuente autorizada de proveedores en el modelo actual.'
                       }
                       title="Sin proveedores documentados"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
+        </Panel>
+      ) : surface === 'WAREHOUSES' ? (
+        <Panel>
+          <div className="table-heading">
+            <div>
+              <h2>Bodegas</h2>
+              <p className="field-help" id="inventory-warehouses-active-help">
+                Activo se muestra como control observado, pero no filtra ni deriva estados sin una
+                definición aprobada (CH14-Q009).
+              </p>
+            </div>
+          </div>
+          <div className="filter-grid">
+            <label>
+              Activo
+              <select
+                aria-describedby="inventory-warehouses-active-help"
+                aria-label="Estado de bodegas"
+                data-action-id="INVENTORY-WAREHOUSES-ACTIVE-FILTER"
+                disabled
+                value="active"
+              >
+                <option value="active">Activo</option>
+              </select>
+            </label>
+            <label>
+              Registros
+              <select
+                aria-label="Registros de bodegas por página"
+                data-action-id="INVENTORY-WAREHOUSES-PAGE-SIZE"
+                disabled
+                value="50"
+              >
+                <option value="50">50</option>
+              </select>
+            </label>
+            <div aria-label="Paginación de bodegas" className="action-row">
+              <Button data-action-id="INVENTORY-WAREHOUSES-PAGE-PREV" disabled type="button">
+                Anterior
+              </Button>
+              <Button data-action-id="INVENTORY-WAREHOUSES-PAGE-NEXT" disabled type="button">
+                Siguiente
+              </Button>
+            </div>
+            <label>
+              Buscar bodegas
+              <input
+                data-action-id="INVENTORY-WAREHOUSES-SEARCH"
+                onChange={(event) => setWarehouseQuery(event.target.value)}
+                placeholder="Buscar nombre o descripción"
+                type="search"
+                value={warehouseQuery}
+              />
+            </label>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Descripción</th>
+                  <th>Fecha de creación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={3}>
+                    <EmptyState
+                      detail={
+                        warehouseQuery
+                          ? `No hay bodegas documentadas que coincidan con “${warehouseQuery}”.`
+                          : 'No existe una fuente autorizada de bodegas en el modelo actual.'
+                      }
+                      title="Sin bodegas documentadas"
                     />
                   </td>
                 </tr>
