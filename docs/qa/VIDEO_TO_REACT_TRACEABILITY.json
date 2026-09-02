@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T09:00:16-06:00",
-  "metadata_generated_from_commit": "b19fb3371e2886c796f5abde32a45de6f597492f",
+  "generated_at": "2026-09-02T09:14:53-06:00",
+  "metadata_generated_from_commit": "772286245bc8290fbe553b592101d3829c66337b",
   "source_sha256": "3191ac487a8809e67b65eea1f24b5d37a35ad893666be5093b55f09280fcee78",
-  "implementation_sha": null,
+  "implementation_sha": "772286245bc8290fbe553b592101d3829c66337b",
   "functional_fingerprint": "f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424",
   "requirements": [
     {
@@ -5068,7 +5068,7 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": null,
+      "last_verified_sha": "772286245bc8290fbe553b592101d3829c66337b",
       "notes": "CH11-E0010/E0015 se cubren con búsqueda y selección factual de paciente, contexto seleccionado y calendario ligero con eventos coloreados. No se implementan navegación/vistas, eliminación, Pool, enlaces ni reglas de visita; Selenium queda PENDING_RUNTIME porque Python no está disponible."
     },
     {
@@ -5128,7 +5128,7 @@
         "CR-010"
       ],
       "blocker_reason": "Eliminar visitas y cualquier mutación de visita, recurso o liquidación permanecen deshabilitados hasta contar con definiciones y autorizaciones aprobadas.",
-      "last_verified_sha": null,
+      "last_verified_sha": "772286245bc8290fbe553b592101d3829c66337b",
       "notes": "CH11-E0010 se cubre con anterior/hoy/siguiente y Mes, Semana, Lista por semana y Lista por día como proyecciones de turnos sintéticos existentes. Playwright verifica los cambios de periodo/vista y que Eliminar visitas permanece deshabilitado sin mutar turnos ni auditoría. Selenium fuente es específico y PENDING_RUNTIME por falta de Python; no se implementan eliminación, disponibilidad, clasificación, liquidación ni Puntual."
     },
     {

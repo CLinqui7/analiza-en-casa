@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "implementation_sha": null,
-  "verification_status": "PENDING_GIT_WRITE",
-  "verification_blocker": "Current source and certification evidence await a stable Git commit. Selenium runtime remains PENDING_RUNTIME because Python is unavailable. CH08 administrative profiles remain demo-local only until the secured Supabase administrative-execution RPC receives its required linked quote/version inputs.",
+  "implementation_sha": "772286245bc8290fbe553b592101d3829c66337b",
+  "verification_status": "VERIFIED_COMMITTED_PUSHED",
+  "verification_blocker": "Selenium runtime remains PENDING_RUNTIME because Python is unavailable. CH08 administrative profiles remain demo-local only until the secured Supabase administrative-execution RPC receives its required linked quote/version inputs.",
   "functional_fingerprint": "f9a3323f58e660129b22033e5ad3b6e00e0b1ae383f021612f5d436459b95424",
   "certification_created_at": "2026-09-02T11:00:00-06:00",
   "certification_test_evidence": "CH10 review confirms that only the factual, read-only F01 list is verified: focused Playwright passed 7/7 across ADMIN, DOCTOR, NURSE, AUDITOR, INVENTORY and FINANCE. F02 and F03 were downgraded from unsupported EXACT claims: the visible type selector does not initiate clinical documents and no medication-card form exists in the React flow. Selenium source coverage is assertion-specific but remains PENDING_RUNTIME because Python is unavailable. Protected CH01-CH04 parity, typecheck, light-only, audit:verify and traceability-mirror gates are rerun at this fingerprint before final certification.",
