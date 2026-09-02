@@ -1,6 +1,6 @@
 {
-  "lot": "CH17_F01_PRECHECK",
-  "handoff": "docs/handoffs/CH17_F01_PRECHECK_HANDOFF.json",
+  "lot": "CH17_F02_PRECHECK",
+  "handoff": "docs/handoffs/CH17_F02_PRECHECK_HANDOFF.json",
   "final_sha": null,
   "next_batch": "CH17_REVIEW"
 }

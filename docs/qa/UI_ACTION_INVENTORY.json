@@ -1547,6 +1547,27 @@
       "blocker": "CH16-Q008; Selenium runtime pendiente: Python no disponible."
     },
     {
+      "action_id": "HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN",
+      "module": "Reportes de salud",
+      "route": "/clinical/reports",
+      "control_type": "MENU",
+      "visible_label": "Acciones de hospitalización",
+      "selector_or_testid": "[data-action-id=HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN]",
+      "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "AUDITOR"],
+      "roles_denied": ["INVENTORY", "FINANCE"],
+      "preconditions": "Sesión con clinical:read; CH17-Q007 pendiente: no existe una hospitalización autorizada que contextualice las acciones.",
+      "positive_scenario": "Abre sólo los siete rótulos observados como opciones deshabilitadas y no carga ni navega a contenido clínico.",
+      "negative_scenario": "No revela ni consulta historia, Claims, visitas, notas, auditorías o Registro XPO; roles sin clinical:read no reciben el control.",
+      "persistence_required": false,
+      "refresh_required": true,
+      "selenium_required": true,
+      "selenium_test_ids": ["SEL-CH17-HEALTH-REPORT-ACTIONS-MENU"],
+      "playwright_test_ids": ["playwright:ch17-health-report-actions-menu"],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocker": "CH17-Q007; Selenium runtime pendiente: Python no disponible."
+    },
+    {
       "action_id": "MEDICAL-ORDER-SEARCH",
       "module": "Órdenes médicas",
       "route": "/clinical/orders",

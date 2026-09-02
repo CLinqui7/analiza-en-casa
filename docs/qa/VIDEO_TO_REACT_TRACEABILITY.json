@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T17:21:35-06:00",
-  "metadata_generated_from_commit": "9b587ce131b965eede19c9755d43a1a07bcfaded",
-  "source_sha256": "319fe32a7f5c1d95f4cc6d393bc28fec49f357b9969fb2e895fc23b0def292d8",
+  "generated_at": "2026-09-02T17:42:55-06:00",
+  "metadata_generated_from_commit": "77cd08e6bd24ede7fbe97dc0d2ec395fd81e665d",
+  "source_sha256": "79729e722cec0037e5c7d0d352fe9148f2d3342b490ab0c33095c3511c41fcda",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "functional_fingerprint": "758a01f34f3283cc1e0af0fc4c0e3a78c43d4fdf98152c4f223c9dfecaf3796f",
+  "functional_fingerprint": "56dbb24917c41b742a009efa109456678707d515e7fef049c146674034288921",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -8048,10 +8048,10 @@
         "HEALTH-REPORT-PAGE-NEXT"
       ],
       "parity_status": "PARTIAL",
-      "functional_status": "VERIFIED",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "UNVERIFIED",
-      "performance_status": "VERIFIED",
+      "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [
         "playwright:ch17-health-report-empty-surface"
@@ -8066,7 +8066,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define fuente autorizada por organización, roles, campos sensibles permitidos, filtros, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH17-E0001/E0003 respaldan sólo la anatomía visible. React no lee ni expone pacientes, casos, signos vitales o auditorías; búsqueda y paginación se muestran deshabilitadas."
+      "notes": "CH17-E0001/E0003 respaldan sólo la anatomía visible. React no lee ni expone pacientes, casos, signos vitales o auditorías; búsqueda y paginación se muestran deshabilitadas. El runner alcanza ambos casos Playwright pero no devuelve un resultado final; funcional/performance permanecen sin verificar."
     },
     {
       "requirement_id": "CH17-F02",
@@ -8078,28 +8078,40 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0005_00h51m14s200ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+      "open_question_ids": [
+        "CH17-Q007"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
+      ],
+      "component_ids": [
+        "HEALTH-REPORT-HOSPITALIZATION-ACTIONS-MENU"
+      ],
+      "action_ids": [
+        "HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"
+      ],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch17-health-report-actions-menu"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH17-HEALTH-REPORT-ACTIONS-MENU"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH17-Q007"
+      ],
+      "blocker_reason": "CH17-Q007 no define la hospitalización autorizada, el vínculo por organización, roles, condiciones, auditoría ni destinos seguros de Historia clínica, Claims, visitas, notas, Reporte de salud, Auditorías o Registro XPO.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH17-E0005 respalda sólo los siete rótulos del menú. React abre una anatomía local sin contexto de paciente ni hospitalización; todos los destinos se presentan como no operativos y no hay consulta, navegación ni mutación. El runner alcanzó los cuatro casos CH17 pero no devolvió resultado final; funcional, rendimiento y permisos permanecen sin verificar."
     },
     {
       "requirement_id": "CH17-F03",

@@ -15,7 +15,7 @@
   },
   "gates": {
     "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
-    "playwright_ch17_f01": "PENDING_RUNTIME_RESULT: focused suite was started; final result must be recorded after the writable worker run completes.",
+    "playwright_ch17_f01": "PENDING_RUNTIME_RESULT: the focused runner reached both CH17 cases but did not return a final result because its Next development server remained active; functional/performance certification is UNVERIFIED.",
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_health_report.py is executable action-specific source coverage."
   },
   "blockers": [

@@ -232,6 +232,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `CH17-Q005`: aprobar la matriz definitiva de creación, firma, corrección y anulación por rol, junto con el contrato runtime de Supabase. La política actual es conservadora y la ejecución contra una instancia Supabase real sigue pendiente. Evidencia: CH17-E0047–CH17-E0048.
 - `CH17-Q006`: definir si la aplicación operativa de enfermería requiere trabajo sin conexión, su fuente autorizada, roles, minimización de campos, sincronización, idempotencia, conflictos, corrección y auditoría. La narración no demuestra un contrato ni una operación segura. Evidencia verbal: CH17, 00:52:34–00:53:44.
 
+- `CH17-Q007`: definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. Historia clínica, Claims, visitas, notas de servicio, Reporte de salud, Auditorías y Registro XPO permanecen como rótulos no operativos sin contexto de paciente ni hospitalización. Evidencia: CH17-E0005, 00:51:14.200.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.

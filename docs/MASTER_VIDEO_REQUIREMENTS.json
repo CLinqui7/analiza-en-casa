@@ -8041,18 +8041,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+        "open_question_ids": [
+          "CH17-Q007"
+        ],
+        "platform_assessment": {
+          "status": "IMPLEMENTED_PARTIAL",
+          "priority": "P1",
+          "patient_safety_impact": "Cada destino puede revelar contenido clínico o administrativo sensible; no se resuelve ni consulta una hospitalización sin la relación, roles y auditoría de CH17-Q007.",
+          "financial_impact": "Reporte Claims puede implicar información financiera o de aseguramiento, pero no se consulta ni se navega a ese destino.",
+          "current_platform_evidence": "/clinical/reports ofrece un menú local sin contexto de hospitalización. Sólo muestra los siete rótulos observados como elementos deshabilitados y no lee datos ni cambia ruta.",
+          "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: apertura del menú, los siete rótulos deshabilitados, recarga sin auditoría y guardas de ruta.",
+          "recommended_action": "Mantener la anatomía local sin destinos hasta aprobar el vínculo por organización, roles, condiciones, auditoría y contratos seguros de cada acción en CH17-Q007.",
+          "blocked_by_client_information": true,
+          "notes": "CH17-E0005 demuestra los rótulos del menú, no su autorización, relación con una hospitalización ni resultados."
+        }
     },
     {
       "requirement_id": "CH17-F03",

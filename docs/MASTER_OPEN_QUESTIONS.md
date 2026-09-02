@@ -163,6 +163,8 @@ Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, finan
 - **CH13-Q013 · UNCERTAIN** — definir anulación, motivo obligatorio, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Evidencia: CH13-E0091, 00:39:40.800.
 - **CH13-Q014 · UNCERTAIN** — definir fuente, alcance organizacional, proveedor/presentación, vigencia y autorización del precio histórico, además del alta de presentaciones. Evidencia: CH13-E0019–CH13-E0025, 00:37:11.800–00:37:17.200; CH13-E0052–CH13-E0055, 00:38:22.400–00:38:25.200.
 
+- **CH17-Q007 · VISIBLE** — definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. El menú de Historia clínica, Reporte Claims, Ver visitas, Notas de servicio, Reporte de salud, Auditorías y Registro XPO no demuestra estas reglas. Evidencia: CH17-E0005, 00:51:14.200.
+
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 
 - **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.

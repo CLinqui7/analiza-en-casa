@@ -97,3 +97,39 @@ class Ch17HealthReportEmptySurface(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('INVENTORY', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SEARCH"]'))
+
+    # test-id: SEL-CH17-HEALTH-REPORT-ACTIONS-MENU
+    def test_admin_opens_observed_actions_without_loading_a_clinical_record(self) -> None:
+        self.login('admin@demo.local', 'demo-admin')
+        self.wait.until(conditions.url_contains('/clinical/reports'))
+        audit_before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        actions = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]')
+        opened_at = time.time()
+        actions.click()
+        menu = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '#health-report-hospitalization-actions[role="menu"]')))
+        self.assertEqual('true', actions.get_attribute('aria-expanded'))
+        self.assertIn('Historia clínica', menu.text)
+        self.assertIn('Reporte Claims', menu.text)
+        self.assertIn('Ver visitas', menu.text)
+        self.assertIn('Notas de servicio', menu.text)
+        self.assertIn('Reporte de salud', menu.text)
+        self.assertIn('Auditorías', menu.text)
+        self.assertIn('Registro XPO', menu.text)
+        self.assertEqual('true', self.driver.find_element(By.XPATH, "//*[@role='menuitem' and normalize-space()='Historia clínica']").get_attribute('aria-disabled'))
+        self.assertIn('CH17-Q007', self.driver.find_element(By.ID, 'health-report-actions-boundary').text)
+        record_pass('HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN', 'SEL-CH17-HEALTH-REPORT-ACTIONS-MENU', opened_at, self.driver.current_url)
+
+        self.driver.refresh()
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '#health-report-hospitalization-actions'))
+        self.assertEqual(audit_before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_doctor_can_open_empty_actions_menu_and_finance_is_denied_direct_route(self) -> None:
+        self.login('doctor@demo.local', 'demo-doctor')
+        self.wait.until(conditions.url_contains('/clinical/reports'))
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]').click()
+        self.assertTrue(self.driver.find_elements(By.CSS_SELECTOR, '#health-report-hospitalization-actions[role="menu"]'))
+
+        self.login('finance@demo.local', 'demo-finance')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('FINANCE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]'))

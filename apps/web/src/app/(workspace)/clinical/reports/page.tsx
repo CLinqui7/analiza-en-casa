@@ -1,6 +1,7 @@
 'use client';
 
 import { EmptyState, Panel, StatusTag } from '@analiza/ui';
+import { useState } from 'react';
 
 const reportColumns = [
   'Acciones',
@@ -15,6 +16,8 @@ const reportColumns = [
 ];
 
 export default function HealthReportPage() {
+  const [actionsOpen, setActionsOpen] = useState(false);
+
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -45,6 +48,43 @@ export default function HealthReportPage() {
           type="search"
           value=""
         />
+      </Panel>
+
+      <Panel>
+        <section aria-labelledby="health-report-actions-title">
+          <h2 id="health-report-actions-title">Acciones de hospitalización</h2>
+          <p className="notice" id="health-report-actions-boundary" role="status">
+            El menú observado se conserva sin contexto de hospitalización. No abre ni consulta historia
+            clínica, Claims, visitas, notas, auditorías o Registro XPO hasta contar con la relación,
+            autorización y auditoría aprobadas (CH17-Q007).
+          </p>
+          <button
+            aria-controls="health-report-hospitalization-actions"
+            aria-describedby="health-report-actions-boundary"
+            aria-expanded={actionsOpen}
+            data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"
+            onClick={() => setActionsOpen((open) => !open)}
+            type="button"
+          >
+            Acciones de hospitalización
+          </button>
+          {actionsOpen ? (
+            <ul
+              aria-label="Acciones observadas de hospitalización"
+              className="action-menu-surface"
+              id="health-report-hospitalization-actions"
+              role="menu"
+            >
+              <li aria-disabled="true" role="menuitem">Historia clínica</li>
+              <li aria-disabled="true" role="menuitem">Reporte Claims</li>
+              <li aria-disabled="true" role="menuitem">Ver visitas</li>
+              <li aria-disabled="true" role="menuitem">Notas de servicio</li>
+              <li aria-disabled="true" role="menuitem">Reporte de salud</li>
+              <li aria-disabled="true" role="menuitem">Auditorías</li>
+              <li aria-disabled="true" role="menuitem">Registro XPO</li>
+            </ul>
+          ) : null}
+        </section>
       </Panel>
 
       <Panel>

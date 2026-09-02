@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `9b587ce131b965eede19c9755d43a1a07bcfaded`
+Commit generador: `77cd08e6bd24ede7fbe97dc0d2ec395fd81e665d`
 SHA de implementación: `02c901a522e3bc0603c1b3c34501836928acf5ff`
-Fingerprint funcional CH01: `758a01f34f3283cc1e0af0fc4c0e3a78c43d4fdf98152c4f223c9dfecaf3796f`
+Fingerprint funcional CH01: `56dbb24917c41b742a009efa109456678707d515e7fef049c146674034288921`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -202,7 +202,7 @@ Fingerprint funcional CH01: `758a01f34f3283cc1e0af0fc4c0e3a78c43d4fdf98152c4f223
 | CH16-F08 | /clinical/hospitalizations | MISSING | — |
 | CH16-F09 | Sin ruta | NOT_TESTABLE | — |
 | CH17-F01 | /clinical/reports | PARTIAL | HEALTH-REPORT-SEARCH, HEALTH-REPORT-PAGE-PREV, HEALTH-REPORT-PAGE-NEXT |
-| CH17-F02 | /clinical/hospitalizations | PARTIAL | — |
+| CH17-F02 | /clinical/reports | PARTIAL | HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN |
 | CH17-F03 | /clinical/hospitalizations | PARTIAL | — |
 | CH17-F04 | /clinical/hospitalizations | PARTIAL | — |
 | CH17-F05 | /clinical/hospitalizations | PARTIAL | — |
