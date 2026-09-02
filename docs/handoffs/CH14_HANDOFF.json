@@ -1,11 +1,11 @@
 {
-  "lot": "CH14_F10_SAFE_WAREHOUSES_LIST",
-  "source_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
-  "base_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
-  "implementation_sha": null,
+  "lot": "CH14_F11_EVIDENCE_AND_SAFETY_PRECHECK",
+  "source_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
+  "base_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
+  "implementation_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
   "verification_status": "PENDING_GIT_WRITE",
-  "final_sha": null,
-  "remote_sha": null,
+  "final_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
+  "remote_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
   "functional_fingerprint": "67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
   "requirements": {
     "verified_partial": ["CH14-F01", "CH14-F02", "CH14-F04", "CH14-F06", "CH14-F09", "CH14-F10"],
@@ -20,12 +20,13 @@
     "f06": "CH14-E0042/E0044 support Inventario / Cierres, its four tabs, Pacientes activos and the Pendientes headers. React renders precisely that read-only anatomy with explicit empty sources; it never receives or queries patients/cases, creates counts, or changes a closure state. Playwright 6/6 proves open/tab/empty/reload-no-audit behavior; Selenium source is assertion-specific and PENDING_RUNTIME.",
     "f09": "CH14-E0061 supports Inventario / Proveedores, Registros 50, Anterior/Siguiente, search, and Código/Empresa/Contacto/Teléfono/Correo/Dirección. React presents the same anatomy as a permission-gated factual empty list; search changes only the empty explanation, Nuevo and pagination controls remain disabled, and no provider source or mutation exists. Playwright 10/10 separately proves ADMIN, INVENTORY and AUDITOR access plus NURSE, DOCTOR and FINANCE direct denial; Selenium source declares the same action-specific scenarios and remains PENDING_RUNTIME.",
     "f10": "CH14-E0071 at 00:43:33.400 is the actual Items / Bodegas frame: Activo, Registros, pagination, search and Nombre/Descripción/Fecha de creación are visible. React implements only this permission-gated, factual empty anatomy: it contains no warehouse rows, source query, CRUD or transfers. Playwright separately verifies ADMIN, INVENTORY and AUDITOR access plus direct DOCTOR, NURSE and FINANCE denials, search and reload without audit mutation. Selenium declares the same assertion-specific flows and remains PENDING_RUNTIME because Python is unavailable.",
+    "f11": "Evidence reconciliation opened CH14-E0072, E0075, E0078 and E0079. Each visibly remains Items / Bodegas; E0078 only exposes Lotes / Series as a menu destination. None establishes a lot/serial table, invalid-date display, expiry, allocation or rejection policy. React has no Lotes/Nros de serie surface, so F11 is MISSING under CH14-Q010/Q011 rather than falsely partial.",
     "f07_correction": "The inherited CH14-F07 EXACT claim had no current certification or test evidence. It is conservatively PARTIAL under CH14-Q006; no close acceptance behavior was added."
   },
   "gates": {
     "typecheck": "PASS",
     "playwright_ch14": "PASS: 16/16 on isolated port 4175 (including empty read-only Bodegas open/search/reload-no-audit behavior, ADMIN/INVENTORY/AUDITOR access and NURSE/DOCTOR/FINANCE direct denials)",
-    "ch14_parity_self_test": "PASS: 16/16 after the safe F10 Bodegas implementation",
+    "ch14_parity_self_test": "PASS: 16/16 after F11 evidence reconciliation",
     "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13 at fingerprint 67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2",
     "traceability_generation": "PASS",
     "traceability_mirror": "PASS with negative self-tests",
@@ -40,7 +41,8 @@
     "CH14-F06 implements only factual empty Cierres anatomy. CH14-Q007 still requires approved roles, data source, state transitions, approval, cancellation, reconciliation and reversal rules; no closure behavior is claimed.",
     "CH14-F09 implements only a factual empty Proveedores anatomy. CH14-Q008 still requires an authorized source, identities, uniqueness, mandatory fields, states, create/edit/deactivate/delete behavior and audit; no supplier behavior is claimed.",
     "CH14-F10 implements only the factual empty Bodegas anatomy under CH14-Q009: the source, operational roles, CRUD, origin/destination, transfers, concurrency, receipt, movement, lot/series and reversal rules have not been approved.",
-    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 permission/evidence repair is committed and pushed at b90334b52751179d3104abe0cbf06bde3fb3fdcf; F10 reconciliation awaits its own metadata commit.",
+    "CH14-F11 is MISSING: CH14-E0072/E0075/E0078/E0079 were opened and show Bodegas, not a Lotes/Nros de serie table. CH14-Q010/Q011 still require an approved expiry/invalid-date policy and lot/serial lifecycle before implementation.",
+    "F04/F06 source and focused verification remain fixed at committed and pushed SHA 3334ca38371009f1fc9ea3322b03eb32073eb0e5. F09 is verified at b90334b52751179d3104abe0cbf06bde3fb3fdcf; F10 is implemented, verified and synchronized at 12411c6194d585d74b7f20c9a2816f497cf55a46. The current F11 reconciliation metadata remains uncommitted.",
     "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
   ],
   "next_batch": "CH14_REVIEW"

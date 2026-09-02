@@ -6693,17 +6693,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q010",
+        "CH14-Q011"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P0",
-        "patient_safety_impact": "La RPC rechaza lote vencido, no disponible o insuficiente; el modo local bloquea ítems trazables.",
-        "financial_impact": "Evita divergencia lote–stock en rutas de mutación habilitadas.",
-        "current_platform_evidence": "app/views.js renderInventoryLots; app/store.js createInventoryMovement; apply_inventory_movement_v2",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q010–CH14-Q011 y validar migraciones en Supabase real.",
+        "patient_safety_impact": "Una fecha o trazabilidad de lote interpretada sin política aprobada puede ocultar disponibilidad o riesgo operativo.",
+        "financial_impact": "No se certifica ningún efecto de inventario o asignación mientras falten las reglas de lote, serie y vencimiento.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no implementa un catálogo de Lotes/Nros de serie; sólo declara que sus reglas de trazabilidad requieren definición aprobada.",
+        "test_path": "Sin prueba actual: CH14-E0075 se abrió y muestra Items / Bodegas, no Lotes/Nros de serie. No se certifica una superficie a partir de evidencia desalineada.",
+        "recommended_action": "Corregir la asignación de evidencia de Lotes/Nros de serie y resolver CH14-Q010–CH14-Q011 antes de implementar o probar catálogo, fechas, asignación o rechazo.",
         "blocked_by_client_information": true,
-        "notes": "Vista de sólo lectura; se rechaza deliberadamente el defecto de fechas inválidas activas observado."
+        "notes": "Reconciliación: CH14-E0075 y los frames adyacentes abiertos muestran Bodegas, por lo que no sustentan el listado de lotes/series ni el texto heredado sobre fechas inválidas. No se deriva política de vencimiento, FEFO, cuarentena, asignación o rechazo."
       }
     },
     {

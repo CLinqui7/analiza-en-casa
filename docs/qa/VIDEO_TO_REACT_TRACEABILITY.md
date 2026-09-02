@@ -2,8 +2,8 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `c7a0e4a93dd62e9fcd8080595f41d62f275dea97`
-SHA de implementación: `PENDING_COMMIT`
+Commit generador: `12411c6194d585d74b7f20c9a2816f497cf55a46`
+SHA de implementación: `12411c6194d585d74b7f20c9a2816f497cf55a46`
 Fingerprint funcional CH01: `67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e440a8ea35cfa2`
 
 | Requisito | Ruta | Estado | Acciones |
@@ -170,7 +170,7 @@ Fingerprint funcional CH01: `67af35b313ef523823d353814a83a10f8d3d6d726e1c7ac419e
 | CH14-F08 | /inventory | NOT_TESTABLE | — |
 | CH14-F09 | /inventory | PARTIAL | INVENTORY-SUPPLIERS-OPEN, INVENTORY-SUPPLIERS-SEARCH, INVENTORY-SUPPLIERS-PAGE-SIZE, INVENTORY-SUPPLIERS-PAGE-PREV, INVENTORY-SUPPLIERS-PAGE-NEXT, INVENTORY-SUPPLIERS-CREATE |
 | CH14-F10 | /inventory | PARTIAL | INVENTORY-WAREHOUSES-OPEN, INVENTORY-WAREHOUSES-ACTIVE-FILTER, INVENTORY-WAREHOUSES-PAGE-SIZE, INVENTORY-WAREHOUSES-PAGE-PREV, INVENTORY-WAREHOUSES-PAGE-NEXT, INVENTORY-WAREHOUSES-SEARCH |
-| CH14-F11 | /inventory | PARTIAL | — |
+| CH14-F11 | /inventory | MISSING | — |
 | CH14-F12 | /inventory | PARTIAL | — |
 | CH14-F13 | /inventory | NOT_TESTABLE | — |
 | CH14-F14 | /inventory | PARTIAL | — |

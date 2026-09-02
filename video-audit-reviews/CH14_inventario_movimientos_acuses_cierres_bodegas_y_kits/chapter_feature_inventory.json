@@ -200,7 +200,7 @@
       "description": "El módulo separa Lotes y Nros de serie; la tabla enlaza lote con item, fechas y estado, y resalta varias Fecha inválida en rojo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -210,7 +210,7 @@
         }
       ],
       "transcript_evidence": "00:44:07.560–00:44:24.040: se exige manejar vencimientos de medicamentos, lotes de insumos y series de equipos.",
-      "test_path": "E2E: crear lote/serie, validar fechas y alertas; impedir asignaciones que violen la política configurada."
+      "test_path": "Sin prueba actual: CH14-E0075 y los frames adyacentes abiertos muestran Bodegas, no Lotes/Nros de serie. No se implementa catálogo, fecha, alerta, asignación o rechazo hasta corregir la evidencia y aprobar CH14-Q010/Q011."
     },
     {
       "id": "CH14-F12",
