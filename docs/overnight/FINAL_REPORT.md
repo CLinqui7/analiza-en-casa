@@ -13,6 +13,13 @@ Clasificación: `SYNTHETIC_DEMO`
 - `npm run react:parity` conserva 37 gaps del baseline legado y por ello retorna no-cero. No es el gate de React/video actual; la separación de scopes y los bloqueos están documentados en `docs/qa/TRACEABILITY_SCOPE.md` y `docs/OPEN_QUESTIONS.md`.
 - `globalComplete` permanece `false`: faltan validación real de Supabase/RLS y proveedores, aprobaciones del cliente para contratos clínicos/financieros y un scheduler de 15 minutos autorizado para producción.
 
+### Addendum · 2026-09-03 · Revalidación y preview final
+
+- Se publicó `bbcab6d74a4c0845ba504794ed5a3842b7140981` en `codex/reconcile-global-release-20260903`. La implementación verificada es `2c52fbb5e74c53057ffd417f6af2452efea74f6d`: las dos correcciones fueron aserciones E2E desfasadas, justificadas por el frame CH09 y el contrato actual de CH16; no cambiaron el comportamiento de negocio.
+- Gates finales verdes: root Playwright 43/43, React Playwright 178/178, Selenium 181/181, cobertura Selenium declarada 334/334 (100%), QA 76/76, cambios de cliente 32/32, paridad de video 210/210 y auditoría 17/17, además de formato, lint, tipos y builds.
+- Nueva preview protegida `READY`: [web-anu19vg20-clinqui7s-projects.vercel.app](https://web-anu19vg20-clinqui7s-projects.vercel.app) (`dpl_3cGwvYKhLaxPUcX4ie6Xvm1KxMZu`). El smoke autenticado confirmó `/` 307 y 200 para login, dashboard, pacientes, hospitalizaciones, cotizaciones, agenda, inventario y portal demo. `Acuses` se valida como pestaña de Inventario; no existe como URL independiente.
+- No se promovió producción. La preview omitió sólo el cron de 15 minutos en el artefacto temporal porque Vercel Hobby lo rechaza; `vercel.json` versionado conserva el cron de producción. `globalComplete` continúa `false` hasta validar Supabase/RLS, proveedores, contratos clínicos/financieros y scheduler autorizado.
+
 ## 1. Resumen ejecutivo
 
 La rama entrega una aplicación ejecutable, evidencia de QA y documentación operativa. Se conservó intacta la evidencia de video y no se reabrió la auditoría completa: 17/17 capítulos, 1,359/1,359 observaciones y 17/17 receipts siguen verificando correctamente.

@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03T06:02:00-06:00",
+  "updatedAt": "2026-09-03T07:15:56-06:00",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "58030d1419e179a4bc51145106c7314cb6417c6c",
+  "head": "bbcab6d74a4c0845ba504794ed5a3842b7140981",
+  "verificationSha": "2c52fbb5e74c53057ffd417f6af2452efea74f6d",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "Vercel preview dpl_AHQzRG5HXRM3SnmMLhKxxFpnC8LB reached READY; protected deployment smoke returned / 307, /login 200, /dashboard 200 and /portal/demo-qt-2026-0148 200 through the authenticated Vercel CLI.",
-  "lastGatePass": "Release regression at implementation SHA 58030d1419e179a4bc51145106c7314cb6417c6c is green: format, lint, typecheck, 98 domain tests, 37 React tests, QA 76/76, light mode, client changes 32/32, video parity 210/210, traceability mirror, audit 17/17, security scan, React boundaries, standalone build, production build, fresh-server Playwright 178/178, Selenium 181/181 and declared Selenium coverage 334/334 (100%).",
+  "lastGateExecuted": "Vercel preview dpl_3cGwvYKhLaxPUcX4ie6Xvm1KxMZu reached READY. Authenticated Vercel CLI smoke returned / 307 and 200 for /login, /dashboard, /patients, /hospitalizations, /quotes, /agenda, /inventory and /portal/demo-qt-2026-0148. Acuses is the tested CH14 tab inside /inventory, not an independent route.",
+  "lastGatePass": "Release regression for implementation SHA 2c52fbb5e74c53057ffd417f6af2452efea74f6d is green: format, lint, typecheck, 98 domain tests, 37 React tests, QA 76/76, light mode, client changes 32/32, video parity 210/210, traceability mirror, audit 17/17, security scan, React boundaries, standalone build, production build, root Playwright 43/43, fresh-server React Playwright 178/178, Selenium 181/181 and declared Selenium coverage 334/334 (100%).",
   "failingGate": "No current release-certification gate fails. npm run react:parity still exits non-zero because it measures the explicitly retained legacy baseline and reports 37 historical route gaps; docs/qa/TRACEABILITY_SCOPE.md records that it is not the current React/video gate.",
   "failingTests": ["npm run react:parity — 37 legacy baseline route gaps, retained as documented migration scope rather than masked as current React/video parity."],
   "repairsApplied": [
@@ -26,17 +27,19 @@
     "Added a page-error assertion to the shared patient editor path and expanded the certification fingerprint to include the map component.",
     "Resolved the Selenium run collision by running its full suite against the already healthy local workspace server rather than starting a second Next development server that would contend for the build lock.",
     "Deleted the ignored local Vercel preview environment file that made preflight fail; no credentials were committed or exposed.",
-    "Created a READY preview using a temporary no-cron, monorepo-output configuration only in the uploaded preview artifact; the checked-in production vercel.json was restored unchanged."
+    "Created a READY preview using a temporary no-cron, monorepo-output configuration only in the uploaded preview artifact; the checked-in production vercel.json was restored unchanged.",
+    "Reconciled the two stale root-browser assertions against the observed CH09 report anatomy and the current canonical CH16 table label; root Playwright then passed 43/43.",
+    "Re-ran the complete React browser (178/178) and Selenium (181/181) suites, published bbcab6d safely, and created a new READY Vercel preview after temporarily omitting only the Hobby-blocked cron from its uploaded artifact."
   ],
   "nextExecutableAction": "Obtain approved real Supabase, scheduler and provider configuration; then execute the documented RLS/RPC, portal-delivery and production UAT gates. Preserve explicit client, clinical and financial approval blockers and do not mark globalComplete true before external certification.",
   "vercel": {
     "status": "READY_PREVIEW_ONLY",
     "projectConfiguration": "preview artifact used no cron and outputDirectory=apps/web/.next; checked-in production vercel.json was restored unchanged",
-    "deploymentId": "dpl_AHQzRG5HXRM3SnmMLhKxxFpnC8LB",
-    "url": "https://web-nuexb31ir-clinqui7s-projects.vercel.app",
-    "inspectorUrl": "https://vercel.com/clinqui7s-projects/web/AHQzRG5HXRM3SnmMLhKxxFpnC8LB",
-    "sourceCommit": "58030d1419e179a4bc51145106c7314cb6417c6c",
-    "smoke": { "/": 307, "/login": 200, "/dashboard": 200, "/portal/demo-qt-2026-0148": 200 },
+    "deploymentId": "dpl_3cGwvYKhLaxPUcX4ie6Xvm1KxMZu",
+    "url": "https://web-anu19vg20-clinqui7s-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/clinqui7s-projects/web/3cGwvYKhLaxPUcX4ie6Xvm1KxMZu",
+    "sourceCommit": "bbcab6d74a4c0845ba504794ed5a3842b7140981",
+    "smoke": { "/": 307, "/login": 200, "/dashboard": 200, "/patients": 200, "/hospitalizations": 200, "/quotes": 200, "/agenda": 200, "/inventory": 200, "/portal/demo-qt-2026-0148": 200 },
     "production": "NOT_PROMOTED"
   },
   "externalBlocker": "Production remains blocked by real Supabase/RLS and provider validation, client approval of clinical and financial contracts, and an approved 15-minute scheduler; Vercel Hobby rejects that production cron. The preview deliberately contains no cron.",
