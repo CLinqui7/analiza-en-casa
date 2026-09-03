@@ -1,0 +1,52 @@
+{
+  "lot": "GLOBAL_RELEASE_PRECHECK",
+  "source_sha": "bbc3d2880b55c581a971535f20dc15e3e0f3937d",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_GIT_SYNC_BLOCKED",
+  "final_sha": null,
+  "remote_sha": "bbc3d2880b55c581a971535f20dc15e3e0f3937d",
+  "release_status": "NOT_READY_SCOPED_GAPS_AND_RUNTIME_EVIDENCE",
+  "global_complete": false,
+  "scope": {
+    "video_requirements": 210,
+    "chapters_audited": 17,
+    "client_change_requests": 32,
+    "client_change_requests_open": 28,
+    "safe_work_completed": [
+      "SECURITY-SCAN-DEMO-FIXTURE-SCOPING",
+      "CR-017-FUNCTIONAL-FINGERPRINT-RECONCILIATION"
+    ]
+  },
+  "safety_preservation": [
+    "CH17-F01 through CH17-F17 retain their reviewed PARTIAL, MISSING, or NOT_TESTABLE states and separate open questions.",
+    "No clinical data bridge, report output, print/export, AI request, clinical mutation, or WhatsApp content/delivery was added.",
+    "CH09-F03 remains independent at /clinical/hospitalizations; it is not a health-report source."
+  ],
+  "gates": {
+    "codex_preflight": "PASS: 17 chapters, 1,359 events, no errors.",
+    "security_scan": "PASS: node scripts/security-scan.mjs --self-test; demo browser fixtures are exempt only when the path is apps/web/e2e and every assigned value is demo-*.",
+    "client_changes": "PASS: node scripts/verify-client-changes.mjs --self-test (32/32); CR-017 fingerprint d6aec14867b05b0ca50c3801856ee149aada280b6f5c20b564c773c75cbc6cff.",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "light_mode": "PASS: 92 product source files contain no Dark/System UI support.",
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "unit_tests": "PASS: npm test (98/98) and npm.cmd run test:react (36/36).",
+    "legacy_qa_and_standalone": "PASS: npm.cmd run check (76/76 QA checks; standalone build generated).",
+    "production_build": "PASS: npm.cmd run build (36 routes).",
+    "react_boundaries": "PASS: 93 files; no prohibited patterns.",
+    "video_audit": "PASS: 17/17 chapters verified; 0 pending; 0 failed.",
+    "selenium_source_coverage": "PARTIAL: 299/339 declared actions (88.20%); Python launcher unavailable, so runtime execution is PENDING_RUNTIME.",
+    "playwright_full_suite": "INCONCLUSIVE: default port 4174 reused a stale server and returned 404 at /doctors; a fresh-port B2 run reached all 6 cases without a final process result before dev-server shutdown. No passing full-suite result is claimed.",
+    "lint": "FAIL: one react-hooks/set-state-in-effect error in hospitalizations/page.tsx; four warnings remain.",
+    "format_check": "FAIL: Prettier reports 93 existing source-style violations. No bulk formatting was performed during this safety-focused checkpoint.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add could not create .git/index.lock and git fetch could not open .git/FETCH_HEAD (Permission denied). No commit or push was attempted; local and cached origin remain bbc3d2880b55c581a971535f20dc15e3e0f3937d."
+  },
+  "release_blockers": [
+    "Non-EXACT video requirements and 28 unresolved client-change requests remain explicitly scoped in the canonical matrices and open-question ledgers.",
+    "Clinical, financial, inventory, insurer, provider, role, audit, retention, and source-data contracts require approved definitions; these remain scoped rather than global blockers.",
+    "Real Supabase/RLS and two-user runtime validation remain unavailable.",
+    "Selenium runtime is unavailable because the Python launcher is absent.",
+    "A full Playwright completion result, lint cleanup, and formatting baseline are still required for release approval.",
+    "Immutable SHA provenance for this checkpoint is pending until Git metadata is writable."
+  ],
+  "next_batch": "GLOBAL_RELEASE_REVIEW"
+}

@@ -134,7 +134,7 @@
     },
     "CR-017": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "e12cdf1a9d82e4e34f5ac4a528a709a7705b4ecc493dc6954421f253746e7714",
+      "functional_fingerprint": "d6aec14867b05b0ca50c3801856ee149aada280b6f5c20b564c773c75cbc6cff",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",

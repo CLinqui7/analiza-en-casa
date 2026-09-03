@@ -1,6 +1,6 @@
 {
-  "lot": "CH17_REVIEW",
-  "handoff": "docs/handoffs/CH17_REVIEW_HANDOFF.json",
+  "lot": "GLOBAL_RELEASE_PRECHECK",
+  "handoff": "docs/handoffs/GLOBAL_RELEASE_PRECHECK_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "GLOBAL_RELEASE_PRECHECK"
+  "next_batch": "GLOBAL_RELEASE_REVIEW"
 }
