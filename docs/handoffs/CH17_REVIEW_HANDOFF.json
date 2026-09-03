@@ -1,7 +1,6 @@
 {
   "lot": "CH17_REVIEW",
-  "source_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
-  "base_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
+  "source_sha": "3b34e5ba5e6365dd2377da108ef83b49952ff546",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "REVIEW_COMPLETE_PENDING_METADATA_COMMIT",
   "final_sha": null,
@@ -9,36 +8,32 @@
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
     "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13"],
-    "reviewed_not_testable": ["CH17-F07"],
-    "next_precheck": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK",
-    "not_independently_implementable": ["CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+    "reviewed_not_testable": ["CH17-F07", "CH17-F14"],
+    "next_precheck": "CH17_F15_EVIDENCE_AND_CLINICAL_PERMISSION_BOUNDARY_PRECHECK",
+    "not_independently_implementable": ["CH17-F15", "CH17-F16", "CH17-F17"]
   },
   "evidence_review": {
-    "f04_f06": "F04-F06 remain MISSING under their existing source, range, authorization, identifier, and print-output blockers. No range, report, insurance, or print behavior is exposed.",
-    "f08_f12": "F08-F12 remain MISSING under their existing clinical/data-source blockers. No clinical panels, antecedents, allergies, vital signs, nursing notes, queries, print output, or writes are exposed.",
-    "f13": "At 7b4faa1ee26d68633dff5374507ded72cf98d7d3, CH17-E0048 and safety_005 establish only sensitive-note edit/save anatomy. F13 is MISSING under CH16-Q008, CH17-Q010, and CH17-Q011; there is no patient/case scope, role authorization, correction reason, immutable original, replacement version, conflict handling, append-only audit, retention, minimization, or redaction contract, and no edit behavior is implemented.",
-    "f14_next": "CH17-E0048 places the visible AI-audit affordance in a sensitive-note context. It does not establish an AI provider, authorized basis, permitted data transfer, minimization/redaction, human review, persistence/training policy, role control, access audit, retention, or output handling. F14 remains NOT_TESTABLE under CH17-Q003 and is the next evidence-only precheck; no AI request or clinical-data transfer is authorized.",
-    "cross_requirement_isolation": "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations with no CH16-Q008/CH17-Q002 blocker. F04-F06 and F08-F13 remain MISSING at /clinical/reports; F07 remains NOT_TESTABLE. CR-020 remains the separate fluid-balance clinical-approval blocker."
+    "f04_f12": "F04-F06 and F08-F12 remain MISSING under their existing source, temporal, print, clinical-data, and clinical-lifecycle blockers. F07 remains NOT_TESTABLE. No report data, patient/hospitalization bridge, clinical content, print/export, or write is exposed.",
+    "f13": "F13 remains MISSING under CH16-Q008, CH17-Q010, and CH17-Q011 with committed provenance at 7b4faa1ee26d68633dff5374507ded72cf98d7d3. No note editor, save action, clinical read/write, print/export, or hospitalizations bridge exists.",
+    "f14": "F14 remains NOT_TESTABLE under CH17-Q003 with committed provenance at 3b34e5ba5e6365dd2377da108ef83b49952ff546. CH17-E0048 establishes only an AI-audit affordance in sensitive-note context; no provider, request, prompt, payload, transfer, output, review, audit, or retention contract is present.",
+    "f15_next": "The F15 source is verbal: the transcript describes post-save editing restrictions and an orthographic correction by another role, while CH17-E0048 does not display a role matrix or correction outcome. CH17-Q005 does not define creation, signature, correction, annulment, reason, versions, roles, audit, or runtime contract. The next precheck must not add edit/save controls, clinical content, permissions, or data access.",
+    "cross_requirement_isolation": "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations. It is not a health-report, correction, AI, or role-authorization source. CR-020 remains the separate fluid-balance clinical-approval blocker."
   },
   "boundaries": [
-    "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization, and redaction.",
-    "CH17-Q001 controls row-level print selection and output content, authorization, audit, and retention.",
-    "CH17-Q002 controls clinical antecedent/allergy forms, catalog, permissions, versioning, and audit.",
-    "CH17-Q003 controls AI-audit provider, authorized basis, permitted data transfer, minimization/redaction, human review, persistence/training, role control, access audit, retention, and output handling.",
-    "CH17-Q009 controls vital-sign fields, units, ranges, validation, provenance, forms, correction/versioning, and audit.",
-    "CH17-Q010 controls nursing-note source fields, shift/resource context, lifecycle, signature, correction/versioning, and audit.",
-    "CH17-Q011 controls clinical-note correction authorization, mandatory reason, immutable signed-original preservation, replacement version, conflict handling, and append-only audit evidence.",
-    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission, and performance status UNVERIFIED despite the focused six-case suite at fec4aef2d984afc95e4f54c2703d20651116c8c9."
+    "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, access audit, retention, minimization, and redaction.",
+    "CH17-Q003 controls AI provider, authorized basis, payload, minimization/redaction, human review, output handling, persistence/training, role control, audit, and retention.",
+    "CH17-Q005 controls the definitive role matrix for creation, signature, correction, annulment, reasons, versions, and audit evidence for clinical notes.",
+    "CH17-Q010 and CH17-Q011 control nursing-note lifecycle and immutable correction safeguards.",
+    "F01-F03 remain PARTIAL with functional, permission, and performance status UNVERIFIED despite the focused six-case suite at fec4aef2d984afc95e4f54c2703d20651116c8c9."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 7b4faa1ee26d68633dff5374507ded72cf98d7d3; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 3b34e5ba5e6365dd2377da108ef83b49952ff546; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
     "protected_parity": "PASS: node scripts/verify-video-react-parity.mjs (210/210; includes protected CH01-CH03).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
-    "f13_regression": "PRESERVED: F13 remains MISSING under CH16-Q008/CH17-Q010/CH17-Q011 at 7b4faa1ee26d68633dff5374507ded72cf98d7d3; no note editor, save action, clinical read/write, print/export, or hospitalizations bridge exists.",
-    "git_sync": "BLOCKED_ENVIRONMENT: at review start local and cached origin/codex/react-full-parity-selenium-100 were both 7b4faa1ee26d68633dff5374507ded72cf98d7d3. git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
+    "git_sync": "BLOCKED_ENVIRONMENT: at review start local and cached origin/codex/react-full-parity-selenium-100 were both 3b34e5ba5e6365dd2377da108ef83b49952ff546. git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
   },
-  "next_batch": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK"
+  "next_batch": "CH17_F15_EVIDENCE_AND_CLINICAL_PERMISSION_BOUNDARY_PRECHECK"
 }

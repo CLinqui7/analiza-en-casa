@@ -1,9 +1,9 @@
-# CH17 review: F04-F14 boundary consolidation
+# CH17 review: F04-F15 boundary consolidation
 
-F04-F06 and F08-F13 remain `MISSING`; F07 remains `NOT_TESTABLE`. F09's source frames establish only six antecedent categories and add affordances; its evidence is committed at `1bbec9f62b414e0da0c0e6468a6bfc8766f53504`. F10's source frames establish only visible allergy selector/list anatomy; its evidence is committed at `fc48a0ed1a849b335a3b6c7897153386f701c098`. F11's evidence is committed at `dae09855e9f10dbebf231a98e449d1dc62970839` and establishes only three vital-sign group labels. F12's evidence is committed at `740b6bde8177d078fda24602a7c1e9e2d980b638` and establishes only nursing-note anatomy; no notes, table controls, print behavior, queries, or writes exist. F13 is MISSING under CH16-Q008, CH17-Q010, and CH17-Q011: edit/save anatomy supplies no authorization, correction reason, immutable original, replacement version, conflict handling, append-only audit, retention, minimization, or redaction contract.
+F04-F06 and F08-F13 remain `MISSING`; F07 and F14 remain `NOT_TESTABLE`. F13 remains MISSING under CH16-Q008, CH17-Q010, and CH17-Q011 at `7b4faa1`. F14 remains NOT_TESTABLE under CH17-Q003 at `3b34e5b`: its source shows only an AI-audit affordance in sensitive-note context, while the product has no AI control, request, prompt, provider, transfer, output, or clinical-data bridge.
 
-`CH09-F03` remains independently `PARTIAL` at `/clinical/hospitalizations`; it is not a health-report source. No report, hospitalization, insurance, clinical, print, export, navigation, or mutation behavior was added in this review.
+`CH09-F03` remains independently `PARTIAL` at `/clinical/hospitalizations`; it is not a health-report, correction, AI, or role-authorization source. CR-020 remains separately clinically blocked for fluid balance.
 
-Opened `CH17-E0048` to select the next evidence-only precheck. Its AI-audit affordance appears in sensitive-note context, but does not define a provider, authorized basis, permitted data transfer, minimization/redaction, human review, persistence/training, role control, access audit, retention, or output handling. F14 remains `NOT_TESTABLE` under CH17-Q003; no AI request or clinical-data transfer is authorized. CR-020 remains separately clinically blocked for fluid balance and does not authorize vital-sign or nursing-note behavior.
+The next evidence-only precheck is F15. Its source is verbal and describes a post-save editing restriction plus an orthographic correction by another role. It does not establish a role matrix, clinical-note lifecycle, signature requirement, correction reason, original preservation, replacement version, audit, or runtime authorization. No edit/save control, clinical content, permission, query, or mutation is authorized.
 
-Next batch: `CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK`.
+Next batch: `CH17_F15_EVIDENCE_AND_CLINICAL_PERMISSION_BOUNDARY_PRECHECK`.

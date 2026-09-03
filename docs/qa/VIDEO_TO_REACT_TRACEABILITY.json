@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:59:41-06:00",
-  "metadata_generated_from_commit": "e9108be81dea8a34ea68b65926ea252b49a6c227",
+  "generated_at": "2026-09-02T21:06:45-06:00",
+  "metadata_generated_from_commit": "3b34e5ba5e6365dd2377da108ef83b49952ff546",
   "source_sha256": "b5ccba34f3bca78eff163f075596be9fe39c282e20e9ff24e55dddeccd9756d3",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8595,8 +8595,8 @@
         "CH17-Q003"
       ],
       "blocker_reason": "CH17-Q003 no define proveedor, base autorizada, datos permitidos, minimización/redacción, revisión humana, manejo de salida, persistencia/entrenamiento, roles, auditoría ni retención para Auditar con IA sobre una nota clínica sensible.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0048 muestra sólo la afinidad Auditar con IA en contexto de nota clínica sensible. React no expone control, nota, solicitud, prompt, proveedor, transferencia externa ni salida de IA; /clinical/hospitalizations no es una fuente ni puente de autorización para /clinical/reports."
+      "last_verified_sha": "3b34e5ba5e6365dd2377da108ef83b49952ff546",
+      "notes": "Precheck factual verified at 3b34e5ba5e6365dd2377da108ef83b49952ff546: CH17-E0048 muestra sólo la afinidad Auditar con IA en contexto de nota clínica sensible. React no expone control, nota, solicitud, prompt, proveedor, transferencia externa ni salida de IA; /clinical/hospitalizations no es una fuente ni puente de autorización para /clinical/reports."
     },
     {
       "requirement_id": "CH17-F15",
