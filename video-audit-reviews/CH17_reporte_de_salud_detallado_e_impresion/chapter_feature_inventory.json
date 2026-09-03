@@ -197,7 +197,7 @@
       "description": "Alergias muestra No registrado, un catálogo seleccionable y Agregar; el capítulo no demuestra la persistencia ni cómo se resuelve la contradicción con No registrado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -212,7 +212,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0030_00h51m50s600ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: añadir alergia sintética, exigir reacción/estado cuando corresponda y evitar coexistencia incoherente con No registrado."
+      "test_path": "Precheck: CH17-E0029/E0030 fueron abiertos. React no expone catálogo, nombres de medicamentos, selector, estado No registrado, Agregar, datos de pacientes, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/contexto/roles/campos/auditoría/retención/minimización/redacción (CH16-Q008) y catálogo/formularios/permisos/reacción-estado/No registrado/persistencia/versionado/corrección/auditoría (CH17-Q002)."
     },
     {
       "id": "CH17-F11",

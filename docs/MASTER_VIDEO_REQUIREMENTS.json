@@ -8385,17 +8385,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La selección y el estado de alergia son información clínica sensible; sembrar un catálogo, asociarlo a una persona o aceptar una alta sin fuente, contexto, roles, reacción/estado, versionado y corrección aprobados puede revelar o alterar datos clínicos.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva una superficie local vacía; no consulta ni reutiliza pacientes, hospitalizaciones, alergias o catálogos y no presenta selector, nombres de medicamentos ni Agregar.",
+        "test_path": "Precheck de evidencia: abrir CH17-E0029 y CH17-E0030; mantener ausentes el catálogo, nombres visibles, selector, estado No registrado, Agregar, consultas, impresión/exportación y mutaciones hasta aprobar CH16-Q008 y CH17-Q002.",
+        "recommended_action": "Obtener fuente tenant-scoped, contexto organizacional, campos por rol, auditoría, retención, minimización y redacción (CH16-Q008), además de catálogo autorizado, formularios, permisos, reacción/estado, resolución de No registrado, persistencia, versión, corrección y auditoría (CH17-Q002), antes de implementar una alergia o un selector.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0029 muestra Alergias expandido con No registrado, Seleccione, un segundo selector vacío y Agregar. CH17-E0030 muestra una lista de sustancias/medicamentos visibles. Ninguna imagen autoriza sembrar el catálogo, exponer los nombres, vincularlos a un paciente, interpretar una alergia o persistir/corregir un registro."
       }
     },
     {
