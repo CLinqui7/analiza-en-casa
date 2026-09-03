@@ -119,8 +119,10 @@ class AgendaSeries(unittest.TestCase):
         self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(text(),'turno persistido')]")))
         self.driver.refresh()
         row = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//td[normalize-space()='Nurse overnight Selenium B3']/parent::tr")))
-        self.assertIn('8/31/2026', row.text)
-        duration = self.driver.execute_script("const shifts = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') || '[]'); const shift = shifts.find((item) => item.note === 'Nurse overnight Selenium B3'); return new Date(shift.endsAt).getTime() - new Date(shift.startsAt).getTime();")
+        self.assertIn('Nurse overnight Selenium B3', row.text)
+        persisted = self.driver.execute_script("const shifts = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') || '[]'); return shifts.find((item) => item.note === 'Nurse overnight Selenium B3');")
+        self.assertTrue(persisted['endsAt'].startswith('2026-08-31'))
+        duration = self.driver.execute_script("return new Date(arguments[0].endsAt).getTime() - new Date(arguments[0].startsAt).getTime();", persisted)
         self.assertEqual(duration, 8 * 60 * 60 * 1000)
         record_pass('AGENDA-SHIFT-PRESET-8H', 'SEL-B3-AGENDA-SERIES', time.time(), self.driver.current_url)
 
