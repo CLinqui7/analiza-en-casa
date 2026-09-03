@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T21:13:34-06:00",
-  "metadata_generated_from_commit": "f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c",
+  "generated_at": "2026-09-02T21:18:39-06:00",
+  "metadata_generated_from_commit": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
   "source_sha256": "95f7d2a24cd6ce8c48e85a50316eb644007d3d702b7b26ee0baa5e6d015c93a7",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8632,8 +8632,8 @@
         "CH17-Q005"
       ],
       "blocker_reason": "CH17-Q005 no define matriz de roles ni precondiciones para crear, firmar, corregir o anular una nota; tampoco define motivos, versiones, conflictos, auditoría append-only ni contrato runtime. Es distinto de CH17-Q010/Q011, que controlan el ciclo y las salvaguardas de corrección de F13.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck verbal: el transcript describe una restricción posterior al guardado y una posible corrección ortográfica por otro rol, pero no identifica rol, estado firmado, autorización ni resultado. React no expone nota, editor, guardado, roles, consulta clínica ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports."
+      "last_verified_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
+      "notes": "Precheck verbal: el transcript describe una restricción posterior al guardado y una posible corrección ortográfica por otro rol, pero no identifica rol, estado firmado, autorización ni resultado. React no expone nota, editor, guardado, roles, consulta clínica ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports. Static verification passed at 6b8592e3e6db5e3363305d01b3d34fd087951bf7; functional, permission, persistence, and performance remain UNVERIFIED because Q005 supplies no approved runtime matrix."
     },
     {
       "requirement_id": "CH17-F16",

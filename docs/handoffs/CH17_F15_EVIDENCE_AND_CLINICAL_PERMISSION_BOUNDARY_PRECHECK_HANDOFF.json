@@ -1,10 +1,10 @@
 {
   "lot": "CH17_F15_EVIDENCE_AND_CLINICAL_PERMISSION_BOUNDARY_PRECHECK",
   "source_sha": "f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PRECHECK_COMPLETE_GIT_SYNC_BLOCKED",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA_METADATA_FOLLOWUP_PENDING",
+  "final_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
+  "remote_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
   "requirement": "CH17-F15",
   "outcome": "NOT_TESTABLE",
   "evidence": {
@@ -34,13 +34,13 @@
     "CR-020 remains the separate fluid-balance clinical-approval blocker and does not authorize note editing or role behavior."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 6b8592e3e6db5e3363305d01b3d34fd087951bf7; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
     "selenium_runtime": "NOT_APPLICABLE: F15 has no implemented action; no Selenium runtime claim is made.",
-    "git_sync": "BLOCKED_ENVIRONMENT: git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied). After the attempted operations, local HEAD and cached origin/codex/react-full-parity-selenium-100 were both f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c."
+    "git_sync": "PARTIAL: platform checkpoint 6b8592e3e6db5e3363305d01b3d34fd087951bf7 contains the F15 precheck and cached origin/codex/react-full-parity-selenium-100 equals that SHA. Manual git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
   },
   "next_batch": "CH17_REVIEW"
 }
