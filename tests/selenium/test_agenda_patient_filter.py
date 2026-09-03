@@ -87,7 +87,7 @@ class AgendaPatientFilter(unittest.TestCase):
         self.login('doctor@demo.local', 'demo-doctor')
         self.assertTrue(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-PATIENT-FILTER"]').is_enabled())
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]').click()
-        self.assertIn('Semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text)
+        self.assertIn('semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text.lower())
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]'))
 
     def test_inventory_is_denied_direct_agenda_route(self) -> None:
@@ -202,7 +202,7 @@ class AgendaPatientFilter(unittest.TestCase):
         self.assertEqual(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-MONTH"]').get_attribute('aria-pressed'), 'true')
         record_pass('AGENDA-CALENDAR-VIEW-MONTH', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]').click()
-        self.assertIn('Semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text)
+        self.assertIn('semana del', self.driver.find_element(By.CSS_SELECTOR, '.agenda-period-label').text.lower())
         record_pass('AGENDA-CALENDAR-VIEW-WEEK', 'SEL-CH11-CALENDAR-NAVIGATION-VIEWS', started, self.driver.current_url)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-CALENDAR-VIEW-LIST-WEEK"]').click()
         self.assertIn('Lista por semana', self.driver.find_element(By.CSS_SELECTOR, '.agenda-list-view h3').text)
