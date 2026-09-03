@@ -8293,17 +8293,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La navegación observada lleva a antecedentes, signos vitales, perfiles y notas clínicas; los paneles y controles Agregar pueden revelar o modificar información clínica sin una fuente, contexto y autorización aprobados.",
+        "financial_impact": "No aplica; no se infieren coberturas, precios ni reglas financieras.",
+        "current_platform_evidence": "/clinical/reports conserva únicamente superficies locales vacías; no muestra navegación de Evaluación Clínica, paneles, controles Agregar ni contenido clínico.",
+        "test_path": "Precheck de evidencia CH17-E0024; futuras pruebas sólo después de aprobar fuente tenant-scoped y campos/roles bajo CH16-Q008, y definición, permisos, auditoría y versionado de antecedentes/alergias bajo CH17-Q002.",
+        "recommended_action": "Mantener navegación, paneles, controles Agregar, consultas y escrituras clínicas ausentes hasta contar con contratos aprobados de fuente, contexto, roles, auditoría, retención, minimización/redacción y formularios clínicos.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0024 muestra las siete subpestañas y paneles de Antecedentes/Evaluaciones con controles Agregar; no autoriza reutilizar hospitalizaciones, exponer contenido ni mutar datos clínicos."
       }
     },
     {

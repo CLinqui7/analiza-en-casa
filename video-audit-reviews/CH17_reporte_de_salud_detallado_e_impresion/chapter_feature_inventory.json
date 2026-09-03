@@ -157,7 +157,7 @@
       "description": "Evaluación Clínica separa antecedentes y evaluaciones, signos vitales, perfiles clínicos, notas de evolución, interconsultas, notas de enfermería y bitácoras.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -166,7 +166,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0024_00h51m37s200ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: recorrer las siete subpestañas y comprobar que preserven paciente, hospitalización y rango activo."
+      "test_path": "Precheck: CH17-E0024 fue abierto. No se implementan subpestañas, paneles, controles Agregar, consultas ni mutaciones hasta aprobar fuente/contexto/roles/campos/auditoría/retención/minimización/redacción (CH16-Q008) y formularios/permisos/versionado/auditoría de antecedentes y alergias (CH17-Q002)."
     },
     {
       "id": "CH17-F09",
