@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T19:55:49-06:00",
-  "metadata_generated_from_commit": "fc48a0ed1a849b335a3b6c7897153386f701c098",
+  "generated_at": "2026-09-02T20:01:08-06:00",
+  "metadata_generated_from_commit": "9b3a973e4c5548e2424faad32a11150843ac198d",
   "source_sha256": "97289834578dbea8bf880cfc0eccdff64605a3f04698da95e3f60406ab43b4cb",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8395,8 +8395,8 @@
         "CH17-Q002"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q002 no define formularios, catálogos, permisos de Agregar, reacción/estado, contradicción con No registrado, versionado, corrección ni auditoría para antecedentes, alergias y vacunas.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con Agregar. React no expone paneles, contenido, catálogos, formularios, controles Agregar, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "1bbec9f62b414e0da0c0e6468a6bfc8766f53504",
+      "notes": "Precheck factual verified at 1bbec9f62b414e0da0c0e6468a6bfc8766f53504: CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con Agregar. React no expone paneles, contenido, catálogos, formularios, controles Agregar, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F10",
@@ -8435,8 +8435,8 @@
         "CH17-Q002"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q002 no define catálogo autorizado, formularios, permisos de Agregar, reacción/estado, contradicción con No registrado, persistencia, versionado, corrección ni auditoría para alergias.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0029 muestra Alergias con No registrado, Seleccione, un segundo selector vacío y Agregar; CH17-E0030 muestra una lista de sustancias/medicamentos. React no expone catálogo, nombres de medicamentos, selector, estado, control Agregar, datos de pacientes, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "fc48a0ed1a849b335a3b6c7897153386f701c098",
+      "notes": "Precheck factual verified at fc48a0ed1a849b335a3b6c7897153386f701c098: CH17-E0029 muestra Alergias con No registrado, Seleccione, un segundo selector vacío y Agregar; CH17-E0030 muestra una lista de sustancias/medicamentos. React no expone catálogo, nombres de medicamentos, selector, estado, control Agregar, datos de pacientes, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F11",
