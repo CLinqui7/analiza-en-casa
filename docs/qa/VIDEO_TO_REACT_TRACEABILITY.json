@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:23:05-06:00",
-  "metadata_generated_from_commit": "0b961b7bd15ab063f317d98b56aa307973932dfb",
+  "generated_at": "2026-09-02T20:29:09-06:00",
+  "metadata_generated_from_commit": "740b6bde8177d078fda24602a7c1e9e2d980b638",
   "source_sha256": "c3fe4a891ccd0226d04a90f1ee1740d9c0fb15a3043ec1af4308739cbc5aeaf6",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8516,8 +8516,8 @@
         "CH17-Q010"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
+      "notes": "Precheck factual verified at 740b6bde8177d078fda24602a7c1e9e2d980b638: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F13",
