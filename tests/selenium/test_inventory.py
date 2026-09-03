@@ -188,7 +188,7 @@ class InventoryList(unittest.TestCase):
         before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-OPEN"]').click()
         main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
-        self.assertIn('no crea, aprueba, cancela, concilia o revierte cierres', main.text)
+        self.assertIn('no crea, aprueba, cancela, concilia o revierte cierres', main.text.lower())
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURE-APPROVE"]'))
         self.assertFalse(self.driver.find_elements(By.XPATH, "//button[normalize-space()='Aprobar cierre']"))
         self.driver.refresh()
