@@ -1,9 +1,9 @@
 {
   "lot": "GLOBAL_RELEASE_WARNING_REPAIR",
   "source_sha": "11be63c1eb4f35d9e2af0ddea1e43522be8d31ad",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "STATIC_GATES_VERIFIED_GIT_WRITE_PENDING",
-  "final_sha": null,
+  "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "verification_status": "STATIC_GATES_VERIFIED_AT_COMMITTED_SHA_RUNTIME_PENDING",
+  "final_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
   "remote_sha": null,
   "release_status": "NOT_READY_RUNTIME_EVIDENCE_PENDING",
   "global_complete": false,
@@ -28,13 +28,14 @@
   },
   "provenance": {
     "prior_committed_repair_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-    "current_functional_fingerprint": "746a641209229f684b0bd392abadfb1fa2a6901ae6e39d1fe1fa816219fe51c0",
-    "status": "PENDING_COMMIT: traceability/certification reflect the working-tree fingerprint and do not claim a new immutable verification SHA."
+    "current_functional_fingerprint": "c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1640f5a945f555",
+    "status": "STATIC_METADATA_REPAIRED_AT_COMMITTED_CODE_SHA: the warning repair is committed at 0e0626fccc8d464b98458c4a40bf185a992f2a90; regenerated parity output is Prettier-compliant and idempotent. CR-011, CR-012, and CR-017 now use current fingerprints but remain PENDING_RUNTIME_CERTIFICATION until a completed fresh focused runtime result exists."
   },
   "remaining_scoped_gaps": [
     "A completed fresh-server full Playwright exit result and protected CH01-CH03 final exit result remain required.",
     "Selenium runtime remains PENDING_RUNTIME because Python is unavailable.",
     "Existing video/client source, clinical, integration, and provider blockers are preserved without behavioral expansion."
   ],
+  "git_sync": "BLOCKED_ENVIRONMENT: git add cannot create .git/index.lock; git push has no schannel credentials; git fetch cannot write .git/FETCH_HEAD. No commit, push, remote SHA, or local/remote equality result is claimed.",
   "next_batch": "GLOBAL_RELEASE_RUNTIME_EVIDENCE"
 }

@@ -641,14 +641,14 @@
       "blocker_reason": "La asignación de médico a un honorario requiere elegibilidad profesional, fuente de precio, impuestos/descuentos, cálculo, liquidación, reversión y auditoría aprobados.",
       "client_question": "¿Qué médicos son elegibles, cuál es la fuente de honorario y cuáles son los roles, cálculos, impuestos, liquidación, reversión y auditoría autorizados?",
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "1c95ed0d3323ec1323540caaf188e3f405a90c05421f52526342efaa55193ecd",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+      "functional_fingerprint": "1adb34e6e30d8aeeff3d491e487aa78eed562b326c58fa062a02798654d9725f",
+      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Las siete categorías están en la UI React y se persisten sólo en el proveedor demo. La accesibilidad de selección cambió en 0e0626f; el runtime enfocado fresco y Selenium siguen pendientes, por lo que no se reemite DEMO_CERTIFIED."
     },
     {
       "change_id": "CR-012",
@@ -700,14 +700,14 @@
       "blocker_reason": "La UI demo persiste por navegador; la solicitud exige visibilidad entre usuarios autorizados, por organización, con RLS, refetch/Realtime y auditoría comprobables.",
       "client_question": "¿Qué proyecto de prueba, organizaciones y dos cuentas autorizadas se usarán para certificar creación, aislamiento y visibilidad multiusuario de pacientes?",
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "7cc1d518f5652c0e7fd7c12fd7e07182176094557f4acb4120eca68640fe6bd4",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+      "functional_fingerprint": "c6b3c0960cd2604e53b2d8df58b9624e889c7486139e2f991dd1ff63921ca7e5",
+      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "write_required": true,
       "multiuser_required": true,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. La accesibilidad de selección cambió en 0e0626f y requiere runtime enfocado fresco antes de reemitir DEMO_CERTIFIED; Selenium sigue pendiente."
     },
     {
       "change_id": "CR-013",
@@ -973,14 +973,14 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
-      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "ad98816bb448d957bc86178fc003db8dd0997dfd7d172cc891b72cc08470f223",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+      "functional_fingerprint": "ce4dd5fb2a5fc9b06a844fc9997eb8ad8cd705c90399addf9b97466a68015be5",
+      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
+      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador. La derivación de paciente cambió en 0e0626f y requiere runtime enfocado fresco antes de reemitir DEMO_CERTIFIED; Selenium sigue pendiente."
     },
     {
       "change_id": "CR-018",
