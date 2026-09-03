@@ -4,6 +4,15 @@ Fecha: 2026-08-26
 Rama: `codex/overnight-audit-hardening`
 Clasificación: `SYNTHETIC_DEMO`
 
+### Addendum · 2026-09-03 · Cierre reproducible de release
+
+- Implementación certificada: `58030d1419e179a4bc51145106c7314cb6417c6c`. Se corrigió una carrera de desmontaje en `PatientLocationMap`: Leaflet detiene cualquier animación pendiente y los cambios de coordenadas/zoom no animan cuando el diálogo puede cerrarse de inmediato. El flujo Playwright del editor compartido ahora comprueba explícitamente que no haya errores de página.
+- La regresión local pasó: Prettier, ESLint, TypeScript, 98 pruebas de dominio, 37 Vitest React, QA 76/76, modo claro, 32/32 cambios de cliente, trazabilidad video 210/210, espejo de trazabilidad, seguridad, límites React, build standalone, build Next, auditoría de video 17/17, Playwright 178/178 y Selenium 181/181. La cobertura Selenium declarada quedó en 334/334 (100%).
+- Los 17 capítulos fueron re-verificados sin editar la evidencia: 1,359 eventos con observaciones y receipts completos. `210/210` significa que todos los requisitos canónicos tienen trazabilidad estructural; no declara que los 210 estén `EXACT`. El desglose vigente es 52 `EXACT`, 85 `PARTIAL`, 20 `MISSING`, 8 `BLOCKED_CLIENT`, 3 `BLOCKED_INTEGRATION`, 40 `NOT_TESTABLE` y 2 `NOT_APPLICABLE`.
+- Preview Vercel listo: [web-nuexb31ir-clinqui7s-projects.vercel.app](https://web-nuexb31ir-clinqui7s-projects.vercel.app) (`dpl_AHQzRG5HXRM3SnmMLhKxxFpnC8LB`). El smoke autenticado de Vercel devolvió `/` 307, `/login` 200, `/dashboard` 200 y `/portal/demo-qt-2026-0148` 200. No se promovió producción. El artefacto preview omitió temporalmente el cron y configuró `apps/web/.next`; `vercel.json` versionado conserva su cron de producción intacto.
+- `npm run react:parity` conserva 37 gaps del baseline legado y por ello retorna no-cero. No es el gate de React/video actual; la separación de scopes y los bloqueos están documentados en `docs/qa/TRACEABILITY_SCOPE.md` y `docs/OPEN_QUESTIONS.md`.
+- `globalComplete` permanece `false`: faltan validación real de Supabase/RLS y proveedores, aprobaciones del cliente para contratos clínicos/financieros y un scheduler de 15 minutos autorizado para producción.
+
 ## 1. Resumen ejecutivo
 
 La rama entrega una aplicación ejecutable, evidencia de QA y documentación operativa. Se conservó intacta la evidencia de video y no se reabrió la auditoría completa: 17/17 capítulos, 1,359/1,359 observaciones y 17/17 receipts siguen verificando correctamente.
