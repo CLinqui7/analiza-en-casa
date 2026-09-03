@@ -260,7 +260,7 @@
       "description": "El menú ofrece Editar y la secuencia de seguridad muestra un área de texto editable con control de guardado; no se demuestra versión, motivo ni preservación del original.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -277,7 +277,7 @@
         }
       ],
       "transcript_evidence": "00:52:15.000–00:52:27.000: se describe editar y guardar para corregir errores ortográficos.",
-      "test_path": "Seguridad: una nota firmada sólo admite corrección autorizada con motivo, nueva versión y auditoría, preservando el original."
+      "test_path": "Precheck: E0048/safety_005 fueron abiertos. React no expone nota, editor, guardado, lectura, consulta ni mutación. Mantener MISSING hasta aprobar fuente/campos/roles (CH16-Q008), ciclo de nota (CH17-Q010) y corrección con motivo, original inmutable, versión de reemplazo y auditoría append-only (CH17-Q011)."
     },
     {
       "id": "CH17-F14",

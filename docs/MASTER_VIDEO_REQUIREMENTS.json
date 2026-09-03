@@ -8515,17 +8515,21 @@
           "observation": "Desde 00:52:14 el menú Editar abre una nota en un área de texto con icono de guardado."
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q010",
+        "CH17-Q011"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "La edición directa de una nota clínica sensible puede sobrescribir el original o eludir autorización, motivo, firma, versionado y auditoría; React no expone ninguna edición.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone una nota, editor, guardado, lectura clínica ni una fuente de hospitalizaciones.",
+        "test_path": "Precheck de evidencia CH17-E0048/safety_005; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar la fuente/roles/campos sensibles del Reporte de salud (CH16-Q008), el ciclo de vida de notas (CH17-Q010) y el contrato de corrección clínica inmutable (CH17-Q011).",
+        "blocked_by_client_information": true,
+        "notes": "E0048 y safety_005 muestran una afinidad visible de editar/guardar sobre contenido sensible, pero no autorizan lectura, edición, persistencia ni un reemplazo de versión. No se usa /clinical/hospitalizations como fuente o puente de autorización."
       }
     },
     {
@@ -10076,6 +10080,16 @@
       "evidence_event_ids": [
         "CH17-E0043",
         "CH17-E0046"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q011",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato autorizado de corrección de una Nota de enfermería: relación tenant-scoped de paciente/hospitalización, roles y precondición de firma, motivo obligatorio, preservación inmutable del original, nueva versión de reemplazo, manejo de errores o conflictos, auditoría append-only, retención, minimización y redacción? CH17-Q010 conserva el ciclo y campos de la nota; CH16-Q008 conserva fuente, roles y campos sensibles del Reporte de salud. E0048/safety_005 no autorizan editar ni guardar directamente.",
+      "evidence_event_ids": [
+        "CH17-E0048"
       ],
       "status": "OPEN"
     }

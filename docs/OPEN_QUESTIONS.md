@@ -240,6 +240,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - `CH17-Q010`: definir el contrato clínico autorizado de Notas de enfermería: fuente por organización y vínculo paciente/hospitalización, campos y contenido permitidos por rol, turno/recurso, ciclo de vida, firma, corrección/versionado, auditoría, retención, minimización y redacción. `CH17-Q001` controla selección por fila, contenido/formato/destino/autoridad de impresión y auditoría de salida; `CH16-Q008` conserva fuente tenant-scoped, roles y campos sensibles. Evidencia: CH17-E0043 y CH17-E0046, 00:52:08.400–00:52:09.800.
 
+- `CH17-Q011`: definir el contrato de corrección de una Nota de enfermería: relación tenant-scoped de paciente/hospitalización, roles y precondición de firma, motivo obligatorio, preservación inmutable del original, versión de reemplazo, conflictos, auditoría append-only, retención, minimización y redacción. `CH17-Q010` mantiene el ciclo y campos de la nota; `CH16-Q008` mantiene fuente, roles y campos sensibles del Reporte de salud. Evidencia: CH17-E0048 y safety_005, 00:52:14.800–00:52:29.000.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.
