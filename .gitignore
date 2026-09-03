@@ -27,3 +27,4 @@ Thumbs.db
 
 # Local review scratch, keep committed review ledgers/results only
 video-audit-reviews/**/scratch/
+.vercel

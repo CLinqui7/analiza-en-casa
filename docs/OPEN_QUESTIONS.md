@@ -300,3 +300,4 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 ## Deployment
 
 - Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.
+- `AUTOMATIC_SCHEDULER_PENDING_EXTERNAL_CONFIGURATION`: el preview de Vercel se despliega con `vercel.preview.json`, que omite únicamente el scheduler de 15 minutos bloqueado por el plan Hobby. Producción debe conservar `vercel.json` y requiere Vercel Pro o un scheduler externo aprobado antes de certificar reintentos automáticos.
