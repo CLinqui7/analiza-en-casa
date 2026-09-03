@@ -4,6 +4,14 @@ Fecha: 2026-08-26
 Rama: `codex/overnight-audit-hardening`
 Clasificación: `SYNTHETIC_DEMO`
 
+### Addendum · 2026-09-03 · Dependency hardening and recertification
+
+- Implementation `4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce` removes the vulnerable direct production dependency `xlsx`. Patient export preserves the `pacientes-activos.xlsx`/`pacientes-inactivos.xlsx` filename, `Pacientes` sheet and seven columns; it creates the minimal OOXML container with `fflate`, with no formulas originating in data. The focused Playwright test inspects the generated archive and `npm audit --omit=dev` reports 0 vulnerabilities.
+- The release was recertified: preflight, security, format, lint, types, 98 domain tests, 37 React Vitest tests, QA 76/76, light mode, client changes 32/32, video 210/210, audit 17/17, React boundaries, builds, performance, root Playwright 43/43, React Playwright 178/178 and Selenium 181/181. Declared Selenium coverage is 334/334 (100%); it is not presented as action-runtime telemetry.
+- The 17-chapter evidence remains immutable and verified. Parity remains 52 `EXACT`, 85 `PARTIAL`, 20 `MISSING`, 8 `BLOCKED_CLIENT`, 3 `BLOCKED_INTEGRATION`, 40 `NOT_TESTABLE` and 2 `NOT_APPLICABLE`; 210/210 certifies traceability, not total feature equivalence.
+- Final mobile-patients and desktop-health-report screenshots were visually checked: no unintended horizontal overflow. A new Vercel preview must be created and verified from the certification commit after push; production will not be promoted.
+- `globalComplete` remains `false`. Real Supabase/RLS and provider validation, client approval of clinical/financial contracts, and an authorized 15-minute production scheduler are still required.
+
 ### Addendum · 2026-09-03 · Cierre reproducible de release
 
 - Implementación certificada: `58030d1419e179a4bc51145106c7314cb6417c6c`. Se corrigió una carrera de desmontaje en `PatientLocationMap`: Leaflet detiene cualquier animación pendiente y los cambios de coordenadas/zoom no animan cuando el diálogo puede cerrarse de inmediato. El flujo Playwright del editor compartido ahora comprueba explícitamente que no haya errores de página.

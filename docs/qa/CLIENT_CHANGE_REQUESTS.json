@@ -57,8 +57,8 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -114,8 +114,8 @@
       "blocker_reason": "La UI y el contrato existen en modo demo, pero la certificación de persistencia por organización requiere un proyecto Supabase de prueba con RLS y dos sesiones autorizadas.",
       "client_question": "¿Qué proyecto de prueba, organizaciones y cuentas de dos roles autorizados se usarán para certificar RLS y visibilidad multiusuario del Carnet de residente?",
       "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
-      "implementation_sha": null,
-      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -161,7 +161,9 @@
         "PATIENT-EXPORT-XLSX"
       ],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch01-xlsx-export"
+      ],
       "selenium_test_ids": [
         "SEL-PAT-EXPORT"
       ],
@@ -172,14 +174,14 @@
       "blocker_reason": "La exportación local respeta la vista filtrada/ordenada, pero no existe una definición aprobada del conjunto completo autorizado, columnas, destinatarios, formato ni auditoría de exportación de pacientes.",
       "client_question": "¿Qué pacientes, columnas, orden, formato, destinatarios y evidencia de auditoría están autorizados para una exportación completa?",
       "acceptance_criteria": "Definir alcance y exportar pacientes autorizados ordenados",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "04ca99b81c0ba3cfaf2ea0538c1973a13aa7b288582ae17069e8623279aadd8b",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "CSV/XLSX exporta la vista filtrada/ordenada, no el conjunto autorizado completo."
+      "notes": "CSV/XLSX exporta la vista filtrada/ordenada; la descarga XLSX se verifica como paquete OOXML y no evalúa el conjunto autorizado completo."
     },
     {
       "change_id": "CR-004",

@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-03T12:08:50.761Z",
+  "generated_at": "2026-09-03T14:02:30.386Z",
   "passed": true,
-  "files": 6898,
-  "total_mib": 522.61,
+  "files": 6899,
+  "total_mib": 522.64,
   "largest_file": {
     "size": 9031144,
     "file": "references\\video-audit\\chapters\\CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits\\chapter_video_exact_reference.mp4"

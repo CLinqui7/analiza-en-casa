@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
+  "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -13,8 +13,8 @@
       "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
     },
     "CR-002": {
-      "implementation_sha": null,
-      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr002-resident-card"
@@ -22,13 +22,14 @@
       "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
     },
     "CR-003": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "04ca99b81c0ba3cfaf2ea0538c1973a13aa7b288582ae17069e8623279aadd8b",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "test_ids": [
+        "playwright:ch01-xlsx-export",
         "SEL-PAT-EXPORT"
       ],
-      "notes": "CSV/XLSX exporta la vista filtrada/ordenada, no el conjunto autorizado completo."
+      "notes": "CSV/XLSX exporta la vista filtrada/ordenada; la descarga XLSX se verifica como paquete OOXML y no evalúa el conjunto autorizado completo."
     },
     "CR-004": {
       "implementation_sha": null,
