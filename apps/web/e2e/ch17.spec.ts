@@ -21,7 +21,7 @@ test('CH17 keeps the visible report anatomy empty until its sensitive-data bound
   await expect(page.locator('[data-action-id="HEALTH-REPORT-SEARCH"]')).toBeDisabled();
   await expect(page.locator('[data-action-id="HEALTH-REPORT-PAGE-PREV"]')).toBeDisabled();
   await expect(page.locator('[data-action-id="HEALTH-REPORT-PAGE-NEXT"]')).toBeDisabled();
-  await expect(page.getByText('CH16-Q008')).toBeVisible();
+  await expect(page.locator('#health-report-data-boundary')).toContainText('CH16-Q008');
 
   await page.reload();
   await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
@@ -71,5 +71,54 @@ test('CH17 permits DOCTOR to open the empty action menu but denies FINANCE the d
   await login(finance, 'finance@demo.local', 'demo-finance');
   await expect(finance.locator('main[role="alert"]')).toContainText('FINANCE');
   await expect(finance.locator('[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]')).toHaveCount(0);
+  await finance.close();
+});
+
+// test-id: playwright:ch17-health-report-empty-sections
+test('CH17 switches only the six observed empty report sections without loading clinical data', async ({ page }) => {
+  await login(page, 'admin@demo.local', 'demo-admin');
+  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const information = page.locator('[data-action-id="HEALTH-REPORT-SECTION-INFORMATION"]');
+  const clinical = page.locator('[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]');
+  const medical = page.locator('[data-action-id="HEALTH-REPORT-SECTION-MEDICAL"]');
+  const treatments = page.locator('[data-action-id="HEALTH-REPORT-SECTION-TREATMENTS"]');
+  const events = page.locator('[data-action-id="HEALTH-REPORT-SECTION-EVENTS"]');
+  const evidence = page.locator('[data-action-id="HEALTH-REPORT-SECTION-EVIDENCE"]');
+
+  await expect(information).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Información Principal: sin contenido autorizado');
+  await clinical.click();
+  await expect(clinical).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Evaluación Clínica: sin contenido autorizado');
+  await medical.click();
+  await expect(medical).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Atención Médica: sin contenido autorizado');
+  await treatments.click();
+  await expect(treatments).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Tratamientos y Órdenes: sin contenido autorizado');
+  await events.click();
+  await expect(events).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Eventos Clínicos: sin contenido autorizado');
+  await evidence.click();
+  await expect(evidence).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('Evidencia y Documentos: sin contenido autorizado');
+  await expect(page.locator('#health-report-sections-boundary')).toContainText('CH16-Q008');
+
+  await page.reload();
+  await expect(information).toHaveAttribute('aria-selected', 'true');
+  expect(await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+});
+
+test('CH17 permits DOCTOR to switch an empty report section but denies FINANCE the control', async ({ browser }) => {
+  const doctor = await browser.newPage();
+  await login(doctor, 'doctor@demo.local', 'demo-doctor');
+  await doctor.locator('[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]').click();
+  await expect(doctor.getByRole('tabpanel')).toContainText('Evaluación Clínica: sin contenido autorizado');
+  await doctor.close();
+
+  const finance = await browser.newPage();
+  await login(finance, 'finance@demo.local', 'demo-finance');
+  await expect(finance.locator('main[role="alert"]')).toContainText('FINANCE');
+  await expect(finance.locator('[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]')).toHaveCount(0);
   await finance.close();
 });

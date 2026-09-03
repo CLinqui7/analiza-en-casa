@@ -1,0 +1,33 @@
+{
+  "lot": "CH17_F03_PRECHECK",
+  "source_sha": "c30ff0f78988b35bec1c26300ee6eddad412cf49",
+  "base_sha": "c30ff0f78988b35bec1c26300ee6eddad412cf49",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "implemented_partial": ["CH17-F03"],
+    "runtime_unverified": ["CH17-F01", "CH17-F02", "CH17-F03"],
+    "explicitly_blocked": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+  },
+  "evidence": {
+    "f03": "CH17-E0008 event frame was opened. It establishes only the six visible section labels: Información Principal, Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos, and Evidencia y Documentos."
+  },
+  "gates": {
+    "typecheck": "PASS: npm.cmd run typecheck --workspace=@analiza/web",
+    "playwright_ch17": "PASS: PLAYWRIGHT_PORT=4205 npx playwright test -c apps/web/playwright.config.ts e2e/ch17.spec.ts (6 passed).",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_health_report.py declares executable action-specific source coverage.",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16 and CH03 13/13 self-checks.",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters)."
+  },
+  "blockers": [
+    "CH16-Q008 blocks source data, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction for every report section.",
+    "No patient selector, insurance, hospitalization, clinical data, audit data, document, date range, print control or destination behavior was implemented.",
+    "CH17-Q007 and CR-020 remain unrelated scoped blockers and were not implemented."
+  ],
+  "next_batch": "CH17_REVIEW"
+}

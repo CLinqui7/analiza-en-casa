@@ -8077,18 +8077,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+        "open_question_ids": [
+          "CH16-Q008"
+        ],
+        "platform_assessment": {
+          "status": "IMPLEMENTED_PARTIAL",
+          "priority": "P1",
+          "patient_safety_impact": "Las seis secciones pueden exponer identidad, seguros, hospitalización, contenido clínico, auditoría y documentos; no se consulta ninguna fuente sin CH16-Q008.",
+          "financial_impact": "No se muestran Claims, seguros, pólizas, coberturas ni información financiera.",
+          "current_platform_evidence": "/clinical/reports reproduce sólo las seis pestañas visibles y estados vacíos locales. No contiene selector de paciente, rango, impresión, campos, seguros, hospitalización, auditoría ni documentos.",
+          "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: alternancia local de cada pestaña, recarga sin auditoría y guardas de ruta.",
+          "recommended_action": "Mantener las pestañas como anatomía vacía hasta que CH16-Q008 apruebe fuente, alcance por organización, campos, roles, filtros, minimización, auditoría y retención.",
+          "blocked_by_client_information": true,
+          "notes": "CH17-E0008 respalda los seis nombres y la anatomía de pestañas, no la autorización ni el contenido de cada sección."
+        }
     },
     {
       "requirement_id": "CH17-F04",

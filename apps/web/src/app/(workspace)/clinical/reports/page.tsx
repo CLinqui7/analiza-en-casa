@@ -15,8 +15,21 @@ const reportColumns = [
   'Estatus',
 ];
 
+const reportSections = [
+  { id: 'information', label: 'Información Principal', actionId: 'HEALTH-REPORT-SECTION-INFORMATION' },
+  { id: 'clinical', label: 'Evaluación Clínica', actionId: 'HEALTH-REPORT-SECTION-CLINICAL' },
+  { id: 'medical', label: 'Atención Médica', actionId: 'HEALTH-REPORT-SECTION-MEDICAL' },
+  { id: 'treatments', label: 'Tratamientos y Órdenes', actionId: 'HEALTH-REPORT-SECTION-TREATMENTS' },
+  { id: 'events', label: 'Eventos Clínicos', actionId: 'HEALTH-REPORT-SECTION-EVENTS' },
+  { id: 'evidence', label: 'Evidencia y Documentos', actionId: 'HEALTH-REPORT-SECTION-EVIDENCE' },
+] as const;
+
+type ReportSectionId = (typeof reportSections)[number]['id'];
+
 export default function HealthReportPage() {
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<ReportSectionId>('information');
+  const activeSection = reportSections.find((section) => section.id === selectedSection) ?? reportSections[0];
 
   return (
     <div className="page-stack">
@@ -84,6 +97,44 @@ export default function HealthReportPage() {
               <li aria-disabled="true" role="menuitem">Registro XPO</li>
             </ul>
           ) : null}
+        </section>
+      </Panel>
+
+      <Panel>
+        <section aria-labelledby="health-report-sections-title">
+          <h2 id="health-report-sections-title">Secciones observadas del reporte</h2>
+          <p className="notice" id="health-report-sections-boundary" role="status">
+            Las pestañas reproducen sólo la navegación visible. No cargan Información Principal,
+            Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos ni Evidencia y
+            Documentos porque CH16-Q008 no autoriza una fuente ni campos de reporte.
+          </p>
+          <div aria-label="Secciones observadas del reporte de salud" role="tablist">
+            {reportSections.map((section) => (
+              <button
+                aria-controls={`health-report-section-${section.id}`}
+                aria-describedby="health-report-sections-boundary"
+                aria-selected={selectedSection === section.id}
+                data-action-id={section.actionId}
+                id={`health-report-tab-${section.id}`}
+                key={section.id}
+                onClick={() => setSelectedSection(section.id)}
+                role="tab"
+                type="button"
+              >
+                {section.label}
+              </button>
+            ))}
+          </div>
+          <div
+            aria-labelledby={`health-report-tab-${activeSection.id}`}
+            id={`health-report-section-${activeSection.id}`}
+            role="tabpanel"
+          >
+            <EmptyState
+              detail="No se consulta ni reutiliza información de pacientes, hospitalizaciones, seguros, datos clínicos, auditorías o documentos."
+              title={`${activeSection.label}: sin contenido autorizado`}
+            />
+          </div>
         </section>
       </Panel>
 

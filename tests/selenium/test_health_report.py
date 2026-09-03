@@ -133,3 +133,69 @@ class Ch17HealthReportEmptySurface(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('FINANCE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]'))
+
+    # test-id: SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS
+    def test_admin_switches_each_observed_empty_section_without_audit_mutation(self) -> None:
+        self.login('admin@demo.local', 'demo-admin')
+        self.wait.until(conditions.url_contains('/clinical/reports'))
+        audit_before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        information = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-INFORMATION"]')
+        clinical = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]')
+        medical = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-MEDICAL"]')
+        treatments = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-TREATMENTS"]')
+        events = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-EVENTS"]')
+        evidence = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-EVIDENCE"]')
+        panel = self.driver.find_element(By.CSS_SELECTOR, '[role="tabpanel"]')
+        self.assertEqual('true', information.get_attribute('aria-selected'))
+        self.assertIn('Información Principal: sin contenido autorizado', panel.text)
+
+        clinical_started = time.time()
+        clinical.click()
+        self.assertEqual('true', clinical.get_attribute('aria-selected'))
+        self.assertIn('Evaluación Clínica: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-CLINICAL', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', clinical_started, self.driver.current_url)
+
+        medical_started = time.time()
+        medical.click()
+        self.assertEqual('true', medical.get_attribute('aria-selected'))
+        self.assertIn('Atención Médica: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-MEDICAL', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', medical_started, self.driver.current_url)
+
+        treatments_started = time.time()
+        treatments.click()
+        self.assertEqual('true', treatments.get_attribute('aria-selected'))
+        self.assertIn('Tratamientos y Órdenes: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-TREATMENTS', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', treatments_started, self.driver.current_url)
+
+        events_started = time.time()
+        events.click()
+        self.assertEqual('true', events.get_attribute('aria-selected'))
+        self.assertIn('Eventos Clínicos: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-EVENTS', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', events_started, self.driver.current_url)
+
+        evidence_started = time.time()
+        evidence.click()
+        self.assertEqual('true', evidence.get_attribute('aria-selected'))
+        self.assertIn('Evidencia y Documentos: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-EVIDENCE', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', evidence_started, self.driver.current_url)
+
+        information_started = time.time()
+        information.click()
+        self.assertEqual('true', information.get_attribute('aria-selected'))
+        self.assertIn('Información Principal: sin contenido autorizado', panel.text)
+        record_pass('HEALTH-REPORT-SECTION-INFORMATION', 'SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS', information_started, self.driver.current_url)
+
+        self.driver.refresh()
+        self.assertEqual('true', self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-INFORMATION"]').get_attribute('aria-selected'))
+        self.assertEqual(audit_before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+
+    def test_doctor_can_switch_empty_section_and_finance_is_denied_direct_route(self) -> None:
+        self.login('doctor@demo.local', 'demo-doctor')
+        self.wait.until(conditions.url_contains('/clinical/reports'))
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]').click()
+        self.assertIn('Evaluación Clínica: sin contenido autorizado', self.driver.find_element(By.CSS_SELECTOR, '[role="tabpanel"]').text)
+
+        self.login('finance@demo.local', 'demo-finance')
+        denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
+        self.assertIn('FINANCE', denied.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]'))

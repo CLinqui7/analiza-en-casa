@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T17:42:55-06:00",
-  "metadata_generated_from_commit": "77cd08e6bd24ede7fbe97dc0d2ec395fd81e665d",
-  "source_sha256": "79729e722cec0037e5c7d0d352fe9148f2d3342b490ab0c33095c3511c41fcda",
+  "generated_at": "2026-09-02T17:59:01-06:00",
+  "metadata_generated_from_commit": "c30ff0f78988b35bec1c26300ee6eddad412cf49",
+  "source_sha256": "83147d2f3dc55be261a334ce1b6409f3b4daa1c13ad723c97cb6b7bd409c1167",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "functional_fingerprint": "56dbb24917c41b742a009efa109456678707d515e7fef049c146674034288921",
+  "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -8123,28 +8123,45 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0008_00h51m16s600ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+      "open_question_ids": [
+        "CH16-Q008"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
+      "react_files": [
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
+      ],
+      "component_ids": [
+        "HEALTH-REPORT-EMPTY-SECTIONS"
+      ],
+      "action_ids": [
+        "HEALTH-REPORT-SECTION-INFORMATION",
+        "HEALTH-REPORT-SECTION-CLINICAL",
+        "HEALTH-REPORT-SECTION-MEDICAL",
+        "HEALTH-REPORT-SECTION-TREATMENTS",
+        "HEALTH-REPORT-SECTION-EVENTS",
+        "HEALTH-REPORT-SECTION-EVIDENCE"
+      ],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
+      "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:ch17-health-report-empty-sections"
+      ],
+      "selenium_test_ids": [
+        "SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS"
+      ],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008"
+      ],
+      "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, retención, minimización ni redacción de ninguna sección del Reporte de salud.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "CH17-E0008 respalda sólo las seis pestañas visibles. React alterna estados vacíos locales sin selector, paciente, seguro, hospitalización, datos clínicos, auditoría, documentos, rango temporal, impresión ni navegación de destino. Playwright completó 6/6, pero la evidencia sigue sin SHA inmutable y no autoriza certificar fuente, permisos o rendimiento."
     },
     {
       "requirement_id": "CH17-F04",
