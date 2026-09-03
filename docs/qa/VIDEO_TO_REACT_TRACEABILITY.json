@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T21:35:53-06:00",
-  "metadata_generated_from_commit": "bad81e5bf6590eeefa1a5a1c3a2425a4f8503c76",
-  "source_sha256": "faff2c169845b729a78144eb6cf8d496eefc0c65d0361a531542d394aa3f6d6b",
+  "generated_at": "2026-09-02T21:44:57-06:00",
+  "metadata_generated_from_commit": "e3f6981592fd59a1c8063a19fe1a7a23ede13adb",
+  "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [

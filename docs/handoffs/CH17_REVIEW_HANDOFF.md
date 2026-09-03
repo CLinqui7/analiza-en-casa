@@ -1,9 +1,13 @@
-# CH17 review: F04-F16 boundary consolidation
+# CH17 review
 
-F01-F03 remain safe local empty surfaces with completed focused regression evidence, but their source, role, and performance contracts are unverified. F04-F06 and F08-F13 remain `MISSING`; F07 and F14-F17 remain `NOT_TESTABLE`. No sensitive clinical report data, patient/hospitalization bridge, print/export, note editor, AI transfer, role control, nursing operation, or clinical write was added.
+CH17 is reconciled without adding clinical data, clinical navigation, range selection, printing/export, editing, AI, nursing-operation, or WhatsApp delivery behavior.
 
-F13 remains `MISSING` under CH16-Q008, CH17-Q010, and CH17-Q011. F14 remains `NOT_TESTABLE` under CH17-Q003, F15 under CH17-Q005, and F16 under CH17-Q006. CH09-F03 remains independently `PARTIAL` at `/clinical/hospitalizations`; CR-020 remains separately blocked for fluid balance.
+- `PARTIAL`: F01–F03 remain only safe local empty anatomy.
+- `MISSING`: F04–F06 and F08–F13 remain blocked by the recorded sensitive-data, temporal, print, clinical-note, vital-sign, and correction contracts.
+- `NOT_TESTABLE`: F07 and F14–F17 remain blocked by missing print, AI, role/correction, nursing-operation, and external-delivery contracts.
 
-Next: `CH17_F17_WHATSAPP_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK`. The verbal statement about sending a nursing note externally does not establish a UI, recipient, authorization, consent, secure delivery, expiry/revocation, minimization, audit, retention, or redaction contract. No WhatsApp control, external request, notification, or clinical-content preview is authorized.
+The review repaired F17's canonical linkage to `CH17-Q004` and restored CH06-F02, which must not carry an unrelated WhatsApp boundary. CH09-F03 remains independent at `/clinical/hospitalizations`; CR-020 remains a separate future fluid-balance approval block.
 
-Static review gates passed: traceability generation/mirror, CH17 and protected parity, light mode, audit verification, and the focused anti-skip scan. Manual Git synchronization is blocked by the environment: the index lock and `FETCH_HEAD` cannot be written, and HTTPS has no credential. Local HEAD and cached origin both remain `91186f12240027f2a6715f2221867bbc1395ee7b`.
+No additional safe CH17 UI work remains. Static gates passed; immutable-SHA provenance remains pending the required commit. Next batch: `GLOBAL_RELEASE_PRECHECK`.
+
+Git synchronization is blocked by the environment: `git add` cannot create `.git/index.lock` and `git fetch` cannot open `.git/FETCH_HEAD` (both Permission denied). No commit or push was falsely claimed; local HEAD and cached `origin/codex/react-full-parity-selenium-100` are both `e3f6981592fd59a1c8063a19fe1a7a23ede13adb`.

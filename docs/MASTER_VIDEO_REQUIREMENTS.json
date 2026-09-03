@@ -3145,7 +3145,7 @@
       "chapter_id": "CH06",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "rule_or_limit": "CH17-Q004 bloquea cualquier compartición externa de una nota de enfermería hasta aprobar consentimiento, destinatario autorizado, enlace seguro expirable/revocable, minimización/redacción, resultado de entrega, auditoría y retención.",
+      "rule_or_limit": "",
       "evidence": [
         {
           "chapter_id": "CH06",
@@ -3153,13 +3153,11 @@
           "timestamp": "00:12:34.800",
           "path": "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/detail_crops/CH06-E0053_00h12m34s800ms_DETAIL.jpg",
           "detail_path": "",
-          "transcript": "00:54:00.000–00:54:23.560 afirma verbalmente que una nota de enfermería podía mandarse por WhatsApp al médico.",
-          "observation": "CH17-E0048 fue abierto: muestra contexto de Reporte de salud, pero ningún control, destinatario, vista previa ni resultado de WhatsApp. La afirmación de compartir existe sólo en la transcripción."
+      "transcript": "",
+      "observation": ""
         }
       ],
-      "open_question_ids": [
-        "CH17-Q004"
-      ],
+      "open_question_ids": [],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
@@ -8651,7 +8649,7 @@
       "chapter_id": "CH17",
       "classification": "VERBAL",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q004 bloquea cualquier compartición externa de una nota de enfermería hasta aprobar consentimiento, destinatario autorizado, enlace seguro expirable/revocable, minimización/redacción, resultado de entrega, auditoría y retención.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8659,21 +8657,23 @@
           "timestamp": "00:52:14.800",
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg",
           "detail_path": "",
-          "transcript": "",
-          "observation": ""
+          "transcript": "00:54:00.000–00:54:23.560 afirma verbalmente que una nota de enfermería podía mandarse por WhatsApp al médico.",
+          "observation": "CH17-E0048 fue abierto: muestra contexto de Reporte de salud, pero ningún control, destinatario, vista previa ni resultado de WhatsApp. La afirmación de compartir existe sólo en la transcripción."
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q004"
+      ],
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Una entrega externa de una nota clínica sensible sin consentimiento, destinatario autorizado, minimización y controles revocables puede revelar contenido de salud.",
+        "financial_impact": "Sin impacto financiero directo demostrado.",
+        "current_platform_evidence": "/clinical/reports no expone nota, control de WhatsApp, destinatario, vista previa ni solicitud externa. Los controles de WhatsApp de cotizaciones y seguros están bloqueados por proveedor y excluyen contenido clínico; no son una ruta reutilizable.",
+        "test_path": "Abrir CH17-E0048 y revisar transcript_raw.txt 00:54:00.000–00:54:23.560; inspeccionar /clinical/reports y los controles bloqueados QUOTE-WHATSAPP e INSURANCE-WHATSAPP sin ejecutar entrega.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q004. Cualquier diseño futuro requiere consentimiento explícito, validación de destinatario autorizado por organización, enlace seguro expirable y revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención; no debe incluir contenido clínico en vista previa o mensaje.",
+        "blocked_by_client_information": true,
+        "notes": "Precheck factual: el frame no muestra interfaz de WhatsApp y la transcripción sólo afirma una compartición. No se agrega control, consulta de destinatario, vista previa, solicitud externa ni puente desde hospitalizaciones."
       }
     }
   ],
