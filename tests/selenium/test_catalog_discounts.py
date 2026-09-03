@@ -63,8 +63,12 @@ class DiscountsCatalog(unittest.TestCase):
         self.driver.get(f'{BASE}/login?next=%2Fcatalogs%2Fdiscounts')
         self.driver.execute_script('localStorage.clear()')
         self.driver.refresh()
-        self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input"))).send_keys(email)
-        self.driver.find_element(By.CSS_SELECTOR, 'input[type=password]').send_keys(password)
+        email_field = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input")))
+        email_field.clear()
+        email_field.send_keys(email)
+        password_field = self.driver.find_element(By.CSS_SELECTOR, 'input[type=password]')
+        password_field.clear()
+        password_field.send_keys(password)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]').click()
 
     def test_admin_searches_factual_empty_matrix_without_audit_mutation(self) -> None:

@@ -29,7 +29,7 @@ class Purchases(unittest.TestCase):
   if SERVER: SERVER.terminate()
  def login(self,email,password):
   self.driver.get(f'{BASE}/login?next=%2Fpurchases'); self.driver.execute_script('localStorage.clear()'); self.driver.refresh()
-  self.wait.until(conditions.visibility_of_element_located((By.XPATH,"//label[contains(., 'Usuario')]//input"))).send_keys(email); self.driver.find_element(By.CSS_SELECTOR,'input[type=password]').send_keys(password); self.driver.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); self.wait.until(conditions.url_contains('/purchases'))
+  email_field=self.wait.until(conditions.visibility_of_element_located((By.XPATH,"//label[contains(., 'Usuario')]//input"))); email_field.clear(); email_field.send_keys(email); password_field=self.driver.find_element(By.CSS_SELECTOR,'input[type=password]'); password_field.clear(); password_field.send_keys(password); self.driver.find_element(By.CSS_SELECTOR,'[data-action-id="AUTH-LOGIN"]').click(); self.wait.until(conditions.url_contains('/purchases'))
  def test_admin_search_and_disabled_excel_do_not_mutate(self):
   started=time.time(); self.login('admin@demo.local','demo-admin'); before=self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
   self.driver.find_element(By.CSS_SELECTOR,'[data-action-id="PURCHASE-LIST-SEARCH"]').send_keys('sin-compra-ch13'); empty=self.driver.find_element(By.CSS_SELECTOR,'tbody .empty-state'); self.assertIn('Sin compras documentadas',empty.text); self.assertIn('sin-compra-ch13',empty.text); record_pass('PURCHASE-LIST-SEARCH','SEL-CH13-PURCHASE-LIST',started,self.driver.current_url)
