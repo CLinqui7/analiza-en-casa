@@ -2,10 +2,10 @@
   "lot": "CH17_F11_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
   "source_sha": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
   "base_sha": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
+  "remote_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
   "requirements": {
     "missing": ["CH17-F11"],
     "explicitly_blocked": ["CH16-Q008", "CH17-Q009"],
@@ -32,7 +32,7 @@
     "f04_f10_regression": "PASS: F04-F06/F08-F10 remain MISSING, F07 remains NOT_TESTABLE, and no application code changed.",
     "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002; F11 alone maps to /clinical/reports with CH16-Q008/CH17-Q009.",
     "selenium_runtime": "NOT_APPLICABLE: F11 has no implemented action; no Selenium runtime claim is made.",
-    "git_sync": "PENDING_RUNTIME_RESULT"
+    "git_sync": "PASS: implementation checkpoint dae09855e9f10dbebf231a98e449d1dc62970839 is committed and matches origin/codex/react-full-parity-selenium-100; cdeae7a50449e0e08bf60512df7ad763e6f2a583 remains the precheck base SHA."
   },
   "next_batch": "CH17_REVIEW"
 }

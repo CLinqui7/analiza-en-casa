@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:07:12-06:00",
-  "metadata_generated_from_commit": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
+  "generated_at": "2026-09-02T20:14:30-06:00",
+  "metadata_generated_from_commit": "dae09855e9f10dbebf231a98e449d1dc62970839",
   "source_sha256": "757c589bcb233ec58d856cd93e118690cab6200c6122f6dcc4b6b377e331f4a9",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8474,8 +8474,8 @@
         "CH17-Q009"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
+      "notes": "Precheck factual verified at dae09855e9f10dbebf231a98e449d1dc62970839: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F12",
