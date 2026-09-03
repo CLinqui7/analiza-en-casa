@@ -8,7 +8,7 @@
       "description": "Reporte de salud lista hospitalizaciones por periodo con estado de auditoría, triage Estable o Comprometido y estatus activo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "MISSING",
+      "current_platform_status": "NOT_TESTABLE",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -94,7 +94,7 @@
       "description": "El reporte presenta identidad, fecha de nacimiento, edad, sexo, periodo de hospitalización, estado, tipo de paciente, tipo de módulo y adicional.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",

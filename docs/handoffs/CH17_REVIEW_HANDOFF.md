@@ -6,4 +6,6 @@ F01–F03 remain the only safe local surfaces: empty anatomy only, with no patie
 
 F04 was reconciled at `98840f19538f15efa4ee6f85e8f864ba753478fc`: CH17-E0012 is only the double-calendar anatomy with example dates, CH17-E0017 is the processing overlay, and CH17-E0019 shows the sensitive result. It remains `MISSING` under CH16-Q008 and CH17-Q008; no calendar or report query exists.
 
-Next: `CH17_F05_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK`; it may document the patient-information source and access boundary from CH17-E0019 but must not render report fields or retrieve report data.
+F05 was reconciled at `7214fe01af9545cac5dc6e269b594ecf946a35ba`: CH17-E0019 exposes principal patient and hospitalization fields, but `/clinical/hospitalizations` is not an authorized source for `/clinical/reports`. F05 remains `MISSING` under CH16-Q008. CH09-F03 remains independently mapped to `/clinical/hospitalizations` as `PARTIAL` with no CH16-Q008 blocker.
+
+Next: `CH17_F06_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK`; CH17-E0021 shows insurance and print-selection fields, which must remain absent until a tenant-scoped source, role/field policy, print-output, audit, retention, minimization, and redaction contract is approved.
