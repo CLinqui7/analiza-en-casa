@@ -59,6 +59,7 @@ class ClinicalHospitalizationList(unittest.TestCase):
         search.send_keys('sin-coincidencia-ch09')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='Sin hospitalizaciones coincidentes']")))
         search.clear()
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')))
         patient_filter = self.d.find_element(By.CSS_SELECTOR, '[data-action-id="CLINICAL-HOSPITALIZATION-PATIENT-COLUMN-FILTER"]')
         patient_filter.send_keys('Aurora')
         matching_detail = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')))
