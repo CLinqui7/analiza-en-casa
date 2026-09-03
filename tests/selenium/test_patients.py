@@ -163,7 +163,7 @@ class Patients(unittest.TestCase):
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Registro sintético agregado')]")))
   s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1')))
   search=s.a('PATIENT-SEARCH'); search.send_keys(Keys.CONTROL,'a'); search.send_keys(Keys.BACKSPACE); search.send_keys('CONTACT-DOC-SEL-001')
-  s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Contacto Documento Selenium')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  row=s.w.until(EC.visibility_of_element_located((By.XPATH,"//tbody/tr[contains(.,'Paciente Contacto Documento Selenium')]"))); row.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DETAIL-NAVIGATE"]').click(); s.w.until(EC.url_contains('/patients/'))
   s.assert_detail_contains('DUI','CONTACT-DOC-SEL-001')
   s.click('PATIENT-EDIT'); s.w.until(EC.url_contains('edit=')); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))
   s.assertEqual(Select(s.d.find_element(By.CSS_SELECTOR,'select[name="contacts.0.documentType"]')).first_selected_option.get_attribute('value'),'DUI')
