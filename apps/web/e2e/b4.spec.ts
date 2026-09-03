@@ -29,6 +29,9 @@ test('a manual doctor fee keeps its selected doctor after save and reload', asyn
   await page.goto('/quotes');
   await page.getByRole('button', { name: '+ Nuevo' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
+  await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
+  await dialog.getByLabel('Referido por').fill('Amigos');
+  await dialog.getByRole('option', { name: 'Amigos & Familia' }).click();
   await dialog.getByLabel('Resumen operativo').fill('Honorario médico B4');
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   const doctor = dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]');
@@ -40,7 +43,7 @@ test('a manual doctor fee keeps its selected doctor after save and reload', asyn
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.getByText(`Médico: ${doctorName}`)).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(page.getByRole('status')).toContainText('persistido');
+  await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
   await expect(dialog).toHaveCount(0);
   await page.reload();

@@ -6,8 +6,10 @@ async function login(
   password = 'demo-admin',
 ) {
   await page.goto('/login');
-  await page.getByLabel('Correo').fill(email);
-  await page.getByLabel('Contraseña').fill(password);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.getByLabel('Usuario o correo').fill(email);
+  await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }
@@ -66,18 +68,13 @@ test('insurance records manual observations, searches, filters and preserves rel
   await expect(
     page.locator('li').filter({ hasText: 'Respuesta administrativa sintética para QA.' }),
   ).toBeVisible();
-  const snapshot = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v2') ?? '{}'),
-  );
-  expect(snapshot.quotes.find((item: { id: string }) => item.id === 'quote-demo-001').status).toBe(
-    'DRAFT',
-  );
-  expect(snapshot.hospitalizations[0].status).toBe('ACTIVE');
-  expect(snapshot.payments).toEqual([]);
-  expect(snapshot.shifts).toHaveLength(2);
-
   await page.getByRole('link', { name: 'quote-demo-001' }).first().click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
+  await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Borrador');
+  await page.goto('/hospitalizations');
+  await expect(page.getByRole('row').filter({ hasText: 'case-demo-001' })).toContainText('Activo');
+  await page.goto('/agenda');
+  await expect(page.getByText('Turno sintético de QA.')).toBeVisible();
 });
 
 test('insurance cancellation, invalid quote, safe channels and role guards are enforced', async ({

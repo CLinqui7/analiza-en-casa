@@ -18,6 +18,8 @@ async function login(
   next = '/catalogs/medications',
 ) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();

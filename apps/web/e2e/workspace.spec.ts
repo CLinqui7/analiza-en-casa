@@ -3,14 +3,22 @@ import { expect, test } from '@playwright/test';
 
 async function loginAs(page: import('@playwright/test').Page, email: string, password: string) {
   await page.goto('/login');
-  await page.getByLabel(/Usuario o correo|Correo/).fill(email);
-  await page.getByLabel(/Clave|Contraseña/).fill(password);
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.getByLabel('Usuario o correo').fill(email);
+  await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }
 
 async function login(page: import('@playwright/test').Page) {
   await loginAs(page, 'admin@demo.local', 'demo-admin');
+}
+
+async function openPatientDetail(page: import('@playwright/test').Page, fullName: string) {
+  const row = page.getByRole('row').filter({ hasText: fullName });
+  await expect(row).toHaveCount(1);
+  await row.getByRole('link', { name: 'Detalle' }).click();
 }
 
 async function fillRequiredPatientData(
@@ -24,8 +32,8 @@ async function fillRequiredPatientData(
   await dialog.getByLabel('Teléfono celular').fill(values.phone);
   await dialog.getByLabel('Empresa').fill('Empresa QA Sintética');
   await dialog.getByLabel('Correo').fill(values.email ?? 'paciente.qa@example.test');
-  await dialog.getByLabel('Dirección').fill('Calle sintética 123');
-  await dialog.getByLabel('Comentario o referencia').fill('Referencia sintética para QA');
+  await dialog.locator('input[name="address.line"]').fill('Calle sintética 123');
+  await dialog.locator('input[name="address.comments"]').fill('Referencia sintética para QA');
 }
 
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
@@ -91,7 +99,7 @@ test('dashboard presents unclassified measurements and opens authorized operatio
   await expect(page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]')).toBeVisible();
 });
 
-test('patient duplicate validation and individual vital registration are usable', async ({
+test('patient duplicate validation and health-report data boundary are enforced', async ({
   page,
 }) => {
   await login(page);
@@ -107,12 +115,8 @@ test('patient duplicate validation and individual vital registration are usable'
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
   await page.goto('/clinical/reports');
-  await page.getByRole('button', { name: 'Registrar medición individual' }).click();
-  await page.getByLabel('Fecha y hora').fill('2026-08-28T10:30');
-  await page.getByLabel('Pulso (lpm)').fill('70');
-  await page.getByRole('button', { name: 'Guardar medición' }).click();
-  await expect(page.getByRole('status')).toContainText('Medición individual registrada');
-  await expect(page.getByText('Pulso: 70 lpm')).toBeVisible();
+  await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
+  await expect(page.locator('[data-action-id^="CLINICAL-VITAL"]')).toHaveCount(0);
 });
 
 test('patient registration persists complete administrative, insurance, contacts, and address data', async ({
@@ -131,15 +135,19 @@ test('patient registration persists complete administrative, insurance, contacts
   await dialog.getByLabel('Teléfono de casa').fill('2200-1111');
   await dialog.getByLabel('Jubilado').check();
   await dialog.getByLabel('Tipo de sangre').selectOption('O+');
-  await dialog.getByLabel('Estado civil').fill('Estado civil sintético');
+  await dialog.getByLabel('Estado civil').selectOption('Soltero/a (demo)');
   await dialog.getByLabel('Nacionalidad').fill('Nacionalidad sintética');
   await dialog.getByLabel('Ocupación').fill('Ocupación sintética');
   await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await dialog.getByLabel('Aseguradora').selectOption('Aseguradora de demostración');
-  await dialog.getByLabel('El paciente es el titular').check();
+  await dialog.getByRole('combobox', { name: 'Aseguradora demo' }).fill('Aseguradora demo A');
+  await dialog.getByRole('option', { name: 'Aseguradora demo A' }).click();
+  await page
+    .getByRole('dialog', { name: '¿El paciente es el titular del seguro?' })
+    .getByRole('button', { name: 'No' })
+    .click();
   await dialog.getByLabel('Número de póliza').fill('POL-QA-001');
-  await dialog.getByLabel('Certificado o unidad').fill('CERT-QA-001');
-  await dialog.getByLabel('Identificación del titular').fill('HOLDER-QA-001');
+  await dialog.getByLabel('Certificado / Unidad').fill('CERT-QA-001');
+  await dialog.getByLabel('DUI / NIT del titular').fill('HOLDER-QA-001');
   await dialog.getByLabel('Nombre del titular').fill('Titular QA Integral');
   await dialog.getByLabel('Fecha de nacimiento del titular').fill('1970-01-02');
   await dialog.getByLabel('Fecha efectiva').fill('2026-08-28');
@@ -156,13 +164,15 @@ test('patient registration persists complete administrative, insurance, contacts
   await dialog.getByRole('button', { name: 'Definir principal' }).nth(1).click();
   await dialog.getByRole('button', { name: 'Agregar contacto' }).click();
   await dialog.getByRole('button', { name: 'Eliminar contacto' }).last().click();
-  await dialog.getByLabel('Enlace de ubicación').fill('https://example.test/ubicacion-qa');
-  await dialog.getByLabel('Coordenadas').fill('13.7000,-89.2000');
+  await dialog
+    .locator('input[name="address.locationUrl"]')
+    .fill('https://example.test/ubicacion-qa');
+  await dialog.locator('input[name="address.coordinates"]').fill('13.7000,-89.2000');
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('status')).toContainText('Paciente QA Integral');
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Integral');
-  await page.getByRole('link', { name: 'Paciente QA Integral' }).click();
+  await openPatientDetail(page, 'Paciente QA Integral');
   await expect(page.getByText('Empresa QA Sintética')).toBeVisible();
   await expect(page.getByText('POL-QA-001')).toBeVisible();
   await expect(page.getByText('Contacto QA Uno')).toBeVisible();
@@ -185,35 +195,44 @@ test('patient detail uses the complete shared editor and persists edits', async 
   });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editable');
-  await page.getByRole('link', { name: 'Paciente QA Editable' }).click();
+  await openPatientDetail(page, 'Paciente QA Editable');
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Activo');
   await page.getByRole('button', { name: 'Editar paciente' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await editDialog.getByLabel('Nombre completo').fill('Paciente QA Editado');
   await editDialog.getByLabel('Teléfono celular').fill('7000-4999');
   await editDialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await editDialog.getByLabel('Aseguradora').selectOption('Cobertura sintética QA');
+  await editDialog
+    .getByRole('combobox', { name: 'Aseguradora demo' })
+    .fill('Cobertura sintética QA');
+  await editDialog.getByRole('option', { name: 'Cobertura sintética QA' }).click();
+  await page
+    .getByRole('dialog', { name: '¿El paciente es el titular del seguro?' })
+    .getByRole('button', { name: 'No' })
+    .click();
   await editDialog.getByLabel('Número de póliza').fill('POL-EDIT-QA');
-  await editDialog.getByLabel('Identificación del titular').fill('HOLDER-EDIT');
+  await editDialog.getByLabel('DUI / NIT del titular').fill('HOLDER-EDIT');
   await editDialog.getByLabel('Nombre del titular').fill('Titular Editado');
   await editDialog.getByLabel('Fecha de nacimiento del titular').fill('1975-02-03');
   await editDialog.getByRole('button', { name: 'Agregar contacto' }).click();
   await editDialog.locator('input[name="contacts.0.fullName"]').fill('Contacto Editado');
   await editDialog.locator('input[name="contacts.0.phone"]').fill('7000-4555');
-  await editDialog.getByLabel('Dirección').fill('Dirección editada QA');
-  await editDialog.getByLabel('Comentario o referencia').fill('Referencia editada QA');
-  await editDialog.getByLabel('Coordenadas').fill('13.7,-89.2');
-  await editDialog.getByLabel('Enlace de ubicación').fill('https://example.test/editada');
-  await editDialog.getByLabel('Tipo de documento').selectOption('PASSPORT');
-  await editDialog.getByLabel('Número de documento').fill('PASS-EDIT-QA');
-  await editDialog.getByLabel('Tipo de documento').selectOption('DUI');
-  await expect(editDialog.getByLabel('Número de documento')).toHaveValue('');
+  await editDialog.locator('input[name="address.line"]').fill('Dirección editada QA');
+  await editDialog.locator('input[name="address.comments"]').fill('Referencia editada QA');
+  await editDialog.locator('input[name="address.coordinates"]').fill('13.7,-89.2');
+  await editDialog
+    .locator('input[name="address.locationUrl"]')
+    .fill('https://example.test/editada');
+  await editDialog.locator('select[name="documentType"]').selectOption('PASSPORT');
+  await editDialog.locator('input[name="documentId"]').fill('PASS-EDIT-QA');
+  await editDialog.locator('select[name="documentType"]').selectOption('DUI');
+  await expect(editDialog.locator('input[name="documentId"]')).toHaveValue('');
   await expect(editDialog.getByLabel('Nombre completo')).toHaveValue('Paciente QA Editado');
-  await editDialog.getByLabel('Tipo de documento').selectOption('OTHER');
-  await editDialog.getByLabel('Número de documento').fill('EDIT-QA-001');
+  await editDialog.locator('select[name="documentType"]').selectOption('OTHER');
+  await editDialog.locator('input[name="documentId"]').fill('EDIT-QA-001');
   await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editado');
-  await page.getByRole('link', { name: 'Paciente QA Editado' }).click();
+  await openPatientDetail(page, 'Paciente QA Editado');
   await expect(page.getByText('POL-EDIT-QA')).toBeVisible();
   await expect(page.getByText('Contacto Editado')).toBeVisible();
   await expect(page.getByText('Dirección editada QA')).toBeVisible();
@@ -222,8 +241,8 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await expect(page.getByText('https://example.test/editada')).toBeVisible();
   await page.getByRole('button', { name: 'Editar paciente' }).click();
   const duplicateEditDialog = page.getByRole('dialog', { name: 'Editar paciente' });
-  await duplicateEditDialog.getByLabel('Tipo de documento').selectOption('DUI');
-  await duplicateEditDialog.getByLabel('Número de documento').fill('123456789');
+  await duplicateEditDialog.locator('select[name="documentType"]').selectOption('DUI');
+  await duplicateEditDialog.locator('input[name="documentId"]').fill('123456789');
   await duplicateEditDialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(
     duplicateEditDialog.getByText('Ya existe un registro con este documento'),
@@ -420,7 +439,7 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   });
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
-  await page.getByRole('link', { name: 'Paciente Playwright Editable' }).click();
+  await openPatientDetail(page, 'Paciente Playwright Editable');
   await page.getByRole('button', { name: 'Editar paciente' }).click();
   await page.getByLabel('Teléfono celular').fill('2222 3333');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
@@ -429,8 +448,10 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const snapshot = JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v2') ?? '{}');
-        return snapshot.patients?.find(
+        const patients = JSON.parse(
+          localStorage.getItem('analiza.en.casa.workspace.v3.patients') ?? '[]',
+        );
+        return patients.find(
           (patient: { documentId?: string }) =>
             patient.documentId === 'PATIENT-PLAYWRIGHT-EDIT-001',
         )?.phone;
@@ -445,17 +466,17 @@ test('hospitalization route provides legacy listing controls, persistence, detai
 }) => {
   await login(page);
   await page.goto('/hospitalizations');
-  await expect(page.getByRole('columnheader', { name: 'Documento' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Identificador' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
   await page.getByLabel('Buscar hospitalización').fill('1234 56789');
   await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
   await page.locator('[data-action-id="HOSPITALIZATION-SEARCH-CLEAR"]').click();
   await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
   await page.getByLabel('Estado administrativo').selectOption('ACTIVE');
-  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-START-DATE"]').fill('2026-08-28');
+  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-DATE"]').fill('2026-08-28');
   await page.getByLabel('Tipo de cuenta').first().selectOption('Referencia sintética');
   await expect(page.getByText('case-demo-001')).toBeVisible();
-  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-RESET"]').click();
+  await page.locator('[data-action-id="HOSPITALIZATION-FILTER-CLEAR"]').click();
   await page.getByRole('button', { name: 'Nueva hospitalización' }).click();
   const createDialog = page.getByRole('dialog', { name: 'Nueva hospitalización' });
   await createDialog.getByLabel('Paciente').selectOption('');
@@ -468,21 +489,26 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(page.getByRole('status')).toContainText('persistida');
   await page.reload();
-  await expect(page.getByText('Confirmar visita de QA')).toBeVisible();
-  const createdRow = page.locator('tbody tr').filter({ hasText: 'Confirmar visita de QA' });
-  const createdId = await createdRow.locator('td').nth(1).innerText();
-  await createdRow.locator('[data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"]').first().click();
-  await expect(page).toHaveURL(new RegExp(`/hospitalizations/${createdId}$`));
+  const createdDetailLink = page.locator(
+    'a[data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"][href^="/hospitalizations/HOS-"]',
+  );
+  await expect(createdDetailLink).toHaveCount(2);
+  const createdPath = await createdDetailLink.first().getAttribute('href');
+  expect(createdPath).not.toBeNull();
+  const createdId = createdPath!.split('/').at(-1)!;
+  await page.goto(createdPath!);
+  await expect(page).toHaveURL(new RegExp(`${createdPath}$`));
   await expect(page.getByText('Responsable QA')).toBeVisible();
   await page.getByRole('button', { name: 'Editar hospitalización' }).click();
   await expect(page.getByRole('dialog', { name: `Editar ${createdId}` })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await createdRow.locator('[data-action-id="HOSPITALIZATION-EDIT"]').click();
+  await page.goto(createdPath!);
+  await page.getByRole('button', { name: 'Editar hospitalización' }).click();
   const editDialog = page.getByRole('dialog', { name: `Editar ${createdId}` });
   await editDialog.getByLabel('Responsable administrativo').fill('Responsable QA actualizado');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
-  await page.reload();
+  await page.goto(createdPath!);
   await expect(page.getByText('Responsable QA actualizado')).toBeVisible();
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -504,7 +530,7 @@ test('hospitalization permissions preserve read-only roles and deny inventory', 
 }) => {
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
   await page.goto('/hospitalizations');
-  await expect(page.getByRole('heading', { name: 'Hospitalizaciones' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Hospitalización' })).toBeVisible();
   await expect(
     page.locator(
       '[data-action-id="HOSPITALIZATION-CREATE"], [data-action-id="HOSPITALIZATION-EDIT"]',
@@ -543,17 +569,17 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
   await page.goto('/agenda');
   await page.getByRole('button', { name: 'Crear turno' }).click();
   const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog.locator('input[name="startsAt"]').fill('2026-08-30T12:00');
-  await dialog.locator('input[name="endsAt"]').fill('2026-08-30T08:00');
+  await dialog.getByLabel('Inicio').fill('12:00');
+  await dialog.getByLabel('Fin').fill('08:00');
   await dialog.getByLabel('Notas').fill('Turno inválido de QA.');
-  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
   await expect(dialog.getByText('El fin debe ser posterior al inicio.')).toBeVisible();
 
-  await dialog.locator('input[name="startsAt"]').fill('2026-08-30T08:00');
-  await dialog.locator('input[name="endsAt"]').fill('2026-08-30T12:00');
+  await dialog.locator('input[name="startTime"]').fill('08:00');
+  await dialog.locator('input[name="endTime"]').fill('12:00');
   await dialog.getByLabel('Notas').fill('Turno programado de QA.');
-  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
-  await expect(page.getByRole('status')).toContainText('Turno persistido');
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByRole('status')).toContainText('turno persistido');
   await page.reload();
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
 });
@@ -565,14 +591,15 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
   await page.goto('/agenda');
   await page.getByRole('button', { name: 'Crear turno' }).click();
   const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog.getByLabel('Inicio').fill('2026-08-31T08:00');
-  await dialog.getByLabel('Fin').fill('2026-08-31T12:00');
+  const scheduledDate = await dialog.getByLabel('Fecha 1').inputValue();
+  await dialog.getByLabel('Inicio').fill('08:00');
+  await dialog.getByLabel('Fin').fill('12:00');
   await dialog.getByLabel('Notas').fill('Turno para reporte de QA.');
-  await dialog.getByRole('button', { name: 'Guardar turno' }).click();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
 
   await page.goto('/reports/nurse-hours');
-  await page.getByLabel('Desde').fill('2026-08-31');
-  await page.getByLabel('Hasta').fill('2026-08-31');
+  await page.getByLabel('Desde').fill(scheduledDate);
+  await page.getByLabel('Hasta').fill(scheduledDate);
   await page.getByLabel('Estado').selectOption('SCHEDULED');
   await expect(page.getByText('Turno para reporte de QA.')).toHaveCount(0);
   await expect(page.getByRole('cell', { name: '4', exact: true })).toBeVisible();
@@ -642,7 +669,10 @@ test('medical-order factual search is normalized and document choice is limited 
 test('quote draft becomes an immutable sent version', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
-  await page.getByRole('button', { name: 'Nueva cotización' }).click();
+  await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
+  await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
+  await page.getByLabel('Referido por').fill('Amigos');
+  await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page
     .getByLabel('Resumen operativo')
     .fill('Coordinación sintética para prueba de inmutabilidad.');
@@ -659,7 +689,10 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
 test('payment application is idempotent and reversal preserves its reason', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
-  await page.getByRole('button', { name: 'Nueva cotización' }).click();
+  await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
+  await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
+  await page.getByLabel('Referido por').fill('Amigos');
+  await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
@@ -750,8 +783,8 @@ test('audit export is restricted to the audit role set', async ({ page }) => {
   await expect((await download).suggestedFilename()).toBe('auditoria-sintetica.csv');
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
-  await page.getByLabel('Correo').fill('doctor@demo.local');
-  await page.getByLabel('Contraseña').fill('demo-doctor');
+  await page.getByLabel('Usuario o correo').fill('doctor@demo.local');
+  await page.getByLabel('Clave').fill('demo-doctor');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await page.goto('/audit');
   await expect(page.locator('main[role="alert"]')).toContainText(
@@ -906,7 +939,7 @@ test('health report does not expose vital records without the approved report-da
   await page.goto('/clinical/reports');
   await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
   await expect(page.locator('[data-action-id="HEALTH-REPORT-SEARCH"]')).toBeDisabled();
-  await expect(page.getByText('CH16-Q008')).toBeVisible();
+  await expect(page.locator('#health-report-data-boundary')).toContainText('CH16-Q008');
 });
 
 test('dashboard has no automatically detectable serious accessibility violations', async ({
