@@ -2,7 +2,7 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `dae09855e9f10dbebf231a98e449d1dc62970839`
+Commit generador: `0b961b7bd15ab063f317d98b56aa307973932dfb`
 SHA de implementación: `02c901a522e3bc0603c1b3c34501836928acf5ff`
 Fingerprint funcional CH01: `a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f`
 
@@ -212,7 +212,7 @@ Fingerprint funcional CH01: `a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab
 | CH17-F09 | /clinical/reports | MISSING | — |
 | CH17-F10 | /clinical/reports | MISSING | — |
 | CH17-F11 | /clinical/reports | MISSING | — |
-| CH17-F12 | /clinical/hospitalizations | PARTIAL | — |
+| CH17-F12 | /clinical/reports | MISSING | — |
 | CH17-F13 | /clinical/hospitalizations | PARTIAL | — |
 | CH17-F14 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH17-F15 | /clinical/hospitalizations | NOT_TESTABLE | — |

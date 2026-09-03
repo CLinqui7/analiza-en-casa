@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:14:30-06:00",
-  "metadata_generated_from_commit": "dae09855e9f10dbebf231a98e449d1dc62970839",
-  "source_sha256": "757c589bcb233ec58d856cd93e118690cab6200c6122f6dcc4b6b377e331f4a9",
+  "generated_at": "2026-09-02T20:23:05-06:00",
+  "metadata_generated_from_commit": "0b961b7bd15ab063f317d98b56aa307973932dfb",
+  "source_sha256": "c3fe4a891ccd0226d04a90f1ee1740d9c0fb15a3043ec1af4308739cbc5aeaf6",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8488,15 +8488,19 @@
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0043_00h52m08s400ms_DETAIL.jpg",
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q001",
+        "CH17-Q010"
+      ],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -8505,11 +8509,15 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008",
+        "CH17-Q001",
+        "CH17-Q010"
+      ],
+      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Precheck factual: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F13",

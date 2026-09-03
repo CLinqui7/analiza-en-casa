@@ -237,7 +237,7 @@
       "description": "Notas de enfermería muestra fecha, turno, recurso y nota clínica, con búsqueda, paginación, selección para impresión y acciones por fila.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -252,7 +252,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: buscar y paginar notas sintéticas; verificar orden cronológico, autor, turno y permisos de lectura."
+      "test_path": "Precheck: CH17-E0043/E0046 fueron abiertos. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/campos/roles/auditoría/retención/minimización/redacción (CH16-Q008), selección y salida de impresión (CH17-Q001), y ciclo clínico de notas de enfermería (CH17-Q010)."
     },
     {
       "id": "CH17-F13",

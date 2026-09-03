@@ -8468,17 +8468,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q001",
+        "CH17-Q010"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "La narrativa de enfermería y su contexto de turno/recurso son contenido clínico sensible; no se expone ni se imprime sin contrato aprobado.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone notas de enfermería, datos de recurso/turno, búsqueda, paginación, selección, acciones ni impresión.",
+        "test_path": "Precheck de evidencia CH17-E0043/CH17-E0046; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar fuente tenant-scoped y campos/roles (CH16-Q008), selección/salida de impresión (CH17-Q001) y ciclo clínico de notas de enfermería (CH17-Q010).",
+        "blocked_by_client_information": true,
+        "notes": "Las evidencias muestran anatomía de tabla y narrativa clínica sensible, pero no autorizan fuente, lecturas, búsqueda, paginación, selección, acciones, impresión, persistencia, corrección/versionado ni reglas clínicas."
       }
     },
     {
@@ -10061,6 +10065,17 @@
       "question": "¿Cuál es el contrato clínico autorizado para Signos vitales: fuente por organización y vínculo de paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, distinción y procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción? CH16-Q008 sigue controlando la fuente tenant-scoped, roles y campos sensibles del Reporte de salud.",
       "evidence_event_ids": [
         "CH17-E0038"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q010",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato clínico autorizado de Notas de enfermería: fuente por organización y vínculo de paciente/hospitalización, campos y contenido permitidos por rol, turno/recurso, ciclo de vida, firma, corrección/versionado, auditoría, retención, minimización y redacción? CH17-Q001 controla además selección por fila, contenido/formato/destino/autoridad de impresión y auditoría de salida; CH16-Q008 conserva fuente tenant-scoped, roles y campos sensibles del Reporte de salud.",
+      "evidence_event_ids": [
+        "CH17-E0043",
+        "CH17-E0046"
       ],
       "status": "OPEN"
     }
