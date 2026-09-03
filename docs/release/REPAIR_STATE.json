@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03T08:19:58.6503192Z",
+  "updatedAt": "2026-09-03T08:25:00.0000000Z",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "deee03498c6336b243934063f8cf92db2e771423",
+  "head": "4a854ddebe40d569d65d14ee58b6d45502c88c27",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "npm run test:selenium",
-  "lastGatePass": "Selenium global smoke (6/6 PASS); patient module (16/16 PASS); patient coverage (36/36 PASS)",
-  "failingGate": "Selenium global coverage has not been rerun at deee034",
+  "lastGateExecuted": "npm run selenium:coverage",
+  "lastGatePass": "CH01 Selenium authentication module (5/5 PASS): login and logout now produce action-level runtime evidence at 4a854dd.",
+  "failingGate": "Selenium global coverage is 89.38% declared (303/339); 36 actions remain unmapped, beginning with DASHBOARD-NAVIGATE.",
   "failingTests": [],
   "repairsApplied": [
     "Prettier LF enforcement and complete global Playwright repair (178/178 PASS).",
@@ -16,8 +16,9 @@
     "Patient document-type test passes after aligning the Document label; contact-document lookup now uses the canonical row-level Detalle link and needs retest.",
     "Patient Selenium module reconciled with v3 segmented mock storage, current dialog/action identifiers, searchable insurer, table columns, and row-level detail navigation (16/16 PASS; 36/36 execution coverage PASS).",
     "Global Selenium smoke now authenticates ADMIN and validates current protected flows, safe Help fallback, resource registration prerequisites, and scheduled-hours reporting (6/6 PASS)."
+    ,"Added authentic Selenium coverage for AUTH-LOGIN and AUTH-LOGOUT: test_ch01 records each action at runtime, the inventory declares SEL-CH01-LOGIN/SEL-CH01-LOGOUT, and CH01 passes 5/5. Global declared coverage rose from 301/339 (88.79%) to 303/339 (89.38%)."
   ],
-  "nextExecutableAction": "Run npm run selenium:coverage. For the first action without PASS evidence at deee034, run its owning Selenium module against http://127.0.0.1:4174, repair the first reproducible failure, rerun that module, and rerun selenium:coverage.",
+  "nextExecutableAction": "Repair DASHBOARD-NAVIGATE next: locate or add a focused Selenium dashboard module against http://127.0.0.1:4174 that records the action with a declared # test-id, update UI_ACTION_INVENTORY.json/CSV, rerun that module and npm run selenium:coverage. Preserve the untracked docs/release/RELEASE_AGENT_PROMPT.txt and unrelated dirty files.",
   "vercel": {
     "status": "NOT_DEPLOYED_AFTER_REPAIR",
     "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; node=20",
