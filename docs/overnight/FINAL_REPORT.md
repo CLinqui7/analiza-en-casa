@@ -4,6 +4,12 @@ Fecha: 2026-08-26
 Rama: `codex/overnight-audit-hardening`
 Clasificación: `SYNTHETIC_DEMO`
 
+### Addendum · 2026-09-03 · Revalidación de cierre desde el estado actual
+
+- Se reejecutaron todos los gates locales en `695d4b73beb9f63e6e14c0cf2f26b705c79ca1c0`: formato, lint, tipos, 98 pruebas de dominio, 37 Vitest React, modo claro, seguridad, cambios de cliente 32/32, paridad de video 210/210, espejo de trazabilidad, auditoría 17/17, build Next y standalone, Playwright baseline 43/43, Playwright React 178/178, Selenium 181/181 y smoke Selenium 6/6. La cobertura Selenium declarada permanece 334/334 (100%) y no se presenta como telemetría runtime.
+- El descubrimiento Selenium sin URL común reveló una colisión de build-lock entre los puertos de servidor predeterminados de los módulos. Se ejecutó de nuevo completo contra el servidor sano compartido mediante `SELENIUM_BASE_URL=http://127.0.0.1:4174`; pasó 181/181 sin cambiar código, aserciones, evidencia ni controles de seguridad.
+- La CLI autenticada de Vercel confirma que `dpl_2CBtezndaDgBrSWs1CGxYUEMQur6` sigue `READY` como preview. No se promovió producción y `globalComplete` se mantiene en `false`: el cierre depende de la disposición autorizada de GitGuardian 36747982, un scheduler/plan que admita el cron productivo y las validaciones/UAT externas de Supabase, proveedores y contratos aprobados.
+
 ### Addendum · 2026-09-03 · Dependency hardening and recertification
 
 - Implementation `4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce` removes the vulnerable direct production dependency `xlsx`. Patient export preserves the `pacientes-activos.xlsx`/`pacientes-inactivos.xlsx` filename, `Pacientes` sheet and seven columns; it creates the minimal OOXML container with `fflate`, with no formulas originating in data. The focused Playwright test inspects the generated archive and `npm audit --omit=dev` reports 0 vulnerabilities.
