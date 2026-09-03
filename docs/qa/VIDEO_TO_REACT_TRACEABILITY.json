@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:38:02-06:00",
-  "metadata_generated_from_commit": "c83fd53a59435ebea141c4eaa19aad381ea61305",
+  "generated_at": "2026-09-02T20:49:06-06:00",
+  "metadata_generated_from_commit": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
   "source_sha256": "f0665e2edcd36d0c70a2454867d282fe8027049e0ec376aa92d93dd8bbf02ef6",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8558,8 +8558,8 @@
         "CH17-Q011"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q010 no define el ciclo y campos de la Nota de enfermería; CH17-Q011 no define autorización, motivo, firma, preservación inmutable del original, versión de reemplazo, conflictos ni auditoría append-only de una corrección clínica.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0048 y safety_005 muestran sólo una afinidad de editar/guardar sobre una nota clínica sensible. React no expone notas, editor, guardado, lectura, consulta ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports."
+      "last_verified_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
+      "notes": "Precheck factual verified at 7b4faa1ee26d68633dff5374507ded72cf98d7d3: CH17-E0048 y safety_005 muestran sólo afinidad de editar/guardar sobre una nota clínica sensible. React no expone notas, editor, guardado, lectura, consulta ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports."
     },
     {
       "requirement_id": "CH17-F14",

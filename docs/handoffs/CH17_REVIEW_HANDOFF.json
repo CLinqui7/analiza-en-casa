@@ -1,55 +1,44 @@
 {
   "lot": "CH17_REVIEW",
-  "source_sha": "da7f5a74df6b20998c1afb240847868cb99cbdd5",
-  "base_sha": "da7f5a74df6b20998c1afb240847868cb99cbdd5",
+  "source_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
+  "base_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "REVIEW_COMPLETE_PENDING_METADATA_COMMIT",
   "final_sha": null,
   "remote_sha": null,
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
-    "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12"],
+    "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13"],
     "reviewed_not_testable": ["CH17-F07"],
-    "next_precheck": "CH17-F13_EVIDENCE_AND_CLINICAL_CORRECTION_BOUNDARY_PRECHECK",
-    "not_independently_implementable": ["CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+    "next_precheck": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK",
+    "not_independently_implementable": ["CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
   },
   "evidence_review": {
-    "f04": "CH17-E0012/E0017/E0019 establish only calendar anatomy, processing and sensitive output. F04 remains MISSING under CH16-Q008 and CH17-Q008; no range control exists.",
-    "f05": "CH17-E0019 exposes identity and hospitalization fields. F05 remains MISSING under CH16-Q008; /clinical/hospitalizations is not an authorization bridge into /clinical/reports.",
-    "f06": "At 999e2d71216006e0e178aa1693a85d954b320bfe, CH17-E0021 establishes insurance identifiers and per-row Imprimir. F06 remains MISSING under CH16-Q008 and CH17-Q001; no identifier, selector or print behavior exists.",
-    "f08": "At 998875f4694d070598ea63f52619f66bfed426a1, CH17-E0024 establishes seven clinical navigation labels plus antecedent/evaluation panels and Agregar controls. F08 remains MISSING under CH16-Q008 and CH17-Q002; no clinical navigation, panel, data or mutation exists.",
-    "f09": "CH17-E0026/E0027 establish only the six Antecedentes categories and add affordances. F09 is MISSING under CH16-Q008 and CH17-Q002; no content, catalog, form, control, query, print/export or mutation exists. Its evidence provenance is committed at 1bbec9f62b414e0da0c0e6468a6bfc8766f53504.",
-    "f10": "CH17-E0029/E0030 establish only the visible Alergias anatomy: No registrado, selectors, a medication-list dropdown and Agregar. F10 remains MISSING under CH16-Q008 and CH17-Q002; no catalog, patient context, role policy, reaction/state, contradiction handling, persistence, version/correction, audit, retention, minimization or redaction is implemented. Its evidence provenance is committed at fc48a0ed1a849b335a3b6c7897153386f701c098.",
-    "f11": "At dae09855e9f10dbebf231a98e449d1dc62970839, CH17-E0038 establishes only the expandable group labels Gráficos de Signos vitales, Signos vitales and Signos vitales cargados por el paciente. F11 remains MISSING under CH16-Q008 and CH17-Q009; no source, values, units, ranges, charts, patient uploads, forms, controls, records, queries or clinical writes exist.",
-    "f12": "At 740b6bde8177d078fda24602a7c1e9e2d980b638, CH17-E0043/E0046 establish only nursing-note table anatomy, row selection for print, actions, paging/search and sensitive note/shift/resource content. F12 is MISSING under CH16-Q008, CH17-Q001 and CH17-Q010; React exposes no notes, controls, print output, query or write.",
-    "f13_next": "CH17-E0048 has been opened: it establishes a note-context edit affordance and editable-text/save anatomy, but it exposes sensitive clinical content and does not establish source, patient/case scope, roles, correction reason, immutable version preservation, signature, audit, retention, minimization or redaction. The inherited /clinical/hospitalizations PARTIAL mapping must be reconciled in the next evidence-only precheck; no edit behavior is authorized.",
-    "f07_f17": "Printing, clinical detail, allergies, vital signs, nursing notes, correction, AI audit and WhatsApp remain scoped by CH16-Q008 and CH17-Q001–Q010. No sensitive output, external sharing, AI transfer or clinical mutation is implemented."
+    "f04_f06": "F04-F06 remain MISSING under their existing source, range, authorization, identifier, and print-output blockers. No range, report, insurance, or print behavior is exposed.",
+    "f08_f12": "F08-F12 remain MISSING under their existing clinical/data-source blockers. No clinical panels, antecedents, allergies, vital signs, nursing notes, queries, print output, or writes are exposed.",
+    "f13": "At 7b4faa1ee26d68633dff5374507ded72cf98d7d3, CH17-E0048 and safety_005 establish only sensitive-note edit/save anatomy. F13 is MISSING under CH16-Q008, CH17-Q010, and CH17-Q011; there is no patient/case scope, role authorization, correction reason, immutable original, replacement version, conflict handling, append-only audit, retention, minimization, or redaction contract, and no edit behavior is implemented.",
+    "f14_next": "CH17-E0048 places the visible AI-audit affordance in a sensitive-note context. It does not establish an AI provider, authorized basis, permitted data transfer, minimization/redaction, human review, persistence/training policy, role control, access audit, retention, or output handling. F14 remains NOT_TESTABLE under CH17-Q003 and is the next evidence-only precheck; no AI request or clinical-data transfer is authorized.",
+    "cross_requirement_isolation": "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations with no CH16-Q008/CH17-Q002 blocker. F04-F06 and F08-F13 remain MISSING at /clinical/reports; F07 remains NOT_TESTABLE. CR-020 remains the separate fluid-balance clinical-approval blocker."
   },
   "boundaries": [
-    "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction.",
-    "CH17-Q001 controls row-level print selection and output content/template/authorization/audit/retention.",
-    "CH17-Q002 controls clinical antecedent/allergy forms, catalog, permissions, versioning and audit.",
-    "CH17-Q009 controls the authorized vital-sign field, unit, range, validation/interpretation, provenance, form, correction/versioning and audit contract.",
-    "CH17-Q010 controls nursing-note source fields, shift/resource context, lifecycle, signature, correction/versioning and audit.",
-    "CH17-Q007 controls record-scoped hospitalization menu destinations.",
-    "CH09-F03 remains independently mapped to /clinical/hospitalizations as PARTIAL with no CH16-Q008/CH17-Q002 blocker.",
-    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED. The focused six-case suite ran at fec4aef2d984afc95e4f54c2703d20651116c8c9, but it does not establish separate source, role, permission or performance contracts.",
-    "CR-020 remains separately clinically blocked for fluid balance; it does not authorize vital-sign data, forms, nursing-note content, printing or writes."
+    "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization, and redaction.",
+    "CH17-Q001 controls row-level print selection and output content, authorization, audit, and retention.",
+    "CH17-Q002 controls clinical antecedent/allergy forms, catalog, permissions, versioning, and audit.",
+    "CH17-Q003 controls AI-audit provider, authorized basis, permitted data transfer, minimization/redaction, human review, persistence/training, role control, access audit, retention, and output handling.",
+    "CH17-Q009 controls vital-sign fields, units, ranges, validation, provenance, forms, correction/versioning, and audit.",
+    "CH17-Q010 controls nursing-note source fields, shift/resource context, lifecycle, signature, correction/versioning, and audit.",
+    "CH17-Q011 controls clinical-note correction authorization, mandatory reason, immutable signed-original preservation, replacement version, conflict handling, and append-only audit evidence.",
+    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission, and performance status UNVERIFIED despite the focused six-case suite at fec4aef2d984afc95e4f54c2703d20651116c8c9."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA da7f5a74df6b20998c1afb240847868cb99cbdd5; EXACT 52, PARTIAL 88, MISSING 19, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 7b4faa1ee26d68633dff5374507ded72cf98d7d3; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
-    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
     "protected_parity": "PASS: node scripts/verify-video-react-parity.mjs (210/210; includes protected CH01-CH03).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
-    "f01_f03_regression": "PRESERVED: focused CH17 Playwright completed 6/6 at fec4aef2d984afc95e4f54c2703d20651116c8c9; no application code changed in this review.",
-    "f09_f10_regression": "PRESERVED: F09 is MISSING under CH16-Q008/CH17-Q002 with evidence verified at 1bbec9f62b414e0da0c0e6468a6bfc8766f53504; F10 is MISSING under the same blockers with evidence verified at fc48a0ed1a849b335a3b6c7897153386f701c098; no application code changed.",
-    "f11_regression": "PRESERVED: F11 is MISSING under CH16-Q008/CH17-Q009 with evidence verified at dae09855e9f10dbebf231a98e449d1dc62970839; no values, units, ranges, charts, uploads, forms, controls, records, queries or writes exist.",
-    "f12_regression": "PRESERVED: F12 is MISSING under CH16-Q008/CH17-Q001/CH17-Q010 with evidence verified at 740b6bde8177d078fda24602a7c1e9e2d980b638; no nursing-note content, table controls, print behavior, query or write exists.",
-    "provenance_repair": "PASS: F09 and F10 traceability/certification records now cite their committed evidence checkpoints without changing routes, blockers, parity or functional status.",
-    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002; F04–F06 and F08–F12 remain /clinical/reports MISSING, while F07 remains NOT_TESTABLE.",
-    "git_sync": "BLOCKED_ENVIRONMENT: at review start local and cached origin/codex/react-full-parity-selenium-100 were both da7f5a74df6b20998c1afb240847868cb99cbdd5. git add/commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
+    "f13_regression": "PRESERVED: F13 remains MISSING under CH16-Q008/CH17-Q010/CH17-Q011 at 7b4faa1ee26d68633dff5374507ded72cf98d7d3; no note editor, save action, clinical read/write, print/export, or hospitalizations bridge exists.",
+    "git_sync": "BLOCKED_ENVIRONMENT: at review start local and cached origin/codex/react-full-parity-selenium-100 were both 7b4faa1ee26d68633dff5374507ded72cf98d7d3. git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
   },
-  "next_batch": "CH17_F13_EVIDENCE_AND_CLINICAL_CORRECTION_BOUNDARY_PRECHECK"
+  "next_batch": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK"
 }
