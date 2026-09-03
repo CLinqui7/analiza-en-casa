@@ -60,6 +60,9 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
       marker.current?.remove();
       marker.current = null;
       if (map.current === instance) map.current = null;
+      // A pending Leaflet pan can complete after React removes the dialog host.
+      // Stop it before remove() clears the map pane used by that animation.
+      instance?.stop();
       instance?.off();
       instance?.remove();
     };
@@ -83,7 +86,9 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
         const position: [number, number] = [point.latitude, point.longitude];
         if (marker.current) marker.current.setLatLng(position);
         else marker.current = module.marker(position).addTo(instance);
-        instance.setView(position, Math.max(instance.getZoom(), 15));
+        // Coordinate typing can be followed immediately by closing the dialog.
+        // Avoid scheduling a pan animation that could outlive its map host.
+        instance.setView(position, Math.max(instance.getZoom(), 15), { animate: false });
       })
       .catch(() => {
         if (!disposed && map.current === instance) setUnavailable(true);
@@ -95,7 +100,9 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
 
   function zoom(delta: number) {
     const instance = map.current;
-    if (instance?.getContainer().isConnected) instance.setZoom(instance.getZoom() + delta);
+    if (instance?.getContainer().isConnected) {
+      instance.setZoom(instance.getZoom() + delta, { animate: false });
+    }
   }
   function fullscreen() {
     void host.current?.requestFullscreen?.();

@@ -14,6 +14,7 @@ export const ch01Scope = [
   'apps/web/src/components/app-shell.tsx',
   'apps/web/src/components/login-form.tsx',
   'apps/web/src/components/install-app.tsx',
+  'apps/web/src/components/patients/patient-location-map.tsx',
   'apps/web/src/components/providers.tsx',
   'apps/web/src/lib/auth.ts',
   'apps/web/src/lib/permissions.ts',
