@@ -167,6 +167,8 @@ Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, finan
 
 - **CH17-Q008 · UNCERTAIN** — definir el rango temporal autorizado del Reporte de salud: valor predeterminado, límites, inclusividad, zona horaria, Seleccionar/Cargar/Cancelar, carga/error/reintento, auditoría, retención y redacción. CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles. Las fechas visibles son ejemplos y no se codifican. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
 
+- **CH17-Q009 · UNCERTAIN** — definir el contrato clínico autorizado de Signos vitales: fuente por organización y vínculo paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción. CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles del Reporte de salud. Evidencia: CH17-E0038, 00:52:00.600.
+
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 
 - **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.

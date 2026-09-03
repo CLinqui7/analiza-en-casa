@@ -8422,17 +8422,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q009"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Los valores, unidades, rangos, orígenes y reglas clínicas no están autorizados; no se exponen datos de signos vitales.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone signos vitales, gráficas, cargas del paciente, controles ni datos clínicos.",
+        "test_path": "Precheck de evidencia CH17-E0038; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar fuente tenant-scoped, campos y roles (CH16-Q008) y el contrato clínico específico de signos vitales (CH17-Q009).",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0038 muestra sólo tres grupos expandibles. No autoriza valores, unidades, rangos, gráficas, cargas del paciente, formularios, consultas, persistencia, correcciones ni reglas clínicas."
       }
     },
     {
@@ -10048,6 +10051,16 @@
         "CH17-E0012",
         "CH17-E0017",
         "CH17-E0019"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q009",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato clínico autorizado para Signos vitales: fuente por organización y vínculo de paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, distinción y procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción? CH16-Q008 sigue controlando la fuente tenant-scoped, roles y campos sensibles del Reporte de salud.",
+      "evidence_event_ids": [
+        "CH17-E0038"
       ],
       "status": "OPEN"
     }

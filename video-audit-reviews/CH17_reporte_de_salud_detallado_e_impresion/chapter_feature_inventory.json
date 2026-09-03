@@ -220,7 +220,7 @@
       "description": "La subpestaña separa gráficos, registros clínicos de signos vitales y signos cargados por el paciente.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -229,7 +229,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0038_00h52m00s600ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: abrir los tres paneles, validar unidades, fecha, autor/origen y señalización de datos aportados por paciente."
+  "test_path": "Precheck: CH17-E0038 fue abierto. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/campos/roles/auditoría/retención/minimización/redacción (CH16-Q008) y campos/unidades/rangos/procedencia/validación/interpretación/formularios/persistencia/corrección/auditoría de signos vitales (CH17-Q009)."
     },
     {
       "id": "CH17-F12",

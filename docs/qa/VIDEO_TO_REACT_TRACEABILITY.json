@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T20:01:08-06:00",
-  "metadata_generated_from_commit": "9b3a973e4c5548e2424faad32a11150843ac198d",
-  "source_sha256": "97289834578dbea8bf880cfc0eccdff64605a3f04698da95e3f60406ab43b4cb",
+  "generated_at": "2026-09-02T20:07:12-06:00",
+  "metadata_generated_from_commit": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
+  "source_sha256": "757c589bcb233ec58d856cd93e118690cab6200c6122f6dcc4b6b377e331f4a9",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8448,15 +8448,18 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0038_00h52m00s600ms_DETAIL.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q009"
+      ],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -8465,11 +8468,14 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008",
+        "CH17-Q009"
+      ],
+      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Precheck factual: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F12",

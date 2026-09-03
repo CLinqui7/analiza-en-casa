@@ -1,0 +1,38 @@
+{
+  "lot": "CH17_F11_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
+  "base_sha": "cdeae7a50449e0e08bf60512df7ad763e6f2a583",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "missing": ["CH17-F11"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q009"],
+    "preserved_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10"],
+    "preserved_not_testable": ["CH17-F07"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0038": "Opened detail crop at 00:52:00.600: Signos vitales visibly contains only the expandable labels Gráficos de Signos vitales, Signos vitales, and Signos vitales cargados por el paciente."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped Reporte de salud source, organization context, fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q009 controls authorized vital-sign fields, units, ranges, validation/interpretation, clinical-versus-patient-upload provenance, roles, forms, persistence, correction/versioning and audit.",
+    "No values, units, ranges, charts, patient-upload content, forms, controls, records, queries, persistence, print/export or clinical writes were added.",
+    "/clinical/hospitalizations is not an authorized source or authorization bridge for /clinical/reports; CH09-F03 remains independently mapped there as PARTIAL.",
+    "CR-020 remains separately clinically blocked for fluid-balance form, closure/correction rules and shift permissions; it does not authorize vital-sign data or behavior."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA cdeae7a50449e0e08bf60512df7ad763e6f2a583; EXACT 52, PARTIAL 89, MISSING 18, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f04_f10_regression": "PASS: F04-F06/F08-F10 remain MISSING, F07 remains NOT_TESTABLE, and no application code changed.",
+    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002; F11 alone maps to /clinical/reports with CH16-Q008/CH17-Q009.",
+    "selenium_runtime": "NOT_APPLICABLE: F11 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "PENDING_RUNTIME_RESULT"
+  },
+  "next_batch": "CH17_REVIEW"
+}

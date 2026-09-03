@@ -236,6 +236,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - `CH17-Q008`: definir el contrato temporal del Reporte de salud: valor predeterminado, límites pasado/futuro, inclusividad, zona horaria, cambios de hospitalización, semántica de Seleccionar/Cargar/Cancelar y estados de carga, error y reintento. También requiere auditoría de acceso, retención y redacción del resultado. `CH16-Q008` mantiene el control de fuente tenant-scoped, roles y campos sensibles. Las fechas visibles son ejemplos y no deben codificarse. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
 
+- `CH17-Q009`: definir el contrato clínico autorizado de Signos vitales: fuente por organización y vínculo paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción. `CH16-Q008` controla la fuente tenant-scoped, roles y campos sensibles del Reporte de salud. Evidencia: CH17-E0038, 00:52:00.600.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.
