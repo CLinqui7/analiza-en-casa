@@ -1,0 +1,38 @@
+{
+  "lot": "CH17_F06_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "7ab41e696057922973aae2c6630ef104487a1aad",
+  "base_sha": "7ab41e696057922973aae2c6630ef104487a1aad",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "missing": ["CH17-F06"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q001"],
+    "preserved_missing": ["CH17-F04", "CH17-F05"],
+    "preserved_partial": ["CH17-F01", "CH17-F02", "CH17-F03"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0021": "Opened: the health report visibly shows a per-row Imprimir selection with Seguro, Póliza, Certificado, Fecha efectiva, Titular and DUI/NIT."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped health-report source, organization isolation, allowed insurance fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q001 controls row-level print selection, authorized output, format/content, authorization, audit and retention.",
+    "No insurance table, identifier, print/export control, selector, report query, patient data, hospitalization data, navigation, persistence or clinical write was added.",
+    "/clinical/hospitalizations is not an authorized source or authorization bridge for /clinical/reports; CH09-F03 remains independently mapped to /clinical/hospitalizations.",
+    "CR-020 remains unrelated and clinically blocked."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; generator source SHA 7ab41e696057922973aae2c6630ef104487a1aad).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f04_f05_regression": "PRESERVED: F04 remains MISSING under CH16-Q008/CH17-Q008 and F05 remains MISSING under CH16-Q008; no application code changed.",
+    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL with no CH16-Q008/CH17-Q001 blocker; F04/F05 remain /clinical/reports MISSING under their existing scoped questions.",
+    "selenium_runtime": "NOT_APPLICABLE: F06 has no implemented action; Python Selenium runtime remains unavailable.",
+    "git_sync": "PENDING_ENVIRONMENT: direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials; source and cached origin were both 7ab41e696057922973aae2c6630ef104487a1aad before this documentation-only precheck."
+  },
+  "next_batch": "CH17_REVIEW"
+}

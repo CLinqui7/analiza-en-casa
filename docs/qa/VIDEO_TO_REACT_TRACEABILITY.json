@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T19:01:58-06:00",
-  "metadata_generated_from_commit": "7214fe01af9545cac5dc6e269b594ecf946a35ba",
-  "source_sha256": "20feb59a5324d49b71bf2362e0962695e9e1104969be182407a2b6ea1f4704f1",
+  "generated_at": "2026-09-02T19:12:03-06:00",
+  "metadata_generated_from_commit": "7ab41e696057922973aae2c6630ef104487a1aad",
+  "source_sha256": "41d5e6a328e14fda94742f5e8956bde2f024f1e3fa5f182d76f48b75a983b9ca",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8251,15 +8251,18 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q001"
+      ],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -8268,11 +8271,14 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008",
+        "CH17-Q001"
+      ],
+      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, alcance organizacional, campos de seguro permitidos por rol, auditoría de acceso, retención, minimización ni redacción; CH17-Q001 no define selección por fila, contenido/formato de impresión, autorizaciones, auditoría ni retención de la salida.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Precheck factual: CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. React no expone, consulta ni reutiliza seguros, identificadores o impresión; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F07",

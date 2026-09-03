@@ -8204,18 +8204,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q001"
+  ],
+  "platform_assessment": {
+    "status": "MISSING",
+    "priority": "P1",
+    "patient_safety_impact": "La evidencia incluye identificadores de seguros y selección por fila para una salida. Sin una fuente tenant-scoped, política de campos por rol, minimización, redacción y auditoría, exponerlos o seleccionarlos puede revelar información sensible.",
+    "financial_impact": "No se infieren cobertura, vigencia, reclamaciones ni efectos financieros a partir de la tabla observada.",
+    "current_platform_evidence": "/clinical/reports es una superficie local vacía; no consulta ni reutiliza datos de pacientes, hospitalizaciones o seguros y no ofrece selección ni impresión.",
+    "test_path": "Precheck de evidencia CH17-E0021; futuras pruebas sólo después de aprobar fuente/roles/campos bajo CH16-Q008 y contrato de selección/salida bajo CH17-Q001.",
+    "recommended_action": "Mantener la tabla de seguros, identificadores y selección de impresión ausentes hasta contar con la fuente autorizada, alcance organizacional, roles/campos, auditoría, retención, minimización/redacción y contrato de salida aprobado.",
+    "blocked_by_client_information": true,
+    "notes": "CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. No autoriza una fuente, campos, selección ni salida imprimible."
+  }
     },
     {
       "requirement_id": "CH17-F07",

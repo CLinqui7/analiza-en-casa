@@ -111,7 +111,7 @@
       "description": "Seguros del paciente expone seguro, póliza, certificado, fecha efectiva, titular y DUI/NIT, con una casilla Imprimir por fila.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -120,7 +120,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: seleccionar un seguro sintético y comprobar que la salida incluya sólo los campos autorizados y seleccionados."
+      "test_path": "Precheck: CH17-E0021 fue abierto. No se implementa tabla, identificadores, selección ni impresión hasta aprobar fuente tenant-scoped, alcance organizacional, roles/campos, auditoría, retención, minimización/redacción (CH16-Q008) y contrato de selección/salida (CH17-Q001)."
     },
     {
       "id": "CH17-F07",
