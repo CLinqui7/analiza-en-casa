@@ -8,7 +8,7 @@
       "description": "Reporte de salud lista hospitalizaciones por periodo con estado de auditoría, triage Estable o Comprometido y estatus activo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -103,7 +103,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: verificar exactitud de campos derivados y acceso mínimo necesario según rol."
+      "test_path": "Precheck: CH17-E0019 fue abierto y /clinical/reports y /clinical/hospitalizations fueron inspeccionados. CH16-Q008 debe aprobar fuente tenant-scoped, alcance organizacional, roles/campos, auditoría, retención, minimización y redacción antes de cualquier E2E de datos."
     },
     {
       "id": "CH17-F06",

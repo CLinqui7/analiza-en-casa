@@ -8168,17 +8168,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "CH17-E0019 expone identidad, identificación, nacimiento, edad, sexo, periodo y estado de hospitalización; no se permite reutilizar datos de hospitalizaciones sin una fuente tenant-scoped ni contrato de mínimo privilegio.",
+        "financial_impact": "No se exponen seguros, pólizas, coberturas, claims ni información financiera.",
+        "current_platform_evidence": "/clinical/reports mantiene solamente superficies locales vacías; /clinical/hospitalizations contiene datos sintéticos de su propio módulo, que no constituyen una fuente autorizada para el Reporte de salud.",
+        "test_path": "Precheck documental: CH17-E0019 fue abierto y /clinical/reports y /clinical/hospitalizations fueron inspeccionados. No hay acción, consulta ni campo de reporte que pueda certificarse.",
+        "recommended_action": "Mantener F05 MISSING hasta aprobar CH16-Q008: fuente tenant-scoped, alcance organizacional, matriz de roles/campos, auditoría de acceso, retención, minimización y redacción antes de mostrar información principal.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0019 demuestra los campos visibles de información principal, pero no autoriza su copia, consulta o reutilización. La ruta de hospitalizaciones no es un puente de autorización para el reporte."
       }
     },
     {
