@@ -165,6 +165,8 @@ Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, finan
 
 - **CH17-Q007 · VISIBLE** — definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. El menú de Historia clínica, Reporte Claims, Ver visitas, Notas de servicio, Reporte de salud, Auditorías y Registro XPO no demuestra estas reglas. Evidencia: CH17-E0005, 00:51:14.200.
 
+- **CH17-Q008 · UNCERTAIN** — definir el rango temporal autorizado del Reporte de salud: valor predeterminado, límites, inclusividad, zona horaria, Seleccionar/Cargar/Cancelar, carga/error/reintento, auditoría, retención y redacción. CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles. Las fechas visibles son ejemplos y no se codifican. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
+
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 
 - **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.

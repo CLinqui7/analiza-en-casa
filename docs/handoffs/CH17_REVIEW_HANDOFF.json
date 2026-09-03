@@ -12,7 +12,7 @@
     "not_independently_implementable": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
   },
   "evidence_review": {
-    "f04": "CH17-E0012 shows a double calendar and Select/Cancel; E0017 shows processing over a report containing sensitive fields; E0019 shows the resulting patient information. No range semantics or authorized report source/roles are evidenced.",
+    "f04": "CH17-E0012 shows only a double calendar with Seleccionar/Cancelar and example dates; E0017 shows Procesando; E0019 shows the result exposes sensitive patient and hospitalization fields. CH16-Q008 and CH17-Q008 leave source/roles and the temporal contract unresolved, so no range control is implemented.",
     "f05_f06": "CH17-E0019 and E0021 visibly contain identity, hospitalization and insurance/policy fields. They do not authorize a report data source or role matrix.",
     "f08_f13": "CH17-E0024/E0026/E0029/E0038/E0043/E0048 show clinical navigation, antecedents/allergy capture, vital signs and nursing notes. They do not authorize local reuse of clinical data, clinical mutations, print, or note correction.",
     "f07_f14_f17": "Printing, AI audit and WhatsApp remain blocked by CH17-Q001/Q003/Q004. No sensitive output, external sharing or AI transfer is implemented."

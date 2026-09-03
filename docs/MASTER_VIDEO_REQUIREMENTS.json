@@ -8131,17 +8131,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "CH17-E0017/E0019 muestran que aplicar un rango expone contenido sensible del reporte; no se permite recuperar ni filtrar datos sin la fuente, alcance por organización y matriz de roles de CH16-Q008.",
+        "financial_impact": "No se exponen Claims, seguros, pólizas, coberturas ni información financiera.",
+        "current_platform_evidence": "/clinical/reports conserva únicamente superficies vacías locales; no existe calendario, selector de paciente, consulta, rango, impresión, exportación ni navegación de reporte.",
+        "test_path": "Precheck documental: CH17-E0012/E0017/E0019 fueron abiertos. No hay acción ni fuente de datos implementada que pueda certificarse.",
+        "recommended_action": "Mantener F04 MISSING hasta aprobar CH16-Q008 y CH17-Q008: fuente tenant-scoped, roles, campos permitidos y contrato temporal versionado antes de habilitar un selector o Cargar.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0012 demuestra sólo la anatomía de calendario doble, Seleccionar y Cancelar con fechas de ejemplo; no autoriza copiar esas fechas ni define rango válido, inclusividad, zona horaria, carga, error, reintento, auditoría, retención o redacción. CH17-E0017 muestra Procesando y CH17-E0019 el resultado con datos sensibles."
       }
     },
     {
@@ -10019,6 +10022,18 @@
       "evidence_event_ids": [
         "CH14-E0006",
         "CH14-E0152"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q008",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué rango temporal se autoriza para Reporte de salud —valor predeterminado, límites pasado/futuro, inclusividad, zona horaria, cambios de hospitalización y semántica de Seleccionar/Cargar/Cancelar— y cuáles son los estados de carga, error, reintento, auditoría, retención y redacción? CH16-Q008 sigue controlando fuente tenant-scoped, campos sensibles y roles. Las fechas visibles son ejemplos y no deben codificarse.",
+      "evidence_event_ids": [
+        "CH17-E0012",
+        "CH17-E0017",
+        "CH17-E0019"
       ],
       "status": "OPEN"
     }

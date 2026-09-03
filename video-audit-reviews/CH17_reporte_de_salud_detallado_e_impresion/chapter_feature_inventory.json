@@ -65,7 +65,7 @@
       "description": "Cambiar rango de fechas abre un calendario doble, permite seleccionar intervalo, Cargarlo y muestra Procesando antes de actualizar el encabezado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -86,7 +86,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: elegir intervalos válidos e inválidos; comprobar límites inclusivos, zona horaria y ausencia de datos fuera del rango."
+      "test_path": "Precheck: CH17-E0012/E0017/E0019 fueron abiertos. No se implementa un selector ni consulta de rango hasta aprobar CH16-Q008 y CH17-Q008; futuras pruebas deben cubrir rangos autorizados, aislamiento organizacional, auditoría y ausencia de datos fuera del rango."
     },
     {
       "id": "CH17-F05",

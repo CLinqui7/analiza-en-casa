@@ -234,6 +234,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - `CH17-Q007`: definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. Historia clínica, Claims, visitas, notas de servicio, Reporte de salud, Auditorías y Registro XPO permanecen como rótulos no operativos sin contexto de paciente ni hospitalización. Evidencia: CH17-E0005, 00:51:14.200.
 
+- `CH17-Q008`: definir el contrato temporal del Reporte de salud: valor predeterminado, límites pasado/futuro, inclusividad, zona horaria, cambios de hospitalización, semántica de Seleccionar/Cargar/Cancelar y estados de carga, error y reintento. También requiere auditoría de acceso, retención y redacción del resultado. `CH16-Q008` mantiene el control de fuente tenant-scoped, roles y campos sensibles. Las fechas visibles son ejemplos y no deben codificarse. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
+
 ## Datos
 
 - Base real de pacientes y formato de importación.
