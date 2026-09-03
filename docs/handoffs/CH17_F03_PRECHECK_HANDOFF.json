@@ -17,6 +17,7 @@
   "gates": {
     "typecheck": "PASS: npm.cmd run typecheck --workspace=@analiza/web",
     "playwright_ch17": "PASS: PLAYWRIGHT_PORT=4205 npx playwright test -c apps/web/playwright.config.ts e2e/ch17.spec.ts (6 passed).",
+    "f03_tabpanel_accessibility": "PASS: the six F03 tabs each reference the stable health-report-active-section role=tabpanel; Playwright and Selenium source assertions verify the relation without loading report data.",
     "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_health_report.py declares executable action-specific source coverage.",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",

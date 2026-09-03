@@ -1,0 +1,27 @@
+{
+  "lot": "CH17_REVIEW",
+  "source_sha": "094096feb3affc403c76cee78d3d14d76418271d",
+  "base_sha": "094096feb3affc403c76cee78d3d14d76418271d",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "reviewed_requirements": {
+    "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
+    "next_precheck": "CH17-F04",
+    "not_independently_implementable": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+  },
+  "evidence_review": {
+    "f04": "CH17-E0012 shows a double calendar and Select/Cancel; E0017 shows processing over a report containing sensitive fields; E0019 shows the resulting patient information. No range semantics or authorized report source/roles are evidenced.",
+    "f05_f06": "CH17-E0019 and E0021 visibly contain identity, hospitalization and insurance/policy fields. They do not authorize a report data source or role matrix.",
+    "f08_f13": "CH17-E0024/E0026/E0029/E0038/E0043/E0048 show clinical navigation, antecedents/allergy capture, vital signs and nursing notes. They do not authorize local reuse of clinical data, clinical mutations, print, or note correction.",
+    "f07_f14_f17": "Printing, AI audit and WhatsApp remain blocked by CH17-Q001/Q003/Q004. No sensitive output, external sharing or AI transfer is implemented."
+  },
+  "boundaries": [
+    "CH16-Q008 controls any Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction.",
+    "CH17-Q007 controls any record-scoped menu destination.",
+    "CR-020 remains unrelated and clinically blocked.",
+    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED until a writable Git stabilization commit exists."
+  ],
+  "next_batch": "CH17_F04_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
+}

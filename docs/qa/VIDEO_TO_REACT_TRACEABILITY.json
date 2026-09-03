@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T17:59:01-06:00",
-  "metadata_generated_from_commit": "c30ff0f78988b35bec1c26300ee6eddad412cf49",
+  "generated_at": "2026-09-02T18:09:51-06:00",
+  "metadata_generated_from_commit": "094096feb3affc403c76cee78d3d14d76418271d",
   "source_sha256": "83147d2f3dc55be261a334ce1b6409f3b4daa1c13ad723c97cb6b7bd409c1167",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8161,7 +8161,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, retención, minimización ni redacción de ninguna sección del Reporte de salud.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH17-E0008 respalda sólo las seis pestañas visibles. React alterna estados vacíos locales sin selector, paciente, seguro, hospitalización, datos clínicos, auditoría, documentos, rango temporal, impresión ni navegación de destino. Playwright completó 6/6, pero la evidencia sigue sin SHA inmutable y no autoriza certificar fuente, permisos o rendimiento."
+      "notes": "CH17-E0008 respalda sólo las seis pestañas visibles. Cada pestaña referencia el tabpanel estable health-report-active-section; React alterna únicamente estados vacíos locales, sin selector, paciente, seguro, hospitalización, datos clínicos, auditoría, documentos, rango temporal, impresión ni navegación de destino. Playwright completó 6/6, pero la evidencia sigue sin SHA inmutable y no autoriza certificar fuente, permisos o rendimiento."
     },
     {
       "requirement_id": "CH17-F04",

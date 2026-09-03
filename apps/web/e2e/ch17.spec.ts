@@ -84,24 +84,32 @@ test('CH17 switches only the six observed empty report sections without loading 
   const treatments = page.locator('[data-action-id="HEALTH-REPORT-SECTION-TREATMENTS"]');
   const events = page.locator('[data-action-id="HEALTH-REPORT-SECTION-EVENTS"]');
   const evidence = page.locator('[data-action-id="HEALTH-REPORT-SECTION-EVIDENCE"]');
+  const activePanel = page.locator('#health-report-active-section[role="tabpanel"]');
 
+  await expect(activePanel).toHaveCount(1);
+  await expect(information).toHaveAttribute('aria-controls', 'health-report-active-section');
+  await expect(clinical).toHaveAttribute('aria-controls', 'health-report-active-section');
+  await expect(medical).toHaveAttribute('aria-controls', 'health-report-active-section');
+  await expect(treatments).toHaveAttribute('aria-controls', 'health-report-active-section');
+  await expect(events).toHaveAttribute('aria-controls', 'health-report-active-section');
+  await expect(evidence).toHaveAttribute('aria-controls', 'health-report-active-section');
   await expect(information).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Información Principal: sin contenido autorizado');
+  await expect(activePanel).toContainText('Información Principal: sin contenido autorizado');
   await clinical.click();
   await expect(clinical).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Evaluación Clínica: sin contenido autorizado');
+  await expect(activePanel).toContainText('Evaluación Clínica: sin contenido autorizado');
   await medical.click();
   await expect(medical).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Atención Médica: sin contenido autorizado');
+  await expect(activePanel).toContainText('Atención Médica: sin contenido autorizado');
   await treatments.click();
   await expect(treatments).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Tratamientos y Órdenes: sin contenido autorizado');
+  await expect(activePanel).toContainText('Tratamientos y Órdenes: sin contenido autorizado');
   await events.click();
   await expect(events).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Eventos Clínicos: sin contenido autorizado');
+  await expect(activePanel).toContainText('Eventos Clínicos: sin contenido autorizado');
   await evidence.click();
   await expect(evidence).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('tabpanel')).toContainText('Evidencia y Documentos: sin contenido autorizado');
+  await expect(activePanel).toContainText('Evidencia y Documentos: sin contenido autorizado');
   await expect(page.locator('#health-report-sections-boundary')).toContainText('CH16-Q008');
 
   await page.reload();

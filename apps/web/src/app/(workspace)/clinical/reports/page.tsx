@@ -111,7 +111,7 @@ export default function HealthReportPage() {
           <div aria-label="Secciones observadas del reporte de salud" role="tablist">
             {reportSections.map((section) => (
               <button
-                aria-controls={`health-report-section-${section.id}`}
+                aria-controls="health-report-active-section"
                 aria-describedby="health-report-sections-boundary"
                 aria-selected={selectedSection === section.id}
                 data-action-id={section.actionId}
@@ -127,7 +127,7 @@ export default function HealthReportPage() {
           </div>
           <div
             aria-labelledby={`health-report-tab-${activeSection.id}`}
-            id={`health-report-section-${activeSection.id}`}
+            id="health-report-active-section"
             role="tabpanel"
           >
             <EmptyState
