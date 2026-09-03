@@ -135,6 +135,16 @@ class Hospitalizations(unittest.TestCase):
 
     def fill(self, label: str, value: str) -> None:
         control = self.field(label)
+        if control.get_attribute('type') in {'date', 'time'}:
+            self.d.execute_script(
+                "const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
+                "set.call(arguments[0], arguments[1]);"
+                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
+                "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+                control,
+                value,
+            )
+            return
         control.clear()
         control.send_keys(value)
 
@@ -619,9 +629,19 @@ class Hospitalizations(unittest.TestCase):
     def test_ch07_quote_tracking_filters_search_and_pages_without_insurance_mutation(self) -> None:
         self.d.get(f'{BASE}/hospitalizations')
         self.list_ready()
-        quotes = get_collection(self.d, 'quotes')
-        self.assertTrue(isinstance(quotes, list) and quotes)
-        base = quotes[0]
+        base = {
+            'caseId': 'case-demo-001',
+            'patientId': 'patient-demo-001',
+            'version': 1,
+            'summary': 'Cotización sintética de seguimiento Selenium',
+            'items': [],
+            'subtotal': 0,
+            'discountAmount': 0,
+            'total': 0,
+            'insurerAmount': 0,
+            'patientAmount': 0,
+            'immutable': False,
+        }
         fixtures = [
             {**base, 'id': 'quote-ch07-sel-1', 'createdAt': '2026-09-01T12:00:00.000Z', 'status': 'DRAFT'},
             {**base, 'id': 'quote-ch07-sel-2', 'createdAt': '2026-09-02T12:00:00.000Z', 'status': 'DRAFT'},
@@ -650,7 +670,7 @@ class Hospitalizations(unittest.TestCase):
 
         date_started = time.time()
         date = self.action('HOSPITALIZATION-QUOTE-FILTER-DATE')
-        self.d.execute_script("arguments[0].value='2000-01-01'; arguments[0].dispatchEvent(new Event('input', {bubbles:true})); arguments[0].dispatchEvent(new Event('change', {bubbles:true}));", date)
+        self.d.execute_script("const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(arguments[0], '2000-01-01'); arguments[0].dispatchEvent(new Event('input', {bubbles:true})); arguments[0].dispatchEvent(new Event('change', {bubbles:true}));", date)
         self.assertEqual(date.get_attribute('value'), '2000-01-01')
         self.pass_('HOSPITALIZATION-QUOTE-FILTER-DATE', 'SEL-CH07-HOSPITALIZATION-QUOTES', date_started)
         self.click('HOSPITALIZATION-QUOTE-FILTER-APPLY')

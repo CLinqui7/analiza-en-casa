@@ -8,23 +8,25 @@ import unittest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from test_hospitalizations import BASE, Hospitalizations
+import test_hospitalizations as hospitalization_tests
+
+BASE = hospitalization_tests.BASE
 
 
 class ClinicalHospitalizationList(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        Hospitalizations.setUpClass()
-        cls.d = Hospitalizations.d
-        cls.w = Hospitalizations.w
+        hospitalization_tests.Hospitalizations.setUpClass()
+        cls.d = hospitalization_tests.Hospitalizations.d
+        cls.w = hospitalization_tests.Hospitalizations.w
 
     @classmethod
     def tearDownClass(cls) -> None:
-        Hospitalizations.tearDownClass()
+        hospitalization_tests.Hospitalizations.tearDownClass()
 
-    reset_mock_state = Hospitalizations.reset_mock_state
-    login_as = Hospitalizations.login_as
-    prepare_authenticated_test = Hospitalizations.prepare_authenticated_test
+    reset_mock_state = hospitalization_tests.Hospitalizations.reset_mock_state
+    login_as = hospitalization_tests.Hospitalizations.login_as
+    prepare_authenticated_test = hospitalization_tests.Hospitalizations.prepare_authenticated_test
 
     def setUp(self) -> None:
         self.prepare_authenticated_test()
