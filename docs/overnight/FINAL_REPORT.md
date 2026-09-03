@@ -122,7 +122,7 @@ La migración no autoriza el uso con datos reales. Quedan por trasladar con pari
 
 ### Addendum · 2026-09-03 · Cierre de release React
 
-- La vista previa protegida de Vercel está `READY`: [web-4pzikj9ca-clinqui7s-projects.vercel.app](https://web-4pzikj9ca-clinqui7s-projects.vercel.app). El smoke autenticado por CLI obtuvo HTTP 200 para `/login` y `/portal/demo-qt-2026-0148`; no se promovió ni fusionó producción.
+- La vista previa protegida de Vercel está `READY`: [web-hwlpgh2xn-clinqui7s-projects.vercel.app](https://web-hwlpgh2xn-clinqui7s-projects.vercel.app). El smoke autenticado por CLI obtuvo HTTP 200 para `/login` y `/portal/demo-qt-2026-0148`; no se promovió ni fusionó producción.
 - Se añadió certificación Selenium real para acciones transversales. La regresión global pasó 181/181 y `npm run selenium:coverage` pasó 334/334 (100%). También permanecen verdes la paridad de video 210/210, cambios de cliente 32/32 y la auditoría de video 17/17.
 - Cinco entradas permanecen `NOT_TESTABLE`, no implementadas: detalle de hospitalización desde una medición sin fuente clínica autorizada, creación de tarjeta de medicamentos (CR-019), registro de signos vitales (CH17-Q009), aprobación de descuentos (CH16-Q001–Q005) y edición de configuración sin contrato seguro. Se mantienen en `docs/OPEN_QUESTIONS.md` y no se sustituyeron por datos, reglas ni acciones simuladas.
 - La certificación final sigue `globalComplete=false`: faltan Supabase/RLS y proveedores reales, contratos clínicos/financieros aprobados y un scheduler autorizado para el cron de 15 minutos que el plan Hobby de Vercel no admite.
