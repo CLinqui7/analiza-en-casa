@@ -1,6 +1,6 @@
 {
-  "lot": "CH17_REVIEW",
-  "handoff": "docs/handoffs/CH17_REVIEW_HANDOFF.json",
+  "lot": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK",
+  "handoff": "docs/handoffs/CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK_HANDOFF.json",
   "final_sha": null,
-  "next_batch": "CH17_F14_EVIDENCE_AND_AI_DATA_BOUNDARY_PRECHECK"
+  "next_batch": "CH17_REVIEW"
 }

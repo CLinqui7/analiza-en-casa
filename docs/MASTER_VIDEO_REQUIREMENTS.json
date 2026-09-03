@@ -8541,7 +8541,7 @@
       "chapter_id": "CH17",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q003 bloquea toda transferencia de contenido clínico a IA hasta contar con proveedor y contrato aprobados.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8553,17 +8553,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q003"
+      ],
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una transferencia de nota clínica a IA sin base autorizada, minimización, revisión humana y auditoría puede revelar datos sensibles o producir una salida no controlada.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports no expone Auditar con IA, una nota clínica, proveedor, solicitud externa, prompt ni transferencia de datos; /clinical/hospitalizations no es un puente de autorización.",
+        "test_path": "Precheck factual de CH17-E0048; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q003: proveedor, base autorizada, datos permitidos, minimización/redacción, revisión humana, manejo de salida, persistencia/entrenamiento, roles, auditoría y retención.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0048 muestra sólo el rótulo Auditar con IA dentro del contexto de una nota sensible. No autoriza interfaz, solicitud, prompt, contenido clínico, transferencia externa ni reutilización de hospitalizaciones."
       }
     },
     {

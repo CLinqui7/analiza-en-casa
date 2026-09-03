@@ -294,7 +294,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0048_00h52m14s800ms_DETAIL.jpg"
         }
       ],
-      "test_path": "Seguridad: usar datos sintéticos; comprobar minimización, consentimiento/base autorizada, aislamiento, no entrenamiento, revisión humana y auditoría."
+      "test_path": "Precheck factual: conservar NOT_TESTABLE hasta aprobar proveedor, base autorizada, datos permitidos, minimización/redacción, revisión humana, salida, persistencia/entrenamiento, roles, auditoría y retención; no exponer control, solicitud ni contenido clínico."
     },
     {
       "id": "CH17-F15",
