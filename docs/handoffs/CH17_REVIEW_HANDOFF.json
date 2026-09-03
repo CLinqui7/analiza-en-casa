@@ -2,10 +2,10 @@
   "lot": "CH17_REVIEW",
   "source_sha": "094096feb3affc403c76cee78d3d14d76418271d",
   "base_sha": "094096feb3affc403c76cee78d3d14d76418271d",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
+  "verification_status": "RUNTIME_EVIDENCE_RECORDED_AT_COMMITTED_SHA",
+  "final_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
+  "remote_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
     "next_precheck": "CH17-F04",
@@ -21,7 +21,8 @@
     "CH16-Q008 controls any Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction.",
     "CH17-Q007 controls any record-scoped menu destination.",
     "CR-020 remains unrelated and clinically blocked.",
-    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED until a writable Git stabilization commit exists."
+    "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED. The focused six-case suite ran at fec4aef2d984afc95e4f54c2703d20651116c8c9, but it does not establish the separate source, role, permission or performance contracts.",
+    "Direct Git synchronization is environment-blocked: current HEAD and cached origin resolve to fec4aef2d984afc95e4f54c2703d20651116c8c9, while direct git add/fetch/push fail because of .git ACL and missing HTTPS credentials."
   ],
   "next_batch": "CH17_F04_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
 }
