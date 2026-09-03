@@ -40,7 +40,7 @@
       "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
     },
     "CR-005": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
       "functional_fingerprint": "0e06656c6ffd690bb42055c77465ee13bc291ec114f96dccc868928d513482f2",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -50,7 +50,7 @@
       "notes": "La alta independiente de médico y recurso se cubre en demo; la SHA queda pendiente hasta que Git permita escribir el checkpoint."
     },
     "CR-006": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
       "functional_fingerprint": "33c59f3a46dfb7270b231aeb96e808331528f3e6ad0f7085b1d4f2e683ed3b1b",
       "certification_status": "PARTIAL",
       "test_ids": [
@@ -61,7 +61,7 @@
       "notes": "Alta y edición se verifican en demo; el alcance restante depende de Storage privado, RLS, descarga autorizada, retención y auditoría de adjuntos."
     },
     "CR-007": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
       "functional_fingerprint": "a70d590b7b4c0683868c1d1220529c4f192dc1f6422b9e8b4aefaba4e0a335bc",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
