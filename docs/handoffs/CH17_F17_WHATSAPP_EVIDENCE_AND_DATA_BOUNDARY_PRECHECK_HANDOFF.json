@@ -1,0 +1,47 @@
+{
+  "lot": "CH17_F17_WHATSAPP_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "bad81e5bf6590eeefa1a5a1c3a2425a4f8503c76",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_GIT_SYNC_BLOCKED",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirement": "CH17-F17",
+  "outcome": "NOT_TESTABLE",
+  "evidence": {
+    "event": "CH17-E0048",
+    "frame_timestamp": "00:52:14.800",
+    "transcript_timestamp": "00:54:00.000–00:54:23.560",
+    "paths": [
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg",
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/transcript_raw.txt"
+    ],
+    "observation": "The opened frame shows Reporte de salud context but no WhatsApp control, recipient, preview, or delivery result. The transcript only asserts that a nursing note could be shared externally with a doctor; it supplies no delivery contract."
+  },
+  "mapping": {
+    "route_id": "ROUTE-HEALTH-REPORTS",
+    "react_route": "/clinical/reports",
+    "react_files": ["apps/web/src/app/(workspace)/clinical/reports/page.tsx"],
+    "component_ids": [],
+    "action_ids": [],
+    "playwright_test_ids": [],
+    "selenium_test_ids": []
+  },
+  "boundaries": [
+    "CH17-Q004 requires an approved organization-scoped source, provider, explicit/revocable consent, authorized-recipient validation, authenticated secure expiring/revocable delivery, minimized/redacted payload, delivery result, audit, and retention before any external sharing.",
+    "No clinical note, WhatsApp control, recipient lookup, preview, external request, delivery claim, or data bridge was added to /clinical/reports.",
+    "QUOTE-WHATSAPP and INSURANCE-WHATSAPP are provider-blocked non-clinical controls. They do not send externally, exclude clinical content, and are not an authorization bridge for F17.",
+    "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations; it is not a source or authorization bridge for health-report sharing. F04-F16 and F07 preserve their recorded boundaries.",
+    "CR-020 remains the separate fluid-balance clinical-approval blocker and does not authorize external sharing."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA bad81e5bf6590eeefa1a5a1c3a2425a4f8503c76; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17 requirements traced).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files contain no Dark/System UI support).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters verified; 0 pending; 0 failed).",
+    "anti_skip": "PASS: focused CH17 Playwright and Selenium source files contain no test/pytest skip marker.",
+    "selenium_runtime": "NOT_APPLICABLE: F17 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add could not create .git/index.lock (Permission denied); therefore no commit or push was attempted. git fetch could not open .git/FETCH_HEAD (Permission denied). Local HEAD and cached origin/codex/react-full-parity-selenium-100 both remain bad81e5bf6590eeefa1a5a1c3a2425a4f8503c76."
+  },
+  "next_batch": "CH17_REVIEW"
+}

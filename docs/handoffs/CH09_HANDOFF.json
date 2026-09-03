@@ -1,0 +1,60 @@
+{
+  "lot": "RECERTIFY_CHECKPOINT_2002145",
+  "source_sha": "200214561d26a23510f75623f0292ecdc9c30981",
+  "base_sha": "200214561d26a23510f75623f0292ecdc9c30981",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "200214561d26a23510f75623f0292ecdc9c30981",
+  "remote_sha": "200214561d26a23510f75623f0292ecdc9c30981",
+  "commits": ["200214561d26a23510f75623f0292ecdc9c30981"],
+  "changed_files": [
+    "apps/web/src/lib/video-parity-summary.ts",
+    "docs/overnight/VIDEO_AUDIT_VERIFY.json",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
+    "docs/handoffs/CH09_HANDOFF.json",
+    "docs/handoffs/CH09_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "recertified": ["CH01", "CH02", "CH03", "CH04"],
+    "preserved_blockers": ["CH09-Q002", "CH09-Q004", "CH09-Q006", "CH08-SUPABASE-ADMINISTRATIVE-EXECUTION-RPC"]
+  },
+  "tests": [
+    "npm --workspace @analiza/web run typecheck",
+    "PLAYWRIGHT_PORT=4312 npx playwright test -c apps/web/playwright.config.ts e2e/ch01.spec.ts",
+    "PLAYWRIGHT_PORT=4313 npx playwright test -c apps/web/playwright.config.ts e2e/ch02.spec.ts",
+    "PLAYWRIGHT_PORT=4314 npx playwright test -c apps/web/playwright.config.ts e2e/ch03.spec.ts",
+    "PLAYWRIGHT_PORT=4315 npx playwright test -c apps/web/playwright.config.ts e2e/quotes.spec.ts --grep CH04 quote general",
+    "npm run qa:video-parity:generate",
+    "npm run qa:traceability-mirror -- --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "npm run qa:video-parity:chapter -- CH02",
+    "npm run qa:video-parity:chapter -- CH03",
+    "npm run qa:video-parity:chapter -- CH04",
+    "npm run qa:light-mode",
+    "npm run audit:verify"
+  ],
+  "gates": {
+    "functional_fingerprint": "PASS: bdb9e7e8a69dba8e6532f6aec0b0944cc837a220f93e200cfdc4243b28acf823 at 200214561d26a23510f75623f0292ecdc9c30981",
+    "typecheck": "PASS",
+    "playwright_ch01": "PASS: 10/10",
+    "playwright_ch02": "PASS: 6/6",
+    "playwright_ch03": "PASS: 4/4",
+    "playwright_ch04_quote_general": "PASS: 1/1",
+    "traceability_generator": "PASS: regenerated 210 requirements from committed checkpoint metadata",
+    "traceability_mirror": "PASS: CH04-F004, CH09-F01 and CH09-F02 JSON/CSV/certification mirrors and negative fixtures",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13; CH04 11/11",
+    "light_mode": "PASS: 78 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable"
+  },
+  "blockers": [
+    "CH09-Q002/Q004/Q006 remain client/clinical-definition blockers; no clinical state, profile, workflow, report, or print behavior was added.",
+    "CH08 administrative profile remains demo-local pending the secured Supabase RPC integration inputs.",
+    "Selenium browser-runtime evidence remains pending because Python is unavailable."
+  ],
+  "next_batch": "CH09_REVIEW"
+}

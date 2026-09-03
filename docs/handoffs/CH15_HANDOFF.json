@@ -1,0 +1,36 @@
+{
+  "lot": "CH15_PRECHECK",
+  "source_sha": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
+  "base_sha": "adfbe2632d4d3f26eda1249f2947959e449d01ba",
+  "implementation_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "remote_sha": "e89a734e92c8fddcbe651f4ee6066dd619095df6",
+  "functional_fingerprint": "725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
+  "requirements": {
+    "verified_partial": ["CH15-F06"],
+    "explicitly_blocked": ["CH15-F01", "CH15-F02", "CH15-F03", "CH15-F04", "CH15-F05", "CH15-F07", "CH15-F09", "CH15-F10", "CH15-F11", "CH15-F12", "CH15-F13", "CH15-F14", "CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "precheck": "CH15-E0003/E0009 were opened: Items faltantes disponibles contains patient-scoped acuse rows, available/required comparison and an add action. CH15-E0013/E0017 and CH15-E0020–E0032 likewise require approved patient, warehouse, stock, template or quote-state rules. These remain blocked by CH15-Q001/Q002/Q003 and no patient, acuse, quote or stock operation was added.",
+    "f06": "CH15-E0046 was opened and shows Items / Medicamentos with Registros, pagination, search, Excel, Nuevo and the Acciones/Código/Nombre/Impuesto/Descuento/Lotes/Estado columns. CH15-E0047 was opened and shows the medication form, but does not define a safe source, fields, write roles, validation, audit or clinical rules. React implements only the permission-gated, read-only empty list at /catalogs/medications."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15": "PASS: 6/6 at isolated port 4176; factual empty list/search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_medications.py is executable, action-specific source coverage",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint 725b6356d61fbe3497693fe1f506f21ed6c349eded6f372748fd68e5cfdfb0b8",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS: 85 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "git_sync": "CACHED tracking ref equals e89a734; fresh push/fetch could not run because HTTPS credentials are unavailable and .git/FETCH_HEAD is write-protected"
+  },
+  "blockers": [
+    "CH15-Q001/Q002/Q003 block patient-scoped acuse, shortage, warehouse, template and quote-origin behavior.",
+    "CH15-Q004 blocks medication and supplies source data, flag effects, identity, attributes, write roles, validation, audit and clinical semantics. Excel and Nuevo remain disabled.",
+    "CH14-Q006 remains unresolved; this batch does not implement closure warning acceptance semantics.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
+    "The implementation commit and cached tracking ref are e89a734. Fresh push/fetch remain blocked by unavailable HTTPS credentials and denied .git/FETCH_HEAD writes; the metadata-only follow-up cannot create .git/index.lock."
+  ],
+  "next_batch": "CH15_REVIEW"
+}

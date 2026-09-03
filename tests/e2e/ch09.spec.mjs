@@ -62,19 +62,20 @@ test("CH09 carga rango, seis secciones y configuración ordenable del reporte", 
   for (const label of ["Información Principal", "Evaluación Clínica", "Atención Médica", "Tratamientos y Órdenes", "Eventos Clínicos", "Evidencia y Documentos"])
     await expect(page.getByRole("button", {name: label, exact: true})).toBeVisible();
   await page.getByRole("button", {name: "Evaluación Clínica", exact: true}).click();
-  await expect(page.getByText("Diagnóstico documentado", {exact: true})).toBeVisible();
+  await expect(page.getByRole("navigation", {name: "Secciones de evaluación clínica"})).toBeVisible();
   await page.getByRole("button", {name: "Cambiar rango de fechas", exact: true}).click();
   await page.locator('#health-report-range-form input[name="start"]').fill("2026-06-01");
   await page.locator('#health-report-range-form input[name="end"]').fill("2026-06-15");
   await page.getByRole("button", {name: "Cargar", exact: true}).click();
   await expect(page.getByRole("heading", {name: /01 jun 2026 al 15 jun 2026/i})).toBeVisible();
   await page.getByRole("button", {name: "Imprimir", exact: true}).click();
-  await expect(page.getByRole("dialog").getByRole("heading", {name: "Configuration report", exact: true})).toBeVisible();
-  await expect(page.getByText("Include attached documents", {exact: false})).toBeVisible();
-  await expect(page.getByText(/Tabla de Signos Vitales/, {exact: false})).toBeVisible();
-  await page.getByRole("button", {name: /Bajar Tabla de Signos Vitales/}).click();
-  await expect(page.getByText("1. Tarjeta de medicamentos", {exact: true})).toBeVisible();
-  await page.getByRole("dialog").locator('.modal-footer [data-action="close-modal"]').click();
+  const configDialog = page.getByRole("dialog");
+  await expect(configDialog.getByRole("heading", {name: "Configuration report", exact: true})).toBeVisible();
+  await expect(configDialog.getByText("Include attached documents", {exact: false})).toBeVisible();
+  await expect(configDialog.getByText(/Tabla de Signos Vitales/, {exact: false})).toBeVisible();
+  await configDialog.getByRole("button", {name: /Bajar Tabla de Signos Vitales/}).click();
+  await expect(configDialog.getByText("3. Tabla de Signos Vitales", {exact: true})).toBeVisible();
+  await configDialog.locator('.modal-footer [data-action="close-modal"]').click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await page.screenshot({path: resolve(evidenceDir, "ch09-health-report-390x844.png"), fullPage: true});
 });

@@ -1,0 +1,66 @@
+{
+  "lot": "CH08",
+  "source_sha": null,
+  "base_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "packages/contracts/src/index.ts",
+    "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+    "apps/web/src/components/administrative-profile-panel.tsx",
+    "apps/web/src/components/administrative-profile-panel.test.ts",
+    "apps/web/src/lib/data-provider.ts",
+    "apps/web/src/lib/data-provider.test.ts",
+    "apps/web/vitest.config.ts",
+    "apps/web/e2e/ch08.spec.ts",
+    "tests/selenium/test_hospitalizations.py",
+    "tests/selenium/helpers/hospitalization_action_recorder.py",
+    "scripts/verify-selenium-hospitalization-coverage.mjs",
+    "scripts/verify-video-react-parity.mjs",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/handoffs/CH07_HANDOFF.json",
+    "docs/handoffs/CH08_HANDOFF.json",
+    "docs/handoffs/CH08_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "exact": [],
+    "partial": ["CH08-F04", "CH08-F05", "CH08-F06", "CH08-F07", "CH08-F08", "CH08-F09", "CH08-F10"],
+    "blocked_integration": ["CH08-F01", "CH08-F02", "CH08-F03"],
+    "not_testable": ["CH08-F11", "CH08-F12"]
+  },
+  "tests": [
+    "npm run typecheck",
+    "npm --workspace @analiza/web test -- --run src/lib/data-provider.test.ts src/components/administrative-profile-panel.test.ts",
+    "PLAYWRIGHT_PORT=4289 npx playwright test -c apps/web/playwright.config.ts e2e/ch08.spec.ts",
+    "node scripts/verify-selenium-hospitalization-coverage.mjs",
+    "node scripts/verify-video-react-parity.mjs --chapter CH08 --self-test"
+  ],
+  "gates": {
+    "typecheck": "PASS",
+    "playwright_ch08": "PASS_7_PROFILE_AND_DIRECT_ROLE_TESTS",
+    "ch08_parity_self_test": "PASS_12_OF_12",
+    "hospitalization_selenium_declaration_coverage": "PASS_38_OF_38",
+    "hospitalization_selenium_runtime": "PENDING_RUNTIME (executed=0; Python unavailable, not FAILED_RUNTIME)"
+  },
+  "evidence": {
+    "functional_fingerprint": "dbebb0a835f5c6a5b4e2845247238f165dc3c1758d7fe105ac1ef1a08eacf544",
+    "ch08_profile_flow": "A synthetic hospitalization opens its execution administrative profile; cancellation is reloaded as non-persistent, while saved administrative labels reappear in the PIC summary and reopened form.",
+    "runtime_semantics": "The hospitalization verifier treats an absent runtime file as PENDING_RUNTIME. PASS_RUNTIME requires a completed Selenium run with every required action recorded PASS at the current fingerprint.",
+    "ch08_permission_flow": "ADMIN and DOCTOR open the profile directly in mock mode. NURSE, FINANCE, and AUDITOR read the same detail without open/save/cancel controls and retain hospitalization/audit storage after reload; INVENTORY receives direct-route denial.",
+    "ch08_supabase_boundary": "Supabase mode exposes an accessible secure-integration pending notice and no profile open/save/dialog. A provider-level regression rejects administrativeProfile before a raw hospitalizations upsert."
+  },
+  "blockers": [
+    "CH08-F01 through F03 are DEMO_LOCAL_ONLY and BLOCKED_INTEGRATION: Supabase needs the existing audited start_administrative_execution RPC with linked quote/version and validated inputs. The generic hospitalizations upsert is deliberately guarded.",
+    "CH08-F04 through F10 remain PARTIAL pending their independently evidenced receivables, statements, payment and report behavior; no financial semantics were invented.",
+    "CH08-F11 remains NOT_TESTABLE pending CH08-Q001 overpayment/credit semantics.",
+    "CH08-F12 remains NOT_TESTABLE pending CH08-Q010 automated-statement definition.",
+    "Python is unavailable, so Selenium source coverage is declared but no runtime PASS is claimed.",
+    "Git metadata writes remain denied; no commit, push, fresh fetch or remote SHA verification is claimed."
+  ],
+  "next_batch": "CH08_SUPABASE_REVIEW"
+}

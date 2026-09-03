@@ -1,0 +1,33 @@
+{
+  "lot": "CH15_F13_PRECHECK",
+  "source_sha": "264d19e2f1aa0b7819985e37eae2e5fbae4f7716",
+  "base_sha": "264d19e2f1aa0b7819985e37eae2e5fbae4f7716",
+  "implementation_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
+  "remote_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
+  "functional_fingerprint": "f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a",
+  "requirements": {
+    "verified_partial": ["CH15-F13"],
+    "explicitly_blocked": ["CH15-F05", "CH15-F11", "CH15-F12", "CH15-F15", "CH15-F16"]
+  },
+  "evidence": {
+    "f13": "CH15-E0122 and the CH15-E0128 detail crop were opened. They show Items / Servicios with Registros, pagination, search, Excel, Nuevo, and Acciones/Código/Nombre/Tipo de producto/Categoría/Impuesto/Descuento/Estado columns. Loaded source rows are not copied. React implements only the factual empty list at /catalogs/services."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch15": "PASS: 30/30 at isolated port 4182; factual empty list/search/reload-no-audit, ADMIN/INVENTORY/AUDITOR allow and DOCTOR/NURSE/FINANCE direct denial",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_catalog_services.py is executable, action-specific source coverage",
+    "ch15_parity_self_test": "PASS: 16/16 at fingerprint f27034f135477e4640e48aa152fc6f4088769a8496c47e7ada132054ba78701a",
+    "traceability_mirror": "PASS: normal and self-test; CH15-F13 is mirrored and duplicate raw certification keys fail closed.",
+    "light_mode": "PASS: 89 product source files",
+    "protected_ch01_ch03_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
+    "audit_verify": "PASS: 17/17 chapters"
+  },
+  "blockers": [
+    "CH15-Q004 blocks authoritative service rows, types, categories, prices, tax/discount effects, export columns, write roles, validation, audit and clinical or financial effects.",
+    "No service rows, categories, product types, prices, tax/discount behavior, writes or financial rules were fabricated.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH15_REVIEW"
+}

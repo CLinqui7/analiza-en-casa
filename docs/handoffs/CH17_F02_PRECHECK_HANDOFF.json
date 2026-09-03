@@ -1,0 +1,33 @@
+{
+  "lot": "CH17_F02_PRECHECK",
+  "source_sha": "77cd08e6bd24ede7fbe97dc0d2ec395fd81e665d",
+  "base_sha": "77cd08e6bd24ede7fbe97dc0d2ec395fd81e665d",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "implemented_partial": ["CH17-F02"],
+    "explicitly_blocked": ["CH17-F01", "CH17-F03", "CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+  },
+  "evidence": {
+    "f02": "CH17-E0005 detail crop was opened. It establishes the labels Historia clínica, Reporte Claims, Ver visitas, Notas de servicio, Reporte de salud, Auditorías and Registro XPO in the hospitalization action menu."
+  },
+  "gates": {
+    "typecheck": "PASS: npm.cmd run typecheck --workspace=@analiza/web",
+    "playwright_ch17_f02": "PENDING_RUNTIME_RESULT: the focused runner reached all four CH17 cases, including the F02 menu and role guards, but did not return a final result because its Next development server remained active; functional/performance/permission certification is UNVERIFIED.",
+    "selenium_declaration": "PASS: node scripts/verify-selenium-coverage.mjs --prefix HEALTH-REPORT- reported declared=4/4, executed=0.",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_health_report.py declares executable action-specific source coverage.",
+    "traceability_mirror": "PASS: normal and --self-test modes.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters)."
+  },
+  "blockers": [
+    "CH17-Q007 blocks the organization-scoped hospitalization relation, roles, conditions, audit evidence and safe destination contract for every observed action.",
+    "CH16-Q008 remains the independent boundary for any sensitive Reporte de salud source, roles, minimization, access audit, retention and redaction.",
+    "CR-020 remains clinically blocked and is unrelated to this read-only menu anatomy.",
+    "The menu has no patient or hospitalization context and does not query, navigate, print, export, message or mutate clinical content."
+  ],
+  "next_batch": "CH17_REVIEW"
+}

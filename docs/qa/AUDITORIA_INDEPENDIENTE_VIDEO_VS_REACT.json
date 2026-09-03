@@ -1,0 +1,1708 @@
+{
+  "audit": {
+    "title": "Auditoría exhaustiva de paridad con el video",
+    "date": "2026-08-29",
+    "repository": "CLinqui7/analiza-en-casa",
+    "branch": "codex/react-full-parity-selenium-100",
+    "remote_sha": "77d3998e1eb95a677112a6ff65eb0956c781536e",
+    "canonical_video_chapters": 17,
+    "canonical_video_events": 1359,
+    "canonical_requirements": 210,
+    "verdict_counts": {
+      "PARCIAL": 48,
+      "COINCIDE": 29,
+      "FALTA": 90,
+      "BLOQUEADO_CLIENTE": 34,
+      "NO_DEMOSTRABLE": 7,
+      "BLOQUEADO_INTEGRACION": 2
+    },
+    "route_summary": {
+      "MIGRATED_EXACT": 7,
+      "MIGRATED_PARTIAL": 20,
+      "MISSING": 13
+    },
+    "scope_note": "Excluye cambios locales de Seguros aún no publicados."
+  },
+  "requirements": [
+    {
+      "chapter": "CH01",
+      "id": "CH01-F001",
+      "requirement": "Acceso mediante ruta directa al módulo de pacientes",
+      "verdict": "PARCIAL",
+      "current": "Existe /patients protegido por sesión.",
+      "gap": "No existe compatibilidad/redirect explícito para la ruta observada /pacientes.php ni prueba del retorno exacto."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F002",
+      "requirement": "Listado de pacientes",
+      "verdict": "COINCIDE",
+      "current": "Listado React operativo con activos/inactivos, búsqueda, detalle y acciones.",
+      "gap": "La presentación no es idéntica, pero la función base está."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F003",
+      "requirement": "Columnas del catálogo de pacientes",
+      "verdict": "PARCIAL",
+      "current": "Muestra paciente, documento, aseguradora, contacto y acción.",
+      "gap": "Faltan edad, empresa en tabla, triage, notificación Botmaker y estado como columnas visibles."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F004",
+      "requirement": "Búsqueda y paginación de pacientes",
+      "verdict": "COINCIDE",
+      "current": "Búsqueda normalizada, selector de tamaño y navegación de páginas.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F005",
+      "requirement": "Exportar y crear paciente",
+      "verdict": "PARCIAL",
+      "current": "Crear paciente y exportar CSV funcionan.",
+      "gap": "El video muestra Excel; la plataforma ofrece CSV y no replica exactamente el formato."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F006",
+      "requirement": "Estados de carga y vacío de tabla",
+      "verdict": "COINCIDE",
+      "current": "Estados de carga/error/vacío explícitos.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F007",
+      "requirement": "Indicadores de triage, notificación y estado",
+      "verdict": "FALTA",
+      "current": "Solo existe estado activo/inactivo como acción.",
+      "gap": "No hay triage ni indicador/consentimiento Botmaker por fila."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F008",
+      "requirement": "Menú lateral colapsable y jerárquico",
+      "verdict": "PARCIAL",
+      "current": "Clínico, Inventario y Reportes son grupos colapsables.",
+      "gap": "Faltan varios grupos/rutas observados y la jerarquía completa del video."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F009",
+      "requirement": "Dashboard operativo",
+      "verdict": "PARCIAL",
+      "current": "Dashboard con métricas sintéticas, mediciones y auditoría.",
+      "gap": "No conserva las seis tarjetas exactas ni sus significados; añade métricas distintas."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F010",
+      "requirement": "Pacientes con valores fuera de rango",
+      "verdict": "FALTA",
+      "current": "Muestra mediciones recientes sin clasificar.",
+      "gap": "No existe sección de valores fuera de rango/Normales ni reglas de umbral."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F011",
+      "requirement": "Menú de usuario y contexto organizacional",
+      "verdict": "FALTA",
+      "current": "Muestra rol/entorno en sidebar.",
+      "gap": "No existe menú de usuario con organización y “Mi usuario” como en el video."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F012",
+      "requirement": "Cierre de sesión",
+      "verdict": "COINCIDE",
+      "current": "Cerrar sesión elimina la sesión y vuelve al login.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F013",
+      "requirement": "Formulario de inicio de sesión",
+      "verdict": "PARCIAL",
+      "current": "Correo, contraseña e iniciar sesión.",
+      "gap": "Falta recuperación de contraseña visible; además usa correo en lugar de la etiqueta Usuario del video."
+    },
+    {
+      "chapter": "CH01",
+      "id": "CH01-F014",
+      "requirement": "Instalación en dispositivo aparente",
+      "verdict": "FALTA",
+      "current": "No existe control PWA/instalación en el login React.",
+      "gap": "Implementar manifest/service worker y prompt seguro si es requisito real."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F001",
+      "requirement": "Ruta autenticada hasta Pacientes",
+      "verdict": "COINCIDE",
+      "current": "Login, dashboard y ruta protegida a Pacientes.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F002",
+      "requirement": "Listado de pacientes con vistas y acciones",
+      "verdict": "PARCIAL",
+      "current": "Activos, inactivos, importar, exportar, nuevo, búsqueda y paginación.",
+      "gap": "Carga masiva no es pestaña y faltan columnas operativas del video."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F003",
+      "requirement": "Formulario de alta por secciones",
+      "verdict": "COINCIDE",
+      "current": "Datos generales, seguro, contactos y dirección en secciones.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F004",
+      "requirement": "Datos personales obligatorios y opcionales",
+      "verdict": "COINCIDE",
+      "current": "Incluye los campos personales principales y validación.",
+      "gap": "Catálogos de algunos campos siguen como texto libre."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F005",
+      "requirement": "Documento y fecha de nacimiento",
+      "verdict": "COINCIDE",
+      "current": "DUI/Pasaporte/Otro, limpieza al cambiar y fecha.",
+      "gap": "Formato oficial fuera del DUI demo sigue configurable."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F006",
+      "requirement": "Selectores demográficos y organizacionales",
+      "verdict": "PARCIAL",
+      "current": "Sexo y sangre son selectores; empresa/estado civil/nacionalidad/ocupación existen.",
+      "gap": "Varios campos son texto libre, no catálogos buscables como se observa."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F007",
+      "requirement": "Consentimiento visible para notificaciones Botmaker/WhatsApp",
+      "verdict": "FALTA",
+      "current": "No existe campo de consentimiento de mensajería en el modelo/formulario React.",
+      "gap": "Agregar consentimiento, fuente, fecha y revocación sin mezclarlo con datos clínicos."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F008",
+      "requirement": "Paciente regular frente a paciente asegurado",
+      "verdict": "COINCIDE",
+      "current": "Selector REGULAR/INSURED y campos condicionales.",
+      "gap": "La política de cobertura sigue correctamente sin inferirse."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F009",
+      "requirement": "Catálogo buscable de seguros",
+      "verdict": "PARCIAL",
+      "current": "Selector con dos aseguradoras sintéticas.",
+      "gap": "No es buscable ni usa un maestro real."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F010",
+      "requirement": "Resultados anómalos en el catálogo de seguros",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se replicó el comportamiento anómalo.",
+      "gap": "El video no aclara si las entradas con apariencia de persona son válidas o un defecto."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F011",
+      "requirement": "Decisión de titularidad del seguro",
+      "verdict": "COINCIDE",
+      "current": "Checkbox de titularidad y datos del titular.",
+      "gap": "No existe lógica de múltiples coberturas."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F012",
+      "requirement": "Datos condicionales de cobertura",
+      "verdict": "COINCIDE",
+      "current": "Póliza, certificado/unidad, titular, fechas condicionales.",
+      "gap": "Validaciones oficiales de póliza/cobertura siguen pendientes."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F013",
+      "requirement": "Contactos asociados al paciente",
+      "verdict": "COINCIDE",
+      "current": "Múltiples contactos, principal, agregar y eliminar.",
+      "gap": "Catálogos de parentesco/rol/país siguen como texto libre."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F014",
+      "requirement": "Dirección con importación y limpieza",
+      "verdict": "PARCIAL",
+      "current": "Enlace, coordenadas, dirección, referencia y limpiar funcionan.",
+      "gap": "Consultar enlace solo muestra aviso; no importa una dirección real."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F015",
+      "requirement": "Mapa embebido para ubicación geográfica",
+      "verdict": "FALTA",
+      "current": "No hay mapa embebido ni marcador.",
+      "gap": "Requiere proveedor y política de geolocalización."
+    },
+    {
+      "chapter": "CH02",
+      "id": "CH02-F016",
+      "requirement": "Acciones Atrás y Guardar sin resultado observado",
+      "verdict": "COINCIDE",
+      "current": "Cancelar/guardar con validación, persistencia y edición.",
+      "gap": "El video no demuestra el resultado exacto, pero la plataforma implementa un flujo seguro."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F001",
+      "requirement": "Menú financiero desde Pacientes",
+      "verdict": "PARCIAL",
+      "current": "Existen Cotizaciones, Seguros, CxC y Pagos como rutas globales.",
+      "gap": "No existe el mismo menú contextual desde cada paciente."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F002",
+      "requirement": "Panel y pestañas de Hospitalización Administrativa",
+      "verdict": "PARCIAL",
+      "current": "Listado, filtros, creación, detalle y edición de hospitalizaciones.",
+      "gap": "No replica el panel/tablero y pestañas exactas del video."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F003",
+      "requirement": "Pestaña Preadmisión transitoria",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se implementó.",
+      "gap": "La evidencia no determina si es función habilitable o residuo de renderizado."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F004",
+      "requirement": "Filtros de hospitalizaciones activas",
+      "verdict": "COINCIDE",
+      "current": "Estado, fecha de inicio y tipo de cuenta, con reset.",
+      "gap": "Sin brecha funcional mayor para los filtros visibles."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F005",
+      "requirement": "Tabla de hospitalizaciones activas",
+      "verdict": "COINCIDE",
+      "current": "Tabla con caso, documento, paciente, fecha, cuenta, estado, responsable y próxima acción.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F006",
+      "requirement": "Interpretación verbal de hospitalización activa",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se automatizan cierres/transiciones.",
+      "gap": "No hay regla confirmada para crear/cerrar estado activo."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F007",
+      "requirement": "Vista de pacientes inactivos",
+      "verdict": "PARCIAL",
+      "current": "Pacientes tiene pestaña Inactivos.",
+      "gap": "No está integrada al panel administrativo observado en este capítulo."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F008",
+      "requirement": "Carga y estado vacío simultáneos",
+      "verdict": "COINCIDE",
+      "current": "React separa carga, error y vacío.",
+      "gap": "Corrige la ambigüedad observada en el video."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F009",
+      "requirement": "Filtros y alta desde Cotizaciones",
+      "verdict": "PARCIAL",
+      "current": "Cotizaciones tiene búsqueda y alta.",
+      "gap": "No replica todos los filtros del listado observado."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F010",
+      "requirement": "Seguimiento de cotización, preautorización, seguro y reclamo",
+      "verdict": "PARCIAL",
+      "current": "Cotización enlaza a Seguro y Pagos; Insurance está en desarrollo.",
+      "gap": "Falta flujo completo de preautorización/reclamo e historial."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F011",
+      "requirement": "Fecha de creación y total por cotización",
+      "verdict": "COINCIDE",
+      "current": "Listado/detalle de cotizaciones muestra creación y cálculos.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F012",
+      "requirement": "Nueva cotización y datos del paciente",
+      "verdict": "PARCIAL",
+      "current": "Paciente se deriva de la hospitalización.",
+      "gap": "No hay selector buscable de paciente ni snapshot completo visible."
+    },
+    {
+      "chapter": "CH03",
+      "id": "CH03-F013",
+      "requirement": "Datos iniciales de factura",
+      "verdict": "PARCIAL",
+      "current": "Caso, paciente, resumen/comentarios y constructor.",
+      "gap": "Faltan fecha de factura, grupo de descuento, referido por y giftcard."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F001",
+      "requirement": "Nueva cotización por secciones",
+      "verdict": "PARCIAL",
+      "current": "Constructor por categorías, resumen, comentarios y totales.",
+      "gap": "Faltan varias secciones de cabecera observadas."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F002",
+      "requirement": "Selector buscable de paciente",
+      "verdict": "FALTA",
+      "current": "Se elige hospitalización; el paciente se deriva.",
+      "gap": "No existe búsqueda directa de paciente por nombre/documento."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F003",
+      "requirement": "Resultados de paciente con etiquetas de cotización",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se replicaron etiquetas ambiguas.",
+      "gap": "El video no explica qué significa una entrada rotulada Cotización."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F004",
+      "requirement": "Autocompletado de datos del paciente",
+      "verdict": "PARCIAL",
+      "current": "Nombre/paciente se deriva del caso.",
+      "gap": "No muestra snapshot de DUI/NIT, teléfono y correo como en el video."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F005",
+      "requirement": "Fecha requerida con calendario",
+      "verdict": "FALTA",
+      "current": "Quote React no captura invoiceDate.",
+      "gap": "Agregar fecha con zona/rangos configurables."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F006",
+      "requirement": "Grupo de descuento obligatorio",
+      "verdict": "FALTA",
+      "current": "Existe descuento manual por tipo, no grupo de descuento.",
+      "gap": "Falta catálogo/grupo y elegibilidad/aprobación."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F007",
+      "requirement": "Referido por como multiselección buscable",
+      "verdict": "FALTA",
+      "current": "No existe referido por.",
+      "gap": "Agregar multiselección/tagging con catálogo autorizado."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F008",
+      "requirement": "Catálogo heterogéneo de referidos",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe catálogo.",
+      "gap": "Falta definir tipos, alcance y máximo de etiquetas."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F009",
+      "requirement": "Acción auxiliar para Referido por",
+      "verdict": "FALTA",
+      "current": "No existe botón + ni alta provisional.",
+      "gap": "Implementar solo tras definir catálogo y deduplicación."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F010",
+      "requirement": "Giftcard y Comentarios",
+      "verdict": "PARCIAL",
+      "current": "Comentarios sí; giftcard no.",
+      "gap": "Falta captura/validación de giftcard."
+    },
+    {
+      "chapter": "CH04",
+      "id": "CH04-F011",
+      "requirement": "Categorías de ítems y filtro de inventario",
+      "verdict": "PARCIAL",
+      "current": "Las siete categorías existen.",
+      "gap": "Falta “Solo disponibles en inventario” y vínculo real con existencias."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F001",
+      "requirement": "Categorías de conceptos en Nueva cotización",
+      "verdict": "COINCIDE",
+      "current": "Servicios, estudios, medicamentos, insumos, equipos, honorarios y extras.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F002",
+      "requirement": "Socio de negocios selecciona catálogo de precios",
+      "verdict": "FALTA",
+      "current": "No existe socio/lista de precios.",
+      "gap": "Requiere maestro y reglas de vigencia/moneda."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F003",
+      "requirement": "Bloqueo visual Procesando durante cargas y adiciones",
+      "verdict": "FALTA",
+      "current": "No hay overlay/estado Procesando en el compositor.",
+      "gap": "Agregar estado de carga si hay operaciones asíncronas."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F004",
+      "requirement": "Catálogo de Servicios con búsqueda incremental",
+      "verdict": "FALTA",
+      "current": "Concepto es texto manual.",
+      "gap": "Falta catálogo buscable."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F005",
+      "requirement": "Selección de servicio autocompleta precio",
+      "verdict": "FALTA",
+      "current": "Precio es manual.",
+      "gap": "Falta tarifario autorizado."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F006",
+      "requirement": "Cantidad requerida y acción Añadir",
+      "verdict": "COINCIDE",
+      "current": "Cantidad validada y acción agregar línea.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F007",
+      "requirement": "Ledger de conceptos agrupado por tipo",
+      "verdict": "COINCIDE",
+      "current": "Items se visualizan por categoría y se detallan por versión.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F008",
+      "requirement": "Resumen de subtotal, descuentos, impuesto y total",
+      "verdict": "PARCIAL",
+      "current": "Subtotal, descuentos, total, aseguradora y paciente.",
+      "gap": "Falta impuesto porque tasa/base no están confirmadas."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F009",
+      "requirement": "Múltiples líneas de Servicios",
+      "verdict": "COINCIDE",
+      "current": "Admite varias líneas por categoría.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F010",
+      "requirement": "Compositor específico de Medicamentos",
+      "verdict": "FALTA",
+      "current": "Medicamentos usa el mismo editor genérico.",
+      "gap": "Faltan medicamento/presentación y controles específicos."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F011",
+      "requirement": "Catálogo de medicamentos muestra conteos entre paréntesis",
+      "verdict": "FALTA",
+      "current": "No hay catálogo de medicamentos.",
+      "gap": "Falta maestro y significado del conteo."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F012",
+      "requirement": "Estado sin resultados en búsqueda",
+      "verdict": "FALTA",
+      "current": "No hay búsqueda de catálogo.",
+      "gap": "Agregar al implementar catálogos."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F013",
+      "requirement": "Selección de medicamento autocompleta precio",
+      "verdict": "FALTA",
+      "current": "Precio manual.",
+      "gap": "Falta catálogo/tarifario autorizado."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F014",
+      "requirement": "Intento de añadir Invanz restablece el compositor",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No se replica un resultado no visible.",
+      "gap": "El video no confirma si la línea se insertó."
+    },
+    {
+      "chapter": "CH05",
+      "id": "CH05-F015",
+      "requirement": "Filtro de inventario y acciones finales visibles",
+      "verdict": "PARCIAL",
+      "current": "Guardar/cancelar existen.",
+      "gap": "Falta filtro de disponibilidad y relación con reservas/lotes."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F01",
+      "requirement": "Categorías de ítems de cotización",
+      "verdict": "COINCIDE",
+      "current": "Siete categorías implementadas.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F02",
+      "requirement": "Catálogo por socio de negocios",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Requiere maestro y lista de precios."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F03",
+      "requirement": "Selección de insumos con existencia",
+      "verdict": "FALTA",
+      "current": "Insumos son texto/precio manual.",
+      "gap": "No consulta existencias, lotes ni bodegas."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F04",
+      "requirement": "Selección de estudios diagnósticos",
+      "verdict": "PARCIAL",
+      "current": "Categoría Estudios existe con líneas manuales.",
+      "gap": "Falta catálogo buscable y autofill."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F05",
+      "requirement": "Honorarios por profesional o servicio",
+      "verdict": "PARCIAL",
+      "current": "Categoría Honorarios existe.",
+      "gap": "No vincula profesional ni tarifa."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F06",
+      "requirement": "Tabla agrupada y cálculo por renglón",
+      "verdict": "COINCIDE",
+      "current": "Cantidad, precio, descuento y subtotal por línea.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F07",
+      "requirement": "Descuentos, impuesto y totales",
+      "verdict": "PARCIAL",
+      "current": "Descuento manual y totales.",
+      "gap": "Falta impuesto y política por renglón."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F08",
+      "requirement": "Autocompletado por paciente",
+      "verdict": "COINCIDE",
+      "current": "Paciente se deriva del caso/hospitalización.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F09",
+      "requirement": "Persistencia y retroceso",
+      "verdict": "COINCIDE",
+      "current": "Borrador, editar/cancelar, reload y detalle.",
+      "gap": "El resultado exacto del video no se ve, pero el flujo actual es verificable."
+    },
+    {
+      "chapter": "CH06",
+      "id": "CH06-F10",
+      "requirement": "Contenido de Equipos y Extras",
+      "verdict": "PARCIAL",
+      "current": "Ambas categorías aceptan líneas manuales.",
+      "gap": "No hay catálogos/campos específicos."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F01",
+      "requirement": "Listado de cotizaciones de hospitalización",
+      "verdict": "COINCIDE",
+      "current": "Listado de cotizaciones vinculadas a casos.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F02",
+      "requirement": "Estados de cotización, preautorización y reclamo",
+      "verdict": "PARCIAL",
+      "current": "Cotización tiene DRAFT/SENT; seguro está en desarrollo.",
+      "gap": "Faltan estados completos de preautorización y reclamo."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F03",
+      "requirement": "Búsqueda de cotización",
+      "verdict": "COINCIDE",
+      "current": "Busca ID, paciente, caso y estado.",
+      "gap": "Sin brecha funcional mayor."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F04",
+      "requirement": "Menú contextual y documentos",
+      "verdict": "PARCIAL",
+      "current": "Detalle ofrece editar, enviar, revisar, imprimir, seguro, pagos y canales seguros.",
+      "gap": "Faltan menú/documentos exactos, duplicar/eliminar y variantes impresas."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F05",
+      "requirement": "Envío por correo o WhatsApp",
+      "verdict": "BLOQUEADO_INTEGRACION",
+      "current": "WhatsApp muestra estado seguro no configurado; email no existe.",
+      "gap": "No hay proveedor ni evidencia de entrega."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F06",
+      "requirement": "Generación y envío directo de PDF",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "Solo window.print; no PDF oficial.",
+      "gap": "No se conoce variante/documento oficial ni canal."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F07",
+      "requirement": "Transiciones de estado",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se inventó la máquina de estados.",
+      "gap": "Falta confirmar eventos, permisos e idempotencia."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F08",
+      "requirement": "Cotización guardada pero no activada",
+      "verdict": "PARCIAL",
+      "current": "DRAFT persistente representa guardada no enviada.",
+      "gap": "El significado “activada” sigue sin definición."
+    },
+    {
+      "chapter": "CH07",
+      "id": "CH07-F09",
+      "requirement": "Resultado de una transición de estado",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No se implementa resultado no observado.",
+      "gap": "El video solo abre selector, sin confirmar transición."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F01",
+      "requirement": "Perfil administrativo de ejecución",
+      "verdict": "FALTA",
+      "current": "No existe perfil administrativo completo.",
+      "gap": "Crear formulario y detalle administrativo."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F02",
+      "requirement": "Campos administrativos y de aseguradora",
+      "verdict": "FALTA",
+      "current": "No existen health manager, revenue, solicitud, forma de pago, categoría, hospital de origen, etc.",
+      "gap": "Requiere modelos/catálogos."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F03",
+      "requirement": "Guardado del perfil administrativo",
+      "verdict": "FALTA",
+      "current": "No existe el perfil que guardar.",
+      "gap": "Implementar persistencia y auditoría."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F04",
+      "requirement": "Listado de cuentas por cobrar y exportaciones",
+      "verdict": "FALTA",
+      "current": "/receivables reutiliza la tabla simple de pagos.",
+      "gap": "Falta listado de cuentas/saldos, filtros y Excel/reporte."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F05",
+      "requirement": "Acciones de una cuenta",
+      "verdict": "FALTA",
+      "current": "Solo aplicar/reversar pagos.",
+      "gap": "Faltan historial, estado de cuenta, archivar, reporte y acciones de cuenta."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F06",
+      "requirement": "Histórico de estados de cuenta",
+      "verdict": "FALTA",
+      "current": "No existe historial de estados de cuenta.",
+      "gap": "Implementar snapshots/versiones."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F07",
+      "requirement": "Pagos de hospitalización",
+      "verdict": "PARCIAL",
+      "current": "Aplicar pago idempotente y reversar con motivo.",
+      "gap": "Falta asignación por cuenta/caso, edición, eliminación y conciliación."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F08",
+      "requirement": "Configuración de estado de cuenta",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar selección de período/secciones/ajustes cuando se confirmen."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F09",
+      "requirement": "Vista previa de cuenta del paciente",
+      "verdict": "FALTA",
+      "current": "No existe preview.",
+      "gap": "Implementar composición y cálculo seguro."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F10",
+      "requirement": "Resumen de pago",
+      "verdict": "FALTA",
+      "current": "No existe vista detallada/imprimible del pago.",
+      "gap": "Implementar detalle y print si se confirma."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F11",
+      "requirement": "Interpretación de total pendiente negativo",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se interpreta automáticamente.",
+      "gap": "Definir si representa crédito, sobrepago o inconsistencia."
+    },
+    {
+      "chapter": "CH08",
+      "id": "CH08-F12",
+      "requirement": "Estado de cuenta automático",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe generación automática.",
+      "gap": "Falta periodicidad, destinatario y canal seguro."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F01",
+      "requirement": "Listado de Hospitalización Clínica",
+      "verdict": "PARCIAL",
+      "current": "Lista hospitalizaciones y cuenta documentos.",
+      "gap": "Faltan triage, auditoría y columnas clínicas."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F02",
+      "requirement": "Acciones de una hospitalización clínica",
+      "verdict": "FALTA",
+      "current": "Solo enlace genérico a evoluciones.",
+      "gap": "Faltan menú/acciones clínicas por caso."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F03",
+      "requirement": "Versiones de perfiles clínicos por hospitalización",
+      "verdict": "FALTA",
+      "current": "No existe ClinicalProfile versionado.",
+      "gap": "Implementar perfil con historial inmutable."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F04",
+      "requirement": "Formulario de perfil clínico",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Faltan datos clínicos estructurados observados."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F05",
+      "requirement": "Catálogo codificado de diagnósticos",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe catálogo.",
+      "gap": "Debe confirmarse estándar/versión y fuente autorizada."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F06",
+      "requirement": "Grupos operativos del perfil",
+      "verdict": "FALTA",
+      "current": "No existen grupos/subgrupos, triage, tipo/frecuencia.",
+      "gap": "Implementar estructura una vez confirmados catálogos."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F07",
+      "requirement": "Dispositivos y planificación de turnos",
+      "verdict": "PARCIAL",
+      "current": "Hospitalización guarda dispositivos y Agenda crea turnos.",
+      "gap": "No están integrados al perfil clínico ni generan planificación por frecuencia."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F08",
+      "requirement": "Listado de Reporte de salud y menú clínico",
+      "verdict": "PARCIAL",
+      "current": "Ruta Reporte de salud y pestañas.",
+      "gap": "Falta listado por hospitalización con menú clínico completo."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F09",
+      "requirement": "Reporte longitudinal por pestañas",
+      "verdict": "PARCIAL",
+      "current": "Siete pestañas existen.",
+      "gap": "La mayoría son placeholders o vacías."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F10",
+      "requirement": "Cambio de rango del reporte",
+      "verdict": "FALTA",
+      "current": "No hay selector de rango.",
+      "gap": "Implementar fechas/rangos."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F11",
+      "requirement": "Configuración de secciones para impresión",
+      "verdict": "FALTA",
+      "current": "No hay modal de secciones ni print del reporte.",
+      "gap": "Implementar configurador."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F12",
+      "requirement": "Resultado de Imprimir no demostrado",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No existe impresión clínica equivalente.",
+      "gap": "El video tampoco demuestra un PDF final."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F13",
+      "requirement": "Intervalo visual discontinuo antes de repetir la confirmación",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No se infiere funcionalidad.",
+      "gap": "No hay evidencia continua."
+    },
+    {
+      "chapter": "CH09",
+      "id": "CH09-F14",
+      "requirement": "Contenido del expediente impreso descrito verbalmente",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se implementa contenido descrito solo verbalmente.",
+      "gap": "Confirmar secciones, orden y permisos."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F01",
+      "requirement": "Listado de pacientes de Orden Médica",
+      "verdict": "PARCIAL",
+      "current": "La ruta busca pacientes y muestra cantidad coincidente.",
+      "gap": "No lista órdenes por paciente ni abre expediente de orden."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F02",
+      "requirement": "Elección de tipo de documento",
+      "verdict": "FALTA",
+      "current": "No existe selector de tipo de documento en Órdenes.",
+      "gap": "Agregar si forma parte del flujo real."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F03",
+      "requirement": "Encabezado y tratamientos de tarjeta",
+      "verdict": "FALTA",
+      "current": "No existe tarjeta de medicamentos funcional.",
+      "gap": "La ruta Medication Cards es solo bloqueo."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F04",
+      "requirement": "Editor detallado de tratamiento",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Faltan medicamento, dosis, vía, frecuencia, duración, horarios, dilución y crónico."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F05",
+      "requirement": "Catálogos visibles de pauta y horarios",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existen.",
+      "gap": "Requiere catálogos oficiales y reglas."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F06",
+      "requirement": "Derivación aparente de fecha final",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe cálculo.",
+      "gap": "Debe confirmarse inclusividad, zona horaria y crónicos."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F07",
+      "requirement": "Composición de orden por etiquetas",
+      "verdict": "FALTA",
+      "current": "No existen etiquetas de orden.",
+      "gap": "Implementar catálogo/ordenamiento tras confirmar reglas."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F08",
+      "requirement": "Consulta de órdenes, tarjetas e historial",
+      "verdict": "FALTA",
+      "current": "La ruta actual solo guarda acciones locales no clínicas.",
+      "gap": "Implementar persistencia de órdenes/tarjetas/historial."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F09",
+      "requirement": "Impresiones de tarjeta de medicamentos",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe impresión.",
+      "gap": "Falta plantilla y contenido oficial."
+    },
+    {
+      "chapter": "CH10",
+      "id": "CH10-F10",
+      "requirement": "Permisos y corrección clínica",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "Hay guardas genéricas, no flujo de orden/tarjeta.",
+      "gap": "El video no define permisos ni corrección completa."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F01",
+      "requirement": "Agenda filtrable por paciente",
+      "verdict": "FALTA",
+      "current": "Agenda lista turnos sin filtros.",
+      "gap": "Agregar búsqueda/filtro por paciente."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F02",
+      "requirement": "Navegación y vistas de calendario",
+      "verdict": "FALTA",
+      "current": "Solo tabla cronológica.",
+      "gap": "Faltan calendario día/semana/mes y navegación."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F03",
+      "requirement": "Formulario de creación de visita",
+      "verdict": "PARCIAL",
+      "current": "Modal crea turno con recurso, paciente, inicio/fin, estado y nota.",
+      "gap": "Faltan campos y semántica de visita observados."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F04",
+      "requirement": "Clasificación puntual o turno",
+      "verdict": "FALTA",
+      "current": "No existe selector puntual/turno.",
+      "gap": "Agregar distinción y reglas."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F05",
+      "requirement": "Catálogo de tipos de visita",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar maestro de tipos."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F06",
+      "requirement": "Detalle de visita finalizada",
+      "verdict": "FALTA",
+      "current": "No hay vista de detalle.",
+      "gap": "Implementar consulta de visita completada."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F07",
+      "requirement": "Tipo de atención en liquidación",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe liquidación.",
+      "gap": "Definir categorías y efecto financiero."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F08",
+      "requirement": "Ajustes al pago de servicio profesional",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir adiciones/descuentos, autorización y relación con CxP."
+    },
+    {
+      "chapter": "CH11",
+      "id": "CH11-F09",
+      "requirement": "Reglas de liquidación y permisos",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe máquina de liquidación.",
+      "gap": "Confirmar reglas y roles."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F01",
+      "requirement": "Resumen de cuentas por pagar",
+      "verdict": "FALTA",
+      "current": "La ruta /payables no existe.",
+      "gap": "Crear módulo y métricas."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F02",
+      "requirement": "Listado de pagos de servicios",
+      "verdict": "FALTA",
+      "current": "Pagos actuales son de cotizaciones/pacientes, no pagos profesionales.",
+      "gap": "Crear listado específico."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F03",
+      "requirement": "Acciones de pagos y reportes",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existen.",
+      "gap": "Falta definir acciones, documentos y permisos."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F04",
+      "requirement": "Filtro de pagos",
+      "verdict": "FALTA",
+      "current": "No existe en un módulo profesional.",
+      "gap": "Implementar filtros observados."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F05",
+      "requirement": "Edición de pago de servicio profesional",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar modal y persistencia."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F06",
+      "requirement": "Conceptos de adición o descuento",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Agregar líneas y cálculo cuando reglas se confirmen."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F07",
+      "requirement": "Catálogo visible de motivos",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar catálogo de motivos observado."
+    },
+    {
+      "chapter": "CH12",
+      "id": "CH12-F08",
+      "requirement": "Reglas financieras de montos y aprobación",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se automatizan.",
+      "gap": "Confirmar cálculo, topes, aprobación y auditoría."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F01",
+      "requirement": "Listado de compras",
+      "verdict": "PARCIAL",
+      "current": "Lista borradores sintéticos.",
+      "gap": "Faltan más columnas, estados y acciones."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F02",
+      "requirement": "Estados visibles de compra",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "Solo DRAFT.",
+      "gap": "Falta máquina de estados y autorizaciones."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F03",
+      "requirement": "Elección de modalidad de compra",
+      "verdict": "FALTA",
+      "current": "No existe orden vs caja menuda.",
+      "gap": "Agregar selector y formularios distintos."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F04",
+      "requirement": "Formulario de orden de compra",
+      "verdict": "PARCIAL",
+      "current": "Solo ítem, referencia y nota.",
+      "gap": "Faltan proveedor, líneas, cantidades, costos, impuestos y fechas."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F05",
+      "requirement": "Tabla de ítems de orden",
+      "verdict": "FALTA",
+      "current": "Una compra referencia un solo catalogItemId.",
+      "gap": "Agregar múltiples líneas."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F06",
+      "requirement": "Formulario de compra por caja menuda",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar modalidad."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F07",
+      "requirement": "Desglose de totales de caja menuda",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar subtotales/impuestos/total según reglas."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F08",
+      "requirement": "Detalle de compra y adjuntos",
+      "verdict": "FALTA",
+      "current": "No hay detalle ni archivos.",
+      "gap": "Implementar rutas, adjuntos y políticas de seguridad."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F09",
+      "requirement": "Acciones sobre compra",
+      "verdict": "FALTA",
+      "current": "No existen ver/editar/anular/recibir/reportar.",
+      "gap": "Implementar acciones sustentadas."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F10",
+      "requirement": "Relación de compras con inventario",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "Guardar borrador no afecta stock.",
+      "gap": "Definir recepción, lotes y transición autorizada."
+    },
+    {
+      "chapter": "CH13",
+      "id": "CH13-F11",
+      "requirement": "Reglas fiscales, de anulación y autorización",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No se inventan.",
+      "gap": "Confirmar impuestos/documentos/roles."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F01",
+      "requirement": "Existencias disponibles, comprometidas y totales",
+      "verdict": "PARCIAL",
+      "current": "Muestra saldo total derivado de movimientos.",
+      "gap": "Faltan disponible, comprometido y total por ítem."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F02",
+      "requirement": "Historial de movimientos por item",
+      "verdict": "COINCIDE",
+      "current": "Kárdex cronológico, filtros y saldo derivado.",
+      "gap": "Sin brecha funcional mayor para historial base."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F03",
+      "requirement": "Inventario comprometido como estado temporal",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe reserva/compromiso.",
+      "gap": "Definir ciclo, expiración y liberación."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F04",
+      "requirement": "Panel de acuses por pacientes y recursos",
+      "verdict": "FALTA",
+      "current": "No existe ruta/panel.",
+      "gap": "Crear módulo de reservas/acuses."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F05",
+      "requirement": "Gestión y exportación de acuses",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir estados, permisos y exportación."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F06",
+      "requirement": "Cierres pendientes, totales y cerrados",
+      "verdict": "FALTA",
+      "current": "No existe ruta de cierres.",
+      "gap": "Crear módulo."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F07",
+      "requirement": "Advertencia de cierre ya abierto",
+      "verdict": "FALTA",
+      "current": "No hay cierres, por tanto tampoco guardia.",
+      "gap": "Implementar unicidad de cierre abierto."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F08",
+      "requirement": "Aprobación de cierre total",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir aprobación y efectos."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F09",
+      "requirement": "Catálogo de proveedores",
+      "verdict": "FALTA",
+      "current": "Ruta Suppliers no existe.",
+      "gap": "Crear maestro."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F10",
+      "requirement": "Catálogo de bodegas y traslados",
+      "verdict": "PARCIAL",
+      "current": "Hay dos bodegas hardcodeadas y tipo TRANSFER.",
+      "gap": "Falta maestro, origen/destino y movimiento contraparte."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F11",
+      "requirement": "Lotes, números de serie y vencimiento",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Crear lotes/series/expiración."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F12",
+      "requirement": "Catálogo de kits de insumos",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Crear maestro de kits."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F13",
+      "requirement": "Composición cuantificada del kit",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir reglas de consumo/descarga y composición."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F14",
+      "requirement": "Creación de acuse para hospitalización",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Vincular hospitalización, items y cantidades."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F15",
+      "requirement": "Detección de items faltantes",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir disponibilidad, sustitución y timing."
+    },
+    {
+      "chapter": "CH14",
+      "id": "CH14-F16",
+      "requirement": "Vínculo de faltantes con cotización",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir cuándo/como genera o modifica cotización."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F01",
+      "requirement": "Reconciliación de items faltantes",
+      "verdict": "FALTA",
+      "current": "No existe flujo de acuses.",
+      "gap": "Implementar conciliación."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F02",
+      "requirement": "Solicitudes desde la casa del paciente",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar canal/registro y seguridad."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F03",
+      "requirement": "Alta manual de items en un acuse",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Agregar editor de acuse."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F04",
+      "requirement": "Carga de acuse desde plantilla o cotización",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar plantillas y vínculo con quote."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F05",
+      "requirement": "Estados seleccionables de cotización",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe en acuse.",
+      "gap": "Definir significado y permisos."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F06",
+      "requirement": "Catálogo y alta de medicamentos",
+      "verdict": "FALTA",
+      "current": "Catálogo actual solo SKU/nombre genérico.",
+      "gap": "Crear catálogo por familia y alta específica."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F07",
+      "requirement": "Advertencia por cambios no guardados",
+      "verdict": "FALTA",
+      "current": "No existe guardia global de formularios complejos.",
+      "gap": "Implementar dirty-state/confirmación."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F08",
+      "requirement": "Catálogo y alta de insumos",
+      "verdict": "FALTA",
+      "current": "No existe catálogo específico.",
+      "gap": "Crear familia y atributos."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F09",
+      "requirement": "Catálogo de estudios diagnósticos",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Crear maestro."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F10",
+      "requirement": "Catálogo y alta de honorarios",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Crear maestro."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F11",
+      "requirement": "Confirmación de guardado de honorario",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Agregar persistencia y feedback."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F12",
+      "requirement": "Acciones y edición de honorarios",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Agregar listar/editar/inactivar."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F13",
+      "requirement": "Catálogo de servicios",
+      "verdict": "FALTA",
+      "current": "No existe catálogo específico.",
+      "gap": "Crear maestro."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F14",
+      "requirement": "Matriz de perfiles de descuento",
+      "verdict": "FALTA",
+      "current": "Ruta Discounts no existe.",
+      "gap": "Crear perfiles/reglas."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F15",
+      "requirement": "Regla de lotes para consumos internos",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir selección/FEFO/serie y excepciones."
+    },
+    {
+      "chapter": "CH15",
+      "id": "CH15-F16",
+      "requirement": "Honorario vinculado a profesional",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe maestro profesional/relación.",
+      "gap": "Definir cardinalidad y tarifa."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F01",
+      "requirement": "Matriz de descuentos por familia",
+      "verdict": "FALTA",
+      "current": "No existe módulo Discounts.",
+      "gap": "Crear matriz por categoría."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F02",
+      "requirement": "Catálogo paginado y exportable",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar listado, búsqueda, paginación y exportación."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F03",
+      "requirement": "Perfiles con categorías excluidas",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Implementar exclusiones."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F04",
+      "requirement": "Alta de perfil de descuento",
+      "verdict": "FALTA",
+      "current": "No existe.",
+      "gap": "Crear formulario/persistencia."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F05",
+      "requirement": "Marca de jubilado",
+      "verdict": "PARCIAL",
+      "current": "Paciente tiene checkbox Jubilado.",
+      "gap": "No está conectado a perfiles/elegibilidad de descuentos."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F06",
+      "requirement": "Perfiles negociados por categoría",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe.",
+      "gap": "Definir reglas, prioridad y aprobación."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F07",
+      "requirement": "Recarga del catálogo después del alta",
+      "verdict": "FALTA",
+      "current": "No existe alta de perfil.",
+      "gap": "Implementar tras crear módulo."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F08",
+      "requirement": "Acceso al reporte de salud",
+      "verdict": "PARCIAL",
+      "current": "Reporte de salud existe en navegación clínica.",
+      "gap": "No se reproduce el salto contextual observado desde descuentos."
+    },
+    {
+      "chapter": "CH16",
+      "id": "CH16-F09",
+      "requirement": "Bloqueo de edición clínica tras guardar",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "Documentos firmados sí son inmutables, pero el flujo observado no está vinculado.",
+      "gap": "Confirmar regla exacta de bloqueo."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F01",
+      "requirement": "Listado clínico con triage y auditoría",
+      "verdict": "PARCIAL",
+      "current": "Lista hospitalizaciones/documentos; auditoría global existe.",
+      "gap": "Faltan triage y columnas exactas."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F02",
+      "requirement": "Acciones de la hospitalización",
+      "verdict": "FALTA",
+      "current": "No hay menú clínico por hospitalización.",
+      "gap": "Agregar acciones observadas."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F03",
+      "requirement": "Reporte clínico por hospitalización",
+      "verdict": "PARCIAL",
+      "current": "Reporte de salud global existe.",
+      "gap": "No está contextualizado completamente por caseId."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F04",
+      "requirement": "Cambio de rango temporal",
+      "verdict": "FALTA",
+      "current": "No hay filtros de rango.",
+      "gap": "Implementar."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F05",
+      "requirement": "Información principal del paciente",
+      "verdict": "PARCIAL",
+      "current": "Algunos nombres/casos aparecen.",
+      "gap": "Falta cabecera clínica completa."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F06",
+      "requirement": "Seguros seleccionables para impresión",
+      "verdict": "FALTA",
+      "current": "No existe configuración de impresión.",
+      "gap": "Implementar tras definir documento."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F07",
+      "requirement": "Salida imprimible configurable",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No existe salida clínica equivalente.",
+      "gap": "El video no demuestra el archivo final, pero sí muestra configuración visible."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F08",
+      "requirement": "Navegación de Evaluación Clínica",
+      "verdict": "PARCIAL",
+      "current": "Pestaña Antecedentes y evaluaciones existe.",
+      "gap": "Contenido/acciones faltantes."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F09",
+      "requirement": "Antecedentes clínicos estructurados",
+      "verdict": "FALTA",
+      "current": "Panel solo indica ausencia.",
+      "gap": "Implementar modelo y captura."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F10",
+      "requirement": "Captura de alergias desde catálogo",
+      "verdict": "FALTA",
+      "current": "Solo aviso de configuración pendiente.",
+      "gap": "Crear catálogo y captura."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F11",
+      "requirement": "Signos vitales agrupados por origen",
+      "verdict": "COINCIDE",
+      "current": "Registra y muestra valores por fuente y fecha.",
+      "gap": "Sin clasificación automática, correctamente."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F12",
+      "requirement": "Listado de notas de enfermería",
+      "verdict": "FALTA",
+      "current": "Pestaña es placeholder vacío.",
+      "gap": "Implementar listado/modelo."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F13",
+      "requirement": "Edición de nota clínica",
+      "verdict": "FALTA",
+      "current": "Corrección genérica de documentos no equivale a nota de enfermería.",
+      "gap": "Implementar flujo específico con versionado."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F14",
+      "requirement": "Auditoría de nota con IA",
+      "verdict": "NO_DEMOSTRABLE",
+      "current": "No existe IA de auditoría.",
+      "gap": "La evidencia no define algoritmo/resultado."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F15",
+      "requirement": "Restricción de edición por rol",
+      "verdict": "PARCIAL",
+      "current": "Existen permisos clinical:write/sign.",
+      "gap": "Falta aplicar a notas/reportes específicos observados."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F16",
+      "requirement": "Aplicación operativa de enfermería",
+      "verdict": "BLOQUEADO_CLIENTE",
+      "current": "No existe app/flujo específico.",
+      "gap": "Falta alcance y reglas."
+    },
+    {
+      "chapter": "CH17",
+      "id": "CH17-F17",
+      "requirement": "Compartir nota de enfermería por WhatsApp",
+      "verdict": "BLOQUEADO_INTEGRACION",
+      "current": "No existe envío.",
+      "gap": "Requiere proveedor, consentimiento y control de datos sensibles."
+    }
+  ]
+}

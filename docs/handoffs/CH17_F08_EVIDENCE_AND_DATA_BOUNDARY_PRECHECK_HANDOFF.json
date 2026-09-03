@@ -1,0 +1,38 @@
+{
+  "lot": "CH17_F08_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "9c61a7062084a4e7df587d0352cdfeafe89ad56f",
+  "base_sha": "9c61a7062084a4e7df587d0352cdfeafe89ad56f",
+  "implementation_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "remote_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "requirements": {
+    "missing": ["CH17-F08"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q002"],
+    "preserved_missing": ["CH17-F04", "CH17-F05", "CH17-F06"],
+    "preserved_not_testable": ["CH17-F07"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0024": "Opened detail crop: Evaluación Clínica visibly has Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería and Bitácoras, plus Antecedentes/Evaluaciones panels and Agregar controls."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped Reporte de salud source, organization context, fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q002 controls clinical antecedent/allergy form definitions, catalog, Agregar permissions, versioning and audit.",
+    "No clinical navigation, panel content, Agregar control, query, patient/hospitalization bridge, print/export, persistence or clinical write was added.",
+    "/clinical/hospitalizations is not an authorized source or authorization bridge for /clinical/reports; CH09-F03 remains independently mapped there.",
+    "CR-020 remains unrelated and clinically blocked."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 9c61a7062084a4e7df587d0352cdfeafe89ad56f; F08 documentation remains pending commit).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f04_f07_regression": "PRESERVED: F04–F06 remain MISSING under their scoped questions; F07 remains NOT_TESTABLE; no application code changed.",
+    "cross_requirement_isolation": "PASS: F04–F06 remain /clinical/reports MISSING, F07 remains NOT_TESTABLE, and CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002.",
+    "selenium_runtime": "NOT_APPLICABLE: F08 has no implemented action; Python Selenium runtime remains unavailable.",
+    "git_sync": "PASS: environment checkpoint 998875f4694d070598ea63f52619f66bfed426a1 contains this precheck and cached origin matches it; direct git add/commit/fetch remain blocked by .git ACL and direct push lacks HTTPS credentials."
+  },
+  "next_batch": "CH17_REVIEW"
+}

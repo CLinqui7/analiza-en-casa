@@ -1,0 +1,67 @@
+{
+  "lot": "CH05_REPAIR",
+  "source_sha": null,
+  "base_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "packages/domain/src/index.ts",
+    "apps/web/src/app/(workspace)/quotes/page.tsx",
+    "apps/web/src/lib/domain.test.ts",
+    "apps/web/e2e/quotes.spec.ts",
+    "tests/e2e/ch16.spec.mjs",
+    "tests/selenium/test_quotes.py",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.json",
+    "docs/qa/CLIENT_CHANGE_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/handoffs/CH05_REPAIR_HANDOFF.json",
+    "docs/handoffs/CH05_REPAIR_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "exact": ["CH05-F001", "CH05-F006", "CH05-F012"],
+    "partial": ["CH05-F002", "CH05-F003", "CH05-F004", "CH05-F005", "CH05-F007", "CH05-F008", "CH05-F009", "CH05-F010", "CH05-F011", "CH05-F013", "CH05-F015"],
+    "not_testable": ["CH05-F014"]
+  },
+  "tests": [
+    "npm run typecheck",
+    "npm run test --workspace=@analiza/web -- src/lib/domain.test.ts",
+    "PLAYWRIGHT_PORT=4276 npm run test:browser:quotes",
+    "npm run qa:client-changes:batch -- B4 --self-test",
+    "node scripts/verify-selenium-quote-coverage.mjs",
+    "npm run qa:light-mode",
+    "npm run qa:video-parity:chapter -- CH01 --self-test",
+    "npm run qa:video-parity:chapter -- CH02 --self-test",
+    "npm run qa:video-parity:chapter -- CH03 --self-test",
+    "npm run qa:video-parity:chapter -- CH04 --self-test",
+    "npm run qa:video-parity:chapter -- CH05 --self-test"
+  ],
+  "gates": {
+    "typecheck": "PASS",
+    "playwright_quotes": "PASS",
+    "client_changes_b4": "PASS",
+    "quote_selenium_declaration_coverage": "PASS",
+    "quote_selenium_runtime": "PENDING_RUNTIME_PYTHON_UNAVAILABLE",
+    "light_only": "PASS",
+    "ch01_parity": "PASS",
+    "ch02_parity": "PASS",
+    "ch03_parity": "PASS",
+    "ch04_parity": "PASS",
+    "ch05_parity": "PASS"
+  },
+  "evidence": {
+    "functional_fingerprint": "16eb62e00f7652be06bf6de620cec3f8662d0d7d9dedf0d651b9b219e7e75678",
+    "catalog_flow": "Focused Playwright and Selenium source assert all seven labels including Estudios Dx, zero-quantity rejection with no added row, then positive-quantity save/reload alongside the synthetic service and medication catalog flows.",
+    "safe_limits": "Catalog labels and items are synthetic. Video prices, counts, stock, tax, coverage, medication eligibility, dosage and reservation semantics are not implemented or certified."
+  },
+  "blockers": [
+    "CH05-F002, F003, F004, F005, F007, F008, F009, F010, F011, F013 and F015 remain PARTIAL.",
+    "CH05-F014 remains NOT_TESTABLE under CH05-Q006/Q007; no medicine-add outcome is inferred from the off-screen video result.",
+    "Python is unavailable, so no Selenium runtime PASS records are claimed.",
+    "Git metadata writes remain denied; no commit, push, fresh fetch or remote SHA verification is claimed."
+  ],
+  "next_batch": "CH06"
+}

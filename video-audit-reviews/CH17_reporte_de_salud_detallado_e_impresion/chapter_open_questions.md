@@ -12,7 +12,7 @@
 - Motivo: El reporte concentra datos clínicos, identificatorios y de seguro sensibles sin demostrar permisos.
 - Estado: NEEDS_CLIENT_CONFIRMATION
 
-## Q03 · ¿El rango del reporte es inclusivo, qué zona horaria usa y cuál es el máximo permitido?
+## Q03 · ¿El rango del reporte es inclusivo, qué zona horaria usa y cuál es el máximo permitido? (canónico: CH17-Q008)
 
 - Evidencia: CH17-E0012 · 00:51:18.800.
 - Motivo: El calendario demuestra selección, no semántica de límites, zona horaria ni rendimiento.

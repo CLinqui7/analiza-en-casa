@@ -1,0 +1,33 @@
+{
+  "lot": "CH13_F01_MIRROR_AND_SELENIUM_REPAIR",
+  "source_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
+  "base_sha": "fdc6fd723e55301c67b24f57fecdefb0d5d535fa",
+  "implementation_sha": null,
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "functional_fingerprint": "416cc99c019f863bf250205f6008e8b8f328f3bb14783cbf86a7b7b8d21084e4",
+  "requirements": {
+    "verified_partial": ["CH13-F01"],
+    "explicitly_blocked": ["CH13-F03", "CH13-F05", "CH13-F07"],
+    "not_implemented": ["CH13-F02", "CH13-F04", "CH13-F06", "CH13-F08", "CH13-F09", "CH13-F10", "CH13-F11"]
+  },
+  "evidence": {
+    "f01": "CH13-E0004 supports only the factual Listado table, local search, and visible Excel control. Existing synthetic draft references and notes remain readable; no supplier, invoice, total, receipt, tax, export, or financial state is fabricated.",
+    "permissions": "Playwright covers ADMIN plus AUDITOR factual read access and NURSE direct-route denial. Selenium source has distinct ADMIN search/export, AUDITOR read, and NURSE denial assertions."
+  },
+  "gates": {
+    "playwright_ch13": "PASS: 2/2",
+    "workspace_purchase_draft": "PASS: 1/1",
+    "ch13_parity_self_test": "PASS: 11/11 before the CH14 follow-up fingerprint refresh",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; executable source coverage is action-specific"
+  },
+  "blockers": [
+    "CH13-Q001/Q004/Q005/Q006/Q008/Q009/Q012/Q014: purchase financial states, supplier/factura data, totals, taxes, exports, and receiving rules require approved client definitions.",
+    "Git metadata writes are denied in this environment; no implementation or remote SHA is claimed.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed."
+  ],
+  "next_batch": "CH14_PRECHECK"
+}

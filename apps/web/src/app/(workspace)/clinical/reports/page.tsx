@@ -1,380 +1,210 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { type VitalReading } from '@analiza/contracts';
-import { measuredVitalMetrics } from '@analiza/domain';
-import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import { EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useWorkspace } from '@/components/providers';
 
-const optionalPositiveNumber = z.preprocess(
-  (value) => (value === '' || value === undefined ? undefined : Number(value)),
-  z.number().positive('Use un valor positivo.').optional(),
-);
+const reportColumns = [
+  'Acciones',
+  'Cédula',
+  'Nombre',
+  'Empresa',
+  'Hospitalización',
+  'Período',
+  'Auditoría',
+  'Triage',
+  'Estatus',
+];
 
-const vitalFormSchema = z
-  .object({
-    patientId: z.string().min(1, 'Seleccione un paciente.'),
-    measuredAt: z.string().min(1, 'Indique fecha y hora.'),
-    source: z.enum(['clinical', 'patient']),
-    systolic: optionalPositiveNumber,
-    diastolic: optionalPositiveNumber,
-    pulse: optionalPositiveNumber,
-    temperature: optionalPositiveNumber,
-    oxygenSaturation: optionalPositiveNumber,
-    glucose: optionalPositiveNumber,
-    note: z.string().trim(),
-  })
-  .superRefine((value, context) => {
-    if (
-      ![
-        value.systolic,
-        value.diastolic,
-        value.pulse,
-        value.temperature,
-        value.oxygenSaturation,
-        value.glucose,
-      ].some((metric) => metric !== undefined)
-    ) {
-      context.addIssue({
-        code: 'custom',
-        message: 'Registre al menos una medición individual.',
-        path: ['systolic'],
-      });
-    }
-  });
-
-type VitalFormInput = z.input<typeof vitalFormSchema>;
-type VitalForm = z.output<typeof vitalFormSchema>;
-
-const tabs = [
-  'Antecedentes y evaluaciones',
-  'Signos vitales',
-  'Perfiles clínicos',
-  'Notas de evolución',
-  'Interconsultas',
-  'Notas de enfermería',
-  'Bitácoras',
+const reportSections = [
+  {
+    id: 'information',
+    label: 'Información Principal',
+    actionId: 'HEALTH-REPORT-SECTION-INFORMATION',
+  },
+  { id: 'clinical', label: 'Evaluación Clínica', actionId: 'HEALTH-REPORT-SECTION-CLINICAL' },
+  { id: 'medical', label: 'Atención Médica', actionId: 'HEALTH-REPORT-SECTION-MEDICAL' },
+  {
+    id: 'treatments',
+    label: 'Tratamientos y Órdenes',
+    actionId: 'HEALTH-REPORT-SECTION-TREATMENTS',
+  },
+  { id: 'events', label: 'Eventos Clínicos', actionId: 'HEALTH-REPORT-SECTION-EVENTS' },
+  { id: 'evidence', label: 'Evidencia y Documentos', actionId: 'HEALTH-REPORT-SECTION-EVIDENCE' },
 ] as const;
-type TabName = (typeof tabs)[number];
+
+type ReportSectionId = (typeof reportSections)[number]['id'];
 
 export default function HealthReportPage() {
-  const { addVitalReading, auditEntries, patients, vitalReadings } = useWorkspace();
-  const [activeTab, setActiveTab] = useState<TabName>('Antecedentes y evaluaciones');
-  const [isVitalDialogOpen, setVitalDialogOpen] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
-  const form = useForm<VitalFormInput, unknown, VitalForm>({
-    resolver: zodResolver(vitalFormSchema),
-    defaultValues: {
-      patientId: patients[0]?.id ?? '',
-      measuredAt: '',
-      source: 'clinical',
-      note: '',
-    },
-  });
-
-  function closeVitalDialog() {
-    setVitalDialogOpen(false);
-    form.reset({ patientId: patients[0]?.id ?? '', measuredAt: '', source: 'clinical', note: '' });
-  }
-
-  function saveVitalReading(values: VitalForm) {
-    const reading: VitalReading = {
-      id: crypto.randomUUID(),
-      patientId: values.patientId,
-      measuredAt: new Date(values.measuredAt).toISOString(),
-      source: values.source,
-      systolic: values.systolic,
-      diastolic: values.diastolic,
-      pulse: values.pulse,
-      temperature: values.temperature,
-      oxygenSaturation: values.oxygenSaturation,
-      glucose: values.glucose,
-      note: values.note || undefined,
-    };
-    addVitalReading(reading);
-    setActiveTab('Signos vitales');
-    setResult('Medición individual registrada con evidencia de auditoría.');
-    closeVitalDialog();
-  }
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<ReportSectionId>('information');
+  const activeSection =
+    reportSections.find((section) => section.id === selectedSection) ?? reportSections[0];
 
   return (
     <div className="page-stack">
-      <header className="page-header page-header-actions">
+      <header className="page-header">
         <div>
           <p className="eyebrow">Clínico</p>
           <h1>Reporte de salud</h1>
-          <p>Presentación trazable de datos sintéticos; no emite diagnóstico ni recomendaciones.</p>
+          <p>
+            Superficie factual de solo lectura; no muestra registros clínicos ni identificatorios.
+          </p>
         </div>
-        <Button
-          onClick={() => {
-            setResult(null);
-            setVitalDialogOpen(true);
-          }}
-          type="button"
-        >
-          Registrar medición individual
-        </Button>
+        <StatusTag tone="warning">Fuente pendiente</StatusTag>
       </header>
-      {result ? (
-        <p className="notice success" role="status">
-          {result}
+
+      <Panel>
+        <p className="notice" id="health-report-data-boundary" role="status">
+          El reporte observado requiere una fuente autorizada por organización, roles, minimización
+          de campos, filtros, auditoría de acceso y retención aprobados (CH16-Q008). La ruta clínica
+          y los datos de otros módulos no se reutilizan como autorización.
         </p>
-      ) : null}
-      <div aria-label="Secciones del reporte de salud" className="tabs" role="tablist">
-        {tabs.map((tab) => (
+        <label className="search-label" htmlFor="health-report-search">
+          Buscar en reporte de salud
+        </label>
+        <input
+          aria-describedby="health-report-data-boundary"
+          data-action-id="HEALTH-REPORT-SEARCH"
+          disabled
+          id="health-report-search"
+          placeholder="Fuente de reportes pendiente de aprobación"
+          readOnly
+          type="search"
+          value=""
+        />
+      </Panel>
+
+      <Panel>
+        <section aria-labelledby="health-report-actions-title">
+          <h2 id="health-report-actions-title">Acciones de hospitalización</h2>
+          <p className="notice" id="health-report-actions-boundary" role="status">
+            El menú observado se conserva sin contexto de hospitalización. No abre ni consulta
+            historia clínica, Claims, visitas, notas, auditorías o Registro XPO hasta contar con la
+            relación, autorización y auditoría aprobadas (CH17-Q007).
+          </p>
           <button
-            aria-selected={activeTab === tab}
-            className={activeTab === tab ? 'tab active' : 'tab'}
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            role="tab"
+            aria-controls="health-report-hospitalization-actions"
+            aria-describedby="health-report-actions-boundary"
+            aria-expanded={actionsOpen}
+            data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"
+            onClick={() => setActionsOpen((open) => !open)}
             type="button"
           >
-            {tab}
+            Acciones de hospitalización
           </button>
-        ))}
-      </div>
-      {activeTab === 'Antecedentes y evaluaciones' ? <BackgroundPanel /> : null}
-      {activeTab === 'Signos vitales' ? (
-        <VitalsPanel readings={vitalReadings} patients={patients} />
-      ) : null}
-      {activeTab === 'Perfiles clínicos' ? <ProfilesPanel /> : null}
-      {activeTab === 'Notas de evolución' ? (
-        <EmptyClinicalPanel
-          title="Notas de evolución"
-          detail="No hay notas sintéticas registradas en esta sesión."
-        />
-      ) : null}
-      {activeTab === 'Interconsultas' ? (
-        <EmptyClinicalPanel
-          title="Interconsultas"
-          detail="No hay interconsultas sintéticas registradas en esta sesión."
-        />
-      ) : null}
-      {activeTab === 'Notas de enfermería' ? (
-        <EmptyClinicalPanel
-          title="Notas de enfermería"
-          detail="Las notas se gestionan como registros auditados; esta sesión no contiene notas sintéticas."
-        />
-      ) : null}
-      {activeTab === 'Bitácoras' ? <AuditPanel entries={auditEntries} /> : null}
-      <Dialog
-        description="Registre sólo valores sintéticos de QA. El sistema no interpreta ni calcula recomendaciones clínicas."
-        footer={
-          <>
-            <Button className="button-secondary" onClick={closeVitalDialog} type="button">
-              Cancelar
-            </Button>
-            <Button form="vital-form" type="submit">
-              Guardar medición
-            </Button>
-          </>
-        }
-        onClose={closeVitalDialog}
-        open={isVitalDialogOpen}
-        title="Registrar signos vitales"
-      >
-        <form
-          className="form-grid form-grid-compact"
-          id="vital-form"
-          noValidate
-          onSubmit={form.handleSubmit(saveVitalReading)}
-        >
-          <label>
-            Paciente
-            <select {...form.register('patientId')}>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.fullName}
-                </option>
-              ))}
-            </select>
-            {form.formState.errors.patientId ? (
-              <span className="field-error">{form.formState.errors.patientId.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Fecha y hora
-            <input {...form.register('measuredAt')} type="datetime-local" />
-            {form.formState.errors.measuredAt ? (
-              <span className="field-error">{form.formState.errors.measuredAt.message}</span>
-            ) : null}
-          </label>
-          <label>
-            Fuente
-            <select {...form.register('source')}>
-              <option value="clinical">Registro clínico</option>
-              <option value="patient">Reportado por paciente</option>
-            </select>
-          </label>
-          <fieldset className="measurement-fieldset">
-            <legend>Mediciones individuales</legend>
-            <label>
-              Sistólica (mmHg)
-              <input {...form.register('systolic')} inputMode="decimal" type="number" />
-            </label>
-            <label>
-              Diastólica (mmHg)
-              <input {...form.register('diastolic')} inputMode="decimal" type="number" />
-            </label>
-            <label>
-              Pulso (lpm)
-              <input {...form.register('pulse')} inputMode="decimal" type="number" />
-            </label>
-            <label>
-              Temperatura (°C)
-              <input
-                {...form.register('temperature')}
-                inputMode="decimal"
-                step="0.1"
-                type="number"
-              />
-            </label>
-            <label>
-              Saturación O₂ (%)
-              <input {...form.register('oxygenSaturation')} inputMode="decimal" type="number" />
-            </label>
-            <label>
-              Glucosa (mg/dL)
-              <input {...form.register('glucose')} inputMode="decimal" step="0.1" type="number" />
-            </label>
-          </fieldset>
-          {form.formState.errors.systolic ? (
-            <span className="field-error" role="alert">
-              {form.formState.errors.systolic.message}
-            </span>
+          {actionsOpen ? (
+            <ul
+              aria-label="Acciones observadas de hospitalización"
+              className="action-menu-surface"
+              id="health-report-hospitalization-actions"
+              role="menu"
+            >
+              <li aria-disabled="true" role="menuitem">
+                Historia clínica
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Reporte Claims
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Ver visitas
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Notas de servicio
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Reporte de salud
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Auditorías
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Registro XPO
+              </li>
+            </ul>
           ) : null}
-          <label>
-            Nota de auditoría (opcional)
-            <textarea {...form.register('note')} rows={3} />
-          </label>
-        </form>
-      </Dialog>
-    </div>
-  );
-}
-
-function BackgroundPanel() {
-  return (
-    <section className="two-column">
-      <Panel>
-        <h2>Antecedentes documentados</h2>
-        <p>
-          No hay antecedentes sintéticos cargados para esta sesión. Este módulo presenta hechos
-          registrados; no infiere información clínica.
-        </p>
+        </section>
       </Panel>
-      <Panel>
-        <h2>Alergias y alertas</h2>
-        <p>
-          El catálogo y su política de fuentes requieren confirmación del cliente. No se muestran
-          alertas no verificadas.
-        </p>
-        <StatusTag tone="warning">Configuración pendiente</StatusTag>
-      </Panel>
-    </section>
-  );
-}
 
-function VitalsPanel({
-  readings,
-  patients,
-}: {
-  readings: VitalReading[];
-  patients: { id: string; fullName: string }[];
-}) {
-  return (
-    <Panel>
-      <div className="table-heading">
-        <div>
-          <h2>Mediciones individuales</h2>
-          <p>Valores mostrados por fuente y fecha, sin clasificación automática.</p>
-        </div>
-        <StatusTag>{readings.length} registros</StatusTag>
-      </div>
-      {readings.length ? (
-        <div className="reading-list">
-          {readings
-            .slice()
-            .reverse()
-            .map((reading) => (
-              <article className="reading-card" key={reading.id}>
-                <header>
-                  <strong>
-                    {patients.find((patient) => patient.id === reading.patientId)?.fullName ??
-                      'Paciente no disponible'}
-                  </strong>
-                  <span>
-                    {new Date(reading.measuredAt).toLocaleString('es-SV')} ·{' '}
-                    {reading.source === 'clinical' ? 'Registro clínico' : 'Reportado por paciente'}
-                  </span>
-                </header>
-                <div className="metric-chip-list">
-                  {measuredVitalMetrics(reading).map((metric) => (
-                    <span className="metric-chip" key={metric.key}>
-                      {metric.label}:{' '}
-                      <strong>
-                        {metric.value} {metric.unit}
-                      </strong>
-                    </span>
-                  ))}
-                </div>
-                {reading.note ? <p>{reading.note}</p> : null}
-              </article>
+      <Panel>
+        <section aria-labelledby="health-report-sections-title">
+          <h2 id="health-report-sections-title">Secciones observadas del reporte</h2>
+          <p className="notice" id="health-report-sections-boundary" role="status">
+            Las pestañas reproducen sólo la navegación visible. No cargan Información Principal,
+            Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos ni
+            Evidencia y Documentos porque CH16-Q008 no autoriza una fuente ni campos de reporte.
+          </p>
+          <div aria-label="Secciones observadas del reporte de salud" role="tablist">
+            {reportSections.map((section) => (
+              <button
+                aria-controls="health-report-active-section"
+                aria-describedby="health-report-sections-boundary"
+                aria-selected={selectedSection === section.id}
+                data-action-id={section.actionId}
+                id={`health-report-tab-${section.id}`}
+                key={section.id}
+                onClick={() => setSelectedSection(section.id)}
+                role="tab"
+                type="button"
+              >
+                {section.label}
+              </button>
             ))}
+          </div>
+          <div
+            aria-labelledby={`health-report-tab-${activeSection.id}`}
+            id="health-report-active-section"
+            role="tabpanel"
+          >
+            <EmptyState
+              detail="No se consulta ni reutiliza información de pacientes, hospitalizaciones, seguros, datos clínicos, auditorías o documentos."
+              title={`${activeSection.label}: sin contenido autorizado`}
+            />
+          </div>
+        </section>
+      </Panel>
+
+      <Panel>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                {reportColumns.map((column) => (
+                  <th key={column}>{column}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan={reportColumns.length}>
+                  <EmptyState
+                    detail="No se consultan ni se copian pacientes, hospitalizaciones, signos vitales ni auditorías hasta contar con el contrato aprobado."
+                    title="Sin registros autorizados para mostrar"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <EmptyState
-          detail="Use el botón para registrar una medición individual."
-          title="Sin mediciones"
-        />
-      )}
-    </Panel>
-  );
-}
-
-function ProfilesPanel() {
-  return (
-    <Panel>
-      <h2>Perfiles clínicos</h2>
-      <p>
-        Esta vista sólo agrupa registros documentados. Cualquier cálculo, diagnóstico o
-        recomendación automatizada permanece fuera del alcance hasta contar con reglas aprobadas por
-        el cliente.
-      </p>
-    </Panel>
-  );
-}
-
-function EmptyClinicalPanel({ title, detail }: { title: string; detail: string }) {
-  return (
-    <Panel>
-      <EmptyState detail={detail} title={title} />
-    </Panel>
-  );
-}
-
-function AuditPanel({
-  entries,
-}: {
-  entries: { id: string; at: string; action: string; subject: string }[];
-}) {
-  return (
-    <Panel>
-      <h2>Bitácora</h2>
-      <ul className="audit-list">
-        {entries.map((entry) => (
-          <li key={entry.id}>
-            <strong>{entry.action}</strong>
-            <span>
-              {entry.subject} · {new Date(entry.at).toLocaleString('es-SV')}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Panel>
+        <nav aria-label="Paginación del reporte de salud" className="pagination">
+          <button
+            aria-describedby="health-report-data-boundary"
+            data-action-id="HEALTH-REPORT-PAGE-PREV"
+            disabled
+            type="button"
+          >
+            Anterior
+          </button>
+          <span aria-current="page">1</span>
+          <button
+            aria-describedby="health-report-data-boundary"
+            data-action-id="HEALTH-REPORT-PAGE-NEXT"
+            disabled
+            type="button"
+          >
+            Siguiente
+          </button>
+        </nav>
+      </Panel>
+    </div>
   );
 }

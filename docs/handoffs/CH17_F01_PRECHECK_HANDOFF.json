@@ -1,0 +1,26 @@
+{
+  "lot": "CH17_F01_PRECHECK",
+  "source_sha": "9b587ce131b965eede19c9755d43a1a07bcfaded",
+  "base_sha": "9b587ce131b965eede19c9755d43a1a07bcfaded",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "verified_partial": ["CH17-F01"],
+    "explicitly_blocked": ["CH17-F02", "CH17-F03", "CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+  },
+  "evidence": {
+    "f01": "CH17-E0001 detail crop and CH17-E0003 were opened. They establish the Reporte de salud table anatomy: Acciones, Cédula, Nombre, Empresa, Hospitalización, Período, Auditoría, Triage and Estatus."
+  },
+  "gates": {
+    "typecheck": "PASS: npm run typecheck --workspace=@analiza/web",
+    "playwright_ch17_f01": "PENDING_RUNTIME_RESULT: the focused runner reached both CH17 cases but did not return a final result because its Next development server remained active; functional/performance certification is UNVERIFIED.",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; tests/selenium/test_health_report.py is executable action-specific source coverage."
+  },
+  "blockers": [
+    "CH16-Q008 blocks any Reporte de salud source, organization-scoped roles, sensitive fields, filters, access audit, retention, minimization and redaction.",
+    "No patients, hospitalizations, vital readings, audit entries, print, export or clinical-report authorization were exposed."
+  ],
+  "next_batch": "CH17_REVIEW"
+}

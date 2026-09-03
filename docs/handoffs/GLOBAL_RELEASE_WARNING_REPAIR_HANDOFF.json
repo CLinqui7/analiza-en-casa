@@ -1,0 +1,41 @@
+{
+  "lot": "GLOBAL_RELEASE_WARNING_REPAIR",
+  "source_sha": "11be63c1eb4f35d9e2af0ddea1e43522be8d31ad",
+  "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "verification_status": "STATIC_GATES_VERIFIED_AT_COMMITTED_SHA_RUNTIME_PENDING",
+  "final_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "remote_sha": null,
+  "release_status": "NOT_READY_RUNTIME_EVIDENCE_PENDING",
+  "global_complete": false,
+  "repairs": [
+    "Quote catalog listbox options now publish aria-selected from the current item selection.",
+    "Agenda derives the selected patient through React Hook Form useWatch rather than render-time form.watch().",
+    "The data-provider no-profile fixture is explicit and no longer creates an unused binding."
+  ],
+  "focused_evidence": {
+    "unit": "PASS: npm.cmd run test --workspace=@analiza/web -- data-provider.test.ts (2/2).",
+    "quote_accessibility": "PENDING_RUNTIME_RESULT: targeted CH05 quote selection reached its one real Playwright case but the inherited server lifecycle returned no final exit summary; it is not recorded as PASS.",
+    "agenda_selected_patient": "Source assertion updated in CH11: selecting patient-demo-002 must update the read-only document field to OTHER DEMO-002. Fresh runtime completion remains pending with the shared Playwright server lifecycle."
+  },
+  "static_gates": {
+    "lint": "PASS: npm.cmd run lint (0 errors, 0 warnings).",
+    "format": "PASS: npm.cmd run format:check.",
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "light_mode": "PASS: npm.cmd run qa:light-mode.",
+    "protected_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13 after regenerating the current functional fingerprint.",
+    "video_parity": "PASS: 210/210 requirements traced.",
+    "traceability_mirror": "PASS: normal/self-test mirror validation."
+  },
+  "provenance": {
+    "prior_committed_repair_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
+    "current_functional_fingerprint": "c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1640f5a945f555",
+    "status": "STATIC_METADATA_REPAIRED_AT_COMMITTED_CODE_SHA: the warning repair is committed at 0e0626fccc8d464b98458c4a40bf185a992f2a90; regenerated parity output is Prettier-compliant and idempotent. CR-011, CR-012, and CR-017 now use current fingerprints but remain PENDING_RUNTIME_CERTIFICATION until a completed fresh focused runtime result exists."
+  },
+  "remaining_scoped_gaps": [
+    "A completed fresh-server full Playwright exit result and protected CH01-CH03 final exit result remain required.",
+    "Selenium runtime remains PENDING_RUNTIME because Python is unavailable.",
+    "Existing video/client source, clinical, integration, and provider blockers are preserved without behavioral expansion."
+  ],
+  "git_sync": "BLOCKED_ENVIRONMENT: git add cannot create .git/index.lock; git push has no schannel credentials; git fetch cannot write .git/FETCH_HEAD. No commit, push, remote SHA, or local/remote equality result is claimed.",
+  "next_batch": "GLOBAL_RELEASE_RUNTIME_EVIDENCE"
+}

@@ -1,0 +1,9 @@
+# GLOBAL_RELEASE_REPAIR handoff
+
+Metadata note: `git add` failed because `.git/index.lock` is not writable; `git push` has no available Windows schannel credentials; and `git fetch` cannot write `.git/FETCH_HEAD`. No metadata commit, push, fetch, or local/remote equality result is claimed.
+
+The release repair clears the resolvable static quality failures. The hospitalization form now owns all additional admission periods in React Hook Form defaults, eliminating the synchronous effect state update while preserving direct `?edit=` editing, close/reopen, add/remove, normalization, and browser-local persistence. Focused unit coverage passes (3/3), and both browser test sources assert a direct URL edit with multiple persisted periods.
+
+The repository formatter was applied to the reported source set and `npm.cmd run format:check` now passes. Lint has no errors, typecheck passes, and client-change verification (32/32), light mode, traceability-mirror self-test, and 17/17 chapter audit verification pass. The listed client requests are no longer blank-blocker records: completed demo flows have focused coverage, while partial/missing work names its concrete source-definition or integration prerequisite.
+
+Release is still not approved. The implementation checkpoint is `f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5`, which contains the repair and is the code SHA for the static and focused B3 evidence. Playwright server reuse is now opt-in to avoid the stale-server 404. The focused B3 regression completed successfully (7/7), but the server is not a fresh release server: it holds Next's development lock and Windows denied termination of its known PID. The CH01–CH03 run reached all 20 cases without a final runner result, and no full-suite final exit result exists. Selenium remains pending because Python is unavailable. The remaining metadata commit, push, fetch, and remote equality verification require writable Git metadata.

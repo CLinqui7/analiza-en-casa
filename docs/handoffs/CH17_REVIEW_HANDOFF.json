@@ -1,0 +1,37 @@
+{
+  "lot": "CH17_REVIEW",
+  "source_sha": "e3f6981592fd59a1c8063a19fe1a7a23ede13adb",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "REVIEW_COMPLETE_GIT_SYNC_BLOCKED",
+  "final_sha": null,
+  "remote_sha": null,
+  "chapter": "CH17",
+  "reviewed_requirements": {
+    "implemented_partial": ["CH17-F01", "CH17-F02", "CH17-F03"],
+    "missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13"],
+    "not_testable": ["CH17-F07", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"],
+    "cross_requirement_isolation": ["CH09-F03"]
+  },
+  "review_conclusions": [
+    "F01-F03 remain safe, local empty-only anatomy. Their focused six-case result remains recorded while source, permission, and performance contracts remain UNVERIFIED.",
+    "F04-F06 and F08-F13 remain MISSING because the evidence exposes sensitive report, insurance, clinical-note, vital, or correction anatomy without an approved tenant-scoped source, role, lifecycle, print, or temporal contract.",
+    "F07, F14-F17 remain NOT_TESTABLE: the evidence does not establish print, AI, role-correction, nursing-operation, or external WhatsApp delivery contracts.",
+    "CH17-F17 canonical metadata was repaired during this review: CH17-Q004 is linked only to F17, while CH06-F02 was restored to its pre-existing evidence and no unrelated requirement carries the WhatsApp boundary.",
+    "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations. It is not a report, note, AI, nursing-operation, or external-sharing source. CR-020 remains limited to its separate future fluid-balance approval."
+  ],
+  "safe_residual_work": {
+    "identified": false,
+    "reason": "All remaining CH17 requirements require an approved sensitive-data, clinical-correction, provider, recipient, print, or runtime role contract. No additional light, read-only anatomy can be added without exposing or implying those behaviors."
+  },
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA e3f6981592fd59a1c8063a19fe1a7a23ede13adb; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17 requirements traced).",
+    "protected_parity": "PASS: node scripts/verify-video-react-parity.mjs --self-check (210/210 requirements traced, including protected CH01-CH03).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files contain no Dark/System UI support).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters verified; 0 pending; 0 failed).",
+    "anti_skip": "PASS: focused CH17 Playwright and Selenium source files contain no test/pytest skip marker.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add could not create .git/index.lock (Permission denied); therefore no commit or push was attempted. git fetch could not open .git/FETCH_HEAD (Permission denied). Local HEAD and cached origin/codex/react-full-parity-selenium-100 both remain e3f6981592fd59a1c8063a19fe1a7a23ede13adb."
+  },
+  "next_batch": "GLOBAL_RELEASE_PRECHECK"
+}

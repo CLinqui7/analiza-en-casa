@@ -1,0 +1,38 @@
+{
+  "lot": "GLOBAL_RELEASE_METADATA_REPAIR",
+  "source_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "verification_status": "STATIC_GATES_VERIFIED_AT_COMMITTED_CODE_SHA_RUNTIME_PENDING",
+  "final_sha": null,
+  "remote_sha": null,
+  "release_status": "NOT_READY_RUNTIME_EVIDENCE_PENDING",
+  "global_complete": false,
+  "repairs": [
+    "The video-parity generator emits Prettier-compliant TypeScript for video-parity-summary.ts; two consecutive generations produced the same SHA-256.",
+    "CR-011, CR-012, and CR-017 registry and certification fingerprints match their changed quote/agenda code at 0e0626f.",
+    "CR-011, CR-012, and CR-017 are PENDING_RUNTIME_CERTIFICATION rather than DEMO_CERTIFIED because a completed fresh focused Playwright result and Selenium runtime result do not exist."
+  ],
+  "static_gates": {
+    "format": "PASS: npm.cmd run format:check.",
+    "lint": "PASS: npm.cmd run lint (0 errors, 0 warnings).",
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "light_mode": "PASS: npm.cmd run qa:light-mode.",
+    "protected_parity": "PASS: npm.cmd run qa:video-parity -- --self-check (210/210 requirements traced, including CH01-CH03).",
+    "traceability_mirror": "PASS: npm.cmd run qa:traceability-mirror -- --self-test.",
+    "client_changes": "PASS: npm.cmd run qa:client-changes -- --self-test (32/32)."
+  },
+  "runtime_evidence": {
+    "playwright": "PENDING_RUNTIME: previous quote/agenda runs did not return a fresh completed final runner result; no old result is reused for certification.",
+    "selenium": "PENDING_RUNTIME: Python is unavailable."
+  },
+  "idempotence": {
+    "generator": "PASS: two qa:video-parity:generate executions at 0e0626f produced video-parity-summary.ts SHA-256 A421EFF2CB18019D84FA7478777FCE0084F08DBD13E14EE3D66D329FF1819B8B."
+  },
+  "remaining_scoped_gaps": [
+    "A completed fresh-server full Playwright exit result and protected CH01-CH03 final exit result remain required.",
+    "Selenium runtime remains PENDING_RUNTIME because Python is unavailable.",
+    "Existing video/client source, clinical, integration, and provider blockers are preserved without behavioral expansion."
+  ],
+  "git_sync": "PENDING: this metadata repair is dirty. The inherited environment has previously denied .git/index.lock and .git/FETCH_HEAD writes and lacks push credentials; no commit, push, remote SHA, or local/remote equality result is claimed.",
+  "next_batch": "GLOBAL_RELEASE_RUNTIME_EVIDENCE"
+}

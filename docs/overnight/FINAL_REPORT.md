@@ -4,6 +4,38 @@ Fecha: 2026-08-26
 Rama: `codex/overnight-audit-hardening`
 Clasificación: `SYNTHETIC_DEMO`
 
+### Addendum · 2026-09-03 · Revalidación de cierre desde el estado actual
+
+- Se reejecutaron todos los gates locales en `695d4b73beb9f63e6e14c0cf2f26b705c79ca1c0`: formato, lint, tipos, 98 pruebas de dominio, 37 Vitest React, modo claro, seguridad, cambios de cliente 32/32, paridad de video 210/210, espejo de trazabilidad, auditoría 17/17, build Next y standalone, Playwright baseline 43/43, Playwright React 178/178, Selenium 181/181 y smoke Selenium 6/6. La cobertura Selenium declarada permanece 334/334 (100%) y no se presenta como telemetría runtime.
+- El descubrimiento Selenium sin URL común reveló una colisión de build-lock entre los puertos de servidor predeterminados de los módulos. Se ejecutó de nuevo completo contra el servidor sano compartido mediante `SELENIUM_BASE_URL=http://127.0.0.1:4174`; pasó 181/181 sin cambiar código, aserciones, evidencia ni controles de seguridad.
+- La CLI autenticada de Vercel confirma que `dpl_2CBtezndaDgBrSWs1CGxYUEMQur6` sigue `READY` como preview. No se promovió producción y `globalComplete` se mantiene en `false`: el cierre depende de la disposición autorizada de GitGuardian 36747982, un scheduler/plan que admita el cron productivo y las validaciones/UAT externas de Supabase, proveedores y contratos aprobados.
+- El preview de esta certificación, [web-6g3onvjq2-clinqui7s-projects.vercel.app](https://web-6g3onvjq2-clinqui7s-projects.vercel.app) (`dpl_m53pXXSHpHKN9HY7rZRvxcyVeD21`), está `READY`. El build remoto pasó y el smoke autenticado devolvió `/` 307 y 200 para login, dashboard, pacientes, hospitalizaciones, cotizaciones, agenda, inventario, portal demo y health. Se omitió sólo el cron del artefacto temporal de preview porque Hobby no admite una frecuencia de 15 minutos; `vercel.json` quedó restaurado con la configuración productiva.
+
+### Addendum · 2026-09-03 · Dependency hardening and recertification
+
+- Implementation `4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce` removes the vulnerable direct production dependency `xlsx`. Patient export preserves the `pacientes-activos.xlsx`/`pacientes-inactivos.xlsx` filename, `Pacientes` sheet and seven columns; it creates the minimal OOXML container with `fflate`, with no formulas originating in data. The focused Playwright test inspects the generated archive and `npm audit --omit=dev` reports 0 vulnerabilities.
+- The release was recertified: preflight, security, format, lint, types, 98 domain tests, 37 React Vitest tests, QA 76/76, light mode, client changes 32/32, video 210/210, audit 17/17, React boundaries, builds, performance, root Playwright 43/43, React Playwright 178/178 and Selenium 181/181. Declared Selenium coverage is 334/334 (100%); it is not presented as action-runtime telemetry.
+- The 17-chapter evidence remains immutable and verified. Parity remains 52 `EXACT`, 85 `PARTIAL`, 20 `MISSING`, 8 `BLOCKED_CLIENT`, 3 `BLOCKED_INTEGRATION`, 40 `NOT_TESTABLE` and 2 `NOT_APPLICABLE`; 210/210 certifies traceability, not total feature equivalence.
+- Final mobile-patients and desktop-health-report screenshots were visually checked: no unintended horizontal overflow. The new protected Vercel preview [web-1idc2eofx-clinqui7s-projects.vercel.app](https://web-1idc2eofx-clinqui7s-projects.vercel.app) (`dpl_2CBtezndaDgBrSWs1CGxYUEMQur6`) passed authenticated smoke: `/` 307 and 200 for login, dashboard, patients, hospitalizations, quotes, agenda, inventory, portal demo and `/api/health`. Production was not promoted.
+- `globalComplete` remains `false`. Real Supabase/RLS and provider validation, client approval of clinical/financial contracts, and an authorized 15-minute production scheduler are still required.
+- PR #5 is intentionally not merge-ready yet: its GitGuardian check identifies the historical UI label `Password` in the action inventory as a generic password (incident `36747982`), but that 19-column fixture row has no credential. Its Vercel Git check also fails because it applies the versioned production cron, which the Hobby plan rejects. Both require authorized external disposition; the independently deployed no-cron preview above is `READY`.
+
+### Addendum · 2026-09-03 · Cierre reproducible de release
+
+- Implementación certificada: `58030d1419e179a4bc51145106c7314cb6417c6c`. Se corrigió una carrera de desmontaje en `PatientLocationMap`: Leaflet detiene cualquier animación pendiente y los cambios de coordenadas/zoom no animan cuando el diálogo puede cerrarse de inmediato. El flujo Playwright del editor compartido ahora comprueba explícitamente que no haya errores de página.
+- La regresión local pasó: Prettier, ESLint, TypeScript, 98 pruebas de dominio, 37 Vitest React, QA 76/76, modo claro, 32/32 cambios de cliente, trazabilidad video 210/210, espejo de trazabilidad, seguridad, límites React, build standalone, build Next, auditoría de video 17/17, Playwright 178/178 y Selenium 181/181. La cobertura Selenium declarada quedó en 334/334 (100%).
+- Los 17 capítulos fueron re-verificados sin editar la evidencia: 1,359 eventos con observaciones y receipts completos. `210/210` significa que todos los requisitos canónicos tienen trazabilidad estructural; no declara que los 210 estén `EXACT`. El desglose vigente es 52 `EXACT`, 85 `PARTIAL`, 20 `MISSING`, 8 `BLOCKED_CLIENT`, 3 `BLOCKED_INTEGRATION`, 40 `NOT_TESTABLE` y 2 `NOT_APPLICABLE`.
+- Preview Vercel listo: [web-nuexb31ir-clinqui7s-projects.vercel.app](https://web-nuexb31ir-clinqui7s-projects.vercel.app) (`dpl_AHQzRG5HXRM3SnmMLhKxxFpnC8LB`). El smoke autenticado de Vercel devolvió `/` 307, `/login` 200, `/dashboard` 200 y `/portal/demo-qt-2026-0148` 200. No se promovió producción. El artefacto preview omitió temporalmente el cron y configuró `apps/web/.next`; `vercel.json` versionado conserva su cron de producción intacto.
+- `npm run react:parity` conserva 37 gaps del baseline legado y por ello retorna no-cero. No es el gate de React/video actual; la separación de scopes y los bloqueos están documentados en `docs/qa/TRACEABILITY_SCOPE.md` y `docs/OPEN_QUESTIONS.md`.
+- `globalComplete` permanece `false`: faltan validación real de Supabase/RLS y proveedores, aprobaciones del cliente para contratos clínicos/financieros y un scheduler de 15 minutos autorizado para producción.
+
+### Addendum · 2026-09-03 · Revalidación y preview final
+
+- Se publicó `bbcab6d74a4c0845ba504794ed5a3842b7140981` en `codex/reconcile-global-release-20260903`. La implementación verificada es `2c52fbb5e74c53057ffd417f6af2452efea74f6d`: las dos correcciones fueron aserciones E2E desfasadas, justificadas por el frame CH09 y el contrato actual de CH16; no cambiaron el comportamiento de negocio.
+- Gates finales verdes: root Playwright 43/43, React Playwright 178/178, Selenium 181/181, cobertura Selenium declarada 334/334 (100%), QA 76/76, cambios de cliente 32/32, paridad de video 210/210 y auditoría 17/17, además de formato, lint, tipos y builds.
+- Nueva preview protegida `READY`: [web-anu19vg20-clinqui7s-projects.vercel.app](https://web-anu19vg20-clinqui7s-projects.vercel.app) (`dpl_3cGwvYKhLaxPUcX4ie6Xvm1KxMZu`). El smoke autenticado confirmó `/` 307 y 200 para login, dashboard, pacientes, hospitalizaciones, cotizaciones, agenda, inventario y portal demo. `Acuses` se valida como pestaña de Inventario; no existe como URL independiente.
+- No se promovió producción. La preview omitió sólo el cron de 15 minutos en el artefacto temporal porque Vercel Hobby lo rechaza; `vercel.json` versionado conserva el cron de producción. `globalComplete` continúa `false` hasta validar Supabase/RLS, proveedores, contratos clínicos/financieros y scheduler autorizado.
+
 ## 1. Resumen ejecutivo
 
 La rama entrega una aplicación ejecutable, evidencia de QA y documentación operativa. Se conservó intacta la evidencia de video y no se reabrió la auditoría completa: 17/17 capítulos, 1,359/1,359 observaciones y 17/17 receipts siguen verificando correctamente.
@@ -115,3 +147,14 @@ Rama de continuación: `codex/client-audio-selenium-hardening`. Se conservó la 
 ### Riesgo y bloqueo residual
 
 La migración no autoriza el uso con datos reales. Quedan por trasladar con paridad demostrable módulos extensos del demo heredado y por validar contra Supabase real RLS/RPC, roles, contratos de firmas clínicas, reglas de seguros, documentos oficiales, catálogos y proveedores. Esos puntos continúan documentados en `docs/OPEN_QUESTIONS.md`; no se infieren reglas de negocio ni se habilitan integraciones sensibles.
+
+### Addendum · 2026-08-29 · Seguros y preautorizaciones React
+
+`ROUTE-INSURANCE` ahora registra solicitudes y eventos administrativos append-only en el proveedor de workspace, persiste en modo mock y conserva búsquedas normalizadas, filtro, contexto de cotización, roles, timeline y enlace a la cotización. Registrar un estado no modifica cotizaciones, pagos, agenda ni hospitalizaciones. Email, WhatsApp, envío al seguro y Reclamo permanecen en estado seguro bloqueado. Los bloqueos pendientes son CH07-Q001 a CH07-Q006, CH08-Q002 y el proveedor externo de entrega.
+
+### Addendum · 2026-09-03 · Cierre de release React
+
+- La vista previa protegida de Vercel está `READY`: [web-hwlpgh2xn-clinqui7s-projects.vercel.app](https://web-hwlpgh2xn-clinqui7s-projects.vercel.app). El smoke autenticado por CLI obtuvo HTTP 200 para `/login` y `/portal/demo-qt-2026-0148`; no se promovió ni fusionó producción.
+- Se añadió certificación Selenium real para acciones transversales. La regresión global pasó 181/181 y `npm run selenium:coverage` pasó 334/334 (100%). También permanecen verdes la paridad de video 210/210, cambios de cliente 32/32 y la auditoría de video 17/17.
+- Cinco entradas permanecen `NOT_TESTABLE`, no implementadas: detalle de hospitalización desde una medición sin fuente clínica autorizada, creación de tarjeta de medicamentos (CR-019), registro de signos vitales (CH17-Q009), aprobación de descuentos (CH16-Q001–Q005) y edición de configuración sin contrato seguro. Se mantienen en `docs/OPEN_QUESTIONS.md` y no se sustituyeron por datos, reglas ni acciones simuladas.
+- La certificación final sigue `globalComplete=false`: faltan Supabase/RLS y proveedores reales, contratos clínicos/financieros aprobados y un scheduler autorizado para el cron de 15 minutos que el plan Hobby de Vercel no admite.

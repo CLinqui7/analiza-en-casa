@@ -1,0 +1,7 @@
+# CH15 F09 safe diagnostic-studies catalog
+
+The traceability mirror rejects duplicate raw certification requirement keys before JSON parsing and now mirrors CH15-F06, CH15-F08, and CH15-F09.
+
+`CH15-E0084` supports the visible Items / Estudios Dx list anatomy. `/catalogs/studies` implements that anatomy as a permission-gated factual empty list with local search and disabled Excel, Nuevo, Registros, and pagination controls. It does not load or create study rows or derive source, price, tax, discount, state, clinical, inventory, or audit behavior.
+
+The frame’s loaded source rows are not copied. `CH15-Q004` leaves the source, effects of Impuesto/Descuento, write roles, fields, validation, audit, prices, and clinical rules undefined. Playwright passed 18/18 on isolated port 4176. The verified implementation checkpoint is `8143d052097aaa1d1cb16cb7d9dd095a2ebb96be`; executable Selenium source remains `PENDING_RUNTIME` because Python is unavailable.

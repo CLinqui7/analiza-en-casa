@@ -1,5 +1,14 @@
 # Preguntas abiertas y bloqueadores
 
+## B0 · Cambios del cliente (Excel auditado)
+
+- `CR-010` / `CR-018`: definir qué entidad representa “Puntual”, sus campos, duración, estados y relación con Hospitalización o Agenda.
+- `CR-014` / `CR-015`: aprobar las fuentes, períodos, permisos y fórmulas de facturación, pacientes mensuales, visitas médicas y cumplimiento de metas; no se usarán cotizaciones ni datos demo como sustituto.
+- `CR-020`–`CR-030`: entregar formularios institucionales versionados y aprobados, reglas de corrección y permisos antes de construir Balance hídrico o escalas clínicas.
+- `CR-022`: confirmar que “Gasglow” corresponde a Glasgow; `CR-024`: que “Ecof” corresponde a ECOG; `CR-026`: que “karnofky” corresponde a Karnofsky.
+- `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.
+- `CR-032`: aportar export/dump autorizado y diccionario de datos de médicos y expedientes para preparar un dry-run idempotente, conciliable y reversible.
+
 ## CH01 · decisiones pendientes trazadas
 
 - `CH01-Q001`: confirmar si el enlace histórico `/pacientes.php` debe conservar una ruta de retorno después del login. El SPA aplica guardia de sesión; no se inventó una regla de redirección heredada.
@@ -82,6 +91,7 @@
 - `CH07-Q011`: definir fórmula, alcance y frecuencia del badge `67` de PIC Ejecución. Se conserva `—` para no inventar el indicador. Evidencia: CH07-E0005–CH07-E0006.
 - `CH07-Q012`: identificar la columna final cuyo encabezado sólo deja ver `Co...` en el material y definir su fuente. Evidencia: CH07-E0007.
 - `CH07-Q013`: confirmar si Preadmisión sigue vigente, depende de permiso/feature flag o es un estado transitorio de la interfaz anterior. Evidencia: CH07-E0002–CH07-E0003.
+- `CH07-REACT-TAXONOMY`: la tabla del video expone etiquetas como Pendiente, Pre aprobación, Poner en ejecución, Rechazar y No aplica, mientras el tablero legacy usa `SENT_TO_INSURER`, `INSURER_REVIEW`, `INFO_REQUIRED`, `PARTIALLY_APPROVED`, `APPROVED` y `REJECTED`. React conserva únicamente esta segunda lista para documentar hechos administrativos manuales; no las fusiona ni define una máquina de transición. Evidencia: CH07-E0007 y CH07-E0018.
 
 ## CH08 · decisiones pendientes trazadas
 
@@ -117,6 +127,7 @@
 - `CH10-Q004`: confirmar aritmética inclusiva/exclusiva inicio–duración–fin, zona horaria y comportamiento crónico. La UI ofrece una sugerencia editable que reproduce el único ejemplo, sin imponerla como regla clínica. Evidencia: CH10-E0035 y CH10-E0038.
 - `CH10-Q005`: definir fuente maestra, deduplicación y permisos de alta inline para medicamentos y prescriptores. Evidencia: CH10-E0021–CH10-E0026.
 - `CH10-Q006`: definir el efecto de Crónico y si Mostrar diluciones sólo captura texto o ejecuta una regla. No se calcula ninguna dilución. Evidencia: CH10-E0039 y CH10-E0050.
+- `CR-019-Q001`: aprobar el formulario versionado de tarjeta de medicamentos para observaciones de diluciones o cuidados especiales; confirmar si la observación pertenece a cada ítem o a la tarjeta general, los roles autorizados, y la política de auditoría, versionado, corrección y firma. Definir el manejo seguro de ese texto clínico antes de capturarlo. Evidencia: CH10-E0050.
 - `CH10-Q007`: entregar catálogo oficial de etiquetas y permisos para crear, quitar y reordenar. La implementación conserva secciones observadas configurables. Evidencia: CH10-E0075–CH10-E0086.
 - `CH10-Q008`: definir sanitización, obligatoriedad, firma y política de secciones clínicas vacías. Evidencia: CH10-E0088–CH10-E0093.
 - `CH10-Q009`: aprobar contenido, encabezados, firmas, papel y validez de tarjeta completa, simple y conteo presencial. Conteo se marca expresamente provisional. Evidencia: CH10-E0109.
@@ -174,17 +185,18 @@
 - `CH14-Q002`: aprobar máquina de estados, roles, idempotencia y efectos de todas las acciones de acuse y Registro XPO. Evidencia: CH14-E0032 y CH14-E0035.
 - `CH14-Q003`: definir formato, datos, permisos y validez de Excel e impresión de acuses. Evidencia: CH14-E0032 y CH14-E0035.
 - `CH14-Q004`: definir Plantilla y Vaciar, persistencia del borrador y recuperación. Evidencia: CH14-E0151.
-- `CH14-Q005`: aprobar el flujo de faltantes, cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152 y safety_022.
-- `CH14-Q006`: determinar qué borra Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0046.
+- `CH14-Q005`: aprobar fuente tenant-scoped, roles, cálculo y tratamiento de faltantes/cantidad insuficiente, sustitución, compra, notificación, significado de Acuse creado, idempotencia, auditoría y reversión. `CH14-E0152` sólo es transición oscurecida; la anatomía factual está en `safety_022` a 00:45:28.
+- `CH14-Q006`: determinar qué datos puede borrar Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0048.
 - `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
 - `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
 - `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.
 - `CH14-Q010`: definir Fecha inválida, vencimiento, ausencia de fecha, cuarentena, agotamiento, FEFO y alertas. Evidencia: CH14-E0082.
 - `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
-- `CH14-Q012`: definir versionado, permisos, duplicación y eliminación de kits preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0098–CH14-E0101.
-- `CH14-Q013`: confirmar selección de lotes, sustitución, atomicidad, idempotencia y reversión al consumir kits. Evidencia: CH14-E0104 y CH14-E0117.
-- `CH14-Q014`: identificar qué significa “faltar una cotización”, entidad, estado y autorización. Evidencia: CH14-E0152.
+- `CH14-Q012`: definir la composición versionada de kits, roles autorizados, auditoría, duplicación y eliminación preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0106–CH14-E0117.
+- `CH14-Q013`: confirmar selección de lotes, sustitución, descarga de existencias atómica e idempotente y reversión al consumir kits. Evidencia: CH14-E0106 y CH14-E0117.
+- `CH14-Q014`: identificar qué significa “faltar una cotización”, qué entidad/estado afecta y qué autorización y auditoría requiere. La frase sólo aparece en la transcripción 00:45:10.320–00:45:13.320; `CH14-E0152` no prueba una relación funcional.
 - `CH14-Q015`: confirmar errores, mensajes, reintentos y recuperación; CH14 no demuestra fallos.
+- `CH14-Q016`: aprobar la fuente de paciente/hospitalización acotada por organización, roles de creación/consulta, vínculo del acuse, validación de cantidad disponible/asignada, idempotencia, auditoría append-only y reversión. Evidencia: CH14-E0149–CH14-E0152.
 
 ## CH15 · decisiones pendientes trazadas
 
@@ -209,14 +221,26 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `CH16-Q005`: ¿Qué roles definitivos pueden crear, editar, inactivar, solicitar y decidir perfiles de descuento, y cómo se debe presentar carga/error en producción? La implementación usa permisos configurados y aprobación nominativa sin inferir la política final. Evidencia: CH16-E0035–CH16-E0039, 00:51:00.000–00:51:07.200.
 - `CH16-Q006`: ¿La exclusión global de medicamentos es obligatoria, condicional o negociable por perfil? Evidencia: CH16-E0003 y CH16-E0024, 00:49:45.400–00:50:28.400.
 - `CH16-Q007`: ¿Qué alcance legal, rol y flujo de corrección requiere el bloqueo de edición clínica mencionado durante la navegación al reporte de salud? No se declara firma ni regla clínica legal. Evidencia verbal: CH16-E0003; navegación CH16-E0041 y CH16-E0044, 00:51:11.200–00:51:27.400.
+- `CH16-Q008`: ¿Cuál es la fuente autorizada y con alcance por organización para el Reporte de salud, qué campos sensibles (Cédula, Nombre, Empresa, Hospitalización, Período, Auditoría, Triage y Estatus) puede ver cada rol, y qué filtros, auditoría de acceso, retención, minimización y redacción aplican? La navegación y las columnas visibles no autorizan exponer datos clínicos. Evidencia: CH16-E0041–CH16-E0044, 00:50:54.000–00:51:07.200.
 
 ## CH17 · reporte de salud detallado e impresión
 
 - `CH17-Q001`: aprobar plantilla oficial de impresión/PDF, papel, encabezado, numeración, contenido por sección, firmas, metadatos y validez. La salida actual es configurable y explícitamente no declara firma electrónica legal. Evidencia: CH17-E0008, CH17-E0021 y CH17-E0043.
 - `CH17-Q002`: entregar catálogo, permisos, reacción/estado, contradicción con “No registrado”, versionado y auditoría para alergias y antecedentes. La plataforma sólo visualiza datos documentados y no los interpreta. Evidencia: CH17-E0026–CH17-E0031.
 - `CH17-Q003`: definir proveedor, base autorizada, minimización, revisión humana, persistencia, entrenamiento, acceso y auditoría de “Auditar con IA”. La acción no se implementa con contenido clínico. Evidencia: CH17-E0048.
-- `CH17-Q004`: definir proveedor, destinatario, consentimiento, expiración, revocación, retención y auditoría de WhatsApp para notas. La plataforma conserva sólo una notificación de enlace seguro sin contenido clínico. Evidencia verbal: CH17-E0048, 00:54:00–00:54:23.560.
+- `CH17-Q004`: definir fuente y alcance por organización, proveedor, consentimiento explícito/revocable, validación del destinatario autorizado, enlace seguro autenticado expirable/revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención de WhatsApp para notas. No se permite contenido clínico en el mensaje ni vista previa. Evidencia verbal: transcript 00:54:00–00:54:23.560; CH17-E0048 no muestra control ni entrega.
 - `CH17-Q005`: aprobar la matriz definitiva de creación, firma, corrección y anulación por rol, junto con el contrato runtime de Supabase. La política actual es conservadora y la ejecución contra una instancia Supabase real sigue pendiente. Evidencia: CH17-E0047–CH17-E0048.
+- `CH17-Q006`: aprobar fuente tenant-scoped, relación de asignación, matriz de roles, campos mínimos por rol, trabajo sin conexión, sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización y redacción para una aplicación operativa de enfermería. La narración no demuestra un contrato ni una operación segura; CH17-E0046 sólo muestra la tabla de notas dentro de Reporte de salud. CR-020 se limita a Balance Hídrico aprobado y no autoriza este flujo. Evidencia verbal: CH17, 00:52:34–00:53:44.
+
+- `CH17-Q007`: definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. Historia clínica, Claims, visitas, notas de servicio, Reporte de salud, Auditorías y Registro XPO permanecen como rótulos no operativos sin contexto de paciente ni hospitalización. Evidencia: CH17-E0005, 00:51:14.200.
+
+- `CH17-Q008`: definir el contrato temporal del Reporte de salud: valor predeterminado, límites pasado/futuro, inclusividad, zona horaria, cambios de hospitalización, semántica de Seleccionar/Cargar/Cancelar y estados de carga, error y reintento. También requiere auditoría de acceso, retención y redacción del resultado. `CH16-Q008` mantiene el control de fuente tenant-scoped, roles y campos sensibles. Las fechas visibles son ejemplos y no deben codificarse. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
+
+- `CH17-Q009`: definir el contrato clínico autorizado de Signos vitales: fuente por organización y vínculo paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción. `CH16-Q008` controla la fuente tenant-scoped, roles y campos sensibles del Reporte de salud. Evidencia: CH17-E0038, 00:52:00.600.
+
+- `CH17-Q010`: definir el contrato clínico autorizado de Notas de enfermería: fuente por organización y vínculo paciente/hospitalización, campos y contenido permitidos por rol, turno/recurso, ciclo de vida, firma, corrección/versionado, auditoría, retención, minimización y redacción. `CH17-Q001` controla selección por fila, contenido/formato/destino/autoridad de impresión y auditoría de salida; `CH16-Q008` conserva fuente tenant-scoped, roles y campos sensibles. Evidencia: CH17-E0043 y CH17-E0046, 00:52:08.400–00:52:09.800.
+
+- `CH17-Q011`: definir el contrato de corrección de una Nota de enfermería: relación tenant-scoped de paciente/hospitalización, roles y precondición de firma, motivo obligatorio, preservación inmutable del original, versión de reemplazo, conflictos, auditoría append-only, retención, minimización y redacción. `CH17-Q010` mantiene el ciclo y campos de la nota; `CH16-Q008` mantiene fuente, roles y campos sensibles del Reporte de salud. Evidencia: CH17-E0048 y safety_005, 00:52:14.800–00:52:29.000.
 
 ## Datos
 
@@ -272,3 +296,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - Cantidad estimada de usuarios concurrentes.
 - Navegadores y dispositivos utilizados.
 - Definición de respaldo y recuperación requerida.
+
+## Deployment
+
+- Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.
+- `AUTOMATIC_SCHEDULER_PENDING_EXTERNAL_CONFIGURATION`: el preview de Vercel se despliega con `vercel.preview.json`, que omite únicamente el scheduler de 15 minutos bloqueado por el plan Hobby. Producción debe conservar `vercel.json` y requiere Vercel Pro o un scheduler externo aprobado antes de certificar reintentos automáticos.

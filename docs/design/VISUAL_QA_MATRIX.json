@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "mode": "LIGHT_ONLY",
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "checks": [
+    {"id":"VISUAL-LIGHT-001","requirement":"No Dark/System/theme switcher in product source","gate":"qa:light-mode","status":"VERIFIED"},
+    {"id":"VISUAL-LIGHT-002","requirement":"No unintended horizontal overflow","gate":"Playwright viewport assertions","status":"PARTIAL"},
+    {"id":"VISUAL-LIGHT-003","requirement":"Keyboard and focus-visible controls","gate":"Playwright/axe","status":"PARTIAL"}
+  ]
+}

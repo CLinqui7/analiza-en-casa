@@ -560,7 +560,8 @@
         "CH14-Q012",
         "CH14-Q013",
         "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q015",
+        "CH14-Q016"
       ]
     },
     {
@@ -3108,7 +3109,7 @@
       "chapter_id": "CH06",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q006 bloquea una aplicación operativa de enfermería hasta aprobar la fuente tenant-scoped, asignación, roles, campos mínimos, trabajo sin conexión, sincronización, idempotencia, conflictos/corrección y auditoría.",
       "evidence": [
         {
           "chapter_id": "CH06",
@@ -3117,7 +3118,7 @@
           "path": "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0007_00h11m34s600ms_motion_progress.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "El frame abierto muestra una tabla de notas de enfermería dentro de Reporte de salud; no muestra una aplicación operativa independiente, una asignación, una captura ni un resultado de sincronización."
         }
       ],
       "open_question_ids": [
@@ -3152,8 +3153,8 @@
           "timestamp": "00:12:34.800",
           "path": "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/detail_crops/CH06-E0053_00h12m34s800ms_DETAIL.jpg",
           "detail_path": "",
-          "transcript": "",
-          "observation": ""
+      "transcript": "",
+      "observation": ""
         }
       ],
       "open_question_ids": [],
@@ -4802,7 +4803,7 @@
       ],
       "open_question_ids": [],
       "platform_assessment": {
-        "status": "IMPLEMENTED_EXACT",
+        "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "La elección conserva el caso autorizado y no crea datos antes de guardar.",
         "financial_impact": "Sin impacto financiero directo.",
@@ -6498,12 +6499,21 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0041",
-          "timestamp": "00:41:38.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg",
+          "event_id": "CH14-E0042",
+          "timestamp": "00:41:43.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0042_00h41m43s000ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "La transición desde Acuses abre Inventario / Cierres con las pestañas Pendientes, Cierres totales, Cerrados y Recursos; Pendientes muestra el encabezado Pacientes activos y las columnas observadas."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0044",
+          "timestamp": "00:41:44.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0044_00h41m44s200ms_stable_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Pendientes presenta filas de pacientes activos con Acciones, DUI/NIT, Paciente, Empresa, Estado y Fecha de inicio."
         }
       ],
       "open_question_ids": [],
@@ -6512,18 +6522,18 @@
         "priority": "P1",
         "patient_safety_impact": "La vista no cierra hospitalizaciones ni cambia estados clínicos.",
         "financial_impact": "No aplica conciliación financiera sin aprobación.",
-        "current_platform_evidence": "app/views.js renderInventoryClosures; app/store.js createInventoryClosure",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Mantener sólo lectura hasta resolver CH14-Q007.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx renders Inventory / Cierres as a local read-only surface with explicit empty sources and no patient or case reads.",
+        "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-closures); tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-CLOSURES, PENDING_RUNTIME).",
+        "recommended_action": "Keep all transitions closed until CH14-Q007 is resolved; only the factual empty anatomy is implemented.",
         "blocked_by_client_information": true,
-        "notes": "Cuatro pestañas y casos visibles; mutaciones cerradas."
+        "notes": "CH14-E0041 fue revisado y corresponde a Acuses, no a Cierres. La evidencia correcta de la anatomía de Cierres es CH14-E0042/E0044; no hay implementación React actual."
       }
     },
     {
       "requirement_id": "CH14-F07",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
       "feature": "Advertencia de cierre ya abierto",
-      "detailed_behavior": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
+      "detailed_behavior": "CH14-E0048 muestra una Advertencia: un cierre permanece abierto, continuar podría borrar datos guardados y la interfaz ofrece Cancelar y Aceptar.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH14",
       "classification": "VISIBLE",
@@ -6532,27 +6542,27 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0046",
-          "timestamp": "00:41:47.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg",
+          "event_id": "CH14-E0048",
+          "timestamp": "00:42:14.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0048_00h42m14s200ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "Modal Advertencia visible con mensaje de posible pérdida de datos guardados y controles Cancelar/Aceptar."
         }
       ],
       "open_question_ids": [
         "CH14-Q006"
       ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_EXACT",
+        "status": "MISSING",
         "priority": "P0",
-        "patient_safety_impact": "Cancelar preserva los datos y Aceptar no ejecuta pérdida silenciosa.",
-        "financial_impact": "No borra conciliación ni cierre previo.",
-        "current_platform_evidence": "app/main.js openClosureWarning",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Mantener bloqueo de Aceptar hasta resolver CH14-Q006.",
+        "patient_safety_impact": "Aceptar podría afectar datos guardados; no se expone hasta contar con reglas aprobadas.",
+        "financial_impact": "No se crean, modifican ni concilian cierres.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone sólo anatomía vacía y de solo lectura de Cierres; no contiene advertencia ni aceptación.",
+        "test_path": "NONE: React no contiene una advertencia, aceptación ni resultado de cierre que pueda probarse.",
+        "recommended_action": "Resolver CH14-Q006 antes de implementar preservación, cancelación o aceptación de cierre.",
         "blocked_by_client_information": true,
-        "notes": "Advertencia y ambos controles reproducidos con desviación segura: Aceptar no muta."
+        "notes": "Corrección de evidencia: CH14-E0045–E0047 sólo muestran filtro y menú de fila; CH14-E0048 es la única evidencia directa del modal. React no implementa el flujo."
       }
     },
     {
@@ -6620,11 +6630,11 @@
         "priority": "P1",
         "patient_safety_impact": "Sin impacto clínico directo; el catálogo no se muta.",
         "financial_impact": "Proveedor puede ser referencia de compras y debe conservar historial.",
-        "current_platform_evidence": "app/views.js renderSuppliers",
-        "test_path": "tests/e2e/ch14.spec.mjs",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx renders an empty, read-only Inventario / Proveedores panel with observed table headers, search, and pagination anatomy; it has no supplier source or mutation path.",
+        "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-suppliers); tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-SUPPLIERS, PENDING_RUNTIME).",
         "recommended_action": "Definir identidad, unicidad y desactivación en CH14-Q008 antes del CRUD.",
         "blocked_by_client_information": true,
-        "notes": "Tabla visible con datos sintéticos; alta/edición bloqueadas."
+        "notes": "React implementa la anatomía visible como una lista factual vacía; no fabrica filas sintéticas de proveedores. Alta, edición, desactivación, identidades, unicidad y auditoría permanecen bloqueadas por CH14-Q008."
       }
     },
     {
@@ -6640,12 +6650,12 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0068",
-          "timestamp": "00:43:28.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0068_00h43m28s600ms_settled.jpg",
-          "detail_path": "",
-          "transcript": "",
-          "observation": ""
+          "event_id": "CH14-E0071",
+          "timestamp": "00:43:33.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg",
+          "detail_path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0071_00h43m33s400ms_DETAIL.jpg",
+          "transcript": "00:43:26.500–00:43:57.500: se describen bodegas y traslados entre ubicaciones.",
+          "observation": "Items / Bodegas muestra Activo, Registros, paginación, búsqueda y Nombre/Descripción/Fecha de creación. La evidencia no define permisos, fuente autorizada ni una transición de traslado."
         }
       ],
       "open_question_ids": [
@@ -6656,11 +6666,11 @@
         "priority": "P0",
         "patient_safety_impact": "Una transferencia incorrecta puede ocultar stock disponible en la ubicación real.",
         "financial_impact": "La RPC conserva la suma de existencias y audita el movimiento.",
-        "current_platform_evidence": "app/views.js renderWarehouses; app/store.js createInventoryMovement; apply_inventory_movement_v2",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q009 y validar concurrencia/RLS en Supabase real.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone Items / Bodegas como superficie factual vacía y de solo lectura: Activo, Registros, paginación, búsqueda y columnas Nombre/Descripción/Fecha de creación. No consulta una fuente, fabrica filas ni expone transferencias.",
+        "test_path": "apps/web/e2e/ch14.spec.ts y tests/selenium/test_inventory.py verifican apertura, roles, búsqueda, controles bloqueados y recarga sin mutación de auditoría.",
+        "recommended_action": "Resolver CH14-Q009 antes de implementar fuente, permisos operativos, CRUD o traslados de bodega.",
         "blocked_by_client_information": true,
-        "notes": "Lista presente; movimiento productivo transaccional; CRUD y acceso directo incompletos."
+        "notes": "CH14-E0071, no E0068, respalda la anatomía visible de Bodegas. React no fabrica filas, CRUD ni traslados; la superficie vacía no constituye un catálogo ni una operación de bodega."
       }
     },
     {
@@ -6684,17 +6694,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q010",
+        "CH14-Q011"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P0",
-        "patient_safety_impact": "La RPC rechaza lote vencido, no disponible o insuficiente; el modo local bloquea ítems trazables.",
-        "financial_impact": "Evita divergencia lote–stock en rutas de mutación habilitadas.",
-        "current_platform_evidence": "app/views.js renderInventoryLots; app/store.js createInventoryMovement; apply_inventory_movement_v2",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q010–CH14-Q011 y validar migraciones en Supabase real.",
+        "patient_safety_impact": "Una fecha o trazabilidad de lote interpretada sin política aprobada puede ocultar disponibilidad o riesgo operativo.",
+        "financial_impact": "No se certifica ningún efecto de inventario o asignación mientras falten las reglas de lote, serie y vencimiento.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no implementa un catálogo de Lotes/Nros de serie; sólo declara que sus reglas de trazabilidad requieren definición aprobada.",
+        "test_path": "Sin prueba actual: CH14-E0075 se abrió y muestra Items / Bodegas, no Lotes/Nros de serie. No se certifica una superficie a partir de evidencia desalineada.",
+        "recommended_action": "Corregir la asignación de evidencia de Lotes/Nros de serie y resolver CH14-Q010–CH14-Q011 antes de implementar o probar catálogo, fechas, asignación o rechazo.",
         "blocked_by_client_information": true,
-        "notes": "Vista de sólo lectura; se rechaza deliberadamente el defecto de fechas inválidas activas observado."
+        "notes": "Reconciliación: CH14-E0075 y los frames adyacentes abiertos muestran Bodegas, por lo que no sustentan el listado de lotes/series ni el texto heredado sobre fechas inválidas. No se deriva política de vencimiento, FEFO, cuarentena, asignación o rechazo."
       }
     },
     {
@@ -6710,34 +6723,38 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0084",
-          "timestamp": "00:44:13.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg",
+          "event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
         },
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0089",
-          "timestamp": "00:44:23.000",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg",
+          "event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH14-Q012",
+        "CH14-Q013",
+        "CH14-Q015"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "La lista no consume componentes.",
         "financial_impact": "No se crean maestros incompletos ni se eliminan referencias históricas.",
-        "current_platform_evidence": "app/views.js renderKits; app/store.js createKit",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q012 antes de habilitar CRUD/versionado.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx: superficie Inventario / Kit de insumos factual vacía, sin fuente, filas, composición ni mutaciones.",
+        "test_path": "apps/web/e2e/ch14.spec.ts; tests/selenium/test_inventory.py: abre, busca y recarga la lista vacía sin mutar auditoría; Excel/Nuevo/paginación quedan deshabilitados.",
+        "recommended_action": "Mantener la anatomía factual vacía y resolver CH14-Q012/Q013/Q015 antes de habilitar exportación, CRUD, composición, consumo o versionado.",
         "blocked_by_client_information": true,
-        "notes": "Catálogo y acciones visibles; mutaciones bloqueadas."
+        "notes": "Reconciliación: CH14-E0084/E0089 se abrieron y muestran Lotes y números de serie, no kits. CH14-E0095, E0100 y E0104 son la secuencia real Kit de insumos: Listado, Excel, Nuevo, búsqueda, paginación, columnas Acciones/Nombre/Actualizado por/Fecha actualización y el menú Editar/Duplicar/Eliminar. React reproduce únicamente la anatomía vacía de solo lectura; no fabrica filas ni habilita operaciones."
       }
     },
     {
@@ -6753,9 +6770,9 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "event_id": "CH14-E0091",
-          "timestamp": "00:44:23.800",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg",
+        "event_id": "CH14-E0106",
+        "timestamp": "00:44:39.600",
+        "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
           "observation": ""
@@ -6771,18 +6788,19 @@
         }
       ],
       "open_question_ids": [
-        "CH14-Q013"
+      "CH14-Q012",
+      "CH14-Q013"
       ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+      "status": "MISSING",
         "priority": "P0",
         "patient_safety_impact": "Una descarga parcial o desde lote incorrecto puede desalinear disponibilidad de insumos.",
         "financial_impact": "El consumo debe ser atómico e idempotente para no duplicar cargos o existencias.",
-        "current_platform_evidence": "app/main.js openKitForm; app/store.js createKit",
-        "test_path": "tests/ch14-inventory-boundaries.test.mjs; tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q012–CH14-Q013 y crear una RPC transaccional.",
+      "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx ofrece únicamente el listado factual vacío de F12; no existe editor ni composición de kits.",
+      "test_path": "No se crea una prueba de editor: no hay superficie React que pueda seleccionar ítems, editar cantidades, quitar componentes o consumir existencias sin reglas aprobadas.",
+      "recommended_action": "Resolver CH14-Q012–CH14-Q013 antes de diseñar una composición versionada con roles autorizados, auditoría y una operación de consumo transaccional, idempotente y reversible.",
         "blocked_by_client_information": true,
-        "notes": "Composición visual presente; descarga automática no implementada."
+      "notes": "Reconciliación: CH14-E0091 es una tabla de lotes/series y no prueba composición. CH14-E0106/E0117 muestran visualmente el editor de KIT CURACIONES (Nombre, Item, Cantidad, Añadir, lista de insumos y quitar), pero no autorizan composición persistente ni descarga de existencias. React no implementa ese editor."
       }
     },
     {
@@ -6798,34 +6816,65 @@
       "evidence": [
         {
           "chapter_id": "CH14",
+          "event_id": "CH14-E0149",
+          "timestamp": "00:45:23.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg",
+          "detail_path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0149_00h45m23s800ms_DETAIL.jpg",
+          "transcript": "",
+          "observation": "El menú de la fila expone Nuevo antes de abrir el formulario."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0150",
+          "timestamp": "00:45:26.600",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0150_00h45m26s600ms_abrupt_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "Acuse nuevo muestra las secciones Información del Acuse e Información del Items a entregar."
+        },
+        {
+          "chapter_id": "CH14",
           "event_id": "CH14-E0151",
           "timestamp": "00:45:27.000",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "Paciente, fecha y hospitalización se muestran junto con Bodega, Item, cantidades y controles Vaciar, Plantilla y Añadir."
+        },
+        {
+          "chapter_id": "CH14",
+          "event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_path": "",
+          "transcript": "",
+          "observation": "La transición posterior queda oscurecida; este frame no muestra el detalle de faltantes. safety_022 es la evidencia separada de ese modal para CH14-F15."
         }
       ],
       "open_question_ids": [
-        "CH14-Q004"
+        "CH14-Q001",
+        "CH14-Q002",
+        "CH14-Q004",
+        "CH14-Q005",
+        "CH14-Q016"
       ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P0",
         "patient_safety_impact": "La captura no descuenta ni reserva stock hasta tener reglas aprobadas.",
         "financial_impact": "No crea cargos o compromisos ficticios.",
-        "current_platform_evidence": "app/main.js openAcknowledgementForm/blocked-inventory-action",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q001–CH14-Q005 antes de persistir.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx expone únicamente Acuses como superficie factual vacía y no consulta pacientes/casos ni abre un formulario de acuse.",
+        "test_path": "No se implementa formulario ni prueba operativa: no existe una fuente de paciente/hospitalización acotada por organización ni una operación autorizada de reserva, entrega o reversión.",
+        "recommended_action": "Resolver CH14-Q001/Q002/Q004/Q005/Q016 antes de diseñar un flujo tenant-scoped que valide cantidades y persista un acuse idempotente, auditado y reversible.",
         "blocked_by_client_information": true,
-        "notes": "Campos y acciones observados presentes; Añadir, Vaciar y Plantilla bloqueados."
+        "notes": "Reconciliación: CH14-E0149–E0151 muestran el menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo su transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para CH14-F15. F14 no define fuente autorizada de paciente/hospitalización, alcance por organización, roles, validación de cantidad, persistencia, idempotencia, auditoría ni reversión. React no expone este formulario ni datos de pacientes/casos."
       }
     },
     {
       "requirement_id": "CH14-F15",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
       "feature": "Detección de items faltantes",
-      "detailed_behavior": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "detailed_behavior": "La hoja de seguridad safety_022 muestra el modal Items faltantes disponibles con Bodega y las columnas Acuse, Tipo, Código, Nombre, Disponible, Requerido y Acuse creado; CH14-E0152 sólo conserva la transición oscurecida del formulario.",
       "evidence_type": "VISIBLE",
       "chapter_id": "CH14",
       "classification": "VISIBLE",
@@ -6836,34 +6885,33 @@
           "chapter_id": "CH14",
           "event_id": "CH14-E0152",
           "timestamp": "00:45:27.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
-          "detail_path": "",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
+          "detail_path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
           "transcript": "",
-          "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
+          "observation": "CH14-E0152 es sólo la transición oscurecida posterior al formulario. safety_022 a 00:45:28 muestra el detalle de faltantes y la comparación factual Disponible/Requerido."
         }
       ],
       "open_question_ids": [
         "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P0",
         "patient_safety_impact": "La política de faltantes puede afectar disponibilidad y sustitución de insumos.",
         "financial_impact": "No crea compra, acuse o cotización por inferencia.",
-        "current_platform_evidence": "app/main.js blocked-inventory-action; docs/OPEN_QUESTIONS.md",
-        "test_path": "tests/e2e/ch14.spec.mjs",
-        "recommended_action": "Resolver CH14-Q005 antes de habilitar el flujo.",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no calcula faltantes ni muestra una superficie de faltantes; docs/OPEN_QUESTIONS.md",
+        "test_path": "NONE: no se implementa un cálculo, notificación, compra, sustitución, acuse ni mutación de existencias sin las definiciones aprobadas.",
+        "recommended_action": "Resolver CH14-Q005 y CH14-Q014 antes de habilitar cualquier comportamiento de faltantes.",
         "blocked_by_client_information": true,
-        "notes": "La evidencia aparece al final sin demostrar resultado."
+        "notes": "safety_022 respalda sólo la anatomía factual del modal. No define cálculo de faltantes, notificaciones, compras, sustituciones, stock, paciente, autorización, idempotencia, auditoría o reversión."
       }
     },
     {
       "requirement_id": "CH14-F16",
       "module": "Inventario, movimientos, acuses, cierres, bodegas y kits",
       "feature": "Vínculo de faltantes con cotización",
-      "detailed_behavior": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "detailed_behavior": "La transcripción menciona de forma ambigua una opción relacionada con ‘faltar una cotización’; no identifica la entidad, el estado, la autorización ni un comportamiento demostrable.",
       "evidence_type": "UNCERTAIN",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
@@ -6876,25 +6924,23 @@
           "timestamp": "00:45:27.400",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg",
           "detail_path": "",
-          "transcript": "",
-          "observation": ""
+          "transcript": "00:45:10.320–00:45:13.320: ‘También tenía una opción de faltar una cotización’.",
+          "observation": "CH14-E0152 es sólo el formulario de Acuse oscurecido y no contiene control, estado ni vínculo de cotización. La frase de la transcripción es ambigua y no autoriza una relación funcional."
         }
       ],
       "open_question_ids": [
-        "CH14-Q005",
-        "CH14-Q014",
-        "CH14-Q015"
+        "CH14-Q014"
       ],
       "platform_assessment": {
         "status": "NEEDS_CLIENT_CONFIRMATION",
         "priority": "P1",
         "patient_safety_impact": "Sin acción clínica automática.",
         "financial_impact": "No se cambia una cotización desde una frase ambigua.",
-        "current_platform_evidence": "docs/OPEN_QUESTIONS.md",
+        "current_platform_evidence": "apps/web/src/app/(workspace)/inventory/page.tsx no expone una acción ni enlace de cotización desde Inventario; docs/OPEN_QUESTIONS.md",
         "test_path": "NONE",
-        "recommended_action": "Resolver CH14-Q014 con el cliente.",
+        "recommended_action": "Resolver CH14-Q014 con el cliente antes de asociar un faltante con cotización, estado, autorización o auditoría.",
         "blocked_by_client_information": true,
-        "notes": "No existe demostración visual suficiente."
+        "notes": "El frame citado sólo es una transición oscurecida del formulario. La narración no define significado, entidad, estado, roles, notificación, idempotencia, auditoría ni efectos de inventario; no se implementa acción alguna."
       }
     },
     {
@@ -7124,17 +7170,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/catalogs/medications: superficie factual vacía y de solo lectura con tabla, búsqueda, paginación y controles visibles deshabilitados.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_medications.py",
+        "recommended_action": "Mantener la anatomía factual vacía y no habilitar alta, exportación ni atributos farmacéuticos antes de CH15-Q004.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0046 respalda el listado y CH15-E0047 el formulario, pero no autorizan datos, catálogo fuente, roles, validación, auditoría ni reglas clínicas. React implementa sólo la lista vacía segura."
       }
     },
     {
@@ -7219,17 +7267,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/catalogs/supplies presenta la anatomía factual vacía de Insumos: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_supplies.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe la fuente, el contrato de escritura y el efecto de las banderas observadas; no fabricar insumos ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0067 respalda la anatomía de tabla. CH15-E0068 muestra un formulario, pero CH15-Q004 no define fuente, efecto de Facturable/Descuento/Impuesto/Lotes/Giftcard/Transporte en frío, escritura, validación, auditoría ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7253,17 +7303,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
         "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/catalogs/studies presenta la anatomía factual vacía de Estudios Dx: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_studies.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe la fuente, el contrato de escritura y el efecto de Impuesto y Descuento; no fabricar estudios, precios ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0084 respalda la anatomía de tabla. El video muestra filas de estudios, pero no autoriza una fuente sintética, identidad clínica, precios, efectos de Impuesto/Descuento, escritura, validación, auditoría ni reglas clínicas. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7296,17 +7348,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004",
+        "CH15-Q006"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran datos ni se crea un vínculo clínico o de recurso.",
+        "financial_impact": "No se muestran precios ni se ejecuta cálculo, liquidación, impuesto, descuento o Giftcard.",
+        "current_platform_evidence": "/catalogs/fees presenta la anatomía factual vacía de Honorarios: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_fees.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004/Q006 no aprueben la fuente, el recurso elegible, el contrato de escritura y los efectos financieros; no fabricar honorarios, precios ni reglas clínicas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0094 respalda la anatomía de tabla y CH15-E0097 muestra el formulario, pero no autoriza una fuente sintética, recurso elegible, precios, efectos de Impuesto/Descuento/Giftcard, escritura, validación, auditoría ni liquidación. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7425,17 +7480,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran datos ni se crea un servicio o relación clínica.",
+        "financial_impact": "No se muestran precios ni se ejecuta cálculo de impuesto o descuento.",
+        "current_platform_evidence": "/catalogs/services presenta la anatomía factual vacía de Servicios: columnas, búsqueda, Registros y controles visibles sin filas ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_services.py",
+        "recommended_action": "Mantener la lista de solo lectura mientras CH15-Q004 no apruebe fuente, tipos/categorías, banderas, contrato de escritura y efectos clínicos o financieros; no fabricar servicios, precios ni reglas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0122 respalda la tabla de Servicios y CH15-E0128 confirma sus columnas con filas de origen, pero no autoriza copiarlas ni define fuente, tipos, categorías, precios, efectos de Impuesto/Descuento, escritura, validación, auditoría ni efectos clínicos o financieros. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7468,17 +7525,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH15-Q004"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/inventario/comprometidos; #/catalogos",
-        "test_path": "#/inventario/comprometidos; #/catalogos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran perfiles ni se crea un efecto clínico.",
+        "financial_impact": "No se muestran porcentajes ni se ejecuta cálculo o cambio de precio.",
+        "current_platform_evidence": "/catalogs/discounts presenta la anatomía factual vacía de Descuentos: columnas, búsqueda, Registros y controles visibles sin perfiles ni operaciones.",
+        "test_path": "apps/web/e2e/ch15.spec.ts; tests/selenium/test_catalog_discounts.py",
+        "recommended_action": "Mantener la matriz de solo lectura mientras CH15-Q004 no apruebe fuente, categorías, porcentajes, cálculo, contrato de escritura y efectos de precio; no fabricar perfiles ni reglas.",
+        "blocked_by_client_information": true,
+        "notes": "CH15-E0144 respalda la anatomía de matriz y CH15-E0148 confirma una fila de origen, pero no autoriza copiarla ni define perfiles, categorías, porcentajes, cálculo, efectos sobre precios, escritura, validación, auditoría ni efectos clínicos o financieros. React no fabrica filas y deja Excel, Nuevo y paginación deshabilitados."
       }
     },
     {
@@ -7579,17 +7638,22 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q001",
+        "CH16-Q002",
+        "CH16-Q003",
+        "CH16-Q005"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/catalogos/descuentos",
-        "test_path": "#/catalogos/descuentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "No se muestran perfiles ni se deriva una decisión clínica.",
+        "financial_impact": "No se muestran porcentajes ni se ejecuta cálculo, cambio de precio o persistencia financiera.",
+        "current_platform_evidence": "/catalogs/discounts presenta sólo la anatomía factual vacía: columnas, búsqueda local, Registros y controles visibles/deshabilitados.",
+        "test_path": "apps/web/e2e/ch16.spec.ts; tests/selenium/test_ch16_discounts.py",
+        "recommended_action": "Mantener la matriz vacía de sólo lectura hasta aprobar fuente, perfiles, porcentajes, precedencia, cálculo, roles de escritura y auditoría.",
+        "blocked_by_client_information": true,
+        "notes": "CH16-E0001/E0018 respaldan las columnas de la matriz, pero no autorizan copiar sus perfiles o valores ni definen fuente, categorías, porcentajes, cálculo, efectos financieros, roles o auditoría."
       }
     },
     {
@@ -7862,17 +7926,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/catalogos/descuentos",
-        "test_path": "#/catalogos/descuentos; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "El reporte muestra campos clínicos y de identificación sensibles; no se deben reutilizar los datos de CH09 ni la ruta existente como una autorización implícita.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "La ruta clínica existente no certifica el Reporte de salud ni su límite de datos/roles.",
+        "test_path": "Pendiente de CH16-Q008: fuente autorizada por organización, roles, minimización, filtros, auditoría de acceso y retención.",
+        "recommended_action": "Mantener el reporte sin implementar hasta recibir el contrato de datos y autorización de CH16-Q008.",
+        "blocked_by_client_information": true,
+        "notes": "CH16-E0041–E0044 sólo prueban la navegación y las columnas visibles; no definen una fuente, campos sensibles permitidos, roles ni el límite auditable de acceso."
       }
     },
     {
@@ -7939,17 +8005,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
         "status": "IMPLEMENTED_PARTIAL",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Cédula, nombre, empresa, hospitalización, período, auditoría, triage y estatus son campos sensibles; no se exponen sin el contrato de CH16-Q008.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva sólo la anatomía de tabla vacía y controles deshabilitados; no consulta pacientes, casos, signos vitales ni auditorías.",
+        "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: anatomía vacía, controles deshabilitados, recarga sin auditoría y denegación de INVENTORY.",
+        "recommended_action": "Mantener la superficie vacía hasta aprobar fuente por organización, roles, minimización, filtros, auditoría de acceso y retención en CH16-Q008.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0001/E0003 demuestran columnas y paginación visibles, no autorización de datos ni semántica de triage/auditoría/estatus."
       }
     },
     {
@@ -7973,18 +8041,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+        "open_question_ids": [
+          "CH17-Q007"
+        ],
+        "platform_assessment": {
+          "status": "IMPLEMENTED_PARTIAL",
+          "priority": "P1",
+          "patient_safety_impact": "Cada destino puede revelar contenido clínico o administrativo sensible; no se resuelve ni consulta una hospitalización sin la relación, roles y auditoría de CH17-Q007.",
+          "financial_impact": "Reporte Claims puede implicar información financiera o de aseguramiento, pero no se consulta ni se navega a ese destino.",
+          "current_platform_evidence": "/clinical/reports ofrece un menú local sin contexto de hospitalización. Sólo muestra los siete rótulos observados como elementos deshabilitados y no lee datos ni cambia ruta.",
+          "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: apertura del menú, los siete rótulos deshabilitados, recarga sin auditoría y guardas de ruta.",
+          "recommended_action": "Mantener la anatomía local sin destinos hasta aprobar el vínculo por organización, roles, condiciones, auditoría y contratos seguros de cada acción en CH17-Q007.",
+          "blocked_by_client_information": true,
+          "notes": "CH17-E0005 demuestra los rótulos del menú, no su autorización, relación con una hospitalización ni resultados."
+        }
     },
     {
       "requirement_id": "CH17-F03",
@@ -8007,18 +8077,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+        "open_question_ids": [
+          "CH16-Q008"
+        ],
+        "platform_assessment": {
+          "status": "IMPLEMENTED_PARTIAL",
+          "priority": "P1",
+          "patient_safety_impact": "Las seis secciones pueden exponer identidad, seguros, hospitalización, contenido clínico, auditoría y documentos; no se consulta ninguna fuente sin CH16-Q008.",
+          "financial_impact": "No se muestran Claims, seguros, pólizas, coberturas ni información financiera.",
+          "current_platform_evidence": "/clinical/reports reproduce sólo las seis pestañas visibles y estados vacíos locales. No contiene selector de paciente, rango, impresión, campos, seguros, hospitalización, auditoría ni documentos.",
+          "test_path": "apps/web/e2e/ch17.spec.ts y tests/selenium/test_health_report.py: alternancia local de cada pestaña, recarga sin auditoría y guardas de ruta.",
+          "recommended_action": "Mantener las pestañas como anatomía vacía hasta que CH16-Q008 apruebe fuente, alcance por organización, campos, roles, filtros, minimización, auditoría y retención.",
+          "blocked_by_client_information": true,
+          "notes": "CH17-E0008 respalda los seis nombres y la anatomía de pestañas, no la autorización ni el contenido de cada sección."
+        }
     },
     {
       "requirement_id": "CH17-F04",
@@ -8059,17 +8131,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "CH17-E0017/E0019 muestran que aplicar un rango expone contenido sensible del reporte; no se permite recuperar ni filtrar datos sin la fuente, alcance por organización y matriz de roles de CH16-Q008.",
+        "financial_impact": "No se exponen Claims, seguros, pólizas, coberturas ni información financiera.",
+        "current_platform_evidence": "/clinical/reports conserva únicamente superficies vacías locales; no existe calendario, selector de paciente, consulta, rango, impresión, exportación ni navegación de reporte.",
+        "test_path": "Precheck documental: CH17-E0012/E0017/E0019 fueron abiertos. No hay acción ni fuente de datos implementada que pueda certificarse.",
+        "recommended_action": "Mantener F04 MISSING hasta aprobar CH16-Q008 y CH17-Q008: fuente tenant-scoped, roles, campos permitidos y contrato temporal versionado antes de habilitar un selector o Cargar.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0012 demuestra sólo la anatomía de calendario doble, Seleccionar y Cancelar con fechas de ejemplo; no autoriza copiar esas fechas ni define rango válido, inclusividad, zona horaria, carga, error, reintento, auditoría, retención o redacción. CH17-E0017 muestra Procesando y CH17-E0019 el resultado con datos sensibles."
       }
     },
     {
@@ -8093,17 +8168,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "CH17-E0019 expone identidad, identificación, nacimiento, edad, sexo, periodo y estado de hospitalización; no se permite reutilizar datos de hospitalizaciones sin una fuente tenant-scoped ni contrato de mínimo privilegio.",
+        "financial_impact": "No se exponen seguros, pólizas, coberturas, claims ni información financiera.",
+        "current_platform_evidence": "/clinical/reports mantiene solamente superficies locales vacías; /clinical/hospitalizations contiene datos sintéticos de su propio módulo, que no constituyen una fuente autorizada para el Reporte de salud.",
+        "test_path": "Precheck documental: CH17-E0019 fue abierto y /clinical/reports y /clinical/hospitalizations fueron inspeccionados. No hay acción, consulta ni campo de reporte que pueda certificarse.",
+        "recommended_action": "Mantener F05 MISSING hasta aprobar CH16-Q008: fuente tenant-scoped, alcance organizacional, matriz de roles/campos, auditoría de acceso, retención, minimización y redacción antes de mostrar información principal.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0019 demuestra los campos visibles de información principal, pero no autoriza su copia, consulta o reutilización. La ruta de hospitalizaciones no es un puente de autorización para el reporte."
       }
     },
     {
@@ -8127,18 +8204,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
-      "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
-        "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
-      }
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q001"
+  ],
+  "platform_assessment": {
+    "status": "MISSING",
+    "priority": "P1",
+    "patient_safety_impact": "La evidencia incluye identificadores de seguros y selección por fila para una salida. Sin una fuente tenant-scoped, política de campos por rol, minimización, redacción y auditoría, exponerlos o seleccionarlos puede revelar información sensible.",
+    "financial_impact": "No se infieren cobertura, vigencia, reclamaciones ni efectos financieros a partir de la tabla observada.",
+    "current_platform_evidence": "/clinical/reports es una superficie local vacía; no consulta ni reutiliza datos de pacientes, hospitalizaciones o seguros y no ofrece selección ni impresión.",
+    "test_path": "Precheck de evidencia CH17-E0021; futuras pruebas sólo después de aprobar fuente/roles/campos bajo CH16-Q008 y contrato de selección/salida bajo CH17-Q001.",
+    "recommended_action": "Mantener la tabla de seguros, identificadores y selección de impresión ausentes hasta contar con la fuente autorizada, alcance organizacional, roles/campos, auditoría, retención, minimización/redacción y contrato de salida aprobado.",
+    "blocked_by_client_information": true,
+    "notes": "CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. No autoriza una fuente, campos, selección ni salida imprimible."
+  }
     },
     {
       "requirement_id": "CH17-F07",
@@ -8183,13 +8263,13 @@
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Una entrega externa de una nota clínica sensible sin consentimiento, destinatario autorizado, minimización y controles revocables puede revelar contenido de salud.",
+        "financial_impact": "Sin impacto financiero directo demostrado.",
+        "current_platform_evidence": "/clinical/reports no expone nota, control de WhatsApp, destinatario, vista previa ni solicitud externa. Los controles de WhatsApp de cotizaciones y seguros están bloqueados por proveedor y excluyen contenido clínico; no son una ruta reutilizable.",
+        "test_path": "Abrir CH17-E0048 y revisar transcript_raw.txt 00:54:00.000–00:54:23.560; inspeccionar /clinical/reports y los controles bloqueados QUOTE-WHATSAPP e INSURANCE-WHATSAPP sin ejecutar entrega.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q004. Cualquier diseño futuro requiere consentimiento explícito, validación de destinatario autorizado por organización, enlace seguro expirable y revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención; no debe incluir contenido clínico en vista previa o mensaje.",
+        "blocked_by_client_information": true,
+        "notes": "Precheck factual: el frame no muestra interfaz de WhatsApp y la transcripción sólo afirma una compartición. No se agrega control, consulta de destinatario, vista previa, solicitud externa ni puente desde hospitalizaciones."
       }
     },
     {
@@ -8213,17 +8293,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La navegación observada lleva a antecedentes, signos vitales, perfiles y notas clínicas; los paneles y controles Agregar pueden revelar o modificar información clínica sin una fuente, contexto y autorización aprobados.",
+        "financial_impact": "No aplica; no se infieren coberturas, precios ni reglas financieras.",
+        "current_platform_evidence": "/clinical/reports conserva únicamente superficies locales vacías; no muestra navegación de Evaluación Clínica, paneles, controles Agregar ni contenido clínico.",
+        "test_path": "Precheck de evidencia CH17-E0024; futuras pruebas sólo después de aprobar fuente tenant-scoped y campos/roles bajo CH16-Q008, y definición, permisos, auditoría y versionado de antecedentes/alergias bajo CH17-Q002.",
+        "recommended_action": "Mantener navegación, paneles, controles Agregar, consultas y escrituras clínicas ausentes hasta contar con contratos aprobados de fuente, contexto, roles, auditoría, retención, minimización/redacción y formularios clínicos.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0024 muestra las siete subpestañas y paneles de Antecedentes/Evaluaciones con controles Agregar; no autoriza reutilizar hospitalizaciones, exponer contenido ni mutar datos clínicos."
       }
     },
     {
@@ -8256,17 +8339,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Los antecedentes, alergias y vacunas son datos clínicos sensibles; exponerlos o admitir su captura sin fuente, contexto, autorización, versionado y corrección aprobados puede revelar o alterar información clínica.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva una superficie local vacía; no consulta, copia ni reutiliza datos de pacientes, hospitalizaciones o antecedentes y no presenta paneles ni controles Agregar.",
+        "test_path": "Precheck de evidencia: abrir CH17-E0026 y CH17-E0027; mantener ausentes datos, catálogos, formularios, controles Agregar, consultas, impresión/exportación y mutaciones hasta aprobar CH16-Q008 y CH17-Q002.",
+        "recommended_action": "Obtener fuente tenant-scoped, contexto organizacional, campos por rol, auditoría, retención, minimización y redacción (CH16-Q008), además de formularios, catálogos, permisos de Agregar, versión, corrección y auditoría de antecedentes (CH17-Q002), antes de implementar cualquier contenido o flujo.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con un control Agregar. No establecen fuente, contexto clínico, roles, forma, catálogo, reacción/estado, versionado, corrección, auditoría, retención, minimización ni redacción."
       }
     },
     {
@@ -8299,17 +8385,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "La selección y el estado de alergia son información clínica sensible; sembrar un catálogo, asociarlo a una persona o aceptar una alta sin fuente, contexto, roles, reacción/estado, versionado y corrección aprobados puede revelar o alterar datos clínicos.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva una superficie local vacía; no consulta ni reutiliza pacientes, hospitalizaciones, alergias o catálogos y no presenta selector, nombres de medicamentos ni Agregar.",
+        "test_path": "Precheck de evidencia: abrir CH17-E0029 y CH17-E0030; mantener ausentes el catálogo, nombres visibles, selector, estado No registrado, Agregar, consultas, impresión/exportación y mutaciones hasta aprobar CH16-Q008 y CH17-Q002.",
+        "recommended_action": "Obtener fuente tenant-scoped, contexto organizacional, campos por rol, auditoría, retención, minimización y redacción (CH16-Q008), además de catálogo autorizado, formularios, permisos, reacción/estado, resolución de No registrado, persistencia, versión, corrección y auditoría (CH17-Q002), antes de implementar una alergia o un selector.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0029 muestra Alergias expandido con No registrado, Seleccione, un segundo selector vacío y Agregar. CH17-E0030 muestra una lista de sustancias/medicamentos visibles. Ninguna imagen autoriza sembrar el catálogo, exponer los nombres, vincularlos a un paciente, interpretar una alergia o persistir/corregir un registro."
       }
     },
     {
@@ -8333,17 +8422,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q009"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Los valores, unidades, rangos, orígenes y reglas clínicas no están autorizados; no se exponen datos de signos vitales.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone signos vitales, gráficas, cargas del paciente, controles ni datos clínicos.",
+        "test_path": "Precheck de evidencia CH17-E0038; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar fuente tenant-scoped, campos y roles (CH16-Q008) y el contrato clínico específico de signos vitales (CH17-Q009).",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0038 muestra sólo tres grupos expandibles. No autoriza valores, unidades, rangos, gráficas, cargas del paciente, formularios, consultas, persistencia, correcciones ni reglas clínicas."
       }
     },
     {
@@ -8376,17 +8468,21 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q001",
+        "CH17-Q010"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "La narrativa de enfermería y su contexto de turno/recurso son contenido clínico sensible; no se expone ni se imprime sin contrato aprobado.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone notas de enfermería, datos de recurso/turno, búsqueda, paginación, selección, acciones ni impresión.",
+        "test_path": "Precheck de evidencia CH17-E0043/CH17-E0046; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar fuente tenant-scoped y campos/roles (CH16-Q008), selección/salida de impresión (CH17-Q001) y ciclo clínico de notas de enfermería (CH17-Q010).",
+        "blocked_by_client_information": true,
+        "notes": "Las evidencias muestran anatomía de tabla y narrativa clínica sensible, pero no autorizan fuente, lecturas, búsqueda, paginación, selección, acciones, impresión, persistencia, corrección/versionado ni reglas clínicas."
       }
     },
     {
@@ -8419,17 +8515,21 @@
           "observation": "Desde 00:52:14 el menú Editar abre una nota en un área de texto con icono de guardado."
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q010",
+        "CH17-Q011"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "La edición directa de una nota clínica sensible puede sobrescribir el original o eludir autorización, motivo, firma, versionado y auditoría; React no expone ninguna edición.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports permanece vacío y no expone una nota, editor, guardado, lectura clínica ni una fuente de hospitalizaciones.",
+        "test_path": "Precheck de evidencia CH17-E0048/safety_005; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener MISSING hasta aprobar la fuente/roles/campos sensibles del Reporte de salud (CH16-Q008), el ciclo de vida de notas (CH17-Q010) y el contrato de corrección clínica inmutable (CH17-Q011).",
+        "blocked_by_client_information": true,
+        "notes": "E0048 y safety_005 muestran una afinidad visible de editar/guardar sobre contenido sensible, pero no autorizan lectura, edición, persistencia ni un reemplazo de versión. No se usa /clinical/hospitalizations como fuente o puente de autorización."
       }
     },
     {
@@ -8441,7 +8541,7 @@
       "chapter_id": "CH17",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q003 bloquea toda transferencia de contenido clínico a IA hasta contar con proveedor y contrato aprobados.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8453,17 +8553,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q003"
+      ],
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una transferencia de nota clínica a IA sin base autorizada, minimización, revisión humana y auditoría puede revelar datos sensibles o producir una salida no controlada.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "current_platform_evidence": "/clinical/reports no expone Auditar con IA, una nota clínica, proveedor, solicitud externa, prompt ni transferencia de datos; /clinical/hospitalizations no es un puente de autorización.",
+        "test_path": "Precheck factual de CH17-E0048; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q003: proveedor, base autorizada, datos permitidos, minimización/redacción, revisión humana, manejo de salida, persistencia/entrenamiento, roles, auditoría y retención.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0048 muestra sólo el rótulo Auditar con IA dentro del contexto de una nota sensible. No autoriza interfaz, solicitud, prompt, contenido clínico, transferencia externa ni reutilización de hospitalizaciones."
       }
     },
     {
@@ -8475,7 +8577,7 @@
       "chapter_id": "CH17",
       "classification": "VERBAL",
       "confidence": "MEDIUM",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q005 bloquea crear, firmar, corregir o anular notas hasta contar con una matriz aprobada de roles y ciclo clínico.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8487,17 +8589,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q005"
+      ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una edición de nota clínica sin matriz de roles, firma, motivo, versión, manejo de conflictos y auditoría puede eludir controles clínicos o sobrescribir evidencia.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "current_platform_evidence": "/clinical/reports no expone nota, editor, guardado, roles, matriz de permisos, consulta clínica ni mutación; /clinical/hospitalizations no es un puente de autorización.",
+        "test_path": "Precheck verbal de transcript 00:51:03-00:52:27 y CH17-E0048; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q005: matriz de roles para creación, firma, corrección y anulación; motivos, versiones, conflictos, auditoría append-only y contrato runtime. CH17-Q010/Q011 mantienen el ciclo y las salvaguardas de corrección de F13.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La regla es verbal y no identifica un rol autorizado ni un resultado de autorización. No autoriza editar, guardar, controlar roles, leer/escribir notas ni reutilizar hospitalizaciones como fuente."
       }
     },
     {
@@ -8521,17 +8625,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q006"
+      ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una aplicación de enfermería sin fuente acotada por organización, asignación autorizada, campos mínimos por rol, sincronización idempotente, corrección y auditoría puede revelar contenido clínico o producir registros clínicos inconsistentes.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "current_platform_evidence": "React no contiene una aplicación operativa de enfermería vinculada a una asignación clínica. /clinical/reports no expone datos ni capturas; /clinical/nursing y los datos genéricos de recursos/signos no son una fuente ni un contrato de autorización para este flujo.",
+        "test_path": "Precheck verbal de transcript 00:52:34-00:53:44 y CH17-E0046; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q006: fuente y alcance por organización, asignación, matriz de roles, campos permitidos, offline/sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización y redacción.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La narración describe una aplicación no mostrada; E0046 es una tabla de notas dentro del Reporte de salud, no evidencia del flujo operativo. No se reutilizan datos genéricos de recursos, signos, horas, documentos, pacientes u hospitalizaciones como autorización, ni se agrega asignación, captura, sincronización, escritura o contenido clínico. CR-020 sólo cubre Balance Hídrico aprobado y no especifica este flujo."
       }
     },
     {
@@ -8543,7 +8649,7 @@
       "chapter_id": "CH17",
       "classification": "VERBAL",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q004 bloquea cualquier compartición externa de una nota de enfermería hasta aprobar consentimiento, destinatario autorizado, enlace seguro expirable/revocable, minimización/redacción, resultado de entrega, auditoría y retención.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8551,21 +8657,23 @@
           "timestamp": "00:52:14.800",
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg",
           "detail_path": "",
-          "transcript": "",
-          "observation": ""
+          "transcript": "00:54:00.000–00:54:23.560 afirma verbalmente que una nota de enfermería podía mandarse por WhatsApp al médico.",
+          "observation": "CH17-E0048 fue abierto: muestra contexto de Reporte de salud, pero ningún control, destinatario, vista previa ni resultado de WhatsApp. La afirmación de compartir existe sólo en la transcripción."
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q004"
+      ],
       "platform_assessment": {
         "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Conservar la incertidumbre; no usar este fragmento como criterio de paridad hasta contar con evidencia concluyente.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Una entrega externa de una nota clínica sensible sin consentimiento, destinatario autorizado, minimización y controles revocables puede revelar contenido de salud.",
+        "financial_impact": "Sin impacto financiero directo demostrado.",
+        "current_platform_evidence": "/clinical/reports no expone nota, control de WhatsApp, destinatario, vista previa ni solicitud externa. Los controles de WhatsApp de cotizaciones y seguros están bloqueados por proveedor y excluyen contenido clínico; no son una ruta reutilizable.",
+        "test_path": "Abrir CH17-E0048 y revisar transcript_raw.txt 00:54:00.000–00:54:23.560; inspeccionar /clinical/reports y los controles bloqueados QUOTE-WHATSAPP e INSURANCE-WHATSAPP sin ejecutar entrega.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q004. Cualquier diseño futuro requiere consentimiento explícito, validación de destinatario autorizado por organización, enlace seguro expirable y revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención; no debe incluir contenido clínico en vista previa o mensaje.",
+        "blocked_by_client_information": true,
+        "notes": "Precheck factual: el frame no muestra interfaz de WhatsApp y la transcripción sólo afirma una compartición. No se agrega control, consulta de destinatario, vista previa, solicitud externa ni puente desde hospitalizaciones."
       }
     }
   ],
@@ -9849,9 +9957,9 @@
       "question_id": "CH14-Q006",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
-      "question": "determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.",
+      "question": "determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia visible: CH14-E0048, 00:42:14.200.",
       "evidence_event_ids": [
-        "CH14-E0046"
+        "CH14-E0048"
       ],
       "status": "OPEN"
     },
@@ -9933,7 +10041,7 @@
       "question_id": "CH14-Q014",
       "chapter_id": "CH14",
       "classification": "UNCERTAIN",
-      "question": "identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización requiere. Evidencia: CH14-E0152, 00:45:27.400; transcripción 00:45:10.320–00:45:13.320.",
+      "question": "identificar qué significa “faltar una cotización”, qué entidad y estado afecta y qué autorización, auditoría e idempotencia requiere. CH14-E0152 sólo muestra una transición oscurecida del formulario; la única mención es la transcripción ambigua 00:45:10.320–00:45:13.320.",
       "evidence_event_ids": [
         "CH14-E0152"
       ],
@@ -9947,6 +10055,59 @@
       "evidence_event_ids": [
         "CH14-E0006",
         "CH14-E0152"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q004",
+      "chapter_id": "CH17",
+      "classification": "VERBAL",
+      "question": "¿Cuál es el contrato autorizado para compartir externamente una Nota de enfermería por WhatsApp: fuente y alcance por organización, consentimiento explícito y revocable, validación del destinatario autorizado, enlace seguro autenticado expirable y revocable, payload mínimo/redactado, resultado de entrega, auditoría de acceso/entrega y retención? No se permite incluir contenido clínico en el mensaje o vista previa. Evidencia verbal: transcript 00:54:00.000–00:54:23.560; CH17-E0048 no muestra control ni entrega.",
+      "evidence_event_ids": [
+        "CH17-E0048"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q008",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Qué rango temporal se autoriza para Reporte de salud —valor predeterminado, límites pasado/futuro, inclusividad, zona horaria, cambios de hospitalización y semántica de Seleccionar/Cargar/Cancelar— y cuáles son los estados de carga, error, reintento, auditoría, retención y redacción? CH16-Q008 sigue controlando fuente tenant-scoped, campos sensibles y roles. Las fechas visibles son ejemplos y no deben codificarse.",
+      "evidence_event_ids": [
+        "CH17-E0012",
+        "CH17-E0017",
+        "CH17-E0019"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q009",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato clínico autorizado para Signos vitales: fuente por organización y vínculo de paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, distinción y procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción? CH16-Q008 sigue controlando la fuente tenant-scoped, roles y campos sensibles del Reporte de salud.",
+      "evidence_event_ids": [
+        "CH17-E0038"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q010",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato clínico autorizado de Notas de enfermería: fuente por organización y vínculo de paciente/hospitalización, campos y contenido permitidos por rol, turno/recurso, ciclo de vida, firma, corrección/versionado, auditoría, retención, minimización y redacción? CH17-Q001 controla además selección por fila, contenido/formato/destino/autoridad de impresión y auditoría de salida; CH16-Q008 conserva fuente tenant-scoped, roles y campos sensibles del Reporte de salud.",
+      "evidence_event_ids": [
+        "CH17-E0043",
+        "CH17-E0046"
+      ],
+      "status": "OPEN"
+    },
+    {
+      "question_id": "CH17-Q011",
+      "chapter_id": "CH17",
+      "classification": "UNCERTAIN",
+      "question": "¿Cuál es el contrato autorizado de corrección de una Nota de enfermería: relación tenant-scoped de paciente/hospitalización, roles y precondición de firma, motivo obligatorio, preservación inmutable del original, nueva versión de reemplazo, manejo de errores o conflictos, auditoría append-only, retención, minimización y redacción? CH17-Q010 conserva el ciclo y campos de la nota; CH16-Q008 conserva fuente, roles y campos sensibles del Reporte de salud. E0048/safety_005 no autorizan editar ni guardar directamente.",
+      "evidence_event_ids": [
+        "CH17-E0048"
       ],
       "status": "OPEN"
     }

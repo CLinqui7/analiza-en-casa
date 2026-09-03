@@ -65,7 +65,7 @@
       "description": "Cambiar rango de fechas abre un calendario doble, permite seleccionar intervalo, Cargarlo y muestra Procesando antes de actualizar el encabezado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -86,7 +86,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: elegir intervalos válidos e inválidos; comprobar límites inclusivos, zona horaria y ausencia de datos fuera del rango."
+      "test_path": "Precheck: CH17-E0012/E0017/E0019 fueron abiertos. No se implementa un selector ni consulta de rango hasta aprobar CH16-Q008 y CH17-Q008; futuras pruebas deben cubrir rangos autorizados, aislamiento organizacional, auditoría y ausencia de datos fuera del rango."
     },
     {
       "id": "CH17-F05",
@@ -94,7 +94,7 @@
       "description": "El reporte presenta identidad, fecha de nacimiento, edad, sexo, periodo de hospitalización, estado, tipo de paciente, tipo de módulo y adicional.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -103,7 +103,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: verificar exactitud de campos derivados y acceso mínimo necesario según rol."
+      "test_path": "Precheck: CH17-E0019 fue abierto y /clinical/reports y /clinical/hospitalizations fueron inspeccionados. CH16-Q008 debe aprobar fuente tenant-scoped, alcance organizacional, roles/campos, auditoría, retención, minimización y redacción antes de cualquier E2E de datos."
     },
     {
       "id": "CH17-F06",
@@ -111,7 +111,7 @@
       "description": "Seguros del paciente expone seguro, póliza, certificado, fecha efectiva, titular y DUI/NIT, con una casilla Imprimir por fila.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -120,7 +120,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: seleccionar un seguro sintético y comprobar que la salida incluya sólo los campos autorizados y seleccionados."
+      "test_path": "Precheck: CH17-E0021 fue abierto. No se implementa tabla, identificadores, selección ni impresión hasta aprobar fuente tenant-scoped, alcance organizacional, roles/campos, auditoría, retención, minimización/redacción (CH16-Q008) y contrato de selección/salida (CH17-Q001)."
     },
     {
       "id": "CH17-F07",
@@ -157,7 +157,7 @@
       "description": "Evaluación Clínica separa antecedentes y evaluaciones, signos vitales, perfiles clínicos, notas de evolución, interconsultas, notas de enfermería y bitácoras.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -166,7 +166,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0024_00h51m37s200ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: recorrer las siete subpestañas y comprobar que preserven paciente, hospitalización y rango activo."
+      "test_path": "Precheck: CH17-E0024 fue abierto. No se implementan subpestañas, paneles, controles Agregar, consultas ni mutaciones hasta aprobar fuente/contexto/roles/campos/auditoría/retención/minimización/redacción (CH16-Q008) y formularios/permisos/versionado/auditoría de antecedentes y alergias (CH17-Q002)."
     },
     {
       "id": "CH17-F09",
@@ -174,7 +174,7 @@
       "description": "Los paneles cubren alergias, antecedentes personales patológicos, hábitos personales, antecedentes quirúrgicos, antecedentes familiares y tarjeta de vacunas.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -189,7 +189,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0027_00h51m44s200ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: expandir cada panel y validar estados vacío, desconocido, negado y registrado sin contradicciones."
+      "test_path": "Precheck: CH17-E0026/E0027 fueron abiertos. React no expone paneles, datos, catálogos, formularios ni Agregar. No se implementan contenido o mutaciones hasta aprobar fuente y campos tenant-scoped, roles, auditoría, retención, minimización y redacción (CH16-Q008), además de formularios, catálogos, permisos de Agregar, reacción/estado, No registrado, versionado, corrección y auditoría (CH17-Q002)."
     },
     {
       "id": "CH17-F10",
@@ -197,7 +197,7 @@
       "description": "Alergias muestra No registrado, un catálogo seleccionable y Agregar; el capítulo no demuestra la persistencia ni cómo se resuelve la contradicción con No registrado.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -212,7 +212,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0030_00h51m50s600ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: añadir alergia sintética, exigir reacción/estado cuando corresponda y evitar coexistencia incoherente con No registrado."
+      "test_path": "Precheck: CH17-E0029/E0030 fueron abiertos. React no expone catálogo, nombres de medicamentos, selector, estado No registrado, Agregar, datos de pacientes, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/contexto/roles/campos/auditoría/retención/minimización/redacción (CH16-Q008) y catálogo/formularios/permisos/reacción-estado/No registrado/persistencia/versionado/corrección/auditoría (CH17-Q002)."
     },
     {
       "id": "CH17-F11",
@@ -220,7 +220,7 @@
       "description": "La subpestaña separa gráficos, registros clínicos de signos vitales y signos cargados por el paciente.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -229,7 +229,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0038_00h52m00s600ms_DETAIL.jpg"
         }
       ],
-      "test_path": "E2E: abrir los tres paneles, validar unidades, fecha, autor/origen y señalización de datos aportados por paciente."
+  "test_path": "Precheck: CH17-E0038 fue abierto. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/campos/roles/auditoría/retención/minimización/redacción (CH16-Q008) y campos/unidades/rangos/procedencia/validación/interpretación/formularios/persistencia/corrección/auditoría de signos vitales (CH17-Q009)."
     },
     {
       "id": "CH17-F12",
@@ -237,7 +237,7 @@
       "description": "Notas de enfermería muestra fecha, turno, recurso y nota clínica, con búsqueda, paginación, selección para impresión y acciones por fila.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -252,7 +252,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: buscar y paginar notas sintéticas; verificar orden cronológico, autor, turno y permisos de lectura."
+      "test_path": "Precheck: CH17-E0043/E0046 fueron abiertos. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones. No se implementa contenido hasta aprobar fuente/campos/roles/auditoría/retención/minimización/redacción (CH16-Q008), selección y salida de impresión (CH17-Q001), y ciclo clínico de notas de enfermería (CH17-Q010)."
     },
     {
       "id": "CH17-F13",
@@ -260,7 +260,7 @@
       "description": "El menú ofrece Editar y la secuencia de seguridad muestra un área de texto editable con control de guardado; no se demuestra versión, motivo ni preservación del original.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -277,7 +277,7 @@
         }
       ],
       "transcript_evidence": "00:52:15.000–00:52:27.000: se describe editar y guardar para corregir errores ortográficos.",
-      "test_path": "Seguridad: una nota firmada sólo admite corrección autorizada con motivo, nueva versión y auditoría, preservando el original."
+      "test_path": "Precheck: E0048/safety_005 fueron abiertos. React no expone nota, editor, guardado, lectura, consulta ni mutación. Mantener MISSING hasta aprobar fuente/campos/roles (CH16-Q008), ciclo de nota (CH17-Q010) y corrección con motivo, original inmutable, versión de reemplazo y auditoría append-only (CH17-Q011)."
     },
     {
       "id": "CH17-F14",
@@ -294,7 +294,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0048_00h52m14s800ms_DETAIL.jpg"
         }
       ],
-      "test_path": "Seguridad: usar datos sintéticos; comprobar minimización, consentimiento/base autorizada, aislamiento, no entrenamiento, revisión humana y auditoría."
+      "test_path": "Precheck factual: conservar NOT_TESTABLE hasta aprobar proveedor, base autorizada, datos permitidos, minimización/redacción, revisión humana, salida, persistencia/entrenamiento, roles, auditoría y retención; no exponer control, solicitud ni contenido clínico."
     },
     {
       "id": "CH17-F15",
@@ -312,7 +312,7 @@
         }
       ],
       "transcript_evidence": "00:51:03.000–00:51:19.000 y 00:52:15.000–00:52:27.000: se contrasta el bloqueo posterior al guardado con correcciones ortográficas de otro rol.",
-      "test_path": "Autorización: verificar permisos por rol y flujo de corrección inmutable con motivo y evidencia de auditoría."
+      "test_path": "Precheck verbal: mantener NOT_TESTABLE hasta aprobar matriz de roles para crear, firmar, corregir y anular, con motivos, versiones, conflictos, auditoría append-only y contrato runtime (CH17-Q005). No exponer editor, guardado, roles, nota clínica, consulta ni mutación. CH17-Q010/Q011 siguen siendo las salvaguardas de ciclo y corrección de F13."
     },
     {
       "id": "CH17-F16",
@@ -330,7 +330,7 @@
         }
       ],
       "transcript_evidence": "00:52:34.000–00:53:44.000: se describe el contexto asignado y las capturas clínicas realizadas desde la aplicación.",
-      "test_path": "E2E móvil: validar asignación, contexto mínimo, captura con autor/hora, modo sin conexión definido y sincronización idempotente."
+      "test_path": "Precheck verbal: CH17-E0046 fue abierto y muestra una tabla de notas dentro de Reporte de salud, no una aplicación operativa. Mantener NOT_TESTABLE hasta aprobar fuente tenant-scoped, asignación, roles, campos mínimos, offline/sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización y redacción (CH17-Q006). No reutilizar datos genéricos de enfermería/signos ni agregar asignación, captura, contenido clínico, offline, sincronización o mutación."
     },
     {
       "id": "CH17-F17",
@@ -348,7 +348,7 @@
         }
       ],
       "transcript_evidence": "00:54:00.000–00:54:23.560: se explica compartir por WhatsApp la nota generada por enfermería al médico.",
-      "test_path": "Seguridad: el mensaje externo no contiene diagnóstico, tratamiento, medicación ni nota; sólo notificación mínima y enlace seguro, autenticado y expirable."
+      "test_path": "Precheck verbal: CH17-E0048 fue abierto y no muestra interfaz, destinatario, vista previa ni resultado de WhatsApp; la transcripción 00:54:00.000–00:54:23.560 sólo afirma compartir externamente una nota al médico. Mantener NOT_TESTABLE hasta aprobar fuente/alcance por organización, proveedor, consentimiento explícito/revocable, destinatario autorizado, enlace seguro autenticado expirable/revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención (CH17-Q004). No agregar control, consulta de destinatario, vista previa, solicitud externa ni contenido clínico; los controles bloqueados de cotizaciones/seguros no son un puente de autorización."
     }
   ]
 }

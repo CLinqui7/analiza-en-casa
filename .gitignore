@@ -19,9 +19,12 @@ coverage/
 playwright-report/
 test-results/
 .codex-log/
+.qa-results/
+__pycache__/
 *.log
 .DS_Store
 Thumbs.db
 
 # Local review scratch, keep committed review ledgers/results only
 video-audit-reviews/**/scratch/
+.vercel

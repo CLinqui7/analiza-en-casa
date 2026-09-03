@@ -48,7 +48,7 @@
       "description": "La conversación explica que lo enviado al domicilio queda comprometido en la cuenta del paciente hasta cerrar o contabilizar el servicio; no demuestra la fórmula de reserva.",
       "classification": "VERBAL",
       "confidence": "MEDIUM",
-      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -110,29 +110,35 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0041",
-          "timestamp": "00:41:38.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0041_00h41m38s600ms_stable_change.jpg"
+          "chapter_event_id": "CH14-E0042",
+          "timestamp": "00:41:43.000",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0042_00h41m43s000ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0044",
+          "timestamp": "00:41:44.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0044_00h41m44s200ms_stable_change.jpg"
         }
       ],
-      "test_path": "E2E: recorrer las cuatro pestañas y validar que un paciente sólo aparezca en el estado correspondiente."
+      "test_path": "apps/web/e2e/ch14.spec.ts (playwright:ch14-inventory-closures) and tests/selenium/test_inventory.py (SEL-CH14-INVENTORY-CLOSURES) verify the four empty tabs, headers, NURSE denial, and reload without audit mutation; no patient source is queried."
     },
     {
       "id": "CH14-F07",
       "name": "Advertencia de cierre ya abierto",
-      "description": "Al iniciar un cierre cuando existe uno abierto, la interfaz advierte que continuar podría borrar datos guardados y obliga a Cancelar o Aceptar.",
+      "description": "CH14-E0048 muestra Advertencia: un cierre continúa abierto, podría haber datos guardados y ofrece Cancelar/Aceptar.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_EXACT",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0046",
-          "timestamp": "00:41:47.400",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0046_00h41m47s400ms_DETAIL.jpg"
+          "chapter_event_id": "CH14-E0048",
+          "timestamp": "00:42:14.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0048_00h42m14s200ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: intentar crear un segundo cierre y verificar advertencia, cancelación sin pérdida y aceptación auditada."
+      "test_path": "NONE: React no contiene el modal, aceptación ni resultado; CH14-Q006 bloquea una implementación segura."
     },
     {
       "id": "CH14-F08",
@@ -168,7 +174,7 @@
         }
       ],
       "transcript_evidence": "00:43:18.500–00:43:33.500: se menciona la creación de proveedores y sus registros.",
-      "test_path": "E2E: crear proveedor sintético, validar campos y encontrarlo con búsqueda bajo el rol autorizado."
+      "test_path": "apps/web/e2e/ch14.spec.ts and tests/selenium/test_inventory.py open the factual empty list, verify headers/search/pagination anatomy, direct NURSE denial, and reload without audit mutation."
     },
     {
       "id": "CH14-F10",
@@ -180,13 +186,13 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0068",
-          "timestamp": "00:43:28.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0068_00h43m28s600ms_settled.jpg"
+          "chapter_event_id": "CH14-E0071",
+          "timestamp": "00:43:33.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg"
         }
       ],
       "transcript_evidence": "00:43:26.500–00:43:57.500: se describen bodegas y traslados cuando un recurso no está en la ubicación esperada.",
-      "test_path": "Integración: traslado transaccional conserva suma de existencias y genera dos movimientos auditados."
+      "test_path": "apps/web/e2e/ch14.spec.ts y tests/selenium/test_inventory.py abren la anatomía vacía, prueban ADMIN/INVENTORY/AUDITOR, denegación directa para DOCTOR/NURSE/FINANCE, búsqueda y recarga sin mutación. CH14-E0071 fundamenta sólo la anatomía visible; CH14-Q009 mantiene fuente, permisos operativos y transferencias bloqueados."
     },
     {
       "id": "CH14-F11",
@@ -194,7 +200,7 @@
       "description": "El módulo separa Lotes y Nros de serie; la tabla enlaza lote con item, fechas y estado, y resalta varias Fecha inválida en rojo.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
@@ -204,7 +210,7 @@
         }
       ],
       "transcript_evidence": "00:44:07.560–00:44:24.040: se exige manejar vencimientos de medicamentos, lotes de insumos y series de equipos.",
-      "test_path": "E2E: crear lote/serie, validar fechas y alertas; impedir asignaciones que violen la política configurada."
+      "test_path": "Sin prueba actual: CH14-E0075 y los frames adyacentes abiertos muestran Bodegas, no Lotes/Nros de serie. No se implementa catálogo, fecha, alerta, asignación o rechazo hasta corregir la evidencia y aprobar CH14-Q010/Q011."
     },
     {
       "id": "CH14-F12",
@@ -216,18 +222,18 @@
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0084",
-          "timestamp": "00:44:13.600",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0084_00h44m13s600ms_stable_change.jpg"
+          "chapter_event_id": "CH14-E0095",
+          "timestamp": "00:44:29.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0095_00h44m29s400ms_abrupt_change.jpg"
         },
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0089",
-          "timestamp": "00:44:23.000",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0089_00h44m23s000ms_DETAIL.jpg"
+          "chapter_event_id": "CH14-E0104",
+          "timestamp": "00:44:35.200",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0104_00h44m35s200ms_settled.jpg"
         }
       ],
-      "test_path": "E2E: crear, duplicar, editar, exportar y eliminar un kit sintético con control de permisos."
+      "test_path": "Playwright/Selenium fuente: abrir/buscar/recargar la anatomía factual vacía sin mutación; Excel, Nuevo y paginación permanecen visibles/deshabilitados. No se crean, editan, duplican, eliminan o consumen kits hasta resolver CH14-Q012/Q013/Q015."
     },
     {
       "id": "CH14-F13",
@@ -235,13 +241,13 @@
       "description": "El editor permite nombrar el kit, seleccionar item y cantidad, añadir componentes, modificar cantidades y quitarlos; el relato indica descarga automática al usar un kit.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH14",
-          "chapter_event_id": "CH14-E0091",
-          "timestamp": "00:44:23.800",
-          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0091_00h44m23s800ms_DETAIL.jpg"
+        "chapter_event_id": "CH14-E0106",
+        "timestamp": "00:44:39.600",
+        "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0106_00h44m39s600ms_abrupt_change.jpg"
         },
         {
           "chapter_id": "CH14",
@@ -251,7 +257,7 @@
         }
       ],
       "transcript_evidence": "00:44:25.720–00:45:02.720: se describe el contenido de un kit y la descarga automática de sus componentes.",
-      "test_path": "Integración: consumir kit descuenta cada componente de forma atómica e idempotente o revierte toda la operación."
+    "test_path": "No se implementa editor ni consumo: CH14-E0106/E0117 sólo justifican la anatomía visual. CH14-Q012 debe aprobar composición versionada, roles y auditoría; CH14-Q013 debe aprobar selección/sustitución, descarga atómica e idempotente, y reversión antes de cualquier operación."
     },
     {
       "id": "CH14-F14",
@@ -259,21 +265,33 @@
       "description": "Acuse nuevo captura paciente, fecha, hospitalización, bodega, item, cantidad disponible y cantidad a asignar, con Vaciar, Plantilla y Añadir.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "IMPLEMENTED_PARTIAL",
+      "current_platform_status": "MISSING",
       "evidence": [
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0149",
+          "timestamp": "00:45:23.800",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0149_00h45m23s800ms_settled.jpg"
+        },
         {
           "chapter_id": "CH14",
           "chapter_event_id": "CH14-E0151",
           "timestamp": "00:45:27.000",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0151_00h45m27s000ms_abrupt_change.jpg"
+        },
+        {
+          "chapter_id": "CH14",
+          "chapter_event_id": "CH14-E0152",
+          "timestamp": "00:45:27.400",
+          "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: crear acuse con item disponible; validar cantidades, hospitalización y prevención de doble envío."
+      "test_path": "No se implementa formulario: CH14-E0149–E0151 prueban la anatomía visual y CH14-E0152 sólo la transición posterior oscurecida. safety_022 es la evidencia separada del detalle de faltantes para F15. CH14-Q001/Q002/Q004/Q005/Q016 deben aprobar fuente tenant-scoped, vínculo paciente/hospitalización, roles, validación de cantidad, idempotencia, auditoría y reversión antes de crear o descargar existencias."
     },
     {
       "id": "CH14-F15",
       "name": "Detección de items faltantes",
-      "description": "La hoja de seguridad posterior al último evento muestra Items faltantes disponibles con bodega, acuse, tipo, código, nombre, Disponible, Requerido y Acuse creado.",
+      "description": "safety_022 muestra Items faltantes disponibles con Bodega y las columnas Acuse, Tipo, Código, Nombre, Disponible, Requerido y Acuse creado; CH14-E0152 sólo muestra la transición oscurecida posterior al formulario.",
       "classification": "VISIBLE",
       "confidence": "MEDIUM",
       "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
@@ -283,15 +301,15 @@
           "chapter_event_id": "CH14-E0152",
           "timestamp": "00:45:27.400",
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/contact_sheets_safety/safety_022.jpg",
-          "observation": "El cuadro visible a 00:45:28 enumera faltantes y compara disponible con requerido."
+          "observation": "CH14-E0152 es la transición oscurecida; safety_022 a 00:45:28 muestra el detalle factual de faltantes y Disponible/Requerido."
         }
       ],
-      "test_path": "E2E: solicitar cantidad insuficiente y comprobar modal, totales correctos y ausencia de stock negativo."
+      "test_path": "No implementar: CH14-Q005 y CH14-Q014 deben aprobar cálculo tenant-scoped, roles, manejo de cantidad insuficiente, significado de Acuse creado, sustitución, compra, notificación, idempotencia, auditoría y reversión antes de cualquier flujo operativo."
     },
     {
       "id": "CH14-F16",
       "name": "Vínculo de faltantes con cotización",
-      "description": "La conversación menciona una opción relacionada con faltar una cotización, pero la frase y el comportamiento no quedan demostrados visualmente.",
+      "description": "La transcripción menciona de forma ambigua una opción relacionada con ‘faltar una cotización’; CH14-E0152 sólo muestra el formulario de Acuse oscurecido y no demuestra entidad, estado, autorización ni comportamiento.",
       "classification": "UNCERTAIN",
       "confidence": "LOW",
       "current_platform_status": "NEEDS_CLIENT_CONFIRMATION",
@@ -303,8 +321,8 @@
           "path": "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0152_00h45m27s400ms_abrupt_change.jpg"
         }
       ],
-      "transcript_evidence": "00:45:10.320–00:45:13.320: 'También tenía una opción de faltar una cotización'.",
-      "test_path": "Pendiente de definición del cliente; no habilitar automatización hasta acordar significado y estado objetivo."
+      "transcript_evidence": "00:45:10.320–00:45:13.320: 'También tenía una opción de faltar una cotización'. CH14-E0152 fue abierto y sólo es la transición oscurecida del formulario, sin control ni estado de cotización.",
+      "test_path": "No implementar: CH14-Q014 debe definir significado, entidad, estado, roles, autorización, auditoría, idempotencia y cualquier efecto de cotización/inventario antes de habilitar una acción o automatización."
     }
   ]
 }

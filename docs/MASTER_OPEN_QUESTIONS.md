@@ -163,6 +163,18 @@ Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, finan
 - **CH13-Q013 · UNCERTAIN** — definir anulación, motivo obligatorio, aprobación, reversión de inventario/contabilidad, notificación y evidencia append-only. Evidencia: CH13-E0091, 00:39:40.800.
 - **CH13-Q014 · UNCERTAIN** — definir fuente, alcance organizacional, proveedor/presentación, vigencia y autorización del precio histórico, además del alta de presentaciones. Evidencia: CH13-E0019–CH13-E0025, 00:37:11.800–00:37:17.200; CH13-E0052–CH13-E0055, 00:38:22.400–00:38:25.200.
 
+- **CH17-Q007 · VISIBLE** — definir la relación autorizada por organización entre cada acción del menú de hospitalización y su registro, roles, condiciones, auditoría y destino seguro. El menú de Historia clínica, Reporte Claims, Ver visitas, Notas de servicio, Reporte de salud, Auditorías y Registro XPO no demuestra estas reglas. Evidencia: CH17-E0005, 00:51:14.200.
+
+- **CH17-Q004 · VERBAL** — definir fuente y alcance por organización, proveedor, consentimiento explícito/revocable, validación del destinatario autorizado, enlace seguro autenticado expirable/revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención de WhatsApp para notas. No se permite contenido clínico en el mensaje ni vista previa. Evidencia verbal: transcript 00:54:00–00:54:23.560; CH17-E0048 no muestra control ni entrega.
+
+- **CH17-Q008 · UNCERTAIN** — definir el rango temporal autorizado del Reporte de salud: valor predeterminado, límites, inclusividad, zona horaria, Seleccionar/Cargar/Cancelar, carga/error/reintento, auditoría, retención y redacción. CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles. Las fechas visibles son ejemplos y no se codifican. Evidencia: CH17-E0012, CH17-E0017 y CH17-E0019, 00:51:18.800–00:51:33.000.
+
+- **CH17-Q009 · UNCERTAIN** — definir el contrato clínico autorizado de Signos vitales: fuente por organización y vínculo paciente/hospitalización, campos y unidades aprobados, rangos/validación e interpretación, procedencia de registros clínicos frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado, auditoría, retención, minimización y redacción. CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles del Reporte de salud. Evidencia: CH17-E0038, 00:52:00.600.
+
+- **CH17-Q010 · UNCERTAIN** — definir el contrato clínico autorizado de Notas de enfermería: fuente por organización y vínculo paciente/hospitalización, campos y contenido permitidos por rol, turno/recurso, ciclo de vida, firma, corrección/versionado, auditoría, retención, minimización y redacción. CH17-Q001 controla selección por fila, contenido/formato/destino/autoridad de impresión y auditoría de salida; CH16-Q008 mantiene la fuente tenant-scoped, los roles y los campos sensibles. Evidencia: CH17-E0043 y CH17-E0046, 00:52:08.400–00:52:09.800.
+
+- **CH17-Q011 · UNCERTAIN** — definir la corrección autorizada de una Nota de enfermería: relación tenant-scoped de paciente/hospitalización, roles y precondición de firma, motivo, preservación inmutable del original, nueva versión de reemplazo, conflictos, auditoría append-only, retención, minimización y redacción. E0048/safety_005 sólo muestran afinidad de editar/guardar y no autorizan una edición directa. Evidencia: CH17-E0048, 00:52:14.800.
+
 ## CH14 · Inventario, movimientos, acuses, cierres, bodegas y kits
 
 - **CH14-Q001 · UNCERTAIN** — definir fórmulas y precedencia de Disponible, Comprometido, Reservado, Entregado, Gastado y Devuelto, incluida su reversión. Evidencia: CH14-E0006, 00:40:05.400; CH14-E0018, 00:40:39.000; transcripción 00:40:10–00:41:30.
@@ -170,7 +182,7 @@ Preguntas abiertas: 135. No se infiere ninguna regla de negocio, clínica, finan
 - **CH14-Q003 · UNCERTAIN** — definir formato, columnas, minimización de datos, permisos y validez del Excel y la impresión de acuses. Evidencia: CH14-E0032, 00:40:53.200; CH14-E0035, 00:41:00.800.
 - **CH14-Q004 · UNCERTAIN** — definir Plantilla y Vaciar, incluida persistencia de borrador, recuperación y confirmación de pérdida. Evidencia: CH14-E0151, 00:45:27.000.
 - **CH14-Q005 · UNCERTAIN** — aprobar el flujo de faltantes, tratamiento de cantidad insuficiente, sustitución, compra, notificación y significado de Acuse creado. Evidencia: CH14-E0152, 00:45:27.400; safety_022 a 00:45:28.
-- **CH14-Q006 · UNCERTAIN** — determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0046, 00:41:47.400.
+- **CH14-Q006 · UNCERTAIN** — determinar qué datos puede borrar Aceptar cuando ya existe un cierre, cómo se recuperan y quién autoriza la operación. Evidencia: CH14-E0048, 00:42:14.200.
 - **CH14-Q007 · UNCERTAIN** — aprobar transiciones entre cierre pendiente, total, aprobado, cerrado y cancelado, campos editables, conciliación, reversión y relación con el cierre administrativo/financiero. Evidencia: CH14-E0050, 00:42:16.400; transcripción 00:42:11–00:43:18.
 - **CH14-Q008 · UNCERTAIN** — definir identificación, unicidad, campos obligatorios, estados, edición y eliminación de proveedores por organización. Evidencia: CH14-E0061, 00:43:24.400.
 - **CH14-Q009 · UNCERTAIN** — aprobar creación/edición de bodegas y reglas de traslado: permisos, bodegas origen/destino, recepción, movimientos, lotes, series, concurrencia y reversión. Evidencia: CH14-E0068, 00:43:28.600; transcripción 00:43:26–00:43:57.

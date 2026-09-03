@@ -5,6 +5,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Analiza en Casa',
   description: 'Demo sintético de operación domiciliaria',
+  manifest: '/manifest.webmanifest',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
