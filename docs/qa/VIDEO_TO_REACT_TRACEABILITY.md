@@ -2,7 +2,7 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `6b8592e3e6db5e3363305d01b3d34fd087951bf7`
+Commit generador: `61dcedf0eb071427948a510167c0db81d938b730`
 SHA de implementación: `02c901a522e3bc0603c1b3c34501836928acf5ff`
 Fingerprint funcional CH01: `a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f`
 
