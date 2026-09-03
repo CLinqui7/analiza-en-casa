@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T19:12:03-06:00",
-  "metadata_generated_from_commit": "7ab41e696057922973aae2c6630ef104487a1aad",
+  "generated_at": "2026-09-02T19:19:07-06:00",
+  "metadata_generated_from_commit": "999e2d71216006e0e178aa1693a85d954b320bfe",
   "source_sha256": "41d5e6a328e14fda94742f5e8956bde2f024f1e3fa5f182d76f48b75a983b9ca",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8277,8 +8277,8 @@
         "CH17-Q001"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, alcance organizacional, campos de seguro permitidos por rol, auditoría de acceso, retención, minimización ni redacción; CH17-Q001 no define selección por fila, contenido/formato de impresión, autorizaciones, auditoría ni retención de la salida.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. React no expone, consulta ni reutiliza seguros, identificadores o impresión; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
+      "notes": "Precheck factual verified at 999e2d71216006e0e178aa1693a85d954b320bfe: CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. React no expone, consulta ni reutiliza seguros, identificadores o impresión; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F07",

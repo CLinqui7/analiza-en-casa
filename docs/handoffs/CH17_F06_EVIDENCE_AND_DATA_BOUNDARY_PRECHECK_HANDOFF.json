@@ -2,10 +2,10 @@
   "lot": "CH17_F06_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
   "source_sha": "7ab41e696057922973aae2c6630ef104487a1aad",
   "base_sha": "7ab41e696057922973aae2c6630ef104487a1aad",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
+  "remote_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
   "requirements": {
     "missing": ["CH17-F06"],
     "explicitly_blocked": ["CH16-Q008", "CH17-Q001"],
@@ -32,7 +32,7 @@
     "f04_f05_regression": "PRESERVED: F04 remains MISSING under CH16-Q008/CH17-Q008 and F05 remains MISSING under CH16-Q008; no application code changed.",
     "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL with no CH16-Q008/CH17-Q001 blocker; F04/F05 remain /clinical/reports MISSING under their existing scoped questions.",
     "selenium_runtime": "NOT_APPLICABLE: F06 has no implemented action; Python Selenium runtime remains unavailable.",
-    "git_sync": "PENDING_ENVIRONMENT: direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials; source and cached origin were both 7ab41e696057922973aae2c6630ef104487a1aad before this documentation-only precheck."
+    "git_sync": "PASS: environment checkpoint 999e2d71216006e0e178aa1693a85d954b320bfe contains this precheck and cached origin matches it; direct git add/commit/fetch remain blocked by .git ACL and direct push lacks HTTPS credentials."
   },
   "next_batch": "CH17_REVIEW"
 }
