@@ -1,5 +1,7 @@
 """Focused, observable Selenium evidence for the CH01 certification surface."""
 # test-id: SEL-CH01-RECOVERY
+# test-id: SEL-CH01-LOGIN
+# test-id: SEL-CH01-LOGOUT
 # test-id: SEL-CH01-INSTALL
 # test-id: SEL-CH01-USER-MENU
 # test-id: SEL-CH01-IMPORT
@@ -54,7 +56,7 @@ class CH01(unittest.TestCase):
     def login(self):
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]').clear(); self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]').send_keys('admin@demo.local')
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-PASSWORD"]').clear(); self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-PASSWORD"]').send_keys('demo-admin')
-        self.action('AUTH-LOGIN').click(); self.wait.until(EC.url_contains('/dashboard'))
+        began = time.time(); self.action('AUTH-LOGIN').click(); self.wait.until(EC.url_contains('/dashboard')); self.pass_('AUTH-LOGIN', 'SEL-CH01-LOGIN', began)
     def test_recovery_and_install_are_honest(self):
         began = time.time(); self.action('AUTH-RECOVER-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'no se envió ningún mensaje')]"))); self.pass_('AUTH-RECOVER-OPEN', 'SEL-CH01-RECOVERY', began)
         began = time.time(); self.action('AUTH-RECOVER-CANCEL').click(); self.wait.until(EC.invisibility_of_element_located((By.XPATH, "//*[contains(text(),'no se envió ningún mensaje')]"))); self.pass_('AUTH-RECOVER-CANCEL', 'SEL-CH01-RECOVERY', began)
@@ -63,6 +65,8 @@ class CH01(unittest.TestCase):
         self.login(); began = time.time(); self.action('USER-MENU-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="menu"]'))); self.pass_('USER-MENU-OPEN', 'SEL-CH01-USER-MENU', began)
         began = time.time(); self.action('USER-PROFILE-OPEN').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]'))); self.assertIn('ADMIN', self.driver.find_element(By.CSS_SELECTOR, '[role="dialog"]').text); self.pass_('USER-PROFILE-OPEN', 'SEL-CH01-USER-MENU', began)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="USER-PROFILE-CLOSE"]').click(); self.action('USER-MENU-OPEN').click(); began = time.time(); self.action('USER-MENU-CLOSE').click(); self.wait.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '[role="menu"]'))); self.pass_('USER-MENU-CLOSE', 'SEL-CH01-USER-MENU', began)
+    def test_logout_clears_session_and_returns_to_login(self):
+        self.login(); began = time.time(); self.action('AUTH-LOGOUT').click(); self.wait.until(EC.url_contains('/login')); self.assertIsNone(self.driver.execute_script("return localStorage.getItem('analiza.en.casa.mock-session.v1')")); self.pass_('AUTH-LOGOUT', 'SEL-CH01-LOGOUT', began)
     def test_import_and_xlsx(self):
         self.login(); self.driver.get(BASE + '/patients'); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'tbody tr')))
         began = time.time(); self.action('PATIENT-TAB-IMPORT').click(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="PATIENT-IMPORT-FILE"]'))); self.pass_('PATIENT-TAB-IMPORT', 'SEL-CH01-IMPORT', began)
