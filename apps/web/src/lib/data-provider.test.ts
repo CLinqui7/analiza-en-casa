@@ -19,8 +19,13 @@ describe('CH08 secure administrative execution boundary', () => {
         { ...hospitalizationWithProfile, administrativeProfile: undefined },
       ]),
     ).toBe(true);
-    const { administrativeProfile: _administrativeProfile, ...hospitalizationWithoutProfile } =
-      hospitalizationWithProfile;
+    const hospitalizationWithoutProfile: Hospitalization = {
+      id: 'hosp-ch08-without-profile',
+      patientId: 'patient-ch08-without-profile',
+      startDate: '2026-08-28',
+      status: 'ACTIVE',
+      accountType: 'PRIVATE',
+    };
     expect(hasAdministrativeProfilePayload([hospitalizationWithoutProfile])).toBe(false);
   });
 

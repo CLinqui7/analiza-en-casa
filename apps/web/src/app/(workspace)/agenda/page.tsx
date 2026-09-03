@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { buildShiftSeries, endForPreset, type ShiftPreset } from '@/lib/agenda-series';
@@ -110,7 +110,8 @@ export default function AgendaPage() {
       note: '',
     },
   });
-  const selectedShiftPatient = patients.find((patient) => patient.id === form.watch('patientId'));
+  const selectedShiftPatientId = useWatch({ control: form.control, name: 'patientId' });
+  const selectedShiftPatient = patients.find((patient) => patient.id === selectedShiftPatientId);
   function close() {
     setOpen(false);
     setDates([initialDate]);

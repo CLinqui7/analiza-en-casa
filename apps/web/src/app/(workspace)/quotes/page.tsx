@@ -808,6 +808,7 @@ function QuoteEditor({
                 >
                   {catalogResults.map((entry) => (
                     <button
+                      aria-selected={item.name === entry.label}
                       data-action-id={
                         activeCategory === 'SUPPLIES' ? 'QUOTE-SUPPLY-SELECT' : 'QUOTE-STUDY-SELECT'
                       }
@@ -984,6 +985,7 @@ function QuoteEditor({
                     {catalogResults.length ? (
                       catalogResults.map((entry) => (
                         <button
+                          aria-selected={item.name === entry.label}
                           data-action-id={
                             activeCategory === 'SERVICES'
                               ? 'QUOTE-SERVICE-SELECT'

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PENDING_GIT_WRITE",
   "verification_blocker": "CH16-Q001/Q002/Q003/Q005 leave discount profiles, values, calculation, source, roles and audit undefined. CH15-Q004/Q006 and CH14-F07 remain explicitly blocked; Selenium is PENDING_RUNTIME because Python is unavailable.",
-  "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
+  "functional_fingerprint": "746a641209229f684b0bd392abadfb1fa2a6901ae6e39d1fe1fa816219fe51c0",
   "certification_created_at": "2026-09-02T11:00:00-06:00",
   "certification_test_evidence": "CH16 focused Playwright passed 6/6 on isolated port 4182: the factual empty Descuentos matrix exposes the six observed family columns, local search and disabled controls without mutating audit state; ADMIN, INVENTORY and AUDITOR access is covered and DOCTOR, NURSE and FINANCE direct routes are denied. Selenium source coverage is action-specific and PENDING_RUNTIME because Python is unavailable. No profile, percentage, calculation, price effect, write or financial operation is certified.",
   "certifications": {

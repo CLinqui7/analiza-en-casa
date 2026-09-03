@@ -1,0 +1,40 @@
+{
+  "lot": "GLOBAL_RELEASE_WARNING_REPAIR",
+  "source_sha": "11be63c1eb4f35d9e2af0ddea1e43522be8d31ad",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "STATIC_GATES_VERIFIED_GIT_WRITE_PENDING",
+  "final_sha": null,
+  "remote_sha": null,
+  "release_status": "NOT_READY_RUNTIME_EVIDENCE_PENDING",
+  "global_complete": false,
+  "repairs": [
+    "Quote catalog listbox options now publish aria-selected from the current item selection.",
+    "Agenda derives the selected patient through React Hook Form useWatch rather than render-time form.watch().",
+    "The data-provider no-profile fixture is explicit and no longer creates an unused binding."
+  ],
+  "focused_evidence": {
+    "unit": "PASS: npm.cmd run test --workspace=@analiza/web -- data-provider.test.ts (2/2).",
+    "quote_accessibility": "PENDING_RUNTIME_RESULT: targeted CH05 quote selection reached its one real Playwright case but the inherited server lifecycle returned no final exit summary; it is not recorded as PASS.",
+    "agenda_selected_patient": "Source assertion updated in CH11: selecting patient-demo-002 must update the read-only document field to OTHER DEMO-002. Fresh runtime completion remains pending with the shared Playwright server lifecycle."
+  },
+  "static_gates": {
+    "lint": "PASS: npm.cmd run lint (0 errors, 0 warnings).",
+    "format": "PASS: npm.cmd run format:check.",
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "light_mode": "PASS: npm.cmd run qa:light-mode.",
+    "protected_parity": "PASS: CH01 14/14, CH02 16/16, CH03 13/13 after regenerating the current functional fingerprint.",
+    "video_parity": "PASS: 210/210 requirements traced.",
+    "traceability_mirror": "PASS: normal/self-test mirror validation."
+  },
+  "provenance": {
+    "prior_committed_repair_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
+    "current_functional_fingerprint": "746a641209229f684b0bd392abadfb1fa2a6901ae6e39d1fe1fa816219fe51c0",
+    "status": "PENDING_COMMIT: traceability/certification reflect the working-tree fingerprint and do not claim a new immutable verification SHA."
+  },
+  "remaining_scoped_gaps": [
+    "A completed fresh-server full Playwright exit result and protected CH01-CH03 final exit result remain required.",
+    "Selenium runtime remains PENDING_RUNTIME because Python is unavailable.",
+    "Existing video/client source, clinical, integration, and provider blockers are preserved without behavioral expansion."
+  ],
+  "next_batch": "GLOBAL_RELEASE_RUNTIME_EVIDENCE"
+}

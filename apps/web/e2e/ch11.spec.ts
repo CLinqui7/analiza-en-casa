@@ -105,8 +105,8 @@ test('CH11 shows factual patient context in the authorized shift form without cr
   const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
   await dialog
     .locator('[data-action-id="AGENDA-SHIFT-PATIENT-SELECT"]')
-    .selectOption('patient-demo-001');
-  await expect(dialog.getByLabel('Documento del paciente')).toHaveValue('DUI 12345678-9');
+    .selectOption('patient-demo-002');
+  await expect(dialog.getByLabel('Documento del paciente')).toHaveValue('OTHER DEMO-002');
   await expect(dialog.getByLabel('Empresa del paciente')).toHaveValue('Sin empresa registrada');
   await expect(dialog.getByRole('button', { name: 'Cerrar', exact: true })).toBeVisible();
   await expect(dialog.getByRole('button', { name: 'Guardar' })).toBeVisible();

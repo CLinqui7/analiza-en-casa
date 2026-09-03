@@ -409,6 +409,11 @@ test('CH05 service and medication catalogs search, recover, reset, process, and 
     .getByLabel('Resultados de servicios')
     .getByRole('option', { name: 'Servicio sintético disponible' })
     .click();
+  await expect(
+    dialog
+      .getByLabel('Resultados de servicios')
+      .getByRole('option', { name: 'Servicio sintético disponible' }),
+  ).toHaveAttribute('aria-selected', 'true');
   await expect(dialog.getByLabel('Concepto')).toHaveValue('Servicio sintético disponible');
   await dialog
     .locator('[data-action-id="QUOTE-BUSINESS-PARTNER"]')
@@ -449,6 +454,11 @@ test('CH05 service and medication catalogs search, recover, reset, process, and 
     .getByLabel('Resultados de medicamentos')
     .getByRole('option', { name: 'Medicamento sintético disponible' })
     .click();
+  await expect(
+    dialog
+      .getByLabel('Resultados de medicamentos')
+      .getByRole('option', { name: 'Medicamento sintético disponible' }),
+  ).toHaveAttribute('aria-selected', 'true');
   await dialog
     .locator('[data-action-id="QUOTE-MEDICATION-BUSINESS-PARTNER"]')
     .selectOption('Socio sintético B');
