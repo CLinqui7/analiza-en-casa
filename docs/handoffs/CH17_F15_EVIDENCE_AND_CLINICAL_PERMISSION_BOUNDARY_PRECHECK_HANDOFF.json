@@ -1,0 +1,46 @@
+{
+  "lot": "CH17_F15_EVIDENCE_AND_CLINICAL_PERMISSION_BOUNDARY_PRECHECK",
+  "source_sha": "f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_GIT_SYNC_BLOCKED",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirement": "CH17-F15",
+  "outcome": "NOT_TESTABLE",
+  "evidence": {
+    "event": "CH17-E0048",
+    "timestamp": "00:52:14.800",
+    "paths": [
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg",
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/transcript_raw.txt"
+    ],
+    "observation": "The transcript gives only a verbal post-save restriction and an orthographic-correction statement. Neither it nor the opened frame establishes a role matrix, signed-note state, authorization outcome, mandatory reason, original preservation, replacement version, conflict handling, or append-only audit."
+  },
+  "mapping": {
+    "route_id": "ROUTE-HEALTH-REPORTS",
+    "react_route": "/clinical/reports",
+    "react_files": ["apps/web/src/app/(workspace)/clinical/reports/page.tsx"],
+    "component_ids": [],
+    "action_ids": [],
+    "playwright_test_ids": [],
+    "selenium_test_ids": []
+  },
+  "boundaries": [
+    "CH17-Q005 requires an approved role matrix and runtime contract for creation, signature, correction, annulment, reasons, versions, conflicts, and append-only audit evidence for clinical notes.",
+    "CH17-Q005 is distinct from CH17-Q010 and CH17-Q011, which remain F13's nursing-note lifecycle and immutable correction-safeguard boundaries.",
+    "CH16-Q008 continues to control the authorized Reporte de salud source, organization scope, sensitive fields by role, access audit, retention, minimization, and redaction.",
+    "No clinical note, editor, save action, role control, clinical query, persistence, print/export, navigation, or write was added.",
+    "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations and is not a report source or authorization bridge.",
+    "CR-020 remains the separate fluid-balance clinical-approval blocker and does not authorize note editing or role behavior."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "selenium_runtime": "NOT_APPLICABLE: F15 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied). After the attempted operations, local HEAD and cached origin/codex/react-full-parity-selenium-100 were both f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c."
+  },
+  "next_batch": "CH17_REVIEW"
+}

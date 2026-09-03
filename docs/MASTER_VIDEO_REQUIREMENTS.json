@@ -8577,7 +8577,7 @@
       "chapter_id": "CH17",
       "classification": "VERBAL",
       "confidence": "MEDIUM",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q005 bloquea crear, firmar, corregir o anular notas hasta contar con una matriz aprobada de roles y ciclo clínico.",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -8589,17 +8589,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q005"
+      ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una edición de nota clínica sin matriz de roles, firma, motivo, versión, manejo de conflictos y auditoría puede eludir controles clínicos o sobrescribir evidencia.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "current_platform_evidence": "/clinical/reports no expone nota, editor, guardado, roles, matriz de permisos, consulta clínica ni mutación; /clinical/hospitalizations no es un puente de autorización.",
+        "test_path": "Precheck verbal de transcript 00:51:03-00:52:27 y CH17-E0048; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q005: matriz de roles para creación, firma, corrección y anulación; motivos, versiones, conflictos, auditoría append-only y contrato runtime. CH17-Q010/Q011 mantienen el ciclo y las salvaguardas de corrección de F13.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La regla es verbal y no identifica un rol autorizado ni un resultado de autorización. No autoriza editar, guardar, controlar roles, leer/escribir notas ni reutilizar hospitalizaciones como fuente."
       }
     },
     {

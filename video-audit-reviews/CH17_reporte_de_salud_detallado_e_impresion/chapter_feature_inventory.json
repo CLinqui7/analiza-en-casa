@@ -312,7 +312,7 @@
         }
       ],
       "transcript_evidence": "00:51:03.000–00:51:19.000 y 00:52:15.000–00:52:27.000: se contrasta el bloqueo posterior al guardado con correcciones ortográficas de otro rol.",
-      "test_path": "Autorización: verificar permisos por rol y flujo de corrección inmutable con motivo y evidencia de auditoría."
+      "test_path": "Precheck verbal: mantener NOT_TESTABLE hasta aprobar matriz de roles para crear, firmar, corregir y anular, con motivos, versiones, conflictos, auditoría append-only y contrato runtime (CH17-Q005). No exponer editor, guardado, roles, nota clínica, consulta ni mutación. CH17-Q010/Q011 siguen siendo las salvaguardas de ciclo y corrección de F13."
     },
     {
       "id": "CH17-F16",

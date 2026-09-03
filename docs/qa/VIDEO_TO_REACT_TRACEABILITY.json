@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T21:06:45-06:00",
-  "metadata_generated_from_commit": "3b34e5ba5e6365dd2377da108ef83b49952ff546",
-  "source_sha256": "b5ccba34f3bca78eff163f075596be9fe39c282e20e9ff24e55dddeccd9756d3",
+  "generated_at": "2026-09-02T21:13:34-06:00",
+  "metadata_generated_from_commit": "f7ecadf6d34b6882f67c2a3c7ec8ff82937cb13c",
+  "source_sha256": "95f7d2a24cd6ce8c48e85a50316eb644007d3d702b7b26ee0baa5e6d015c93a7",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8611,10 +8611,10 @@
       "open_question_ids": [
         "CH17-Q005"
       ],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
@@ -8631,9 +8631,9 @@
       "blocker_ids": [
         "CH17-Q005"
       ],
-      "blocker_reason": "No están definidos creación, firma, corrección, anulación, razones, versiones y autorización por rol.",
+      "blocker_reason": "CH17-Q005 no define matriz de roles ni precondiciones para crear, firmar, corregir o anular una nota; tampoco define motivos, versiones, conflictos, auditoría append-only ni contrato runtime. Es distinto de CH17-Q010/Q011, que controlan el ciclo y las salvaguardas de corrección de F13.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se implementa edición clínica."
+      "notes": "Precheck verbal: el transcript describe una restricción posterior al guardado y una posible corrección ortográfica por otro rol, pero no identifica rol, estado firmado, autorización ni resultado. React no expone nota, editor, guardado, roles, consulta clínica ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports."
     },
     {
       "requirement_id": "CH17-F16",
