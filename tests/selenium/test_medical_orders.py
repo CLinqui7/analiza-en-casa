@@ -6,6 +6,7 @@ from __future__ import annotations
 import unittest
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 import test_hospitalizations as hospitalization_tests
@@ -44,10 +45,12 @@ class MedicalOrders(unittest.TestCase):
         search = self.d.find_element(By.CSS_SELECTOR, '[data-action-id="MEDICAL-ORDER-SEARCH"]')
         search.send_keys('Aurora')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='Paciente Demo Aurora']")))
-        search.clear()
+        search.send_keys(Keys.CONTROL, 'a')
+        search.send_keys(Keys.BACKSPACE)
         search.send_keys('sin-coincidencia-ch10')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='No hay registros disponibles']")))
-        search.clear()
+        search.send_keys(Keys.CONTROL, 'a')
+        search.send_keys(Keys.BACKSPACE)
 
         self.d.find_element(By.CSS_SELECTOR, '[data-action-id="MEDICAL-ORDER-TAB-INACTIVE"]').click()
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='Paciente Demo Brisa']")))
