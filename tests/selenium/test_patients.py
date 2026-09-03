@@ -25,6 +25,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 from helpers.action_recorder import record_pass, reset
+from helpers.mock_workspace_storage import clear_workspace, get_collection, get_collections
 
 ROOT=Path(__file__).resolve().parents[2]; BASE=os.getenv('SELENIUM_BASE_URL','http://127.0.0.1:4174'); SERVER=None
 def ready():
@@ -52,7 +53,7 @@ class Patients(unittest.TestCase):
   if SERVER: SERVER.terminate()
   c.temp_dir.cleanup()
  def reset_mock_state(s):
-  s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.assertTrue(s.d.current_url.startswith(BASE)); s.d.execute_script('localStorage.removeItem("analiza.en.casa.workspace.v2"); localStorage.removeItem("analiza.en.casa.mock-session.v1");'); s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Usuario')]//input"))); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'input[type=password]'))); s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id=AUTH-LOGIN]'))); s.assertIn('/login',s.d.current_url)
+  s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.assertTrue(s.d.current_url.startswith(BASE)); clear_workspace(s.d); s.d.get(BASE+'/login'); s.w.until(lambda d:d.execute_script('return document.readyState')=='complete'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Usuario')]//input"))); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'input[type=password]'))); s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id=AUTH-LOGIN]'))); s.assertIn('/login',s.d.current_url)
  def login_as(s,email,password,expected_role):
   email_box=s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Usuario')]//input"))); email_box.clear(); email_box.send_keys(email); password_box=s.d.find_element(By.CSS_SELECTOR,'input[type=password]'); password_box.clear(); password_box.send_keys(password); s.a('AUTH-LOGIN').click(); s.w.until(EC.url_contains('/dashboard')); s.w.until(EC.presence_of_element_located((By.TAG_NAME,'aside'))); s.w.until(lambda d:'Validando sesión' not in d.find_element(By.TAG_NAME,'body').text); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[role="alert"]')); session=s.d.execute_script('return localStorage.getItem("analiza.en.casa.mock-session.v1")'); s.assertIsNotNone(session); s.assertIn(f'"role":"{expected_role}"',session)
  def prepare_authenticated_test(s,email='admin@demo.local',password='demo-admin',expected_role='ADMIN'):
@@ -62,14 +63,14 @@ class Patients(unittest.TestCase):
   for _ in range(3):
    s.prepare_authenticated_test(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.prepare_authenticated_test('inventory@demo.local','demo-inventory','INVENTORY'); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'main[role="alert"]')))
  def test_permission_integrity_roles(s):
-  s.prepare_authenticated_test('nurse@demo.local','demo-nurse','NURSE'); before=s.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")')
-  s.assertTrue(s.a('DASHBOARD-PATIENT-CREATE').is_displayed()); s.click('DASHBOARD-PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
-  s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
-  s.assertTrue(s.a('PATIENT-CREATE').is_displayed()); started=time.time(); s.click('PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
-  s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE-CANCEL"]')))
-  s.assertEqual(s.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")'),before); s.pass_('PATIENT-CREATE-CANCEL','SEL-PAT-PERMISSION-INTEGRITY',started)
+  s.prepare_authenticated_test('nurse@demo.local','demo-nurse','NURSE'); before=get_collections(s.d,['patients','auditEntries'])
+  s.assertTrue(s.a('DASHBOARD-PATIENT-CREATE').is_displayed()); s.click('DASHBOARD-PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-BACK"]')))
+  s.click('PATIENT-BACK'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-BACK"]')))
+  s.assertTrue(s.a('PATIENT-CREATE').is_displayed()); started=time.time(); s.click('PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-BACK"]')))
+  s.click('PATIENT-BACK'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-BACK"]')))
+  s.assertEqual(get_collections(s.d,['patients','auditEntries']),before); s.pass_('PATIENT-BACK','SEL-PAT-PERMISSION-INTEGRITY',started)
   s.prepare_authenticated_test('auditor@demo.local','demo-auditor','AUDITOR'); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
-  s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE"]')); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-INACTIVATE"]')); s.assertIn('Solo lectura',s.d.find_element(By.TAG_NAME,'body').text)
+  s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE"]')); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-INACTIVATE"]')); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT"]'))
   s.prepare_authenticated_test('inventory@demo.local','demo-inventory','INVENTORY'); s.d.get(BASE+'/patients'); denied=s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'main[role="alert"]')))
   s.assertIn('acceso',denied.text.lower()); s.assertFalse(s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-CREATE"]'))
  def a(s,x): return s.d.find_element(By.CSS_SELECTOR,f'[data-action-id="{x}"]')
@@ -100,13 +101,13 @@ class Patients(unittest.TestCase):
  def find_and_open_fixture(s,name='Paciente Fixture Edit Selenium'):
   s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('EDIT-FIXTURE-001')
-  s.w.until(EC.visibility_of_element_located((By.XPATH,f"//a[contains(.,'{name}')]")))
-  s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  row=s.w.until(EC.visibility_of_element_located((By.XPATH,f"//tbody/tr[contains(.,'{name}')]")))
+  row.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DETAIL-NAVIGATE"]').click(); s.w.until(EC.url_contains('/patients/'))
  def create_full_patient_fixture(s):
   """Prepare the edit scenario through the real patient UI without action evidence."""
   s.open_create()
   Select(s.a('PATIENT-DOCUMENT-TYPE')).select_by_value('OTHER')
-  s.fill('Número de documento','EDIT-FIXTURE-001')
+  s.fill('Documento','EDIT-FIXTURE-001')
   s.fill('Nombre completo','Paciente Fixture Edit Selenium')
   s.fill('Fecha de nacimiento','1985-04-20')
   s.field('Femenino').click()
@@ -115,10 +116,11 @@ class Patients(unittest.TestCase):
   s.fill('Dirección','Dirección Fixture Original')
   s.fill('Comentarios relevantes de la dirección','Referencia Fixture Original')
   Select(s.a('PATIENT-INSURANCE-TOGGLE')).select_by_value('INSURED')
-  s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Aseguradora')]//select")))
-  Select(s.field('Aseguradora')).select_by_value('Aseguradora de demostración')
+  insurer=s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id="PATIENT-INSURER-SEARCH"]')))
+  insurer.send_keys('Aseguradora demo A'); insurer.send_keys(Keys.ENTER)
+  s.w.until(EC.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id="PATIENT-INSURANCE-HOLDER-NO"]'))).click()
   s.fill('Número de póliza','POL-FIXTURE-001')
-  s.fill('Identificación del titular','TIT-FIXTURE-001')
+  s.fill('DUI / NIT del titular','TIT-FIXTURE-001')
   s.fill('Nombre del titular','Titular Fixture Original')
   s.fill('Fecha de nacimiento del titular','1970-01-02')
   s.click('PATIENT-CONTACT-ADD')
@@ -169,10 +171,10 @@ class Patients(unittest.TestCase):
   s.assertEqual(Select(s.d.find_element(By.CSS_SELECTOR,'select[name="contacts.0.documentType"]')).first_selected_option.get_attribute('value'),'DUI')
   s.assertEqual(s.contact_field(0,'documentId').get_attribute('value'),'CONTACT-DOC-SEL-001')
   s.fill_contact(0,'documentId','CONTACT-DOC-SEL-EDIT')
-  s.click('PATIENT-EDIT-SUBMIT'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))
+  s.click('PATIENT-EDIT-SUBMIT'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]'))); s.w.until(EC.url_to_be(BASE+'/patients'))
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'actualizado y persistido')]")))
   s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1'))); search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('CONTACT-DOC-SEL-001')
-  s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Contacto Documento Selenium')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  row=s.w.until(EC.visibility_of_element_located((By.XPATH,"//tbody/tr[contains(.,'Paciente Contacto Documento Selenium')]"))); row.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DETAIL-NAVIGATE"]').click(); s.w.until(EC.url_contains('/patients/'))
   s.assert_detail_contains('CONTACT-DOC-SEL-EDIT'); s.pass_('PATIENT-CONTACT-DOCUMENT-ID','SEL-PAT-CONTACT-DOCUMENT',submit_started)
  def test_insurance(s):
   s.open_create(); t=time.time(); Select(s.a('PATIENT-INSURANCE-TOGGLE')).select_by_value('INSURED'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//label[contains(.,'Aseguradora')]"))); s.pass_('PATIENT-INSURANCE-TOGGLE','SEL-PAT-INSURANCE',t)
@@ -189,7 +191,7 @@ class Patients(unittest.TestCase):
   edit_started=time.time(); s.click('PATIENT-EDIT'); s.w.until(EC.url_contains('edit='))
   s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))
   s.w.until(lambda _:s.field('Nombre completo').get_attribute('value')=='Paciente Fixture Edit Selenium')
-  s.assertEqual(s.field('Número de documento').get_attribute('value'),'EDIT-FIXTURE-001')
+  s.assertEqual(s.field('Documento').get_attribute('value'),'EDIT-FIXTURE-001')
   s.assertEqual(s.field('Teléfono celular').get_attribute('value'),'70008888')
   s.assertEqual(s.field('Número de póliza').get_attribute('value'),'POL-FIXTURE-001')
   s.assertEqual(s.contact_field(0,'fullName').get_attribute('value'),'Contacto Fixture Principal')
@@ -220,11 +222,10 @@ class Patients(unittest.TestCase):
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Paciente Selenium Editado actualizado y persistido')]")))
   s.assertTrue(s.d.current_url.rstrip('/').endswith('/patients'))
   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Paciente Selenium Editado')
-  s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Selenium Editado')]")))
-  s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+  row=s.w.until(EC.visibility_of_element_located((By.XPATH,"//tbody/tr[contains(.,'Paciente Selenium Editado')]")))
+  row.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DETAIL-NAVIGATE"]').click(); s.w.until(EC.url_contains('/patients/'))
   s.assert_detail_contains('Paciente Selenium Editado','70009999','POL-SEL-EDIT','Titular Selenium Editado','Contacto Selenium Editado','Dirección Selenium Editada','Referencia Selenium Editada')
-  stored=s.d.execute_script('return JSON.parse(localStorage.getItem("analiza.en.casa.workspace.v2"));')
-  stored_patient=next(item for item in stored['patients'] if item['documentId']=='EDIT-FIXTURE-001')
+  stored_patient=next(item for item in get_collection(s.d,'patients') if item['documentId']=='EDIT-FIXTURE-001')
   s.assertEqual(stored_patient['fullName'],'Paciente Selenium Editado')
   s.assertEqual(stored_patient['phone'],'70009999')
   s.assertEqual(stored_patient['insurance']['policyNumber'],'POL-SEL-EDIT')
@@ -246,15 +247,15 @@ class Patients(unittest.TestCase):
    box.clear(); box.send_keys(value); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{expected}')]"))); s.assertEqual(len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr')),1)
   box.clear(); box.send_keys('sin coincidencia selenium'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Sin resultados')]"))); s.pass_('PATIENT-SEARCH','SEL-PAT-SEARCH',t); t=time.time(); s.click('PATIENT-SEARCH-CLEAR'); s.assertEqual(box.get_attribute('value'),''); s.assertGreater(len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr')),0); s.pass_('PATIENT-SEARCH-CLEAR','SEL-PAT-SEARCH',t)
  def test_tabs_sort_pagination(s):
-  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); t=time.time(); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Brisa')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//*[contains(text(),'Paciente Demo Aurora') and self::a]")); s.pass_('PATIENT-TAB-INACTIVE','SEL-PAT-PAGINATION',t); t=time.time(); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Aurora')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//*[contains(text(),'Paciente Demo Brisa') and self::a]")); s.pass_('PATIENT-TAB-ACTIVE','SEL-PAT-PAGINATION',t)
-  def names(): return [x.text for x in s.d.find_elements(By.CSS_SELECTOR,'tbody tr td:first-child a')]
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); t=time.time(); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Brisa')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//tbody/tr[contains(.,'Paciente Demo Aurora')]")); s.pass_('PATIENT-TAB-INACTIVE','SEL-PAT-PAGINATION',t); t=time.time(); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Aurora')]"))); s.assertFalse(s.d.find_elements(By.XPATH,"//tbody/tr[contains(.,'Paciente Demo Brisa')]")); s.pass_('PATIENT-TAB-ACTIVE','SEL-PAT-PAGINATION',t)
+  def names(): return [x.text for x in s.d.find_elements(By.CSS_SELECTOR,'tbody tr td:nth-child(3)')]
   t=time.time(); s.click('PATIENT-SORT-NAME'); after=names(); s.assertEqual(after,sorted(after,reverse=True)); s.click('PATIENT-SORT-NAME'); s.assertEqual(names(),sorted(names())); s.pass_('PATIENT-SORT-NAME','SEL-PAT-PAGINATION',t)
   def docs(): return [x.text.split(': ',1)[-1] for x in s.d.find_elements(By.CSS_SELECTOR,'tbody tr td:nth-child(2)')]
   t=time.time(); s.click('PATIENT-SORT-DOCUMENT'); after=docs(); s.assertEqual(after,sorted(after)); s.click('PATIENT-SORT-DOCUMENT'); s.assertEqual(docs(),sorted(docs(),reverse=True)); s.pass_('PATIENT-SORT-DOCUMENT','SEL-PAT-PAGINATION',t)
   from selenium.webdriver.support.select import Select
   t=time.time(); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('5'); page1=names(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); s.assertLessEqual(len(page1),5); s.assertGreater(len(pages),1); next_t=time.time(); s.click('PATIENT-PAGE-NEXT'); s.w.until(lambda _:names()!=page1); s.pass_('PATIENT-PAGE-NEXT','SEL-PAT-PAGINATION',next_t); paginate_t=time.time(); pages=s.d.find_elements(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"]'); pages[-1].click(); s.assertEqual(pages[-1].get_attribute('aria-current'),'page'); s.pass_('PATIENT-PAGINATE','SEL-PAT-PAGINATION',paginate_t); previous_t=time.time(); s.click('PATIENT-PAGE-PREVIOUS'); s.assertEqual(names(),page1); s.pass_('PATIENT-PAGE-PREVIOUS','SEL-PAT-PAGINATION',previous_t); Select(s.a('PATIENT-PAGE-SIZE')).select_by_value('10'); s.assertEqual(s.d.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-PAGINATE"][aria-current="page"]').text,'1'); s.pass_('PATIENT-PAGE-SIZE','SEL-PAT-PAGINATION',t)
  def test_status_transitions(s):
-  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); name=s.d.find_element(By.CSS_SELECTOR,'tbody tr td:first-child a').text; t=time.time(); s.click('PATIENT-INACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.click('PATIENT-TAB-INACTIVE'); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-INACTIVATE','SEL-PAT-STATUS',t); t=time.time(); s.click('PATIENT-REACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-REACTIVATE','SEL-PAT-STATUS',t)
+  s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); name=s.d.find_element(By.CSS_SELECTOR,'tbody tr td:nth-child(3)').text; t=time.time(); s.click('PATIENT-INACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.click('PATIENT-TAB-INACTIVE'); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-INACTIVATE','SEL-PAT-STATUS',t); t=time.time(); s.click('PATIENT-REACTIVATE'); s.assertNotIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.click('PATIENT-TAB-ACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,f"//*[contains(text(),'{name}')]"))); s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr'))); s.assertIn(name,s.d.find_element(By.TAG_NAME,'body').text); s.pass_('PATIENT-REACTIVATE','SEL-PAT-STATUS',t)
  def test_import(s):
   s.prepare_authenticated_test()
   valid=s.write_fixture('patients-valid.csv','document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-SEL-001,Importado,Selenium,OTHER,70001234,importado.selenium@example.test,Empresa Selenium,ACTIVE\n')
@@ -296,22 +297,21 @@ class Patients(unittest.TestCase):
   s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('IMPORT-SEL-001')
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Importado Selenium')]")))
-  stored=s.d.execute_script('return JSON.parse(localStorage.getItem("analiza.en.casa.workspace.v2"));')
-  patient=next(item for item in stored['patients'] if item['documentId']=='IMPORT-SEL-001')
+  patient=next(item for item in get_collection(s.d,'patients') if item['documentId']=='IMPORT-SEL-001')
   s.assertEqual(patient['fullName'],'Importado Selenium'); s.assertEqual(patient['status'],'ACTIVE')
   s.pass_('PATIENT-IMPORT-CONFIRM','SEL-PAT-IMPORT',confirm_started)
  def test_export(s):
   s.prepare_authenticated_test(); s.clear_downloads(); s.d.get(BASE+'/patients'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'tbody tr')))
   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Paciente Demo Aurora')
   s.w.until(lambda _:len(s.d.find_elements(By.CSS_SELECTOR,'tbody tr'))==1)
-  exported=time.time(); s.click('PATIENT-EXPORT'); active=s.wait_download('pacientes-activos.csv')
+  exported=time.time(); s.click('PATIENT-EXPORT-CSV'); active=s.wait_download('pacientes-activos.csv')
   active_csv=active.read_text(encoding='utf8')
-  for header in ('Tipo de documento','Documento','Nombre completo','Teléfono','Correo','Empresa','Estado'): s.assertIn(header,active_csv)
+  for header in ('Documento','Nombre completo','Edad','Empresa','Triage','Notif. Botmaker','Estado'): s.assertIn(header,active_csv)
   s.assertIn('Paciente Demo Aurora',active_csv); s.assertIn('12345678-9',active_csv); s.assertNotIn('Paciente Demo Celeste',active_csv)
   s.click('PATIENT-SEARCH-CLEAR'); s.click('PATIENT-TAB-INACTIVE'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Paciente Demo Brisa')]")))
-  s.click('PATIENT-EXPORT'); inactive=s.wait_download('pacientes-inactivos.csv')
+  s.click('PATIENT-EXPORT-CSV'); inactive=s.wait_download('pacientes-inactivos.csv')
   inactive_csv=inactive.read_text(encoding='utf8'); s.assertIn('Paciente Demo Brisa',inactive_csv); s.assertNotIn('Paciente Demo Aurora',inactive_csv)
-  s.pass_('PATIENT-EXPORT','SEL-PAT-EXPORT',exported)
+  s.pass_('PATIENT-EXPORT-CSV','SEL-PAT-EXPORT',exported)
  def test_mobile(s):
   s.d.set_window_size(390,844); s.prepare_authenticated_test(); s.d.get(BASE+'/patients')
   try:
@@ -321,8 +321,8 @@ class Patients(unittest.TestCase):
    search.clear(); s.click('PATIENT-CREATE'); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-SAVE"]')))
    form=s.d.find_element(By.ID,'patient-form'); s.d.execute_script('arguments[0].scrollTop=arguments[0].scrollHeight;',form)
    submit=s.a('PATIENT-SAVE'); s.d.execute_script('arguments[0].scrollIntoView({block:"center"});',submit); s.assertTrue(submit.is_displayed())
-   s.click('PATIENT-CREATE-CANCEL'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-SAVE"]')))
-   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Aurora'); s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Demo Aurora')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
+   s.click('PATIENT-BACK'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-SAVE"]')))
+   search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('Aurora'); row=s.w.until(EC.visibility_of_element_located((By.XPATH,"//tbody/tr[contains(.,'Paciente Demo Aurora')]"))); row.find_element(By.CSS_SELECTOR,'[data-action-id="PATIENT-DETAIL-NAVIGATE"]').click(); s.w.until(EC.url_contains('/patients/'))
    s.assertEqual(s.d.find_element(By.TAG_NAME,'h1').text,'Paciente Demo Aurora')
    scroll_width,viewport=s.d.execute_script('return [document.documentElement.scrollWidth, window.innerWidth];')
    s.assertLessEqual(scroll_width,viewport+8,f'critical horizontal overflow: {scroll_width}px > {viewport}px')
