@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T19:26:12-06:00",
-  "metadata_generated_from_commit": "9c61a7062084a4e7df587d0352cdfeafe89ad56f",
+  "generated_at": "2026-09-02T19:30:17-06:00",
+  "metadata_generated_from_commit": "998875f4694d070598ea63f52619f66bfed426a1",
   "source_sha256": "9f6b5be517dbb363a7080d2ef291c12dfb49a0659adfc456e2db62ba3b4fb112",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8355,8 +8355,8 @@
         "CH17-Q002"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto de organización, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción; CH17-Q002 no define formularios, permisos de Agregar, catálogo, versionado ni auditoría de antecedentes/alergias.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck factual: CH17-E0024 muestra Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería y Bitácoras, además de paneles y controles Agregar. React no expone navegación clínica, paneles, datos o mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+      "notes": "Precheck factual verified at 998875f4694d070598ea63f52619f66bfed426a1: CH17-E0024 muestra Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería y Bitácoras, además de paneles y controles Agregar. React no expone navegación clínica, paneles, datos o mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F09",

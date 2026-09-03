@@ -1,41 +1,44 @@
 {
   "lot": "CH17_REVIEW",
-  "source_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
-  "base_sha": "999e2d71216006e0e178aa1693a85d954b320bfe",
+  "source_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "base_sha": "998875f4694d070598ea63f52619f66bfed426a1",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "REVIEW_COMPLETE_PENDING_METADATA_COMMIT",
   "final_sha": null,
   "remote_sha": null,
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
-    "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06"],
-    "next_precheck": "CH17-F08",
-    "not_independently_implementable": ["CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+    "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08"],
+    "reviewed_not_testable": ["CH17-F07"],
+    "next_precheck": "CH17-F09",
+    "not_independently_implementable": ["CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
   },
   "evidence_review": {
-    "f04": "Reconciled against opened CH17-E0012/E0017/E0019: E0012 is only a double calendar with Seleccionar/Cancelar and example dates; E0017 is Procesando; E0019 exposes sensitive patient and hospitalization fields. CH16-Q008 and CH17-Q008 leave source/roles and the temporal contract unresolved, so F04 remains MISSING without a range control.",
-    "f05": "Reconciled at 7214fe01af9545cac5dc6e269b594ecf946a35ba: CH17-E0019 visibly contains principal patient identity, identification, birth date, age, sex, hospitalization period and status. F05 is MISSING under CH16-Q008; /clinical/hospitalizations is not an authorization bridge into /clinical/reports.",
-    "f06": "Reconciled at 999e2d71216006e0e178aa1693a85d954b320bfe against opened CH17-E0021: Seguro, Póliza, Certificado, Fecha efectiva, Titular, DUI/NIT and per-row Imprimir are visible. F06 is MISSING under CH16-Q008 and CH17-Q001; no insurance identifier, selector or print behavior exists.",
-    "f08_next": "Opened CH17-E0024 detail crop: Evaluación Clínica visibly contains Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería and Bitácoras, while the same frame exposes clinical panels. The next batch is evidence-only: it must establish source, role, context, audit, retention, minimization and redaction boundaries before any local navigation or clinical content can be considered.",
+    "f04": "CH17-E0012/E0017/E0019 establish only calendar anatomy, processing and sensitive output. F04 remains MISSING under CH16-Q008 and CH17-Q008; no range control exists.",
+    "f05": "CH17-E0019 exposes identity and hospitalization fields. F05 remains MISSING under CH16-Q008; /clinical/hospitalizations is not an authorization bridge into /clinical/reports.",
+    "f06": "At 999e2d71216006e0e178aa1693a85d954b320bfe, CH17-E0021 establishes insurance identifiers and per-row Imprimir. F06 remains MISSING under CH16-Q008 and CH17-Q001; no identifier, selector or print behavior exists.",
+    "f08": "At 998875f4694d070598ea63f52619f66bfed426a1, CH17-E0024 establishes seven clinical navigation labels plus antecedent/evaluation panels and Agregar controls. F08 remains MISSING under CH16-Q008 and CH17-Q002; no clinical navigation, panel, data or mutation exists.",
+    "f09_next": "Opened CH17-E0026/E0027: Antecedentes visibly lists Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares and Tarjeta de vacunas, each with Agregar. The next batch is evidence-only: source, clinical context, form definitions, authorization, audit, retention, minimization, redaction, versioning and correction must be established before any content or control is considered.",
     "f07_f17": "Printing, clinical detail, allergies, vital signs, nursing notes, correction, AI audit and WhatsApp remain scoped by CH16-Q008 and CH17-Q001–Q007. No sensitive output, external sharing, AI transfer or clinical mutation is implemented."
   },
   "boundaries": [
-    "CH16-Q008 controls any Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction.",
-    "CH17-Q001 controls row-level print selection, authorized output, content, template, authorization, audit and retention.",
-    "CH17-Q007 controls any record-scoped hospitalization menu destination.",
-    "CH09-F03 remains independently mapped to /clinical/hospitalizations as PARTIAL with no CH16-Q008 or CH17-Q001 blocker.",
+    "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, filters, access audit, retention, minimization and redaction.",
+    "CH17-Q001 controls row-level print selection and output content/template/authorization/audit/retention.",
+    "CH17-Q002 controls clinical antecedent/allergy forms, catalog, permissions, versioning and audit.",
+    "CH17-Q007 controls record-scoped hospitalization menu destinations.",
+    "CH09-F03 remains independently mapped to /clinical/hospitalizations as PARTIAL with no CH16-Q008/CH17-Q002 blocker.",
     "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED. The focused six-case suite ran at fec4aef2d984afc95e4f54c2703d20651116c8c9, but it does not establish separate source, role, permission or performance contracts.",
-    "CR-020 remains unrelated and clinically blocked."
+    "CR-020 remains separately clinically blocked."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 999e2d71216006e0e178aa1693a85d954b320bfe).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 998875f4694d070598ea63f52619f66bfed426a1).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
     "f01_f03_regression": "PRESERVED: focused CH17 Playwright completed 6/6 at fec4aef2d984afc95e4f54c2703d20651116c8c9; no application code changed in this review.",
-    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q001; F04–F06 remain /clinical/reports MISSING under their scoped questions.",
-    "git_sync": "PENDING_ENVIRONMENT: prior direct git add/commit/fetch attempts failed on .git ACL and direct push lacked HTTPS credentials."
+    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002; F04–F06 and F08 remain /clinical/reports MISSING, while F07 remains NOT_TESTABLE.",
+    "git_sync": "PENDING_ENVIRONMENT: direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials."
   },
-  "next_batch": "CH17_F08_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
+  "next_batch": "CH17_F09_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
 }

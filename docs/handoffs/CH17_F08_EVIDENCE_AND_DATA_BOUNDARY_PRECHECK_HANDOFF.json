@@ -2,10 +2,10 @@
   "lot": "CH17_F08_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
   "source_sha": "9c61a7062084a4e7df587d0352cdfeafe89ad56f",
   "base_sha": "9c61a7062084a4e7df587d0352cdfeafe89ad56f",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "998875f4694d070598ea63f52619f66bfed426a1",
+  "remote_sha": "998875f4694d070598ea63f52619f66bfed426a1",
   "requirements": {
     "missing": ["CH17-F08"],
     "explicitly_blocked": ["CH16-Q008", "CH17-Q002"],
@@ -32,7 +32,7 @@
     "f04_f07_regression": "PRESERVED: F04–F06 remain MISSING under their scoped questions; F07 remains NOT_TESTABLE; no application code changed.",
     "cross_requirement_isolation": "PASS: F04–F06 remain /clinical/reports MISSING, F07 remains NOT_TESTABLE, and CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002.",
     "selenium_runtime": "NOT_APPLICABLE: F08 has no implemented action; Python Selenium runtime remains unavailable.",
-    "git_sync": "PENDING_ENVIRONMENT: F08 documentation is not yet in an immutable checkpoint; direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials."
+    "git_sync": "PASS: environment checkpoint 998875f4694d070598ea63f52619f66bfed426a1 contains this precheck and cached origin matches it; direct git add/commit/fetch remain blocked by .git ACL and direct push lacks HTTPS credentials."
   },
   "next_batch": "CH17_REVIEW"
 }

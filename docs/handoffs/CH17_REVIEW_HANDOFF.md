@@ -1,7 +1,7 @@
-# CH17 review: F04–F06 consolidation
+# CH17 review: F04–F08 consolidation
 
-`CH17-F04`, `CH17-F05`, and `CH17-F06` remain `MISSING`. F04 has no temporal/source contract; F05 has no authorized tenant-scoped report source; and F06 adds insurance identifiers and row-level print selection without an authorized source, role/field policy, output contract, audit, retention, minimization, or redaction policy.
+F04–F06 and F08 remain `MISSING`; F07 remains `NOT_TESTABLE`. F08 is verified at `998875f4694d070598ea63f52619f66bfed426a1`: its visible clinical navigation, panels, and add controls have no authorized report source, clinical context, form, role, audit, retention, minimization, redaction, versioning, or mutation contract.
 
-F04 and F05 retain their verified historical evidence revisions. F06 is verified at `999e2d71216006e0e178aa1693a85d954b320bfe`. `CH09-F03` remains independently `PARTIAL` at `/clinical/hospitalizations`; it is not a health-report source.
+`CH09-F03` remains independently `PARTIAL` at `/clinical/hospitalizations`; it is not a health-report source. No report, hospitalization, insurance, clinical, print, export, navigation, or mutation behavior was added in this review.
 
-Opened `CH17-E0024` for the next evidence-only precheck. Its seven Evaluación Clínica labels are visible, but the same frame exposes clinical panels. No clinical navigation, content, patient context, range, print/export, or write behavior is authorized.
+Opened `CH17-E0026` and `CH17-E0027` for the next evidence-only precheck. The frames visibly list six antecedent categories with add controls; they do not authorize clinical data, forms, or writes.
