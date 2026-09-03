@@ -1,6 +1,6 @@
 {
   "lot": "CH17_REVIEW",
-  "source_sha": "61dcedf0eb071427948a510167c0db81d938b730",
+  "source_sha": "91186f12240027f2a6715f2221867bbc1395ee7b",
   "implementation_sha": "PENDING_COMMIT",
   "verification_status": "REVIEW_COMPLETE_GIT_SYNC_BLOCKED",
   "final_sha": null,
@@ -8,36 +8,32 @@
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
     "reviewed_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13"],
-    "reviewed_not_testable": ["CH17-F07", "CH17-F14", "CH17-F15", "CH17-F17"],
-    "next_precheck": "CH17_F16_EVIDENCE_AND_NURSING_DATA_BOUNDARY_PRECHECK",
-    "not_independently_implementable": ["CH17-F16", "CH17-F17"]
+    "reviewed_not_testable": ["CH17-F07", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"],
+    "next_precheck": "CH17_F17_WHATSAPP_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
   },
   "evidence_review": {
-    "f01_f03": "F01-F03 remain PARTIAL only for their safe local empty anatomy. Their focused six-case Playwright result at fec4aef is preserved, but functional, permission, and performance certification remains UNVERIFIED because the source and role contracts are absent.",
-    "f04_f12": "F04-F06 and F08-F12 remain MISSING under the existing source, temporal, print, clinical-data, and clinical-lifecycle blockers. F07 remains NOT_TESTABLE. No report data, patient/hospitalization bridge, clinical content, print/export, or write is exposed.",
-    "f13": "F13 remains MISSING under CH16-Q008, CH17-Q010, and CH17-Q011 at 7b4faa1ee26d68633dff5374507ded72cf98d7d3. No note editor, save action, clinical read/write, print/export, or hospitalizations bridge exists.",
-    "f14_f15": "F14 remains NOT_TESTABLE under CH17-Q003 at 3b34e5ba5e6365dd2377da108ef83b49952ff546. F15 remains NOT_TESTABLE under CH17-Q005 at 6b8592e3e6db5e3363305d01b3d34fd087951bf7. Neither adds AI processing, clinical data, a note editor, role control, or clinical mutation.",
-    "f16_next": "F16 is the next ordered evidence-only precheck. The cited evidence is verbal nursing-operations narration; it does not establish an authorized tenant-scoped source, role matrix, offline policy, synchronization/idempotency, conflict/correction behavior, audit, retention, minimization, or redaction. The inherited master NEEDS_CLIENT_CONFIRMATION and trace NOT_TESTABLE classification must be reconciled before any implementation.",
-    "cross_requirement_isolation": "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations and is not a Reporte de salud, nursing-operation, correction, AI, or role-authorization source. CR-020 remains the separate fluid-balance clinical-approval blocker."
+    "f01_f03": "F01-F03 remain PARTIAL only for safe local empty anatomy. The completed focused six-case suite at fec4aef is preserved; functional, permission, and performance statuses remain UNVERIFIED because source and role contracts are absent.",
+    "f04_f13": "F04-F06 and F08-F13 remain MISSING under their recorded source, temporal, print, clinical-data, and lifecycle boundaries. F07 remains NOT_TESTABLE. No report data, patient/hospitalization bridge, clinical content, print/export, or write is exposed.",
+    "f14_f16": "F14 remains NOT_TESTABLE under CH17-Q003 at 3b34e5ba5e6365dd2377da108ef83b49952ff546; F15 remains NOT_TESTABLE under CH17-Q005 at 6b8592e3e6db5e3363305d01b3d34fd087951bf7; F16 remains NOT_TESTABLE under CH17-Q006. None adds AI processing, a note editor, role control, nursing assignment/capture, data access, synchronization, or clinical mutation.",
+    "f17_next": "F17 is the last unclosed CH17 evidence-only precheck. The verbal transcript describes sharing a nursing note externally, but no UI, authorized recipient, consent, secure-link policy, expiry/revocation, output minimization, delivery result, audit, retention, or redaction is shown. The next batch must not add a WhatsApp control, preview, clinical content, recipient lookup, external request, or notification.",
+    "cross_requirement_isolation": "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations and is not a Reporte de salud, nursing-operation, correction, AI, role-authorization, or external-sharing source. CR-020 remains the separate fluid-balance clinical-approval blocker."
   },
   "boundaries": [
     "CH16-Q008 controls the Reporte de salud source, organization scope, sensitive fields, roles, access audit, retention, minimization, and redaction.",
-    "CH17-Q003 controls any AI provider, authorized basis, payload, minimization/redaction, human review, output handling, persistence/training, role control, audit, and retention.",
-    "CH17-Q005 controls the approved clinical-note role matrix and runtime contract for creation, signature, correction, annulment, reasons, versions, conflicts, and append-only audit.",
-    "CH17-Q006 controls nursing-operation source, roles, offline behavior, synchronization, idempotency, conflicts, correction, and audit; it is the scoped F16 precheck boundary.",
+    "CH17-Q003 controls AI processing; CH17-Q005 controls clinical-note role authorization; CH17-Q006 controls nursing-operation source, assignment, offline behavior, synchronization, idempotency, conflicts, correction, and audit.",
     "CH17-Q010 and CH17-Q011 remain F13 nursing-note lifecycle and immutable correction safeguards.",
-    "CH17-Q004 remains F17's WhatsApp consent, delivery, revocation, retention, and audit boundary; no clinical content is sent in previews.",
-    "CR-020 does not authorize Reporte de salud, nursing-note, vital-sign, AI, or nursing-operation behavior."
+    "CH17-Q004 is F17's separate WhatsApp provider, recipient, consent, secure delivery, expiry, revocation, retention, and audit boundary. No clinical content is permitted in any preview.",
+    "CR-020 does not authorize Reporte de salud, nursing-note, vital-sign, AI, nursing-operation, or external-sharing behavior."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 61dcedf0eb071427948a510167c0db81d938b730; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 91186f12240027f2a6715f2221867bbc1395ee7b; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
     "protected_parity": "PASS: node scripts/verify-video-react-parity.mjs (210/210; includes protected CH01-CH03).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
     "anti_skip": "PASS: focused CH17 Playwright and Selenium source files contain no test/pytest skip marker.",
-    "git_sync": "BLOCKED_ENVIRONMENT: git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied). After the attempted operations, local HEAD and cached origin/codex/react-full-parity-selenium-100 were both 61dcedf0eb071427948a510167c0db81d938b730."
+    "git_sync": "BLOCKED_ENVIRONMENT: git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied). After the attempted operations, local HEAD and cached origin/codex/react-full-parity-selenium-100 were both 91186f12240027f2a6715f2221867bbc1395ee7b."
   },
-  "next_batch": "CH17_F16_EVIDENCE_AND_NURSING_DATA_BOUNDARY_PRECHECK"
+  "next_batch": "CH17_F17_WHATSAPP_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
 }
