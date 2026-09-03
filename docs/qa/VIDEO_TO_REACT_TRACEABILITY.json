@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T18:40:45-06:00",
-  "metadata_generated_from_commit": "f60a50225b36c33204cac5ed6bc49ea59ace9581",
+  "generated_at": "2026-09-02T18:49:35-06:00",
+  "metadata_generated_from_commit": "98840f19538f15efa4ee6f85e8f864ba753478fc",
   "source_sha256": "09990067ae7a3da3f032a489f8e7f3af8c6d1d1d429595b3959bb84c39e68b32",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
@@ -8201,8 +8201,8 @@
         "CH17-Q008"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles ni roles del Reporte de salud; CH17-Q008 no define rango permitido, inclusividad, zona horaria, carga/error/reintento, auditoría, retención ni redacción. Las fechas visibles son ejemplos y no se codifican.",
-      "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-      "notes": "Precheck factual: CH17-E0012 muestra calendario doble, Seleccionar y Cancelar; CH17-E0017 muestra Procesando; CH17-E0019 muestra que el resultado revela campos sensibles. React no muestra calendario, selector, consulta, rango, impresión, exportación ni navegación de reporte."
+      "last_verified_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
+      "notes": "Precheck factual reconciled at 98840f19538f15efa4ee6f85e8f864ba753478fc: CH17-E0012 muestra calendario doble, Seleccionar y Cancelar; CH17-E0017 muestra Procesando; CH17-E0019 muestra que el resultado revela campos sensibles. React no muestra calendario, selector, consulta, rango, impresión, exportación ni navegación de reporte."
     },
     {
       "requirement_id": "CH17-F05",

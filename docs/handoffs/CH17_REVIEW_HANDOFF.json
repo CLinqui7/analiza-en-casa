@@ -1,19 +1,21 @@
 {
   "lot": "CH17_REVIEW",
-  "source_sha": "094096feb3affc403c76cee78d3d14d76418271d",
-  "base_sha": "094096feb3affc403c76cee78d3d14d76418271d",
-  "implementation_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-  "verification_status": "RUNTIME_EVIDENCE_RECORDED_AT_COMMITTED_SHA",
-  "final_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-  "remote_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
+  "source_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
+  "base_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "REVIEW_COMPLETE_PENDING_METADATA_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
   "reviewed_requirements": {
     "safe_local_surfaces": ["CH17-F01", "CH17-F02", "CH17-F03"],
-    "next_precheck": "CH17-F04",
-    "not_independently_implementable": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
+    "reviewed_missing": ["CH17-F04"],
+    "next_precheck": "CH17-F05",
+    "not_independently_implementable": ["CH17-F05", "CH17-F06", "CH17-F07", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12", "CH17-F13", "CH17-F14", "CH17-F15", "CH17-F16", "CH17-F17"]
   },
   "evidence_review": {
-    "f04": "CH17-E0012 shows only a double calendar with Seleccionar/Cancelar and example dates; E0017 shows Procesando; E0019 shows the result exposes sensitive patient and hospitalization fields. CH16-Q008 and CH17-Q008 leave source/roles and the temporal contract unresolved, so no range control is implemented.",
-    "f05_f06": "CH17-E0019 and E0021 visibly contain identity, hospitalization and insurance/policy fields. They do not authorize a report data source or role matrix.",
+    "f04": "Reconciled against opened CH17-E0012/E0017/E0019: E0012 is only a double calendar with Seleccionar/Cancelar and example dates; E0017 is Procesando; E0019 exposes sensitive patient and hospitalization fields. CH16-Q008 and CH17-Q008 leave source/roles and the temporal contract unresolved, so F04 remains MISSING without a range control.",
+    "f05_next": "CH17-E0019 visibly contains principal patient and hospitalization information. The next evidence-only precheck must establish its source, organization scope, role, audit, retention, minimization and redaction boundary before any display is considered.",
+    "f06": "CH17-E0021 visibly contains insurance/policy fields. It does not authorize a report data source or role matrix.",
     "f08_f13": "CH17-E0024/E0026/E0029/E0038/E0043/E0048 show clinical navigation, antecedents/allergy capture, vital signs and nursing notes. They do not authorize local reuse of clinical data, clinical mutations, print, or note correction.",
     "f07_f14_f17": "Printing, AI audit and WhatsApp remain blocked by CH17-Q001/Q003/Q004. No sensitive output, external sharing or AI transfer is implemented."
   },
@@ -22,7 +24,17 @@
     "CH17-Q007 controls any record-scoped menu destination.",
     "CR-020 remains unrelated and clinically blocked.",
     "The F01-F03 local empty surfaces remain PARTIAL with functional, permission and performance status UNVERIFIED. The focused six-case suite ran at fec4aef2d984afc95e4f54c2703d20651116c8c9, but it does not establish the separate source, role, permission or performance contracts.",
-    "Direct Git synchronization is environment-blocked: current HEAD and cached origin resolve to fec4aef2d984afc95e4f54c2703d20651116c8c9, while direct git add/fetch/push fail because of .git ACL and missing HTTPS credentials."
+    "F04 evidence precheck is checkpointed at 98840f19538f15efa4ee6f85e8f864ba753478fc. This review's metadata commit remains pending; direct git add/fetch/push are unavailable in this worker because of .git ACL and missing HTTPS credentials."
   ],
-  "next_batch": "CH17_F04_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
+  "gates": {
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 98840f19538f15efa4ee6f85e8f864ba753478fc).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f01_f03_regression": "PRESERVED: focused CH17 Playwright completed 6/6 at fec4aef2d984afc95e4f54c2703d20651116c8c9; no application code changed in this review.",
+    "git_sync": "PENDING_ENVIRONMENT: git add/commit/fetch fail on .git/index.lock or .git/FETCH_HEAD ACL; direct push lacks HTTPS credentials. Current HEAD and cached origin ref both resolve to 98840f19538f15efa4ee6f85e8f864ba753478fc."
+  },
+  "next_batch": "CH17_F05_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK"
 }

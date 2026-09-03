@@ -2,10 +2,10 @@
   "lot": "CH17_F04_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
   "source_sha": "f60a50225b36c33204cac5ed6bc49ea59ace9581",
   "base_sha": "f60a50225b36c33204cac5ed6bc49ea59ace9581",
-  "implementation_sha": "PENDING_COMMIT",
-  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
-  "final_sha": null,
-  "remote_sha": null,
+  "implementation_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
+  "remote_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
   "requirements": {
     "missing": ["CH17-F04"],
     "explicitly_blocked": ["CH16-Q008", "CH17-Q008"],
@@ -23,13 +23,13 @@
     "CR-020 remains unrelated and clinically blocked."
   ],
   "gates": {
-    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; generated from f60a50225b36c33204cac5ed6bc49ea59ace9581).",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; regenerated and checked at 98840f19538f15efa4ee6f85e8f864ba753478fc).",
     "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
     "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
     "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
     "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
     "selenium_runtime": "NOT_APPLICABLE: F04 has no implemented action; Python remains unavailable for Selenium runtime.",
-    "git_sync": "PENDING_ENVIRONMENT: direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials. Current HEAD and cached origin ref both resolve to f60a50225b36c33204cac5ed6bc49ea59ace9581."
+    "git_sync": "PASS (checkpoint provenance): HEAD and cached origin ref resolve to 98840f19538f15efa4ee6f85e8f864ba753478fc. Direct git add/fetch/push remain unavailable in this worker because of .git ACL and missing HTTPS credentials."
   },
   "next_batch": "CH17_REVIEW"
 }
