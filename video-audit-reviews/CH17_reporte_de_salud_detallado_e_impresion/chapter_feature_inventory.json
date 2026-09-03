@@ -330,7 +330,7 @@
         }
       ],
       "transcript_evidence": "00:52:34.000–00:53:44.000: se describe el contexto asignado y las capturas clínicas realizadas desde la aplicación.",
-      "test_path": "E2E móvil: validar asignación, contexto mínimo, captura con autor/hora, modo sin conexión definido y sincronización idempotente."
+      "test_path": "Precheck verbal: CH17-E0046 fue abierto y muestra una tabla de notas dentro de Reporte de salud, no una aplicación operativa. Mantener NOT_TESTABLE hasta aprobar fuente tenant-scoped, asignación, roles, campos mínimos, offline/sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización y redacción (CH17-Q006). No reutilizar datos genéricos de enfermería/signos ni agregar asignación, captura, contenido clínico, offline, sincronización o mutación."
     },
     {
       "id": "CH17-F17",

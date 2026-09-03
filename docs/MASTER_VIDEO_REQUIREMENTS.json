@@ -3109,7 +3109,7 @@
       "chapter_id": "CH06",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "rule_or_limit": "",
+      "rule_or_limit": "CH17-Q006 bloquea una aplicación operativa de enfermería hasta aprobar la fuente tenant-scoped, asignación, roles, campos mínimos, trabajo sin conexión, sincronización, idempotencia, conflictos/corrección y auditoría.",
       "evidence": [
         {
           "chapter_id": "CH06",
@@ -3118,7 +3118,7 @@
           "path": "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0007_00h11m34s600ms_motion_progress.jpg",
           "detail_path": "",
           "transcript": "",
-          "observation": ""
+          "observation": "El frame abierto muestra una tabla de notas de enfermería dentro de Reporte de salud; no muestra una aplicación operativa independiente, una asignación, una captura ni un resultado de sincronización."
         }
       ],
       "open_question_ids": [
@@ -8625,17 +8625,19 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH17-Q006"
+      ],
       "platform_assessment": {
-        "status": "NEEDS_CLIENT_CONFIRMATION",
+        "status": "NOT_TESTABLE",
         "priority": "P2",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
+        "patient_safety_impact": "Una aplicación de enfermería sin fuente acotada por organización, asignación autorizada, campos mínimos por rol, sincronización idempotente, corrección y auditoría puede revelar contenido clínico o producir registros clínicos inconsistentes.",
         "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Confirmar la regla o el resultado esperado antes de implementar.",
+        "current_platform_evidence": "React no contiene una aplicación operativa de enfermería vinculada a una asignación clínica. /clinical/reports no expone datos ni capturas; /clinical/nursing y los datos genéricos de recursos/signos no son una fuente ni un contrato de autorización para este flujo.",
+        "test_path": "Precheck verbal de transcript 00:52:34-00:53:44 y CH17-E0046; qa:video-parity, traceability mirror, qa:light-mode y audit:verify.",
+        "recommended_action": "Mantener NOT_TESTABLE hasta aprobar CH17-Q006: fuente y alcance por organización, asignación, matriz de roles, campos permitidos, offline/sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización y redacción.",
         "blocked_by_client_information": true,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "notes": "La narración describe una aplicación no mostrada; E0046 es una tabla de notas dentro del Reporte de salud, no evidencia del flujo operativo. No se reutilizan datos genéricos de recursos, signos, horas, documentos, pacientes u hospitalizaciones como autorización, ni se agrega asignación, captura, sincronización, escritura o contenido clínico. CR-020 sólo cubre Balance Hídrico aprobado y no especifica este flujo."
       }
     },
     {

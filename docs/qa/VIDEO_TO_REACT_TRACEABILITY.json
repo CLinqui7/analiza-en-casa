@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T21:21:27-06:00",
-  "metadata_generated_from_commit": "61dcedf0eb071427948a510167c0db81d938b730",
-  "source_sha256": "95f7d2a24cd6ce8c48e85a50316eb644007d3d702b7b26ee0baa5e6d015c93a7",
+  "generated_at": "2026-09-02T21:26:31-06:00",
+  "metadata_generated_from_commit": "3736e1d973e3f749c7ed249e8b55973629108c6f",
+  "source_sha256": "3a1cff0e08cb1e673d3d449a03d01d3428ea6d8f8c437d9a3352c6a25390e027",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8648,10 +8648,10 @@
       "open_question_ids": [
         "CH17-Q006"
       ],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
@@ -8668,9 +8668,9 @@
       "blocker_ids": [
         "CH17-Q006"
       ],
-      "blocker_reason": "No existe contrato para fuente, roles, offline, sincronización, idempotencia, conflictos, corrección ni auditoría de la aplicación de enfermería.",
+      "blocker_reason": "CH17-Q006 no define fuente tenant-scoped, asignación, matriz de roles, campos mínimos por rol, offline, sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización ni redacción para la aplicación operativa de enfermería. CR-020 sólo define una futura aprobación de Balance Hídrico y no autoriza esta aplicación.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se implementa captura o sincronización clínica."
+      "notes": "Precheck verbal: CH17-E0046 muestra una tabla de notas dentro de Reporte de salud, no una aplicación operativa ni una asignación. React no expone aplicación, datos clínicos, capturas, offline, sincronización ni escritura. /clinical/nursing y los datos genéricos de recursos/signos no son una fuente o puente de autorización."
     },
     {
       "requirement_id": "CH17-F17",

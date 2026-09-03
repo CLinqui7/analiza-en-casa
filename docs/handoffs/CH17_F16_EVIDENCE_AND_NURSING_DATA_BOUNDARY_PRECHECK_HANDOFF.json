@@ -1,0 +1,46 @@
+{
+  "lot": "CH17_F16_EVIDENCE_AND_NURSING_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "3736e1d973e3f749c7ed249e8b55973629108c6f",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_GIT_SYNC_BLOCKED",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirement": "CH17-F16",
+  "outcome": "NOT_TESTABLE",
+  "evidence": {
+    "event": "CH17-E0046",
+    "timestamp": "00:52:09.800",
+    "paths": [
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg",
+      "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/transcript_raw.txt"
+    ],
+    "observation": "The opened frame is a nursing-notes table within Reporte de salud, not a separate operational nursing application. The transcript narrates a possible assigned context and clinical captures, but does not establish an authorized source, role outcome, data contract, offline policy, synchronization outcome, or audit behavior."
+  },
+  "mapping": {
+    "route_id": "ROUTE-HEALTH-REPORTS",
+    "react_route": "/clinical/reports",
+    "react_files": ["apps/web/src/app/(workspace)/clinical/reports/page.tsx"],
+    "component_ids": [],
+    "action_ids": [],
+    "playwright_test_ids": [],
+    "selenium_test_ids": []
+  },
+  "boundaries": [
+    "CH17-Q006 requires an approved tenant-scoped source, assignment relation, role matrix, fields per role, offline policy, synchronization, idempotency, conflict/correction behavior, audit, retention, minimization, and redaction before any operational nursing application.",
+    "The /clinical/reports mapping identifies only the inspected parent surface; it is not an operational nursing application or an authorized data source.",
+    "Existing generic workspace collections for resources, vital readings, hours, documents, patients, and hospitalizations are not an authorization bridge and were not queried, copied, or exposed.",
+    "CR-020 remains the separate future Balance Hídrico approval and does not define nursing operations, vital signs, notes, assignment, or synchronization.",
+    "CH09-F03 remains independently PARTIAL at /clinical/hospitalizations; F13-F15 and F04-F12/F07 preserve their recorded boundaries."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 3736e1d973e3f749c7ed249e8b55973629108c6f; EXACT 52, PARTIAL 87, MISSING 20, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "anti_skip": "PASS: focused CH17 Playwright and Selenium source files contain no test/pytest skip marker.",
+    "selenium_runtime": "NOT_APPLICABLE: F16 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add and commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied). After the attempted operations, local HEAD and cached origin/codex/react-full-parity-selenium-100 were both 3736e1d973e3f749c7ed249e8b55973629108c6f."
+  },
+  "next_batch": "CH17_REVIEW"
+}
