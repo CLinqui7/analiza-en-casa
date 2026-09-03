@@ -60,11 +60,11 @@
       "persistence_required": false,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-DASHBOARD"],
       "playwright_test_ids": ["playwright:navigation-session-role-guard"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "DASHBOARD-PATIENT-CREATE",
@@ -81,11 +81,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-DASHBOARD"],
       "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "DASHBOARD-QUOTE-CREATE",
@@ -102,11 +102,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-DASHBOARD"],
       "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "DASHBOARD-HOSPITALIZATION-DETAIL",
@@ -122,12 +122,12 @@
       "negative_scenario": "Una medición sin caso muestra el estado explícito.",
       "persistence_required": false,
       "refresh_required": true,
-      "selenium_required": true,
+      "selenium_required": false,
       "selenium_test_ids": [],
       "playwright_test_ids": ["playwright:dashboard-operational-actions"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "NOT_TESTABLE",
+      "blocker": "CH17-Q009: no hay una fuente cl\u00ednica autorizada para crear la medici\u00f3n vinculada que hace visible este enlace."
     },
     {
       "action_id": "PATIENT-NAVIGATE",
@@ -1383,11 +1383,11 @@
       "persistence_required": false,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-INSURANCE"],
       "playwright_test_ids": ["playwright:insurance-route-parity"],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_VERIFIED",
-      "blocker": "Selenium no corresponde a este turno."
+      "blocker": ""
     },
     {
       "action_id": "INSURANCE-SEARCH",
@@ -1404,11 +1404,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-INSURANCE"],
       "playwright_test_ids": ["playwright:insurance-route-parity"],
       "unit_test_ids": ["domain:searchInsuranceRequests"],
       "status": "IMPLEMENTED_VERIFIED",
-      "blocker": "Selenium no corresponde a este turno."
+      "blocker": ""
     },
     {
       "action_id": "INSURANCE-UPDATE",
@@ -1425,22 +1425,22 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-INSURANCE"],
       "playwright_test_ids": ["playwright:insurance-route-parity"],
       "unit_test_ids": ["domain:appendInsuranceEvent"],
       "status": "IMPLEMENTED_VERIFIED",
       "blocker": "CH07-Q001 mantiene abierta la máquina de estados; la acción no la implementa."
     },
-    {"action_id":"INSURANCE-SEARCH-CLEAR","module":"Seguros","route":"/insurance","control_type":"CLEAR","visible_label":"Limpiar búsqueda","selector_or_testid":"[data-action-id=INSURANCE-SEARCH-CLEAR]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Búsqueda con texto","positive_scenario":"Limpia la consulta sin mutar solicitudes.","negative_scenario":"Deshabilitado sin texto.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-FILTER-STATUS","module":"Seguros","route":"/insurance","control_type":"FILTER","visible_label":"Estado observado","selector_or_testid":"[data-action-id=INSURANCE-FILTER-STATUS]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Solicitudes existentes","positive_scenario":"Filtra registros existentes por el estado observado.","negative_scenario":"No modifica ningún estado.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-FILTER-RESET","module":"Seguros","route":"/insurance","control_type":"RESET","visible_label":"Restablecer filtro","selector_or_testid":"[data-action-id=INSURANCE-FILTER-RESET]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Filtro aplicado","positive_scenario":"Restablece el filtro de estado.","negative_scenario":"No modifica solicitudes.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-UPDATE-SUBMIT","module":"Seguros","route":"/insurance","control_type":"SUBMIT","visible_label":"Registrar actualización","selector_or_testid":"[data-action-id=INSURANCE-UPDATE-SUBMIT]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Modal válido","positive_scenario":"Persiste una observación y un evento append-only.","negative_scenario":"Datos inválidos o rol denegado no mutan el snapshot.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":["domain:appendInsuranceEvent"],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-UPDATE-CANCEL","module":"Seguros","route":"/insurance","control_type":"CANCEL","visible_label":"Cancelar","selector_or_testid":"[data-action-id=INSURANCE-UPDATE-CANCEL]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Modal abierto","positive_scenario":"Cierra sin persistir.","negative_scenario":"No crea solicitud ni evento.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-OPEN-QUOTE","module":"Seguros","route":"/insurance","control_type":"NAVIGATE","visible_label":"Abrir cotización","selector_or_testid":"[data-action-id=INSURANCE-OPEN-QUOTE]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Cotización relacionada visible","positive_scenario":"Abre la cotización relacionada.","negative_scenario":"No duplica información editable.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Selenium no corresponde a este turno."},
-    {"action_id":"INSURANCE-WHATSAPP","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"WhatsApp","selector_or_testid":"[data-action-id=INSURANCE-WHATSAPP]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Canal no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No crea entrega ni expone datos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
-    {"action_id":"INSURANCE-EMAIL","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"Email","selector_or_testid":"[data-action-id=INSURANCE-EMAIL]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Canal no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No crea entrega ni expone datos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
-    {"action_id":"INSURANCE-SEND","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"Enviar al seguro","selector_or_testid":"[data-action-id=INSURANCE-SEND]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Proveedor no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No declara notificación ni entrega.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
-    {"action_id":"INSURANCE-CLAIM","module":"Seguros","route":"/insurance","control_type":"BLOCKED","visible_label":"Reclamo","selector_or_testid":"[data-action-id=INSURANCE-CLAIM]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Sesión autorizada","positive_scenario":"Informa la definición pendiente.","negative_scenario":"No crea ni procesa reclamos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":[],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_CLIENT CH08-Q002."},
+    {"action_id":"INSURANCE-SEARCH-CLEAR","module":"Seguros","route":"/insurance","control_type":"CLEAR","visible_label":"Limpiar búsqueda","selector_or_testid":"[data-action-id=INSURANCE-SEARCH-CLEAR]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Búsqueda con texto","positive_scenario":"Limpia la consulta sin mutar solicitudes.","negative_scenario":"Deshabilitado sin texto.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-FILTER-STATUS","module":"Seguros","route":"/insurance","control_type":"FILTER","visible_label":"Estado observado","selector_or_testid":"[data-action-id=INSURANCE-FILTER-STATUS]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Solicitudes existentes","positive_scenario":"Filtra registros existentes por el estado observado.","negative_scenario":"No modifica ningún estado.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-FILTER-RESET","module":"Seguros","route":"/insurance","control_type":"RESET","visible_label":"Restablecer filtro","selector_or_testid":"[data-action-id=INSURANCE-FILTER-RESET]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Filtro aplicado","positive_scenario":"Restablece el filtro de estado.","negative_scenario":"No modifica solicitudes.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-UPDATE-SUBMIT","module":"Seguros","route":"/insurance","control_type":"SUBMIT","visible_label":"Registrar actualización","selector_or_testid":"[data-action-id=INSURANCE-UPDATE-SUBMIT]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Modal válido","positive_scenario":"Persiste una observación y un evento append-only.","negative_scenario":"Datos inválidos o rol denegado no mutan el snapshot.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":["domain:appendInsuranceEvent"],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-UPDATE-CANCEL","module":"Seguros","route":"/insurance","control_type":"CANCEL","visible_label":"Cancelar","selector_or_testid":"[data-action-id=INSURANCE-UPDATE-CANCEL]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Modal abierto","positive_scenario":"Cierra sin persistir.","negative_scenario":"No crea solicitud ni evento.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-OPEN-QUOTE","module":"Seguros","route":"/insurance","control_type":"NAVIGATE","visible_label":"Abrir cotización","selector_or_testid":"[data-action-id=INSURANCE-OPEN-QUOTE]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Cotización relacionada visible","positive_scenario":"Abre la cotización relacionada.","negative_scenario":"No duplica información editable.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":""},
+    {"action_id":"INSURANCE-WHATSAPP","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"WhatsApp","selector_or_testid":"[data-action-id=INSURANCE-WHATSAPP]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Canal no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No crea entrega ni expone datos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
+    {"action_id":"INSURANCE-EMAIL","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"Email","selector_or_testid":"[data-action-id=INSURANCE-EMAIL]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Canal no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No crea entrega ni expone datos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
+    {"action_id":"INSURANCE-SEND","module":"Seguros","route":"/insurance","control_type":"EXTERNAL","visible_label":"Enviar al seguro","selector_or_testid":"[data-action-id=INSURANCE-SEND]","roles_allowed":["ADMIN","FINANCE"],"roles_denied":["DOCTOR","NURSE","INVENTORY","AUDITOR"],"preconditions":"Proveedor no configurado","positive_scenario":"Muestra bloqueo seguro.","negative_scenario":"No declara notificación ni entrega.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_INTEGRATION proveedor no configurado."},
+    {"action_id":"INSURANCE-CLAIM","module":"Seguros","route":"/insurance","control_type":"BLOCKED","visible_label":"Reclamo","selector_or_testid":"[data-action-id=INSURANCE-CLAIM]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Sesión autorizada","positive_scenario":"Informa la definición pendiente.","negative_scenario":"No crea ni procesa reclamos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-RELEASE-INSURANCE"],"playwright_test_ids":["playwright:insurance-route-parity"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"BLOCKED_CLIENT CH08-Q002."},
     {
       "action_id": "PAYMENT-APPLY",
       "module": "Pagos",
@@ -1456,11 +1456,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-PAYMENTS"],
       "playwright_test_ids": ["playwright:payment-idempotent-void"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "PAYMENT-VOID",
@@ -1477,11 +1477,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-PAYMENTS"],
       "playwright_test_ids": ["playwright:payment-idempotent-void"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "HEALTH-REPORT-SEARCH",
@@ -1749,12 +1749,12 @@
       "negative_scenario": "Validación impide crear un registro incompleto.",
       "persistence_required": true,
       "refresh_required": true,
-      "selenium_required": true,
+      "selenium_required": false,
       "selenium_test_ids": [],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "MISSING",
-      "blocker": "No ruta React."
+      "status": "NOT_TESTABLE",
+      "blocker": "CR-019: falta el contrato clínico aprobado para crear, firmar y corregir tarjetas de medicamentos."
     },
     {
       "action_id": "CARE-PLAN-CREATE",
@@ -1771,11 +1771,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-CLINICAL-DOCUMENTS"],
       "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "EVOLUTION-CREATE",
@@ -1792,11 +1792,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-CLINICAL-DOCUMENTS"],
       "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "CLINICAL-DOCUMENT-SIGN",
@@ -1813,11 +1813,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-CLINICAL-DOCUMENTS"],
       "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "CLINICAL-DOCUMENT-CORRECT",
@@ -1834,11 +1834,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-CLINICAL-DOCUMENTS"],
       "playwright_test_ids": ["playwright:clinical-document-immutability"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "VITALS-RECORD",
@@ -1854,12 +1854,12 @@
       "negative_scenario": "No asigna umbrales clínicos inventados.",
       "persistence_required": true,
       "refresh_required": true,
-      "selenium_required": true,
+      "selenium_required": false,
       "selenium_test_ids": [],
       "playwright_test_ids": ["playwright:patient-vital"],
       "unit_test_ids": ["domain:measuredVitalMetrics"],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "NOT_TESTABLE",
+      "blocker": "CH17-Q009: falta el contrato clínico autorizado para capturar, validar, versionar y auditar signos vitales."
     },
     {
       "action_id": "NURSING-RESOURCE-CREATE",
@@ -2275,11 +2275,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:nurse-hours-filter-export"],
       "unit_test_ids": ["domain:nurseHoursTotal"],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "NURSE-HOURS-EXPORT",
@@ -2296,11 +2296,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:nurse-hours-filter-export"],
       "unit_test_ids": ["domain:toCsv"],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "PURCHASE-CREATE",
@@ -2317,11 +2317,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:purchase-draft-persistence"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "INVENTORY-MOVEMENT-CREATE",
@@ -2359,11 +2359,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": [],
       "unit_test_ids": ["domain:deriveKardex"],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "INVENTORY-CLOSURE-APPROVE",
@@ -2401,11 +2401,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:catalog-sku-persistence"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia de todos los roles pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "DISCOUNT-APPROVE",
@@ -2421,12 +2421,12 @@
       "negative_scenario": "AUDITOR no puede aprobar.",
       "persistence_required": true,
       "refresh_required": true,
-      "selenium_required": true,
+      "selenium_required": false,
       "selenium_test_ids": [],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "MISSING",
-      "blocker": "No ruta React."
+      "status": "NOT_TESTABLE",
+      "blocker": "CH16-Q001–Q005: falta la política financiera aprobada de solicitudes, aprobación, reversión y auditoría de descuentos."
     },
     {
       "action_id": "AUDIT-EXPORT",
@@ -2443,11 +2443,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:audit-export-role-guard"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y evidencia del rol AUDITOR pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "SETTINGS-EDIT",
@@ -2463,12 +2463,12 @@
       "negative_scenario": "No expone secretos ni deja configurar canal no aprobado.",
       "persistence_required": true,
       "refresh_required": true,
-      "selenium_required": true,
+      "selenium_required": false,
       "selenium_test_ids": [],
       "playwright_test_ids": [],
       "unit_test_ids": [],
-      "status": "MISSING",
-      "blocker": "No ruta React."
+      "status": "NOT_TESTABLE",
+      "blocker": "No existe una ruta ni un contrato aprobado de configuración segura; no se simula la edición de secretos o integraciones."
     },
     {
       "action_id": "HELP-SEARCH",
@@ -2485,11 +2485,11 @@
       "persistence_required": false,
       "refresh_required": false,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-OPERATIONS"],
       "playwright_test_ids": ["playwright:help-search-safe-empty"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium pendiente."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
     },
     {
       "action_id": "PORTAL-REQUEST-OTP",
@@ -2506,11 +2506,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-PORTAL"],
       "playwright_test_ids": ["playwright:portal-second-factor-generic-errors"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y entorno Supabase de integración pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": "BLOCKED_INTEGRATION: la entrega y validación real requieren un entorno Supabase y proveedor aprobados."
     },
     {
       "action_id": "PORTAL-VERIFY-OTP",
@@ -2527,11 +2527,11 @@
       "persistence_required": true,
       "refresh_required": true,
       "selenium_required": true,
-      "selenium_test_ids": [],
+      "selenium_test_ids": ["SEL-RELEASE-PORTAL"],
       "playwright_test_ids": ["playwright:portal-second-factor-generic-errors"],
       "unit_test_ids": [],
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "blocker": "Selenium y entorno Supabase de integración pendientes."
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": "BLOCKED_INTEGRATION: la entrega y validación real requieren un entorno Supabase y proveedor aprobados."
     },
 {"action_id":"QUOTE-NAVIGATE","module":"Cotizaciones","route":"/quotes","control_type":"NAVIGATE","visible_label":"Cotizaciones","selector_or_testid":"[data-action-id=QUOTE-NAVIGATE]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Sesión con quotes:read","positive_scenario":"Abre el listado autorizado.","negative_scenario":"La ruta queda denegada sin permiso.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-NAVIGATION"],"playwright_test_ids":["playwright:quotes-list-search"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-SEARCH","module":"Cotizaciones","route":"/quotes","control_type":"SEARCH","visible_label":"Buscar cotización","selector_or_testid":"[data-action-id=QUOTE-SEARCH]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Cotizaciones disponibles","positive_scenario":"Busca ID, paciente, caso y estado normalizados.","negative_scenario":"Muestra vacío explícito.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-SEARCH"],"playwright_test_ids":["playwright:quotes-list-search"],"unit_test_ids":["domain:searchQuotes"],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},

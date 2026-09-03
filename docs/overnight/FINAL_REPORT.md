@@ -119,3 +119,10 @@ La migración no autoriza el uso con datos reales. Quedan por trasladar con pari
 ### Addendum · 2026-08-29 · Seguros y preautorizaciones React
 
 `ROUTE-INSURANCE` ahora registra solicitudes y eventos administrativos append-only en el proveedor de workspace, persiste en modo mock y conserva búsquedas normalizadas, filtro, contexto de cotización, roles, timeline y enlace a la cotización. Registrar un estado no modifica cotizaciones, pagos, agenda ni hospitalizaciones. Email, WhatsApp, envío al seguro y Reclamo permanecen en estado seguro bloqueado. Los bloqueos pendientes son CH07-Q001 a CH07-Q006, CH08-Q002 y el proveedor externo de entrega.
+
+### Addendum · 2026-09-03 · Cierre de release React
+
+- La vista previa protegida de Vercel está `READY`: [web-4pzikj9ca-clinqui7s-projects.vercel.app](https://web-4pzikj9ca-clinqui7s-projects.vercel.app). El smoke autenticado por CLI obtuvo HTTP 200 para `/login` y `/portal/demo-qt-2026-0148`; no se promovió ni fusionó producción.
+- Se añadió certificación Selenium real para acciones transversales. La regresión global pasó 181/181 y `npm run selenium:coverage` pasó 334/334 (100%). También permanecen verdes la paridad de video 210/210, cambios de cliente 32/32 y la auditoría de video 17/17.
+- Cinco entradas permanecen `NOT_TESTABLE`, no implementadas: detalle de hospitalización desde una medición sin fuente clínica autorizada, creación de tarjeta de medicamentos (CR-019), registro de signos vitales (CH17-Q009), aprobación de descuentos (CH16-Q001–Q005) y edición de configuración sin contrato seguro. Se mantienen en `docs/OPEN_QUESTIONS.md` y no se sustituyeron por datos, reglas ni acciones simuladas.
+- La certificación final sigue `globalComplete=false`: faltan Supabase/RLS y proveedores reales, contratos clínicos/financieros aprobados y un scheduler autorizado para el cron de 15 minutos que el plan Hobby de Vercel no admite.

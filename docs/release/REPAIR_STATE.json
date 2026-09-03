@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03T03:32:00.0000000-06:00",
+  "updatedAt": "2026-09-03T04:46:00.0000000-06:00",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "80c3977",
+  "head": "f3e18a242edffad8cabaa75d82bc9b604fb76cd2",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "npx vercel --scope clinqui7s-projects --local-config vercel.preview.json --yes",
-  "lastGatePass": "Local release regression is green: format, lint, typecheck, 37 React tests, 98 baseline tests, client changes 32/32, video parity 210/210, traceability mirror, audit 17/17, build, Selenium 176/176 (shared local server) and Playwright 178/178. The Vercel preview build also compiled and generated all 36 routes.",
-  "failingGate": "Vercel preview deployment dpl_5hG1exWqR1FdJ3rnfNNuhQYtosFK fails only while Vercel patches preview comments in immutable static upload mode; its log requires next@16.3.0-canary.32 or newer.",
+  "lastGateExecuted": "Selenium global regression, selenium:coverage, qa:video-parity, qa:client-changes, protected Vercel preview smoke",
+  "lastGatePass": "Release regression is green: format, lint, typecheck, 37 React tests, 98 baseline tests, client changes 32/32, video parity 210/210, traceability mirror, audit 17/17, build, Playwright 178/178, Selenium 181/181 with the shared local server, and declared Selenium coverage 334/334 (100%). The protected Vercel preview returned HTTP 200 for /login and /portal/demo-qt-2026-0148.",
+  "failingGate": "No executable local gate fails. Production certification remains pending external client, Supabase/RLS, provider, scheduler and approval evidence.",
   "failingTests": [],
   "repairsApplied": [
     "Prettier LF enforcement and complete global Playwright repair (178/178 PASS).",
@@ -17,15 +17,17 @@
     "Patient Selenium module reconciled with v3 segmented mock storage, current dialog/action identifiers, searchable insurer, table columns, and row-level detail navigation (16/16 PASS; 36/36 execution coverage PASS).",
     "Global Selenium smoke now authenticates ADMIN and validates current protected flows, safe Help fallback, resource registration prerequisites, and scheduled-hours reporting (6/6 PASS)."
     ,"Added authentic Selenium coverage for AUTH-LOGIN and AUTH-LOGOUT: test_ch01 records each action at runtime, the inventory declares SEL-CH01-LOGIN/SEL-CH01-LOGOUT, and CH01 passes 5/5. Global declared coverage rose from 301/339 (88.79%) to 303/339 (89.38%).",
-    "Repaired quote Selenium fixtures for segmented v3 storage, mandatory referral selection, React-controlled native dates, stable selected-referral assertions, shared inventory-only state, and the explicit update-line control. Quotes passed 21/21; global Selenium passed 176/176 and Playwright passed 178/178."
+    "Repaired quote Selenium fixtures for segmented v3 storage, mandatory referral selection, React-controlled native dates, stable selected-referral assertions, shared inventory-only state, and the explicit update-line control. Quotes passed 21/21; global Selenium passed 176/176 and Playwright passed 178/178.",
+    "Added assertion-backed Selenium coverage for dashboard navigation and creation links, insurance search/filter/update/safe external actions, idempotent payment reversal, immutable clinical document correction, operational filters/exports, purchase/catalog persistence, audit export and generic portal second-factor handling.",
+    "Reconciled the action inventory: 334 executable actions declare Selenium evidence and pass coverage. DASHBOARD-HOSPITALIZATION-DETAIL, MEDICATION-CARD-CREATE, VITALS-RECORD, DISCOUNT-APPROVE and SETTINGS-EDIT are NOT_TESTABLE because their required authorized clinical, financial or configuration contracts remain absent; none was marked implemented."
   ],
-  "nextExecutableAction": "Obtain approval for a supported Vercel/Next workaround (Vercel recommends next@16.3.0-canary.32 or newer), then redeploy preview with vercel.preview.json and run production smoke for six demo roles and patient portal. Preserve the explicit client/integration blockers; do not mark globalComplete true before external certification.",
+  "nextExecutableAction": "Obtain approved real Supabase, scheduler and provider configuration; then execute the documented RLS/RPC, portal delivery and production UAT gates. Preserve the explicit client and clinical approval blockers; do not mark globalComplete true before external certification.",
   "vercel": {
-    "status": "ERROR_AFTER_SUCCESSFUL_BUILD",
-    "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; node=20",
-    "deploymentId": "dpl_5hG1exWqR1FdJ3rnfNNuhQYtosFK",
-    "url": "https://web-6bsxxfuak-clinqui7s-projects.vercel.app"
+    "status": "READY_PREVIEW_ONLY",
+    "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; preview uses vercel.preview.json without cron; production vercel.json remains unchanged",
+    "deploymentId": "dpl_CpC3Q2znwYA2cyFkN6Qyn6PpmaBa",
+    "url": "https://web-4pzikj9ca-clinqui7s-projects.vercel.app"
   },
-  "externalBlocker": "The authorized project clinqui7s-projects/web built successfully with the preview-only config, but Vercel rejected publication because Next 16.3.3 cannot patch preview comments with immutable static upload. Upgrading to Vercel's requested canary needs explicit approval.",
+  "externalBlocker": "Preview is READY. Production is still blocked by real Supabase/RLS and provider validation, client approval of clinical and financial contracts, and an approved 15-minute scheduler (the current Vercel Hobby plan rejects the production cron).",
   "globalComplete": false
 }
