@@ -5,7 +5,11 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:cr007-professional-specialties
 // test-id: playwright:b2-doctors-admin-only
 
-async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin') {
+async function login(
+  page: import('@playwright/test').Page,
+  email = 'admin@demo.local',
+  password = 'demo-admin',
+) {
   await page.goto('/login?next=%2Fdoctors');
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
@@ -13,7 +17,9 @@ async function login(page: import('@playwright/test').Page, email = 'admin@demo.
   await expect(page).toHaveURL(/\/doctors$/);
 }
 
-test('B2 keeps doctor and resource creation independent and persists the doctor edit', async ({ page }) => {
+test('B2 keeps doctor and resource creation independent and persists the doctor edit', async ({
+  page,
+}) => {
   await login(page);
   await expect(page.getByRole('link', { name: 'Nuevo recurso' })).toBeVisible();
   await page.getByRole('button', { name: 'Nuevo médico' }).click();
@@ -31,7 +37,9 @@ test('B2 keeps doctor and resource creation independent and persists the doctor 
     mimeType: 'text/plain',
     buffer: Buffer.from('archivo sintético B2'),
   });
-  await expect(dialog.getByRole('list', { name: 'Archivos seleccionados' })).toContainText('credencial-b2.txt');
+  await expect(dialog.getByRole('list', { name: 'Archivos seleccionados' })).toContainText(
+    'credencial-b2.txt',
+  );
   await dialog.getByRole('button', { name: 'Guardar médico' }).click();
   await expect(page.getByRole('status')).toContainText('Médica B2 QA registrado');
   await page.reload();
@@ -40,18 +48,21 @@ test('B2 keeps doctor and resource creation independent and persists the doctor 
 
   await page.getByRole('button', { name: 'Editar médico' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar médico' });
-  await expect(editDialog.getByRole('combobox', { name: 'Especialidad o profesión' })).toHaveAttribute(
-    'placeholder',
-    'Nutricionista',
-  );
+  await expect(
+    editDialog.getByRole('combobox', { name: 'Especialidad o profesión' }),
+  ).toHaveAttribute('placeholder', 'Nutricionista');
   await expect(editDialog.getByLabel('Dirección')).toHaveValue('Dirección sintética B2');
   await editDialog.getByLabel('Dirección').fill('Dirección sintética B2 editada');
   await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await page.reload();
   await page.getByRole('button', { name: 'Editar médico' }).click();
   const reopenedDialog = page.getByRole('dialog', { name: 'Editar médico' });
-  await expect(reopenedDialog.getByLabel('Dirección')).toHaveValue('Dirección sintética B2 editada');
-  await expect(reopenedDialog.getByRole('list', { name: 'Archivos seleccionados' })).toContainText('credencial-b2.txt');
+  await expect(reopenedDialog.getByLabel('Dirección')).toHaveValue(
+    'Dirección sintética B2 editada',
+  );
+  await expect(reopenedDialog.getByRole('list', { name: 'Archivos seleccionados' })).toContainText(
+    'credencial-b2.txt',
+  );
   await reopenedDialog.getByRole('button', { name: 'Cancelar' }).click();
 
   await page.getByRole('link', { name: 'Nuevo recurso' }).click();
@@ -81,7 +92,9 @@ for (const role of [
     await page.getByRole('button', { name: 'Iniciar sesión' }).click();
 
     await expect(page).toHaveURL(/\/doctors$/);
-    await expect(page.locator('main[role="alert"]')).toHaveText(`Acceso restringido para el rol ${role.name}.`);
+    await expect(page.locator('main[role="alert"]')).toHaveText(
+      `Acceso restringido para el rol ${role.name}.`,
+    );
     await expect(page.getByRole('button', { name: 'Nuevo médico' })).toHaveCount(0);
     await expect(page.getByText('Médicos y recursos', { exact: true })).toHaveCount(0);
   });

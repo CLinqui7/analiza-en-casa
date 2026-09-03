@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-const port = process.env.PLAYWRIGHT_PORT ?? '4174';
+const port = process.env.PLAYWRIGHT_PORT ?? '4205';
 const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
@@ -20,7 +20,9 @@ export default defineConfig({
   webServer: {
     command: `npm run dev --workspace=@analiza/web -- --port ${port}`,
     url: baseURL,
-    reuseExistingServer: true,
+    // A reused development process can serve an obsolete route tree. Release
+    // verification must either start a fresh server or fail visibly.
+    reuseExistingServer: process.env.PLAYWRIGHT_REUSE_EXISTING_SERVER === 'true',
     timeout: 60_000,
   },
 });

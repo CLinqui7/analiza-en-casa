@@ -58,7 +58,7 @@
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "8c10993c4c6728fe3fb527d52ec1b6ae24db55eceded9411b82c2993f30c06a5",
+      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -86,8 +86,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-3"
       ],
-      "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-PATIENTS"
       ],
@@ -110,13 +110,13 @@
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "La UI y el contrato existen en modo demo, pero la certificación de persistencia por organización requiere un proyecto Supabase de prueba con RLS y dos sesiones autorizadas.",
+      "client_question": "¿Qué proyecto de prueba, organizaciones y cuentas de dos roles autorizados se usarán para certificar RLS y visibilidad multiusuario del Carnet de residente?",
       "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
@@ -168,9 +168,9 @@
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "La exportación local respeta la vista filtrada/ordenada, pero no existe una definición aprobada del conjunto completo autorizado, columnas, destinatarios, formato ni auditoría de exportación de pacientes.",
+      "client_question": "¿Qué pacientes, columnas, orden, formato, destinatarios y evidencia de auditoría están autorizados para una exportación completa?",
       "acceptance_criteria": "Definir alcance y exportar pacientes autorizados ordenados",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -227,9 +227,9 @@
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "El formulario, contrato y migración existen en demo; falta certificar el documento administrativo y su auditoría bajo RLS con dos sesiones de una organización de prueba.",
+      "client_question": "¿Qué proyecto de prueba, organizaciones y cuentas de dos roles autorizados se usarán para certificar RLS y auditoría del documento de responsable?",
       "acceptance_criteria": "Guardar tipo y número de documento del responsable",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -260,20 +260,28 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-6"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
       "react_files": [
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
         "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
       ],
       "db_objects": [],
-      "action_ids": [],
+      "action_ids": [
+        "DOCTOR-CREATE",
+        "DOCTOR-RESOURCE-CREATE"
+      ],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:cr005-independent-doctor-resource"
+      ],
+      "selenium_test_ids": [
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
       "dependency_ids": [
         "B2"
       ],
@@ -281,9 +289,9 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Separar altas, rutas y modelos de médico y recurso",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "0e06656c6ffd690bb42055c77465ee13bc291ec114f96dccc868928d513482f2",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
@@ -317,30 +325,43 @@
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/lib/doctor-catalog.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "DOCTOR-CREATE",
+        "DOCTOR-ATTACHMENTS",
+        "DOCTOR-SAVE",
+        "DOCTOR-EDIT",
+        "DOCTOR-EDIT-SAVE"
+      ],
+      "unit_test_ids": [
+        "vitest:cr006-doctor-attachment-metadata"
+      ],
+      "playwright_test_ids": [
+        "playwright:cr006-doctor-save-reload-edit"
+      ],
+      "selenium_test_ids": [
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
       "dependency_ids": [
         "B2"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "Los adjuntos de médicos quedan limitados a metadatos demo: faltan Storage privado, RLS, descarga autorizada, retención y auditoría de archivos clínico-administrativos.",
+      "client_question": "¿Qué proyecto de prueba, bucket privado, roles, política de retención y evidencia de auditoría aprobarán los adjuntos de médicos?",
       "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "33c59f3a46dfb7270b231aeb96e808331528f3e6ad0f7085b1d4f2e683ed3b1b",
+      "certification_status": "PARTIAL",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "notes": "La alta y edición de médico se verifican en demo; los adjuntos no almacenan bytes ni tienen descarga privada autorizada."
     },
     {
       "change_id": "CR-007",
@@ -362,20 +383,29 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-8"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "IMPLEMENTED_DEMO_ONLY",
+      "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "packages/contracts/src/index.ts"
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/lib/doctor-catalog.ts"
       ],
       "db_objects": [],
-      "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
+      "action_ids": [
+        "DOCTOR-SPECIALTY-SELECT"
+      ],
+      "unit_test_ids": [
+        "vitest:cr007-professional-specialties"
+      ],
+      "playwright_test_ids": [
+        "playwright:cr007-professional-specialties"
+      ],
+      "selenium_test_ids": [
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
       "dependency_ids": [
         "B2"
       ],
@@ -383,14 +413,14 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Catálogo buscable y persistente de especialidades/profesiones",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "a70d590b7b4c0683868c1d1220529c4f192dc1f6422b9e8b4aefaba4e0a335bc",
+      "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "No existe el catálogo ni selector."
+      "notes": "El selector de especialidades solicitado funciona y persiste en modo demo por navegador; la certificación de servicio compartido queda fuera de este alcance demo."
     },
     {
       "change_id": "CR-008",
@@ -437,9 +467,9 @@
       "dependency_ids": [
         "B3"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "Los adjuntos privados requieren un bucket de Storage privado, políticas RLS, metadatos auditables y enlaces de descarga autorizados; el navegador no conserva bytes.",
+      "client_question": "¿Qué proyecto de prueba, bucket privado, roles y política de retención/autorización aprobarán los adjuntos de hospitalización?",
       "acceptance_criteria": "Adjuntar archivo privado a hospitalización con auditoría",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -490,16 +520,19 @@
       "unit_test_ids": [
         "vitest:ch03-hospitalization-filters"
       ],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:cr009-admission-periods"
+      ],
       "selenium_test_ids": [
-        "SEL-HOSP-CREATE"
+        "SEL-HOSP-CREATE",
+        "SEL-B3-HOSPITALIZATION-PERIODS"
       ],
       "dependency_ids": [
         "B3"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "El formulario soporta ingreso, egreso y períodos múltiples sintéticos, pero el cliente no ha definido si cada período representa reingreso, traslado, cierre, sus permisos ni sus efectos clínicos o financieros.",
+      "client_question": "¿Qué representa cada período adicional, qué roles pueden crearlo/corregirlo y qué efectos de reingreso, traslado, cierre, auditoría y facturación se autorizan?",
       "acceptance_criteria": "Ingreso/egreso; períodos múltiples sólo tras definición",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -604,12 +637,12 @@
       "dependency_ids": [
         "B4"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "La asignación de médico a un honorario requiere elegibilidad profesional, fuente de precio, impuestos/descuentos, cálculo, liquidación, reversión y auditoría aprobados.",
+      "client_question": "¿Qué médicos son elegibles, cuál es la fuente de honorario y cuáles son los roles, cálculos, impuestos, liquidación, reversión y auditoría autorizados?",
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "df0362d9138b356a67fdbbaf7f617835486ad7007495c16922bc574ad3afa141",
+      "functional_fingerprint": "1c95ed0d3323ec1323540caaf188e3f405a90c05421f52526342efaa55193ecd",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -663,12 +696,12 @@
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "La UI demo persiste por navegador; la solicitud exige visibilidad entre usuarios autorizados, por organización, con RLS, refetch/Realtime y auditoría comprobables.",
+      "client_question": "¿Qué proyecto de prueba, organizaciones y dos cuentas autorizadas se usarán para certificar creación, aislamiento y visibilidad multiusuario de pacientes?",
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "780ed1a406a48bda9c7ab65d259aedd6aacdbdb7df896781b6de82632af0c260",
+      "functional_fingerprint": "7cc1d518f5652c0e7fd7c12fd7e07182176094557f4acb4120eca68640fe6bd4",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -716,9 +749,9 @@
       "dependency_ids": [
         "B4"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "La asignación de médico a un honorario requiere elegibilidad profesional, fuente de precio, impuestos/descuentos, cálculo, liquidación, reversión y auditoría aprobados.",
+      "client_question": "¿Qué médicos son elegibles, cuál es la fuente de honorario y cuáles son los roles, cálculos, impuestos, liquidación, reversión y auditoría autorizados?",
       "acceptance_criteria": "Vincular médico y honorario trazable a línea FEES",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -873,9 +906,9 @@
       "dependency_ids": [
         "B4"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "El dato demo de aseguradora no define una métrica aprobada: faltan alcance por organización, definición de particular/asegurado, período, roles, redacción y auditoría del tablero.",
+      "client_question": "¿Cómo se definen particular y asegurado, el período/organización, roles permitidos, minimización y auditoría para esta métrica?",
       "acceptance_criteria": "Métrica/gráfica con datos de seguro y permisos",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -941,7 +974,7 @@
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "d6aec14867b05b0ca50c3801856ee149aada280b6f5c20b564c773c75cbc6cff",
+      "functional_fingerprint": "ad98816bb448d957bc86178fc003db8dd0997dfd7d172cc891b72cc08470f223",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1660,9 +1693,9 @@
       "dependency_ids": [
         "B1"
       ],
-      "blocker_type": null,
-      "blocker_reason": null,
-      "client_question": null,
+      "blocker_type": "INTEGRATION",
+      "blocker_reason": "La UI demo persiste por navegador; la solicitud exige visibilidad entre usuarios autorizados, por organización, con RLS, refetch/Realtime y auditoría comprobables.",
+      "client_question": "¿Qué proyecto de prueba, organizaciones y dos cuentas autorizadas se usarán para certificar creación, aislamiento y visibilidad multiusuario de pacientes?",
       "acceptance_criteria": "Persistencia multiusuario por organización, RLS, refetch/Realtime y auditoría",
       "implementation_sha": null,
       "functional_fingerprint": null,

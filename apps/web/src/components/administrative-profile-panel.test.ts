@@ -16,12 +16,14 @@ describe('CH08 administrative profile integration boundary', () => {
   // test-id: vitest:ch08-supabase-profile-ui-block
   it('shows the secure integration notice and no profile save entry point in Supabase mode', () => {
     const onOpen = vi.fn();
-    const markup = renderToStaticMarkup(createElement(AdministrativeProfilePanel, {
-      hospitalization,
-      canWrite: true,
-      onOpen,
-      providerMode: 'supabase',
-    }));
+    const markup = renderToStaticMarkup(
+      createElement(AdministrativeProfilePanel, {
+        hospitalization,
+        canWrite: true,
+        onOpen,
+        providerMode: 'supabase',
+      }),
+    );
 
     expect(markup).toContain('administrative-profile-integration-blocked');
     expect(markup).not.toContain('HOSPITALIZATION-ADMIN-PROFILE-OPEN');
@@ -30,12 +32,14 @@ describe('CH08 administrative profile integration boundary', () => {
   });
 
   it('keeps the editable profile entry point available only in mock mode', () => {
-    const markup = renderToStaticMarkup(createElement(AdministrativeProfilePanel, {
-      hospitalization,
-      canWrite: true,
-      onOpen: vi.fn(),
-      providerMode: 'mock',
-    }));
+    const markup = renderToStaticMarkup(
+      createElement(AdministrativeProfilePanel, {
+        hospitalization,
+        canWrite: true,
+        onOpen: vi.fn(),
+        providerMode: 'mock',
+      }),
+    );
 
     expect(markup).toContain('HOSPITALIZATION-ADMIN-PROFILE-OPEN');
     expect(markup).not.toContain('administrative-profile-integration-blocked');

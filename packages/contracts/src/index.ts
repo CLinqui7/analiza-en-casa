@@ -52,7 +52,12 @@ export const patientSchema = z.object({
   nationality: z.string().trim().optional(),
   occupation: z.string().trim().optional(),
   triageStatus: z.string().trim().optional(),
-  notifications: z.object({ botmakerConsent: z.boolean().default(true), lastStatus: z.string().trim().optional() }).optional(),
+  notifications: z
+    .object({
+      botmakerConsent: z.boolean().default(true),
+      lastStatus: z.string().trim().optional(),
+    })
+    .optional(),
   insurance: patientInsuranceSchema.optional(),
   contacts: z.array(patientContactSchema).optional(),
   address: patientAddressSchema.optional(),
@@ -143,10 +148,15 @@ export const hospitalizationSchema = z.object({
   patientId: z.string(),
   startDate: z.string(),
   endDate: z.string().optional(),
-  admissionPeriods: z.array(z.object({
-    admissionDate: z.string(),
-    dischargeDate: z.string().optional(),
-  })).min(1).optional(),
+  admissionPeriods: z
+    .array(
+      z.object({
+        admissionDate: z.string(),
+        dischargeDate: z.string().optional(),
+      }),
+    )
+    .min(1)
+    .optional(),
   status: z.enum(['ACTIVE', 'PENDING_CLOSE', 'CLOSED']),
   accountType: z.string().trim().min(1),
   insurer: z.string().trim().optional(),
@@ -160,21 +170,23 @@ export const hospitalizationSchema = z.object({
    * descriptive only and never create insurance, billing, coverage, tax, or
    * clinical rules.
    */
-  administrativeProfile: z.object({
-    healthManager: z.string().trim().optional(),
-    referredBy: z.string().trim().optional(),
-    revenueType: z.string().trim().optional(),
-    type: z.string().trim().optional(),
-    startDate: z.string().trim().optional(),
-    durationDays: z.string().trim().optional(),
-    paymentMethod: z.string().trim().optional(),
-    insurer: z.string().trim().optional(),
-    requestType: z.string().trim().optional(),
-    majorCategory: z.string().trim().optional(),
-    subcategory: z.string().trim().optional(),
-    originatingHospital: z.string().trim().optional(),
-    patientClass: z.string().trim().optional(),
-  }).optional(),
+  administrativeProfile: z
+    .object({
+      healthManager: z.string().trim().optional(),
+      referredBy: z.string().trim().optional(),
+      revenueType: z.string().trim().optional(),
+      type: z.string().trim().optional(),
+      startDate: z.string().trim().optional(),
+      durationDays: z.string().trim().optional(),
+      paymentMethod: z.string().trim().optional(),
+      insurer: z.string().trim().optional(),
+      requestType: z.string().trim().optional(),
+      majorCategory: z.string().trim().optional(),
+      subcategory: z.string().trim().optional(),
+      originatingHospital: z.string().trim().optional(),
+      patientClass: z.string().trim().optional(),
+    })
+    .optional(),
 });
 
 export const quoteItemCategorySchema = z.enum([

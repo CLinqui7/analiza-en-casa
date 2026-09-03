@@ -348,8 +348,8 @@ export default function ClinicalHospitalizationsPage() {
                                 id={`clinical-hospitalization-boundary-${hospitalization.id}`}
                               >
                                 Perfil, documento y eventos clínicos requieren modelo, autorización,
-                                auditoría y definiciones aprobadas (CH09-Q006); no se inician desde este
-                                listado.
+                                auditoría y definiciones aprobadas (CH09-Q006); no se inician desde
+                                este listado.
                               </p>
                             </div>
                           ) : null}

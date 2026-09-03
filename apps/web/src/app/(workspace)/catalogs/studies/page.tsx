@@ -18,14 +18,26 @@ export default function DiagnosticStudiesCatalogPage() {
           <h1>Items / Estudios Dx</h1>
           <p>
             Superficie factual de solo lectura basada en CH15-E0084. No carga filas, ni define
-            fuente, precios, impuestos, descuentos, estados, reglas clínicas o comportamiento de escritura.
+            fuente, precios, impuestos, descuentos, estados, reglas clínicas o comportamiento de
+            escritura.
           </p>
         </div>
         <div className="action-row">
-          <Button aria-describedby="catalog-studies-export-help" className="button-secondary" data-action-id="CATALOG-STUDIES-EXPORT" disabled type="button">
+          <Button
+            aria-describedby="catalog-studies-export-help"
+            className="button-secondary"
+            data-action-id="CATALOG-STUDIES-EXPORT"
+            disabled
+            type="button"
+          >
             Excel
           </Button>
-          <Button aria-describedby="catalog-studies-create-help" data-action-id="CATALOG-STUDIES-CREATE" disabled type="button">
+          <Button
+            aria-describedby="catalog-studies-create-help"
+            data-action-id="CATALOG-STUDIES-CREATE"
+            disabled
+            type="button"
+          >
             Nuevo
           </Button>
         </div>
@@ -46,17 +58,31 @@ export default function DiagnosticStudiesCatalogPage() {
         <div className="table-controls">
           <label>
             Registros
-            <select aria-label="Registros de estudios por página" data-action-id="CATALOG-STUDIES-PAGE-SIZE" disabled value="50" onChange={() => undefined}>
+            <select
+              aria-label="Registros de estudios por página"
+              data-action-id="CATALOG-STUDIES-PAGE-SIZE"
+              disabled
+              value="50"
+              onChange={() => undefined}
+            >
               <option value="50">50</option>
             </select>
           </label>
           <label>
             Buscar estudios diagnósticos
-            <input data-action-id="CATALOG-STUDIES-SEARCH" onChange={(event) => setQuery(event.target.value)} value={query} />
+            <input
+              data-action-id="CATALOG-STUDIES-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              value={query}
+            />
           </label>
           <div className="action-row" aria-label="Paginación de estudios diagnósticos">
-            <Button data-action-id="CATALOG-STUDIES-PAGE-PREV" disabled type="button">Anterior</Button>
-            <Button data-action-id="CATALOG-STUDIES-PAGE-NEXT" disabled type="button">Siguiente</Button>
+            <Button data-action-id="CATALOG-STUDIES-PAGE-PREV" disabled type="button">
+              Anterior
+            </Button>
+            <Button data-action-id="CATALOG-STUDIES-PAGE-NEXT" disabled type="button">
+              Siguiente
+            </Button>
           </div>
         </div>
         <div className="table-wrap">

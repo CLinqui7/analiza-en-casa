@@ -8,10 +8,14 @@ async function login(page: Page, email: string, password: string) {
 }
 
 // test-id: playwright:ch16-discount-matrix
-test('CH16 renders only the factual empty discount-family matrix without financial mutation', async ({ page }) => {
+test('CH16 renders only the factual empty discount-family matrix without financial mutation', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin');
   await expect(page).toHaveURL(/\/catalogs\/discounts$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
 
   await expect(page.getByRole('heading', { name: 'Descuentos' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
@@ -33,8 +37,12 @@ test('CH16 renders only the factual empty discount-family matrix without financi
   await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-PAGE-NEXT"]')).toBeDisabled();
 
   await page.reload();
-  await expect(page.locator('tbody .empty-state')).toContainText('Sin perfiles de descuento documentados');
-  expect(await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect(page.locator('tbody .empty-state')).toContainText(
+    'Sin perfiles de descuento documentados',
+  );
+  expect(
+    await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+  ).toBe(auditBefore);
 });
 
 test('CH16 lets INVENTORY read the discount-family matrix', async ({ page }) => {

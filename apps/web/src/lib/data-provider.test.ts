@@ -14,8 +14,13 @@ const hospitalizationWithProfile: Hospitalization = {
 describe('CH08 secure administrative execution boundary', () => {
   it('recognizes an administrative execution profile payload', () => {
     expect(hasAdministrativeProfilePayload([hospitalizationWithProfile])).toBe(true);
-    expect(hasAdministrativeProfilePayload([{ ...hospitalizationWithProfile, administrativeProfile: undefined }])).toBe(true);
-    const { administrativeProfile: _administrativeProfile, ...hospitalizationWithoutProfile } = hospitalizationWithProfile;
+    expect(
+      hasAdministrativeProfilePayload([
+        { ...hospitalizationWithProfile, administrativeProfile: undefined },
+      ]),
+    ).toBe(true);
+    const { administrativeProfile: _administrativeProfile, ...hospitalizationWithoutProfile } =
+      hospitalizationWithProfile;
     expect(hasAdministrativeProfilePayload([hospitalizationWithoutProfile])).toBe(false);
   });
 
@@ -24,8 +29,9 @@ describe('CH08 secure administrative execution boundary', () => {
     const from = vi.fn();
     const provider = new SupabaseDataProvider(() => ({ from }) as never);
 
-    await expect(provider.saveChanges({ hospitalizations: [hospitalizationWithProfile] }))
-      .rejects.toThrow('RPC segura');
+    await expect(
+      provider.saveChanges({ hospitalizations: [hospitalizationWithProfile] }),
+    ).rejects.toThrow('RPC segura');
 
     expect(from).not.toHaveBeenCalled();
   });

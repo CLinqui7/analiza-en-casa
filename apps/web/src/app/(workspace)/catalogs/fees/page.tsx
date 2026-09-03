@@ -18,14 +18,26 @@ export default function FeesCatalogPage() {
           <h1>Items / Honorarios</h1>
           <p>
             Superficie factual de solo lectura basada en CH15-E0094. No carga filas, ni define
-            recursos elegibles, precios, impuestos, descuentos, Giftcard, liquidación o reglas clínicas.
+            recursos elegibles, precios, impuestos, descuentos, Giftcard, liquidación o reglas
+            clínicas.
           </p>
         </div>
         <div className="action-row">
-          <Button aria-describedby="catalog-fees-export-help" className="button-secondary" data-action-id="CATALOG-FEES-EXPORT" disabled type="button">
+          <Button
+            aria-describedby="catalog-fees-export-help"
+            className="button-secondary"
+            data-action-id="CATALOG-FEES-EXPORT"
+            disabled
+            type="button"
+          >
             Excel
           </Button>
-          <Button aria-describedby="catalog-fees-create-help" data-action-id="CATALOG-FEES-CREATE" disabled type="button">
+          <Button
+            aria-describedby="catalog-fees-create-help"
+            data-action-id="CATALOG-FEES-CREATE"
+            disabled
+            type="button"
+          >
             Nuevo
           </Button>
         </div>
@@ -35,7 +47,8 @@ export default function FeesCatalogPage() {
         La exportación requiere columnas, minimización y autorización aprobadas.
       </p>
       <p className="field-help" id="catalog-fees-create-help">
-        El alta requiere una fuente, recurso elegible, roles, campos, validación, auditoría y reglas financieras aprobadas.
+        El alta requiere una fuente, recurso elegible, roles, campos, validación, auditoría y reglas
+        financieras aprobadas.
       </p>
 
       <Panel>
@@ -46,17 +59,31 @@ export default function FeesCatalogPage() {
         <div className="table-controls">
           <label>
             Registros
-            <select aria-label="Registros de honorarios por página" data-action-id="CATALOG-FEES-PAGE-SIZE" disabled value="50" onChange={() => undefined}>
+            <select
+              aria-label="Registros de honorarios por página"
+              data-action-id="CATALOG-FEES-PAGE-SIZE"
+              disabled
+              value="50"
+              onChange={() => undefined}
+            >
               <option value="50">50</option>
             </select>
           </label>
           <label>
             Buscar honorarios
-            <input data-action-id="CATALOG-FEES-SEARCH" onChange={(event) => setQuery(event.target.value)} value={query} />
+            <input
+              data-action-id="CATALOG-FEES-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              value={query}
+            />
           </label>
           <div className="action-row" aria-label="Paginación de honorarios">
-            <Button data-action-id="CATALOG-FEES-PAGE-PREV" disabled type="button">Anterior</Button>
-            <Button data-action-id="CATALOG-FEES-PAGE-NEXT" disabled type="button">Siguiente</Button>
+            <Button data-action-id="CATALOG-FEES-PAGE-PREV" disabled type="button">
+              Anterior
+            </Button>
+            <Button data-action-id="CATALOG-FEES-PAGE-NEXT" disabled type="button">
+              Siguiente
+            </Button>
           </div>
         </div>
         <div className="table-wrap">

@@ -3,10 +3,12 @@ import type { Hospitalization } from '@analiza/contracts';
 export type AdmissionPeriod = NonNullable<Hospitalization['admissionPeriods']>[number];
 
 export function normalizeAdmissionPeriods(periods: AdmissionPeriod[]): AdmissionPeriod[] {
-  const normalized = periods.filter((period) => period.admissionDate).map((period) => ({
-    admissionDate: period.admissionDate,
-    dischargeDate: period.dischargeDate || undefined,
-  }));
+  const normalized = periods
+    .filter((period) => period.admissionDate)
+    .map((period) => ({
+      admissionDate: period.admissionDate,
+      dischargeDate: period.dischargeDate || undefined,
+    }));
   const keys = new Set<string>();
   for (const period of normalized) {
     if (period.dischargeDate && period.dischargeDate < period.admissionDate) {

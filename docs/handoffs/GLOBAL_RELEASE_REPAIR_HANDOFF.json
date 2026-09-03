@@ -1,0 +1,47 @@
+{
+  "lot": "GLOBAL_RELEASE_REPAIR",
+  "source_sha": "e82973453cba0ae460e400cf8317c17784051422",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "REPAIRED_STATIC_GATES_RUNTIME_INCOMPLETE_GIT_SYNC_PENDING",
+  "final_sha": null,
+  "remote_sha": null,
+  "release_status": "NOT_READY_RUNTIME_EVIDENCE_AND_SCOPED_GAPS",
+  "global_complete": false,
+  "safe_work_completed": [
+    "HOSPITALIZATION_DIRECT_EDIT_PERIOD_STATE_REFACTOR",
+    "REPOSITORY_SOURCE_FORMATTING",
+    "FRESH_PLAYWRIGHT_SERVER_REUSE_HARDENING",
+    "CLIENT_CHANGE_BLOCKER_RECONCILIATION"
+  ],
+  "behavior_preserved": [
+    "The hospitalization form initializes extra periods from form defaults for both manual edit and direct ?edit= URLs.",
+    "Close/reopen, add/remove period, normalization, and browser-local persistence remain covered without a synchronous setState effect.",
+    "No clinical, financial, inventory, provider, or sensitive-data boundary changed."
+  ],
+  "client_change_resolution": {
+    "completed_demo": ["CR-002", "CR-005", "CR-007"],
+    "specific_client_definition": ["CR-003", "CR-009", "CR-013", "CR-016"],
+    "specific_integration": ["CR-004", "CR-006", "CR-008", "CR-031"],
+    "evidence": "Each listed request now has a factual status, tests for completed demo behavior, or a specific source/role/integration question; the Supabase/two-user limitation is scoped only to requests that require it."
+  },
+  "gates": {
+    "format_check": "PASS: npm.cmd run format:check; all matched files use Prettier code style.",
+    "lint": "PASS_WITH_EXISTING_WARNINGS: npm.cmd run lint; no errors, including no react-hooks/set-state-in-effect error in hospitalizations/page.tsx.",
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "hospitalization_unit": "PASS: npm.cmd run test --workspace=@analiza/web -- hospitalization-periods.test.ts (1 file, 3 tests).",
+    "client_changes": "PASS: npm.cmd run qa:client-changes (32/32; self-tests passed).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "traceability_mirror": "PASS: npm.cmd run qa:traceability-mirror -- --self-test.",
+    "video_audit": "PASS: npm.cmd run audit:verify (17/17 chapters, 0 pending, 0 failed).",
+    "playwright_b3": "PENDING_RUNTIME_RESULT: fresh 4205 run launched all seven B3 cases without reported test failures but did not return a final Playwright exit summary before the runner lifecycle stalled; it is not recorded as PASS.",
+    "playwright_full_suite": "PENDING_RUNTIME_RESULT: stale-server reuse is disabled by default in the Playwright config; a completed fresh-server full-suite exit result is still required.",
+    "selenium": "PENDING_RUNTIME: Python launcher is unavailable; the direct ?edit= multiple-period assertion remains executable source coverage only.",
+    "git_sync": "PENDING_ENVIRONMENT: final commit/push/fetch must be retried after Git metadata permits index.lock and FETCH_HEAD writes."
+  },
+  "release_blockers": [
+    "A completed fresh-server full Playwright exit result is still required; partial B2/B3 output is not a release pass.",
+    "Immutable SHA provenance is pending until Git metadata becomes writable.",
+    "Clinical, financial, inventory, provider, role, audit, retention, and source-data contracts remain explicitly scoped in their ledgers; they are not blanket infrastructure blockers."
+  ],
+  "next_batch": "GLOBAL_RELEASE_REVIEW"
+}

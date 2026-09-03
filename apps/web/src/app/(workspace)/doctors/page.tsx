@@ -11,10 +11,13 @@ import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { doctorSpecialtyOptions, toDoctorAttachmentMetadata } from '@/lib/doctor-catalog';
 
-const optionalEmailSchema = z.string().trim().refine(
-  (value) => !value || z.string().email().safeParse(value).success,
-  'Ingrese un correo electrónico válido.',
-);
+const optionalEmailSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => !value || z.string().email().safeParse(value).success,
+    'Ingrese un correo electrónico válido.',
+  );
 
 const doctorFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre del médico.'),
@@ -44,7 +47,10 @@ export default function DoctorsPage() {
   const [attachments, setAttachments] = useState<Doctor['attachments']>([]);
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const form = useForm<DoctorForm>({ resolver: zodResolver(doctorFormSchema), defaultValues: emptyDoctor });
+  const form = useForm<DoctorForm>({
+    resolver: zodResolver(doctorFormSchema),
+    defaultValues: emptyDoctor,
+  });
   const demoOnly = providerMode !== 'mock';
 
   function closeDialog() {
@@ -85,7 +91,11 @@ export default function DoctorsPage() {
     };
     if (editingDoctor) updateDoctor(doctor);
     else addDoctor(doctor);
-    setResult(editingDoctor ? `Médico ${doctor.fullName} actualizado.` : `Médico ${doctor.fullName} registrado.`);
+    setResult(
+      editingDoctor
+        ? `Médico ${doctor.fullName} actualizado.`
+        : `Médico ${doctor.fullName} registrado.`,
+    );
     closeDialog();
   }
 
@@ -98,56 +108,212 @@ export default function DoctorsPage() {
           <p>Las altas de recursos y médicos son independientes.</p>
         </div>
         <div className="header-actions">
-          <Link className="button button-secondary" data-action-id="DOCTOR-RESOURCE-CREATE" href="/clinical/nursing">
+          <Link
+            className="button button-secondary"
+            data-action-id="DOCTOR-RESOURCE-CREATE"
+            href="/clinical/nursing"
+          >
             Nuevo recurso
           </Link>
           {can('settings:write') && !demoOnly ? (
-            <Button data-action-id="DOCTOR-CREATE" onClick={openCreate} type="button">Nuevo médico</Button>
+            <Button data-action-id="DOCTOR-CREATE" onClick={openCreate} type="button">
+              Nuevo médico
+            </Button>
           ) : null}
         </div>
       </header>
       {demoOnly ? (
         <p className="notice warning" role="status">
-          El alta de médicos está disponible en el modo demo. La integración de Supabase requiere el mapeo organizacional y almacenamiento privado de archivos.
+          El alta de médicos está disponible en el modo demo. La integración de Supabase requiere el
+          mapeo organizacional y almacenamiento privado de archivos.
         </p>
       ) : null}
-      {result ? <p className="notice success" role="status">{result}</p> : null}
+      {result ? (
+        <p className="notice success" role="status">
+          {result}
+        </p>
+      ) : null}
       {doctors.length ? (
         <Panel>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Nombre</th><th>JVPM</th><th>DUI</th><th>Especialidad / profesión</th><th>Archivos</th><th>Acción</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>JVPM</th>
+                  <th>DUI</th>
+                  <th>Especialidad / profesión</th>
+                  <th>Archivos</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
               <tbody>
                 {doctors.map((doctor) => (
                   <tr key={doctor.id}>
-                    <td>{doctor.fullName}</td><td>{doctor.jvpm}</td><td>{doctor.documentId}</td><td>{doctor.specialty}</td>
-                    <td>{doctor.attachments.length ? doctor.attachments.map((attachment) => attachment.name).join(', ') : 'Sin archivos'}</td>
-                    <td>{can('settings:write') && !demoOnly ? <Button data-action-id="DOCTOR-EDIT" onClick={() => openEdit(doctor)} type="button">Editar médico</Button> : '—'}</td>
+                    <td>{doctor.fullName}</td>
+                    <td>{doctor.jvpm}</td>
+                    <td>{doctor.documentId}</td>
+                    <td>{doctor.specialty}</td>
+                    <td>
+                      {doctor.attachments.length
+                        ? doctor.attachments.map((attachment) => attachment.name).join(', ')
+                        : 'Sin archivos'}
+                    </td>
+                    <td>
+                      {can('settings:write') && !demoOnly ? (
+                        <Button
+                          data-action-id="DOCTOR-EDIT"
+                          onClick={() => openEdit(doctor)}
+                          type="button"
+                        >
+                          Editar médico
+                        </Button>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </Panel>
-      ) : <Panel><EmptyState detail="Registre un médico o abra la alta independiente de recursos." title="Sin médicos registrados" /></Panel>}
+      ) : (
+        <Panel>
+          <EmptyState
+            detail="Registre un médico o abra la alta independiente de recursos."
+            title="Sin médicos registrados"
+          />
+        </Panel>
+      )}
       <Dialog
         description="Los archivos conservan únicamente nombre, tipo y tamaño en el modo demo; su contenido requiere almacenamiento privado configurado."
-        footer={<><Button className="button-secondary" onClick={closeDialog} type="button">Cancelar</Button><Button data-action-id={editingDoctor ? 'DOCTOR-EDIT-SAVE' : 'DOCTOR-SAVE'} form="doctor-form" type="submit">{editingDoctor ? 'Guardar cambios' : 'Guardar médico'}</Button></>}
+        footer={
+          <>
+            <Button className="button-secondary" onClick={closeDialog} type="button">
+              Cancelar
+            </Button>
+            <Button
+              data-action-id={editingDoctor ? 'DOCTOR-EDIT-SAVE' : 'DOCTOR-SAVE'}
+              form="doctor-form"
+              type="submit"
+            >
+              {editingDoctor ? 'Guardar cambios' : 'Guardar médico'}
+            </Button>
+          </>
+        }
         onClose={closeDialog}
         open={isOpen}
         title={editingDoctor ? 'Editar médico' : 'Nuevo médico'}
       >
-        <form className="form-grid" id="doctor-form" noValidate onSubmit={form.handleSubmit(submit)}>
-          <label>Nombre completo<input {...form.register('fullName')} />{form.formState.errors.fullName ? <span className="field-error" role="alert">{form.formState.errors.fullName.message}</span> : null}</label>
-          <label>JVPM<input {...form.register('jvpm')} />{form.formState.errors.jvpm ? <span className="field-error" role="alert">{form.formState.errors.jvpm.message}</span> : null}</label>
-          <label>DUI<input {...form.register('documentId')} />{form.formState.errors.documentId ? <span className="field-error" role="alert">{form.formState.errors.documentId.message}</span> : null}</label>
-          <Controller control={form.control} name="specialty" render={({ field }) => <SearchableSelect actionId="DOCTOR-SPECIALTY-SELECT" ariaLabel="Especialidad o profesión" onChange={field.onChange} options={doctorSpecialtyOptions} placeholder="Buscar especialidad o profesión" value={field.value} />} />
-          {form.formState.errors.specialty ? <span className="field-error" role="alert">{form.formState.errors.specialty.message}</span> : null}
-          <label>Teléfono<input {...form.register('phone')} type="tel" /></label>
-          <label>Correo<input {...form.register('email')} type="email" />{form.formState.errors.email ? <span className="field-error" role="alert">{form.formState.errors.email.message}</span> : null}</label>
-          <label>Dirección<textarea {...form.register('address')} rows={3} />{form.formState.errors.address ? <span className="field-error" role="alert">{form.formState.errors.address.message}</span> : null}</label>
-          <label>Archivos administrativos (demo)<input data-action-id="DOCTOR-ATTACHMENTS" multiple onChange={(event) => setAttachments(toDoctorAttachmentMetadata(event.currentTarget.files ?? []))} type="file" /></label>
-          {attachments.length ? <ul aria-label="Archivos seleccionados">{attachments.map((attachment) => <li key={attachment.id}>{attachment.name} ({attachment.size} bytes) <Button aria-label={`Quitar ${attachment.name}`} className="button-secondary" onClick={() => setAttachments((current) => current.filter((item) => item.id !== attachment.id))} type="button">Quitar</Button></li>)}</ul> : <p className="field-help">Sin archivos seleccionados.</p>}
+        <form
+          className="form-grid"
+          id="doctor-form"
+          noValidate
+          onSubmit={form.handleSubmit(submit)}
+        >
+          <label>
+            Nombre completo
+            <input {...form.register('fullName')} />
+            {form.formState.errors.fullName ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.fullName.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            JVPM
+            <input {...form.register('jvpm')} />
+            {form.formState.errors.jvpm ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.jvpm.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            DUI
+            <input {...form.register('documentId')} />
+            {form.formState.errors.documentId ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.documentId.message}
+              </span>
+            ) : null}
+          </label>
+          <Controller
+            control={form.control}
+            name="specialty"
+            render={({ field }) => (
+              <SearchableSelect
+                actionId="DOCTOR-SPECIALTY-SELECT"
+                ariaLabel="Especialidad o profesión"
+                onChange={field.onChange}
+                options={doctorSpecialtyOptions}
+                placeholder="Buscar especialidad o profesión"
+                value={field.value}
+              />
+            )}
+          />
+          {form.formState.errors.specialty ? (
+            <span className="field-error" role="alert">
+              {form.formState.errors.specialty.message}
+            </span>
+          ) : null}
+          <label>
+            Teléfono
+            <input {...form.register('phone')} type="tel" />
+          </label>
+          <label>
+            Correo
+            <input {...form.register('email')} type="email" />
+            {form.formState.errors.email ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.email.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            Dirección
+            <textarea {...form.register('address')} rows={3} />
+            {form.formState.errors.address ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.address.message}
+              </span>
+            ) : null}
+          </label>
+          <label>
+            Archivos administrativos (demo)
+            <input
+              data-action-id="DOCTOR-ATTACHMENTS"
+              multiple
+              onChange={(event) =>
+                setAttachments(toDoctorAttachmentMetadata(event.currentTarget.files ?? []))
+              }
+              type="file"
+            />
+          </label>
+          {attachments.length ? (
+            <ul aria-label="Archivos seleccionados">
+              {attachments.map((attachment) => (
+                <li key={attachment.id}>
+                  {attachment.name} ({attachment.size} bytes){' '}
+                  <Button
+                    aria-label={`Quitar ${attachment.name}`}
+                    className="button-secondary"
+                    onClick={() =>
+                      setAttachments((current) =>
+                        current.filter((item) => item.id !== attachment.id),
+                      )
+                    }
+                    type="button"
+                  >
+                    Quitar
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="field-help">Sin archivos seleccionados.</p>
+          )}
         </form>
       </Dialog>
     </div>

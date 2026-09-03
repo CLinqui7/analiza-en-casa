@@ -237,23 +237,19 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Importar CSV' }).click();
   const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
-  await dialog
-    .locator('[data-action-id="PATIENT-IMPORT-FILE"]')
-    .setInputFiles({
-      name: 'invalido.csv',
-      mimeType: 'text/csv',
-      buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento'),
-    });
+  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
+    name: 'invalido.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento'),
+  });
   await expect(dialog.getByRole('alert')).toContainText('Fila 2');
-  await dialog
-    .locator('[data-action-id="PATIENT-IMPORT-FILE"]')
-    .setInputFiles({
-      name: 'pacientes-validos.csv',
-      mimeType: 'text/csv',
-      buffer: Buffer.from(
-        'document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE',
-      ),
-    });
+  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
+    name: 'pacientes-validos.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      'document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE',
+    ),
+  });
   await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
     '2 filas válidas',
   );

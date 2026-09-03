@@ -15,7 +15,9 @@ export const doctorSpecialtyOptions = [
 type FileMetadataSource = Pick<File, 'name' | 'size' | 'type'>;
 
 /** Metadata only: file bytes belong in a private, RLS-protected storage integration. */
-export function toDoctorAttachmentMetadata(files: Iterable<FileMetadataSource>): DoctorAttachment[] {
+export function toDoctorAttachmentMetadata(
+  files: Iterable<FileMetadataSource>,
+): DoctorAttachment[] {
   return Array.from(files, (file) => ({
     id: crypto.randomUUID(),
     name: file.name,

@@ -1,6 +1,6 @@
 {
-  "lot": "GLOBAL_RELEASE_PRECHECK",
-  "handoff": "docs/handoffs/GLOBAL_RELEASE_PRECHECK_HANDOFF.json",
+  "lot": "GLOBAL_RELEASE_REPAIR",
+  "handoff": "docs/handoffs/GLOBAL_RELEASE_REPAIR_HANDOFF.json",
   "final_sha": null,
   "next_batch": "GLOBAL_RELEASE_REVIEW"
 }

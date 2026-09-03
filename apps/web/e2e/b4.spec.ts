@@ -47,7 +47,12 @@ test('a manual doctor fee keeps its selected doctor after save and reload', asyn
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await expect(page.getByText('Honorario B4')).toBeVisible();
   await expect(page.getByText(`Médico: ${doctorName}`)).toBeVisible();
-  await expect(page.getByRole('row', { name: /Honorario B4/ }).getByRole('cell').nth(2)).toHaveText('USD 55.00');
+  await expect(
+    page
+      .getByRole('row', { name: /Honorario B4/ })
+      .getByRole('cell')
+      .nth(2),
+  ).toHaveText('USD 55.00');
 });
 
 // test-id: playwright:cr016-patient-coverage-counts

@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "8c10993c4c6728fe3fb527d52ec1b6ae24db55eceded9411b82c2993f30c06a5",
+      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -14,8 +14,8 @@
     },
     "CR-002": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "functional_fingerprint": "779df348f74b1252211cb449ae15d27d37af5a38c7742cf087abed8387e89699",
+      "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr002-resident-card"
       ],
@@ -40,25 +40,36 @@
       "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
     },
     "CR-005": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "0e06656c6ffd690bb42055c77465ee13bc291ec114f96dccc868928d513482f2",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "playwright:cr005-independent-doctor-resource",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "La alta independiente de médico y recurso se cubre en demo; la SHA queda pendiente hasta que Git permita escribir el checkpoint."
     },
     "CR-006": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "33c59f3a46dfb7270b231aeb96e808331528f3e6ad0f7085b1d4f2e683ed3b1b",
+      "certification_status": "PARTIAL",
+      "test_ids": [
+        "vitest:cr006-doctor-attachment-metadata",
+        "playwright:cr006-doctor-save-reload-edit",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "Alta y edición se verifican en demo; el alcance restante depende de Storage privado, RLS, descarga autorizada, retención y auditoría de adjuntos."
     },
     "CR-007": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe el catálogo ni selector."
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "a70d590b7b4c0683868c1d1220529c4f192dc1f6422b9e8b4aefaba4e0a335bc",
+      "certification_status": "DEMO_CERTIFIED",
+      "test_ids": [
+        "vitest:cr007-professional-specialties",
+        "playwright:cr007-professional-specialties",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "El selector de especialidades se verifica en modo demo por navegador; la SHA queda pendiente hasta que Git permita escribir el checkpoint."
     },
     "CR-008": {
       "implementation_sha": null,
@@ -88,7 +99,7 @@
     },
     "CR-011": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "df0362d9138b356a67fdbbaf7f617835486ad7007495c16922bc574ad3afa141",
+      "functional_fingerprint": "1c95ed0d3323ec1323540caaf188e3f405a90c05421f52526342efaa55193ecd",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -97,7 +108,7 @@
     },
     "CR-012": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "780ed1a406a48bda9c7ab65d259aedd6aacdbdb7df896781b6de82632af0c260",
+      "functional_fingerprint": "7cc1d518f5652c0e7fd7c12fd7e07182176094557f4acb4120eca68640fe6bd4",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -134,7 +145,7 @@
     },
     "CR-017": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "d6aec14867b05b0ca50c3801856ee149aada280b6f5c20b564c773c75cbc6cff",
+      "functional_fingerprint": "ad98816bb448d957bc86178fc003db8dd0997dfd7d172cc891b72cc08470f223",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
@@ -253,7 +264,7 @@
       "test_ids": [
         "SEL-PAT-CREATE"
       ],
-      "notes": "Supabase/RLS existe, pero demo usa localStorage por navegador y no hay E2E de dos usuarios."
+      "notes": "Supabase/RLS existe, pero demo usa localStorage por navegador; falta la certificación concreta con dos sesiones autorizadas, aislamiento organizacional, refetch/Realtime y auditoría."
     },
     "CR-032": {
       "implementation_sha": null,

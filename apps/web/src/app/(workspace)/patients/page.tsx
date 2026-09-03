@@ -115,7 +115,10 @@ const patientFormSchema = z
       });
     }
     values.contacts.forEach((contact, index) => {
-      const documentPairError = validateContactDocumentPair(contact.documentType, contact.documentId);
+      const documentPairError = validateContactDocumentPair(
+        contact.documentType,
+        contact.documentId,
+      );
       if (!documentPairError) return;
       context.addIssue({
         code: 'custom',
@@ -224,9 +227,11 @@ function previewPatientImport(
     const documentType =
       record.documentType?.toUpperCase() === 'PASAPORTE'
         ? 'PASSPORT'
-        : ['CARNET DE RESIDENTE', 'CARNET_DE_RESIDENTE'].includes(record.documentType?.toUpperCase())
+        : ['CARNET DE RESIDENTE', 'CARNET_DE_RESIDENTE'].includes(
+              record.documentType?.toUpperCase(),
+            )
           ? 'RESIDENT_CARD'
-        : record.documentType?.toUpperCase() || 'DUI';
+          : record.documentType?.toUpperCase() || 'DUI';
     if (!['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER'].includes(documentType)) {
       errors.push(`Fila ${rowNumber}: tipo de documento inválido.`);
       return;
@@ -568,11 +573,13 @@ export default function PatientsPage() {
       occupation: values.occupation || undefined,
       triageStatus: values.triageStatus || undefined,
       insurance,
-      contacts: values.contacts.map(({ documentType: contactDocumentType, documentId: contactDocumentId, ...contact }) => ({
-        ...contact,
-        documentType: contactDocumentType || undefined,
-        documentId: contactDocumentId.trim() || undefined,
-      })),
+      contacts: values.contacts.map(
+        ({ documentType: contactDocumentType, documentId: contactDocumentId, ...contact }) => ({
+          ...contact,
+          documentType: contactDocumentType || undefined,
+          documentId: contactDocumentId.trim() || undefined,
+        }),
+      ),
       address: values.address,
       status: editingPatient?.status ?? 'ACTIVE',
       notifications: { botmakerConsent: values.botmakerConsent },
@@ -938,11 +945,11 @@ export default function PatientsPage() {
               <span className="required-marker" aria-label="obligatorio">
                 *
               </span>
-                <input
-                  {...documentInput}
-                  aria-describedby="document-help"
-                  aria-label="Número de documento"
-                  inputMode={documentType === 'DUI' ? 'numeric' : undefined}
+              <input
+                {...documentInput}
+                aria-describedby="document-help"
+                aria-label="Número de documento"
+                inputMode={documentType === 'DUI' ? 'numeric' : undefined}
                 onChange={(event) => {
                   const value =
                     documentType === 'DUI' ? maskDui(event.target.value) : event.target.value;

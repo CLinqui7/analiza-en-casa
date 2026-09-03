@@ -79,10 +79,10 @@ export function SearchableSelect({
             setOpen(true);
             setActiveIndex(0);
           }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          if (query.trim() && !selected) onChange(query.trim());
-        }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            if (query.trim() && !selected) onChange(query.trim());
+          }}
           onKeyDown={onKeyDown}
           placeholder={selected?.label ?? placeholder}
           role="combobox"

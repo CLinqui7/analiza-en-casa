@@ -51,7 +51,10 @@ const closureTabs: Array<{ id: ClosureTab; label: string; actionId: string }> = 
   { id: 'CLOSED', label: 'Cerrados', actionId: 'INVENTORY-CLOSURES-TAB-CLOSED' },
   { id: 'RESOURCES', label: 'Recursos', actionId: 'INVENTORY-CLOSURES-TAB-RESOURCES' },
 ];
-const emptyClosureCopy: Record<Exclude<ClosureTab, 'PENDING'>, { title: string; detail: string }> = {
+const emptyClosureCopy: Record<
+  Exclude<ClosureTab, 'PENDING'>,
+  { title: string; detail: string }
+> = {
   TOTALS: {
     title: 'Sin cierres totales documentados',
     detail: 'No existe una fuente autorizada de cierres totales en el modelo actual.',
@@ -180,7 +183,7 @@ export default function InventoryPage() {
                     ? 'Items / Bodegas'
                     : surface === 'KITS'
                       ? 'Inventario / Kit de insumos'
-                    : 'Gestión de inventario'}
+                      : 'Gestión de inventario'}
           </h1>
           <p>
             {surface === 'ACKNOWLEDGEMENTS'
@@ -193,7 +196,7 @@ export default function InventoryPage() {
                     ? 'Superficie factual y de solo lectura. No consulta ni crea bodegas; la fuente, los permisos y los traslados requieren definición aprobada.'
                     : surface === 'KITS'
                       ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
-                    : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
+                      : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -513,18 +516,10 @@ export default function InventoryPage() {
               </select>
             </label>
             <div aria-label="Paginación de proveedores" className="action-row">
-              <Button
-                data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV"
-                disabled
-                type="button"
-              >
+              <Button data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV" disabled type="button">
                 Anterior
               </Button>
-              <Button
-                data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT"
-                disabled
-                type="button"
-              >
+              <Button data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT" disabled type="button">
                 Siguiente
               </Button>
             </div>

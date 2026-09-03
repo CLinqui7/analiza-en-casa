@@ -33,19 +33,41 @@ test('CH01-F001 direct-auth preserves the requested patients route', async ({ pa
 
 test('CH01-F002 patient-tabs-import exposes the bulk import surface', async ({ page }) => {
   await login(page, '/patients');
-  for (const tab of ['Activos', 'Inactivos', 'Carga masiva']) await expect(page.getByRole('tab', { name: new RegExp(tab) })).toBeVisible();
+  for (const tab of ['Activos', 'Inactivos', 'Carga masiva'])
+    await expect(page.getByRole('tab', { name: new RegExp(tab) })).toBeVisible();
   await page.getByRole('tab', { name: /Carga masiva/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
-  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({ name: 'ch01.csv', mimeType: 'text/csv', buffer: Buffer.from('document,firstName,lastName,documentType\nCH01-IMPORT,Persona,Prueba,OTHER') });
-  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText('1 filas válidas');
+  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
+    name: 'ch01.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      'document,firstName,lastName,documentType\nCH01-IMPORT,Persona,Prueba,OTHER',
+    ),
+  });
+  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
+    '1 filas válidas',
+  );
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await expect(dialog).toHaveCount(0);
 });
 
-test('CH01-F003 patient-video-columns presents the observed administrative columns', async ({ page }) => {
+test('CH01-F003 patient-video-columns presents the observed administrative columns', async ({
+  page,
+}) => {
   await login(page, '/patients');
-  expect(await page.locator('thead th').allTextContents()).toEqual(['Acción', 'Documento ↕', 'Nombre completo ↑', 'Edad', 'Empresa', 'Triage', 'Notif. Botmaker', 'Estado']);
-  await expect(page.getByRole('cell', { name: 'Sin clasificar', exact: true }).first()).toBeVisible();
+  expect(await page.locator('thead th').allTextContents()).toEqual([
+    'Acción',
+    'Documento ↕',
+    'Nombre completo ↑',
+    'Edad',
+    'Empresa',
+    'Triage',
+    'Notif. Botmaker',
+    'Estado',
+  ]);
+  await expect(
+    page.getByRole('cell', { name: 'Sin clasificar', exact: true }).first(),
+  ).toBeVisible();
 });
 
 test('CH01-F004 search-pagination filters and pages patient records', async ({ page }) => {
@@ -75,10 +97,18 @@ test('CH01-F005 xlsx-export creates a valid workbook', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar Excel' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('pacientes-activos.xlsx');
-  const workbook = XLSX.readFile(await download.path() as string);
+  const workbook = XLSX.readFile((await download.path()) as string);
   expect(workbook.SheetNames).toEqual(['Pacientes']);
   const rows = XLSX.utils.sheet_to_json<string[]>(workbook.Sheets.Pacientes, { header: 1 });
-  expect(rows[0]).toEqual(['Documento', 'Nombre completo', 'Edad', 'Empresa', 'Triage', 'Notif. Botmaker', 'Estado']);
+  expect(rows[0]).toEqual([
+    'Documento',
+    'Nombre completo',
+    'Edad',
+    'Empresa',
+    'Triage',
+    'Notif. Botmaker',
+    'Estado',
+  ]);
   expect(rows.length).toBeGreaterThan(1);
 });
 
@@ -93,7 +123,9 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill('7000-0001');
   await dialog.getByLabel('Empresa').fill('Empresa sintética');
-  await dialog.getByRole('textbox', { name: 'Dirección obligatorio', exact: true }).fill('Dirección sintética');
+  await dialog
+    .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
+    .fill('Dirección sintética');
   await dialog.getByLabel('Comentarios relevantes de la dirección').fill('Referencia sintética');
   await dialog.getByLabel('Triage administrativo').fill('Pendiente administrativo');
   await dialog.getByLabel('Autoriza notificaciones operativas por WhatsApp').uncheck();
@@ -101,17 +133,45 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('CH01-CONSENT');
   await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText('No');
-  await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText('Pendiente administrativo');
+  await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText(
+    'Pendiente administrativo',
+  );
 });
 
-test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe', async ({ page }) => {
+test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe', async ({
+  page,
+}) => {
   await login(page);
-  for (const metric of ['Pacientes con alertas', 'Pacientes activos', 'Tratamientos actualizados', 'Tratamientos por finalizar', 'Planes de cuidado', 'Incidentes']) await expect(page.getByText(metric, { exact: true })).toBeVisible();
-  for (const header of ['Acciones', 'Paciente', 'FC', 'FR', 'Oxígeno', 'Sistólica', 'Diastólica', 'Temp', 'Dolor', 'Glicemia', 'Fecha', 'Recurso']) await expect(page.getByRole('columnheader', { name: header, exact: true })).toBeVisible();
+  for (const metric of [
+    'Pacientes con alertas',
+    'Pacientes activos',
+    'Tratamientos actualizados',
+    'Tratamientos por finalizar',
+    'Planes de cuidado',
+    'Incidentes',
+  ])
+    await expect(page.getByText(metric, { exact: true })).toBeVisible();
+  for (const header of [
+    'Acciones',
+    'Paciente',
+    'FC',
+    'FR',
+    'Oxígeno',
+    'Sistólica',
+    'Diastólica',
+    'Temp',
+    'Dolor',
+    'Glicemia',
+    'Fecha',
+    'Recurso',
+  ])
+    await expect(page.getByRole('columnheader', { name: header, exact: true })).toBeVisible();
   await expect(page.getByText('Sin clasificar', { exact: true })).toBeVisible();
 });
 
-test('CH01-F011-F014 user menu, logout, recovery, and PWA fallback work honestly', async ({ page }) => {
+test('CH01-F011-F014 user menu, logout, recovery, and PWA fallback work honestly', async ({
+  page,
+}) => {
   await login(page);
   await page.locator('[data-action-id="USER-MENU-OPEN"]').click();
   await expect(page.getByRole('menu')).toContainText('Analiza en Casa');

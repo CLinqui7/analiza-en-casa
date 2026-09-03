@@ -3,7 +3,12 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch12-payables-summary
 // test-id: playwright:ch12-payables-permissions
 
-async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin', next = '/payables') {
+async function login(
+  page: import('@playwright/test').Page,
+  email = 'admin@demo.local',
+  password = 'demo-admin',
+  next = '/payables',
+) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
@@ -11,9 +16,13 @@ async function login(page: import('@playwright/test').Page, email = 'admin@demo.
   await expect(page).toHaveURL(new RegExp(`${next}$`));
 }
 
-test('CH12 renders the factual payables summary without creating financial records', async ({ page }) => {
+test('CH12 renders the factual payables summary without creating financial records', async ({
+  page,
+}) => {
   await login(page);
-  const storedBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const storedBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('tab', { name: 'Resumen' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('tab', { name: 'Pagos de Servicio' })).toBeDisabled();
   await expect(page.getByRole('heading', { name: 'Facturas' })).toBeVisible();
@@ -24,11 +33,17 @@ test('CH12 renders the factual payables summary without creating financial recor
   await expect(page.getByRole('button', { name: 'Descargar' })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Limpiar Tabla' })).toBeDisabled();
   await page.getByLabel('Buscar facturas').fill('sin-factura-ch12');
-  await expect(page.getByText('No hay facturas documentadas para “sin-factura-ch12”.')).toBeVisible();
+  await expect(
+    page.getByText('No hay facturas documentadas para “sin-factura-ch12”.'),
+  ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Reclamos' })).toBeVisible();
   await expect(page.getByText('Sin reclamos documentados')).toBeVisible();
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(storedBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(storedBefore);
 });
 
 test('CH12 permits FINANCE to read the payables summary', async ({ page }) => {
@@ -41,6 +56,8 @@ test('CH12 permits FINANCE to read the payables summary', async ({ page }) => {
 
 test('CH12 denies INVENTORY direct payables navigation', async ({ page }) => {
   await login(page, 'inventory@demo.local', 'demo-inventory');
-  await expect(page.locator('main[role="alert"]')).toContainText('Acceso restringido para el rol INVENTORY');
+  await expect(page.locator('main[role="alert"]')).toContainText(
+    'Acceso restringido para el rol INVENTORY',
+  );
   await expect(page.getByRole('heading', { name: 'Cuentas por pagar' })).toHaveCount(0);
 });

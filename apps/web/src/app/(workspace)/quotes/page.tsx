@@ -955,7 +955,7 @@ function QuoteEditor({
               ) : null}
             </div>
           </div>
-        {activeCategory === 'SERVICES' || activeCategory === 'MEDICATIONS' ? (
+          {activeCategory === 'SERVICES' || activeCategory === 'MEDICATIONS' ? (
             <div className="form-grid form-grid-compact quote-item-catalog">
               <label className="full-field">
                 {activeCategory === 'SERVICES' ? 'Buscar servicios' : 'Buscar medicamentos'}

@@ -22,10 +22,21 @@ export default function ServicesCatalogPage() {
           </p>
         </div>
         <div className="action-row">
-          <Button aria-describedby="catalog-services-export-help" className="button-secondary" data-action-id="CATALOG-SERVICES-EXPORT" disabled type="button">
+          <Button
+            aria-describedby="catalog-services-export-help"
+            className="button-secondary"
+            data-action-id="CATALOG-SERVICES-EXPORT"
+            disabled
+            type="button"
+          >
             Excel
           </Button>
-          <Button aria-describedby="catalog-services-create-help" data-action-id="CATALOG-SERVICES-CREATE" disabled type="button">
+          <Button
+            aria-describedby="catalog-services-create-help"
+            data-action-id="CATALOG-SERVICES-CREATE"
+            disabled
+            type="button"
+          >
             Nuevo
           </Button>
         </div>
@@ -35,7 +46,8 @@ export default function ServicesCatalogPage() {
         La exportación requiere columnas, minimización y autorización aprobadas.
       </p>
       <p className="field-help" id="catalog-services-create-help">
-        El alta requiere una fuente, roles, campos, validación, auditoría y reglas de catálogo aprobadas.
+        El alta requiere una fuente, roles, campos, validación, auditoría y reglas de catálogo
+        aprobadas.
       </p>
 
       <Panel>
@@ -46,17 +58,31 @@ export default function ServicesCatalogPage() {
         <div className="table-controls">
           <label>
             Registros
-            <select aria-label="Registros de servicios por página" data-action-id="CATALOG-SERVICES-PAGE-SIZE" disabled value="50" onChange={() => undefined}>
+            <select
+              aria-label="Registros de servicios por página"
+              data-action-id="CATALOG-SERVICES-PAGE-SIZE"
+              disabled
+              value="50"
+              onChange={() => undefined}
+            >
               <option value="50">50</option>
             </select>
           </label>
           <label>
             Buscar servicios
-            <input data-action-id="CATALOG-SERVICES-SEARCH" onChange={(event) => setQuery(event.target.value)} value={query} />
+            <input
+              data-action-id="CATALOG-SERVICES-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              value={query}
+            />
           </label>
           <div className="action-row" aria-label="Paginación de servicios">
-            <Button data-action-id="CATALOG-SERVICES-PAGE-PREV" disabled type="button">Anterior</Button>
-            <Button data-action-id="CATALOG-SERVICES-PAGE-NEXT" disabled type="button">Siguiente</Button>
+            <Button data-action-id="CATALOG-SERVICES-PAGE-PREV" disabled type="button">
+              Anterior
+            </Button>
+            <Button data-action-id="CATALOG-SERVICES-PAGE-NEXT" disabled type="button">
+              Siguiente
+            </Button>
           </div>
         </div>
         <div className="table-wrap">

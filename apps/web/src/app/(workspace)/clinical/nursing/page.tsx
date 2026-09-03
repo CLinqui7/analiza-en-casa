@@ -15,7 +15,10 @@ const resourceFormSchema = z.object({
   shift: z.enum(['MORNING', 'AFTERNOON', 'NIGHT']),
   availability: z.enum(['AVAILABLE', 'ASSIGNED', 'OFF_DUTY']),
   capacity: z.coerce.number().int().nonnegative('La capacidad no puede ser negativa.'),
-  boardRegistrationNumber: z.string().trim().min(1, 'Ingrese el número de Junta o registro profesional.'),
+  boardRegistrationNumber: z
+    .string()
+    .trim()
+    .min(1, 'Ingrese el número de Junta o registro profesional.'),
 });
 type ResourceFormInput = z.input<typeof resourceFormSchema>;
 type ResourceForm = z.output<typeof resourceFormSchema>;
@@ -67,16 +70,18 @@ export default function NursingBoardPage() {
           <h1>Tablero de enfermería</h1>
           <p>Disponibilidad, territorio, turno y capacidad operativa, sin datos de pacientes.</p>
         </div>
-        {can('nursing:write') ? <Button
-          data-action-id="NURSING-RESOURCE-CREATE"
-          onClick={() => {
-            setResult(null);
-            setOpen(true);
-          }}
-          type="button"
-        >
-          Nuevo recurso
-        </Button> : null}
+        {can('nursing:write') ? (
+          <Button
+            data-action-id="NURSING-RESOURCE-CREATE"
+            onClick={() => {
+              setResult(null);
+              setOpen(true);
+            }}
+            type="button"
+          >
+            Nuevo recurso
+          </Button>
+        ) : null}
       </header>
       {result ? (
         <p className="notice success" role="status">
@@ -145,7 +150,9 @@ export default function NursingBoardPage() {
             Número de Junta / registro profesional
             <input {...form.register('boardRegistrationNumber')} />
             {form.formState.errors.boardRegistrationNumber ? (
-              <span className="field-error">{form.formState.errors.boardRegistrationNumber.message}</span>
+              <span className="field-error">
+                {form.formState.errors.boardRegistrationNumber.message}
+              </span>
             ) : null}
           </label>
           <label>

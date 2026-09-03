@@ -62,11 +62,16 @@ export async function login(email: string, password: string): Promise<AuthSessio
     }
     return { userId: data.session.user.id, role, mode: 'supabase' };
   }
-  const user = mockUsers.find(([candidateEmail, candidatePassword]) =>
-    candidateEmail === email.trim().toLowerCase() && candidatePassword === password,
+  const user = mockUsers.find(
+    ([candidateEmail, candidatePassword]) =>
+      candidateEmail === email.trim().toLowerCase() && candidatePassword === password,
   );
   if (!user) throw new Error('Credenciales no válidas.');
-  const session: AuthSession = { userId: `mock-${user[2].toLowerCase()}`, role: user[2], mode: 'mock' };
+  const session: AuthSession = {
+    userId: `mock-${user[2].toLowerCase()}`,
+    role: user[2],
+    mode: 'mock',
+  };
   window.localStorage.setItem(mockSessionKey, JSON.stringify(session));
   return session;
 }

@@ -17,15 +17,27 @@ export default function DiscountsCatalogPage() {
           <p className="eyebrow">Items</p>
           <h1>Descuentos</h1>
           <p>
-            Superficie factual de solo lectura basada en la evidencia de Descuentos de CH15 y CH16. No carga perfiles ni define
-            categorías, porcentajes, cálculos, precios, impuestos o efectos aguas abajo.
+            Superficie factual de solo lectura basada en la evidencia de Descuentos de CH15 y CH16.
+            No carga perfiles ni define categorías, porcentajes, cálculos, precios, impuestos o
+            efectos aguas abajo.
           </p>
         </div>
         <div className="action-row">
-          <Button aria-describedby="catalog-discounts-export-help" className="button-secondary" data-action-id="CATALOG-DISCOUNTS-EXPORT" disabled type="button">
+          <Button
+            aria-describedby="catalog-discounts-export-help"
+            className="button-secondary"
+            data-action-id="CATALOG-DISCOUNTS-EXPORT"
+            disabled
+            type="button"
+          >
             Excel
           </Button>
-          <Button aria-describedby="catalog-discounts-create-help" data-action-id="CATALOG-DISCOUNTS-CREATE" disabled type="button">
+          <Button
+            aria-describedby="catalog-discounts-create-help"
+            data-action-id="CATALOG-DISCOUNTS-CREATE"
+            disabled
+            type="button"
+          >
             Nuevo
           </Button>
         </div>
@@ -35,7 +47,8 @@ export default function DiscountsCatalogPage() {
         La exportación requiere columnas, minimización y autorización aprobadas.
       </p>
       <p className="field-help" id="catalog-discounts-create-help">
-        La creación requiere fuente, categorías, reglas, roles, validación, auditoría y efectos aprobados.
+        La creación requiere fuente, categorías, reglas, roles, validación, auditoría y efectos
+        aprobados.
       </p>
 
       <Panel>
@@ -46,17 +59,31 @@ export default function DiscountsCatalogPage() {
         <div className="table-controls">
           <label>
             Registros
-            <select aria-label="Registros de descuentos por página" data-action-id="CATALOG-DISCOUNTS-PAGE-SIZE" disabled value="10" onChange={() => undefined}>
+            <select
+              aria-label="Registros de descuentos por página"
+              data-action-id="CATALOG-DISCOUNTS-PAGE-SIZE"
+              disabled
+              value="10"
+              onChange={() => undefined}
+            >
               <option value="10">10</option>
             </select>
           </label>
           <label>
             Buscar descuentos
-            <input data-action-id="CATALOG-DISCOUNTS-SEARCH" onChange={(event) => setQuery(event.target.value)} value={query} />
+            <input
+              data-action-id="CATALOG-DISCOUNTS-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              value={query}
+            />
           </label>
           <div className="action-row" aria-label="Paginación de descuentos">
-            <Button data-action-id="CATALOG-DISCOUNTS-PAGE-PREV" disabled type="button">Anterior</Button>
-            <Button data-action-id="CATALOG-DISCOUNTS-PAGE-NEXT" disabled type="button">Siguiente</Button>
+            <Button data-action-id="CATALOG-DISCOUNTS-PAGE-PREV" disabled type="button">
+              Anterior
+            </Button>
+            <Button data-action-id="CATALOG-DISCOUNTS-PAGE-NEXT" disabled type="button">
+              Siguiente
+            </Button>
           </div>
         </div>
         <div className="table-wrap">

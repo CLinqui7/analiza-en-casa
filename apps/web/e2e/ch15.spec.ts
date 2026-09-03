@@ -11,7 +11,12 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch15-discounts-catalog
 // test-id: playwright:ch15-discounts-catalog-permissions
 
-async function login(page: import('@playwright/test').Page, email = 'admin@demo.local', password = 'demo-admin', next = '/catalogs/medications') {
+async function login(
+  page: import('@playwright/test').Page,
+  email = 'admin@demo.local',
+  password = 'demo-admin',
+  next = '/catalogs/medications',
+) {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
@@ -21,9 +26,21 @@ async function login(page: import('@playwright/test').Page, email = 'admin@demo.
 test('CH15 renders the factual empty discount matrix without mutation', async ({ page }) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/discounts');
   await expect(page).toHaveURL(/\/catalogs\/discounts$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Descuentos' })).toBeVisible();
-  for (const header of ['Acciones', 'Nombre', 'Descripción', 'Servicios', 'Laboratorios', 'Medicamentos', 'Equipos', 'Insumos', 'Honorarios']) {
+  for (const header of [
+    'Acciones',
+    'Nombre',
+    'Descripción',
+    'Servicios',
+    'Laboratorios',
+    'Medicamentos',
+    'Equipos',
+    'Insumos',
+    'Honorarios',
+  ]) {
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
   }
   await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-EXPORT"]')).toBeDisabled();
@@ -32,10 +49,16 @@ test('CH15 renders the factual empty discount matrix without mutation', async ({
   await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-PAGE-PREV"]')).toBeDisabled();
   await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-PAGE-NEXT"]')).toBeDisabled();
   await page.getByLabel('Buscar descuentos').fill('sin-descuento-ch15');
-  await expect(page.locator('tbody .empty-state')).toContainText('Sin perfiles de descuento documentados');
+  await expect(page.locator('tbody .empty-state')).toContainText(
+    'Sin perfiles de descuento documentados',
+  );
   await expect(page.locator('tbody .empty-state')).toContainText('sin-descuento-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the discount matrix', async ({ page }) => {
@@ -71,9 +94,20 @@ test('CH15 denies FINANCE direct discount matrix access', async ({ page }) => {
 test('CH15 renders the factual empty services catalog without mutation', async ({ page }) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/services');
   await expect(page).toHaveURL(/\/catalogs\/services$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Items / Servicios' })).toBeVisible();
-  for (const header of ['Acciones', 'Código', 'Nombre', 'Tipo de producto', 'Categoría', 'Impuesto', 'Descuento', 'Estado']) {
+  for (const header of [
+    'Acciones',
+    'Código',
+    'Nombre',
+    'Tipo de producto',
+    'Categoría',
+    'Impuesto',
+    'Descuento',
+    'Estado',
+  ]) {
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
   }
   await expect(page.locator('[data-action-id="CATALOG-SERVICES-EXPORT"]')).toBeDisabled();
@@ -85,7 +119,11 @@ test('CH15 renders the factual empty services catalog without mutation', async (
   await expect(page.locator('tbody .empty-state')).toContainText('Sin servicios documentados');
   await expect(page.locator('tbody .empty-state')).toContainText('sin-servicio-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the services catalog', async ({ page }) => {
@@ -121,7 +159,9 @@ test('CH15 denies FINANCE direct services catalog access', async ({ page }) => {
 test('CH15 renders the factual empty fees catalog without mutation', async ({ page }) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/fees');
   await expect(page).toHaveURL(/\/catalogs\/fees$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Items / Honorarios' })).toBeVisible();
   for (const header of ['Acciones', 'Código', 'Nombre', 'Impuesto', 'Descuento', 'Estado']) {
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
@@ -135,7 +175,11 @@ test('CH15 renders the factual empty fees catalog without mutation', async ({ pa
   await expect(page.locator('tbody .empty-state')).toContainText('Sin honorarios documentados');
   await expect(page.locator('tbody .empty-state')).toContainText('sin-honorario-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the fees catalog', async ({ page }) => {
@@ -171,9 +215,19 @@ test('CH15 denies FINANCE direct fees catalog access', async ({ page }) => {
 test('CH15 renders the factual empty medication catalog without mutation', async ({ page }) => {
   await login(page);
   await expect(page).toHaveURL(/\/catalogs\/medications$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Items / Medicamentos' })).toBeVisible();
-  for (const header of ['Acciones', 'Código', 'Nombre', 'Impuesto', 'Descuento', 'Lotes', 'Estado']) {
+  for (const header of [
+    'Acciones',
+    'Código',
+    'Nombre',
+    'Impuesto',
+    'Descuento',
+    'Lotes',
+    'Estado',
+  ]) {
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
   }
   await expect(page.locator('[data-action-id="CATALOG-MEDICATIONS-EXPORT"]')).toBeDisabled();
@@ -185,7 +239,11 @@ test('CH15 renders the factual empty medication catalog without mutation', async
   await expect(page.locator('tbody .empty-state')).toContainText('Sin medicamentos documentados');
   await expect(page.locator('tbody .empty-state')).toContainText('sin-medicamento-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the medication catalog', async ({ page }) => {
@@ -221,9 +279,20 @@ test('CH15 denies FINANCE direct medication catalog access', async ({ page }) =>
 test('CH15 renders the factual empty supplies catalog without mutation', async ({ page }) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/supplies');
   await expect(page).toHaveURL(/\/catalogs\/supplies$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Items / Insumos' })).toBeVisible();
-  for (const header of ['Acciones', 'Código', 'Nombre', 'Tipo', 'Impuesto', 'Descuento', 'Lotes', 'Estado']) {
+  for (const header of [
+    'Acciones',
+    'Código',
+    'Nombre',
+    'Tipo',
+    'Impuesto',
+    'Descuento',
+    'Lotes',
+    'Estado',
+  ]) {
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
   }
   await expect(page.locator('[data-action-id="CATALOG-SUPPLIES-EXPORT"]')).toBeDisabled();
@@ -235,7 +304,11 @@ test('CH15 renders the factual empty supplies catalog without mutation', async (
   await expect(page.locator('tbody .empty-state')).toContainText('Sin insumos documentados');
   await expect(page.locator('tbody .empty-state')).toContainText('sin-insumo-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the supplies catalog', async ({ page }) => {
@@ -268,10 +341,14 @@ test('CH15 denies FINANCE direct supplies catalog access', async ({ page }) => {
   await expect(page.getByLabel('Buscar insumos')).toHaveCount(0);
 });
 
-test('CH15 renders the factual empty diagnostic studies catalog without mutation', async ({ page }) => {
+test('CH15 renders the factual empty diagnostic studies catalog without mutation', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/studies');
   await expect(page).toHaveURL(/\/catalogs\/studies$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   await expect(page.getByRole('heading', { name: 'Items / Estudios Dx' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Código' })).toBeVisible();
@@ -286,10 +363,16 @@ test('CH15 renders the factual empty diagnostic studies catalog without mutation
   await expect(page.locator('[data-action-id="CATALOG-STUDIES-PAGE-PREV"]')).toBeDisabled();
   await expect(page.locator('[data-action-id="CATALOG-STUDIES-PAGE-NEXT"]')).toBeDisabled();
   await page.getByLabel('Buscar estudios diagnósticos').fill('sin-estudio-ch15');
-  await expect(page.locator('tbody .empty-state')).toContainText('Sin estudios diagnósticos documentados');
+  await expect(page.locator('tbody .empty-state')).toContainText(
+    'Sin estudios diagnósticos documentados',
+  );
   await expect(page.locator('tbody .empty-state')).toContainText('sin-estudio-ch15');
   await page.reload();
-  await expect.poll(() => page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+    )
+    .toBe(auditBefore);
 });
 
 test('CH15 lets INVENTORY open the diagnostic studies catalog', async ({ page }) => {

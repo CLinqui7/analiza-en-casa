@@ -1,5 +1,23 @@
-import type { Hospitalization, InsuranceEvent, InsuranceRequest, InsuranceRequestStatus, InventoryMovement, NurseHourEntry, Patient, Payment, Quote, QuoteDiscount, QuoteItem, QuoteItemCategory, VitalReading } from '@analiza/contracts';
-import { insuranceEventSchema, insuranceRequestSchema, insuranceRequestStatusSchema } from '@analiza/contracts';
+import type {
+  Hospitalization,
+  InsuranceEvent,
+  InsuranceRequest,
+  InsuranceRequestStatus,
+  InventoryMovement,
+  NurseHourEntry,
+  Patient,
+  Payment,
+  Quote,
+  QuoteDiscount,
+  QuoteItem,
+  QuoteItemCategory,
+  VitalReading,
+} from '@analiza/contracts';
+import {
+  insuranceEventSchema,
+  insuranceRequestSchema,
+  insuranceRequestStatusSchema,
+} from '@analiza/contracts';
 
 export type DocumentRule = {
   label: string;
@@ -53,9 +71,16 @@ export function ageFromBirthDate(birthDate?: string, today = new Date()): number
   if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return undefined;
   const [year, month, day] = birthDate.split('-').map(Number);
   const birth = new Date(Date.UTC(year, month - 1, day));
-  if (birth.getUTCFullYear() !== year || birth.getUTCMonth() !== month - 1 || birth.getUTCDate() !== day) return undefined;
+  if (
+    birth.getUTCFullYear() !== year ||
+    birth.getUTCMonth() !== month - 1 ||
+    birth.getUTCDate() !== day
+  )
+    return undefined;
   const age = today.getUTCFullYear() - year;
-  const anniversaryPending = today.getUTCMonth() < month - 1 || (today.getUTCMonth() === month - 1 && today.getUTCDate() < day);
+  const anniversaryPending =
+    today.getUTCMonth() < month - 1 ||
+    (today.getUTCMonth() === month - 1 && today.getUTCDate() < day);
   return age - Number(anniversaryPending) >= 0 ? age - Number(anniversaryPending) : undefined;
 }
 
@@ -107,11 +132,12 @@ export function searchPatients(patients: readonly Patient[], query: string): Pat
   const documentNeedle = normalizeDocument(query);
   const phoneNeedle = normalizePhone(query);
   if (!needle) return [...patients];
-  return patients.filter((patient) =>
-    normalizeText(patient.fullName).includes(needle) ||
-    normalizeText(patient.insurer ?? '').includes(needle) ||
-    normalizeDocument(patient.documentId).includes(documentNeedle) ||
-    (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
+  return patients.filter(
+    (patient) =>
+      normalizeText(patient.fullName).includes(needle) ||
+      normalizeText(patient.insurer ?? '').includes(needle) ||
+      normalizeDocument(patient.documentId).includes(documentNeedle) ||
+      (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
   );
 }
 
@@ -129,12 +155,14 @@ export function searchInsuranceRequests(
   if (!needle) return [...requests];
   return requests.filter((request) => {
     const patient = patients.find((candidate) => candidate.id === request.patientId);
-    return normalizeText(request.quoteId).includes(needle)
-      || normalizeDocument(request.quoteId).includes(documentNeedle)
-      || normalizeText(request.insurer).includes(needle)
-      || normalizeText(patient?.fullName ?? '').includes(needle)
-      || normalizeDocument(patient?.documentId ?? '').includes(documentNeedle)
-      || (phoneNeedle.length > 0 && normalizePhone(patient?.phone ?? '').includes(phoneNeedle));
+    return (
+      normalizeText(request.quoteId).includes(needle) ||
+      normalizeDocument(request.quoteId).includes(documentNeedle) ||
+      normalizeText(request.insurer).includes(needle) ||
+      normalizeText(patient?.fullName ?? '').includes(needle) ||
+      normalizeDocument(patient?.documentId ?? '').includes(documentNeedle) ||
+      (phoneNeedle.length > 0 && normalizePhone(patient?.phone ?? '').includes(phoneNeedle))
+    );
   });
 }
 
@@ -151,7 +179,9 @@ export function hasValidInsuranceRequestContext(
   const quote = quotes.find((candidate) => candidate.id === request.quoteId);
   const patient = patients.find((candidate) => candidate.id === request.patientId);
   const insurer = patient?.insurer ?? patient?.insurance?.insurer;
-  return Boolean(quote && patient && quote.patientId === patient.id && insurer && insurer === request.insurer);
+  return Boolean(
+    quote && patient && quote.patientId === patient.id && insurer && insurer === request.insurer,
+  );
 }
 
 /** Append a locally observed administrative fact. There is deliberately no
@@ -186,15 +216,17 @@ export function searchHospitalizations(
   if (!needle) return [...hospitalizations];
   return hospitalizations.filter((hospitalization) => {
     const patient = patients.find((candidate) => candidate.id === hospitalization.patientId);
-    return [
-      normalizeText(hospitalization.id),
-      normalizeText(hospitalization.status),
-      normalizeText(hospitalization.accountType),
-      normalizeText(patient?.fullName ?? ''),
-      normalizeText(patient?.company ?? ''),
-    ].some((value) => value.includes(needle))
-      || normalizeDocument(hospitalization.id).includes(documentNeedle)
-      || normalizeDocument(patient?.documentId ?? '').includes(documentNeedle);
+    return (
+      [
+        normalizeText(hospitalization.id),
+        normalizeText(hospitalization.status),
+        normalizeText(hospitalization.accountType),
+        normalizeText(patient?.fullName ?? ''),
+        normalizeText(patient?.company ?? ''),
+      ].some((value) => value.includes(needle)) ||
+      normalizeDocument(hospitalization.id).includes(documentNeedle) ||
+      normalizeDocument(patient?.documentId ?? '').includes(documentNeedle)
+    );
   });
 }
 
@@ -211,15 +243,20 @@ export function filterHospitalizations(
   hospitalizations: readonly Hospitalization[],
   filters: HospitalizationFilters,
 ): Hospitalization[] {
-  return hospitalizations.filter((item) =>
-    (!filters.status || item.status === filters.status)
-    && (!filters.startDate || item.startDate === filters.startDate)
-    && (!filters.accountType || item.accountType === filters.accountType));
+  return hospitalizations.filter(
+    (item) =>
+      (!filters.status || item.status === filters.status) &&
+      (!filters.startDate || item.startDate === filters.startDate) &&
+      (!filters.accountType || item.accountType === filters.accountType),
+  );
 }
 
 /** Operational elapsed calendar days from available administrative dates.
  * It deliberately does not characterize care or a clinical duration. */
-export function hospitalizationDurationDays(item: Pick<Hospitalization, 'startDate' | 'endDate'>, now = new Date()): number | undefined {
+export function hospitalizationDurationDays(
+  item: Pick<Hospitalization, 'startDate' | 'endDate'>,
+  now = new Date(),
+): number | undefined {
   const start = new Date(`${item.startDate}T00:00:00.000Z`);
   const end = new Date(`${item.endDate ?? now.toISOString().slice(0, 10)}T00:00:00.000Z`);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return undefined;
@@ -250,10 +287,14 @@ export function quoteItemSubtotal(item: QuoteItem): number {
 
 export function validateQuoteItem(item: QuoteItem): string | undefined {
   if (!item.name.trim()) return 'El concepto es obligatorio.';
-  if (!Number.isFinite(item.quantity) || item.quantity <= 0) return 'La cantidad debe ser mayor que cero.';
-  if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0) return 'El precio manual no puede ser negativo.';
-  if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0) return 'El descuento manual no puede ser negativo.';
-  if (item.discountAmount > quoteItemGross(item)) return 'El descuento manual no puede superar el importe de la línea.';
+  if (!Number.isFinite(item.quantity) || item.quantity <= 0)
+    return 'La cantidad debe ser mayor que cero.';
+  if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0)
+    return 'El precio manual no puede ser negativo.';
+  if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0)
+    return 'El descuento manual no puede ser negativo.';
+  if (item.discountAmount > quoteItemGross(item))
+    return 'El descuento manual no puede superar el importe de la línea.';
   return undefined;
 }
 
@@ -267,14 +308,25 @@ export type QuoteTotals = {
   patientAmount: number;
 };
 
-function generalQuoteDiscount(items: readonly QuoteItem[], netBeforeGeneralDiscount: number, discount?: QuoteDiscount): number {
+function generalQuoteDiscount(
+  items: readonly QuoteItem[],
+  netBeforeGeneralDiscount: number,
+  discount?: QuoteDiscount,
+): number {
   if (!discount) return 0;
-  if (discount.type === 'FIXED') return Math.min(netBeforeGeneralDiscount, roundMoney(discount.value ?? 0));
-  if (discount.type === 'PERCENT') return Math.min(netBeforeGeneralDiscount, roundMoney(netBeforeGeneralDiscount * (discount.value ?? 0) / 100));
-  return roundMoney(items.reduce((sum, item) => {
-    const percentage = discount.categories?.[item.category] ?? 0;
-    return sum + quoteItemSubtotal(item) * percentage / 100;
-  }, 0));
+  if (discount.type === 'FIXED')
+    return Math.min(netBeforeGeneralDiscount, roundMoney(discount.value ?? 0));
+  if (discount.type === 'PERCENT')
+    return Math.min(
+      netBeforeGeneralDiscount,
+      roundMoney((netBeforeGeneralDiscount * (discount.value ?? 0)) / 100),
+    );
+  return roundMoney(
+    items.reduce((sum, item) => {
+      const percentage = discount.categories?.[item.category] ?? 0;
+      return sum + (quoteItemSubtotal(item) * percentage) / 100;
+    }, 0),
+  );
 }
 
 /** Pure quote calculation. All prices, discounts, and insurer responsibility
@@ -288,14 +340,16 @@ export function calculateQuoteTotals(
     const error = validateQuoteItem(item);
     if (error) throw new Error(error);
   }
-  if (!Number.isFinite(insurerAmount) || insurerAmount < 0) throw new Error('El importe explícito de aseguradora no puede ser negativo.');
+  if (!Number.isFinite(insurerAmount) || insurerAmount < 0)
+    throw new Error('El importe explícito de aseguradora no puede ser negativo.');
   const subtotal = roundMoney(items.reduce((sum, item) => sum + quoteItemGross(item), 0));
   const itemDiscountAmount = roundMoney(items.reduce((sum, item) => sum + item.discountAmount, 0));
   const netBeforeGeneralDiscount = roundMoney(subtotal - itemDiscountAmount);
   const generalDiscountAmount = generalQuoteDiscount(items, netBeforeGeneralDiscount, discount);
   const total = roundMoney(netBeforeGeneralDiscount - generalDiscountAmount);
   const explicitInsurerAmount = roundMoney(insurerAmount);
-  if (explicitInsurerAmount > total) throw new Error('El importe explícito de aseguradora no puede superar el total.');
+  if (explicitInsurerAmount > total)
+    throw new Error('El importe explícito de aseguradora no puede superar el total.');
   return {
     subtotal,
     itemDiscountAmount,
@@ -307,37 +361,56 @@ export function calculateQuoteTotals(
   };
 }
 
-export function calculateQuoteBalance(quote: Pick<Quote, 'id' | 'patientAmount'>, payments: readonly Payment[]) {
-  const paid = roundMoney(payments
-    .filter((payment) => payment.quoteId === quote.id && payment.status === 'APPLIED')
-    .reduce((sum, payment) => sum + payment.amount, 0));
+export function calculateQuoteBalance(
+  quote: Pick<Quote, 'id' | 'patientAmount'>,
+  payments: readonly Payment[],
+) {
+  const paid = roundMoney(
+    payments
+      .filter((payment) => payment.quoteId === quote.id && payment.status === 'APPLIED')
+      .reduce((sum, payment) => sum + payment.amount, 0),
+  );
   return { paid, balance: roundMoney(quote.patientAmount - paid) };
 }
 
-export function searchQuotes(quotes: readonly Quote[], patients: readonly Patient[], query: string): Quote[] {
+export function searchQuotes(
+  quotes: readonly Quote[],
+  patients: readonly Patient[],
+  query: string,
+): Quote[] {
   const needle = normalizeText(query);
   const normalizedNeedle = normalizeDocument(query);
   if (!needle) return [...quotes];
   return quotes.filter((quote) => {
     const patient = patients.find((candidate) => candidate.id === quote.patientId);
-    return [quote.id, quote.caseId, quote.status, patient?.fullName ?? '']
-      .some((value) => normalizeText(value).includes(needle))
-      || normalizeDocument(quote.id).includes(normalizedNeedle)
-      || normalizeDocument(quote.caseId).includes(normalizedNeedle);
+    return (
+      [quote.id, quote.caseId, quote.status, patient?.fullName ?? ''].some((value) =>
+        normalizeText(value).includes(needle),
+      ) ||
+      normalizeDocument(quote.id).includes(normalizedNeedle) ||
+      normalizeDocument(quote.caseId).includes(normalizedNeedle)
+    );
   });
 }
 
 export type QuoteListFilters = { status?: Quote['status'] | ''; createdDate?: string };
 
 export function filterQuotes(quotes: readonly Quote[], filters: QuoteListFilters): Quote[] {
-  return quotes.filter((quote) =>
-    (!filters.status || quote.status === filters.status)
-    && (!filters.createdDate || quote.createdAt.slice(0, 10) === filters.createdDate));
+  return quotes.filter(
+    (quote) =>
+      (!filters.status || quote.status === filters.status) &&
+      (!filters.createdDate || quote.createdAt.slice(0, 10) === filters.createdDate),
+  );
 }
 
 /** Backward-compatible defaults for administrative CH03 fields.  No value
  * returned here is a discount, referral, or gift-card business rule. */
-export function normalizeQuoteInvoiceMetadata(quote: Pick<Quote, 'createdAt' | 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'>): Pick<Quote, 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'> {
+export function normalizeQuoteInvoiceMetadata(
+  quote: Pick<
+    Quote,
+    'createdAt' | 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'
+  >,
+): Pick<Quote, 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'> {
   return {
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
     discountGroup: quote.discountGroup ?? 'Regular',
@@ -371,7 +444,12 @@ export function createQuoteRevision(
     rootQuoteId,
     revisionReason: reason,
     items: source.items.map((item) => ({ ...item })),
-    discount: source.discount ? { ...source.discount, categories: source.discount.categories ? { ...source.discount.categories } : undefined } : undefined,
+    discount: source.discount
+      ? {
+          ...source.discount,
+          categories: source.discount.categories ? { ...source.discount.categories } : undefined,
+        }
+      : undefined,
   };
 }
 

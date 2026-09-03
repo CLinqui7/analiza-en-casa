@@ -149,7 +149,9 @@ test('CH09 DOCTOR can open the factual clinical list and its authorized hospital
   await expect(page.getByRole('heading', { name: 'case-demo-001' })).toBeVisible();
 });
 
-test('CH09 row menu opens the scoped quote and blocks undefined clinical workflows', async ({ page }) => {
+test('CH09 row menu opens the scoped quote and blocks undefined clinical workflows', async ({
+  page,
+}) => {
   await loginToClinicalHospitalizations(page);
 
   const menuToggle = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-ACTIONS-MENU"]');
@@ -182,13 +184,17 @@ test('CH09 row menu opens the scoped quote and blocks undefined clinical workflo
   await expect(page.getByRole('heading', { name: 'quote-demo-001' })).toBeVisible();
 });
 
-test('CH09 NURSE can read the factual list but cannot expose a quote navigation', async ({ page }) => {
+test('CH09 NURSE can read the factual list but cannot expose a quote navigation', async ({
+  page,
+}) => {
   await loginToClinicalHospitalizations(page, 'nurse@demo.local', 'demo-nurse');
 
   const menuToggle = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-ACTIONS-MENU"]');
   await menuToggle.click();
   await expect(menuToggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]')).toHaveCount(0);
+  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]')).toHaveCount(
+    0,
+  );
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"]'),
   ).toBeDisabled();

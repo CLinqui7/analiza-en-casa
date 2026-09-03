@@ -16,10 +16,18 @@ const reportColumns = [
 ];
 
 const reportSections = [
-  { id: 'information', label: 'Información Principal', actionId: 'HEALTH-REPORT-SECTION-INFORMATION' },
+  {
+    id: 'information',
+    label: 'Información Principal',
+    actionId: 'HEALTH-REPORT-SECTION-INFORMATION',
+  },
   { id: 'clinical', label: 'Evaluación Clínica', actionId: 'HEALTH-REPORT-SECTION-CLINICAL' },
   { id: 'medical', label: 'Atención Médica', actionId: 'HEALTH-REPORT-SECTION-MEDICAL' },
-  { id: 'treatments', label: 'Tratamientos y Órdenes', actionId: 'HEALTH-REPORT-SECTION-TREATMENTS' },
+  {
+    id: 'treatments',
+    label: 'Tratamientos y Órdenes',
+    actionId: 'HEALTH-REPORT-SECTION-TREATMENTS',
+  },
   { id: 'events', label: 'Eventos Clínicos', actionId: 'HEALTH-REPORT-SECTION-EVENTS' },
   { id: 'evidence', label: 'Evidencia y Documentos', actionId: 'HEALTH-REPORT-SECTION-EVIDENCE' },
 ] as const;
@@ -29,7 +37,8 @@ type ReportSectionId = (typeof reportSections)[number]['id'];
 export default function HealthReportPage() {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState<ReportSectionId>('information');
-  const activeSection = reportSections.find((section) => section.id === selectedSection) ?? reportSections[0];
+  const activeSection =
+    reportSections.find((section) => section.id === selectedSection) ?? reportSections[0];
 
   return (
     <div className="page-stack">
@@ -37,16 +46,18 @@ export default function HealthReportPage() {
         <div>
           <p className="eyebrow">Clínico</p>
           <h1>Reporte de salud</h1>
-          <p>Superficie factual de solo lectura; no muestra registros clínicos ni identificatorios.</p>
+          <p>
+            Superficie factual de solo lectura; no muestra registros clínicos ni identificatorios.
+          </p>
         </div>
         <StatusTag tone="warning">Fuente pendiente</StatusTag>
       </header>
 
       <Panel>
         <p className="notice" id="health-report-data-boundary" role="status">
-          El reporte observado requiere una fuente autorizada por organización, roles, minimización de
-          campos, filtros, auditoría de acceso y retención aprobados (CH16-Q008). La ruta clínica y
-          los datos de otros módulos no se reutilizan como autorización.
+          El reporte observado requiere una fuente autorizada por organización, roles, minimización
+          de campos, filtros, auditoría de acceso y retención aprobados (CH16-Q008). La ruta clínica
+          y los datos de otros módulos no se reutilizan como autorización.
         </p>
         <label className="search-label" htmlFor="health-report-search">
           Buscar en reporte de salud
@@ -67,9 +78,9 @@ export default function HealthReportPage() {
         <section aria-labelledby="health-report-actions-title">
           <h2 id="health-report-actions-title">Acciones de hospitalización</h2>
           <p className="notice" id="health-report-actions-boundary" role="status">
-            El menú observado se conserva sin contexto de hospitalización. No abre ni consulta historia
-            clínica, Claims, visitas, notas, auditorías o Registro XPO hasta contar con la relación,
-            autorización y auditoría aprobadas (CH17-Q007).
+            El menú observado se conserva sin contexto de hospitalización. No abre ni consulta
+            historia clínica, Claims, visitas, notas, auditorías o Registro XPO hasta contar con la
+            relación, autorización y auditoría aprobadas (CH17-Q007).
           </p>
           <button
             aria-controls="health-report-hospitalization-actions"
@@ -88,13 +99,27 @@ export default function HealthReportPage() {
               id="health-report-hospitalization-actions"
               role="menu"
             >
-              <li aria-disabled="true" role="menuitem">Historia clínica</li>
-              <li aria-disabled="true" role="menuitem">Reporte Claims</li>
-              <li aria-disabled="true" role="menuitem">Ver visitas</li>
-              <li aria-disabled="true" role="menuitem">Notas de servicio</li>
-              <li aria-disabled="true" role="menuitem">Reporte de salud</li>
-              <li aria-disabled="true" role="menuitem">Auditorías</li>
-              <li aria-disabled="true" role="menuitem">Registro XPO</li>
+              <li aria-disabled="true" role="menuitem">
+                Historia clínica
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Reporte Claims
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Ver visitas
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Notas de servicio
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Reporte de salud
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Auditorías
+              </li>
+              <li aria-disabled="true" role="menuitem">
+                Registro XPO
+              </li>
             </ul>
           ) : null}
         </section>
@@ -105,8 +130,8 @@ export default function HealthReportPage() {
           <h2 id="health-report-sections-title">Secciones observadas del reporte</h2>
           <p className="notice" id="health-report-sections-boundary" role="status">
             Las pestañas reproducen sólo la navegación visible. No cargan Información Principal,
-            Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos ni Evidencia y
-            Documentos porque CH16-Q008 no autoriza una fuente ni campos de reporte.
+            Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos ni
+            Evidencia y Documentos porque CH16-Q008 no autoriza una fuente ni campos de reporte.
           </p>
           <div aria-label="Secciones observadas del reporte de salud" role="tablist">
             {reportSections.map((section) => (

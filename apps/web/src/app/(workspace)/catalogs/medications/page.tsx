@@ -18,14 +18,26 @@ export default function MedicationCatalogPage() {
           <h1>Items / Medicamentos</h1>
           <p>
             Superficie factual de solo lectura basada en CH15-E0046. No carga filas, ni define
-            identidad farmacéutica, precios, impuestos, descuentos, lotes, estados o reglas clínicas.
+            identidad farmacéutica, precios, impuestos, descuentos, lotes, estados o reglas
+            clínicas.
           </p>
         </div>
         <div className="action-row">
-          <Button aria-describedby="catalog-medications-export-help" className="button-secondary" data-action-id="CATALOG-MEDICATIONS-EXPORT" disabled type="button">
+          <Button
+            aria-describedby="catalog-medications-export-help"
+            className="button-secondary"
+            data-action-id="CATALOG-MEDICATIONS-EXPORT"
+            disabled
+            type="button"
+          >
             Excel
           </Button>
-          <Button aria-describedby="catalog-medications-create-help" data-action-id="CATALOG-MEDICATIONS-CREATE" disabled type="button">
+          <Button
+            aria-describedby="catalog-medications-create-help"
+            data-action-id="CATALOG-MEDICATIONS-CREATE"
+            disabled
+            type="button"
+          >
             Nuevo
           </Button>
         </div>
@@ -35,7 +47,8 @@ export default function MedicationCatalogPage() {
         La exportación requiere columnas, minimización y autorización aprobadas.
       </p>
       <p className="field-help" id="catalog-medications-create-help">
-        El alta requiere catálogo fuente, roles, campos, validación, auditoría y reglas clínicas aprobadas.
+        El alta requiere catálogo fuente, roles, campos, validación, auditoría y reglas clínicas
+        aprobadas.
       </p>
 
       <Panel>
@@ -46,17 +59,31 @@ export default function MedicationCatalogPage() {
         <div className="table-controls">
           <label>
             Registros
-            <select aria-label="Registros de medicamentos por página" data-action-id="CATALOG-MEDICATIONS-PAGE-SIZE" disabled value="50" onChange={() => undefined}>
+            <select
+              aria-label="Registros de medicamentos por página"
+              data-action-id="CATALOG-MEDICATIONS-PAGE-SIZE"
+              disabled
+              value="50"
+              onChange={() => undefined}
+            >
               <option value="50">50</option>
             </select>
           </label>
           <label>
             Buscar medicamentos
-            <input data-action-id="CATALOG-MEDICATIONS-SEARCH" onChange={(event) => setQuery(event.target.value)} value={query} />
+            <input
+              data-action-id="CATALOG-MEDICATIONS-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              value={query}
+            />
           </label>
           <div className="action-row" aria-label="Paginación de medicamentos">
-            <Button data-action-id="CATALOG-MEDICATIONS-PAGE-PREV" disabled type="button">Anterior</Button>
-            <Button data-action-id="CATALOG-MEDICATIONS-PAGE-NEXT" disabled type="button">Siguiente</Button>
+            <Button data-action-id="CATALOG-MEDICATIONS-PAGE-PREV" disabled type="button">
+              Anterior
+            </Button>
+            <Button data-action-id="CATALOG-MEDICATIONS-PAGE-NEXT" disabled type="button">
+              Siguiente
+            </Button>
           </div>
         </div>
         <div className="table-wrap">
@@ -83,7 +110,11 @@ export default function MedicationCatalogPage() {
         </div>
       </Panel>
 
-      <Link className="button button-secondary" data-action-id="CATAL-MEDICATIONS-BACK" href="/catalogs">
+      <Link
+        className="button button-secondary"
+        data-action-id="CATAL-MEDICATIONS-BACK"
+        href="/catalogs"
+      >
         Volver a Catálogos
       </Link>
     </div>

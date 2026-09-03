@@ -8,13 +8,27 @@ async function login(page: Page, email: string, password: string) {
 }
 
 // test-id: playwright:ch17-health-report-empty-surface
-test('CH17 keeps the visible report anatomy empty until its sensitive-data boundary is approved', async ({ page }) => {
+test('CH17 keeps the visible report anatomy empty until its sensitive-data boundary is approved', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin');
   await expect(page).toHaveURL(/\/clinical\/reports$/);
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
 
   await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
-  for (const column of ['Acciones', 'Cédula', 'Nombre', 'Empresa', 'Hospitalización', 'Período', 'Auditoría', 'Triage', 'Estatus']) {
+  for (const column of [
+    'Acciones',
+    'Cédula',
+    'Nombre',
+    'Empresa',
+    'Hospitalización',
+    'Período',
+    'Auditoría',
+    'Triage',
+    'Estatus',
+  ]) {
     await expect(page.getByRole('columnheader', { name: column })).toBeVisible();
   }
   await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
@@ -25,7 +39,9 @@ test('CH17 keeps the visible report anatomy empty until its sensitive-data bound
 
   await page.reload();
   await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
-  expect(await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  expect(
+    await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+  ).toBe(auditBefore);
 });
 
 test('CH17 denies INVENTORY direct access to the clinical report route', async ({ page }) => {
@@ -35,9 +51,13 @@ test('CH17 denies INVENTORY direct access to the clinical report route', async (
 });
 
 // test-id: playwright:ch17-health-report-actions-menu
-test('CH17 opens only the observed disabled hospitalization-action anatomy without a clinical context', async ({ page }) => {
+test('CH17 opens only the observed disabled hospitalization-action anatomy without a clinical context', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin');
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   const actions = page.locator('[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]');
 
   await expect(actions).toHaveAttribute('aria-expanded', 'false');
@@ -45,39 +65,77 @@ test('CH17 opens only the observed disabled hospitalization-action anatomy witho
   await expect(actions).toHaveAttribute('aria-expanded', 'true');
   const menu = page.getByRole('menu', { name: 'Acciones observadas de hospitalización' });
   await expect(menu).toBeVisible();
-  await expect(menu.getByRole('menuitem', { name: 'Historia clínica' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Reporte Claims' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Ver visitas' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Notas de servicio' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Reporte de salud' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Auditorías' })).toHaveAttribute('aria-disabled', 'true');
-  await expect(menu.getByRole('menuitem', { name: 'Registro XPO' })).toHaveAttribute('aria-disabled', 'true');
+  await expect(menu.getByRole('menuitem', { name: 'Historia clínica' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Reporte Claims' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Ver visitas' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Notas de servicio' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Reporte de salud' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Auditorías' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
+  await expect(menu.getByRole('menuitem', { name: 'Registro XPO' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
   await expect(page.getByText('CH17-Q007')).toBeVisible();
 
   await page.reload();
-  await expect(page.getByRole('menu', { name: 'Acciones observadas de hospitalización' })).toHaveCount(0);
-  expect(await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  await expect(
+    page.getByRole('menu', { name: 'Acciones observadas de hospitalización' }),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+  ).toBe(auditBefore);
 });
 
-test('CH17 permits DOCTOR to open the empty action menu but denies FINANCE the direct clinical route', async ({ browser }) => {
+test('CH17 permits DOCTOR to open the empty action menu but denies FINANCE the direct clinical route', async ({
+  browser,
+}) => {
   const doctor = await browser.newPage();
   await login(doctor, 'doctor@demo.local', 'demo-doctor');
   await doctor.locator('[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]').click();
-  await expect(doctor.getByRole('menu', { name: 'Acciones observadas de hospitalización' })).toBeVisible();
-  await expect(doctor.getByRole('menuitem', { name: 'Historia clínica' })).toHaveAttribute('aria-disabled', 'true');
+  await expect(
+    doctor.getByRole('menu', { name: 'Acciones observadas de hospitalización' }),
+  ).toBeVisible();
+  await expect(doctor.getByRole('menuitem', { name: 'Historia clínica' })).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
   await doctor.close();
 
   const finance = await browser.newPage();
   await login(finance, 'finance@demo.local', 'demo-finance');
   await expect(finance.locator('main[role="alert"]')).toContainText('FINANCE');
-  await expect(finance.locator('[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]')).toHaveCount(0);
+  await expect(
+    finance.locator('[data-action-id="HEALTH-REPORT-HOSPITALIZATION-ACTIONS-OPEN"]'),
+  ).toHaveCount(0);
   await finance.close();
 });
 
 // test-id: playwright:ch17-health-report-empty-sections
-test('CH17 switches only the six observed empty report sections without loading clinical data', async ({ page }) => {
+test('CH17 switches only the six observed empty report sections without loading clinical data', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin');
-  const auditBefore = await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'));
+  const auditBefore = await page.evaluate(() =>
+    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
+  );
   const information = page.locator('[data-action-id="HEALTH-REPORT-SECTION-INFORMATION"]');
   const clinical = page.locator('[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]');
   const medical = page.locator('[data-action-id="HEALTH-REPORT-SECTION-MEDICAL"]');
@@ -114,14 +172,20 @@ test('CH17 switches only the six observed empty report sections without loading 
 
   await page.reload();
   await expect(information).toHaveAttribute('aria-selected', 'true');
-  expect(await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'))).toBe(auditBefore);
+  expect(
+    await page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
+  ).toBe(auditBefore);
 });
 
-test('CH17 permits DOCTOR to switch an empty report section but denies FINANCE the control', async ({ browser }) => {
+test('CH17 permits DOCTOR to switch an empty report section but denies FINANCE the control', async ({
+  browser,
+}) => {
   const doctor = await browser.newPage();
   await login(doctor, 'doctor@demo.local', 'demo-doctor');
   await doctor.locator('[data-action-id="HEALTH-REPORT-SECTION-CLINICAL"]').click();
-  await expect(doctor.getByRole('tabpanel')).toContainText('Evaluación Clínica: sin contenido autorizado');
+  await expect(doctor.getByRole('tabpanel')).toContainText(
+    'Evaluación Clínica: sin contenido autorizado',
+  );
   await doctor.close();
 
   const finance = await browser.newPage();
