@@ -11,6 +11,7 @@ Clasificación: `SYNTHETIC_DEMO`
 - The 17-chapter evidence remains immutable and verified. Parity remains 52 `EXACT`, 85 `PARTIAL`, 20 `MISSING`, 8 `BLOCKED_CLIENT`, 3 `BLOCKED_INTEGRATION`, 40 `NOT_TESTABLE` and 2 `NOT_APPLICABLE`; 210/210 certifies traceability, not total feature equivalence.
 - Final mobile-patients and desktop-health-report screenshots were visually checked: no unintended horizontal overflow. The new protected Vercel preview [web-1idc2eofx-clinqui7s-projects.vercel.app](https://web-1idc2eofx-clinqui7s-projects.vercel.app) (`dpl_2CBtezndaDgBrSWs1CGxYUEMQur6`) passed authenticated smoke: `/` 307 and 200 for login, dashboard, patients, hospitalizations, quotes, agenda, inventory, portal demo and `/api/health`. Production was not promoted.
 - `globalComplete` remains `false`. Real Supabase/RLS and provider validation, client approval of clinical/financial contracts, and an authorized 15-minute production scheduler are still required.
+- PR #5 is intentionally not merge-ready yet: its GitGuardian check identifies the historical UI label `Password` in the action inventory as a generic password (incident `36747982`), but that 19-column fixture row has no credential. Its Vercel Git check also fails because it applies the versioned production cron, which the Hobby plan rejects. Both require authorized external disposition; the independently deployed no-cron preview above is `READY`.
 
 ### Addendum · 2026-09-03 · Cierre reproducible de release
 

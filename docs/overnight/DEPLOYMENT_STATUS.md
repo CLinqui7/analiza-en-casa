@@ -14,4 +14,6 @@ The Vercel build completed with `npm ci` and `npm run build --workspace=@analiza
 
 The preview artifact deliberately omitted the production cron and set its output directory to `apps/web/.next`; the repository's versioned `vercel.json` was restored unchanged afterwards. No production deployment or promotion occurred.
 
+The Git-connected Vercel status on PR #5 remains failed because it necessarily reads the versioned production cron, which Hobby rejects. This is distinct from the manually verified READY preview above. GitGuardian also requires an authorized false-positive disposition for historical incident `36747982`, which identifies a UI label in the 19-column action inventory rather than a credential.
+
 Production remains blocked pending real Supabase/RLS and provider validation, approved clinical and financial contracts, and a scheduler that supports the required 15-minute cron. Vercel Hobby rejects that cron frequency.
