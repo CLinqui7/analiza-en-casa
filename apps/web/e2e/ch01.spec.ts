@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import XLSX from 'xlsx';
+import { readFile } from 'node:fs/promises';
+import { strFromU8, unzipSync } from 'fflate';
 
 // test-id: playwright:ch01-direct-auth
 // test-id: playwright:ch01-patient-tabs-import
@@ -97,19 +98,20 @@ test('CH01-F005 xlsx-export creates a valid workbook', async ({ page }) => {
   await page.getByRole('button', { name: 'Exportar Excel' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('pacientes-activos.xlsx');
-  const workbook = XLSX.readFile((await download.path()) as string);
-  expect(workbook.SheetNames).toEqual(['Pacientes']);
-  const rows = XLSX.utils.sheet_to_json<string[]>(workbook.Sheets.Pacientes, { header: 1 });
-  expect(rows[0]).toEqual([
-    'Documento',
-    'Nombre completo',
-    'Edad',
-    'Empresa',
-    'Triage',
-    'Notif. Botmaker',
-    'Estado',
+  const archive = unzipSync(new Uint8Array(await readFile((await download.path()) as string)));
+  expect(Object.keys(archive).sort()).toEqual([
+    '[Content_Types].xml',
+    '_rels/.rels',
+    'xl/_rels/workbook.xml.rels',
+    'xl/workbook.xml',
+    'xl/worksheets/sheet1.xml',
   ]);
-  expect(rows.length).toBeGreaterThan(1);
+  expect(strFromU8(archive['xl/workbook.xml'])).toContain('name="Pacientes"');
+  const sheetXml = strFromU8(archive['xl/worksheets/sheet1.xml']);
+  expect(sheetXml).toContain('<dimension ref="A1:G');
+  expect(sheetXml).toContain('>Documento</t>');
+  expect(sheetXml).toContain('>Notif. Botmaker</t>');
+  expect((sheetXml.match(/<row /g) ?? []).length).toBeGreaterThan(1);
 });
 
 test('CH01-F007 triage-botmaker-status persists as administrative state', async ({ page }) => {

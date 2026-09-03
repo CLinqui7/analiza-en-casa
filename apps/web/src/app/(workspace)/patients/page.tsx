@@ -491,8 +491,7 @@ export default function PatientsPage() {
     URL.revokeObjectURL(anchor.href);
   }
   async function exportPatientsXlsx() {
-    // SheetJS is imported only on export so the patient route's initial bundle is unchanged.
-    const XLSX = await import('xlsx');
+    const { createXlsxWorkbook } = await import('@/lib/xlsx');
     const rows = visiblePatients.map((patient) => ({
       Documento: patient.documentId,
       'Nombre completo': patient.fullName,
@@ -502,26 +501,21 @@ export default function PatientsPage() {
       'Notif. Botmaker': (patient.notifications?.botmakerConsent ?? true) ? 'Sí' : 'No',
       Estado: patient.status === 'ACTIVE' ? 'Activo' : 'Inactivo',
     }));
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.json_to_sheet(rows, {
-        header: [
-          'Documento',
-          'Nombre completo',
-          'Edad',
-          'Empresa',
-          'Triage',
-          'Notif. Botmaker',
-          'Estado',
-        ],
-      }),
-      'Pacientes',
+    const workbookBytes = createXlsxWorkbook(
+      [
+        { key: 'Documento', label: 'Documento' },
+        { key: 'Nombre completo', label: 'Nombre completo', width: 28 },
+        { key: 'Edad', label: 'Edad' },
+        { key: 'Empresa', label: 'Empresa', width: 28 },
+        { key: 'Triage', label: 'Triage', width: 24 },
+        { key: 'Notif. Botmaker', label: 'Notif. Botmaker', width: 22 },
+        { key: 'Estado', label: 'Estado' },
+      ],
+      rows,
     );
-    const blob = new Blob(
-      [XLSX.write(workbook, { bookType: 'xlsx', type: 'array', compression: true })],
-      { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
-    );
+    const blob = new Blob([workbookBytes], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
     const anchor = document.createElement('a');
     anchor.download = `pacientes-${tab === 'ACTIVE' ? 'activos' : 'inactivos'}.xlsx`;
     anchor.href = URL.createObjectURL(blob);
