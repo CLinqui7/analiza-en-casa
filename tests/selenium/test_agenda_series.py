@@ -64,15 +64,25 @@ class AgendaSeries(unittest.TestCase):
     def agenda_collections(self) -> list[str | None]:
         return self.driver.execute_script("return ['shifts', 'auditEntries'].map((key) => localStorage.getItem('analiza.en.casa.workspace.v3.' + key))")
 
+    def set_input_value(self, input_element, value: str) -> None:
+        self.driver.execute_script(
+            "const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
+            "set.call(arguments[0], arguments[1]);"
+            "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
+            "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+            input_element,
+            value,
+        )
+
     def test_multi_day_six_hour_series_persists(self) -> None:
         started = time.time()
         self.login_as('admin@demo.local', 'demo-admin', 'ADMIN')
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]').click()
         dates = self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE"]')
-        dates[0].clear(); dates[0].send_keys('09/24/2026')
+        self.set_input_value(dates[0], '2026-09-24')
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE-ADD"]').click()
         dates = self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE"]')
-        dates[1].send_keys('09/25/2026')
+        self.set_input_value(dates[1], '2026-09-25')
         self.assertEqual(len(dates), 2)
         self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE-REMOVE"]')[1].click()
         dates = self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE"]')
@@ -98,9 +108,9 @@ class AgendaSeries(unittest.TestCase):
         self.login_as('nurse@demo.local', 'demo-nurse', 'NURSE')
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-CREATE"]').click()
         date = self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-DATE"]')
-        date.clear(); date.send_keys('08/30/2026')
+        self.set_input_value(date, '2026-08-30')
         start = self.driver.find_element(By.XPATH, "//label[contains(., 'Inicio')]//input")
-        start.clear(); start.send_keys('08:00PM')
+        self.set_input_value(start, '20:00')
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AGENDA-SHIFT-PRESET-8H"]').click()
         self.assertEqual(self.driver.find_element(By.XPATH, "//label[contains(., 'Fin')]//input").get_attribute('value'), '04:00')
         self.assertIn('Finaliza el día siguiente', self.driver.find_element(By.TAG_NAME, 'body').text)
