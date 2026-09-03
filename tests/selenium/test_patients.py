@@ -20,6 +20,7 @@ from urllib.request import urlopen
 from urllib.error import URLError
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
@@ -161,7 +162,7 @@ class Patients(unittest.TestCase):
   submit_started=time.time(); s.click('PATIENT-SAVE'); s.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-SAVE"]')))
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(text(),'Registro sintético agregado')]")))
   s.d.refresh(); s.w.until(EC.visibility_of_element_located((By.TAG_NAME,'h1')))
-  search=s.a('PATIENT-SEARCH'); search.clear(); search.send_keys('CONTACT-DOC-SEL-001')
+  search=s.a('PATIENT-SEARCH'); search.send_keys(Keys.CONTROL,'a'); search.send_keys(Keys.BACKSPACE); search.send_keys('CONTACT-DOC-SEL-001')
   s.w.until(EC.visibility_of_element_located((By.XPATH,"//a[contains(.,'Paciente Contacto Documento Selenium')]"))); s.click('PATIENT-DETAIL-NAVIGATE'); s.w.until(EC.url_contains('/patients/'))
   s.assert_detail_contains('DUI','CONTACT-DOC-SEL-001')
   s.click('PATIENT-EDIT'); s.w.until(EC.url_contains('edit=')); s.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-EDIT-SUBMIT"]')))

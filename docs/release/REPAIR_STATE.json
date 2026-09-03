@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "updatedAt": "2026-09-03T00:00:00Z",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "b9590ff541dc792bdf9e9be6a998a0e48de09a28",
+  "head": "8f1532c6914f023e1a256cd13584e9c35a4b4810",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
-  "lastGatePass": "test_patients.Patients.test_address",
+  "lastGateExecuted": "test_patients.Patients.test_document_type and test_contact_document_pair_persists_through_reload_and_edit",
+  "lastGatePass": "test_patients.Patients.test_document_type",
   "failingGate": "Selenium patients module",
   "failingTests": [
-    "test_patients.Patients.test_contact_document_pair_persists_through_reload_and_edit",
+    "test_patients.Patients.test_contact_document_pair_persists_through_reload_and_edit (search clearing repaired in working tree; retest pending)",
     "test_patients.Patients.test_create_and_validation",
     "test_patients.Patients.test_document_type",
     "test_patients.Patients.test_edit",
@@ -18,9 +18,10 @@
     "Prettier LF enforcement and complete global Playwright repair (178/178 PASS).",
     "Inventory movement creation and missing closure-approval boundary Selenium evidence (25/25 inventory tests; 39/39 inventory coverage with execution evidence).",
     "Selenium credential clearing, agenda date/time native setters, clinical/hospitalization fixtures and filter events, medical-orders support isolation, and patient canonical login/save/address contracts.",
-    "Patient address boundary test passes using PATIENT-ADDRESS-IMPORT without external map integration."
+    "Patient address boundary test passes using PATIENT-ADDRESS-IMPORT without external map integration.",
+    "Patient document-type test passes after aligning the Document label; contact-document search now dispatches a real clear event and needs retest."
   ],
-  "nextExecutableAction": "Run each listed patient Selenium failure individually with SELENIUM_BASE_URL=http://127.0.0.1:4210, repair its current UI contract, then rerun test_patients.py.",
+  "nextExecutableAction": "Commit the pending patient search-clear repair, rerun test_contact_document_pair_persists_through_reload_and_edit, then continue the remaining listed patient Selenium tests individually.",
   "vercel": {
     "status": "NOT_DEPLOYED_AFTER_REPAIR",
     "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; node=20",
