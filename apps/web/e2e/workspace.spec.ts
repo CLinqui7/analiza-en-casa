@@ -183,6 +183,8 @@ test('patient registration persists complete administrative, insurance, contacts
 });
 
 test('patient detail uses the complete shared editor and persists edits', async ({ page }) => {
+  const pageErrors: Error[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error));
   await login(page);
   await page.goto('/patients');
   await page.getByRole('button', { name: 'Agregar paciente' }).click();
@@ -247,6 +249,10 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await expect(
     duplicateEditDialog.getByText('Ya existe un registro con este documento'),
   ).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(duplicateEditDialog).toHaveCount(0);
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  expect(pageErrors).toEqual([]);
 });
 
 test('patient import validates CSV rows, persists valid rows, and exports filtered results', async ({

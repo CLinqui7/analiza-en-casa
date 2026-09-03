@@ -736,7 +736,7 @@
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [
-        "CH06-F005"
+        "CH06-F05"
       ],
       "react_files": [
         "apps/web/src/app/(workspace)/quotes/page.tsx"
@@ -841,7 +841,7 @@
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [
-        "CH11-F001"
+        "CH11-F01"
       ],
       "react_files": [
         "apps/web/src/app/(workspace)/agenda/page.tsx"
@@ -1120,9 +1120,7 @@
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
-      "video_requirement_ids": [
-        "CH17-F011"
-      ],
+      "video_requirement_ids": [],
       "react_files": [
         "apps/web/src/app/(workspace)/clinical"
       ],
@@ -1145,7 +1143,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica. No se enlaza a CH17-F11 porque esa evidencia trata signos vitales, no Balance Hídrico."
     },
     {
       "change_id": "CR-021",

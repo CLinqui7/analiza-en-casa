@@ -1,8 +1,8 @@
 # Codex preflight
 
 - Passed: **true**
-- Files: 6807
-- Size: 521.58 MiB
+- Files: 6897
+- Size: 522.6 MiB
 - Chapters: 17
 - Events: 1359
 - Detail crops: 730

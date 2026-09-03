@@ -11,69 +11,100 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
   const host = useRef<HTMLDivElement>(null);
   const map = useRef<LeafletMap | null>(null);
   const marker = useRef<Marker | null>(null);
+  const onCoordinatesChangeRef = useRef(onCoordinatesChange);
   const [unavailable, setUnavailable] = useState(false);
-  const point = parseExplicitCoordinates(coordinates);
 
   useEffect(() => {
-    let cancelled = false;
-    let Leaflet: typeof import('leaflet') | undefined;
+    onCoordinatesChangeRef.current = onCoordinatesChange;
+  }, [onCoordinatesChange]);
+
+  useEffect(() => {
+    let disposed = false;
+    let instance: LeafletMap | null = null;
     void import('leaflet')
       .then((module) => {
-        if (cancelled || !host.current) return;
-        Leaflet = module;
-        const instance = module
+        if (disposed || !host.current) return;
+        const initialPoint = parseExplicitCoordinates(coordinates);
+        const created = module
           .map(host.current, { scrollWheelZoom: false, zoomControl: false })
-          .setView(point ? [point.latitude, point.longitude] : defaultCenter, point ? 15 : 12);
-        map.current = instance;
+          .setView(
+            initialPoint ? [initialPoint.latitude, initialPoint.longitude] : defaultCenter,
+            initialPoint ? 15 : 12,
+          );
+        if (disposed) {
+          created.remove();
+          return;
+        }
+        instance = created;
+        map.current = created;
         module
           .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
           })
-          .on('tileerror', () => setUnavailable(true))
-          .addTo(instance);
-        instance.on('click', (event) =>
-          onCoordinatesChange(`${event.latlng.lat.toFixed(6)}, ${event.latlng.lng.toFixed(6)}`),
+          .on('tileerror', () => {
+            if (!disposed) setUnavailable(true);
+          })
+          .addTo(created);
+        created.on('click', (event) =>
+          onCoordinatesChangeRef.current(
+            `${event.latlng.lat.toFixed(6)}, ${event.latlng.lng.toFixed(6)}`,
+          ),
         );
       })
-      .catch(() => setUnavailable(true));
+      .catch(() => {
+        if (!disposed) setUnavailable(true);
+      });
     return () => {
-      cancelled = true;
-      map.current?.remove();
-      map.current = null;
+      disposed = true;
+      marker.current?.remove();
       marker.current = null;
-      void Leaflet;
+      if (map.current === instance) map.current = null;
+      instance?.off();
+      instance?.remove();
     };
     // Map creation must occur only on dialog open; coordinate changes are handled below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!map.current) return;
-    void import('leaflet').then((module) => {
-      if (!map.current) return;
-      if (!point) {
-        marker.current?.remove();
-        marker.current = null;
-        return;
-      }
-      const position: [number, number] = [point.latitude, point.longitude];
-      if (marker.current) marker.current.setLatLng(position);
-      else marker.current = module.marker(position).addTo(map.current);
-      map.current.setView(position, Math.max(map.current.getZoom(), 15));
-    });
-  }, [coordinates, point]);
+    const instance = map.current;
+    if (!instance) return;
+    let disposed = false;
+    const point = parseExplicitCoordinates(coordinates);
+    void import('leaflet')
+      .then((module) => {
+        if (disposed || map.current !== instance || !instance.getContainer().isConnected) return;
+        if (!point) {
+          marker.current?.remove();
+          marker.current = null;
+          return;
+        }
+        const position: [number, number] = [point.latitude, point.longitude];
+        if (marker.current) marker.current.setLatLng(position);
+        else marker.current = module.marker(position).addTo(instance);
+        instance.setView(position, Math.max(instance.getZoom(), 15));
+      })
+      .catch(() => {
+        if (!disposed && map.current === instance) setUnavailable(true);
+      });
+    return () => {
+      disposed = true;
+    };
+  }, [coordinates]);
 
   function zoom(delta: number) {
     const instance = map.current;
-    if (instance) instance.setZoom(instance.getZoom() + delta);
+    if (instance?.getContainer().isConnected) instance.setZoom(instance.getZoom() + delta);
   }
   function fullscreen() {
     void host.current?.requestFullscreen?.();
   }
   function layer() {
     setUnavailable(false);
-    map.current?.eachLayer((candidate) => {
+    const instance = map.current;
+    if (!instance?.getContainer().isConnected) return;
+    instance.eachLayer((candidate) => {
       if ('setUrl' in candidate) {
         const tile = candidate as unknown as { setUrl: (url: string) => void };
         tile.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
@@ -81,12 +112,6 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
     });
   }
 
-  if (unavailable)
-    return (
-      <div className="patient-map-fallback" role="status">
-        Mapa no disponible. Puede ingresar coordenadas manualmente.
-      </div>
-    );
   return (
     <section aria-label="Mapa de ubicación" className="patient-map-shell">
       <div className="patient-map-controls">
@@ -124,9 +149,15 @@ export default function PatientLocationMap({ coordinates, onCoordinatesChange }:
         </button>
       </div>
       <div className="patient-map" data-action-id="PATIENT-MAP-MARKER" ref={host} />
-      <p className="field-help">
-        Haga clic en el mapa para colocar el marcador. Use Ctrl + desplazamiento para hacer zoom.
-      </p>
+      {unavailable ? (
+        <p className="patient-map-fallback" role="status">
+          Mapa no disponible. Puede ingresar coordenadas manualmente.
+        </p>
+      ) : (
+        <p className="field-help">
+          Haga clic en el mapa para colocar el marcador. Use Ctrl + desplazamiento para hacer zoom.
+        </p>
+      )}
     </section>
   );
 }

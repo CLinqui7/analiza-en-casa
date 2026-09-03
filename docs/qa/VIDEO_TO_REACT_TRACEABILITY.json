@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T22:48:05-06:00",
-  "metadata_generated_from_commit": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+  "generated_at": "2026-09-03T04:53:37-06:00",
+  "metadata_generated_from_commit": "e202c44c2232b847ee092e0ebc58e0b0b30adfde",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-  "functional_fingerprint": "c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1640f5a945f555",
+  "implementation_sha": null,
+  "functional_fingerprint": "50ce9a927703b31e0a9aa83d8168b0cfaf03d66d3c331e7d13eacd66dcfa6842",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -2569,37 +2569,33 @@
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [
-        "AGENDA-SHIFT-DETAIL-DIALOG"
+        "QUOTE-TOTALS-SUMMARY"
       ],
       "action_ids": [
-        "AGENDA-SHIFT-DETAIL-OPEN",
-        "AGENDA-SHIFT-DETAIL-UPDATES",
-        "AGENDA-SHIFT-DETAIL-CLOSE"
+        "QUOTE-ITEM-ADD",
+        "QUOTE-DISCOUNT-UPDATE"
       ],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
       "unit_test_ids": [],
       "playwright_test_ids": [
-        "playwright:ch11-synthetic-shift-detail"
+        "playwright:quotes-builder-lifecycle"
       ],
       "selenium_test_ids": [
-        "SEL-CH11-SYNTHETIC-SHIFT-DETAIL"
+        "SEL-QUOTE-DISCOUNT"
       ],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
-        "CH11-Q002",
-        "CH11-Q004",
-        "CH11-Q006",
-        "CH11-Q008",
-        "CR-010"
+        "CH05-Q004",
+        "CH05-Q008"
       ],
-      "blocker_reason": "La evidencia no define estados/transiciones de visita finalizada, actualizaciones, eliminación, roles del detalle, disponibilidad o liquidación. Se conserva sólo una vista de agenda factual y de lectura sola para turnos sintéticos existentes.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH11-E0050 muestra Agenda/Actualizaciones, inicio/fin, paciente y recurso asignado. Playwright prueba que DOCTOR abre/cierra el detalle factual de un turno sintético sin mutar turnos ni auditoría; INVENTORY no recibe la acción por denegación de ruta. Actualizaciones se mantiene visible y deshabilitada bajo CH11-Q002/Q006. No se etiqueta el turno como visita finalizada ni se exponen observaciones clínicas, pagos, disponibilidad o mutaciones. Selenium fuente es específica y PENDING_RUNTIME por falta de Python."
+      "blocker_reason": "La interfaz recalcula subtotal, descuento y total de importes manuales sintéticos. El video no autoriza impuesto, cobertura ni la regla financiera que determina el total final.",
+      "last_verified_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+      "notes": "CH05-E0067 respalda la presencia del resumen. Playwright y Selenium comprueban que añadir una línea y actualizar un descuento recalculan y preservan los importes manuales; no se muestra impuesto ni se infieren cobertura, moneda o reglas financieras."
     },
     {
       "requirement_id": "CH05-F009",
@@ -3220,7 +3216,10 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0115_00h14m24s200ms_settled.jpg"
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH06-Q008",
+        "CH06-Q009"
+      ],
       "route_id": "ROUTE-QUOTES",
       "react_route": "/quotes",
       "react_files": [
@@ -3241,9 +3240,10 @@
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [
-        "CH06-Q006"
+        "CH06-Q008",
+        "CH06-Q009"
       ],
-      "blocker_reason": "La evidencia verbal no muestra el resultado de Guardar ni el contrato de versiones; CH06-Q006 requiere confirmación antes de clasificarlo como paridad exacta.",
+      "blocker_reason": "La evidencia verbal no muestra el resultado de Guardar ni la semántica de Atrás; faltan el contrato de versiones, navegación y resultado de error o cancelación antes de clasificarlo como paridad exacta.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -3258,7 +3258,7 @@
         "references/video-audit/chapters/CH06_cotizacion_insumos_equipos_honorarios_extras_y_totales/event_frames/CH06-E0085_00h13m50s600ms_abrupt_change.jpg"
       ],
       "open_question_ids": [
-        "CH06-Q005"
+        "CH06-Q007"
       ],
       "route_id": "ROUTE-QUOTES",
       "react_route": "/quotes",
@@ -3280,9 +3280,9 @@
       "visual_test_ids": [],
       "blocker_type": "NOT_TESTABLE",
       "blocker_ids": [
-        "CH06-Q005"
+        "CH06-Q007"
       ],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
+      "blocker_reason": "El capítulo sólo muestra las pestañas Equipos y Extras; faltan campos, catálogos, reglas de precios, disponibilidad, impuestos y persistencia autorizados.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
@@ -6043,7 +6043,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "BLOCKED_CLIENT",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6052,11 +6052,17 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q004",
+        "CH13-Q006",
+        "CH13-Q007",
+        "CH13-Q008",
+        "CH13-Q014"
+      ],
+      "blocker_reason": "El formulario observado requiere reglas aprobadas de impuesto, descuento, adjuntos privados, unicidad de factura y precio histórico. No se habilita una compra de caja menuda ni almacenamiento de adjuntos sin esos contratos.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH13-E0035/CH13-E0052 respaldan sólo la anatomía visual. La ruta React no certifica el formulario completo ni la escritura financiera hasta contar con los contratos y una prueba enfocada."
     },
     {
       "requirement_id": "CH13-F07",
@@ -6161,7 +6167,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "BLOCKED_CLIENT",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -6170,11 +6176,16 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH13-Q010",
+        "CH13-Q011",
+        "CH13-Q012",
+        "CH13-Q013"
+      ],
+      "blocker_reason": "Editar, copiar, imprimir y anular requieren reglas aprobadas de campos editables, copia, salida oficial y reversión auditada. Ninguna mutación o documento oficial se habilita sólo por la presencia del menú en el video.",
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "notes": "CH13-E0091 respalda el menú visible, pero la ruta React no certifica sus efectos operativos sin contratos y pruebas enfocadas."
     },
     {
       "requirement_id": "CH13-F10",

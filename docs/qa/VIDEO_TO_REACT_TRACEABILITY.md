@@ -2,9 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `0e0626fccc8d464b98458c4a40bf185a992f2a90`
-SHA de implementación: `0e0626fccc8d464b98458c4a40bf185a992f2a90`
-Fingerprint funcional CH01: `c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1640f5a945f555`
+Commit generador: `e202c44c2232b847ee092e0ebc58e0b0b30adfde`
+SHA de implementación: `pendiente`
+Fingerprint funcional CH01: `50ce9a927703b31e0a9aa83d8168b0cfaf03d66d3c331e7d13eacd66dcfa6842`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -69,7 +69,7 @@ Fingerprint funcional CH01: `c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1
 | CH05-F005 | /quotes | PARTIAL | QUOTE-ITEM-ADD |
 | CH05-F006 | /quotes | EXACT | QUOTE-ITEM-ADD |
 | CH05-F007 | /quotes | PARTIAL | QUOTE-MEDICATION-SEARCH, QUOTE-MEDICATION-SELECT |
-| CH05-F008 | /quotes | PARTIAL | AGENDA-SHIFT-DETAIL-OPEN, AGENDA-SHIFT-DETAIL-UPDATES, AGENDA-SHIFT-DETAIL-CLOSE |
+| CH05-F008 | /quotes | PARTIAL | QUOTE-ITEM-ADD, QUOTE-DISCOUNT-UPDATE |
 | CH05-F009 | /quotes | PARTIAL | — |
 | CH05-F010 | /quotes | PARTIAL | QUOTE-MEDICATION-CATEGORY |
 | CH05-F011 | /quotes | PARTIAL | — |
@@ -154,10 +154,10 @@ Fingerprint funcional CH01: `c785da9299a0a604ef46393f92d9c0c59a93a663dac9b1144d1
 | CH13-F03 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F04 | /purchases | PARTIAL | — |
 | CH13-F05 | /purchases | BLOCKED_CLIENT | — |
-| CH13-F06 | /purchases | PARTIAL | — |
+| CH13-F06 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F07 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F08 | /purchases | PARTIAL | — |
-| CH13-F09 | /purchases | PARTIAL | — |
+| CH13-F09 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F10 | /purchases | NOT_TESTABLE | — |
 | CH13-F11 | /purchases | NOT_TESTABLE | — |
 | CH14-F01 | /inventory | PARTIAL | INVENTORY-ITEM-SEARCH, INVENTORY-ITEM-EXPORT, INVENTORY-TRANSFERS |
