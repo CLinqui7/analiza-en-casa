@@ -1,27 +1,23 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03T00:00:00Z",
+  "updatedAt": "2026-09-03T08:19:58.6503192Z",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "618cd18e67985c939f3b791ca3dbd2a5f24e6659",
+  "head": "deee03498c6336b243934063f8cf92db2e771423",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "test_patients.Patients.test_document_type and test_contact_document_pair_persists_through_reload_and_edit",
-  "lastGatePass": "test_patients.Patients.test_document_type",
-  "failingGate": "Selenium patients module",
-  "failingTests": [
-    "test_patients.Patients.test_contact_document_pair_persists_through_reload_and_edit (row-level detail locator repaired in working tree; retest pending)",
-    "test_patients.Patients.test_create_and_validation",
-    "test_patients.Patients.test_document_type",
-    "test_patients.Patients.test_edit",
-    "test_patients.Patients.test_export"
-  ],
+  "lastGateExecuted": "npm run test:selenium",
+  "lastGatePass": "Selenium global smoke (6/6 PASS); patient module (16/16 PASS); patient coverage (36/36 PASS)",
+  "failingGate": "Selenium global coverage has not been rerun at deee034",
+  "failingTests": [],
   "repairsApplied": [
     "Prettier LF enforcement and complete global Playwright repair (178/178 PASS).",
     "Inventory movement creation and missing closure-approval boundary Selenium evidence (25/25 inventory tests; 39/39 inventory coverage with execution evidence).",
     "Selenium credential clearing, agenda date/time native setters, clinical/hospitalization fixtures and filter events, medical-orders support isolation, and patient canonical login/save/address contracts.",
     "Patient address boundary test passes using PATIENT-ADDRESS-IMPORT without external map integration.",
-    "Patient document-type test passes after aligning the Document label; contact-document lookup now uses the canonical row-level Detalle link and needs retest."
+    "Patient document-type test passes after aligning the Document label; contact-document lookup now uses the canonical row-level Detalle link and needs retest.",
+    "Patient Selenium module reconciled with v3 segmented mock storage, current dialog/action identifiers, searchable insurer, table columns, and row-level detail navigation (16/16 PASS; 36/36 execution coverage PASS).",
+    "Global Selenium smoke now authenticates ADMIN and validates current protected flows, safe Help fallback, resource registration prerequisites, and scheduled-hours reporting (6/6 PASS)."
   ],
-  "nextExecutableAction": "Commit the pending patient row-detail locator repair, rerun test_contact_document_pair_persists_through_reload_and_edit, then continue the remaining listed patient Selenium tests individually.",
+  "nextExecutableAction": "Run npm run selenium:coverage. For the first action without PASS evidence at deee034, run its owning Selenium module against http://127.0.0.1:4174, repair the first reproducible failure, rerun that module, and rerun selenium:coverage.",
   "vercel": {
     "status": "NOT_DEPLOYED_AFTER_REPAIR",
     "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; node=20",
