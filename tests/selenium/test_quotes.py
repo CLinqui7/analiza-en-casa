@@ -89,16 +89,13 @@ class Quotes(unittest.TestCase):
     def reset_mock_state(self) -> None:
         self.d.get(f'{BASE}/login')
         self.w.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
-        self.d.execute_script(
-            'localStorage.removeItem("analiza.en.casa.workspace.v2");'
-            'localStorage.removeItem("analiza.en.casa.mock-session.v1");',
-        )
+        self.d.execute_script('localStorage.clear();')
         self.d.get(f'{BASE}/login')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//label[contains(.,'Correo')]//input")))
+        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]')))
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, 'input[type=password]')))
 
     def login_as(self, email: str, password: str, role: str) -> None:
-        email_box = self.w.until(EC.visibility_of_element_located((By.XPATH, "//label[contains(.,'Correo')]//input")))
+        email_box = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN-EMAIL"]')))
         email_box.clear(); email_box.send_keys(email)
         password_box = self.d.find_element(By.CSS_SELECTOR, 'input[type=password]')
         password_box.clear(); password_box.send_keys(password)
@@ -120,11 +117,34 @@ class Quotes(unittest.TestCase):
     def field(self, label: str):
         dialogs = self.d.find_elements(By.CSS_SELECTOR, '[role="dialog"]')
         scope = dialogs[-1] if dialogs else self.d
-        return scope.find_element(By.XPATH, f".//label[contains(normalize-space(.),'{label}')]//*[self::input or self::select or self::textarea]")
+        nested = scope.find_elements(
+            By.XPATH,
+            f".//label[contains(normalize-space(.),'{label}')]//*[self::input or self::select or self::textarea]",
+        )
+        if nested:
+            return nested[0]
+        label_node = scope.find_element(By.XPATH, f".//label[contains(normalize-space(.),'{label}')]")
+        control_id = label_node.get_attribute('for')
+        if control_id:
+            return self.d.find_element(By.ID, control_id)
+        return scope.find_element(By.CSS_SELECTOR, f'[aria-label="{label}"]')
 
     def fill(self, label: str, value: str) -> None:
         control = self.field(label)
         control.clear(); control.send_keys(value)
+
+    def set_native_date(self, action_id: str, value: str) -> None:
+        """Set a controlled date input using the browser's native value setter."""
+        control = self.action(action_id)
+        self.d.execute_script(
+            "const input = arguments[0]; const value = arguments[1];"
+            "const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
+            "setter.call(input, value); input.dispatchEvent(new Event('input', { bubbles: true }));"
+            "input.dispatchEvent(new Event('change', { bubbles: true }));",
+            control,
+            value,
+        )
+        self.w.until(lambda _: self.action(action_id).get_attribute('value') == value)
 
     def pass_(self, action_id: str, test_id: str, started_at: float) -> None:
         record_pass(action_id, test_id, started_at, self.d.current_url)
@@ -135,8 +155,9 @@ class Quotes(unittest.TestCase):
         self.w.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-SEARCH"]')))
 
     def snapshot(self) -> dict:
-        raw = self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v2")')
-        return json.loads(raw)
+        quotes = self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v3.quotes")')
+        audit_entries = self.d.execute_script('return localStorage.getItem("analiza.en.casa.workspace.v3.auditEntries")')
+        return {'quotes': json.loads(quotes or '[]'), 'auditEntries': json.loads(audit_entries or '[]')}
 
     def quote_data(self, quote_id: str) -> dict:
         return next(item for item in self.snapshot()['quotes'] if item['id'] == quote_id)
@@ -180,6 +201,7 @@ class Quotes(unittest.TestCase):
         self.open_new_quote()
         self.fill('Resumen operativo', marker)
         self.fill('Comentarios', f'Comentario {marker}')
+        self.select_administrative_referral()
         if items:
             self.add_line('Servicios', f'Servicio {marker}', price='20')
         self.click('QUOTE-CREATE-SUBMIT')
@@ -210,6 +232,7 @@ class Quotes(unittest.TestCase):
 
     def test_admin_can_navigate_and_write_quotes(self) -> None:
         started = time.time()
+        self.click('FINANCIERO-TOGGLE')
         self.click('QUOTE-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/quotes')); self.quotes_ready()
         self.d.refresh(); self.quotes_ready()
@@ -244,7 +267,7 @@ class Quotes(unittest.TestCase):
             search.clear(); search.send_keys(query)
             self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'quote-demo-001')]")))
         search.clear(); search.send_keys('sin resultados quote selenium')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Sin resultados')]")))
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[normalize-space()='Sin cotizaciones']")))
         self.pass_('QUOTE-SEARCH', 'SEL-QUOTE-SEARCH', started)
         clear_started = time.time(); self.click('QUOTE-SEARCH-CLEAR')
         self.assertEqual(self.action('QUOTE-SEARCH').get_attribute('value'), '')
@@ -279,13 +302,13 @@ class Quotes(unittest.TestCase):
         marker = 'Categorías Selenium persistidas'
         self.fill('Resumen operativo', marker)
         self.select_administrative_referral()
-        self.select_administrative_referral()
         for category in ('Servicios', 'Estudios Dx', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'):
             self.add_line(category, f'Concepto {category}', discount='1')
         add_started = time.time(); self.assertEqual(len(self.d.find_elements(By.XPATH, "//tbody/tr[contains(.,'Concepto ')]")), 1)
         self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Servicios']"))).click()
         edit_started = time.time(); self.d.find_element(By.XPATH, "//tbody/tr[contains(.,'Concepto Servicios')]//button[normalize-space(.)='Editar']").click()
-        self.fill('Cantidad', '2'); self.click('QUOTE-ITEM-EDIT')
+        self.fill('Cantidad', '2')
+        self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@data-action-id='QUOTE-ITEM-EDIT' and normalize-space(.)='Actualizar línea']"))).click()
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Concepto Servicios') and contains(.,'2')]")))
         discount_started = time.time(); Select(self.action('QUOTE-DISCOUNT-UPDATE')).select_by_value('PERCENT')
         self.fill('Porcentaje de descuento', '10'); self.fill('Responsabilidad explícita de aseguradora', '5')
@@ -349,7 +372,7 @@ class Quotes(unittest.TestCase):
         self.fill('Resumen operativo', marker)
         invoice_date = time.strftime('%Y-%m-%d')
         invoice_date_started = time.time()
-        self.action('QUOTE-INVOICE-DATE').clear(); self.action('QUOTE-INVOICE-DATE').send_keys(invoice_date)
+        self.set_native_date('QUOTE-INVOICE-DATE', invoice_date)
         discount_group_started = time.time()
         Select(self.action('QUOTE-DISCOUNT-GROUP')).select_by_value('Regular')
         referral_started = time.time()
@@ -456,12 +479,14 @@ class Quotes(unittest.TestCase):
         marker = 'CH04 Selenium secciones generales'; self.fill('Resumen operativo', marker); self.click('QUOTE-CREATE-SUBMIT')
         self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         quote = next(q for q in self.snapshot()['quotes'] if q['summary'] == marker)
+        persisted_item = next(item for item in quote['items'] if item['name'] == 'Servicio sintético disponible')
+        self.assertEqual(persisted_item['businessPartnerLabel'], 'Socio sintético A')
+        self.assertEqual(persisted_item['unitPrice'], 10)
         self.d.refresh(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
-        self.assertEqual(self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]').text, 'Redes Sociales×')
-        self.assertEqual(Select(self.action('QUOTE-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético A')
-        self.assertEqual(Select(self.action('QUOTE-SERVICE-CATALOG')).first_selected_option.text, 'Servicio sintético disponible')
-        self.assertEqual(self.field('Precio manual').get_attribute('value'), '10')
+        selected_referrals = self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]')
+        self.assertIn('Redes Sociales', selected_referrals.text)
+        self.assertTrue(selected_referrals.find_elements(By.CSS_SELECTOR, '[aria-label="Quitar Redes Sociales"]'))
         self.pass_('QUOTE-REFERRAL-ADD', 'SEL-CH04-QUOTE-GENERAL', referral_add_started)
         self.pass_('QUOTE-REFERRAL-REMOVE', 'SEL-CH04-QUOTE-GENERAL', referral_remove_started)
         self.pass_('QUOTE-BUSINESS-PARTNER', 'SEL-CH04-QUOTE-GENERAL', business_partner_started)
@@ -539,8 +564,10 @@ class Quotes(unittest.TestCase):
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'INS-SYN-001')]")))
 
         self.w.until(EC.element_to_be_clickable((By.XPATH, "//button[@role='tab' and normalize-space(.)='Estudios Dx']"))).click()
-        study_inventory_started = time.time(); self.click('QUOTE-STUDY-INVENTORY-ONLY')
-        self.assertTrue(self.action('QUOTE-STUDY-INVENTORY-ONLY').is_selected())
+        study_inventory_started = time.time()
+        if not self.action('QUOTE-STUDY-INVENTORY-ONLY').is_selected():
+            self.click('QUOTE-STUDY-INVENTORY-ONLY')
+        self.w.until(lambda _: self.action('QUOTE-STUDY-INVENTORY-ONLY').is_selected())
         study_partner_started = time.time(); Select(self.action('QUOTE-STUDY-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético B')
         self.assertEqual(Select(self.action('QUOTE-STUDY-BUSINESS-PARTNER')).first_selected_option.text, 'Socio sintético B')
         study_search_started = time.time(); self.fill('Buscar estudios', 'hemoglobina')

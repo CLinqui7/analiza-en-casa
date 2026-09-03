@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03T08:25:00.0000000Z",
+  "updatedAt": "2026-09-03T03:25:41.7124129-06:00",
   "branch": "codex/reconcile-global-release-20260903",
-  "head": "4a854ddebe40d569d65d14ee58b6d45502c88c27",
+  "head": "c40fab97718713764b50ec5d07fe8e93c5ce9155",
   "baseRemote": "origin/codex/react-full-parity-selenium-100@2f33d2a8cdff7086568da2cd0eb62bc304b470b0",
-  "lastGateExecuted": "npm run selenium:coverage",
-  "lastGatePass": "CH01 Selenium authentication module (5/5 PASS): login and logout now produce action-level runtime evidence at 4a854dd.",
-  "failingGate": "Selenium global coverage is 89.38% declared (303/339); 36 actions remain unmapped, beginning with DASHBOARD-NAVIGATE.",
+  "lastGateExecuted": "npm run test:browser:react",
+  "lastGatePass": "Local release regression is green: format, lint, typecheck, 37 React tests, 98 baseline tests, client changes 32/32, video parity 210/210, traceability mirror, audit 17/17, build, Selenium 176/176 (shared local server) and Playwright 178/178.",
+  "failingGate": "External release certification is pending: no configured Vercel deployment URL is available for a new READY deployment and production smoke.",
   "failingTests": [],
   "repairsApplied": [
     "Prettier LF enforcement and complete global Playwright repair (178/178 PASS).",
@@ -16,14 +16,16 @@
     "Patient document-type test passes after aligning the Document label; contact-document lookup now uses the canonical row-level Detalle link and needs retest.",
     "Patient Selenium module reconciled with v3 segmented mock storage, current dialog/action identifiers, searchable insurer, table columns, and row-level detail navigation (16/16 PASS; 36/36 execution coverage PASS).",
     "Global Selenium smoke now authenticates ADMIN and validates current protected flows, safe Help fallback, resource registration prerequisites, and scheduled-hours reporting (6/6 PASS)."
-    ,"Added authentic Selenium coverage for AUTH-LOGIN and AUTH-LOGOUT: test_ch01 records each action at runtime, the inventory declares SEL-CH01-LOGIN/SEL-CH01-LOGOUT, and CH01 passes 5/5. Global declared coverage rose from 301/339 (88.79%) to 303/339 (89.38%)."
+    ,"Added authentic Selenium coverage for AUTH-LOGIN and AUTH-LOGOUT: test_ch01 records each action at runtime, the inventory declares SEL-CH01-LOGIN/SEL-CH01-LOGOUT, and CH01 passes 5/5. Global declared coverage rose from 301/339 (88.79%) to 303/339 (89.38%).",
+    "Repaired quote Selenium fixtures for segmented v3 storage, mandatory referral selection, React-controlled native dates, stable selected-referral assertions, shared inventory-only state, and the explicit update-line control. Quotes passed 21/21; global Selenium passed 176/176 and Playwright passed 178/178."
   ],
-  "nextExecutableAction": "Repair DASHBOARD-NAVIGATE next: locate or add a focused Selenium dashboard module against http://127.0.0.1:4174 that records the action with a declared # test-id, update UI_ACTION_INVENTORY.json/CSV, rerun that module and npm run selenium:coverage. Preserve the untracked docs/release/RELEASE_AGENT_PROMPT.txt and unrelated dirty files.",
+  "nextExecutableAction": "Commit and push the repaired release branch, then link/configure the authorized Vercel project, obtain a new READY deployment, and run the required production smoke for the six demo roles and patient portal. Preserve the explicit client/integration blockers; do not mark globalComplete true before external certification.",
   "vercel": {
-    "status": "NOT_DEPLOYED_AFTER_REPAIR",
+    "status": "PENDING_EXTERNAL_CONFIGURATION",
     "projectConfiguration": "root=.; install=npm ci; build=npm run build; framework=Next.js; node=20",
     "deploymentId": null,
     "url": null
   },
+  "externalBlocker": "No Vercel project/deployment URL was present in the workspace, so a new authorized deployment and production smoke could not be initiated.",
   "globalComplete": false
 }
