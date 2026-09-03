@@ -1,0 +1,9 @@
+references/
+video-audit-reviews/
+docs/
+tests/
+test-results/
+playwright-report/
+coverage/
+*.mp4
+*.zip

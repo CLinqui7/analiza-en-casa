@@ -60,8 +60,14 @@ class InventoryList(unittest.TestCase):
         self.driver.get(f'{BASE}/login?next=%2Finventory')
         self.driver.execute_script('localStorage.clear()')
         self.driver.refresh()
-        self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input"))).send_keys(email)
-        self.driver.find_element(By.CSS_SELECTOR, 'input[type=password]').send_keys(password)
+        email_field = self.wait.until(
+            conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input"))
+        )
+        email_field.clear()
+        email_field.send_keys(email)
+        password_field = self.driver.find_element(By.CSS_SELECTOR, 'input[type=password]')
+        password_field.clear()
+        password_field.send_keys(password)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]').click()
         self.wait.until(conditions.url_contains('/inventory'))
 
@@ -89,6 +95,7 @@ class InventoryList(unittest.TestCase):
         main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
         self.assertIn('Inventario / Acuses', main.text)
         self.assertFalse(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-AREA"]').is_enabled())
+        record_pass('INVENTORY-ACK-AREA', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
         self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Identificación']"))
         record_pass('INVENTORY-ACKNOWLEDGEMENTS-OPEN', 'SEL-CH14-INVENTORY-ACKNOWLEDGEMENTS', started, self.driver.current_url)
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ACK-TAB-PATIENTS"]').click()
@@ -137,13 +144,27 @@ class InventoryList(unittest.TestCase):
         self.assertEqual(dialog.find_element(By.XPATH, ".//label[contains(., 'Código')]//input").get_attribute('value'), 'KIT-DEMO-001')
         record_pass('INVENTORY-ITEM-HISTORY-OPEN', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
         from_input = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-FROM"]')
-        from_input.send_keys('08/28/2026')
+        self.driver.execute_script(
+            "const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
+            "set.call(arguments[0], arguments[1]);"
+            "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
+            "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+            from_input,
+            '2026-08-28',
+        )
         rows = dialog.find_elements(By.CSS_SELECTOR, 'tbody tr')
         self.assertEqual(len(rows), 1)
         self.assertIn('EXIT', rows[0].text)
         record_pass('INVENTORY-ITEM-HISTORY-FROM', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
         to_input = dialog.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-TO"]')
-        to_input.send_keys('08/27/2026')
+        self.driver.execute_script(
+            "const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;"
+            "set.call(arguments[0], arguments[1]);"
+            "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));"
+            "arguments[0].dispatchEvent(new Event('change', { bubbles: true }));",
+            to_input,
+            '2026-08-27',
+        )
         self.assertIn('Sin movimientos en el rango', dialog.text)
         record_pass('INVENTORY-ITEM-HISTORY-TO', 'SEL-CH14-INVENTORY-ITEM-HISTORY', started, self.driver.current_url)
         self.driver.refresh()
@@ -335,9 +356,12 @@ class InventoryList(unittest.TestCase):
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('NURSE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]'))
-
     def test_finance_is_denied_inventory_kits_direct_route(self) -> None:
         self.login('finance@demo.local', 'demo-finance')
         denied = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'main[role="alert"]')))
         self.assertIn('FINANCE', denied.text)
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-KITS-OPEN"]'))
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
