@@ -37,6 +37,7 @@ from helpers.mock_workspace_storage import (
     get_collections,
     get_hospitalizations,
     legacy_snapshot_exists,
+    set_collection,
     set_legacy_snapshot,
 )
 
@@ -650,7 +651,7 @@ class Hospitalizations(unittest.TestCase):
             {**base, 'id': 'quote-ch07-sel-5', 'createdAt': '2026-09-05T12:00:00.000Z', 'status': 'DRAFT'},
             {**base, 'id': 'quote-ch07-sel-6', 'createdAt': '2026-09-06T12:00:00.000Z', 'status': 'SENT'},
         ]
-        append_collection_items(self.d, 'quotes', fixtures)
+        set_collection(self.d, 'quotes', fixtures)
         self.d.refresh()
         tab_started = time.time()
         self.click('HOSPITALIZATION-TAB-QUOTES')

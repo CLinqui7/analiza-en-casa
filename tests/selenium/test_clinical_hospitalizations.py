@@ -27,6 +27,7 @@ class ClinicalHospitalizationList(unittest.TestCase):
     reset_mock_state = hospitalization_tests.Hospitalizations.reset_mock_state
     login_as = hospitalization_tests.Hospitalizations.login_as
     prepare_authenticated_test = hospitalization_tests.Hospitalizations.prepare_authenticated_test
+    action = hospitalization_tests.Hospitalizations.action
 
     def setUp(self) -> None:
         self.prepare_authenticated_test()
