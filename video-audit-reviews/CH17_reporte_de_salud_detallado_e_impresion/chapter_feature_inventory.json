@@ -348,7 +348,7 @@
         }
       ],
       "transcript_evidence": "00:54:00.000–00:54:23.560: se explica compartir por WhatsApp la nota generada por enfermería al médico.",
-      "test_path": "Seguridad: el mensaje externo no contiene diagnóstico, tratamiento, medicación ni nota; sólo notificación mínima y enlace seguro, autenticado y expirable."
+      "test_path": "Precheck verbal: CH17-E0048 fue abierto y no muestra interfaz, destinatario, vista previa ni resultado de WhatsApp; la transcripción 00:54:00.000–00:54:23.560 sólo afirma compartir externamente una nota al médico. Mantener NOT_TESTABLE hasta aprobar fuente/alcance por organización, proveedor, consentimiento explícito/revocable, destinatario autorizado, enlace seguro autenticado expirable/revocable, payload mínimo/redactado, resultado de entrega, auditoría y retención (CH17-Q004). No agregar control, consulta de destinatario, vista previa, solicitud externa ni contenido clínico; los controles bloqueados de cotizaciones/seguros no son un puente de autorización."
     }
   ]
 }

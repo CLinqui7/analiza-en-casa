@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T21:31:19-06:00",
-  "metadata_generated_from_commit": "91186f12240027f2a6715f2221867bbc1395ee7b",
-  "source_sha256": "3a1cff0e08cb1e673d3d449a03d01d3428ea6d8f8c437d9a3352c6a25390e027",
+  "generated_at": "2026-09-02T21:35:53-06:00",
+  "metadata_generated_from_commit": "bad81e5bf6590eeefa1a5a1c3a2425a4f8503c76",
+  "source_sha256": "faff2c169845b729a78144eb6cf8d496eefc0c65d0361a531542d394aa3f6d6b",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8685,10 +8685,10 @@
       "open_question_ids": [
         "CH17-Q004"
       ],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
@@ -8705,9 +8705,9 @@
       "blocker_ids": [
         "CH17-Q004"
       ],
-      "blocker_reason": "No se definen proveedor, consentimiento, destinatario, expiración, revocación, retención y auditoría; no se envía contenido clínico por WhatsApp.",
+      "blocker_reason": "CH17-Q004 no define fuente ni alcance por organización, proveedor, consentimiento explícito/revocable, destinatario autorizado, enlace seguro autenticado expirable/revocable, payload mínimo/redactado, resultado de entrega, auditoría ni retención para WhatsApp de una nota clínica.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se comparte una nota clínica."
+      "notes": "Precheck verbal: CH17-E0048 fue abierto y no muestra interfaz, destinatario, vista previa ni resultado de WhatsApp; transcript 00:54:00.000–00:54:23.560 sólo afirma que se podía compartir externamente una nota al médico. /clinical/reports no expone nota, control, consulta de destinatario, solicitud ni entrega. QUOTE-WHATSAPP e INSURANCE-WHATSAPP están bloqueados por proveedor y no permiten contenido clínico; no son un puente de autorización."
     }
   ]
 }
