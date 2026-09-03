@@ -8339,17 +8339,20 @@
           "observation": ""
         }
       ],
-      "open_question_ids": [],
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
       "platform_assessment": {
-        "status": "IMPLEMENTED_PARTIAL",
+        "status": "MISSING",
         "priority": "P1",
-        "patient_safety_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "financial_impact": "Pendiente de evaluación contra la implementación y las reglas confirmadas.",
-        "current_platform_evidence": "#/clinica/reportes; #/clinica/evoluciones",
-        "test_path": "#/clinica/reportes; #/clinica/evoluciones; npm test",
-        "recommended_action": "Comparar el comportamiento observado con la ruta actual y completar la parte faltante.",
-        "blocked_by_client_information": false,
-        "notes": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas."
+        "patient_safety_impact": "Los antecedentes, alergias y vacunas son datos clínicos sensibles; exponerlos o admitir su captura sin fuente, contexto, autorización, versionado y corrección aprobados puede revelar o alterar información clínica.",
+        "financial_impact": "No aplica.",
+        "current_platform_evidence": "/clinical/reports conserva una superficie local vacía; no consulta, copia ni reutiliza datos de pacientes, hospitalizaciones o antecedentes y no presenta paneles ni controles Agregar.",
+        "test_path": "Precheck de evidencia: abrir CH17-E0026 y CH17-E0027; mantener ausentes datos, catálogos, formularios, controles Agregar, consultas, impresión/exportación y mutaciones hasta aprobar CH16-Q008 y CH17-Q002.",
+        "recommended_action": "Obtener fuente tenant-scoped, contexto organizacional, campos por rol, auditoría, retención, minimización y redacción (CH16-Q008), además de formularios, catálogos, permisos de Agregar, versión, corrección y auditoría de antecedentes (CH17-Q002), antes de implementar cualquier contenido o flujo.",
+        "blocked_by_client_information": true,
+        "notes": "CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con un control Agregar. No establecen fuente, contexto clínico, roles, forma, catálogo, reacción/estado, versionado, corrección, auditoría, retención, minimización ni redacción."
       }
     },
     {

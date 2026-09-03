@@ -174,7 +174,7 @@
       "description": "Los paneles cubren alergias, antecedentes personales patológicos, hábitos personales, antecedentes quirúrgicos, antecedentes familiares y tarjeta de vacunas.",
       "classification": "VISIBLE",
       "confidence": "HIGH",
-      "current_platform_status": "NOT_TESTABLE",
+      "current_platform_status": "MISSING",
       "evidence": [
         {
           "chapter_id": "CH17",
@@ -189,7 +189,7 @@
           "path": "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0027_00h51m44s200ms_abrupt_change.jpg"
         }
       ],
-      "test_path": "E2E: expandir cada panel y validar estados vacío, desconocido, negado y registrado sin contradicciones."
+      "test_path": "Precheck: CH17-E0026/E0027 fueron abiertos. React no expone paneles, datos, catálogos, formularios ni Agregar. No se implementan contenido o mutaciones hasta aprobar fuente y campos tenant-scoped, roles, auditoría, retención, minimización y redacción (CH16-Q008), además de formularios, catálogos, permisos de Agregar, reacción/estado, No registrado, versionado, corrección y auditoría (CH17-Q002)."
     },
     {
       "id": "CH17-F10",

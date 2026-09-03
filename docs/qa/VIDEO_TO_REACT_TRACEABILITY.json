@@ -1,8 +1,8 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-02T19:30:17-06:00",
-  "metadata_generated_from_commit": "998875f4694d070598ea63f52619f66bfed426a1",
-  "source_sha256": "9f6b5be517dbb363a7080d2ef291c12dfb49a0659adfc456e2db62ba3b4fb112",
+  "generated_at": "2026-09-02T19:36:06-06:00",
+  "metadata_generated_from_commit": "42651f3fe8208ad5c42a8f2718c9a37692f25578",
+  "source_sha256": "ff9db39e280b58275a491148ec62d1454618c7fdba33761d649dbafed1a158e4",
   "implementation_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
   "functional_fingerprint": "a8d8b960ae6fbf852f3dc3c74a81f127b2eb0abdbacaf9135ab65b275676bf5f",
   "requirements": [
@@ -8369,15 +8369,18 @@
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0026_00h51m43s400ms_abrupt_change.jpg",
         "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0027_00h51m44s200ms_abrupt_change.jpg"
       ],
-      "open_question_ids": [],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
+      "open_question_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
+      "route_id": "ROUTE-HEALTH-REPORTS",
+      "react_route": "/clinical/reports",
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "MISSING",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -8386,11 +8389,14 @@
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [],
-      "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_ids": [
+        "CH16-Q008",
+        "CH17-Q002"
+      ],
+      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q002 no define formularios, catálogos, permisos de Agregar, reacción/estado, contradicción con No registrado, versionado, corrección ni auditoría para antecedentes, alergias y vacunas.",
+      "last_verified_sha": "PENDING_COMMIT",
+      "notes": "Precheck factual: CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con Agregar. React no expone paneles, contenido, catálogos, formularios, controles Agregar, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F10",

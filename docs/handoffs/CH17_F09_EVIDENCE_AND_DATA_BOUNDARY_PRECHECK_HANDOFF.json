@@ -1,0 +1,39 @@
+{
+  "lot": "CH17_F09_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "42651f3fe8208ad5c42a8f2718c9a37692f25578",
+  "base_sha": "42651f3fe8208ad5c42a8f2718c9a37692f25578",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "missing": ["CH17-F09"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q002"],
+    "preserved_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08"],
+    "preserved_not_testable": ["CH17-F07"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0026": "Opened event frame at 00:51:43.400: Antecedentes visibly presents Alergias, Antecedentes personales patológicos, Hábitos personales and Antecedentes quirúrgicos with plus/add affordances; the page is report clinical context, not an authorized data contract.",
+    "CH17-E0027": "Opened event frame at 00:51:44.200: the same Antecedentes surface visibly includes Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares and Tarjeta de vacunas, each with a plus/add affordance."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped Reporte de salud source, organization context, fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q002 controls clinical antecedent/allergy forms, catalogs, Agregar permissions, reaction/state, No registrado contradiction, versioning, correction and audit.",
+    "No patient data, antecedent content, catalog, form, Agregar control, query, patient/hospitalization bridge, print/export, persistence or clinical write was added.",
+    "/clinical/hospitalizations is not an authorized source or authorization bridge for /clinical/reports; CH09-F03 remains independently mapped there as PARTIAL.",
+    "CR-020 remains separately blocked by clinical approval for its approved fluid-balance form and rules."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 42651f3fe8208ad5c42a8f2718c9a37692f25578; EXACT 52, PARTIAL 91, MISSING 16, BLOCKED_CLIENT 6, BLOCKED_INTEGRATION 3, NOT_TESTABLE 40, NOT_APPLICABLE 2).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f04_f08_regression": "PASS: F04-F06/F08 remain MISSING, F07 remains NOT_TESTABLE, and no application code changed.",
+    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL without CH16-Q008/CH17-Q002; F09 alone maps to /clinical/reports with both blockers.",
+    "selenium_runtime": "NOT_APPLICABLE: F09 has no implemented action; Python Selenium runtime remains unavailable.",
+    "git_sync": "BLOCKED_ENVIRONMENT: attempted git add/commit/push/fetch after all passing gates. add/commit fail because .git/index.lock is Permission denied; push fails with schannel SEC_E_NO_CREDENTIALS; fetch cannot open .git/FETCH_HEAD. Current local and cached origin are both 42651f3fe8208ad5c42a8f2718c9a37692f25578, but this F09 worktree remains uncommitted."
+  },
+  "next_batch": "CH17_REVIEW"
+}
