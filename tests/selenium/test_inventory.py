@@ -6,6 +6,8 @@
 # test-id: SEL-CH14-INVENTORY-SUPPLIERS
 # test-id: SEL-CH14-INVENTORY-WAREHOUSES
 # test-id: SEL-CH14-INVENTORY-KITS
+# test-id: SEL-INVENTORY-MOVEMENT-SAFETY
+# test-id: SEL-INVENTORY-CLOSURE-BOUNDARY
 from __future__ import annotations
 
 import os
@@ -133,6 +135,65 @@ class InventoryList(unittest.TestCase):
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]'))
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-OPEN"]'))
         self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-SUPPLIERS-OPEN"]'))
+
+    def test_movement_creation_persists_and_refuses_negative_stock(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        self.driver.get(f'{BASE}/inventory/kardex')
+        self.wait.until(
+            conditions.element_to_be_clickable(
+                (By.CSS_SELECTOR, '[data-action-id="INVENTORY-MOVEMENT-CREATE"]')
+            )
+        ).click()
+        dialog = self.wait.until(
+            conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]'))
+        )
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Tipo de movimiento')]//select").send_keys('Entrada')
+        quantity = dialog.find_element(By.XPATH, ".//label[contains(., 'Cantidad')]//input")
+        quantity.clear()
+        quantity.send_keys('3')
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Referencia')]//input").send_keys('SEL-MOV-001')
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Motivo')]//input").send_keys('Entrada sintética Selenium')
+        dialog.find_element(By.CSS_SELECTOR, 'button[form="movement-form"]').click()
+        self.wait.until(
+            conditions.visibility_of_element_located((By.XPATH, "//*[contains(., 'Movimiento persistido')]") )
+        )
+        self.assertIn('SEL-MOV-001', self.driver.find_element(By.TAG_NAME, 'main').text)
+        self.driver.refresh()
+        self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('SEL-MOV-001', self.driver.find_element(By.TAG_NAME, 'main').text)
+
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-MOVEMENT-CREATE"]').click()
+        dialog = self.wait.until(
+            conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]'))
+        )
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Tipo de movimiento')]//select").send_keys('Salida')
+        quantity = dialog.find_element(By.XPATH, ".//label[contains(., 'Cantidad')]//input")
+        quantity.clear()
+        quantity.send_keys('999999')
+        dialog.find_element(By.XPATH, ".//label[contains(., 'Motivo')]//input").send_keys('Salida negativa bloqueada')
+        dialog.find_element(By.CSS_SELECTOR, 'button[form="movement-form"]').click()
+        self.assertIn('saldo negativo', dialog.text)
+        self.assertNotIn('999999', self.driver.find_element(By.TAG_NAME, 'main').text)
+        record_pass('INVENTORY-MOVEMENT-CREATE', 'SEL-INVENTORY-MOVEMENT-SAFETY', started, self.driver.current_url)
+
+        self.login('auditor@demo.local', 'demo-auditor')
+        self.driver.get(f'{BASE}/inventory/kardex')
+        self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-MOVEMENT-CREATE"]'))
+
+    def test_closure_approval_is_an_explicit_non_mutating_boundary(self) -> None:
+        started = time.time()
+        self.login('admin@demo.local', 'demo-admin')
+        before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURES-OPEN"]').click()
+        main = self.wait.until(conditions.visibility_of_element_located((By.TAG_NAME, 'main')))
+        self.assertIn('no crea, aprueba, cancela, concilia o revierte cierres', main.text)
+        self.assertFalse(self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-CLOSURE-APPROVE"]'))
+        self.assertFalse(self.driver.find_elements(By.XPATH, "//button[normalize-space()='Aprobar cierre']"))
+        self.driver.refresh()
+        self.assertEqual(before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
+        record_pass('INVENTORY-CLOSURE-APPROVE', 'SEL-INVENTORY-CLOSURE-BOUNDARY', started, self.driver.current_url)
 
     def test_admin_opens_and_filters_item_history_without_audit_mutation(self) -> None:
         started = time.time()
