@@ -594,52 +594,26 @@ export default function PatientsPage() {
     closeDialog();
   }
   return (
-    <div className="page-stack">
+    <div className="page-stack patients-page">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Registro</p>
           <h1>Pacientes</h1>
           <p>La búsqueda normaliza mayúsculas, acentos y espacios en todos los resultados.</p>
         </div>
-        <div>
-          <Button
-            className="button-secondary"
-            data-action-id="PATIENT-REFRESH"
-            onClick={() => {
-              void refreshPatients().then((refreshed) => {
-                if (refreshed)
-                  setResult('Listado de pacientes actualizado desde el origen autorizado.');
-              });
-            }}
-            type="button"
-          >
-            Actualizar lista
-          </Button>
+        <div className="patient-header-actions">
           {can('patients:write') ? (
-            <>
-              <Button
-                className="button-secondary"
-                data-action-id="PATIENT-IMPORT"
-                onClick={() => {
-                  setImportPreview(null);
-                  setImportOpen(true);
-                }}
-                type="button"
-              >
-                Importar CSV
-              </Button>
-              <Button
-                data-action-id="PATIENT-CREATE"
-                onClick={() => {
-                  setResult(null);
-                  setDismissedLinkedDialog(false);
-                  setIsOpen(true);
-                }}
-                type="button"
-              >
-                Agregar paciente
-              </Button>
-            </>
+            <Button
+              className="button-secondary"
+              data-action-id="PATIENT-IMPORT"
+              onClick={() => {
+                setImportPreview(null);
+                setImportOpen(true);
+              }}
+              type="button"
+            >
+              Importar CSV
+            </Button>
           ) : null}
           <Button
             className="button-secondary"
@@ -649,16 +623,48 @@ export default function PatientsPage() {
             }}
             type="button"
           >
-            Exportar Excel
+            Exportar todos
           </Button>
-          <Button
-            className="button-secondary"
-            data-action-id="PATIENT-EXPORT-CSV"
-            onClick={exportPatientsCsv}
-            type="button"
-          >
-            Exportar CSV
-          </Button>
+          {can('patients:write') ? (
+            <Button
+              className="patient-create-button"
+              data-action-id="PATIENT-CREATE"
+              onClick={() => {
+                setResult(null);
+                setDismissedLinkedDialog(false);
+                setIsOpen(true);
+              }}
+              type="button"
+            >
+              + Nuevo paciente
+            </Button>
+          ) : null}
+          <details className="patient-more-actions">
+            <summary>Más</summary>
+            <div>
+              <Button
+                className="button-secondary"
+                data-action-id="PATIENT-REFRESH"
+                onClick={() => {
+                  void refreshPatients().then((refreshed) => {
+                    if (refreshed)
+                      setResult('Listado de pacientes actualizado desde el origen autorizado.');
+                  });
+                }}
+                type="button"
+              >
+                Actualizar lista
+              </Button>
+              <Button
+                className="button-secondary"
+                data-action-id="PATIENT-EXPORT-CSV"
+                onClick={exportPatientsCsv}
+                type="button"
+              >
+                Exportar CSV
+              </Button>
+            </div>
+          </details>
         </div>
       </header>
       {result ? (
@@ -666,53 +672,10 @@ export default function PatientsPage() {
           {result}
         </p>
       ) : null}
-      <div aria-label="Estados de pacientes" className="tabs" role="tablist">
-        <Button
-          aria-selected={tab === 'ACTIVE'}
-          data-action-id="PATIENT-TAB-ACTIVE"
-          className={tab === 'ACTIVE' ? 'tab active' : 'tab'}
-          onClick={() => {
-            setTab('ACTIVE');
-            setPage(1);
-          }}
-          role="tab"
-          type="button"
-        >
-          Activos ({patients.filter((patient) => patient.status === 'ACTIVE').length})
-        </Button>
-        <Button
-          aria-selected={tab === 'INACTIVE'}
-          data-action-id="PATIENT-TAB-INACTIVE"
-          className={tab === 'INACTIVE' ? 'tab active' : 'tab'}
-          onClick={() => {
-            setTab('INACTIVE');
-            setPage(1);
-          }}
-          role="tab"
-          type="button"
-        >
-          Inactivos ({patients.filter((patient) => patient.status === 'INACTIVE').length})
-        </Button>
-        <Button
-          aria-selected={tab === 'IMPORT'}
-          data-action-id="PATIENT-TAB-IMPORT"
-          className={tab === 'IMPORT' ? 'tab active' : 'tab'}
-          onClick={() => {
-            setTab('IMPORT');
-            setImportOpen(true);
-          }}
-          role="tab"
-          type="button"
-        >
-          Carga masiva
-        </Button>
-      </div>
-      <Panel>
-        <div className="table-heading">
-          <div>
-            <label className="search-label" htmlFor="patient-search">
-              Buscar paciente
-            </label>
+      <Panel className="patient-filter-panel">
+        <div className="patient-filter-bar">
+          <label className="patient-search-field" htmlFor="patient-search">
+            <span aria-hidden="true">⌕</span>
             <input
               className="patient-search-input"
               id="patient-search"
@@ -725,6 +688,47 @@ export default function PatientsPage() {
               type="search"
               value={query}
             />
+          </label>
+          <div aria-label="Estados de pacientes" className="patient-status-tabs" role="tablist">
+            <Button
+              aria-selected={tab === 'ACTIVE'}
+              data-action-id="PATIENT-TAB-ACTIVE"
+              className={tab === 'ACTIVE' ? 'tab active' : 'tab'}
+              onClick={() => {
+                setTab('ACTIVE');
+                setPage(1);
+              }}
+              role="tab"
+              type="button"
+            >
+              Activos ({patients.filter((patient) => patient.status === 'ACTIVE').length})
+            </Button>
+            <Button
+              aria-selected={tab === 'INACTIVE'}
+              data-action-id="PATIENT-TAB-INACTIVE"
+              className={tab === 'INACTIVE' ? 'tab active' : 'tab'}
+              onClick={() => {
+                setTab('INACTIVE');
+                setPage(1);
+              }}
+              role="tab"
+              type="button"
+            >
+              Inactivos ({patients.filter((patient) => patient.status === 'INACTIVE').length})
+            </Button>
+            <Button
+              aria-selected={false}
+              className="tab"
+              data-action-id="PATIENT-TAB-IMPORT"
+              onClick={() => {
+                setImportPreview(null);
+                setImportOpen(true);
+              }}
+              role="tab"
+              type="button"
+            >
+              Carga masiva
+            </Button>
           </div>
           {query ? (
             <Button
@@ -739,16 +743,15 @@ export default function PatientsPage() {
               Limpiar búsqueda
             </Button>
           ) : null}
+          <strong className="patient-result-count">{visiblePatients.length} resultados</strong>
         </div>
       </Panel>
-      <Panel>
+      <Panel className="patient-directory-panel">
         <div className="table-heading">
-          <h2>Resultados</h2>
+          <h2>Directorio</h2>
           <div>
-            <StatusTag>{visiblePatients.length} visibles</StatusTag>
-            <label>
-              {' '}
-              Mostrar{' '}
+            <label className="patient-page-size">
+              Mostrar
               <select
                 data-action-id="PATIENT-PAGE-SIZE"
                 onChange={(event) => {
@@ -769,7 +772,7 @@ export default function PatientsPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Acción</th>
+                  <th>Paciente</th>
                   <th
                     aria-sort={
                       sort === 'documentId'
@@ -789,7 +792,7 @@ export default function PatientsPage() {
                       }}
                       type="button"
                     >
-                      Documento {sort === 'documentId' ? (direction === 1 ? '↑' : '↓') : '↕'}
+                      Documento {sort === 'documentId' ? (direction === 1 ? '↑' : '↓') : ''}
                     </Button>
                   </th>
                   <th
@@ -807,59 +810,61 @@ export default function PatientsPage() {
                       }}
                       type="button"
                     >
-                      Nombre completo {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : '↕'}
+                      Contacto {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : ''}
                     </Button>
                   </th>
-                  <th>Edad</th>
-                  <th>Empresa</th>
-                  <th>Triage</th>
-                  <th>Notif. Botmaker</th>
+                  <th>Cobertura registrada</th>
                   <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {pageRows.map((patient) => (
                   <tr key={patient.id}>
-                    <td>
-                      <div className="header-actions">
-                        <Link
-                          data-action-id="PATIENT-DETAIL-NAVIGATE"
-                          href={`/patients/${patient.id}`}
-                        >
-                          Detalle
+                    <td className="patient-person-cell">
+                      <span aria-hidden="true" className="patient-avatar">
+                        {patient.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
+                      </span>
+                      <div>
+                        <Link href={`/patients/${patient.id}`}>
+                          {patient.fullName}
                         </Link>
-                        {can('patients:write') ? (
-                          <Button
-                            data-action-id={
-                              patient.status === 'ACTIVE'
-                                ? 'PATIENT-INACTIVATE'
-                                : 'PATIENT-REACTIVATE'
-                            }
-                            onClick={() => {
-                              void updatePatient({
-                                ...patient,
-                                status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
-                              });
-                            }}
-                            type="button"
-                          >
-                            {patient.status === 'ACTIVE' ? 'Inactivar' : 'Reactivar'}
-                          </Button>
-                        ) : null}
+                        <small>{patient.id}</small>
                       </div>
                     </td>
                     <td>
-                      {patient.documentType}: {patient.documentId}
+                      {patient.documentType}<small>{patient.documentId}</small>
                     </td>
-                    <td>{patient.fullName}</td>
-                    <td>{ageFromBirthDate(patient.birthDate) ?? '—'}</td>
-                    <td>{patient.company ?? '—'}</td>
-                    <td>{patient.triageStatus || 'Sin clasificar'}</td>
-                    <td>{(patient.notifications?.botmakerConsent ?? true) ? 'Sí' : 'No'}</td>
+                    <td>{patient.phone || 'Sin teléfono'}<small>{patient.email || ''}</small></td>
+                    <td>{patient.insurer ?? patient.insurance?.insurer ?? 'Particular'}<small>{patient.company ?? ''}</small></td>
                     <td>
                       <StatusTag tone={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {patient.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                       </StatusTag>
+                    </td>
+                    <td>
+                      <div className="patient-row-actions">
+                        <Link
+                          aria-label={`Abrir ${patient.fullName}`}
+                          data-action-id="PATIENT-DETAIL-NAVIGATE"
+                          href={`/patients/${patient.id}`}
+                          title="Abrir paciente"
+                        >
+                          ↗
+                        </Link>
+                        {can('patients:write') ? (
+                          <Button
+                            aria-label={patient.status === 'ACTIVE' ? `Inactivar ${patient.fullName}` : `Reactivar ${patient.fullName}`}
+                            className="button-secondary"
+                            data-action-id={patient.status === 'ACTIVE' ? 'PATIENT-INACTIVATE' : 'PATIENT-REACTIVATE'}
+                            onClick={() => void updatePatient({ ...patient, status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })}
+                            title={patient.status === 'ACTIVE' ? 'Inactivar' : 'Reactivar'}
+                            type="button"
+                          >
+                            {patient.status === 'ACTIVE' ? '✓' : '↻'}
+                          </Button>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}

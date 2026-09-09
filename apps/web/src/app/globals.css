@@ -2414,6 +2414,293 @@ body {
   padding: 0;
 }
 
+.form-grid input[type='checkbox'] {
+  width: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Pacientes sigue la jerarquía compacta del Studio sin perder acciones ni permisos. */
+.patients-page {
+  gap: 14px;
+}
+
+.patients-page .page-header {
+  padding-block: 4px 2px;
+}
+
+.patient-header-actions,
+.patient-filter-bar,
+.patient-status-tabs,
+.patient-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.patient-header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.patient-create-button {
+  border-color: #d83d49;
+  background: #d83d49;
+  box-shadow: 0 8px 18px rgb(216 61 73 / 18%);
+}
+
+.patient-create-button:hover {
+  border-color: #bd2f3b;
+  background: #bd2f3b;
+}
+
+.patient-more-actions {
+  position: relative;
+}
+
+.patient-more-actions summary {
+  min-height: 38px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: #17475a;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  list-style: none;
+}
+
+.patient-more-actions summary::-webkit-details-marker {
+  display: none;
+}
+
+.patient-more-actions > div {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  width: 170px;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 35px rgb(8 47 69 / 16%);
+}
+
+.patient-more-actions > div .button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.patient-filter-panel {
+  padding: 10px 12px;
+}
+
+.patient-filter-bar {
+  min-width: 0;
+}
+
+.patient-search-field {
+  display: flex;
+  min-width: 240px;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfcfd;
+  color: #547080;
+}
+
+.patient-search-field input {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.patient-status-tabs {
+  flex: 0 0 auto;
+}
+
+.patient-status-tabs .tab {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #3d5a68;
+  box-shadow: none;
+}
+
+.patient-status-tabs .tab.active {
+  border-color: #d8e1e7;
+  background: #e9eff4;
+  color: #0b3b4d;
+}
+
+.patient-result-count {
+  flex: 0 0 auto;
+  color: #607887;
+  font-size: 0.72rem;
+}
+
+.patient-directory-panel .table-heading {
+  min-height: 58px;
+}
+
+.patient-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #607887;
+  font-size: 0.75rem;
+}
+
+.patient-page-size select {
+  width: 74px;
+  min-height: 34px;
+}
+
+.patient-directory-panel table {
+  min-width: 850px;
+}
+
+.patient-directory-panel th,
+.patient-directory-panel td {
+  padding: 10px 13px;
+  vertical-align: middle;
+}
+
+.patient-directory-panel th .button {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.patient-directory-panel td small {
+  display: block;
+  margin-top: 3px;
+  color: #7b8f9a;
+  font-size: 0.66rem;
+}
+
+.patient-person-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient-person-cell a {
+  color: #0a4258;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.patient-avatar {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8f0f5;
+  color: #1a4b61;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.patient-row-actions .button,
+.patient-row-actions a {
+  display: grid;
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fff;
+  color: #16485c;
+  box-shadow: none;
+  text-decoration: none;
+}
+
+.patients-page .pagination .button {
+  border-color: var(--line);
+  background: #fff;
+  color: #16485c;
+  box-shadow: none;
+}
+
+.patients-page .pagination .button.active {
+  border-color: #173f55;
+  background: #173f55;
+  color: #fff;
+}
+
+.patients-page .dialog {
+  display: grid;
+  width: min(850px, 100%);
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.workspace-main:has(.patients-page .dialog-backdrop) .workspace-topbar {
+  z-index: 0;
+}
+
+.patients-page .patient-create-button,
+.patients-page .dialog-footer .button:not(.button-secondary) {
+  border-color: #d83d49 !important;
+  background: #d83d49 !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgb(216 61 73 / 18%) !important;
+}
+
+.patients-page .dialog-content {
+  overflow: auto;
+}
+
+.patients-page .dialog .form-grid {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.patients-page .dialog .form-grid > fieldset {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px 16px;
+  margin: 0;
+  padding: 18px 0;
+  border: 0;
+  border-bottom: 1px solid #e1e8ed;
+}
+
+.patients-page .dialog .form-grid > fieldset > legend {
+  padding: 0 0 8px;
+  color: #12394c;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.patients-page .dialog .form-grid > fieldset > .field-help,
+.patients-page .dialog .form-grid > fieldset > p,
+.patients-page .dialog .form-grid > fieldset > .patient-map-shell,
+.patients-page .dialog .form-grid > fieldset > .action-row {
+  grid-column: 1 / -1;
+}
+
 .brand-copy strong {
   font-size: 0.91rem;
   white-space: nowrap;
@@ -3079,6 +3366,42 @@ body {
 
   .dialog {
     max-height: calc(100dvh - var(--topbar-h) - 20px);
+  }
+
+  .patient-header-actions,
+  .patient-filter-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .patient-header-actions .button,
+  .patient-header-actions .patient-more-actions,
+  .patient-header-actions .patient-more-actions summary {
+    width: 100%;
+  }
+
+  .patient-more-actions > div {
+    right: auto;
+    left: 0;
+    width: 100%;
+  }
+
+  .patient-status-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .patient-status-tabs .tab {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .patients-page .dialog .form-grid > fieldset {
+    grid-template-columns: 1fr;
+  }
+
+  .patients-page .dialog .form-grid > fieldset > * {
+    grid-column: 1;
   }
 
   .desktop-nav-toggle {
