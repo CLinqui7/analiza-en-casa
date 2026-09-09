@@ -42,7 +42,7 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "9f6737de030f004026878634084219f6200c1b38",
+  "candidate_sha": "9f6737d0cee1d788e8418ded08dae7530ae1a13e",
   "deployment": {
     "environment": "preview",
     "url": "https://web-aflb54vd7-clinqui7s-projects.vercel.app",
