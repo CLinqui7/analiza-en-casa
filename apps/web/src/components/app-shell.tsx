@@ -287,7 +287,8 @@ export function AppShell({ children }: PropsWithChildren) {
 
   useEffect(() => {
     const restoreTimer = window.setTimeout(
-      () => setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true'),
+      () =>
+        setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true'),
       0,
     );
     const focusSearch = (event: KeyboardEvent) => {
@@ -315,17 +316,19 @@ export function AppShell({ children }: PropsWithChildren) {
     event.preventDefault();
     const query = globalSearch.trim();
     if (!query) return;
-    const normalized = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const route =
-      normalized.includes('cotiza')
-        ? '/quotes'
-        : normalized.includes('hospital') || normalized.includes('caso')
-          ? '/hospitalizations'
-          : normalized.includes('seguro') || normalized.includes('preautor')
-            ? '/insurance'
-            : normalized.includes('agenda') || normalized.includes('turno')
-              ? '/agenda'
-              : '/patients';
+    const normalized = query
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    const route = normalized.includes('cotiza')
+      ? '/quotes'
+      : normalized.includes('hospital') || normalized.includes('caso')
+        ? '/hospitalizations'
+        : normalized.includes('seguro') || normalized.includes('preautor')
+          ? '/insurance'
+          : normalized.includes('agenda') || normalized.includes('turno')
+            ? '/agenda'
+            : '/patients';
     router.push(`${route}?search=${encodeURIComponent(query)}`);
   }
 
@@ -477,6 +480,7 @@ export function AppShell({ children }: PropsWithChildren) {
             Cerrar
           </button>
           <Link
+            aria-label="Ir al inicio de Analiza en Casa"
             className="brand"
             data-action-id="DASHBOARD-NAVIGATE"
             href="/dashboard"
@@ -526,12 +530,14 @@ export function AppShell({ children }: PropsWithChildren) {
                 return (
                   <li key={group.href}>
                     <Link
+                      aria-label={group.label}
                       aria-current={isActive(pathname, group.href) ? 'page' : undefined}
                       className="nav-link"
                       data-action-id={group.actionId}
                       href={group.href}
                       onClick={() => closeMobileNavigation()}
                       scroll={false}
+                      title={sidebarCollapsed ? group.label : undefined}
                     >
                       <NavigationGlyph label={group.label} />
                       <span className="nav-item-label">{group.label}</span>
@@ -551,10 +557,12 @@ export function AppShell({ children }: PropsWithChildren) {
               return (
                 <li key={group.label} className="nav-group">
                   <button
+                    aria-label={`${open ? 'Contraer' : 'Expandir'} ${group.label}`}
                     aria-expanded={open}
                     className={`nav-group-trigger${hasCurrentChild ? ' current-group' : ''}`}
                     data-action-id={`${group.label.toUpperCase()}-TOGGLE`}
                     onClick={() => setExpanded((current) => ({ ...current, [group.label]: !open }))}
+                    title={sidebarCollapsed ? group.label : undefined}
                     type="button"
                   >
                     <span className="nav-group-copy">
@@ -597,6 +605,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </div>
           <div ref={userMenuRef} className="user-menu">
             <button
+              aria-label={`Abrir menú de mi cuenta. Rol ${session.role}`}
               aria-expanded={userMenuOpen}
               className="account-card"
               data-action-id="USER-MENU-OPEN"

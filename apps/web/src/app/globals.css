@@ -2903,7 +2903,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #fff;
-  color: #6d818c;
+  color: #4f6672;
   font-size: 0.58rem;
   white-space: nowrap;
 }
@@ -3808,7 +3808,7 @@ body {
 }
 
 .inventory-ledger-metrics small {
-  color: #6c7d88;
+  color: #596f7a;
   font-size: 0.64rem;
   font-weight: 780;
   letter-spacing: 0.035em;
@@ -3823,7 +3823,7 @@ body {
 }
 
 .inventory-ledger-metrics article > div > span {
-  color: #81929b;
+  color: #5d737e;
   font-size: 0.62rem;
 }
 
@@ -3938,7 +3938,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #607985;
+  color: #526c78;
   font-size: 0.64rem;
   white-space: nowrap;
 }
@@ -3963,7 +3963,7 @@ body {
 
 .inventory-ledger-table th {
   background: #f6fafb;
-  color: #607985;
+  color: #526b77;
   font-size: 0.58rem;
   letter-spacing: 0.055em;
 }
@@ -3984,7 +3984,7 @@ body {
   max-width: 260px;
   margin-top: 3px;
   overflow: hidden;
-  color: #82939c;
+  color: #5f7580;
   font-size: 0.59rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4011,13 +4011,13 @@ body {
 .inventory-ledger-quantity.in,
 .inventory-ledger-in {
   background: #e9f8ef;
-  color: #248e50;
+  color: #176b3b;
 }
 
 .inventory-ledger-quantity.out,
 .inventory-ledger-out {
   background: #ffeded;
-  color: #b94b47;
+  color: #9b3f3b;
 }
 
 .inventory-ledger-balance {
@@ -4076,7 +4076,7 @@ body {
   }
 }
 
-@media (max-width: 740px) {
+@media (width <= 740px) {
   .inventory-ledger-page > .page-header .button {
     width: 100%;
   }

@@ -101,23 +101,17 @@ export default function KardexPage() {
     );
   });
   const summary = useMemo(() => {
-    const incoming = allRows
-      .filter((row) => direction(row) === 'in')
-      .reduce((total, row) => total + row.quantity, 0);
-    const outgoing = allRows
-      .filter((row) => direction(row) === 'out')
-      .reduce((total, row) => total + row.quantity, 0);
-    const balance = itemIds.reduce(
-      (total, itemId) =>
-        total +
-        (allRows
-          .filter((row) => row.itemId === itemId)
-          .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-          .at(-1)?.balance ?? 0),
-      0,
-    );
+    let incoming = 0;
+    let outgoing = 0;
+    const latestBalanceByItem = new Map<string, number>();
+    for (const row of allRows) {
+      if (direction(row) === 'in') incoming += row.quantity;
+      else outgoing += row.quantity;
+      if (!latestBalanceByItem.has(row.itemId)) latestBalanceByItem.set(row.itemId, row.balance);
+    }
+    const balance = [...latestBalanceByItem.values()].reduce((total, value) => total + value, 0);
     return { incoming, outgoing, balance };
-  }, [allRows, itemIds]);
+  }, [allRows]);
   const form = useForm<MovementFormInput, unknown, MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
