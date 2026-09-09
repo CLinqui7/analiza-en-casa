@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import {
@@ -285,7 +286,10 @@ export function AppShell({ children }: PropsWithChildren) {
   const required = permissionForPath(pathname);
 
   useEffect(() => {
-    setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true');
+    const restoreTimer = window.setTimeout(
+      () => setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true'),
+      0,
+    );
     const focusSearch = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -293,7 +297,10 @@ export function AppShell({ children }: PropsWithChildren) {
       }
     };
     window.addEventListener('keydown', focusSearch);
-    return () => window.removeEventListener('keydown', focusSearch);
+    return () => {
+      window.clearTimeout(restoreTimer);
+      window.removeEventListener('keydown', focusSearch);
+    };
   }, []);
 
   const toggleSidebar = useCallback(() => {
@@ -475,6 +482,14 @@ export function AppShell({ children }: PropsWithChildren) {
             href="/dashboard"
             scroll={false}
           >
+            <Image
+              alt="Analiza en Casa"
+              className="brand-logo"
+              height={66}
+              priority
+              src="/brand/analiza-en-casa-logo.png"
+              width={152}
+            />
             <span className="brand-monogram" aria-hidden="true">
               AC
             </span>
@@ -485,7 +500,12 @@ export function AppShell({ children }: PropsWithChildren) {
           </Link>
           <p className="environment-label">
             <span className="environment-dot" aria-hidden="true" />
-            {session.mode === 'supabase' ? 'Conectado a Supabase' : 'Entorno demo'} · {session.role}
+            {session.mode === 'supabase'
+              ? 'Conectado a Supabase'
+              : session.mode === 'mongodb'
+                ? 'Conectado a MongoDB'
+                : 'Entorno demo'}{' '}
+            · {session.role}
           </p>
         </div>
 

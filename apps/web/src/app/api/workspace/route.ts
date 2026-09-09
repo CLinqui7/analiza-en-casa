@@ -6,6 +6,7 @@ import { MongoDoctorRepository } from '@/server/mongo-doctors';
 import { MongoHospitalizationRepository } from '@/server/mongo-hospitalizations';
 import { MongoPatientRepository } from '@/server/mongo-patients';
 import { MongoShiftRepository } from '@/server/mongo-shifts';
+import { MongoInsuranceRepository, MongoQuoteRepository } from '@/server/mongo-quotes';
 import { MongoAuthService, mongoAuthStore, sessionCookieName } from '@/server/mongo-auth';
 import { mongoDatabase, mongoRuntimeConfig } from '@/server/mongodb';
 
@@ -36,7 +37,7 @@ export async function GET(request?: Request) {
         .find((part) => part.startsWith(`${sessionCookieName}=`))
         ?.slice(sessionCookieName.length + 1),
     );
-    const [patients, doctors, hospitalizations, agenda] = await Promise.all([
+    const [patients, doctors, hospitalizations, agenda, quotes, insurance] = await Promise.all([
       new MongoPatientRepository(database.collection('patients')).listWithVersions(session),
       can(session.role, 'settings:write')
         ? new MongoDoctorRepository(database.collection('doctors')).listWithVersions(session)
@@ -53,6 +54,12 @@ export async function GET(request?: Request) {
             new MongoShiftRepository(database as never).listResources(session),
           ])
         : Promise.resolve([[], []] as const),
+      can(session.role, 'quotes:read')
+        ? new MongoQuoteRepository(database).listWithVersions(session)
+        : Promise.resolve([]),
+      can(session.role, 'insurance:read')
+        ? new MongoInsuranceRepository(database).list(session)
+        : Promise.resolve({ requests: [], events: [] }),
     ]);
     return NextResponse.json(
       {
@@ -62,6 +69,9 @@ export async function GET(request?: Request) {
         hospitalizations: hospitalizations.map(({ hospitalization }) => hospitalization),
         shifts: agenda[0],
         nursingResources: agenda[1],
+        quotes: quotes.map(({ quote }) => quote),
+        insuranceRequests: insurance.requests,
+        insuranceEvents: insurance.events,
         patientVersions: Object.fromEntries(
           patients.map(({ patient, version }) => [patient.id, version]),
         ),
@@ -71,6 +81,7 @@ export async function GET(request?: Request) {
         hospitalizationVersions: Object.fromEntries(
           hospitalizations.map(({ hospitalization, version }) => [hospitalization.id, version]),
         ),
+        quoteVersions: Object.fromEntries(quotes.map(({ quote, version }) => [quote.id, version])),
       },
       { headers: { 'Cache-Control': 'no-store' } },
     );

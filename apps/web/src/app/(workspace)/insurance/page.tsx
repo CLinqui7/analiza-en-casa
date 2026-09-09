@@ -113,13 +113,13 @@ export default function InsurancePage() {
     setDraft(null);
     setLocalError(null);
   }
-  function submitUpdate(event: React.FormEvent<HTMLFormElement>) {
+  async function submitUpdate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draft || !draft.note.trim() || !draft.date) {
       setLocalError('Indique el estado observado, la fecha y una observación.');
       return;
     }
-    const registered = recordInsuranceObservation({
+    const registered = await recordInsuranceObservation({
       ...draft,
       note: draft.note.trim(),
       date: new Date(draft.date).toISOString(),
@@ -409,7 +409,7 @@ export default function InsurancePage() {
         }
       >
         {activeQuote && activePatient ? (
-          <form className="form-grid" id="insurance-update-form" onSubmit={submitUpdate}>
+          <form className="form-grid" id="insurance-update-form" onSubmit={(event) => void submitUpdate(event)}>
             <p className="full">
               <strong>Contexto:</strong> {activePatient.fullName} ·{' '}
               {insurerFor(activePatient) ?? 'Sin aseguradora'} · total{' '}

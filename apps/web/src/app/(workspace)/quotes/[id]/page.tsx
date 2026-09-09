@@ -2,12 +2,16 @@
 
 import { calculateQuoteBalance, canEditQuote, quoteCategories } from '@analiza/domain';
 import { Button, EmptyState, Panel } from '@analiza/ui';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { mongoMutationHeaders } from '@/lib/auth';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
+type PortalShare = { portalUrl: string; whatsappPhone: string; expiresAt: string; qrDataUrl: string };
 
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +19,8 @@ export default function QuoteDetailPage() {
   const { patients, payments, quotes, sendQuote } = useWorkspace();
   const { can } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
+  const [portalShare, setPortalShare] = useState<PortalShare | null>(null);
+  const [creatingPortal, setCreatingPortal] = useState(false);
   const quote = quotes.find((candidate) => candidate.id === id);
   if (!quote)
     return (
@@ -40,14 +46,47 @@ export default function QuoteDetailPage() {
     .slice()
     .sort((a, b) => a.version - b.version);
   const editable = can('quotes:write') && canEditQuote(currentQuote);
-  function send() {
-    sendQuote(currentQuote.id);
-    setMessage(
-      'La versión se marcó como enviada e inmutable. No se envió información a un canal externo.',
-    );
+  async function send() {
+    const saved = await sendQuote(currentQuote.id);
+    if (saved) {
+      setMessage(
+        'La versión se marcó como enviada e inmutable. No se envió información a un canal externo.',
+      );
+    }
   }
-  function unavailable(text: string) {
-    setMessage(text);
+  async function createPortalShare() {
+    setCreatingPortal(true);
+    setMessage(null);
+    try {
+      const response = await fetch('/api/portal-links', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+        body: JSON.stringify({ quoteId: currentQuote.id }),
+      });
+      const payload: unknown = await response.json().catch(() => null);
+      if (!response.ok || !payload || typeof payload !== 'object') {
+        const detail = payload && typeof payload === 'object' && typeof (payload as { error?: unknown }).error === 'string'
+          ? (payload as { error: string }).error
+          : 'No fue posible crear el acceso seguro.';
+        setMessage(detail);
+        return;
+      }
+      const { portalUrl, whatsappPhone, expiresAt } = payload as Record<string, unknown>;
+      if (typeof portalUrl !== 'string' || typeof whatsappPhone !== 'string' || typeof expiresAt !== 'string') throw new Error();
+      const qrDataUrl = await QRCode.toDataURL(portalUrl, { width: 280, margin: 1, color: { dark: '#082f45', light: '#ffffff' } });
+      setPortalShare({ portalUrl, whatsappPhone, expiresAt, qrDataUrl });
+      setMessage('Acceso seguro creado. El QR y el enlace vencen automáticamente.');
+    } catch {
+      setMessage('El portal seguro requiere la conexión Mongo y la sesión protegida.');
+    } finally {
+      setCreatingPortal(false);
+    }
+  }
+  async function copyPortalLink() {
+    if (!portalShare) return;
+    await navigator.clipboard.writeText(portalShare.portalUrl);
+    setMessage('Enlace seguro copiado.');
   }
   return (
     <div className="page-stack quote-print-area">
@@ -80,7 +119,7 @@ export default function QuoteDetailPage() {
             </Button>
           ) : null}
           {editable ? (
-            <Button data-action-id="QUOTE-SEND" onClick={send} type="button">
+            <Button data-action-id="QUOTE-SEND" onClick={() => void send()} type="button">
               Enviar versión
             </Button>
           ) : null}
@@ -240,31 +279,43 @@ export default function QuoteDetailPage() {
                 Abrir pagos
               </Button>
             ) : null}
-            {can('quotes:write') ? (
-              <Button
-                className="button-secondary"
-                data-action-id="QUOTE-WHATSAPP"
-                onClick={() => unavailable('Proveedor de mensajería no configurado.')}
-                type="button"
-              >
-                Enviar WhatsApp
-              </Button>
-            ) : null}
-            {can('quotes:write') ? (
+            {can('quotes:write') && quote.immutable ? (
               <Button
                 className="button-secondary"
                 data-action-id="QUOTE-PORTAL"
-                onClick={() => unavailable('Portal seguro no configurado.')}
+                disabled={creatingPortal}
+                onClick={() => void createPortalShare()}
                 type="button"
               >
-                Copiar enlace portal
+                {creatingPortal ? 'Creando acceso…' : 'Crear QR y enlace seguro'}
               </Button>
             ) : null}
           </div>
           <p className="field-help">
-            Los canales externos permanecen bloqueados hasta que exista infraestructura aprobada. No
-            se incluyen datos clínicos en estas acciones.
+            WhatsApp recibe únicamente un enlace con segundo factor; no se incluyen diagnósticos,
+            tratamientos, medicamentos ni importes en el mensaje.
           </p>
+          {portalShare ? (
+            <div className="portal-share-card">
+              <Image alt="Código QR del portal seguro" height={280} src={portalShare.qrDataUrl} unoptimized width={280} />
+              <div>
+                <strong>Acceso de consulta</strong>
+                <span>Vence {new Date(portalShare.expiresAt).toLocaleString('es-SV')}</span>
+                <div className="action-row">
+                  <Button className="button-secondary" data-action-id="QUOTE-PORTAL-COPY" onClick={() => void copyPortalLink()} type="button">Copiar enlace</Button>
+                  <a
+                    className="button"
+                    data-action-id="QUOTE-WHATSAPP"
+                    href={`https://wa.me/${portalShare.whatsappPhone}?text=${encodeURIComponent(`Analiza en Casa: consulte el estado de su trámite mediante este enlace seguro. Se solicitará un código de verificación: ${portalShare.portalUrl}`)}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Enviar por WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </Panel>
       </div>
       <Panel>

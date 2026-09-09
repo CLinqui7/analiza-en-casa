@@ -3,12 +3,19 @@
 import {
   doctorSchema,
   hospitalizationSchema,
+  insuranceEventSchema,
+  insuranceRequestSchema,
   nursingResourceSchema,
+  quoteSchema,
   shiftSchema,
   patientSchema,
   type Doctor,
   type Hospitalization,
   type Patient,
+  type InsuranceEvent,
+  type InsuranceRequest,
+  type InsuranceRequestStatus,
+  type Quote,
   type Shift,
 } from '@analiza/contracts';
 import { mongoMutationHeaders } from '@/lib/auth';
@@ -18,6 +25,7 @@ type WorkspaceResponse = WorkspaceSnapshot & {
   patientVersions?: Record<string, unknown>;
   doctorVersions?: Record<string, unknown>;
   hospitalizationVersions?: Record<string, unknown>;
+  quoteVersions?: Record<string, unknown>;
 };
 
 function responseError(response: Response, fallback: string): Promise<Error> {
@@ -47,6 +55,7 @@ export class HttpDataProvider implements DataProvider {
   private patientVersions = new Map<string, number>();
   private doctorVersions = new Map<string, number>();
   private hospitalizationVersions = new Map<string, number>();
+  private quoteVersions = new Map<string, number>();
 
   private loadVersions(raw: Record<string, unknown> | undefined) {
     return new Map(
@@ -72,6 +81,7 @@ export class HttpDataProvider implements DataProvider {
     this.patientVersions = this.loadVersions(payload.patientVersions);
     this.doctorVersions = this.loadVersions(payload.doctorVersions);
     this.hospitalizationVersions = this.loadVersions(payload.hospitalizationVersions);
+    this.quoteVersions = this.loadVersions(payload.quoteVersions);
     return {
       ...payload,
       patients: payload.patients.map((patient) => patientSchema.parse(patient)),
@@ -82,6 +92,13 @@ export class HttpDataProvider implements DataProvider {
       shifts: (payload.shifts ?? []).map((shift) => shiftSchema.parse(shift)),
       nursingResources: (payload.nursingResources ?? []).map((resource) =>
         nursingResourceSchema.parse(resource),
+      ),
+      quotes: (payload.quotes ?? []).map((quote) => quoteSchema.parse(quote)),
+      insuranceRequests: (payload.insuranceRequests ?? []).map((request) =>
+        insuranceRequestSchema.parse(request),
+      ),
+      insuranceEvents: (payload.insuranceEvents ?? []).map((event) =>
+        insuranceEventSchema.parse(event),
       ),
     };
   }
@@ -232,6 +249,62 @@ export class HttpDataProvider implements DataProvider {
       throw new Error('La respuesta de la serie de turnos no es válida.');
     }
     return (payload as { shifts: unknown[] }).shifts.map((shift) => shiftSchema.parse(shift));
+  }
+
+  async createQuote(quote: Quote): Promise<Quote> {
+    const response = await this.fetchImpl('/api/quotes', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify({ quote }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, 1);
+    return saved;
+  }
+
+  async replaceQuote(quote: Quote): Promise<Quote> {
+    const expectedVersion = this.quoteVersions.get(quote.id);
+    if (!expectedVersion) throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quote.id)}`, {
+      method: 'PUT', credentials: 'same-origin',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify({ quote, expectedVersion }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async sendQuote(quoteId: string): Promise<Quote> {
+    const expectedVersion = this.quoteVersions.get(quoteId);
+    if (!expectedVersion) throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quoteId)}/send`, {
+      method: 'POST', credentials: 'same-origin',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify({ expectedVersion }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible enviar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async recordInsuranceObservation(input: {
+    quoteId: string;
+    status: InsuranceRequestStatus;
+    note: string;
+    date: string;
+  }): Promise<{ request: InsuranceRequest; event: InsuranceEvent }> {
+    const response = await this.fetchImpl('/api/insurance-observations', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify({ ...input, idempotencyKey: crypto.randomUUID() }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible registrar la actualización del seguro.');
+    const payload = (await response.json()) as { request?: unknown; event?: unknown };
+    return { request: insuranceRequestSchema.parse(payload.request), event: insuranceEventSchema.parse(payload.event) };
   }
 
   async saveChanges(_changes: Partial<WorkspaceSnapshot>): Promise<void> {

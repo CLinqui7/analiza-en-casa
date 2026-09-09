@@ -78,9 +78,9 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addShiftSeries: (shifts: Shift[], idempotencyKey: string) => Promise<boolean>;
   addHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   updateHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
-  addQuote: (quote: Quote) => void;
-  updateQuote: (quote: Quote) => void;
-  sendQuote: (quoteId: string) => void;
+  addQuote: (quote: Quote) => Promise<boolean>;
+  updateQuote: (quote: Quote) => Promise<boolean>;
+  sendQuote: (quoteId: string) => Promise<boolean>;
   addPayment: (payment: Payment) => void;
   voidPayment: (paymentId: string, reason: string) => void;
   addClinicalDocument: (document: ClinicalDocument) => void;
@@ -100,7 +100,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
     status: InsuranceRequestStatus;
     note: string;
     date: string;
-  }) => boolean;
+  }) => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -411,6 +411,122 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [can, commit, provider],
   );
+  const saveQuote = useCallback(
+    async (quote: Quote, operation: 'create' | 'replace'): Promise<boolean> => {
+      if (!can('quotes:write')) return false;
+      if (provider.mode === 'mongodb') {
+        const command = operation === 'create' ? provider.createQuote : provider.replaceQuote;
+        if (!command) {
+          setError('El comando seguro de cotizaciones no está disponible; no se guardó nada.');
+          return false;
+        }
+        try {
+          const saved = await command.call(provider, quote);
+          setSnapshot((current) => ({
+            ...current,
+            quotes: operation === 'create'
+              ? [...current.quotes, saved]
+              : current.quotes.map((candidate) => candidate.id === saved.id ? saved : candidate),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible guardar la cotización.');
+          return false;
+        }
+      }
+      const hospitalization = snapshot.hospitalizations.find((candidate) => candidate.id === quote.caseId);
+      if (!hospitalization || hospitalization.patientId !== quote.patientId) return false;
+      if (operation === 'create' && snapshot.quotes.some((candidate) => candidate.id === quote.id)) return false;
+      const original = operation === 'replace' ? snapshot.quotes.find((candidate) => candidate.id === quote.id) : undefined;
+      if (operation === 'replace' && (!original || !canEditQuote(original))) return false;
+      try {
+        const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
+        const normalized: Quote = { ...quote, ...totals, immutable: false, status: 'DRAFT', sentAt: undefined };
+        commit((current) => ({
+          ...current,
+          quotes: operation === 'create'
+            ? [...current.quotes, normalized]
+            : current.quotes.map((candidate) => candidate.id === normalized.id ? normalized : candidate),
+          auditEntries: [audit(operation === 'create' ? (quote.version > 1 ? 'Revisión de cotización creada' : 'Cotización creada') : 'Borrador de cotización actualizado', quote.id), ...current.auditEntries],
+        }));
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [can, commit, provider, snapshot.hospitalizations, snapshot.quotes],
+  );
+  const sendStoredQuote = useCallback(
+    async (quoteId: string): Promise<boolean> => {
+      if (!can('quotes:write')) return false;
+      const currentQuote = snapshot.quotes.find((candidate) => candidate.id === quoteId);
+      if (!currentQuote || !canEditQuote(currentQuote)) return false;
+      if (provider.mode === 'mongodb') {
+        if (!provider.sendQuote) {
+          setError('El comando seguro de envío no está disponible; no se guardó nada.');
+          return false;
+        }
+        try {
+          const saved = await provider.sendQuote(quoteId);
+          setSnapshot((current) => ({ ...current, quotes: current.quotes.map((candidate) => candidate.id === saved.id ? saved : candidate) }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible enviar la cotización.');
+          return false;
+        }
+      }
+      commit((current) => ({
+        ...current,
+        quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() } : candidate),
+        auditEntries: [audit('Cotización marcada como enviada e inmutable', quoteId), ...current.auditEntries],
+      }));
+      return true;
+    },
+    [can, commit, provider, snapshot.quotes],
+  );
+  const saveInsuranceObservation = useCallback(
+    async (input: { quoteId: string; status: InsuranceRequestStatus; note: string; date: string }): Promise<boolean> => {
+      if (!can('insurance:write') || !isInsuranceRequestStatus(input.status) || !input.note.trim()) return false;
+      if (provider.mode === 'mongodb') {
+        if (!provider.recordInsuranceObservation) {
+          setError('El comando seguro de seguros no está disponible; no se guardó nada.');
+          return false;
+        }
+        try {
+          const saved = await provider.recordInsuranceObservation(input);
+          setSnapshot((current) => ({
+            ...current,
+            insuranceRequests: current.insuranceRequests.some((candidate) => candidate.id === saved.request.id)
+              ? current.insuranceRequests.map((candidate) => candidate.id === saved.request.id ? saved.request : candidate)
+              : [...current.insuranceRequests, saved.request],
+            insuranceEvents: current.insuranceEvents.some((candidate) => candidate.id === saved.event.id)
+              ? current.insuranceEvents
+              : [...current.insuranceEvents, saved.event],
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible registrar la actualización del seguro.');
+          return false;
+        }
+      }
+      const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
+      const patient = quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
+      const insurer = patient?.insurer ?? patient?.insurance?.insurer;
+      if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
+      const existing = snapshot.insuranceRequests.find((candidate) => candidate.quoteId === quote.id);
+      const request: InsuranceRequest = existing ?? { id: crypto.randomUUID(), quoteId: quote.id, patientId: patient.id, insurer, status: input.status, createdAt: input.date, updatedAt: input.date, lastNote: input.note.trim() };
+      const event: InsuranceEvent = { id: crypto.randomUUID(), requestId: request.id, status: input.status, date: input.date, note: input.note.trim() };
+      try {
+        const appended = appendInsuranceEvent(request, snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id), event);
+        commit((current) => ({ ...current, insuranceRequests: existing ? current.insuranceRequests.map((candidate) => candidate.id === request.id ? appended.request : candidate) : [...current.insuranceRequests, appended.request], insuranceEvents: [...current.insuranceEvents, event], auditEntries: [audit(existing ? 'Actualización de seguro registrada' : 'Preautorización registrada', existing ? event.id : request.id), ...current.auditEntries] }));
+        return true;
+      } catch { return false; }
+    },
+    [can, commit, provider, snapshot.insuranceEvents, snapshot.insuranceRequests, snapshot.patients, snapshot.quotes],
+  );
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       ...snapshot,
@@ -472,104 +588,9 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       addShiftSeries: saveShiftSeries,
       addHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'create'),
       updateHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'replace'),
-      addQuote: (quote) => {
-        if (!can('quotes:write')) return;
-        commit((current) => {
-          const hospitalization = current.hospitalizations.find(
-            (candidate) => candidate.id === quote.caseId,
-          );
-          if (
-            !hospitalization ||
-            hospitalization.patientId !== quote.patientId ||
-            current.quotes.some((candidate) => candidate.id === quote.id)
-          )
-            return current;
-          try {
-            const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
-            const normalized: Quote = {
-              ...quote,
-              ...totals,
-              immutable: false,
-              status: 'DRAFT',
-              sentAt: undefined,
-            };
-            return {
-              ...current,
-              quotes: [...current.quotes, normalized],
-              auditEntries: [
-                audit(
-                  quote.version > 1 ? 'Revisión de cotización creada' : 'Cotización creada',
-                  quote.id,
-                ),
-                ...current.auditEntries,
-              ],
-            };
-          } catch {
-            return current;
-          }
-        });
-      },
-      updateQuote: (quote) => {
-        if (!can('quotes:write')) return;
-        commit((current) => {
-          const original = current.quotes.find((candidate) => candidate.id === quote.id);
-          const hospitalization = current.hospitalizations.find(
-            (candidate) => candidate.id === quote.caseId,
-          );
-          if (
-            !original ||
-            !canEditQuote(original) ||
-            !hospitalization ||
-            hospitalization.patientId !== quote.patientId
-          )
-            return current;
-          try {
-            const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
-            const updated: Quote = {
-              ...original,
-              ...quote,
-              ...totals,
-              immutable: false,
-              status: 'DRAFT',
-              sentAt: undefined,
-            };
-            return {
-              ...current,
-              quotes: current.quotes.map((candidate) =>
-                candidate.id === quote.id ? updated : candidate,
-              ),
-              auditEntries: [
-                audit('Borrador de cotización actualizado', quote.id),
-                ...current.auditEntries,
-              ],
-            };
-          } catch {
-            return current;
-          }
-        });
-      },
-      sendQuote: (quoteId) =>
-        commit((current) => {
-          const quote = current.quotes.find((candidate) => candidate.id === quoteId);
-          if (!can('quotes:write') || !quote || !canEditQuote(quote)) return current;
-          return {
-            ...current,
-            quotes: current.quotes.map((candidate) =>
-              candidate.id === quoteId
-                ? {
-                    ...candidate,
-                    status: 'SENT',
-                    immutable: true,
-                    sentAt: new Date().toISOString(),
-                  }
-                : candidate,
-            ),
-            auditEntries: [
-              audit('Cotización marcada como enviada e inmutable', quoteId),
-              ...current.auditEntries,
-            ],
-          };
-        }),
+      addQuote: (quote) => saveQuote(quote, 'create'),
+      updateQuote: (quote) => saveQuote(quote, 'replace'),
+      sendQuote: sendStoredQuote,
       addPayment: (payment) =>
         commit((current) => {
           if (
@@ -752,66 +773,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       },
-      recordInsuranceObservation: (input) => {
-        if (
-          provider.mode !== 'mock' ||
-          !can('insurance:write') ||
-          !isInsuranceRequestStatus(input.status) ||
-          !input.note.trim()
-        )
-          return false;
-        const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
-        const patient =
-          quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
-        const insurer = patient?.insurer ?? patient?.insurance?.insurer;
-        if (!quote || !patient || !insurer) return false;
-        const existing = snapshot.insuranceRequests.find(
-          (candidate) => candidate.quoteId === quote.id,
-        );
-        const request: InsuranceRequest = existing ?? {
-          id: crypto.randomUUID(),
-          quoteId: quote.id,
-          patientId: patient.id,
-          insurer,
-          status: input.status,
-          createdAt: input.date,
-          updatedAt: input.date,
-          lastNote: input.note.trim(),
-        };
-        const event: InsuranceEvent = {
-          id: crypto.randomUUID(),
-          requestId: request.id,
-          status: input.status,
-          date: input.date,
-          note: input.note.trim(),
-        };
-        try {
-          const appended = appendInsuranceEvent(
-            request,
-            snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id),
-            event,
-          );
-          commit((current) => ({
-            ...current,
-            insuranceRequests: existing
-              ? current.insuranceRequests.map((candidate) =>
-                  candidate.id === request.id ? appended.request : candidate,
-                )
-              : [...current.insuranceRequests, appended.request],
-            insuranceEvents: [...current.insuranceEvents, event],
-            auditEntries: [
-              audit(
-                existing ? 'Actualización de seguro registrada' : 'Preautorización registrada',
-                existing ? event.id : request.id,
-              ),
-              ...current.auditEntries,
-            ],
-          }));
-          return true;
-        } catch {
-          return false;
-        }
-      },
+      recordInsuranceObservation: saveInsuranceObservation,
     }),
     [
       can,
@@ -822,8 +784,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       refreshPatients,
       saveDoctor,
       saveHospitalization,
+      saveInsuranceObservation,
       savePatient,
+      saveQuote,
       saveShiftSeries,
+      sendStoredQuote,
       snapshot,
     ],
   );

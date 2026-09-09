@@ -148,6 +148,15 @@ export interface DataProvider {
   createHospitalization?(hospitalization: Hospitalization): Promise<Hospitalization>;
   replaceHospitalization?(hospitalization: Hospitalization): Promise<Hospitalization>;
   createShiftSeries?(shifts: Shift[], idempotencyKey: string): Promise<Shift[]>;
+  createQuote?(quote: Quote): Promise<Quote>;
+  replaceQuote?(quote: Quote): Promise<Quote>;
+  sendQuote?(quoteId: string): Promise<Quote>;
+  recordInsuranceObservation?(input: {
+    quoteId: string;
+    status: InsuranceRequest['status'];
+    note: string;
+    date: string;
+  }): Promise<{ request: InsuranceRequest; event: InsuranceEvent }>;
 }
 
 /**

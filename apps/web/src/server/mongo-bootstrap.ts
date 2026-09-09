@@ -4,6 +4,8 @@ import { mongoFinancialIndexes } from './mongo-financial';
 import { mongoDoctorIndexes } from './mongo-doctors';
 import { mongoHospitalizationIndexes } from './mongo-hospitalizations';
 import { mongoPatientIndexes } from './mongo-patients';
+import { mongoQuoteIndexes } from './mongo-quotes';
+import { mongoPortalIndexes } from './mongo-portal';
 import { mongoShiftIndexes } from './mongo-shifts';
 
 type IndexDefinition = {
@@ -30,6 +32,8 @@ export const mongoSchemaIndexes: readonly IndexDefinition[] = [
   ...mongoDoctorIndexes,
   ...mongoHospitalizationIndexes,
   ...mongoShiftIndexes,
+  ...mongoQuoteIndexes,
+  ...mongoPortalIndexes,
   ...mongoFinancialIndexes,
   ...mongoFileMetadataIndexes,
 ];

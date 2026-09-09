@@ -297,7 +297,7 @@ function QuoteEditor({
       discount: { type: current.discount?.type ?? 'PERCENT', ...current.discount, ...next },
     }));
   }
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
     if (!selectedCase) nextErrors.caseId = 'Seleccione una hospitalización válida.';
@@ -332,7 +332,7 @@ function QuoteEditor({
     };
     if (mode === 'create') {
       const id = crypto.randomUUID();
-      addQuote({
+      const saved = await addQuote({
         id,
         ...common,
         version: 1,
@@ -346,14 +346,14 @@ function QuoteEditor({
         originalQuoteId: id,
         rootQuoteId: id,
       });
-      onSaved('Borrador de cotización persistido.');
+      if (saved) onSaved('Borrador de cotización persistido.');
     } else if (mode === 'edit' && source) {
-      updateQuote({ ...source, ...common });
-      onSaved('Borrador de cotización actualizado y persistido.');
+      const saved = await updateQuote({ ...source, ...common });
+      if (saved) onSaved('Borrador de cotización actualizado y persistido.');
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
-      addQuote({ ...revision, ...common });
-      onSaved('Nueva versión de cotización creada como borrador.');
+      const saved = await addQuote({ ...revision, ...common });
+      if (saved) onSaved('Nueva versión de cotización creada como borrador.');
     }
   }
   const title =
@@ -400,7 +400,7 @@ function QuoteEditor({
       open={open}
       title={title}
     >
-      <form className="form-grid" id="quote-editor-form" noValidate onSubmit={submit}>
+      <form className="form-grid" id="quote-editor-form" noValidate onSubmit={(event) => void submit(event)}>
         <fieldset className="quote-fieldset full-field">
           <legend>Datos del paciente</legend>
           <div className="form-grid form-grid-compact">

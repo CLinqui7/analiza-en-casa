@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-09T14:08:31.000Z",
-  "passed": true,
-  "files": 10981,
-  "total_mib": 629.23,
+  "generated_at": "2026-09-09T15:49:32.172Z",
+  "passed": false,
+  "files": 11025,
+  "total_mib": 631.4,
   "largest_file": {
     "size": 23837696,
     "file": ".analiza-runtime\\bin\\chromedriver.exe"
@@ -13,6 +13,9 @@
   "exact_clips": 17,
   "event_contact_sheets": 158,
   "safety_contact_sheets": 212,
-  "errors": [],
+  "errors": [
+    "Environment file must not be committed: .env.local",
+    "Environment file must not be committed: .vercel\\.env.preview.local"
+  ],
   "warnings": []
 }
