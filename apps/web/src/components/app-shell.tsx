@@ -1,10 +1,16 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
-import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type PropsWithChildren,
+} from 'react';
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 
@@ -187,6 +193,30 @@ const navigation: NavigationGroup[] = [
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
 ];
 
+const navigationGlyphs: Record<string, string> = {
+  Inicio: '⌂',
+  Pacientes: '♙',
+  Agenda: '▣',
+  Financiero: '$',
+  Pagos: '$',
+  Clínico: '+',
+  Inventario: '▤',
+  Catálogos: '▦',
+  Administración: '⚙',
+  Compras: '◇',
+  Reportes: '▥',
+  Auditoría: '✓',
+  Ayuda: '?',
+};
+
+function NavigationGlyph({ label }: { label: string }) {
+  return (
+    <span aria-hidden="true" className="nav-item-glyph">
+      {navigationGlyphs[label] ?? '·'}
+    </span>
+  );
+}
+
 function isActive(pathname: string, href: string) {
   return (
     pathname === href ||
@@ -235,9 +265,12 @@ export function AppShell({ children }: PropsWithChildren) {
   const mobileMenuCloseRef = useRef<HTMLButtonElement>(null);
   const profileDialogRef = useRef<HTMLElement>(null);
   const profileReturnFocusRef = useRef<HTMLElement>(null);
+  const globalSearchRef = useRef<HTMLInputElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userProfileOpen, setUserProfileOpen] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Financiero:
       pathname.startsWith('/hospitalizations') ||
@@ -250,6 +283,44 @@ export function AppShell({ children }: PropsWithChildren) {
     Reportes: pathname.startsWith('/reports'),
   });
   const required = permissionForPath(pathname);
+
+  useEffect(() => {
+    setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true');
+    const focusSearch = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        globalSearchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', focusSearch);
+    return () => window.removeEventListener('keydown', focusSearch);
+  }, []);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem('analiza.sidebar.collapsed', String(next));
+      return next;
+    });
+  }, []);
+
+  function submitGlobalSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = globalSearch.trim();
+    if (!query) return;
+    const normalized = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const route =
+      normalized.includes('cotiza')
+        ? '/quotes'
+        : normalized.includes('hospital') || normalized.includes('caso')
+          ? '/hospitalizations'
+          : normalized.includes('seguro') || normalized.includes('preautor')
+            ? '/insurance'
+            : normalized.includes('agenda') || normalized.includes('turno')
+              ? '/agenda'
+              : '/patients';
+    router.push(`${route}?search=${encodeURIComponent(query)}`);
+  }
 
   const closeUserProfile = useCallback(() => {
     setUserProfileOpen(false);
@@ -371,7 +442,7 @@ export function AppShell({ children }: PropsWithChildren) {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
       {mobileNavigationOpen ? (
         <button
           aria-label="Cerrar menú de navegación"
@@ -404,14 +475,13 @@ export function AppShell({ children }: PropsWithChildren) {
             href="/dashboard"
             scroll={false}
           >
-            <Image
-              alt="Analiza en Casa"
-              className="brand-logo"
-              height={702}
-              priority
-              src="/brand/analiza-en-casa-logo.png"
-              width={2047}
-            />
+            <span className="brand-monogram" aria-hidden="true">
+              AC
+            </span>
+            <span className="brand-copy">
+              <strong>Analiza en Casa</strong>
+              <small>Atención domiciliaria</small>
+            </span>
           </Link>
           <p className="environment-label">
             <span className="environment-dot" aria-hidden="true" />
@@ -443,7 +513,7 @@ export function AppShell({ children }: PropsWithChildren) {
                       onClick={() => closeMobileNavigation()}
                       scroll={false}
                     >
-                      <span className="nav-item-dot" aria-hidden="true" />
+                      <NavigationGlyph label={group.label} />
                       <span className="nav-item-label">{group.label}</span>
                     </Link>
                   </li>
@@ -468,7 +538,7 @@ export function AppShell({ children }: PropsWithChildren) {
                     type="button"
                   >
                     <span className="nav-group-copy">
-                      <span className="nav-item-dot" aria-hidden="true" />
+                      <NavigationGlyph label={group.label} />
                       <span>{group.label}</span>
                     </span>
                     <span className={`nav-chevron${open ? ' open' : ''}`} aria-hidden="true">
@@ -487,7 +557,8 @@ export function AppShell({ children }: PropsWithChildren) {
                             onClick={() => closeMobileNavigation()}
                             scroll={false}
                           >
-                            {child.label}
+                            <span aria-hidden="true" className="nav-subitem-mark" />
+                            <span>{child.label}</span>
                           </Link>
                         </li>
                       ))}
@@ -580,30 +651,63 @@ export function AppShell({ children }: PropsWithChildren) {
 
       <div className="workspace-main">
         <header className="workspace-topbar">
-          <div className="topbar-page-copy">
-            <span className="topbar-accent" aria-hidden="true" />
-            <div>
-              <span>Analiza en Casa</span>
-              <strong>{currentPageLabel(pathname)}</strong>
-            </div>
+          <div className="topbar-leading">
+            <button
+              aria-controls="main-navigation"
+              aria-expanded={!sidebarCollapsed}
+              aria-label={sidebarCollapsed ? 'Expandir navegación' : 'Contraer navegación'}
+              className="desktop-nav-toggle"
+              data-action-id="DESKTOP-NAV-TOGGLE"
+              onClick={toggleSidebar}
+              type="button"
+            >
+              ☰
+            </button>
+            <button
+              aria-controls="main-navigation"
+              aria-expanded={mobileNavigationOpen}
+              aria-label={
+                mobileNavigationOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'
+              }
+              className="mobile-nav-toggle"
+              data-action-id="MOBILE-NAV-TOGGLE"
+              onClick={() => setMobileNavigationOpen((open) => !open)}
+              ref={mobileMenuToggleRef}
+              type="button"
+            >
+              Menú
+            </button>
+            <form className="global-search" onSubmit={submitGlobalSearch} role="search">
+              <span aria-hidden="true">⌕</span>
+              <input
+                aria-label="Buscar en Analiza en Casa"
+                onChange={(event) => setGlobalSearch(event.target.value)}
+                placeholder="Buscar paciente, caso, cotización o comando…"
+                ref={globalSearchRef}
+                type="search"
+                value={globalSearch}
+              />
+              <kbd>Ctrl K</kbd>
+            </form>
           </div>
-          <button
-            aria-controls="main-navigation"
-            aria-expanded={mobileNavigationOpen}
-            aria-label={
-              mobileNavigationOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'
-            }
-            className="mobile-nav-toggle"
-            data-action-id="MOBILE-NAV-TOGGLE"
-            onClick={() => setMobileNavigationOpen((open) => !open)}
-            ref={mobileMenuToggleRef}
-            type="button"
-          >
-            Menú
-          </button>
-          <div className="topbar-environment">
-            <span className="environment-dot" aria-hidden="true" />
-            {session.mode === 'supabase' ? 'Supabase' : 'Demo'} · {session.role}
+          <div className="topbar-actions">
+            <span className="topbar-page-name">{currentPageLabel(pathname)}</span>
+            <button
+              className="topbar-profile"
+              data-action-id="USER-PROFILE-OPEN"
+              onClick={(event) => {
+                profileReturnFocusRef.current = event.currentTarget;
+                setUserProfileOpen(true);
+              }}
+              type="button"
+            >
+              <span className="account-avatar">{session.role.slice(0, 1)}</span>
+              <span>
+                <strong>Mi cuenta</strong>
+                <small>{session.role}</small>
+              </span>
+              <span aria-hidden="true">⌄</span>
+            </button>
           </div>
         </header>
         <main className="main-content">{children}</main>

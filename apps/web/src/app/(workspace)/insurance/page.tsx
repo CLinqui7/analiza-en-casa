@@ -55,7 +55,7 @@ export default function InsurancePage() {
     recordInsuranceObservation,
   } = useWorkspace();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [status, setStatus] = useState<InsuranceRequestStatus | ''>('');
   const [draft, setDraft] = useState<UpdateDraft | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -149,8 +149,8 @@ export default function InsurancePage() {
     ? patients.find((candidate) => candidate.id === activeQuote.patientId)
     : undefined;
   return (
-    <div className="page-stack">
-      <header className="page-header">
+    <div className="page-stack insurance-page">
+      <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Operaciones</p>
           <h1>Preautorizaciones y seguros</h1>
@@ -159,7 +159,14 @@ export default function InsurancePage() {
             ni transiciones automáticas.
           </p>
         </div>
-        <StatusTag tone="warning">Reglas de seguro pendientes</StatusTag>
+        <div className="header-actions">
+          <StatusTag tone="warning">Reglas de seguro pendientes</StatusTag>
+          {can('quotes:read') ? (
+            <Link className="button" data-action-id="INSURANCE-OPEN-QUOTES" href="/quotes">
+              + Elegir cotización
+            </Link>
+          ) : null}
+        </div>
       </header>
       {message ? (
         <p className="notice success" role="status">
@@ -260,60 +267,75 @@ export default function InsurancePage() {
           </Button>
         </div>
       </Panel>
-      <Panel>
-        {loading ? (
-          <p role="status">Cargando solicitudes…</p>
-        ) : visibleRequests.length + unrequestedQuotes.length ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Cotización</th>
-                  <th>Paciente</th>
-                  <th>Documento</th>
-                  <th>Aseguradora</th>
-                  <th>Estado</th>
-                  <th>Total</th>
-                  <th>Última observación</th>
-                  <th>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRequests.map((request) => (
-                  <InsuranceRow
-                    events={insuranceEvents.filter((event) => event.requestId === request.id)}
-                    key={request.id}
-                    onUpdate={openUpdate}
-                    patient={patients.find((candidate) => candidate.id === request.patientId)}
-                    quote={quotes.find((candidate) => candidate.id === request.quoteId)}
-                    request={request}
-                    writable={can('insurance:write')}
-                  />
-                ))}
-                {unrequestedQuotes.map((candidate) => (
-                  <InsuranceRow
-                    events={[]}
-                    key={candidate.id}
-                    onUpdate={openUpdate}
-                    patient={patients.find((item) => item.id === candidate.patientId)}
-                    quote={candidate}
-                    writable={can('insurance:write')}
-                  />
-                ))}
-              </tbody>
-            </table>
+      {loading ? (
+        <Panel><p role="status">Cargando solicitudes…</p></Panel>
+      ) : (
+        <section className="insurance-board-shell" aria-label="Tablero de preautorizaciones">
+          <div className="insurance-board">
+            {statuses.map((boardStatus) => {
+              const requests = visibleRequests.filter((request) => request.status === boardStatus);
+              return (
+                <section className="insurance-column" key={boardStatus}>
+                  <header>
+                    <strong>{labels[boardStatus]}</strong>
+                    <span>{requests.length}</span>
+                  </header>
+                  <div className="insurance-column-content">
+                    {requests.length ? (
+                      requests.map((request) => (
+                        <InsuranceCard
+                          events={insuranceEvents.filter((event) => event.requestId === request.id)}
+                          key={request.id}
+                          onUpdate={openUpdate}
+                          patient={patients.find((candidate) => candidate.id === request.patientId)}
+                          quote={quotes.find((candidate) => candidate.id === request.quoteId)}
+                          request={request}
+                          writable={can('insurance:write')}
+                        />
+                      ))
+                    ) : (
+                      <p className="insurance-column-empty">Sin registros</p>
+                    )}
+                  </div>
+                </section>
+              );
+            })}
           </div>
-        ) : (
+        </section>
+      )}
+      {unrequestedQuotes.length ? (
+        <Panel className="insurance-unrequested">
+          <div className="table-heading">
+            <div>
+              <h2>Cotizaciones aseguradas sin solicitud</h2>
+              <p>Registre el primer hecho administrativo para incorporarlas al tablero.</p>
+            </div>
+            <StatusTag>{unrequestedQuotes.length} pendientes</StatusTag>
+          </div>
+          <div className="insurance-unrequested-grid">
+            {unrequestedQuotes.map((candidate) => {
+              const patient = patients.find((item) => item.id === candidate.patientId);
+              return (
+                <article className="insurance-pending-card" key={candidate.id}>
+                  <div><Link href={`/quotes/${candidate.id}`}>{candidate.id}</Link><StatusTag>Sin solicitud</StatusTag></div>
+                  <strong>{patient?.fullName ?? 'Paciente no disponible'}</strong>
+                  <span>{insurerFor(patient) ?? 'Sin aseguradora'}</span>
+                  <span>Total {candidate.total.toFixed(2)}</span>
+                  {can('insurance:write') ? <Button className="button-secondary" onClick={() => openUpdate(candidate)} type="button">Registrar actualización</Button> : null}
+                </article>
+              );
+            })}
+          </div>
+        </Panel>
+      ) : null}
+      {!loading && !visibleRequests.length && !unrequestedQuotes.length ? (
+        <Panel>
           <EmptyState
-            detail={
-              query || status
-                ? 'Ajuste o restablezca los filtros para ver solicitudes existentes.'
-                : 'Registre una actualización administrativa desde una cotización para iniciar el historial.'
-            }
+            detail={query || status ? 'Ajuste o restablezca los filtros para ver solicitudes existentes.' : 'Registre una actualización administrativa desde una cotización para iniciar el historial.'}
             title="Sin resultados"
           />
-        )}
-      </Panel>
+        </Panel>
+      ) : null}
       <Panel>
         <h2>Acciones externas y reclamos</h2>
         <p>
@@ -450,7 +472,7 @@ export default function InsurancePage() {
   );
 }
 
-function InsuranceRow({
+function InsuranceCard({
   events,
   onUpdate,
   patient,
@@ -468,57 +490,36 @@ function InsuranceRow({
   writable: boolean;
 }) {
   return (
-    <tr>
-      <td>
+    <article className="insurance-card">
+      <div className="insurance-card-topline">
         {quote ? (
           <Link data-action-id="INSURANCE-OPEN-QUOTE" href={`/quotes/${quote.id}`}>
             {quote.id}
           </Link>
-        ) : (
-          request?.quoteId
-        )}
-      </td>
-      <td>{patient?.fullName ?? 'No disponible'}</td>
-      <td>{patient?.documentId ?? 'No disponible'}</td>
-      <td>{request?.insurer ?? insurerFor(patient) ?? 'Sin dato'}</td>
-      <td>
-        {request ? (
-          <StatusTag tone={tone(request.status)}>{labels[request.status]}</StatusTag>
-        ) : (
-          <StatusTag>Sin solicitud registrada</StatusTag>
-        )}
-      </td>
-      <td>{quote ? quote.total.toFixed(2) : 'No disponible'}</td>
-      <td>
-        {request ? (
-          <details>
-            <summary>{request.lastNote}</summary>
-            <ol>
-              {events.map((event) => (
-                <li key={event.id}>
-                  <strong>{labels[event.status]}</strong> · {displayDate(event.date)}
-                  <br />
-                  {event.note}
-                </li>
-              ))}
-            </ol>
-          </details>
-        ) : (
-          'Sin observación'
-        )}
-      </td>
-      <td>
-        {quote && writable ? (
-          <Button
-            className="button-link"
-            data-action-id="INSURANCE-UPDATE"
-            onClick={() => onUpdate(quote)}
-            type="button"
-          >
-            Registrar actualización
-          </Button>
-        ) : null}
-      </td>
-    </tr>
+        ) : <strong>{request?.quoteId}</strong>}
+        {request ? <StatusTag tone={tone(request.status)}>{labels[request.status]}</StatusTag> : null}
+      </div>
+      <h3>{patient?.fullName ?? 'Paciente no disponible'}</h3>
+      <p>{request?.insurer ?? insurerFor(patient) ?? 'Aseguradora no disponible'}</p>
+      <dl>
+        <div><dt>Total</dt><dd>{quote ? quote.total.toFixed(2) : 'No disponible'}</dd></div>
+        <div><dt>Documento</dt><dd>{patient?.documentId ?? 'No disponible'}</dd></div>
+      </dl>
+      {request ? (
+        <details className="insurance-card-history">
+          <summary>{request.lastNote}</summary>
+          <ol>
+            {events.map((event) => (
+              <li key={event.id}><strong>{labels[event.status]}</strong> · {displayDate(event.date)}<br />{event.note}</li>
+            ))}
+          </ol>
+        </details>
+      ) : null}
+      {quote && writable ? (
+        <Button className="button-secondary" data-action-id="INSURANCE-UPDATE" onClick={() => onUpdate(quote)} type="button">
+          Actualizar →
+        </Button>
+      ) : null}
+    </article>
   );
 }

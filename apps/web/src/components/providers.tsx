@@ -108,11 +108,17 @@ const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 type DashboardWorkspace = Pick<
   WorkspaceContextValue,
   | 'auditEntries'
+  | 'catalogItems'
   | 'clinicalDocuments'
   | 'error'
   | 'hospitalizations'
+  | 'insuranceRequests'
+  | 'inventoryMovements'
   | 'loading'
+  | 'nursingResources'
   | 'patients'
+  | 'payments'
+  | 'quotes'
   | 'shifts'
   | 'vitalReadings'
 >;
@@ -824,21 +830,33 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const dashboardValue = useMemo<DashboardWorkspace>(
     () => ({
       auditEntries: value.auditEntries,
+      catalogItems: value.catalogItems,
       clinicalDocuments: value.clinicalDocuments,
       error: value.error,
       hospitalizations: value.hospitalizations,
+      insuranceRequests: value.insuranceRequests,
+      inventoryMovements: value.inventoryMovements,
       loading: value.loading,
+      nursingResources: value.nursingResources,
       patients: value.patients,
+      payments: value.payments,
+      quotes: value.quotes,
       shifts: value.shifts,
       vitalReadings: value.vitalReadings,
     }),
     [
       value.auditEntries,
+      value.catalogItems,
       value.clinicalDocuments,
       value.error,
       value.hospitalizations,
+      value.insuranceRequests,
+      value.inventoryMovements,
       value.loading,
+      value.nursingResources,
       value.patients,
+      value.payments,
+      value.quotes,
       value.shifts,
       value.vitalReadings,
     ],

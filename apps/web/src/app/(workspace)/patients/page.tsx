@@ -280,7 +280,7 @@ export default function PatientsPage() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [dismissedLinkedDialog, setDismissedLinkedDialog] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [tab, setTab] = useState<'ACTIVE' | 'INACTIVE' | 'IMPORT'>('ACTIVE');
   const [sort, setSort] = useState<'fullName' | 'documentId'>('fullName');
   const [direction, setDirection] = useState<1 | -1>(1);

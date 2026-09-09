@@ -1267,7 +1267,7 @@ export default function QuotesPage() {
   const { can } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [message, setMessage] = useState<string | null>(null);
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Quote['status'] | '',

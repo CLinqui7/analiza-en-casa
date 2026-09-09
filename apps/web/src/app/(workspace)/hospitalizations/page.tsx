@@ -106,7 +106,7 @@ export default function HospitalizationsPage() {
   const [pendingPrivateFiles, setPendingPrivateFiles] = useState<File[]>([]);
   const [privateFiles, setPrivateFiles] = useState<Record<string, PrivateFileMetadata[]>>({});
   const [tab, setTab] = useState<'ACTIVE' | 'QUOTES' | 'PIC'>('ACTIVE');
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Hospitalization['status'] | '',
     startDate: '',
