@@ -42,11 +42,11 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "6394e41ce63687fcacfb969eb83dee564a4aff8e",
+  "candidate_sha": "9f6737de030f004026878634084219f6200c1b38",
   "deployment": {
     "environment": "preview",
-    "url": "https://web-j5m7wmi68-clinqui7s-projects.vercel.app",
-    "id": "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
+    "url": "https://web-aflb54vd7-clinqui7s-projects.vercel.app",
+    "id": "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V",
     "status": "READY_PROTECTED_DEMO",
     "project": "clinqui7s-projects/web",
     "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
@@ -54,18 +54,21 @@
     "output_directory": "apps/web/.next",
     "preview_comments_enabled": false,
     "deployment_protection_preserved": true,
-    "inspector_url": "https://vercel.com/clinqui7s-projects/web/EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/GQdTCqq4BtS7V2dopAj1ykdytU7V",
     "attempted_ids": [
       "dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF",
       "dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r",
       "dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip",
       "dpl_Exfcg894KnB9WnwcFfErcxpxTrV9",
-      "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg"
+      "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
+      "dpl_6a7uqwKejss8Eq5rhzrQYkXQMko6",
+      "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V"
     ],
     "screenshots": [
       "docs/parity/screenshots/preview-final-dashboard-6394e41.png",
       "docs/parity/screenshots/preview-final-insurance-6394e41.png",
-      "docs/parity/screenshots/preview-final-patient-mobile-dialog-6394e41.png"
+      "docs/parity/screenshots/preview-final-patient-mobile-dialog-6394e41.png",
+      "docs/parity/screenshots/preview-patients-studio-9f6737d.png"
     ]
   },
   "pending_ids": [
