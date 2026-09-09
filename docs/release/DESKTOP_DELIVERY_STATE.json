@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-09T14:15:00.000Z",
+  "updated_at": "2026-09-09T14:30:00.000Z",
   "next_action": "Provision the existing Atlas project with a least-privilege application user and protected Vercel preview variables, then execute the Mongo bootstrap and remote multi-session verification.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
@@ -16,7 +16,7 @@
   ],
   "tests": [
     "npm run codex:preflight",
-    "npm run test:react -- --run src/server/mongo-bootstrap.test.ts src/server/mongo-bootstrap-command.test.ts src/server/mongo-shifts.test.ts src/lib/http-data-provider.test.ts (11 passed)",
+    "npm run test:react -- --run src/server/mongo-auth.test.ts src/server/mongo-bootstrap.test.ts src/server/mongo-bootstrap-command.test.ts src/server/mongo-shifts.test.ts src/lib/http-data-provider.test.ts (17 passed)",
     "npm run typecheck",
     "npm run lint",
     "npm run build",
@@ -25,7 +25,7 @@
   ],
   "failures": [
     "Atlas application credentials and approved network access are not available in this session, so no remote Mongo write/read or multi-session authorization has been claimed.",
-    "The Vercel CLI is not authenticated or installed in this session, so no preview URL or deployment ID has been claimed.",
+    "Vercel is authenticated and the existing clinqui7s-projects/web project has been verified, but its Mongo preview variables and Atlas network access still need verification before a connected preview can be claimed.",
     "Quotes do not yet have resource-scoped Mongo command handlers; their existing demo workflow remains explicitly unverified for Mongo persistence."
   ],
   "atlas": {
@@ -34,12 +34,14 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "305d9b9ed2a864f29fd70d9912c694c51dfc4660",
+  "candidate_sha": "305d9b916c7d7b8c2096b9c8a93079155fbe3167",
   "deployment": {
     "environment": "preview",
     "url": null,
     "id": null,
-    "status": "NOT_ATTEMPTED_MISSING_SESSION"
+    "status": "BLOCKED_MISSING_MONGODB_PREVIEW_VARS",
+    "project": "clinqui7s-projects/web",
+    "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ"
   },
   "pending_ids": [
     "MONGO-REMOTE-BOOTSTRAP",
