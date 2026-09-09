@@ -1006,7 +1006,7 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </label>
-            <fieldset>
+            <fieldset className="choice-fieldset">
               <legend>
                 Sexo{' '}
                 <span className="required-marker" aria-label="obligatorio">

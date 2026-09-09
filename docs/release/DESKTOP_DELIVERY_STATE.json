@@ -1,33 +1,40 @@
 {
-  "updated_at": "2026-09-09T14:40:00.000Z",
-  "next_action": "Disable the managed Preview Comments integration for the existing Vercel project (or obtain Vercel support guidance for its immutable static upload conflict), provision the existing Atlas project with a least-privilege application user and protected Vercel preview variables, then execute the Mongo bootstrap and remote multi-session verification.",
+  "updated_at": "2026-09-09T15:55:00.000Z",
+  "next_action": "Provision a least-privilege Atlas application user for the existing analiza-cluster database analiza_en_casa, configure protected Preview-only Mongo and WhatsApp variables, apply the audited bootstrap with the optional synthetic seed, and execute the A/B/C multi-session isolation proof.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
     "apps/web/src/app/(workspace)/dashboard/page.tsx",
     "apps/web/src/app/(workspace)/patients/page.tsx",
+    "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
     "apps/web/src/app/(workspace)/quotes/page.tsx",
+    "apps/web/src/app/(workspace)/quotes/[id]/page.tsx",
     "apps/web/src/app/(workspace)/agenda/page.tsx",
+    "apps/web/src/app/(workspace)/insurance/page.tsx",
+    "apps/web/src/server/mongo-quotes.ts",
+    "apps/web/src/server/mongo-portal.ts",
     "apps/web/src/server/mongo-bootstrap-command.ts",
     "apps/web/src/server/mongo-bootstrap.ts",
-    "apps/web/src/server/mongo-shifts.ts",
     "apps/web/src/app/api/workspace/route.ts",
     "apps/web/src/lib/http-data-provider.ts"
   ],
   "tests": [
-    "npm run codex:preflight",
-    "npm run test:react -- --run src/server/mongo-auth.test.ts src/server/mongo-bootstrap.test.ts src/server/mongo-bootstrap-command.test.ts src/server/mongo-shifts.test.ts src/lib/http-data-provider.test.ts (17 passed)",
-    "npm run typecheck",
-    "npm run lint",
-    "npm run build",
+    "npm run typecheck --workspace=@analiza/web (passed)",
+    "npm run test --workspace=@analiza/web -- --run (23 files, 88 passed)",
+    "npm run lint --workspace=@analiza/web (passed)",
+    "npm test (103 passed)",
+    "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
     "npm run audit:verify (17/17 chapters passed)",
-    "agent-browser visual review at 1440x900 and 390x844; no error overlay or mobile horizontal overflow"
+    "npm run security:scan (599 files, passed)",
+    "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
+    "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
+    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow"
   ],
   "failures": [
-    "Atlas application credentials and approved network access are not available in this session, so no remote Mongo write/read or multi-session authorization has been claimed.",
-    "Vercel is authenticated and the existing clinqui7s-projects/web project has been verified, but it has no Mongo preview variables and Atlas network access has not been verified.",
-    "Preview deployments dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF, dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r and dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip compiled the application successfully but failed when Vercel tried to patch managed Preview Comments into immutable static output. Removing the branch-scoped feedback variable did not resolve the managed integration, and the vendor-suggested Next canary has three high production dependency advisories, so it was not retained.",
-    "Quotes do not yet have resource-scoped Mongo command handlers; their existing demo workflow remains explicitly unverified for Mongo persistence."
+    "Atlas application credentials and approved protected network access are not available in this session, so no remote Mongo write/read, synthetic seed, multi-session authorization or tenant-isolation success is claimed.",
+    "The existing Vercel Preview has no Mongo or WhatsApp provider variables; it therefore remains explicitly in synthetic DEMO mode.",
+    "The operator preflight records the presence of two ignored local environment files. They are not tracked or included in the deployment and were preserved without reading or printing their values.",
+    "Direct PDF attachment delivery by WhatsApp is not implemented or claimed; the implemented channel uses a short-lived secure portal URL and OTP without clinical or financial content in the message."
   ],
   "atlas": {
     "project_id": "6aa160fb84024a21784cb906",
@@ -35,26 +42,36 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "305d9b916c7d7b8c2096b9c8a93079155fbe3167",
+  "candidate_sha": "6394e41ce63687fcacfb969eb83dee564a4aff8e",
   "deployment": {
     "environment": "preview",
-    "url": null,
-    "id": null,
-    "status": "BLOCKED_MANAGED_PREVIEW_COMMENTS_AND_MONGODB_VARS",
+    "url": "https://web-j5m7wmi68-clinqui7s-projects.vercel.app",
+    "id": "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
+    "status": "READY_PROTECTED_DEMO",
     "project": "clinqui7s-projects/web",
     "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
+    "framework": "nextjs",
     "output_directory": "apps/web/.next",
+    "preview_comments_enabled": false,
+    "deployment_protection_preserved": true,
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
     "attempted_ids": [
       "dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF",
       "dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r",
-      "dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip"
+      "dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip",
+      "dpl_Exfcg894KnB9WnwcFfErcxpxTrV9",
+      "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg"
+    ],
+    "screenshots": [
+      "docs/parity/screenshots/preview-final-dashboard-6394e41.png",
+      "docs/parity/screenshots/preview-final-insurance-6394e41.png",
+      "docs/parity/screenshots/preview-final-patient-mobile-dialog-6394e41.png"
     ]
   },
   "pending_ids": [
     "MONGO-REMOTE-BOOTSTRAP",
     "MONGO-A-B-C-MULTISESSION",
-    "MONGO-QUOTE-COMMANDS",
-    "VERCEL-PREVIEW-DEPLOY",
+    "WHATSAPP-PROVIDER-PREVIEW",
     "CR-031"
   ]
 }
