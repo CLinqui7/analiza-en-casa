@@ -176,7 +176,8 @@ function QuoteEditor({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
-  const { addQuote, doctors, hospitalizations, patients, updateQuote } = useWorkspace();
+  const { addQuote, doctors, hospitalizations, patients, refreshPatients, updateQuote } =
+    useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
     source
       ? cloneDraft(source)
@@ -195,6 +196,8 @@ function QuoteEditor({
   const [processingItem, setProcessingItem] = useState(false);
   const [referralCatalogOpen, setReferralCatalogOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [refreshingPatients, setRefreshingPatients] = useState(false);
+  const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
 
   const totals = useMemo(() => {
     try {
@@ -240,6 +243,16 @@ function QuoteEditor({
 
   function setNumber(key: 'quantity' | 'unitPrice' | 'discountAmount', value: string) {
     setItem((current) => ({ ...current, [key]: Number(value) }));
+  }
+  async function refreshPatientOptions() {
+    setRefreshingPatients(true);
+    const refreshed = await refreshPatients();
+    setRefreshingPatients(false);
+    setPatientRefreshNotice(
+      refreshed
+        ? 'Lista de pacientes actualizada desde el origen autorizado.'
+        : 'No fue posible actualizar la lista. Su selección no se modificó.',
+    );
   }
   function selectFeeDoctor(doctorId: string) {
     const doctor = doctors.find((candidate) => candidate.id === doctorId);
@@ -404,6 +417,17 @@ function QuoteEditor({
               placeholder="Nombre o documento"
               value={draft.patientQuery}
             />
+            <Button
+              className="button-secondary"
+              data-action-id="QUOTE-PATIENT-REFRESH"
+              disabled={mode !== 'create' || refreshingPatients}
+              onClick={() => {
+                void refreshPatientOptions();
+              }}
+              type="button"
+            >
+              {refreshingPatients ? 'Actualizando…' : 'Actualizar pacientes'}
+            </Button>
             <datalist id="quote-patient-options">
               {patientOptions.map((patient) => (
                 <option key={patient.id} value={patient.fullName}>
@@ -453,6 +477,11 @@ function QuoteEditor({
             Los datos del paciente son de solo lectura desde la cotización; su edición se realiza en
             Pacientes.
           </p>
+          {patientRefreshNotice ? (
+            <p className="field-help" role="status">
+              {patientRefreshNotice}
+            </p>
+          ) : null}
         </fieldset>
         <label>
           Hospitalización compatible

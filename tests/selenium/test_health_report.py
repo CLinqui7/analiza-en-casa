@@ -77,7 +77,9 @@ class Ch17HealthReportEmptySurface(unittest.TestCase):
         audit_before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
         self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Cédula']"))
         self.assertTrue(self.driver.find_elements(By.XPATH, "//th[normalize-space()='Hospitalización']"))
-        self.assertIn('Sin registros autorizados para mostrar', self.driver.find_element(By.CSS_SELECTOR, 'tbody .empty-state').text)
+        empty_state = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'tbody .empty-state')))
+        self.wait.until(lambda _: 'Sin registros autorizados para mostrar' in empty_state.text)
+        self.assertIn('Sin registros autorizados para mostrar', empty_state.text)
         self.assertIn('CH16-Q008', self.driver.find_element(By.ID, 'health-report-data-boundary').text)
 
         search_started = time.time()
@@ -93,7 +95,9 @@ class Ch17HealthReportEmptySurface(unittest.TestCase):
         record_pass('HEALTH-REPORT-PAGE-NEXT', 'SEL-CH17-HEALTH-REPORT-EMPTY-SURFACE', next_started, self.driver.current_url)
 
         self.driver.refresh()
-        self.assertIn('Sin registros autorizados para mostrar', self.driver.find_element(By.CSS_SELECTOR, 'tbody .empty-state').text)
+        empty_state = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, 'tbody .empty-state')))
+        self.wait.until(lambda _: 'Sin registros autorizados para mostrar' in empty_state.text)
+        self.assertIn('Sin registros autorizados para mostrar', empty_state.text)
         self.assertEqual(audit_before, self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')"))
 
     def test_inventory_is_denied_the_direct_clinical_report_route(self) -> None:

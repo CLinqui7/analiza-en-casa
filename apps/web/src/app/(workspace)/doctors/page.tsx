@@ -10,6 +10,11 @@ import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { doctorSpecialtyOptions, toDoctorAttachmentMetadata } from '@/lib/doctor-catalog';
+import {
+  privateFileDownloadHref,
+  type PrivateFileMetadata,
+  uploadPrivateFiles,
+} from '@/lib/private-files';
 
 const optionalEmailSchema = z
   .string()
@@ -45,22 +50,27 @@ export default function DoctorsPage() {
   const { addDoctor, doctors, providerMode, updateDoctor } = useWorkspace();
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
   const [attachments, setAttachments] = useState<Doctor['attachments']>([]);
+  const [pendingPrivateFiles, setPendingPrivateFiles] = useState<File[]>([]);
+  const [privateFiles, setPrivateFiles] = useState<Record<string, PrivateFileMetadata[]>>({});
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const form = useForm<DoctorForm>({
     resolver: zodResolver(doctorFormSchema),
     defaultValues: emptyDoctor,
   });
-  const demoOnly = providerMode !== 'mock';
+  const mongoMode = providerMode === 'mongodb';
 
   function closeDialog() {
     form.reset(emptyDoctor);
     setAttachments([]);
+    setPendingPrivateFiles([]);
     setEditingDoctor(null);
     setOpen(false);
   }
   function openCreate() {
     setResult(null);
+    setActionError(null);
     form.reset(emptyDoctor);
     setAttachments([]);
     setEditingDoctor(null);
@@ -68,6 +78,7 @@ export default function DoctorsPage() {
   }
   function openEdit(doctor: Doctor) {
     setResult(null);
+    setActionError(null);
     form.reset({
       fullName: doctor.fullName,
       jvpm: doctor.jvpm,
@@ -81,16 +92,31 @@ export default function DoctorsPage() {
     setEditingDoctor(doctor);
     setOpen(true);
   }
-  function submit(values: DoctorForm) {
+  async function submit(values: DoctorForm) {
     const doctor: Doctor = {
       id: editingDoctor?.id ?? crypto.randomUUID(),
       ...values,
       phone: values.phone || undefined,
       email: values.email || undefined,
-      attachments,
+      attachments: mongoMode ? [] : attachments,
     };
-    if (editingDoctor) updateDoctor(doctor);
-    else addDoctor(doctor);
+    const saved = editingDoctor ? await updateDoctor(doctor) : await addDoctor(doctor);
+    if (!saved) return;
+    if (mongoMode && pendingPrivateFiles.length) {
+      try {
+        const uploaded = await uploadPrivateFiles('doctor', doctor.id, pendingPrivateFiles);
+        setPrivateFiles((current) => ({
+          ...current,
+          [doctor.id]: [...(current[doctor.id] ?? []), ...uploaded],
+        }));
+      } catch (cause) {
+        setActionError(
+          `El médico fue guardado, pero los archivos privados no se cargaron: ${
+            cause instanceof Error ? cause.message : 'intente nuevamente desde Editar médico.'
+          }`,
+        );
+      }
+    }
     setResult(
       editingDoctor
         ? `Médico ${doctor.fullName} actualizado.`
@@ -115,22 +141,32 @@ export default function DoctorsPage() {
           >
             Nuevo recurso
           </Link>
-          {can('settings:write') && !demoOnly ? (
+          {can('settings:write') ? (
             <Button data-action-id="DOCTOR-CREATE" onClick={openCreate} type="button">
               Nuevo médico
             </Button>
           ) : null}
         </div>
       </header>
-      {demoOnly ? (
+      {providerMode === 'mock' ? (
         <p className="notice warning" role="status">
-          El alta de médicos está disponible en el modo demo. La integración de Supabase requiere el
-          mapeo organizacional y almacenamiento privado de archivos.
+          Los médicos y archivos en este modo son datos demo locales. No se presentan como
+          integración compartida ni como almacenamiento privado.
+        </p>
+      ) : mongoMode ? (
+        <p className="notice warning" role="status">
+          En Mongo, guarde primero el médico. Los adjuntos privados se cargan por bytes mediante la
+          ruta autorizada y no se registran sólo por nombre.
         </p>
       ) : null}
       {result ? (
         <p className="notice success" role="status">
           {result}
+        </p>
+      ) : null}
+      {actionError ? (
+        <p className="notice error" role="alert">
+          {actionError}
         </p>
       ) : null}
       {doctors.length ? (
@@ -155,12 +191,18 @@ export default function DoctorsPage() {
                     <td>{doctor.documentId}</td>
                     <td>{doctor.specialty}</td>
                     <td>
-                      {doctor.attachments.length
-                        ? doctor.attachments.map((attachment) => attachment.name).join(', ')
-                        : 'Sin archivos'}
+                      {mongoMode && privateFiles[doctor.id]?.length
+                        ? privateFiles[doctor.id].map((file) => (
+                            <span key={file.id}>
+                              <a href={privateFileDownloadHref(file.id)}>{file.name}</a>{' '}
+                            </span>
+                          ))
+                        : doctor.attachments.length
+                          ? doctor.attachments.map((attachment) => attachment.name).join(', ')
+                          : 'Sin archivos'}
                     </td>
                     <td>
-                      {can('settings:write') && !demoOnly ? (
+                      {can('settings:write') ? (
                         <Button
                           data-action-id="DOCTOR-EDIT"
                           onClick={() => openEdit(doctor)}
@@ -187,7 +229,11 @@ export default function DoctorsPage() {
         </Panel>
       )}
       <Dialog
-        description="Los archivos conservan únicamente nombre, tipo y tamaño en el modo demo; su contenido requiere almacenamiento privado configurado."
+        description={
+          mongoMode
+            ? 'Guarde el médico antes de cargar archivos privados. Un nombre de archivo no acredita una carga.'
+            : 'Los archivos demo conservan únicamente nombre, tipo y tamaño; su contenido no se carga a un almacenamiento privado.'
+        }
         footer={
           <>
             <Button className="button-secondary" onClick={closeDialog} type="button">
@@ -280,17 +326,35 @@ export default function DoctorsPage() {
               </span>
             ) : null}
           </label>
-          <label>
-            Archivos administrativos (demo)
-            <input
-              data-action-id="DOCTOR-ATTACHMENTS"
-              multiple
-              onChange={(event) =>
-                setAttachments(toDoctorAttachmentMetadata(event.currentTarget.files ?? []))
-              }
-              type="file"
-            />
-          </label>
+          {!mongoMode ? (
+            <label>
+              Archivos administrativos (demo)
+              <input
+                data-action-id="DOCTOR-ATTACHMENTS"
+                multiple
+                onChange={(event) =>
+                  setAttachments(toDoctorAttachmentMetadata(event.currentTarget.files ?? []))
+                }
+                type="file"
+              />
+            </label>
+          ) : (
+            <label>
+              Archivos administrativos privados
+              <input
+                data-action-id="DOCTOR-ATTACHMENTS"
+                multiple
+                onChange={(event) =>
+                  setPendingPrivateFiles(Array.from(event.currentTarget.files ?? []))
+                }
+                type="file"
+              />
+              <span className="field-help">
+                Los bytes se cargan después de guardar el médico y cada descarga vuelve a comprobar
+                autorización.
+              </span>
+            </label>
+          )}
           {attachments.length ? (
             <ul aria-label="Archivos seleccionados">
               {attachments.map((attachment) => (

@@ -1,15 +1,15 @@
 # Codex preflight
 
 - Passed: **true**
-- Files: 6899
-- Size: 522.64 MiB
+- Files: 10981
+- Size: 629.23 MiB
 - Chapters: 17
 - Events: 1359
 - Detail crops: 730
 - Exact clips: 17
 - Event sheets: 158
 - Safety sheets: 212
-- Largest file: references\video-audit\chapters\CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits\chapter_video_exact_reference.mp4 (8.61 MiB)
+- Largest file: .analiza-runtime\bin\chromedriver.exe (22.73 MiB)
 
 ## Errors
 None

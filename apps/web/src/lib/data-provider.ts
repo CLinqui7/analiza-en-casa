@@ -19,6 +19,7 @@ import type {
 } from '@analiza/contracts';
 import { calculateQuoteTotals, normalizeQuoteInvoiceMetadata } from '@analiza/domain';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
+import { HttpDataProvider } from '@/lib/http-data-provider';
 import {
   demoInventoryMovements,
   demoHospitalizations,
@@ -81,6 +82,25 @@ export const defaultSnapshot = (): WorkspaceSnapshot => ({
   ],
 });
 
+export const emptySnapshot = (): WorkspaceSnapshot => ({
+  patients: [],
+  vitalReadings: [],
+  nursingResources: [],
+  doctors: [],
+  nurseHours: [],
+  inventoryMovements: [],
+  shifts: [],
+  hospitalizations: [],
+  quotes: [],
+  payments: [],
+  clinicalDocuments: [],
+  catalogItems: [],
+  purchases: [],
+  insuranceRequests: [],
+  insuranceEvents: [],
+  auditEntries: [],
+});
+
 /** Migrates locally persisted quote records from the earlier, minimal React
  * contract. This keeps mock reloads backward compatible while calculation
  * fields remain derived rather than trusted from browser storage. */
@@ -118,9 +138,16 @@ export function normalizeQuote(quote: Quote): Quote {
 }
 
 export interface DataProvider {
-  readonly mode: 'mock' | 'supabase';
+  readonly mode: 'mock' | 'supabase' | 'mongodb';
   load(): Promise<WorkspaceSnapshot>;
   saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void>;
+  createPatient?(patient: Patient): Promise<Patient>;
+  replacePatient?(patient: Patient): Promise<Patient>;
+  createDoctor?(doctor: Doctor): Promise<Doctor>;
+  replaceDoctor?(doctor: Doctor): Promise<Doctor>;
+  createHospitalization?(hospitalization: Hospitalization): Promise<Hospitalization>;
+  replaceHospitalization?(hospitalization: Hospitalization): Promise<Hospitalization>;
+  createShiftSeries?(shifts: Shift[], idempotencyKey: string): Promise<Shift[]>;
 }
 
 /**
@@ -359,5 +386,10 @@ export class SupabaseDataProvider implements DataProvider {
 }
 
 export function createDataProvider(): DataProvider {
+  const dataMode = process.env.NEXT_PUBLIC_DATA_MODE;
+  if (dataMode === 'mongodb') return new HttpDataProvider();
+  if (dataMode && dataMode !== 'mock' && dataMode !== 'supabase') {
+    throw new Error('NEXT_PUBLIC_DATA_MODE no es un modo de datos reconocido.');
+  }
   return getSupabaseBrowserClient() ? new SupabaseDataProvider() : new MockDataProvider();
 }

@@ -476,8 +476,14 @@ class Quotes(unittest.TestCase):
         business_partner_started = time.time(); Select(self.action('QUOTE-BUSINESS-PARTNER')).select_by_visible_text('Socio sintético A')
         service_started = time.time(); services.select_by_visible_text('Servicio sintético disponible')
         self.fill('Cantidad', '1'); self.fill('Precio manual', '10'); self.click('QUOTE-ITEM-ADD')
-        marker = 'CH04 Selenium secciones generales'; self.fill('Resumen operativo', marker); self.click('QUOTE-CREATE-SUBMIT')
+        # V17_CH04_PROCESSING_SYNC
+        self.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '.quote-processing')))
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Servicio sintético disponible')]")))
+        marker = 'CH04 Selenium secciones generales'
+        self.fill('Resumen operativo', marker)
+        self.click('QUOTE-CREATE-SUBMIT')
         self.w.until(EC.url_to_be(f'{BASE}/quotes'))
+        self.w.until(lambda _: any(q['summary'] == marker for q in self.snapshot()['quotes']))
         quote = next(q for q in self.snapshot()['quotes'] if q['summary'] == marker)
         persisted_item = next(item for item in quote['items'] if item['name'] == 'Servicio sintético disponible')
         self.assertEqual(persisted_item['businessPartnerLabel'], 'Socio sintético A')

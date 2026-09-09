@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -88,7 +88,7 @@ function agendaDateLabel(date: string) {
 }
 
 export default function AgendaPage() {
-  const { addShift, nursingResources, patients, shifts } = useWorkspace();
+  const { addShiftSeries, nursingResources, patients, providerMode, shifts } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -99,6 +99,7 @@ export default function AgendaPage() {
   const [calendarAnchor, setCalendarAnchor] = useState(initialDate);
   const [calendarView, setCalendarView] = useState<CalendarView>('MONTH');
   const [detailShift, setDetailShift] = useState<(typeof shifts)[number] | null>(null);
+  const [saving, setSaving] = useState(false);
   const form = useForm<ShiftForm>({
     resolver: zodResolver(shiftSchema),
     defaultValues: {
@@ -110,6 +111,11 @@ export default function AgendaPage() {
       note: '',
     },
   });
+  useEffect(() => {
+    if (!form.getValues('resourceId') && nursingResources[0])
+      form.setValue('resourceId', nursingResources[0].id);
+    if (!form.getValues('patientId') && patients[0]) form.setValue('patientId', patients[0].id);
+  }, [form, nursingResources, patients]);
   const selectedShiftPatientId = useWatch({ control: form.control, name: 'patientId' });
   const selectedShiftPatient = patients.find((patient) => patient.id === selectedShiftPatientId);
   function close() {
@@ -124,7 +130,7 @@ export default function AgendaPage() {
     form.setValue('endTime', end.endTime);
     setEndDayOffset(end.endDayOffset);
   }
-  function submit(values: ShiftForm) {
+  async function submit(values: ShiftForm) {
     try {
       const series = buildShiftSeries({
         ...values,
@@ -133,7 +139,11 @@ export default function AgendaPage() {
         existing: shifts,
         idFor: () => crypto.randomUUID(),
       });
-      series.forEach(addShift);
+      setSaving(true);
+      if (!(await addShiftSeries(series, crypto.randomUUID()))) {
+        form.setError('startTime', { message: 'El servidor no confirmó la serie de turnos.' });
+        return;
+      }
       setMessage(
         `${series.length} turno${series.length === 1 ? '' : 's'} persistido${series.length === 1 ? '' : 's'} para las fechas seleccionadas.`,
       );
@@ -142,6 +152,8 @@ export default function AgendaPage() {
       form.setError('startTime', {
         message: error instanceof Error ? error.message : 'No fue posible crear la serie.',
       });
+    } finally {
+      setSaving(false);
     }
   }
   const matchingPatients = patients.filter((patient) =>
@@ -231,7 +243,11 @@ export default function AgendaPage() {
         <div>
           <p className="eyebrow">Operaciones</p>
           <h1>Agenda y turnos</h1>
-          <p>Turnos sintéticos auditables; las horas se derivan de su intervalo programado.</p>
+          <p>
+            {providerMode === 'mongodb'
+              ? 'Turnos leídos y guardados mediante comandos seguros por organización.'
+              : 'Turnos sintéticos auditables; las horas se derivan de su intervalo programado.'}
+          </p>
         </div>
         {can('agenda:write') ? (
           <Button
@@ -542,8 +558,13 @@ export default function AgendaPage() {
             >
               Cerrar
             </Button>
-            <Button data-action-id="AGENDA-SHIFT-SAVE" form="shift-form" type="submit">
-              Guardar
+            <Button
+              data-action-id="AGENDA-SHIFT-SAVE"
+              disabled={saving}
+              form="shift-form"
+              type="submit"
+            >
+              {saving ? 'Guardando…' : 'Guardar'}
             </Button>
           </>
         }

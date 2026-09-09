@@ -1,0 +1,11 @@
+﻿TIME=2026-09-04T23:40:35.1192882-06:00
+GATE=PLAYWRIGHT_43
+
+Exit 1: npx.cmd playwright test -c playwright.v6.config.mjs
+En S:\Usuarios\Carlos\carlo\ANALIZA_RECOVERY_V6_FIXED\RUN_ANALIZA_RECOVERY_V6.ps1: 31 Carácter: 7
++       throw ("Exit {0}: {1} {2}" -f $code,$Exe,($CommandArgs -join "  ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Exit 1: npx.cmd...t.v6.config.mjs:String) [], RuntimeException
+    + FullyQualifiedErrorId : Exit 1: npx.cmd playwright test -c playwright.v6.config.mjs
+ 
+

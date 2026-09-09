@@ -1,0 +1,13 @@
+﻿TIME=2026-09-07T14:34:58.6529854-06:00
+GATE=SELENIUM_FOCALS
+
+Exit 1: py.exe -m unittest discover -s tests/selenium -p test_medical_orders.py -k factual_list_search_tabs_pagination 
+-v
+En S:\Usuarios\Carlos\carlo\ANALIZA_RECOVERY_V17_FINAL\RUN_ANALIZA_RECOVERY_V17.ps1: 24 Carácter: 7
++       throw ("Exit {0}: {1} {2}" -f $LASTEXITCODE,$Exe,($CommandArgs  ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Exit 1: py.exe ...s_pagination -v:String) [], RuntimeException
+    + FullyQualifiedErrorId : Exit 1: py.exe -m unittest discover -s tests/selenium -p test_medical_orders.py -k factu 
+   al_list_search_tabs_pagination -v
+ 
+

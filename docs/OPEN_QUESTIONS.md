@@ -275,6 +275,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Integraciones
 
+- `DB01-MONGODB`: aprobar y provisionar identidad de aplicación, membresías/roles por organización, cluster Atlas separado de staging/producción, usuario técnico de mínimos privilegios, conectividad segura, secretos gestionados, bootstrap revisado, storage privado de adjuntos y backup/restauración. Hasta contar con ello `/api/workspace` falla cerrado y no se certifica Mongo remoto ni persistencia multiusuario.
 - Proveedor y credenciales de WhatsApp.
 - Proveedor y credenciales de SMS.
 - Correo transaccional.
@@ -301,3 +302,8 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.
 - `AUTOMATIC_SCHEDULER_PENDING_EXTERNAL_CONFIGURATION`: el preview de Vercel se despliega con `vercel.preview.json`, que omite únicamente el scheduler de 15 minutos bloqueado por el plan Hobby. Producción debe conservar `vercel.json` y requiere Vercel Pro o un scheduler externo aprobado antes de certificar reintentos automáticos.
+
+## M01 · identidad MongoDB
+
+- Seleccionar proveedor aprobado para verificación de correo y restablecimiento de acceso; no existe envío ni recuperación habilitados en la aplicación local. Debe definir límites, contenido mínimo, expiración, auditoría y protección contra enumeración antes de publicar esa función.
+- Proveer por canal seguro el mecanismo de bootstrap, secretos administrados y aprobación de la matriz definitiva de membresías/roles. El código local no crea un administrador por signup público, no contiene cuentas reales y no puede validar Atlas remoto sin una infraestructura autorizada.

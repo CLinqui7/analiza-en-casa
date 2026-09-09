@@ -20,6 +20,11 @@ import {
   normalizeAdmissionPeriods,
   type AdmissionPeriod,
 } from '@/lib/hospitalization-periods';
+import {
+  privateFileDownloadHref,
+  type PrivateFileMetadata,
+  uploadPrivateFiles,
+} from '@/lib/private-files';
 
 const accountTypes = ['SEGURO', 'PARTICULAR', 'EMPRESA'] as const;
 const priorities = ['LOW', 'MEDIUM', 'HIGH'] as const;
@@ -82,14 +87,24 @@ function formFor(item: Hospitalization): HospitalizationForm {
 }
 
 export default function HospitalizationsPage() {
-  const { addHospitalization, error, hospitalizations, loading, patients, updateHospitalization } =
-    useWorkspace();
+  const {
+    addHospitalization,
+    error,
+    hospitalizations,
+    loading,
+    patients,
+    providerMode,
+    updateHospitalization,
+  } = useWorkspace();
   const { can } = useAuth();
   const searchParams = useSearchParams();
   const [editing, setEditing] = useState<Hospitalization | null>(null);
   const [creating, setCreating] = useState(false);
   const [dismissedRequestedEdit, setDismissedRequestedEdit] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingPrivateFiles, setPendingPrivateFiles] = useState<File[]>([]);
+  const [privateFiles, setPrivateFiles] = useState<Record<string, PrivateFileMetadata[]>>({});
   const [tab, setTab] = useState<'ACTIVE' | 'QUOTES' | 'PIC'>('ACTIVE');
   const [query, setQuery] = useState('');
   const [draftFilters, setDraftFilters] = useState({
@@ -156,9 +171,11 @@ export default function HospitalizationsPage() {
     setEditing(null);
     setDismissedRequestedEdit(true);
     form.reset(blankForm());
+    setPendingPrivateFiles([]);
   };
   const openCreate = () => {
     setMessage(null);
+    setActionError(null);
     setEditing(null);
     setDismissedRequestedEdit(true);
     form.reset(blankForm());
@@ -166,13 +183,14 @@ export default function HospitalizationsPage() {
   };
   const openEdit = (item: Hospitalization) => {
     setMessage(null);
+    setActionError(null);
     setCreating(false);
     setDismissedRequestedEdit(true);
     setEditing(item);
     form.reset(formFor(item));
   };
 
-  function submit(values: HospitalizationForm) {
+  async function submit(values: HospitalizationForm) {
     let admissionPeriods: AdmissionPeriod[];
     try {
       admissionPeriods = normalizeAdmissionPeriods([
@@ -202,16 +220,44 @@ export default function HospitalizationsPage() {
             .filter(Boolean)
         : undefined,
     };
+    const record = activeEdit
+      ? { ...activeEdit, ...data }
+      : {
+          id: `HOS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+          ...data,
+          status: 'ACTIVE' as const,
+        };
+    const saved = activeEdit
+      ? await updateHospitalization({ ...activeEdit, ...data })
+      : await addHospitalization(record);
+    if (!saved) return;
+    if (providerMode === 'mongodb' && pendingPrivateFiles.length) {
+      try {
+        const uploaded = await uploadPrivateFiles(
+          'hospitalization',
+          record.id,
+          pendingPrivateFiles,
+        );
+        setPrivateFiles((current) => ({
+          ...current,
+          [record.id]: [...(current[record.id] ?? []), ...uploaded],
+        }));
+      } catch (cause) {
+        setActionError(
+          `La hospitalización fue guardada, pero los archivos privados no se cargaron: ${
+            cause instanceof Error ? cause.message : 'intente nuevamente desde Editar.'
+          }`,
+        );
+      }
+    }
     if (activeEdit) {
-      updateHospitalization({ ...activeEdit, ...data });
       setMessage('Hospitalización actualizada y persistida con evidencia de auditoría.');
     } else {
-      addHospitalization({
-        id: `HOS-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
-        ...data,
-        status: 'ACTIVE',
-      });
-      setMessage('Hospitalización sintética persistida con evidencia de auditoría.');
+      setMessage(
+        providerMode === 'mongodb'
+          ? 'Hospitalización registrada.'
+          : 'Hospitalización sintética persistida con evidencia de auditoría.',
+      );
     }
     close();
   }
@@ -241,6 +287,24 @@ export default function HospitalizationsPage() {
       {error ? (
         <p className="notice error" role="alert">
           No fue posible persistir la información: {error}
+        </p>
+      ) : null}
+      {actionError ? (
+        <p className="notice error" role="alert">
+          {actionError}
+        </p>
+      ) : null}
+      {Object.values(privateFiles).flat().length ? (
+        <p className="notice success" role="status">
+          Archivos privados cargados en esta sesión:{' '}
+          {Object.values(privateFiles)
+            .flat()
+            .map((file, index) => (
+              <span key={file.id}>
+                {index ? ', ' : ''}
+                <a href={privateFileDownloadHref(file.id)}>{file.name}</a>
+              </span>
+            ))}
         </p>
       ) : null}
       <Panel>
@@ -341,7 +405,7 @@ export default function HospitalizationsPage() {
                 </select>
               </label>
               <label>
-                Fecha de inicio
+                Fecha de ingreso
                 <input
                   data-action-id="HOSPITALIZATION-FILTER-DATE"
                   onChange={(event) =>
@@ -405,6 +469,7 @@ export default function HospitalizationsPage() {
                         <th>Empresa</th>
                         <th>Tipo</th>
                         <th>Estado</th>
+                        <th>Períodos</th>
                         <th>Duración</th>
                       </tr>
                     </thead>
@@ -451,6 +516,11 @@ export default function HospitalizationsPage() {
                               <StatusTag tone={statusTone(item.status)}>
                                 {statusLabels[item.status]}
                               </StatusTag>
+                            </td>
+                            <td>
+                              {admissionPeriodsFor(item).length}
+                              <br />
+                              <small>Ingreso / egreso administrativos</small>
                             </td>
                             <td>
                               {duration === undefined ? 'No disponible' : `${duration} días`}
@@ -692,11 +762,28 @@ export default function HospitalizationsPage() {
               </div>
             ))}
           </div>
-          <p className="notice warning full" role="status">
-            Los archivos privados de hospitalización siguen bloqueados: no se almacenan bytes ni se
-            ofrecen descargas hasta contar con Storage privado, RLS y evidencia de integración
-            organizacional.
-          </p>
+          {providerMode === 'mongodb' ? (
+            <label className="full">
+              Archivos privados de hospitalización
+              <input
+                data-action-id="HOSPITALIZATION-ATTACHMENTS"
+                multiple
+                onChange={(event) =>
+                  setPendingPrivateFiles(Array.from(event.currentTarget.files ?? []))
+                }
+                type="file"
+              />
+              <span className="field-help">
+                Los bytes se cargan después de guardar y cada descarga vuelve a comprobar
+                autorización.
+              </span>
+            </label>
+          ) : (
+            <p className="notice warning full" role="status">
+              Los archivos demo no se almacenan como archivos privados ni se presentan como
+              descargas autorizadas.
+            </p>
+          )}
           <label>
             Tipo de cuenta
             <select {...form.register('accountType')}>

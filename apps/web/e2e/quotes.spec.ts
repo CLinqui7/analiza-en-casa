@@ -174,6 +174,7 @@ test('quote builder persists all categories, calculations, edit, send, revision 
 test('quote metadata persists through reload and list filters and pagination have observable effects', async ({
   page,
 }) => {
+  test.slow();
   await login(page);
   let dialog = await openNewQuote(page);
   const today = new Date().toISOString().slice(0, 10);

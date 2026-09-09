@@ -1,0 +1,51 @@
+{
+  "updated_at": "2026-09-09T14:15:00.000Z",
+  "next_action": "Provision the existing Atlas project with a least-privilege application user and protected Vercel preview variables, then execute the Mongo bootstrap and remote multi-session verification.",
+  "files": [
+    "apps/web/src/components/app-shell.tsx",
+    "apps/web/src/components/login-form.tsx",
+    "apps/web/src/app/(workspace)/dashboard/page.tsx",
+    "apps/web/src/app/(workspace)/patients/page.tsx",
+    "apps/web/src/app/(workspace)/quotes/page.tsx",
+    "apps/web/src/app/(workspace)/agenda/page.tsx",
+    "apps/web/src/server/mongo-bootstrap-command.ts",
+    "apps/web/src/server/mongo-bootstrap.ts",
+    "apps/web/src/server/mongo-shifts.ts",
+    "apps/web/src/app/api/workspace/route.ts",
+    "apps/web/src/lib/http-data-provider.ts"
+  ],
+  "tests": [
+    "npm run codex:preflight",
+    "npm run test:react -- --run src/server/mongo-bootstrap.test.ts src/server/mongo-bootstrap-command.test.ts src/server/mongo-shifts.test.ts src/lib/http-data-provider.test.ts (11 passed)",
+    "npm run typecheck",
+    "npm run lint",
+    "npm run build",
+    "npm run audit:verify (17/17 chapters passed)",
+    "agent-browser visual review at 1440x900 and 390x844; no error overlay or mobile horizontal overflow"
+  ],
+  "failures": [
+    "Atlas application credentials and approved network access are not available in this session, so no remote Mongo write/read or multi-session authorization has been claimed.",
+    "The Vercel CLI is not authenticated or installed in this session, so no preview URL or deployment ID has been claimed.",
+    "Quotes do not yet have resource-scoped Mongo command handlers; their existing demo workflow remains explicitly unverified for Mongo persistence."
+  ],
+  "atlas": {
+    "project_id": "6aa160fb84024a21784cb906",
+    "cluster": "analiza-cluster",
+    "database": "analiza_en_casa",
+    "verified_from_application": false
+  },
+  "candidate_sha": null,
+  "deployment": {
+    "environment": "preview",
+    "url": null,
+    "id": null,
+    "status": "NOT_ATTEMPTED_MISSING_SESSION"
+  },
+  "pending_ids": [
+    "MONGO-REMOTE-BOOTSTRAP",
+    "MONGO-A-B-C-MULTISESSION",
+    "MONGO-QUOTE-COMMANDS",
+    "VERCEL-PREVIEW-DEPLOY",
+    "CR-031"
+  ]
+}

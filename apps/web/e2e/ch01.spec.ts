@@ -144,6 +144,7 @@ test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe',
   page,
 }) => {
   await login(page);
+  const operationalIndicators = page.getByLabel('Indicadores operativos');
   for (const metric of [
     'Pacientes con alertas',
     'Pacientes activos',
@@ -152,7 +153,7 @@ test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe',
     'Planes de cuidado',
     'Incidentes',
   ])
-    await expect(page.getByText(metric, { exact: true })).toBeVisible();
+    await expect(operationalIndicators.getByText(metric, { exact: true })).toBeVisible();
   for (const header of [
     'Acciones',
     'Paciente',
@@ -178,7 +179,11 @@ test('CH01-F011-F014 user menu, logout, recovery, and PWA fallback work honestly
   await page.locator('[data-action-id="USER-MENU-OPEN"]').click();
   await expect(page.getByRole('menu')).toContainText('Analiza en Casa');
   await page.keyboard.press('Escape');
-  await page.locator('[data-action-id="AUTH-LOGOUT"]').last().click();
+  await expect(page.getByRole('menu')).toHaveCount(0);
+  await page.locator('[data-action-id="USER-MENU-OPEN"]').click();
+  const accountMenu = page.getByRole('menu');
+  await expect(accountMenu).toBeVisible();
+  await accountMenu.locator('[data-action-id="AUTH-LOGOUT"]').click();
   await expect(page).toHaveURL(/\/login(?:\?|$)/);
   await page.getByRole('button', { name: 'Recuperar acceso' }).click();
   await expect(page.getByText('no se envió ningún mensaje')).toBeVisible();

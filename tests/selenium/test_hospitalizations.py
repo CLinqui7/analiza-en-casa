@@ -519,6 +519,11 @@ class Hospitalizations(unittest.TestCase):
         self.assertEqual(stored['nextAction'], 'Próxima Acción Selenium Editada')
         self.assertEqual(stored['devices'], ['Dispositivo Selenium A', 'Dispositivo Selenium B'])
         self.d.refresh()
+        self.w.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//*[normalize-space()='Próxima Acción Selenium Editada']")
+            )
+        )
         self.assertIn('Próxima Acción Selenium Editada', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('HOSPITALIZATION-EDIT-SUBMIT', 'SEL-HOSP-EDIT', submit_started)
 

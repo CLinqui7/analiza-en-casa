@@ -1,0 +1,12 @@
+﻿TIME=2026-09-06T01:12:12.2003292-06:00
+GATE=SELENIUM_FOCALS
+
+Exit 1: py.exe -m unittest discover -s tests/selenium -p test_quotes.py -k ch04_referral_tags -v
+En S:\Usuarios\Carlos\carlo\ANALIZA_RECOVERY_V11_FINAL\RUN_ANALIZA_RECOVERY_V11.ps1: 23 Carácter: 7
++       throw ("Exit {0}: {1} {2}" -f $LASTEXITCODE,$Exe,($CommandArgs  ...
++       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Exit 1: py.exe ...eferral_tags -v:String) [], RuntimeException
+    + FullyQualifiedErrorId : Exit 1: py.exe -m unittest discover -s tests/selenium -p test_quotes.py -k ch04_referral 
+   _tags -v
+ 
+

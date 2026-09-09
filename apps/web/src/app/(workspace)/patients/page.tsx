@@ -273,7 +273,8 @@ function previewPatientImport(
 }
 
 export default function PatientsPage() {
-  const { addPatient, addPatients, patients, updatePatient } = useWorkspace();
+  const { addPatient, addPatients, patients, providerMode, refreshPatients, updatePatient } =
+    useWorkspace();
   const { can } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -291,6 +292,7 @@ export default function PatientsPage() {
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const [saving, setSaving] = useState(false);
   const form = useForm<PatientForm>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
@@ -527,7 +529,7 @@ export default function PatientsPage() {
     }, 0);
     setResult(`Archivo ${anchor.download} generado.`);
   }
-  function onSubmit(values: PatientForm) {
+  async function onSubmit(values: PatientForm) {
     const documentError = validateDocument(values.documentType, values.documentId);
     if (documentError) {
       form.setError('documentId', { type: 'validate', message: documentError });
@@ -578,12 +580,16 @@ export default function PatientsPage() {
       status: editingPatient?.status ?? 'ACTIVE',
       notifications: { botmakerConsent: values.botmakerConsent },
     };
-    if (editingPatient) updatePatient(patient);
-    else addPatient(patient);
+    setSaving(true);
+    const saved = editingPatient ? await updatePatient(patient) : await addPatient(patient);
+    setSaving(false);
+    if (!saved) return;
     setResult(
       editingPatient
         ? `Paciente ${patient.fullName} actualizado y persistido.`
-        : `Registro sintético agregado para ${patient.fullName}.`,
+        : providerMode === 'mongodb'
+          ? `Paciente ${patient.fullName} registrado.`
+          : `Registro sintético agregado para ${patient.fullName}.`,
     );
     closeDialog();
   }
@@ -596,6 +602,19 @@ export default function PatientsPage() {
           <p>La búsqueda normaliza mayúsculas, acentos y espacios en todos los resultados.</p>
         </div>
         <div>
+          <Button
+            className="button-secondary"
+            data-action-id="PATIENT-REFRESH"
+            onClick={() => {
+              void refreshPatients().then((refreshed) => {
+                if (refreshed)
+                  setResult('Listado de pacientes actualizado desde el origen autorizado.');
+              });
+            }}
+            type="button"
+          >
+            Actualizar lista
+          </Button>
           {can('patients:write') ? (
             <>
               <Button
@@ -695,6 +714,7 @@ export default function PatientsPage() {
               Buscar paciente
             </label>
             <input
+              className="patient-search-input"
               id="patient-search"
               data-action-id="PATIENT-SEARCH"
               onChange={(event) => {
@@ -815,12 +835,12 @@ export default function PatientsPage() {
                                 ? 'PATIENT-INACTIVATE'
                                 : 'PATIENT-REACTIVATE'
                             }
-                            onClick={() =>
-                              updatePatient({
+                            onClick={() => {
+                              void updatePatient({
                                 ...patient,
                                 status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
-                              })
-                            }
+                              });
+                            }}
                             type="button"
                           >
                             {patient.status === 'ACTIVE' ? 'Inactivar' : 'Reactivar'}
@@ -897,10 +917,11 @@ export default function PatientsPage() {
             </Button>
             <Button
               data-action-id={editingPatient ? 'PATIENT-EDIT-SUBMIT' : 'PATIENT-SAVE'}
+              disabled={saving}
               form="patient-form"
               type="submit"
             >
-              {editingPatient ? 'Guardar cambios' : 'Guardar'}
+              {saving ? 'Guardando…' : editingPatient ? 'Guardar cambios' : 'Guardar'}
             </Button>
           </>
         }
@@ -1438,7 +1459,11 @@ export default function PatientsPage() {
             </Button>
             <Button
               data-action-id="PATIENT-IMPORT-CONFIRM"
-              disabled={!importPreview?.rows.length || Boolean(importPreview.errors.length)}
+              disabled={
+                providerMode === 'mongodb' ||
+                !importPreview?.rows.length ||
+                Boolean(importPreview.errors.length)
+              }
               onClick={confirmImport}
               type="button"
             >
@@ -1503,6 +1528,12 @@ export default function PatientsPage() {
               </div>
             )}
           </div>
+        ) : null}
+        {providerMode === 'mongodb' ? (
+          <p className="field-help" role="status">
+            La importación masiva aún requiere un comando Mongo idempotente aprobado; no se guardará
+            ninguna fila desde esta pantalla.
+          </p>
         ) : null}
       </Dialog>
       <Dialog

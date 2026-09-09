@@ -1,0 +1,59 @@
+ANALIZA EN CASA · FUNCTIONAL CONVERGENCE V6
+
+Trabaja SOLO en:
+C:\Temp\analiza-ui-polish-final-v5
+
+Rama:
+codex/ui-polish-final-20260904
+
+NO:
+- tocar main
+- force-push
+- reset --hard
+- git clean
+- borrar evidencia
+- inventar reglas clínicas, financieras, fiscales, de inventario o integraciones
+- degradar tests
+- marcar EXACT/VERIFIED solo para hacer pasar un gate
+
+Contexto:
+- Base certificada: b06103fff5f836878e333f0b454e20d711d68e72.
+- Logo/UI polish/sidebar/login/portal ya están aplicados.
+- Cron automático se mantiene deshabilitado en staging; conservar api/cron-retries.js.
+- CH01 selector Planes de cuidado y CH01 logout tras Escape ya están corregidos.
+- El launcher ejecutará todos los gates después de tu reparación.
+- NO hagas commit ni push. El launcher lo hará cuando todo esté verde.
+
+LEE:
+- AGENTS.md
+- docs/release/V6_ACTIONABLE_GAPS.json
+- docs/release/FINAL_VIDEO_FUNCTION_AUDIT.md
+- docs/qa/VIDEO_TO_REACT_TRACEABILITY.json
+- docs/qa/CLIENT_CHANGE_REQUESTS.json
+- evidence_paths de cada requirement
+
+OBJETIVO DE ESTE TURNO:
+Revisa SOLO los requirements listados en V6_ACTIONABLE_GAPS.json.
+
+Para cada requirement:
+1. Abre la evidencia real citada.
+2. Abre el código React actual y pruebas.
+3. Si el comportamiento visible/determinista está suficientemente demostrado:
+   - impleméntalo sin inventar datos/reglas;
+   - añade/ajusta pruebas específicas;
+   - actualiza trazabilidad honestamente.
+4. Si NO puede implementarse porque falta definición real:
+   - NO inventes;
+   - usa únicamente blocker/open question ya soportado por evidencia/documentación;
+   - documenta por qué.
+5. Si ya estaba implementado pero UNVERIFIED:
+   - agrega certificación/prueba enfocada y actualiza el estado.
+6. No conviertas un simple “se ve en video” en una regla productiva si faltan semántica, permisos, persistencia o fórmula.
+7. Mantén visibles las superficies que sí están demostradas cuando sea seguro, aunque la acción deba quedar deshabilitada.
+
+Al terminar:
+- corre pruebas focales de los capítulos tocados;
+- corre lint/typecheck si modificaste código;
+- regenera/actualiza la trazabilidad si corresponde;
+- NO commit;
+- NO push.

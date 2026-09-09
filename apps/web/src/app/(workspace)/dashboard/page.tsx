@@ -2,7 +2,9 @@
 
 import { EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
+import { useState } from 'react';
 import { useAuth, useDashboardWorkspace } from '@/components/providers';
+import { filterDashboardReadings, getDashboardActions } from '@/lib/dashboard-activity';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { videoParitySummary } from '@/lib/video-parity-summary';
 
@@ -18,14 +20,18 @@ export default function DashboardPage() {
     hospitalizations,
     loading,
     patients,
+    shifts,
     vitalReadings,
   } = useDashboardWorkspace();
   const { can } = useAuth();
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const supabaseConfigured = Boolean(getSupabaseBrowserClient());
   const carePlans = clinicalDocuments.filter((document) => document.type === 'CARE_PLAN').length;
-  const recentReadings = vitalReadings
-    .slice()
-    .sort((left, right) => right.measuredAt.localeCompare(left.measuredAt));
+  const recentReadings = filterDashboardReadings(vitalReadings, dateRange);
+  const actions = getDashboardActions(shifts, hospitalizations, patients, dateRange);
+  const visibleActions = actions.filter((action) =>
+    action.kind === 'SHIFT' ? can('agenda:read') : can('cases:read'),
+  );
   const insuredPatients = patients.filter((patient) =>
     Boolean(patient.insurance?.insurer ?? patient.insurer),
   );
@@ -119,6 +125,120 @@ export default function DashboardPage() {
               <span>Incidentes</span>
               <strong>—</strong>
               <small>Sin fuente ni regla aprobada.</small>
+            </Panel>
+          </section>
+
+          <Panel>
+            <div className="table-heading dashboard-filter-heading">
+              <div>
+                <h2>Actividad por fecha</h2>
+                <p>Filtra las mediciones y acciones mostradas con sus fechas registradas.</p>
+              </div>
+              <button
+                className="button button-secondary"
+                data-action-id="DASHBOARD-DATE-CLEAR"
+                disabled={!dateRange.from && !dateRange.to}
+                onClick={() => setDateRange({ from: '', to: '' })}
+                type="button"
+              >
+                Limpiar fechas
+              </button>
+            </div>
+            <div className="form-grid form-grid-compact dashboard-date-filters">
+              <label>
+                Desde
+                <input
+                  data-action-id="DASHBOARD-DATE-FROM"
+                  onChange={(event) =>
+                    setDateRange((current) => ({ ...current, from: event.target.value }))
+                  }
+                  type="date"
+                  value={dateRange.from}
+                />
+              </label>
+              <label>
+                Hasta
+                <input
+                  data-action-id="DASHBOARD-DATE-TO"
+                  onChange={(event) =>
+                    setDateRange((current) => ({ ...current, to: event.target.value }))
+                  }
+                  type="date"
+                  value={dateRange.to}
+                />
+              </label>
+            </div>
+          </Panel>
+
+          <section className="two-column" aria-label="Acciones operativas">
+            <Panel>
+              <div className="table-heading">
+                <div>
+                  <h2>Próximas acciones</h2>
+                  <p>Turnos programados y acciones documentadas en casos no cerrados.</p>
+                </div>
+                {can('agenda:read') ? (
+                  <Link
+                    className="button button-secondary"
+                    data-action-id="DASHBOARD-AGENDA-OPEN"
+                    href="/agenda"
+                  >
+                    Ver agenda
+                  </Link>
+                ) : null}
+              </div>
+              {visibleActions.length ? (
+                <ul className="action-list">
+                  {visibleActions.map((action) => (
+                    <li className="action-card" key={action.id}>
+                      <strong>{action.patientName}</strong>
+                      <span>{action.detail}</span>
+                      <span>{new Date(action.occursAt).toLocaleString('es-SV')}</span>
+                      <Link data-action-id={`DASHBOARD-ACTION-${action.kind}`} href={action.href}>
+                        Abrir
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  detail="Ajuste el rango o registre un turno o una próxima acción documentada."
+                  title="Sin acciones para este rango"
+                />
+              )}
+            </Panel>
+            <Panel>
+              <h2>Acceso rápido</h2>
+              <p>Accesos a flujos autorizados para este rol.</p>
+              <div className="header-actions dashboard-quick-actions">
+                {can('patients:read') ? (
+                  <Link
+                    className="button button-secondary"
+                    data-action-id="DASHBOARD-PATIENTS-OPEN"
+                    href="/patients"
+                  >
+                    Pacientes
+                  </Link>
+                ) : null}
+                {can('quotes:read') ? (
+                  <Link
+                    className="button button-secondary"
+                    data-action-id="DASHBOARD-QUOTES-OPEN"
+                    href="/quotes"
+                  >
+                    Cotizaciones
+                  </Link>
+                ) : null}
+                {can('agenda:read') ? (
+                  <Link
+                    className="button button-secondary"
+                    data-action-id="DASHBOARD-AGENDA-QUICK"
+                    href="/agenda"
+                  >
+                    Agenda
+                  </Link>
+                ) : null}
+              </div>
             </Panel>
           </section>
 

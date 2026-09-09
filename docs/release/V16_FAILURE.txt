@@ -1,0 +1,11 @@
+﻿TIME=2026-09-07T14:29:37.8611189-06:00
+GATE=PATCH_V16
+
+PATCH_ANALIZA_V16.py falló.
+En S:\Usuarios\Carlos\carlo\ANALIZA_RECOVERY_V16_FINAL\RUN_ANALIZA_RECOVERY_V16.ps1: 99 Carácter: 30
++   if ($LASTEXITCODE -ne 0) { throw "PATCH_ANALIZA_V16.py falló." }
++                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (PATCH_ANALIZA_V16.py falló.:String) [], RuntimeException
+    + FullyQualifiedErrorId : PATCH_ANALIZA_V16.py falló.
+ 
+

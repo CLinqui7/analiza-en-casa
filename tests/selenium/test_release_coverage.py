@@ -169,14 +169,23 @@ class ReleaseCoverage(unittest.TestCase):
         self.d.get(f'{BASE}/patients')
         self.click('DASHBOARD-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/dashboard'))
-        self.click('DASHBOARD-PATIENT-CREATE')
-        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
-        self.assertIn('Agregar paciente', self.d.find_element(By.CSS_SELECTOR, '[role="dialog"]').text)
+        try:
+            for viewport in ('desktop', 'mobile'):
+                with self.subTest(viewport=viewport):
+                    if viewport == 'mobile':
+                        self.d.set_window_size(390, 844)
 
-        self.d.get(f'{BASE}/dashboard')
-        self.click('DASHBOARD-QUOTE-CREATE')
-        self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
-        self.assertIn('Nueva cotizaci\u00f3n', self.d.find_element(By.CSS_SELECTOR, '[role="dialog"]').text)
+                    self.d.get(f'{BASE}/dashboard')
+                    self.click('DASHBOARD-PATIENT-CREATE')
+                    self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+                    self.assertIn('Agregar paciente', self.d.find_element(By.CSS_SELECTOR, '[role="dialog"]').text)
+
+                    self.d.get(f'{BASE}/dashboard')
+                    self.click('DASHBOARD-QUOTE-CREATE')
+                    self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
+                    self.assertIn('Nueva cotizaci\u00f3n', self.d.find_element(By.CSS_SELECTOR, '[role="dialog"]').text)
+        finally:
+            self.d.set_window_size(1440, 1000)
 
     def test_insurance_actions_preserve_safe_and_append_only_boundaries(self) -> None:
         self.click('FINANCIERO-TOGGLE')

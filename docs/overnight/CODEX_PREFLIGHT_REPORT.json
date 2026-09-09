@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-03T14:21:29.637Z",
+  "generated_at": "2026-09-09T14:08:31.000Z",
   "passed": true,
-  "files": 6899,
-  "total_mib": 522.64,
+  "files": 10981,
+  "total_mib": 629.23,
   "largest_file": {
-    "size": 9031144,
-    "file": "references\\video-audit\\chapters\\CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits\\chapter_video_exact_reference.mp4"
+    "size": 23837696,
+    "file": ".analiza-runtime\\bin\\chromedriver.exe"
   },
   "chapters": 17,
   "events": 1359,

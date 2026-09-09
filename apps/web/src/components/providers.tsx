@@ -45,6 +45,7 @@ import { can, type Permission, type Role } from '@/lib/permissions';
 import {
   createDataProvider,
   defaultSnapshot,
+  emptySnapshot,
   type AuditEntry,
   type DataProvider,
   type WorkspaceSnapshot,
@@ -63,18 +64,20 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   loading: boolean;
   error: string | null;
   providerMode: DataProvider['mode'];
-  addPatient: (patient: Patient) => void;
+  addPatient: (patient: Patient) => Promise<boolean>;
   addPatients: (patients: Patient[]) => void;
-  updatePatient: (patient: Patient) => void;
+  updatePatient: (patient: Patient) => Promise<boolean>;
+  refreshPatients: () => Promise<boolean>;
   addVitalReading: (reading: VitalReading) => void;
   addNursingResource: (resource: NursingResource) => void;
-  addDoctor: (doctor: Doctor) => void;
-  updateDoctor: (doctor: Doctor) => void;
+  addDoctor: (doctor: Doctor) => Promise<boolean>;
+  updateDoctor: (doctor: Doctor) => Promise<boolean>;
   addNurseHour: (entry: NurseHourEntry) => void;
   addInventoryMovement: (movement: InventoryMovement) => void;
   addShift: (shift: Shift) => void;
-  addHospitalization: (hospitalization: Hospitalization) => void;
-  updateHospitalization: (hospitalization: Hospitalization) => void;
+  addShiftSeries: (shifts: Shift[], idempotencyKey: string) => Promise<boolean>;
+  addHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
+  updateHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   addQuote: (quote: Quote) => void;
   updateQuote: (quote: Quote) => void;
   sendQuote: (quoteId: string) => void;
@@ -110,6 +113,7 @@ type DashboardWorkspace = Pick<
   | 'hospitalizations'
   | 'loading'
   | 'patients'
+  | 'shifts'
   | 'vitalReadings'
 >;
 const DashboardWorkspaceContext = createContext<DashboardWorkspace | null>(null);
@@ -170,7 +174,9 @@ function AuthProvider({ children }: PropsWithChildren) {
 function WorkspaceProvider({ children }: PropsWithChildren) {
   const { can } = useAuth();
   const [provider] = useState<DataProvider>(() => createDataProvider());
-  const [snapshot, setSnapshot] = useState<WorkspaceSnapshot>(defaultSnapshot);
+  const [snapshot, setSnapshot] = useState<WorkspaceSnapshot>(() =>
+    provider.mode === 'mongodb' ? emptySnapshot() : defaultSnapshot(),
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -186,6 +192,12 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
 
   const commit = useCallback(
     (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot) => {
+      if (provider.mode === 'mongodb') {
+        setError(
+          'La persistencia Mongo no está disponible hasta configurar identidad y comandos versionados; no se guardó ningún cambio.',
+        );
+        return;
+      }
       setSnapshot((current) => {
         const next = change(current);
         const changes = changedSlices(current, next);
@@ -200,18 +212,206 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [provider],
   );
+  const savePatient = useCallback(
+    async (patient: Patient, operation: 'create' | 'replace'): Promise<boolean> => {
+      if (provider.mode === 'mongodb') {
+        const command = operation === 'create' ? provider.createPatient : provider.replacePatient;
+        if (!command) {
+          setError(
+            'El comando seguro de pacientes no está disponible; no se guardó ningún cambio.',
+          );
+          return false;
+        }
+        try {
+          const saved = await command.call(provider, patient);
+          setSnapshot((current) => ({
+            ...current,
+            patients:
+              operation === 'create'
+                ? [...current.patients, saved]
+                : current.patients.map((candidate) =>
+                    candidate.id === saved.id ? saved : candidate,
+                  ),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible guardar el paciente.');
+          return false;
+        }
+      }
+      commit((current) => ({
+        ...current,
+        patients:
+          operation === 'create'
+            ? [...current.patients, patient]
+            : current.patients.map((candidate) =>
+                candidate.id === patient.id ? patient : candidate,
+              ),
+        auditEntries: [
+          audit(
+            operation === 'create' ? 'Paciente registrado' : 'Paciente actualizado',
+            patient.id,
+          ),
+          ...current.auditEntries,
+        ],
+      }));
+      return true;
+    },
+    [commit, provider],
+  );
+  const refreshPatients = useCallback(async (): Promise<boolean> => {
+    try {
+      const loaded = await provider.load();
+      setSnapshot((current) => ({ ...current, patients: loaded.patients }));
+      setError(null);
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No fue posible actualizar pacientes.');
+      return false;
+    }
+  }, [provider]);
+  const saveDoctor = useCallback(
+    async (doctor: Doctor, operation: 'create' | 'replace'): Promise<boolean> => {
+      if (!can('settings:write')) return false;
+      if (provider.mode === 'mongodb') {
+        const command = operation === 'create' ? provider.createDoctor : provider.replaceDoctor;
+        if (!command) {
+          setError('El comando seguro de médicos no está disponible; no se guardó ningún cambio.');
+          return false;
+        }
+        try {
+          const saved = await command.call(provider, doctor);
+          setSnapshot((current) => ({
+            ...current,
+            doctors:
+              operation === 'create'
+                ? [...current.doctors, saved]
+                : current.doctors.map((candidate) =>
+                    candidate.id === saved.id ? saved : candidate,
+                  ),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible guardar el médico.');
+          return false;
+        }
+      }
+      commit((current) => ({
+        ...current,
+        doctors:
+          operation === 'create'
+            ? [...current.doctors, doctor]
+            : current.doctors.map((candidate) => (candidate.id === doctor.id ? doctor : candidate)),
+        auditEntries: [
+          audit(operation === 'create' ? 'Médico registrado' : 'Médico actualizado', doctor.id),
+          ...current.auditEntries,
+        ],
+      }));
+      return true;
+    },
+    [can, commit, provider],
+  );
+  const saveHospitalization = useCallback(
+    async (hospitalization: Hospitalization, operation: 'create' | 'replace'): Promise<boolean> => {
+      if (!can('cases:write')) return false;
+      if (provider.mode === 'mongodb') {
+        const command =
+          operation === 'create' ? provider.createHospitalization : provider.replaceHospitalization;
+        if (!command) {
+          setError(
+            'El comando seguro de hospitalizaciones no está disponible; no se guardó ningún cambio.',
+          );
+          return false;
+        }
+        try {
+          const saved = await command.call(provider, hospitalization);
+          setSnapshot((current) => ({
+            ...current,
+            hospitalizations:
+              operation === 'create'
+                ? [...current.hospitalizations, saved]
+                : current.hospitalizations.map((candidate) =>
+                    candidate.id === saved.id ? saved : candidate,
+                  ),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(
+            cause instanceof Error ? cause.message : 'No fue posible guardar la hospitalización.',
+          );
+          return false;
+        }
+      }
+      commit((current) => ({
+        ...current,
+        hospitalizations:
+          operation === 'create'
+            ? [...current.hospitalizations, hospitalization]
+            : current.hospitalizations.map((candidate) =>
+                candidate.id === hospitalization.id ? hospitalization : candidate,
+              ),
+        auditEntries: [
+          audit(
+            operation === 'create' ? 'Hospitalización registrada' : 'Hospitalización actualizada',
+            hospitalization.id,
+          ),
+          ...current.auditEntries,
+        ],
+      }));
+      return true;
+    },
+    [can, commit, provider],
+  );
+  const saveShiftSeries = useCallback(
+    async (shifts: Shift[], idempotencyKey: string): Promise<boolean> => {
+      if (!can('agenda:write')) return false;
+      if (provider.mode === 'mongodb') {
+        if (!provider.createShiftSeries) {
+          setError('El comando seguro de Agenda no está disponible; no se guardó ningún turno.');
+          return false;
+        }
+        try {
+          const saved = await provider.createShiftSeries(shifts, idempotencyKey);
+          setSnapshot((current) => ({
+            ...current,
+            shifts: [
+              ...current.shifts.filter(
+                (currentShift) => !saved.some((shift) => shift.id === currentShift.id),
+              ),
+              ...saved,
+            ],
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(
+            cause instanceof Error ? cause.message : 'No fue posible guardar la serie de turnos.',
+          );
+          return false;
+        }
+      }
+      commit((current) => ({
+        ...current,
+        shifts: [...current.shifts, ...shifts],
+        auditEntries: [
+          audit('Serie de turnos registrada', idempotencyKey),
+          ...current.auditEntries,
+        ],
+      }));
+      return true;
+    },
+    [can, commit, provider],
+  );
   const value = useMemo<WorkspaceContextValue>(
     () => ({
       ...snapshot,
       loading,
       error,
       providerMode: provider.mode,
-      addPatient: (patient) =>
-        commit((current) => ({
-          ...current,
-          patients: [...current.patients, patient],
-          auditEntries: [audit('Paciente registrado', patient.id), ...current.auditEntries],
-        })),
+      addPatient: (patient) => savePatient(patient, 'create'),
       addPatients: (patients) =>
         commit((current) => ({
           ...current,
@@ -221,12 +421,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
             ...current.auditEntries,
           ],
         })),
-      updatePatient: (patient) =>
-        commit((current) => ({
-          ...current,
-          patients: current.patients.map((item) => (item.id === patient.id ? patient : item)),
-          auditEntries: [audit('Paciente actualizado', patient.id), ...current.auditEntries],
-        })),
+      updatePatient: (patient) => savePatient(patient, 'replace'),
+      refreshPatients,
       addVitalReading: (reading) =>
         commit((current) => ({
           ...current,
@@ -242,27 +438,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
             ...current.auditEntries,
           ],
         })),
-      addDoctor: (doctor) => {
-        if (!can('settings:write')) return;
-        commit((current) => ({
-          ...current,
-          doctors: [...current.doctors, doctor],
-          auditEntries: [audit('Médico registrado', doctor.id), ...current.auditEntries],
-        }));
-      },
-      updateDoctor: (doctor) => {
-        if (!can('settings:write')) return;
-        commit((current) => {
-          if (!current.doctors.some((candidate) => candidate.id === doctor.id)) return current;
-          return {
-            ...current,
-            doctors: current.doctors.map((candidate) =>
-              candidate.id === doctor.id ? doctor : candidate,
-            ),
-            auditEntries: [audit('Médico actualizado', doctor.id), ...current.auditEntries],
-          };
-        });
-      },
+      addDoctor: (doctor) => saveDoctor(doctor, 'create'),
+      updateDoctor: (doctor) => saveDoctor(doctor, 'replace'),
       addNurseHour: (entry) =>
         commit((current) => ({
           ...current,
@@ -286,34 +463,9 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           auditEntries: [audit('Turno registrado', shift.id), ...current.auditEntries],
         }));
       },
-      addHospitalization: (hospitalization) => {
-        if (!can('cases:write')) return;
-        commit((current) => ({
-          ...current,
-          hospitalizations: [...current.hospitalizations, hospitalization],
-          auditEntries: [
-            audit('Hospitalización registrada', hospitalization.id),
-            ...current.auditEntries,
-          ],
-        }));
-      },
-      updateHospitalization: (hospitalization) => {
-        if (!can('cases:write')) return;
-        commit((current) => {
-          if (!current.hospitalizations.some((candidate) => candidate.id === hospitalization.id))
-            return current;
-          return {
-            ...current,
-            hospitalizations: current.hospitalizations.map((candidate) =>
-              candidate.id === hospitalization.id ? hospitalization : candidate,
-            ),
-            auditEntries: [
-              audit('Hospitalización actualizada', hospitalization.id),
-              ...current.auditEntries,
-            ],
-          };
-        });
-      },
+      addShiftSeries: saveShiftSeries,
+      addHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'create'),
+      updateHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'replace'),
       addQuote: (quote) => {
         if (!can('quotes:write')) return;
         commit((current) => {
@@ -655,7 +807,19 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         }
       },
     }),
-    [can, commit, error, loading, provider.mode, snapshot],
+    [
+      can,
+      commit,
+      error,
+      loading,
+      provider.mode,
+      refreshPatients,
+      saveDoctor,
+      saveHospitalization,
+      savePatient,
+      saveShiftSeries,
+      snapshot,
+    ],
   );
   const dashboardValue = useMemo<DashboardWorkspace>(
     () => ({
@@ -665,6 +829,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       hospitalizations: value.hospitalizations,
       loading: value.loading,
       patients: value.patients,
+      shifts: value.shifts,
       vitalReadings: value.vitalReadings,
     }),
     [
@@ -674,6 +839,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       value.hospitalizations,
       value.loading,
       value.patients,
+      value.shifts,
       value.vitalReadings,
     ],
   );

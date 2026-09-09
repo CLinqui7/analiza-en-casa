@@ -1,0 +1,14 @@
+{
+    "schemaVersion":  6,
+    "updatedAt":  "2026-09-04T23:40:35.1672850-06:00",
+    "branch":  "codex/ui-polish-final-20260904",
+    "head":  "b06103fff5f836878e333f0b454e20d711d68e72",
+    "baseCertified":  "codex/reconcile-global-release-20260903@b06103fff5f836878e333f0b454e20d711d68e72",
+    "status":  "FAILED_NEEDS_REPAIR",
+    "currentGate":  "PLAYWRIGHT_43",
+    "message":  "Exit 1: npx.cmd playwright test -c playwright.v6.config.mjs\r\nEn S:\\Usuarios\\Carlos\\carlo\\ANALIZA_RECOVERY_V6_FIXED\\RUN_ANALIZA_RECOVERY_V6.ps1: 31 Carácter: 7\r\n+       throw (\"Exit {0}: {1} {2}\" -f $code,$Exe,($CommandArgs -join \"  ...\r\n+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : OperationStopped: (Exit 1: npx.cmd...t.v6.config.mjs:String) [], RuntimeException\r\n    + FullyQualifiedErrorId : Exit 1: npx.cmd playwright test -c playwright.v6.config.mjs\r\n \r\n",
+    "runtime":  "C:\\Temp\\analiza-ui-polish-final-v5",
+    "cron":  "DISABLED_FOR_STAGING_BY_CLIENT_DECISION",
+    "model":  "gpt-5.6-terra",
+    "reasoningEffort":  "high"
+}

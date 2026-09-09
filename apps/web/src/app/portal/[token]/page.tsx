@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Panel, StatusTag } from '@analiza/ui';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -11,6 +12,21 @@ type PortalSnapshot = { quote_id?: unknown; status?: unknown; updated_at?: unkno
 
 function readSnapshot(value: unknown): PortalSnapshot | null {
   return value && typeof value === 'object' ? (value as PortalSnapshot) : null;
+}
+
+function PortalBrand() {
+  return (
+    <div className="portal-brand">
+      <Image
+        alt="Analiza en Casa"
+        height={702}
+        priority
+        src="/brand/analiza-en-casa-logo.png"
+        width={2047}
+      />
+      <span>Portal seguro</span>
+    </div>
+  );
 }
 
 export default function PortalPage() {
@@ -38,6 +54,7 @@ export default function PortalPage() {
       setLoading(false);
     }
   }
+
   async function verifyCode(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -62,9 +79,10 @@ export default function PortalPage() {
     }
   }
 
-  if (snapshot)
+  if (snapshot) {
     return (
       <main className="portal-shell">
+        <PortalBrand />
         <header className="page-header">
           <div>
             <p className="eyebrow">Portal seguro</p>
@@ -106,8 +124,11 @@ export default function PortalPage() {
         </Panel>
       </main>
     );
+  }
+
   return (
     <main className="portal-shell">
+      <PortalBrand />
       <header className="page-header">
         <div>
           <p className="eyebrow">Portal seguro</p>

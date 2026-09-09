@@ -1,8 +1,10 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import { createPortal } from 'react-dom';
+import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 
@@ -192,6 +194,19 @@ function isActive(pathname: string, href: string) {
   );
 }
 
+function currentPageLabel(pathname: string) {
+  const items: Array<{ href: string; label: string }> = [];
+  for (const group of navigation) {
+    if (group.href) items.push({ href: group.href, label: group.label });
+    for (const child of group.children ?? []) items.push({ href: child.href, label: child.label });
+  }
+  return (
+    items
+      .filter((item) => isActive(pathname, item.href))
+      .sort((a, b) => b.href.length - a.href.length)[0]?.label ?? 'Analiza en Casa'
+  );
+}
+
 function DeniedRoute({ pathname }: { pathname: string }) {
   const router = useRouter();
   useEffect(() => {
@@ -213,8 +228,16 @@ export function AppShell({ children }: PropsWithChildren) {
   const router = useRouter();
   const { can, loading, logout, session } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const accountMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const navScrollRef = useRef<HTMLElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const mobileMenuToggleRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuCloseRef = useRef<HTMLButtonElement>(null);
+  const profileDialogRef = useRef<HTMLElement>(null);
+  const profileReturnFocusRef = useRef<HTMLElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userProfileOpen, setUserProfileOpen] = useState(false);
+  const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Financiero:
       pathname.startsWith('/hospitalizations') ||
@@ -227,30 +250,117 @@ export function AppShell({ children }: PropsWithChildren) {
     Reportes: pathname.startsWith('/reports'),
   });
   const required = permissionForPath(pathname);
+
+  const closeUserProfile = useCallback(() => {
+    setUserProfileOpen(false);
+    window.requestAnimationFrame(() => profileReturnFocusRef.current?.focus());
+  }, []);
+
+  const closeMobileNavigation = useCallback((restoreFocus = false) => {
+    setMobileNavigationOpen(false);
+    if (restoreFocus) {
+      window.requestAnimationFrame(() => mobileMenuToggleRef.current?.focus());
+    }
+  }, []);
+
   useEffect(() => {
     const close = (event: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node))
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
   }, []);
+
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setUserMenuOpen(false);
-        setUserProfileOpen(false);
+        if (mobileNavigationOpen) closeMobileNavigation(true);
+        if (userProfileOpen) closeUserProfile();
       }
     };
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
-  }, []);
-  if (loading)
+  }, [closeMobileNavigation, closeUserProfile, mobileNavigationOpen, userProfileOpen]);
+
+  useEffect(() => {
+    const node = navScrollRef.current;
+    if (!node) return;
+    const saved = window.sessionStorage.getItem('analiza.sidebar.scrollTop');
+    if (saved) {
+      const value = Number(saved);
+      window.requestAnimationFrame(() => {
+        if (Number.isFinite(value)) node.scrollTop = value;
+      });
+    }
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileNavigationOpen) return;
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+    const previousOverflow = document.body.style.overflow;
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(sidebar.querySelectorAll<HTMLElement>(focusableSelector));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', trapFocus);
+    window.requestAnimationFrame(() => mobileMenuCloseRef.current?.focus());
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', trapFocus);
+    };
+  }, [mobileNavigationOpen]);
+
+  useEffect(() => {
+    if (!userProfileOpen) return;
+    const dialog = profileDialogRef.current;
+    if (!dialog) return;
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', trapFocus);
+    window.requestAnimationFrame(() => {
+      dialog.querySelector<HTMLElement>(focusableSelector)?.focus();
+    });
+    return () => document.removeEventListener('keydown', trapFocus);
+  }, [userProfileOpen]);
+
+  if (loading) {
     return (
       <main className="access-denied" role="status">
         Validando sesión…
       </main>
     );
+  }
   if (!session) return <DeniedRoute pathname={pathname} />;
   if (required && !can(required)) {
     return (
@@ -262,17 +372,63 @@ export function AppShell({ children }: PropsWithChildren) {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar" aria-label="Navegación principal">
-        <Link className="brand" data-action-id="DASHBOARD-NAVIGATE" href="/dashboard">
-          <span className="brand-mark" aria-hidden="true">
-            A
-          </span>
-          <span>Analiza en Casa</span>
-        </Link>
-        <p className="environment-label">
-          {session.mode === 'supabase' ? 'Supabase' : 'Demo persistente'} · {session.role}
-        </p>
-        <nav>
+      {mobileNavigationOpen ? (
+        <button
+          aria-label="Cerrar menú de navegación"
+          className="mobile-nav-overlay"
+          data-action-id="MOBILE-NAV-CLOSE"
+          onClick={() => closeMobileNavigation(true)}
+          type="button"
+        />
+      ) : null}
+      <aside
+        aria-label="Navegación principal"
+        className={`sidebar${mobileNavigationOpen ? ' mobile-navigation-open' : ''}`}
+        id="main-navigation"
+        ref={sidebarRef}
+      >
+        <div className="sidebar-header">
+          <button
+            aria-label="Cerrar menú"
+            className="mobile-nav-close"
+            data-action-id="MOBILE-NAV-CLOSE"
+            onClick={() => closeMobileNavigation(true)}
+            ref={mobileMenuCloseRef}
+            type="button"
+          >
+            Cerrar
+          </button>
+          <Link
+            className="brand"
+            data-action-id="DASHBOARD-NAVIGATE"
+            href="/dashboard"
+            scroll={false}
+          >
+            <Image
+              alt="Analiza en Casa"
+              className="brand-logo"
+              height={702}
+              priority
+              src="/brand/analiza-en-casa-logo.png"
+              width={2047}
+            />
+          </Link>
+          <p className="environment-label">
+            <span className="environment-dot" aria-hidden="true" />
+            {session.mode === 'supabase' ? 'Conectado a Supabase' : 'Entorno demo'} · {session.role}
+          </p>
+        </div>
+
+        <nav
+          className="nav-scroll"
+          ref={navScrollRef}
+          onScroll={(event) =>
+            window.sessionStorage.setItem(
+              'analiza.sidebar.scrollTop',
+              String(event.currentTarget.scrollTop),
+            )
+          }
+        >
           <ul className="nav-list">
             {navigation.map((group) => {
               if (group.href && group.permission && group.actionId) {
@@ -284,16 +440,24 @@ export function AppShell({ children }: PropsWithChildren) {
                       className="nav-link"
                       data-action-id={group.actionId}
                       href={group.href}
+                      onClick={() => closeMobileNavigation()}
+                      scroll={false}
                     >
-                      {group.label}
+                      <span className="nav-item-dot" aria-hidden="true" />
+                      <span className="nav-item-label">{group.label}</span>
                     </Link>
                   </li>
                 );
               }
-              const children = group.children?.filter((child) => can(child.permission)) ?? [];
-              if (!children.length) return null;
+
+              const childrenForRole =
+                group.children?.filter((child) => can(child.permission)) ?? [];
+              if (!childrenForRole.length) return null;
               const open = expanded[group.label] ?? false;
-              const hasCurrentChild = children.some((child) => isActive(pathname, child.href));
+              const hasCurrentChild = childrenForRole.some((child) =>
+                isActive(pathname, child.href),
+              );
+
               return (
                 <li key={group.label} className="nav-group">
                   <button
@@ -303,41 +467,58 @@ export function AppShell({ children }: PropsWithChildren) {
                     onClick={() => setExpanded((current) => ({ ...current, [group.label]: !open }))}
                     type="button"
                   >
-                    <span>{group.label}</span>
-                    <span aria-hidden="true">{open ? '⌄' : '›'}</span>
+                    <span className="nav-group-copy">
+                      <span className="nav-item-dot" aria-hidden="true" />
+                      <span>{group.label}</span>
+                    </span>
+                    <span className={`nav-chevron${open ? ' open' : ''}`} aria-hidden="true">
+                      ›
+                    </span>
                   </button>
-                  {open ? (
+                  <div className={`nav-sublist-shell${open ? ' open' : ''}`}>
                     <ul className="nav-sublist">
-                      {children.map((child) => (
+                      {childrenForRole.map((child) => (
                         <li key={child.href}>
                           <Link
                             aria-current={isActive(pathname, child.href) ? 'page' : undefined}
                             className="nav-sublink"
                             data-action-id={child.actionId}
                             href={child.href}
+                            onClick={() => closeMobileNavigation()}
+                            scroll={false}
                           >
                             {child.label}
                           </Link>
                         </li>
                       ))}
                     </ul>
-                  ) : null}
+                  </div>
                 </li>
               );
             })}
           </ul>
         </nav>
+
         <footer className="sidebar-footer">
-          <p>Desarrollado por Interactive Core</p>
+          <div className="sidebar-credit">
+            <span>Analiza en Casa</span>
+            <small>Desarrollado por Interactive Core</small>
+          </div>
           <div ref={userMenuRef} className="user-menu">
             <button
               aria-expanded={userMenuOpen}
-              className="button button-secondary"
+              className="account-card"
               data-action-id="USER-MENU-OPEN"
               onClick={() => setUserMenuOpen((open) => !open)}
+              ref={accountMenuTriggerRef}
               type="button"
             >
-              Mi cuenta
+              <span className="account-avatar">{session.role.slice(0, 1)}</span>
+              <span className="account-copy">
+                <strong>Mi cuenta</strong>
+                <small>{session.role}</small>
+              </span>
+              <span aria-hidden="true">•••</span>
             </button>
             {userMenuOpen ? (
               <div className="user-menu-popover" role="menu">
@@ -354,13 +535,14 @@ export function AppShell({ children }: PropsWithChildren) {
                 <button
                   data-action-id="USER-PROFILE-OPEN"
                   onClick={() => {
+                    profileReturnFocusRef.current = accountMenuTriggerRef.current;
                     setUserMenuOpen(false);
                     setUserProfileOpen(true);
                   }}
                   role="menuitem"
                   type="button"
                 >
-                  Mi usuario
+                  Ver mi usuario
                 </button>
                 <button
                   data-action-id="AUTH-LOGOUT"
@@ -380,46 +562,99 @@ export function AppShell({ children }: PropsWithChildren) {
               </div>
             ) : null}
           </div>
+
           <button
-            className="button button-secondary"
+            aria-label="Cerrar sesión"
+            className="account-logout-quick"
             data-action-id="AUTH-LOGOUT"
             onClick={() => void logout().then(() => router.replace('/login'))}
             type="button"
           >
-            Cerrar sesión
+            <span aria-hidden="true" className="account-logout-icon">
+              Salir
+            </span>
+            <span>Cerrar sesión</span>
           </button>
         </footer>
       </aside>
-      <main className="main-content">{children}</main>
-      {userProfileOpen ? (
-        <div aria-label="Mi usuario" className="dialog-backdrop" role="dialog">
-          <section className="dialog">
-            <h2>Mi usuario</h2>
-            <dl className="definition-list">
-              <div>
-                <dt>Usuario</dt>
-                <dd>{session.userId}</dd>
-              </div>
-              <div>
-                <dt>Rol</dt>
-                <dd>{session.role}</dd>
-              </div>
-              <div>
-                <dt>Organización</dt>
-                <dd>Analiza en Casa · ámbito sintético</dd>
-              </div>
-            </dl>
-            <button
-              className="button button-secondary"
-              data-action-id="USER-PROFILE-CLOSE"
-              onClick={() => setUserProfileOpen(false)}
-              type="button"
+
+      <div className="workspace-main">
+        <header className="workspace-topbar">
+          <div className="topbar-page-copy">
+            <span className="topbar-accent" aria-hidden="true" />
+            <div>
+              <span>Analiza en Casa</span>
+              <strong>{currentPageLabel(pathname)}</strong>
+            </div>
+          </div>
+          <button
+            aria-controls="main-navigation"
+            aria-expanded={mobileNavigationOpen}
+            aria-label={
+              mobileNavigationOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'
+            }
+            className="mobile-nav-toggle"
+            data-action-id="MOBILE-NAV-TOGGLE"
+            onClick={() => setMobileNavigationOpen((open) => !open)}
+            ref={mobileMenuToggleRef}
+            type="button"
+          >
+            Menú
+          </button>
+          <div className="topbar-environment">
+            <span className="environment-dot" aria-hidden="true" />
+            {session.mode === 'supabase' ? 'Supabase' : 'Demo'} · {session.role}
+          </div>
+        </header>
+        <main className="main-content">{children}</main>
+      </div>
+
+      {userProfileOpen && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              aria-labelledby="user-profile-title"
+              aria-modal="true"
+              className="dialog-backdrop"
+              role="dialog"
             >
-              Cerrar
-            </button>
-          </section>
-        </div>
-      ) : null}
+              <section className="dialog" ref={profileDialogRef} role="document" tabIndex={-1}>
+                <div className="dialog-header">
+                  <div>
+                    <p className="eyebrow">Cuenta</p>
+                    <h2 id="user-profile-title">Mi usuario</h2>
+                  </div>
+                </div>
+                <div className="dialog-content">
+                  <dl className="definition-list">
+                    <div>
+                      <dt>Usuario</dt>
+                      <dd>{session.userId}</dd>
+                    </div>
+                    <div>
+                      <dt>Rol</dt>
+                      <dd>{session.role}</dd>
+                    </div>
+                    <div>
+                      <dt>Organización</dt>
+                      <dd>Analiza en Casa · ámbito sintético</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div className="dialog-footer">
+                  <button
+                    className="button button-secondary"
+                    data-action-id="USER-PROFILE-CLOSE"
+                    onClick={closeUserProfile}
+                    type="button"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </section>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
