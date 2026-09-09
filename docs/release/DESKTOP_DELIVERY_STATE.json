@@ -34,7 +34,7 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": null,
+  "candidate_sha": "305d9b9ed2a864f29fd70d9912c694c51dfc4660",
   "deployment": {
     "environment": "preview",
     "url": null,
