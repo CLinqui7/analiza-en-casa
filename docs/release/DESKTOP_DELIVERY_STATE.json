@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-09T14:30:00.000Z",
-  "next_action": "Provision the existing Atlas project with a least-privilege application user and protected Vercel preview variables, then execute the Mongo bootstrap and remote multi-session verification.",
+  "updated_at": "2026-09-09T14:40:00.000Z",
+  "next_action": "Disable the managed Preview Comments integration for the existing Vercel project (or obtain Vercel support guidance for its immutable static upload conflict), provision the existing Atlas project with a least-privilege application user and protected Vercel preview variables, then execute the Mongo bootstrap and remote multi-session verification.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -25,7 +25,8 @@
   ],
   "failures": [
     "Atlas application credentials and approved network access are not available in this session, so no remote Mongo write/read or multi-session authorization has been claimed.",
-    "Vercel is authenticated and the existing clinqui7s-projects/web project has been verified, but its Mongo preview variables and Atlas network access still need verification before a connected preview can be claimed.",
+    "Vercel is authenticated and the existing clinqui7s-projects/web project has been verified, but it has no Mongo preview variables and Atlas network access has not been verified.",
+    "Preview deployments dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF, dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r and dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip compiled the application successfully but failed when Vercel tried to patch managed Preview Comments into immutable static output. Removing the branch-scoped feedback variable did not resolve the managed integration, and the vendor-suggested Next canary has three high production dependency advisories, so it was not retained.",
     "Quotes do not yet have resource-scoped Mongo command handlers; their existing demo workflow remains explicitly unverified for Mongo persistence."
   ],
   "atlas": {
@@ -39,9 +40,15 @@
     "environment": "preview",
     "url": null,
     "id": null,
-    "status": "BLOCKED_MISSING_MONGODB_PREVIEW_VARS",
+    "status": "BLOCKED_MANAGED_PREVIEW_COMMENTS_AND_MONGODB_VARS",
     "project": "clinqui7s-projects/web",
-    "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ"
+    "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
+    "output_directory": "apps/web/.next",
+    "attempted_ids": [
+      "dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF",
+      "dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r",
+      "dpl_Fj7ynaMKPmn6HHqVLkCdGL1AM3ip"
+    ]
   },
   "pending_ids": [
     "MONGO-REMOTE-BOOTSTRAP",
