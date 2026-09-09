@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type InventoryMovement } from '@analiza/contracts';
 import { canRecordMovement, deriveKardex } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import { usePathname } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -52,8 +53,10 @@ function direction(movement: InventoryMovement) {
 }
 
 export default function KardexPage() {
+  const pathname = usePathname();
   const { addInventoryMovement, inventoryMovements } = useWorkspace();
   const { can, session } = useAuth();
+  const isMovementView = pathname.endsWith('/movements');
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
@@ -97,6 +100,24 @@ export default function KardexPage() {
           .includes(filters.reference.toLocaleLowerCase('es')))
     );
   });
+  const summary = useMemo(() => {
+    const incoming = allRows
+      .filter((row) => direction(row) === 'in')
+      .reduce((total, row) => total + row.quantity, 0);
+    const outgoing = allRows
+      .filter((row) => direction(row) === 'out')
+      .reduce((total, row) => total + row.quantity, 0);
+    const balance = itemIds.reduce(
+      (total, itemId) =>
+        total +
+        (allRows
+          .filter((row) => row.itemId === itemId)
+          .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+          .at(-1)?.balance ?? 0),
+      0,
+    );
+    return { incoming, outgoing, balance };
+  }, [allRows, itemIds]);
   const form = useForm<MovementFormInput, unknown, MovementForm>({
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
@@ -148,12 +169,16 @@ export default function KardexPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack inventory-ledger-page">
       <header className="page-header page-header-actions">
         <div>
-          <p className="eyebrow">Inventario</p>
-          <h1>Kárdex</h1>
-          <p>Historial cronológico reproducible por ítem; no permite edición directa del saldo.</p>
+          <p className="eyebrow">Analiza en Casa · Inventario</p>
+          <h1>{isMovementView ? 'Movimientos de inventario' : 'Kárdex de inventario'}</h1>
+          <p>
+            {isMovementView
+              ? 'Entradas, salidas, transferencias, devoluciones y ajustes con responsable y referencia.'
+              : 'Saldo cronológico reproducible por ítem y bodega, sin edición directa de existencias.'}
+          </p>
         </div>
         {can('inventory:write') ? (
           <Button
@@ -164,7 +189,7 @@ export default function KardexPage() {
             }}
             type="button"
           >
-            Registrar movimiento
+            <span aria-hidden="true">＋</span> Registrar movimiento
           </Button>
         ) : null}
       </header>
@@ -173,8 +198,57 @@ export default function KardexPage() {
           {result}
         </p>
       ) : null}
-      <Panel>
-        <div className="filter-grid">
+      <section aria-label="Resumen de inventario" className="inventory-ledger-metrics">
+        <article>
+          <span className="inventory-ledger-metric-icon incoming" aria-hidden="true">
+            ↙
+          </span>
+          <div>
+            <small>Entradas acumuladas</small>
+            <strong>{summary.incoming}</strong>
+            <span>unidades registradas</span>
+          </div>
+        </article>
+        <article>
+          <span className="inventory-ledger-metric-icon outgoing" aria-hidden="true">
+            ↗
+          </span>
+          <div>
+            <small>Salidas acumuladas</small>
+            <strong>{summary.outgoing}</strong>
+            <span>unidades registradas</span>
+          </div>
+        </article>
+        <article>
+          <span className="inventory-ledger-metric-icon balance" aria-hidden="true">
+            ≋
+          </span>
+          <div>
+            <small>Existencia calculada</small>
+            <strong>{summary.balance}</strong>
+            <span>en todos los ítems</span>
+          </div>
+        </article>
+        <article>
+          <span className="inventory-ledger-metric-icon trace" aria-hidden="true">
+            #
+          </span>
+          <div>
+            <small>Trazabilidad</small>
+            <strong>{allRows.length}</strong>
+            <span>movimientos auditables</span>
+          </div>
+        </article>
+      </section>
+      <Panel className="inventory-ledger-filter-panel">
+        <div className="table-heading inventory-ledger-filter-heading">
+          <div>
+            <h2>Filtros del historial</h2>
+            <p>Combine ítem, fechas, bodega, tipo o referencia.</p>
+          </div>
+          <StatusTag>{rows.length} visibles</StatusTag>
+        </div>
+        <div className="inventory-ledger-filter-grid">
           <label>
             Ítem
             <select
@@ -243,61 +317,154 @@ export default function KardexPage() {
             <input
               data-action-id="KARDEX-FILTER-REFERENCE"
               onChange={(event) => updateFilter('reference', event.target.value)}
+              placeholder="Buscar referencia o motivo"
+              type="search"
               value={filters.reference}
             />
           </label>
+          <Button
+            className="button-secondary inventory-ledger-reset"
+            data-action-id="KARDEX-FILTER-RESET"
+            onClick={resetFilters}
+            type="button"
+          >
+            Limpiar filtros
+          </Button>
         </div>
-        <Button
-          className="button-secondary"
-          data-action-id="KARDEX-FILTER-RESET"
-          onClick={resetFilters}
-          type="button"
-        >
-          Limpiar filtros
-        </Button>
       </Panel>
-      <Panel>
+      <Panel className="inventory-ledger-table-panel">
         <div className="table-heading">
-          <h2>Movimientos</h2>
-          <StatusTag>{rows.length} visibles</StatusTag>
+          <div>
+            <h2>{isMovementView ? 'Historial de movimientos' : 'Detalle del kárdex'}</h2>
+            <p>
+              {isMovementView
+                ? 'Cada operación conserva fecha, referencia y responsable.'
+                : 'Las entradas y salidas explican el saldo resultante de cada ítem.'}
+            </p>
+          </div>
+          <span className="inventory-ledger-live">
+            <i aria-hidden="true" /> Historial actualizado
+          </span>
         </div>
         {rows.length ? (
           <div className="table-wrap">
-            <table>
+            <table className="inventory-ledger-table">
               <thead>
                 <tr>
-                  <th>Fecha / hora</th>
-                  <th>Ítem</th>
-                  <th>SKU</th>
-                  <th>Bodega</th>
-                  <th>Referencia</th>
-                  <th>Tipo</th>
-                  <th>Entrada</th>
-                  <th>Salida</th>
-                  <th>Saldo</th>
-                  <th>Usuario</th>
+                  {isMovementView ? (
+                    <>
+                      <th>Fecha / movimiento</th>
+                      <th>Ítem</th>
+                      <th>Tipo</th>
+                      <th>Cantidad</th>
+                      <th>Bodega</th>
+                      <th>Referencia / motivo</th>
+                      <th>Responsable</th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Fecha / hora</th>
+                      <th>Ítem</th>
+                      <th>Bodega</th>
+                      <th>Referencia</th>
+                      <th>Entrada</th>
+                      <th>Salida</th>
+                      <th>Saldo</th>
+                      <th>Responsable</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td>{new Date(row.createdAt).toLocaleString('es-SV')}</td>
-                    <td>{itemCatalog[row.itemId]?.name ?? row.itemId}</td>
-                    <td>{itemCatalog[row.itemId]?.sku ?? 'Sin SKU'}</td>
-                    <td>{warehouses[row.warehouseId ?? ''] ?? row.warehouseId ?? 'Sin bodega'}</td>
-                    <td>{row.reference ?? row.reason}</td>
-                    <td>
-                      {kindLabel[row.kind]}
-                      {row.kind === 'ADJUSTMENT'
-                        ? ` ${row.adjustmentDirection === 'OUT' ? '−' : '+'}`
-                        : ''}
-                    </td>
-                    <td>{direction(row) === 'in' ? row.quantity : '—'}</td>
-                    <td>{direction(row) === 'out' ? row.quantity : '—'}</td>
-                    <td>{row.balance}</td>
-                    <td>{row.user ?? 'Sistema'}</td>
-                  </tr>
-                ))}
+                {rows.map((row) => {
+                  const rowDirection = direction(row);
+                  const date = new Date(row.createdAt);
+                  const movementLabel = `${kindLabel[row.kind]}${
+                    row.kind === 'ADJUSTMENT'
+                      ? ` ${row.adjustmentDirection === 'OUT' ? '−' : '+'}`
+                      : ''
+                  }`;
+                  return (
+                    <tr key={row.id}>
+                      {isMovementView ? (
+                        <>
+                          <td>
+                            <strong>{date.toLocaleDateString('es-SV')}</strong>
+                            <small>
+                              {date.toLocaleTimeString('es-SV', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}{' '}
+                              · {row.id}
+                            </small>
+                          </td>
+                          <td>
+                            <strong>{itemCatalog[row.itemId]?.name ?? row.itemId}</strong>
+                            <small>{itemCatalog[row.itemId]?.sku ?? 'Sin SKU'}</small>
+                          </td>
+                          <td>
+                            <StatusTag tone={rowDirection === 'in' ? 'success' : 'warning'}>
+                              {movementLabel}
+                            </StatusTag>
+                          </td>
+                          <td>
+                            <strong className={`inventory-ledger-quantity ${rowDirection}`}>
+                              {rowDirection === 'in' ? '+' : '−'}
+                              {row.quantity}
+                            </strong>
+                          </td>
+                          <td>
+                            {warehouses[row.warehouseId ?? ''] ?? row.warehouseId ?? 'Sin bodega'}
+                          </td>
+                          <td>
+                            <strong>{row.reference ?? 'Sin referencia'}</strong>
+                            <small>{row.reason}</small>
+                          </td>
+                          <td>{row.user ?? 'Sistema'}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td>
+                            <strong>{date.toLocaleDateString('es-SV')}</strong>
+                            <small>
+                              {date.toLocaleTimeString('es-SV', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </small>
+                          </td>
+                          <td>
+                            <strong>{itemCatalog[row.itemId]?.name ?? row.itemId}</strong>
+                            <small>{itemCatalog[row.itemId]?.sku ?? 'Sin SKU'}</small>
+                          </td>
+                          <td>
+                            {warehouses[row.warehouseId ?? ''] ?? row.warehouseId ?? 'Sin bodega'}
+                          </td>
+                          <td>
+                            <strong>{row.reference ?? 'Sin referencia'}</strong>
+                            <small>
+                              {movementLabel} · {row.reason}
+                            </small>
+                          </td>
+                          <td>
+                            <span className="inventory-ledger-in">
+                              {rowDirection === 'in' ? `+${row.quantity}` : '—'}
+                            </span>
+                          </td>
+                          <td>
+                            <span className="inventory-ledger-out">
+                              {rowDirection === 'out' ? `−${row.quantity}` : '—'}
+                            </span>
+                          </td>
+                          <td>
+                            <strong className="inventory-ledger-balance">{row.balance}</strong>
+                          </td>
+                          <td>{row.user ?? 'Sistema'}</td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -325,7 +492,7 @@ export default function KardexPage() {
         title="Registrar movimiento de inventario"
       >
         <form
-          className="form-grid"
+          className="form-grid inventory-movement-form"
           id="movement-form"
           noValidate
           onSubmit={form.handleSubmit(submit)}
@@ -380,7 +547,7 @@ export default function KardexPage() {
             Referencia
             <input {...form.register('reference')} />
           </label>
-          <label>
+          <label className="full-field">
             Motivo
             <input {...form.register('reason')} />
             {form.formState.errors.reason ? (

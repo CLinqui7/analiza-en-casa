@@ -2304,12 +2304,12 @@ th {
 
 /* === ANALIZA V12 DENSE OPERATIONS SHELL === */
 :root {
-  --brand-navy: #12384a;
-  --brand-navy-900: #082f45;
-  --brand-navy-950: #062838;
-  --brand-coral: #13a99d;
-  --brand-red: #0f948a;
-  --teal: #14afa3;
+  --brand-navy: #173e54;
+  --brand-navy-900: #0f2d3f;
+  --brand-navy-950: #0b2230;
+  --brand-coral: #ef746e;
+  --brand-red: #b94b47;
+  --teal: #20b6aa;
   --canvas: #f3f7f9;
   --line: #d6e3e8;
   --ink: #082f45;
@@ -2333,7 +2333,9 @@ body {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #08384a 0%, #0a2f42 72%, #082b3d 100%);
+  background:
+    radial-gradient(circle at 10% 0%, rgb(32 182 170 / 18%), transparent 28%),
+    linear-gradient(180deg, #0b2230 0%, #0f2d3f 100%);
   box-shadow: 6px 0 22px rgb(8 47 69 / 11%);
 }
 
@@ -2881,8 +2883,8 @@ body {
 }
 
 .global-search:focus-within {
-  border-color: #61cfc7;
-  box-shadow: 0 0 0 3px rgb(19 169 157 / 11%);
+  border-color: #20b6aa;
+  box-shadow: 0 0 0 3px rgb(32 182 170 / 10%);
 }
 
 .global-search input {
@@ -2958,27 +2960,28 @@ body {
 }
 
 .page-header h1 {
-  color: #082f45;
+  color: #0f2d3f;
 }
 
 .eyebrow {
-  color: #078a80 !important;
+  color: #15938b !important;
 }
 
 .button {
-  border-color: #0e9f94;
-  background: #11a99d;
-  box-shadow: 0 5px 14px rgb(17 169 157 / 15%);
+  border-color: #15938b;
+  background: linear-gradient(135deg, #15938b, #20b6aa);
+  box-shadow: 0 7px 18px rgb(21 147 139 / 20%);
 }
 
 .button:hover {
-  background: #0d9188;
+  border-color: #0c746d;
+  background: linear-gradient(135deg, #0c746d, #15938b);
 }
 
 .button.button-secondary {
   border-color: #cddde3;
   background: #fff;
-  color: #0b6570;
+  color: #173e54;
   box-shadow: none;
 }
 
@@ -3758,5 +3761,347 @@ body {
 
   .portal-share-card {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Kárdex y movimientos conservan el mismo historial, con lectura específica por ruta. */
+.inventory-ledger-page {
+  gap: 16px;
+}
+
+.inventory-ledger-page > .page-header {
+  padding: 3px 0 1px;
+}
+
+.inventory-ledger-page > .page-header .button {
+  min-height: 40px;
+  padding-inline: 15px;
+}
+
+.inventory-ledger-page > .page-header .button > span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.inventory-ledger-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inventory-ledger-metrics article {
+  display: flex;
+  min-height: 100px;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  border: 1px solid rgb(220 231 236 / 90%);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgb(15 45 63 / 6%);
+}
+
+.inventory-ledger-metrics article > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.inventory-ledger-metrics small {
+  color: #6c7d88;
+  font-size: 0.64rem;
+  font-weight: 780;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.inventory-ledger-metrics strong {
+  color: #0f2d3f;
+  font-size: 1.55rem;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.inventory-ledger-metrics article > div > span {
+  color: #81929b;
+  font-size: 0.62rem;
+}
+
+.inventory-ledger-metric-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 11px;
+  background: #edf9f8;
+  color: #0c746d;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.inventory-ledger-metric-icon.outgoing {
+  background: #ffeded;
+  color: #b94b47;
+}
+
+.inventory-ledger-metric-icon.balance {
+  background: #eaf5fb;
+  color: #397caa;
+}
+
+.inventory-ledger-metric-icon.trace {
+  background: #f0edff;
+  color: #6657b8;
+}
+
+.inventory-ledger-filter-panel {
+  padding: 14px 16px 16px;
+}
+
+.inventory-ledger-filter-heading {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.inventory-ledger-filter-heading h2 {
+  margin: 0;
+  color: #0f2d3f;
+  font-size: 0.87rem;
+}
+
+.inventory-ledger-filter-heading p {
+  margin-top: 3px;
+  font-size: 0.66rem;
+}
+
+.inventory-ledger-filter-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1.15fr) minmax(118px, 0.8fr) minmax(118px, 0.8fr)
+    minmax(150px, 1fr) minmax(130px, 0.85fr) minmax(190px, 1.25fr) auto;
+  align-items: end;
+  gap: 9px;
+}
+
+.inventory-ledger-filter-grid label {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  color: #24556c;
+  font-size: 0.67rem;
+  font-weight: 760;
+}
+
+.inventory-ledger-filter-grid input,
+.inventory-ledger-filter-grid select {
+  width: 100%;
+  min-height: 38px;
+  padding-inline: 10px;
+  border: 1px solid #dce7ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #173042;
+  font-size: 0.72rem;
+}
+
+.inventory-ledger-reset {
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.inventory-ledger-table-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.inventory-ledger-table-panel > .table-heading {
+  min-height: 70px;
+  align-items: center;
+  margin: 0;
+  padding: 15px 18px;
+  border-bottom: 1px solid #dce7ec;
+}
+
+.inventory-ledger-table-panel > .table-heading h2 {
+  margin: 0;
+  color: #0f2d3f;
+  font-size: 0.92rem;
+}
+
+.inventory-ledger-table-panel > .table-heading p {
+  margin-top: 3px;
+  font-size: 0.66rem;
+}
+
+.inventory-ledger-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #607985;
+  font-size: 0.64rem;
+  white-space: nowrap;
+}
+
+.inventory-ledger-live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #20b6aa;
+  box-shadow: 0 0 0 4px rgb(32 182 170 / 12%);
+}
+
+.inventory-ledger-table {
+  min-width: 980px;
+}
+
+.inventory-ledger-table th,
+.inventory-ledger-table td {
+  padding: 11px 14px;
+  vertical-align: middle;
+}
+
+.inventory-ledger-table th {
+  background: #f6fafb;
+  color: #607985;
+  font-size: 0.58rem;
+  letter-spacing: 0.055em;
+}
+
+.inventory-ledger-table td {
+  color: #294859;
+  font-size: 0.7rem;
+}
+
+.inventory-ledger-table td strong:not(.inventory-ledger-quantity, .inventory-ledger-balance) {
+  display: block;
+  color: #0f2d3f;
+  font-size: 0.72rem;
+}
+
+.inventory-ledger-table td small {
+  display: block;
+  max-width: 260px;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #82939c;
+  font-size: 0.59rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inventory-ledger-table .status-tag {
+  font-size: 0.56rem;
+  white-space: nowrap;
+}
+
+.inventory-ledger-quantity,
+.inventory-ledger-in,
+.inventory-ledger-out,
+.inventory-ledger-balance {
+  display: inline-grid;
+  min-width: 42px;
+  min-height: 28px;
+  place-items: center;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.inventory-ledger-quantity.in,
+.inventory-ledger-in {
+  background: #e9f8ef;
+  color: #248e50;
+}
+
+.inventory-ledger-quantity.out,
+.inventory-ledger-out {
+  background: #ffeded;
+  color: #b94b47;
+}
+
+.inventory-ledger-balance {
+  background: #edf9f8;
+  color: #0c746d;
+}
+
+.workspace-main:has(.inventory-ledger-page .dialog-backdrop) .workspace-topbar {
+  z-index: 0;
+}
+
+.inventory-ledger-page .dialog {
+  display: grid;
+  width: min(860px, 100%);
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.inventory-ledger-page .dialog-content {
+  overflow: auto;
+}
+
+.inventory-movement-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.inventory-movement-form .full-field {
+  grid-column: 1 / -1;
+}
+
+.inventory-ledger-page .dialog-footer .button:not(.button-secondary) {
+  border-color: #ef746e;
+  background: #ef746e;
+  box-shadow: 0 7px 18px rgb(239 116 110 / 20%);
+}
+
+.inventory-ledger-page .dialog-footer .button:not(.button-secondary):hover {
+  border-color: #b94b47;
+  background: #b94b47;
+}
+
+@media (max-width: 1280px) {
+  .inventory-ledger-filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .inventory-ledger-reset {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 900px) {
+  .inventory-ledger-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 740px) {
+  .inventory-ledger-page > .page-header .button {
+    width: 100%;
+  }
+
+  .inventory-ledger-metrics,
+  .inventory-ledger-filter-grid,
+  .inventory-movement-form {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-ledger-metrics {
+    gap: 9px;
+  }
+
+  .inventory-ledger-metrics article {
+    min-height: 88px;
+  }
+
+  .inventory-ledger-reset,
+  .inventory-movement-form .full-field {
+    width: 100%;
+    grid-column: 1;
+  }
+
+  .inventory-ledger-table-panel > .table-heading {
+    align-items: flex-start;
   }
 }

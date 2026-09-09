@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
+      "functional_fingerprint": "16a35bb3f557ac7f85d3f1f2fb2714ae79b76d8dbddaf4aab1c45627e0fa65ec",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -14,7 +14,7 @@
     },
     "CR-002": {
       "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "36c89ecdd53679f6fbc7c84c9157fb85de1aff671c4f5e76fb10bf1c83c25517",
+      "functional_fingerprint": "16a35bb3f557ac7f85d3f1f2fb2714ae79b76d8dbddaf4aab1c45627e0fa65ec",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr002-resident-card"
@@ -42,7 +42,7 @@
     },
     "CR-005": {
       "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-      "functional_fingerprint": "0e06656c6ffd690bb42055c77465ee13bc291ec114f96dccc868928d513482f2",
+      "functional_fingerprint": "f982436a19817459ccb233e52512e1e75d584fb7f2801357ead774150fc26b53",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "playwright:cr005-independent-doctor-resource",
@@ -63,7 +63,7 @@
     },
     "CR-007": {
       "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-      "functional_fingerprint": "a70d590b7b4c0683868c1d1220529c4f192dc1f6422b9e8b4aefaba4e0a335bc",
+      "functional_fingerprint": "26fe627c4d4714d37fb949540f3201ad992d12992016fb3f7511685ffb63cbab",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr007-professional-specialties",
@@ -100,7 +100,7 @@
     },
     "CR-011": {
       "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "1adb34e6e30d8aeeff3d491e487aa78eed562b326c58fa062a02798654d9725f",
+      "functional_fingerprint": "35098a8a4504e93f4cc3329b1cd10a9337dd331e118af5d7388d2be56cd5a203",
       "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -109,7 +109,7 @@
     },
     "CR-012": {
       "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "c6b3c0960cd2604e53b2d8df58b9624e889c7486139e2f991dd1ff63921ca7e5",
+      "functional_fingerprint": "965acde673f0f59c8be64eeb5352a970b60bcd83e9a1095313bbfa4af85b1280",
       "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -146,7 +146,7 @@
     },
     "CR-017": {
       "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "ce4dd5fb2a5fc9b06a844fc9997eb8ad8cd705c90399addf9b97466a68015be5",
+      "functional_fingerprint": "486a24921979ed881208c141d2350f7b915227a90ff68678082f79586b7b8718",
       "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
