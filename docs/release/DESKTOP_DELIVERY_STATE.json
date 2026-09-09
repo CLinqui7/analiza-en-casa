@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-09T15:55:00.000Z",
-  "next_action": "Provision a least-privilege Atlas application user for the existing analiza-cluster database analiza_en_casa, configure protected Preview-only Mongo and WhatsApp variables, apply the audited bootstrap with the optional synthetic seed, and execute the A/B/C multi-session isolation proof.",
+  "updated_at": "2026-09-09T16:47:00.000Z",
+  "next_action": "Obtain an approved fixed-egress path for Vercel Preview and an authenticated Atlas session, then provision a least-privilege Atlas application user for only analiza_en_casa, apply the audited bootstrap with the optional synthetic seed, and execute the A/B/C multi-session isolation proof.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -11,6 +11,7 @@
     "apps/web/src/app/(workspace)/quotes/[id]/page.tsx",
     "apps/web/src/app/(workspace)/agenda/page.tsx",
     "apps/web/src/app/(workspace)/insurance/page.tsx",
+    "apps/web/src/app/(workspace)/inventory/kardex/page.tsx",
     "apps/web/src/server/mongo-quotes.ts",
     "apps/web/src/server/mongo-portal.ts",
     "apps/web/src/server/mongo-bootstrap-command.ts",
@@ -28,10 +29,14 @@
     "npm run security:scan (599 files, passed)",
     "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
     "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
-    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow"
+    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
+    "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
+    "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
+    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections"
   ],
   "failures": [
     "Atlas application credentials and approved protected network access are not available in this session, so no remote Mongo write/read, synthetic seed, multi-session authorization or tenant-isolation success is claimed.",
+    "The Vercel team is on Hobby, where a fixed Static IP is not available; the native Atlas integration would require 0.0.0.0/0 and readWriteAnyDatabase, both prohibited by the delivery contract.",
     "The existing Vercel Preview has no Mongo or WhatsApp provider variables; it therefore remains explicitly in synthetic DEMO mode.",
     "The operator preflight records the presence of two ignored local environment files. They are not tracked or included in the deployment and were preserved without reading or printing their values.",
     "Direct PDF attachment delivery by WhatsApp is not implemented or claimed; the implemented channel uses a short-lived secure portal URL and OTP without clinical or financial content in the message."
@@ -42,11 +47,11 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "9f6737d0cee1d788e8418ded08dae7530ae1a13e",
+  "candidate_sha": "e5c10030c700e626e0766d56553b35dfe90a950b",
   "deployment": {
     "environment": "preview",
-    "url": "https://web-aflb54vd7-clinqui7s-projects.vercel.app",
-    "id": "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V",
+    "url": "https://web-jcn3ac7wr-clinqui7s-projects.vercel.app",
+    "id": "dpl_Cm63Tf36N4khGRoXkZK9a4pGB2pG",
     "status": "READY_PROTECTED_DEMO",
     "project": "clinqui7s-projects/web",
     "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
@@ -54,7 +59,7 @@
     "output_directory": "apps/web/.next",
     "preview_comments_enabled": false,
     "deployment_protection_preserved": true,
-    "inspector_url": "https://vercel.com/clinqui7s-projects/web/GQdTCqq4BtS7V2dopAj1ykdytU7V",
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/Cm63Tf36N4khGRoXkZK9a4pGB2pG",
     "attempted_ids": [
       "dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF",
       "dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r",
@@ -62,13 +67,20 @@
       "dpl_Exfcg894KnB9WnwcFfErcxpxTrV9",
       "dpl_EjNYeCQqbpR6ZMP6nsHCEDmaBWbg",
       "dpl_6a7uqwKejss8Eq5rhzrQYkXQMko6",
-      "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V"
+      "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V",
+      "dpl_YmVibdLinfPhiT5tEAjUAYmDaddd",
+      "dpl_Cm63Tf36N4khGRoXkZK9a4pGB2pG"
     ],
     "screenshots": [
       "docs/parity/screenshots/preview-final-dashboard-6394e41.png",
       "docs/parity/screenshots/preview-final-insurance-6394e41.png",
       "docs/parity/screenshots/preview-final-patient-mobile-dialog-6394e41.png",
-      "docs/parity/screenshots/preview-patients-studio-9f6737d.png"
+      "docs/parity/screenshots/preview-patients-studio-9f6737d.png",
+      "docs/parity/screenshots/preview-inventory-movements-e5c1003.png",
+      "docs/parity/screenshots/preview-inventory-movement-dialog-e5c1003.png",
+      "docs/parity/screenshots/preview-kardex-e5c1003.png",
+      "docs/parity/screenshots/preview-kardex-mobile-e5c1003.png",
+      "docs/parity/screenshots/preview-patients-menu-collapsed-e5c1003.png"
     ]
   },
   "pending_ids": [
