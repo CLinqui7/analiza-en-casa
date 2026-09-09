@@ -5,6 +5,7 @@ import {
   calculateQuoteBalance,
   calculateQuoteTotals,
   createQuoteRevision,
+  currentInventoryBalance,
   filterQuotes,
   quoteCategories,
   searchPatients,
@@ -27,6 +28,7 @@ type QuoteDraft = Pick<
   | 'discount'
   | 'insurerAmount'
   | 'invoiceDate'
+  | 'invoiceDocumentType'
   | 'discountGroup'
   | 'referralLabel'
   | 'referralSelections'
@@ -40,6 +42,9 @@ const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
   quantity: 0,
   unitPrice: 0,
   discountAmount: 0,
+  ...(category === 'MEDICATIONS'
+    ? { presentation: 'TABLET' as const, unitsPerPresentation: 1 }
+    : {}),
 });
 const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   caseId,
@@ -49,6 +54,7 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   summary: '',
   comments: '',
   invoiceDate: new Date().toISOString().slice(0, 10),
+  invoiceDocumentType: 'INVOICE',
   discountGroup: 'Regular',
   referralLabel: '',
   referralSelections: [],
@@ -147,6 +153,7 @@ function cloneDraft(quote: Quote): QuoteDraft {
     summary: quote.summary,
     comments: quote.comments ?? '',
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
+    invoiceDocumentType: quote.invoiceDocumentType ?? 'INVOICE',
     discountGroup: quote.discountGroup ?? 'Regular',
     referralLabel: quote.referralLabel ?? '',
     referralSelections: quote.referralSelections ?? [],
@@ -176,8 +183,16 @@ function QuoteEditor({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
-  const { addQuote, doctors, hospitalizations, patients, refreshPatients, updateQuote } =
-    useWorkspace();
+  const {
+    addQuote,
+    catalogItems,
+    doctors,
+    hospitalizations,
+    inventoryMovements,
+    patients,
+    refreshPatients,
+    updateQuote,
+  } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
     source
       ? cloneDraft(source)
@@ -223,6 +238,13 @@ function QuoteEditor({
   );
   const patientOptions = searchPatients(patients, draft.patientQuery).slice(0, 10);
   const itemError = validateQuoteItem(item);
+  const linkedInventoryItem = catalogItems.find(
+    (candidate) => candidate.id === item.inventoryItemId,
+  );
+  const linkedInventoryBalance = linkedInventoryItem
+    ? currentInventoryBalance(inventoryMovements, linkedInventoryItem.id)
+    : undefined;
+  const itemUnits = item.quantity * (item.unitsPerPresentation ?? 1);
   const activeCatalog =
     activeCategory === 'SERVICES'
       ? serviceCatalog
@@ -321,6 +343,7 @@ function QuoteEditor({
       patientId: selectedCase!.patientId,
       summary: draft.summary.trim(),
       invoiceDate: draft.invoiceDate,
+      invoiceDocumentType: draft.invoiceDocumentType,
       discountGroup: draft.discountGroup?.trim() || 'Regular',
       referralLabel: draft.referralQuery.trim() || draft.referralLabel?.trim() || undefined,
       referralSelections: draft.referralSelections?.length ? draft.referralSelections : undefined,
@@ -404,30 +427,34 @@ function QuoteEditor({
         <fieldset className="quote-fieldset full-field">
           <legend>Datos del paciente</legend>
           <div className="form-grid form-grid-compact">
-            <label htmlFor="quote-patient-search">Buscar paciente</label>
-            <input
-              aria-label="Buscar paciente"
-              data-action-id="QUOTE-PATIENT-SEARCH"
-              disabled={mode !== 'create'}
-              id="quote-patient-search"
-              list="quote-patient-options"
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, patientQuery: event.target.value }))
-              }
-              placeholder="Nombre o documento"
-              value={draft.patientQuery}
-            />
-            <Button
-              className="button-secondary"
-              data-action-id="QUOTE-PATIENT-REFRESH"
-              disabled={mode !== 'create' || refreshingPatients}
-              onClick={() => {
-                void refreshPatientOptions();
-              }}
-              type="button"
-            >
-              {refreshingPatients ? 'Actualizando…' : 'Actualizar pacientes'}
-            </Button>
+            <label htmlFor="quote-patient-search">
+              Buscar paciente
+              <input
+                aria-label="Buscar paciente"
+                data-action-id="QUOTE-PATIENT-SEARCH"
+                disabled={mode !== 'create'}
+                id="quote-patient-search"
+                list="quote-patient-options"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, patientQuery: event.target.value }))
+                }
+                placeholder="Nombre o documento"
+                value={draft.patientQuery}
+              />
+            </label>
+            <div className="quote-patient-refresh">
+              <Button
+                className="button-secondary"
+                data-action-id="QUOTE-PATIENT-REFRESH"
+                disabled={mode !== 'create' || refreshingPatients}
+                onClick={() => {
+                  void refreshPatientOptions();
+                }}
+                type="button"
+              >
+                {refreshingPatients ? 'Actualizando…' : 'Actualizar pacientes'}
+              </Button>
+            </div>
             <datalist id="quote-patient-options">
               {patientOptions.map((patient) => (
                 <option key={patient.id} value={patient.fullName}>
@@ -527,6 +554,25 @@ function QuoteEditor({
               />
             </label>
             <label>
+              Tipo de comprobante
+              <select
+                data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    invoiceDocumentType: event.target.value as Quote['invoiceDocumentType'],
+                  }))
+                }
+                value={draft.invoiceDocumentType ?? 'INVOICE'}
+              >
+                <option value="INVOICE">Factura</option>
+                <option value="TAX_CREDIT">Crédito fiscal</option>
+              </select>
+              <span className="field-help">
+                Clasificación administrativa; no calcula impuestos ni reglas fiscales.
+              </span>
+            </label>
+            <label>
               Grupo de descuento <span aria-hidden="true">*</span>
               <select
                 data-action-id="QUOTE-DISCOUNT-GROUP"
@@ -544,7 +590,7 @@ function QuoteEditor({
               </label>
               <div className="referral-input-row">
                 <input
-                  aria-controls="quote-referral-catalog"
+                  aria-controls={referralCatalogOpen ? 'quote-referral-catalog' : undefined}
                   aria-describedby={errors.referral ? 'quote-referral-error' : undefined}
                   aria-invalid={Boolean(errors.referral)}
                   data-action-id="QUOTE-REFERRAL"
@@ -925,6 +971,70 @@ function QuoteEditor({
                 </label>
               </>
             ) : null}
+            {activeCategory === 'MEDICATIONS' ? (
+              <>
+                <label>
+                  Presentación
+                  <select
+                    data-action-id="QUOTE-MEDICATION-PRESENTATION"
+                    onChange={(event) =>
+                      setItem((current) => ({
+                        ...current,
+                        presentation: event.target.value as NonNullable<QuoteItem['presentation']>,
+                      }))
+                    }
+                    value={item.presentation ?? 'TABLET'}
+                  >
+                    <option value="TABLET">Tableta</option>
+                    <option value="BLISTER">Blíster</option>
+                    <option value="UNIT">Unidad</option>
+                  </select>
+                </label>
+                <label>
+                  Unidades por presentación
+                  <input
+                    data-action-id="QUOTE-MEDICATION-UNITS-PER-PRESENTATION"
+                    min="1"
+                    onChange={(event) =>
+                      setItem((current) => ({
+                        ...current,
+                        unitsPerPresentation: Math.max(1, Math.trunc(Number(event.target.value))),
+                      }))
+                    }
+                    step="1"
+                    type="number"
+                    value={item.unitsPerPresentation ?? 1}
+                  />
+                </label>
+                <label className="full-field">
+                  Vincular con inventario
+                  <select
+                    data-action-id="QUOTE-MEDICATION-INVENTORY-LINK"
+                    onChange={(event) =>
+                      setItem((current) => ({
+                        ...current,
+                        inventoryItemId: event.target.value || undefined,
+                      }))
+                    }
+                    value={item.inventoryItemId ?? ''}
+                  >
+                    <option value="">Sin vínculo</option>
+                    {catalogItems
+                      .filter((candidate) => candidate.status === 'ACTIVE')
+                      .map((candidate) => (
+                        <option key={candidate.id} value={candidate.id}>
+                          {candidate.sku} · {candidate.name}
+                        </option>
+                      ))}
+                  </select>
+                  <span className="field-help">
+                    {linkedInventoryItem
+                      ? `${itemUnits} unidades indicadas · existencia actual ${linkedInventoryBalance ?? 0}. La cotización no reserva ni descuenta stock.`
+                      : `${itemUnits} unidades indicadas. Seleccione un ítem para ver su existencia.`}
+                  </span>
+                </label>
+              </>
+            ) : null}
             <label>
               Cantidad <span aria-hidden="true">*</span>
               <input
@@ -990,7 +1100,7 @@ function QuoteEditor({
               <label className="full-field">
                 {activeCategory === 'SERVICES' ? 'Buscar servicios' : 'Buscar medicamentos'}
                 <input
-                  aria-controls="quote-item-catalog"
+                  aria-controls={catalogQuery ? 'quote-item-catalog' : undefined}
                   data-action-id={
                     activeCategory === 'SERVICES'
                       ? 'QUOTE-SERVICE-SEARCH'
@@ -1088,7 +1198,12 @@ function QuoteEditor({
               {errors.item}
             </p>
           ) : null}
-          <div className="table-wrap">
+          <div
+            aria-label="Conceptos de la categoría activa"
+            className="table-wrap"
+            role="region"
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>
@@ -1117,6 +1232,22 @@ function QuoteEditor({
                           <>
                             <br />
                             <small>Socio: {candidate.businessPartnerLabel}</small>
+                          </>
+                        ) : null}
+                        {candidate.presentation ? (
+                          <>
+                            <br />
+                            <small>
+                              {candidate.presentation === 'BLISTER'
+                                ? 'Blíster'
+                                : candidate.presentation === 'TABLET'
+                                  ? 'Tableta'
+                                  : 'Unidad'}{' '}
+                              · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)} unidades
+                              {candidate.inventoryItemId
+                                ? ` · Inventario ${catalogItems.find((catalogItem) => catalogItem.id === candidate.inventoryItemId)?.sku ?? candidate.inventoryItemId}`
+                                : ''}
+                            </small>
                           </>
                         ) : null}
                       </td>
@@ -1302,7 +1433,7 @@ export default function QuotesPage() {
     router.push('/quotes');
   }
   return (
-    <div className="page-stack">
+    <div className="page-stack quotes-page">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Facturación</p>

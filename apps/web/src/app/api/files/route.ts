@@ -34,6 +34,37 @@ function formValue(form: FormData, name: string) {
   return typeof value === 'string' ? value : '';
 }
 
+function fileRepository(database: Awaited<ReturnType<typeof mongoDatabase>>) {
+  return new MongoFileRepository(
+    database.collection('fileMetadata') as never,
+    new MongoGridFsPrivateStorage(database),
+    mongoFileOwnerLookup(database as never),
+    database.collection('auditEvents') as never,
+  );
+}
+
+/** Metadata listing remains tenant-scoped and rechecks the owner permission on every request. */
+export async function GET(request: NextRequest) {
+  try {
+    const database = await mongoDatabase();
+    const auth = new MongoAuthService(mongoAuthStore(database));
+    const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
+    const ownerType = request.nextUrl.searchParams.get('ownerType') as FileOwnerType;
+    const ownerId = request.nextUrl.searchParams.get('ownerId') ?? '';
+    const files = await fileRepository(database).listForOwner(actor, ownerType, ownerId);
+    return NextResponse.json(files, { headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    if (error instanceof MongoInputError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    if (error instanceof MongoAccessError) return secureError(403);
+    return secureError(authorizationStatus(error));
+  }
+}
+
 /** Bounded multipart upload: owner scope comes from the session and bytes never enter JSON. */
 export async function POST(request: NextRequest) {
   try {
@@ -52,12 +83,7 @@ export async function POST(request: NextRequest) {
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
-    const files = new MongoFileRepository(
-      database.collection('fileMetadata') as never,
-      new MongoGridFsPrivateStorage(database),
-      mongoFileOwnerLookup(database as never),
-      database.collection('auditEvents') as never,
-    );
+    const files = fileRepository(database);
     const file = await files.upload(actor, {
       ownerType: formValue(form, 'ownerType') as FileOwnerType,
       ownerId: formValue(form, 'ownerId'),

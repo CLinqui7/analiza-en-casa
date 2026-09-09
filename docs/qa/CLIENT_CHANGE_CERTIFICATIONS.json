@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "16a35bb3f557ac7f85d3f1f2fb2714ae79b76d8dbddaf4aab1c45627e0fa65ec",
+      "functional_fingerprint": "73e43817ca6648247df2b6aa366a2549f459d7eb1049bc38824db604488cf1fa",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -14,7 +14,7 @@
     },
     "CR-002": {
       "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "16a35bb3f557ac7f85d3f1f2fb2714ae79b76d8dbddaf4aab1c45627e0fa65ec",
+      "functional_fingerprint": "73e43817ca6648247df2b6aa366a2549f459d7eb1049bc38824db604488cf1fa",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr002-resident-card"
@@ -100,7 +100,7 @@
     },
     "CR-011": {
       "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "35098a8a4504e93f4cc3329b1cd10a9337dd331e118af5d7388d2be56cd5a203",
+      "functional_fingerprint": "90f93af45f7aaf3ebfa9e95dc051e4081983656b86bd3aea926790d5e6ebc91e",
       "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -109,7 +109,7 @@
     },
     "CR-012": {
       "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "965acde673f0f59c8be64eeb5352a970b60bcd83e9a1095313bbfa4af85b1280",
+      "functional_fingerprint": "0ce94838a03b2cd28ab6f2ad966aa6e2133b61513b1220f443348b3fd24efabb",
       "certification_status": "PENDING_RUNTIME_CERTIFICATION",
       "test_ids": [
         "SEL-QUOTE-CREATE"

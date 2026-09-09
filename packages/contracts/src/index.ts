@@ -165,6 +165,8 @@ export const hospitalizationSchema = z.object({
   diagnosisSummary: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
   devices: z.array(z.string().trim().min(1)).optional(),
+  /** Resources assigned to the case; account-level visibility requires a server-side user link. */
+  assignedNursingResourceIds: z.array(z.string().trim().min(1)).optional(),
   /**
    * Administrative execution-profile fields observed in CH08. They are
    * descriptive only and never create insurance, billing, coverage, tax, or
@@ -207,6 +209,11 @@ export const quoteItemSchema = z.object({
   doctorName: z.string().trim().optional(),
   /** Administrative label selected in the quote UI; never a rate or coverage rule. */
   businessPartnerLabel: z.string().trim().optional(),
+  /** Commercial presentation metadata only; it never implies dosage or stock consumption. */
+  presentation: z.enum(['UNIT', 'TABLET', 'BLISTER']).optional(),
+  unitsPerPresentation: z.number().int().positive().optional(),
+  /** Optional traceability link. Inventory changes still require an explicit audited movement. */
+  inventoryItemId: z.string().trim().min(1).optional(),
   quantity: z.number().positive(),
   unitPrice: z.number().nonnegative(),
   discountAmount: z.number().nonnegative().default(0),
@@ -227,6 +234,7 @@ export const quoteSchema = z.object({
   summary: z.string().trim().min(1),
   /** Administrative invoice fields observed in CH03.  They do not alter totals. */
   invoiceDate: z.string().optional(),
+  invoiceDocumentType: z.enum(['INVOICE', 'TAX_CREDIT']).optional(),
   discountGroup: z.string().trim().optional(),
   referralLabel: z.string().trim().optional(),
   /** Multiple administrative referral labels observed in CH04; no attribution rule is implied. */

@@ -159,6 +159,10 @@ export default function QuoteDetailPage() {
               <dd>{new Date(quote.createdAt).toLocaleString('es-SV')}</dd>
             </div>
             <div>
+              <dt>Comprobante</dt>
+              <dd>{quote.invoiceDocumentType === 'TAX_CREDIT' ? 'Crédito fiscal' : 'Factura'}</dd>
+            </div>
+            <div>
               <dt>Envío</dt>
               <dd>
                 {quote.sentAt ? new Date(quote.sentAt).toLocaleString('es-SV') : 'No enviada'}
@@ -205,6 +209,20 @@ export default function QuoteDetailPage() {
                             <>
                               <br />
                               <small>Médico: {item.doctorName}</small>
+                            </>
+                          ) : null}
+                          {item.presentation ? (
+                            <>
+                              <br />
+                              <small>
+                                {item.presentation === 'BLISTER'
+                                  ? 'Blíster'
+                                  : item.presentation === 'TABLET'
+                                    ? 'Tableta'
+                                    : 'Unidad'}{' '}
+                                · {item.quantity * (item.unitsPerPresentation ?? 1)} unidades
+                                {item.inventoryItemId ? ' · Vinculado a inventario' : ''}
+                              </small>
                             </>
                           ) : null}
                         </td>

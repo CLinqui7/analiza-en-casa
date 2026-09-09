@@ -41,6 +41,7 @@ const formSchema = z.object({
   diagnosisSummary: z.string().trim(),
   nextAction: z.string().trim(),
   devices: z.string().trim(),
+  assignedNursingResourceIds: z.array(z.string()),
   admissionPeriods: z.array(
     z.object({ admissionDate: z.string(), dischargeDate: z.string().optional() }),
   ),
@@ -66,6 +67,7 @@ function blankForm(): HospitalizationForm {
     diagnosisSummary: '',
     nextAction: '',
     devices: '',
+    assignedNursingResourceIds: [],
     admissionPeriods: [],
   };
 }
@@ -82,6 +84,7 @@ function formFor(item: Hospitalization): HospitalizationForm {
     diagnosisSummary: item.diagnosisSummary ?? '',
     nextAction: item.nextAction ?? '',
     devices: item.devices?.join(', ') ?? '',
+    assignedNursingResourceIds: item.assignedNursingResourceIds ?? [],
     admissionPeriods: admissionPeriodsFor(item).slice(1),
   };
 }
@@ -92,6 +95,7 @@ export default function HospitalizationsPage() {
     error,
     hospitalizations,
     loading,
+    nursingResources,
     patients,
     providerMode,
     updateHospitalization,
@@ -219,6 +223,9 @@ export default function HospitalizationsPage() {
             .map((value) => value.trim())
             .filter(Boolean)
         : undefined,
+      assignedNursingResourceIds: values.assignedNursingResourceIds.length
+        ? values.assignedNursingResourceIds
+        : undefined,
     };
     const record = activeEdit
       ? { ...activeEdit, ...data }
@@ -263,7 +270,7 @@ export default function HospitalizationsPage() {
   }
 
   return (
-    <div className="page-stack">
+    <div className="page-stack hospitalizations-page">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Financiero</p>
@@ -831,6 +838,41 @@ export default function HospitalizationsPage() {
             Dispositivos / accesos
             <input {...form.register('devices')} placeholder="Separados por coma" />
           </label>
+          <fieldset className="full assignment-fieldset">
+            <legend>Enfermeras asignadas para la atención</legend>
+            {nursingResources.length ? (
+              <div className="assignment-option-grid">
+                {nursingResources.map((resource) => (
+                  <label key={resource.id}>
+                    <input
+                      data-action-id="HOSPITALIZATION-NURSE-ASSIGNMENT"
+                      type="checkbox"
+                      value={resource.id}
+                      {...form.register('assignedNursingResourceIds')}
+                    />
+                    <span>
+                      <strong>{resource.displayName}</strong>
+                      <small>
+                        {resource.shift === 'MORNING'
+                          ? 'Mañana'
+                          : resource.shift === 'AFTERNOON'
+                            ? 'Tarde'
+                            : 'Noche'}{' '}
+                        · {resource.territory}
+                      </small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="field-help">Primero registre recursos de enfermería en Agenda.</p>
+            )}
+            <p className="field-help">
+              La asignación se guarda con el caso. La visibilidad exclusiva requiere que cada
+              recurso esté vinculado a una cuenta autorizada del servidor; no se concede acceso
+              desde el navegador.
+            </p>
+          </fieldset>
         </form>
       </Dialog>
     </div>

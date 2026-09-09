@@ -25,6 +25,13 @@ function repository() {
     findOne: vi.fn(async (filter: Record<string, unknown>) =>
       filter.organizationId === 'org-a' ? row : null,
     ),
+    find: vi.fn((filter: Record<string, unknown>) => ({
+      sort: vi.fn(() => ({
+        toArray: vi.fn(async () =>
+          filter.organizationId === 'org-a' && row ? [row] : [],
+        ),
+      })),
+    })),
   };
   const storage = {
     putObject: vi.fn(async ({ storageKey, bytes }) => void objects.set(storageKey, bytes)),
@@ -62,6 +69,9 @@ describe('Mongo private file repository', () => {
       metadata,
       bytes: upload.bytes,
     });
+    await expect(files.listForOwner(userB, upload.ownerType, upload.ownerId)).resolves.toEqual([
+      metadata,
+    ]);
     await expect(files.download(userC, metadata.id)).resolves.toBeNull();
     expect(auditEvents.insertOne).toHaveBeenCalledTimes(2);
   });

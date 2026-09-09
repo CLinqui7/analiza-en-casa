@@ -1841,10 +1841,44 @@ tbody tr:hover {
 }
 
 .dialog {
+  display: grid;
+  overflow: hidden;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   border: 1px solid rgb(255 255 255 / 55%);
   border-radius: 20px;
   box-shadow: var(--shadow-lg);
   animation: analiza-dialog-enter 190ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+
+.dialog-content {
+  overflow: auto;
+}
+
+.workspace-main:has(.dialog-backdrop) .workspace-topbar {
+  z-index: 0;
+}
+
+.quotes-page .dialog {
+  width: min(1200px, 100%);
+}
+
+@media (min-width: 821px) {
+  .quotes-page .dialog-backdrop {
+    left: var(--sidebar-w);
+  }
+}
+
+.hospitalizations-page .dialog {
+  width: min(900px, 100%);
+}
+
+.quote-patient-refresh {
+  display: flex;
+  align-items: flex-end;
+}
+
+.quote-patient-refresh .button {
+  width: 100%;
 }
 
 .user-menu-popover {
@@ -2701,6 +2735,73 @@ body {
 .patients-page .dialog .form-grid > fieldset > .patient-map-shell,
 .patients-page .dialog .form-grid > fieldset > .action-row {
   grid-column: 1 / -1;
+}
+
+.patients-page .dialog .form-grid > fieldset > .private-file-history,
+.patients-page .dialog .form-grid > fieldset > .private-file-list {
+  grid-column: 1 / -1;
+}
+
+.private-file-history {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #dbe7ec;
+  border-radius: 10px;
+  background: #f7fafb;
+}
+
+.private-file-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: #34566a;
+  font-size: 0.8rem;
+}
+
+.private-file-list a {
+  color: #0c746d;
+  font-weight: 800;
+}
+
+.dashboard-goal-pending {
+  grid-column: 1 / -1;
+  border-color: #f0cdd0 !important;
+  background: #fff5f5 !important;
+}
+
+.assignment-fieldset {
+  padding: 14px;
+  border: 1px solid #dbe7ec;
+  border-radius: 12px;
+  background: #f8fbfc;
+}
+
+.assignment-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.assignment-option-grid label {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #dbe7ec;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.assignment-option-grid label > span {
+  display: grid;
+  gap: 2px;
+}
+
+.assignment-option-grid small {
+  color: #61798a;
 }
 
 .brand-copy strong {

@@ -2,7 +2,7 @@
 
 import { mongoMutationHeaders } from '@/lib/auth';
 
-export type PrivateFileOwner = 'doctor' | 'hospitalization';
+export type PrivateFileOwner = 'patient' | 'doctor' | 'hospitalization';
 export type PrivateFileMetadata = Readonly<{
   id: string;
   ownerType: PrivateFileOwner;
@@ -47,6 +47,23 @@ export async function uploadPrivateFiles(
     uploaded.push((await response.json()) as PrivateFileMetadata);
   }
   return uploaded;
+}
+
+/** Retrieves authorized metadata again after navigation or from another signed-in session. */
+export async function listPrivateFiles(
+  ownerType: PrivateFileOwner,
+  ownerId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<PrivateFileMetadata[]> {
+  const query = new URLSearchParams({ ownerType, ownerId });
+  const response = await fetchImpl(`/api/files?${query}`, {
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw await uploadError(response);
+  const payload: unknown = await response.json();
+  if (!Array.isArray(payload)) throw new Error('La lista de archivos privados no es válida.');
+  return payload as PrivateFileMetadata[];
 }
 
 /** A download remains same-origin and is authorized again by the server for every request. */

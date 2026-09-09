@@ -4,7 +4,7 @@ import { can, type Permission } from '@/lib/permissions';
 import { MongoAccessError, MongoInputError, type ServerActor } from './mongo-patients';
 
 export const MAX_PRIVATE_FILE_BYTES = 25 * 1024 * 1024;
-const ownerTypeSchema = z.enum(['doctor', 'hospitalization']);
+const ownerTypeSchema = z.enum(['patient', 'doctor', 'hospitalization']);
 const fileMetadataSchema = z.object({
   id: z.string().uuid(),
   ownerType: ownerTypeSchema,
@@ -36,6 +36,9 @@ type StoredFileMetadata = FileMetadata & {
 type FileMetadataCollection = {
   insertOne(document: StoredFileMetadata): Promise<unknown>;
   findOne(filter: Record<string, unknown>): Promise<StoredFileMetadata | null>;
+  find(filter: Record<string, unknown>): {
+    sort(value: Record<string, number>): { toArray(): Promise<StoredFileMetadata[]> };
+  };
 };
 type OwnerCollection = {
   findOne(filter: Record<string, unknown>): Promise<Record<string, unknown> | null>;
@@ -53,6 +56,7 @@ export type FileOwnerLookup = {
 };
 
 const ownerPermissions: Record<FileOwnerType, { read: Permission; write: Permission }> = {
+  patient: { read: 'patients:read', write: 'patients:write' },
   doctor: { read: 'settings:write', write: 'settings:write' },
   hospitalization: { read: 'cases:read', write: 'cases:write' },
 };
@@ -157,6 +161,23 @@ export class MongoFileRepository {
     return file;
   }
 
+  /** Lists only metadata for one authorized owner; private object keys never leave the server. */
+  async listForOwner(
+    actor: ServerActor,
+    ownerType: FileOwnerType,
+    ownerId: string,
+  ): Promise<FileMetadata[]> {
+    const parsedOwner = ownerTypeSchema.safeParse(ownerType);
+    if (!parsedOwner.success || !ownerId.trim()) throw new MongoInputError();
+    if (!can(actor.role, ownerPermission(parsedOwner.data, 'read'))) throw new MongoAccessError();
+    if (!(await this.owners.exists(actor, parsedOwner.data, ownerId))) return [];
+    const rows = await this.files
+      .find({ organizationId: actor.organizationId, ownerType: parsedOwner.data, ownerId })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return rows.map(publicMetadata);
+  }
+
   /** A foreign tenant has the same null result as an unknown file; bytes are accessed afterwards. */
   async download(
     actor: ServerActor,
@@ -176,12 +197,16 @@ export class MongoFileRepository {
 
 /** Mongo adapter for owner existence checks. Tenant scope is always supplied by the actor. */
 export function mongoFileOwnerLookup(database: {
-  collection(name: 'doctors' | 'hospitalizations'): OwnerCollection;
+  collection(name: 'patients' | 'doctors' | 'hospitalizations'): OwnerCollection;
 }): FileOwnerLookup {
   return {
     async exists(actor, ownerType, ownerId) {
       const collection = database.collection(
-        ownerType === 'doctor' ? 'doctors' : 'hospitalizations',
+        ownerType === 'patient'
+          ? 'patients'
+          : ownerType === 'doctor'
+            ? 'doctors'
+            : 'hospitalizations',
       );
       return Boolean(
         await collection.findOne({ id: ownerId, organizationId: actor.organizationId }),

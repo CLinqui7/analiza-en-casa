@@ -266,6 +266,26 @@ describe('quote domain', () => {
     expect(fee).toMatchObject({ doctorId: 'doctor-1', doctorName: 'Médica Demo', unitPrice: 55 });
   });
 
+  it('preserves fiscal-document and medication packaging metadata without changing totals', () => {
+    const medication = quoteItemSchema.parse({
+      id: 'medication-1',
+      category: 'MEDICATIONS',
+      name: 'Medicamento sintético',
+      presentation: 'BLISTER',
+      unitsPerPresentation: 10,
+      inventoryItemId: 'inventory-1',
+      quantity: 2,
+      unitPrice: 4,
+      discountAmount: 0,
+    });
+    expect(medication).toMatchObject({
+      presentation: 'BLISTER',
+      unitsPerPresentation: 10,
+      inventoryItemId: 'inventory-1',
+    });
+    expect(calculateQuoteTotals([medication], undefined, 0).total).toBe(8);
+  });
+
   it('uses only applied payments for the patient balance', () => {
     expect(
       calculateQuoteBalance(quote, [

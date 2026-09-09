@@ -86,6 +86,15 @@ export default function DashboardPage() {
     .slice()
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const currentMonth = new Date().toISOString().slice(0, 7);
+  const visitsThisMonth = shifts.filter(
+    (shift) => shift.status !== 'CANCELLED' && shift.startsAt.startsWith(currentMonth),
+  ).length;
+  const sentQuoteValueThisMonth = latestQuotes
+    .filter(
+      (quote) =>
+        quote.status === 'SENT' && (quote.sentAt ?? quote.createdAt).startsWith(currentMonth),
+    )
+    .reduce((sum, quote) => sum + quote.total, 0);
   const appliedPaymentsThisMonth = payments
     .filter((payment) => payment.status === 'APPLIED' && payment.createdAt.startsWith(currentMonth))
     .reduce((sum, payment) => sum + payment.amount, 0);
@@ -251,6 +260,31 @@ export default function DashboardPage() {
           </section>
 
           <section className="dashboard-insights-grid" aria-label="Indicadores de gestión">
+            <Panel className="dashboard-card dashboard-goals-card">
+              <div className="dashboard-card-heading">
+                <div>
+                  <h2>Visitas y metas</h2>
+                  <p>Actividad mensual documentada, sin convertir cotizaciones en ventas cobradas.</p>
+                </div>
+                {can('agenda:read') ? <Link href="/agenda">Abrir agenda</Link> : null}
+              </div>
+              <div className="dashboard-split-metrics">
+                <div>
+                  <strong data-testid="dashboard-monthly-visits">{visitsThisMonth}</strong>
+                  <span>Visitas del mes</span>
+                </div>
+                <div>
+                  <strong data-testid="dashboard-monthly-sent-quotes">
+                    {currency.format(sentQuoteValueThisMonth)}
+                  </strong>
+                  <span>Valor cotizado enviado</span>
+                </div>
+                <div className="dashboard-goal-pending">
+                  <strong>Sin meta definida</strong>
+                  <span>Objetivo pendiente de confirmación</span>
+                </div>
+              </div>
+            </Panel>
             <Panel className="dashboard-card">
               <div className="dashboard-card-heading"><div><h2>Pacientes por modalidad</h2><p>Clasificación según la aseguradora registrada.</p></div>{can('patients:read') ? <Link href="/patients">Ver pacientes</Link> : null}</div>
               <div className="dashboard-split-metrics">

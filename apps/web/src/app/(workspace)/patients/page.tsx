@@ -29,6 +29,12 @@ import {
   parseExplicitCoordinates,
   prefillPolicyHolder,
 } from '@/lib/patient-form';
+import {
+  listPrivateFiles,
+  privateFileDownloadHref,
+  type PrivateFileMetadata,
+  uploadPrivateFiles,
+} from '@/lib/private-files';
 
 const PatientLocationMap = dynamic(() => import('@/components/patients/patient-location-map'), {
   ssr: false,
@@ -287,12 +293,15 @@ export default function PatientsPage() {
   const [pageSize, setPageSize] = useState(5);
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [addressNotice, setAddressNotice] = useState<string | null>(null);
   const [holderDialogOpen, setHolderDialogOpen] = useState(false);
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pendingIdentityFiles, setPendingIdentityFiles] = useState<File[]>([]);
+  const [identityFiles, setIdentityFiles] = useState<PrivateFileMetadata[]>([]);
   const form = useForm<PatientForm>({
     resolver: zodResolver(patientFormSchema),
     defaultValues: {
@@ -375,12 +384,32 @@ export default function PatientsPage() {
     });
   }, [editDialogOpen, editingPatient, form]);
 
+  useEffect(() => {
+    if (!editingPatient || !editDialogOpen || providerMode !== 'mongodb') return;
+    let active = true;
+    void listPrivateFiles('patient', editingPatient.id)
+      .then((files) => {
+        if (active) setIdentityFiles(files);
+      })
+      .catch(() => {
+        if (active)
+          setActionError(
+            'No fue posible recuperar los documentos privados de este paciente. Intente nuevamente.',
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [editDialogOpen, editingPatient, providerMode]);
+
   function closeDialog() {
     setIsOpen(false);
     setDismissedLinkedDialog(true);
     setAddressNotice(null);
     setCoverageNotice(null);
     setHolderDialogOpen(false);
+    setPendingIdentityFiles([]);
+    setIdentityFiles([]);
     form.reset();
     if (searchParams.has('create') || searchParams.has('edit')) router.replace('/patients');
   }
@@ -530,6 +559,7 @@ export default function PatientsPage() {
     setResult(`Archivo ${anchor.download} generado.`);
   }
   async function onSubmit(values: PatientForm) {
+    setActionError(null);
     const documentError = validateDocument(values.documentType, values.documentId);
     if (documentError) {
       form.setError('documentId', { type: 'validate', message: documentError });
@@ -582,8 +612,25 @@ export default function PatientsPage() {
     };
     setSaving(true);
     const saved = editingPatient ? await updatePatient(patient) : await addPatient(patient);
+    if (!saved) {
+      setSaving(false);
+      return;
+    }
+    if (providerMode === 'mongodb' && pendingIdentityFiles.length) {
+      try {
+        const uploaded = await uploadPrivateFiles('patient', patient.id, pendingIdentityFiles);
+        setIdentityFiles((current) => [...uploaded, ...current]);
+      } catch {
+        setSaving(false);
+        setResult(null);
+        setActionError(
+          `El paciente ${patient.fullName} quedó guardado, pero sus documentos no se cargaron. Abra el registro e inténtelo nuevamente.`,
+        );
+        closeDialog();
+        return;
+      }
+    }
     setSaving(false);
-    if (!saved) return;
     setResult(
       editingPatient
         ? `Paciente ${patient.fullName} actualizado y persistido.`
@@ -631,6 +678,8 @@ export default function PatientsPage() {
               data-action-id="PATIENT-CREATE"
               onClick={() => {
                 setResult(null);
+                setActionError(null);
+                setPendingIdentityFiles([]);
                 setDismissedLinkedDialog(false);
                 setIsOpen(true);
               }}
@@ -670,6 +719,11 @@ export default function PatientsPage() {
       {result ? (
         <p className="notice success" role="status">
           {result}
+        </p>
+      ) : null}
+      {actionError ? (
+        <p className="notice error" role="alert">
+          {actionError}
         </p>
       ) : null}
       <Panel className="patient-filter-panel">
@@ -1125,6 +1179,48 @@ export default function PatientsPage() {
               Ocupación
               <input {...form.register('occupation')} />
             </label>
+          </fieldset>
+          <fieldset className="patient-private-files">
+            <legend>Fotografías y documentos de identidad</legend>
+            <label>
+              Fotos del DUI u otro documento
+              <input
+                accept="image/jpeg,image/png,application/pdf"
+                data-action-id="PATIENT-IDENTITY-ATTACHMENTS"
+                disabled={providerMode !== 'mongodb'}
+                multiple
+                onChange={(event) =>
+                  setPendingIdentityFiles(Array.from(event.currentTarget.files ?? []))
+                }
+                type="file"
+              />
+            </label>
+            <p className="field-help">
+              {providerMode === 'mongodb'
+                ? 'Hasta 5 MB por archivo. Se almacena de forma privada y cada lectura vuelve a validar organización y permisos.'
+                : 'La carga está disponible únicamente con el almacenamiento privado Mongo activo; la demo no conserva archivos.'}
+            </p>
+            {pendingIdentityFiles.length ? (
+              <ul className="private-file-list" aria-label="Documentos preparados para cargar">
+                {pendingIdentityFiles.map((file) => (
+                  <li key={`${file.name}-${file.lastModified}`}>
+                    {file.name} · {(file.size / 1024).toFixed(1)} KB
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {identityFiles.length ? (
+              <div className="private-file-history">
+                <strong>Documentos guardados</strong>
+                <ul className="private-file-list">
+                  {identityFiles.map((file) => (
+                    <li key={file.id}>
+                      <a href={privateFileDownloadHref(file.id)}>{file.name}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </fieldset>
           <fieldset>
             <legend>Notificaciones</legend>

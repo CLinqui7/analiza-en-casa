@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { privateFileDownloadHref, uploadPrivateFiles } from './private-files';
+import { listPrivateFiles, privateFileDownloadHref, uploadPrivateFiles } from './private-files';
 
 describe('private file browser boundary', () => {
   // test-id: vitest:e02-private-file-multipart-browser-boundary
@@ -40,5 +40,31 @@ describe('private file browser boundary', () => {
   // test-id: vitest:e02-private-file-download-path-encoded
   it('uses the bounded authenticated file path for download', () => {
     expect(privateFileDownloadHref('file / synthetic')).toBe('/api/files/file%20%2F%20synthetic');
+  });
+
+  it('lists authorized metadata through the same-origin route', async () => {
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        JSON.stringify([
+          {
+            id: 'file-synthetic-1',
+            ownerType: 'patient',
+            ownerId: 'patient-synthetic-1',
+            name: 'dui-frente.png',
+            mimeType: 'image/png',
+            size: 3,
+            sha256: 'a'.repeat(64),
+          },
+        ]),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+    await expect(
+      listPrivateFiles('patient', 'patient-synthetic-1', fetchMock as typeof fetch),
+    ).resolves.toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/files?ownerType=patient&ownerId=patient-synthetic-1',
+      expect.objectContaining({ credentials: 'same-origin' }),
+    );
   });
 });
