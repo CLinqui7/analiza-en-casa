@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-09T16:47:00.000Z",
-  "next_action": "Obtain an approved fixed-egress path for Vercel Preview and an authenticated Atlas session, then provision a least-privilege Atlas application user for only analiza_en_casa, apply the audited bootstrap with the optional synthetic seed, and execute the A/B/C multi-session isolation proof.",
+  "updated_at": "2026-09-09T18:15:12.823Z",
+  "next_action": "Upgrade the existing Vercel team to a plan that permits Static IP for Preview and provide an authenticated Atlas session. Then enable fixed egress without broadening Deployment Protection, provision a least-privilege application user for only analiza_en_casa, run the audited bootstrap with synthetic seed, and execute the A/B/C multi-session isolation proof.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -14,14 +14,18 @@
     "apps/web/src/app/(workspace)/inventory/kardex/page.tsx",
     "apps/web/src/server/mongo-quotes.ts",
     "apps/web/src/server/mongo-portal.ts",
+    "apps/web/src/server/mongo-files.ts",
     "apps/web/src/server/mongo-bootstrap-command.ts",
     "apps/web/src/server/mongo-bootstrap.ts",
+    "apps/web/src/app/api/files/route.ts",
     "apps/web/src/app/api/workspace/route.ts",
-    "apps/web/src/lib/http-data-provider.ts"
+    "apps/web/src/lib/http-data-provider.ts",
+    "apps/web/src/lib/private-files.ts",
+    "packages/contracts/src/index.ts"
   ],
   "tests": [
     "npm run typecheck --workspace=@analiza/web (passed)",
-    "npm run test --workspace=@analiza/web -- --run (23 files, 88 passed)",
+    "npm run test --workspace=@analiza/web -- --run (23 files, 90 passed)",
     "npm run lint --workspace=@analiza/web (passed)",
     "npm test (103 passed)",
     "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
@@ -32,11 +36,16 @@
     "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
     "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
     "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
-    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections"
+    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections",
+    "published Preview browser review at 1440x1000: Dashboard, Patients, Hospitalizations, Quotes, Agenda and Insurance opened behind preserved Deployment Protection",
+    "published Preview browser review: patient identity-file state, invoice/tax-credit classification, tablet/blister quantity controls, inventory link and nursing assignment controls are visible",
+    "published Preview browser review: sidebar collapsed state remained true after navigation to Patients",
+    "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
+    "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
   ],
   "failures": [
     "Atlas application credentials and approved protected network access are not available in this session, so no remote Mongo write/read, synthetic seed, multi-session authorization or tenant-isolation success is claimed.",
-    "The Vercel team is on Hobby, where a fixed Static IP is not available; the native Atlas integration would require 0.0.0.0/0 and readWriteAnyDatabase, both prohibited by the delivery contract.",
+    "The Vercel team is on Hobby. The authorized Static IP API request returned HTTP 402, so fixed Preview egress cannot be enabled on the current plan; broad 0.0.0.0/0 Atlas access remains prohibited.",
     "The existing Vercel Preview has no Mongo or WhatsApp provider variables; it therefore remains explicitly in synthetic DEMO mode.",
     "The operator preflight records the presence of two ignored local environment files. They are not tracked or included in the deployment and were preserved without reading or printing their values.",
     "Direct PDF attachment delivery by WhatsApp is not implemented or claimed; the implemented channel uses a short-lived secure portal URL and OTP without clinical or financial content in the message."
@@ -47,19 +56,20 @@
     "database": "analiza_en_casa",
     "verified_from_application": false
   },
-  "candidate_sha": "e5c10030c700e626e0766d56553b35dfe90a950b",
+  "candidate_sha": "fdab19b3cf93108766f8f5e41b2493387ea60b29",
   "deployment": {
     "environment": "preview",
-    "url": "https://web-jcn3ac7wr-clinqui7s-projects.vercel.app",
-    "id": "dpl_Cm63Tf36N4khGRoXkZK9a4pGB2pG",
+    "url": "https://web-33i2fxgya-clinqui7s-projects.vercel.app",
+    "id": "dpl_8iJ5feMwfiPJizWZZGNpWr4gnawi",
     "status": "READY_PROTECTED_DEMO",
     "project": "clinqui7s-projects/web",
     "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
     "framework": "nextjs",
     "output_directory": "apps/web/.next",
     "preview_comments_enabled": false,
+    "preview_comments_environment_variable": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0",
     "deployment_protection_preserved": true,
-    "inspector_url": "https://vercel.com/clinqui7s-projects/web/Cm63Tf36N4khGRoXkZK9a4pGB2pG",
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/8iJ5feMwfiPJizWZZGNpWr4gnawi",
     "attempted_ids": [
       "dpl_Hcr8RdN7LyXU7b4iVjDfToyYZgdF",
       "dpl_ALG9THPfDXMgWyRi4A4AMbpVow3r",
@@ -69,7 +79,9 @@
       "dpl_6a7uqwKejss8Eq5rhzrQYkXQMko6",
       "dpl_GQdTCqq4BtS7V2dopAj1ykdytU7V",
       "dpl_YmVibdLinfPhiT5tEAjUAYmDaddd",
-      "dpl_Cm63Tf36N4khGRoXkZK9a4pGB2pG"
+      "dpl_Cm63Tf36N4khGRoXkZK9a4pGB2pG",
+      "dpl_BuawisjaCCPYAozvcNuBrugu7R3w",
+      "dpl_8iJ5feMwfiPJizWZZGNpWr4gnawi"
     ],
     "screenshots": [
       "docs/parity/screenshots/preview-final-dashboard-6394e41.png",
@@ -80,7 +92,16 @@
       "docs/parity/screenshots/preview-inventory-movement-dialog-e5c1003.png",
       "docs/parity/screenshots/preview-kardex-e5c1003.png",
       "docs/parity/screenshots/preview-kardex-mobile-e5c1003.png",
-      "docs/parity/screenshots/preview-patients-menu-collapsed-e5c1003.png"
+      "docs/parity/screenshots/preview-patients-menu-collapsed-e5c1003.png",
+      "docs/parity/screenshots/preview-dashboard-fdab19b.png",
+      "docs/parity/screenshots/preview-patient-dialog-fdab19b.png",
+      "docs/parity/screenshots/preview-patient-files-fdab19b.png",
+      "docs/parity/screenshots/preview-patients-collapsed-fdab19b.png",
+      "docs/parity/screenshots/preview-quote-dialog-fdab19b.png",
+      "docs/parity/screenshots/preview-quote-medication-fdab19b.png",
+      "docs/parity/screenshots/preview-quote-mobile-fdab19b.png",
+      "docs/parity/screenshots/preview-hospitalization-nurses-fdab19b.png",
+      "docs/parity/screenshots/preview-preauthorizations-fdab19b.png"
     ]
   },
   "pending_ids": [

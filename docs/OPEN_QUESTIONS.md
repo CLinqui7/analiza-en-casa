@@ -307,3 +307,10 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - Seleccionar proveedor aprobado para verificación de correo y restablecimiento de acceso; no existe envío ni recuperación habilitados en la aplicación local. Debe definir límites, contenido mínimo, expiración, auditoría y protección contra enumeración antes de publicar esa función.
 - Proveer por canal seguro el mecanismo de bootstrap, secretos administrados y aprobación de la matriz definitiva de membresías/roles. El código local no crea un administrador por signup público, no contiene cuentas reales y no puede validar Atlas remoto sin una infraestructura autorizada.
+
+## Solicitudes de reunión · 2026-09-09
+
+- `MEETING-Q001`: identificar qué control significa “selección de fin” y en qué pantalla debe retirarse. No se elimina un campo ambiguo sin confirmar su propósito.
+- `MEETING-Q002`: definir período, actor, denominador, moneda y fuente aprobada de “visitas”, “ventas” y “meta”. El panel actual muestra visitas documentadas, valor de cotizaciones enviadas —no ventas ni cobros— y “Sin meta definida”.
+- `MEETING-Q003`: aprobar el vínculo por organización entre recurso de enfermería y cuenta autenticada, vigencia de la asignación, reasignación/revocación, acceso al paciente y Balance Hídrico, y auditoría. La hospitalización ya guarda recursos asignados, pero el navegador no concede acceso exclusivo por sí solo.
+- `MEETING-Q004`: definir campos fiscales, emisor, numeración y reglas tributarias de factura/crédito fiscal. La cotización actual conserva únicamente la clasificación administrativa y no calcula impuestos.
