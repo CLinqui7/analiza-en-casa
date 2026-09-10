@@ -38,7 +38,7 @@ test('B3 persists multiple admission and discharge periods without accepting att
   await expect(dialog.getByLabel('Egreso adicional 1')).toHaveValue('2026-09-26');
   await expect(dialog.getByLabel('Ingreso adicional 2')).toHaveCount(0);
   await expect(
-    dialog.getByText('Los archivos privados de hospitalización siguen bloqueados'),
+    dialog.getByText('Los archivos demo no se almacenan como archivos privados', { exact: false }),
   ).toBeVisible();
   await expect(dialog.locator('input[type=file]')).toHaveCount(0);
   await dialog.getByLabel('Próxima acción').fill('B3 admission periods');

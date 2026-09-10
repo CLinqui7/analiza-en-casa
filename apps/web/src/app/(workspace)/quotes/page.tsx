@@ -1199,7 +1199,7 @@ function QuoteEditor({
             </p>
           ) : null}
           <div
-            aria-label="Conceptos de la categoría activa"
+            aria-label="Detalle de la categoría activa"
             className="table-wrap"
             role="region"
             tabIndex={0}

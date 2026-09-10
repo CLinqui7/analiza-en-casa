@@ -69,6 +69,8 @@ export default function PatientDetailPage() {
               <dt>Empresa</dt>
               <dd>{valueOrEmpty(patient.company)}</dd>
             </div>
+            <div><dt>Triage administrativo</dt><dd>{patient.triageStatus || 'Sin clasificar'}</dd></div>
+            <div><dt>Notificaciones operativas</dt><dd>{patient.notifications?.botmakerConsent ? 'Autorizadas' : 'No autorizadas'}</dd></div>
             <div>
               <dt>Jubilado</dt>
               <dd>{patient.retired ? 'Sí' : 'No'}</dd>

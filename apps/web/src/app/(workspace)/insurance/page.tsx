@@ -169,7 +169,7 @@ export default function InsurancePage() {
         </div>
       </header>
       {message ? (
-        <p className="notice success" role="status">
+        <p className={`notice ${message.startsWith('Actualización administrativa') ? 'success' : 'warning'}`} role="status">
           {message}
         </p>
       ) : null}

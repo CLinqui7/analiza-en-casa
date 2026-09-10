@@ -73,7 +73,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addDoctor: (doctor: Doctor) => Promise<boolean>;
   updateDoctor: (doctor: Doctor) => Promise<boolean>;
   addNurseHour: (entry: NurseHourEntry) => void;
-  addInventoryMovement: (movement: InventoryMovement) => void;
+  addInventoryMovement: (movement: InventoryMovement) => Promise<boolean>;
   addShift: (shift: Shift) => void;
   addShiftSeries: (shifts: Shift[], idempotencyKey: string) => Promise<boolean>;
   addHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
@@ -81,8 +81,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addQuote: (quote: Quote) => Promise<boolean>;
   updateQuote: (quote: Quote) => Promise<boolean>;
   sendQuote: (quoteId: string) => Promise<boolean>;
-  addPayment: (payment: Payment) => void;
-  voidPayment: (paymentId: string, reason: string) => void;
+  addPayment: (payment: Payment) => Promise<boolean>;
+  voidPayment: (paymentId: string, reason: string) => Promise<boolean>;
   addClinicalDocument: (document: ClinicalDocument) => void;
   signClinicalDocument: (documentId: string) => void;
   correctClinicalDocument: (
@@ -91,7 +91,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
     summary: string,
     author: string,
   ) => void;
-  addCatalogItem: (item: CatalogItem) => void;
+  addCatalogItem: (item: CatalogItem) => Promise<boolean>;
   addPurchase: (purchase: Purchase) => void;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
   addInsuranceEvent: (event: InsuranceEvent) => boolean;
@@ -178,7 +178,7 @@ function AuthProvider({ children }: PropsWithChildren) {
 }
 
 function WorkspaceProvider({ children }: PropsWithChildren) {
-  const { can } = useAuth();
+  const { can, session } = useAuth();
   const [provider] = useState<DataProvider>(() => createDataProvider());
   const [snapshot, setSnapshot] = useState<WorkspaceSnapshot>(() =>
     provider.mode === 'mongodb' ? emptySnapshot() : defaultSnapshot(),
@@ -187,14 +187,26 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (provider.mode === 'mongodb' && !session) return;
+    let cancelled = false;
     void provider
       .load()
-      .then(setSnapshot)
-      .catch((cause: unknown) =>
-        setError(cause instanceof Error ? cause.message : 'Error de persistencia.'),
-      )
-      .finally(() => setLoading(false));
-  }, [provider]);
+      .then((value) => {
+        if (!cancelled) {
+          setSnapshot(value);
+          setError(null);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setError(cause instanceof Error ? cause.message : 'Error de persistencia.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [provider, session]);
 
   const commit = useCallback(
     (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot) => {
@@ -269,7 +281,9 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const refreshPatients = useCallback(async (): Promise<boolean> => {
     try {
       const loaded = await provider.load();
-      setSnapshot((current) => ({ ...current, patients: loaded.patients }));
+      setSnapshot((current) =>
+        provider.mode === 'mongodb' ? loaded : { ...current, patients: loaded.patients },
+      );
       setError(null);
       return true;
     } catch (cause) {
@@ -424,31 +438,61 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           const saved = await command.call(provider, quote);
           setSnapshot((current) => ({
             ...current,
-            quotes: operation === 'create'
-              ? [...current.quotes, saved]
-              : current.quotes.map((candidate) => candidate.id === saved.id ? saved : candidate),
+            quotes:
+              operation === 'create'
+                ? [...current.quotes, saved]
+                : current.quotes.map((candidate) =>
+                    candidate.id === saved.id ? saved : candidate,
+                  ),
           }));
           setError(null);
           return true;
         } catch (cause) {
-          setError(cause instanceof Error ? cause.message : 'No fue posible guardar la cotización.');
+          setError(
+            cause instanceof Error ? cause.message : 'No fue posible guardar la cotización.',
+          );
           return false;
         }
       }
-      const hospitalization = snapshot.hospitalizations.find((candidate) => candidate.id === quote.caseId);
+      const hospitalization = snapshot.hospitalizations.find(
+        (candidate) => candidate.id === quote.caseId,
+      );
       if (!hospitalization || hospitalization.patientId !== quote.patientId) return false;
-      if (operation === 'create' && snapshot.quotes.some((candidate) => candidate.id === quote.id)) return false;
-      const original = operation === 'replace' ? snapshot.quotes.find((candidate) => candidate.id === quote.id) : undefined;
+      if (operation === 'create' && snapshot.quotes.some((candidate) => candidate.id === quote.id))
+        return false;
+      const original =
+        operation === 'replace'
+          ? snapshot.quotes.find((candidate) => candidate.id === quote.id)
+          : undefined;
       if (operation === 'replace' && (!original || !canEditQuote(original))) return false;
       try {
         const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
-        const normalized: Quote = { ...quote, ...totals, immutable: false, status: 'DRAFT', sentAt: undefined };
+        const normalized: Quote = {
+          ...quote,
+          ...totals,
+          immutable: false,
+          status: 'DRAFT',
+          sentAt: undefined,
+        };
         commit((current) => ({
           ...current,
-          quotes: operation === 'create'
-            ? [...current.quotes, normalized]
-            : current.quotes.map((candidate) => candidate.id === normalized.id ? normalized : candidate),
-          auditEntries: [audit(operation === 'create' ? (quote.version > 1 ? 'Revisión de cotización creada' : 'Cotización creada') : 'Borrador de cotización actualizado', quote.id), ...current.auditEntries],
+          quotes:
+            operation === 'create'
+              ? [...current.quotes, normalized]
+              : current.quotes.map((candidate) =>
+                  candidate.id === normalized.id ? normalized : candidate,
+                ),
+          auditEntries: [
+            audit(
+              operation === 'create'
+                ? quote.version > 1
+                  ? 'Revisión de cotización creada'
+                  : 'Cotización creada'
+                : 'Borrador de cotización actualizado',
+              quote.id,
+            ),
+            ...current.auditEntries,
+          ],
         }));
         return true;
       } catch {
@@ -469,7 +513,12 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         }
         try {
           const saved = await provider.sendQuote(quoteId);
-          setSnapshot((current) => ({ ...current, quotes: current.quotes.map((candidate) => candidate.id === saved.id ? saved : candidate) }));
+          setSnapshot((current) => ({
+            ...current,
+            quotes: current.quotes.map((candidate) =>
+              candidate.id === saved.id ? saved : candidate,
+            ),
+          }));
           setError(null);
           return true;
         } catch (cause) {
@@ -479,16 +528,29 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       }
       commit((current) => ({
         ...current,
-        quotes: current.quotes.map((candidate) => candidate.id === quoteId ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() } : candidate),
-        auditEntries: [audit('Cotización marcada como enviada e inmutable', quoteId), ...current.auditEntries],
+        quotes: current.quotes.map((candidate) =>
+          candidate.id === quoteId
+            ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() }
+            : candidate,
+        ),
+        auditEntries: [
+          audit('Cotización marcada como enviada e inmutable', quoteId),
+          ...current.auditEntries,
+        ],
       }));
       return true;
     },
     [can, commit, provider, snapshot.quotes],
   );
   const saveInsuranceObservation = useCallback(
-    async (input: { quoteId: string; status: InsuranceRequestStatus; note: string; date: string }): Promise<boolean> => {
-      if (!can('insurance:write') || !isInsuranceRequestStatus(input.status) || !input.note.trim()) return false;
+    async (input: {
+      quoteId: string;
+      status: InsuranceRequestStatus;
+      note: string;
+      date: string;
+    }): Promise<boolean> => {
+      if (!can('insurance:write') || !isInsuranceRequestStatus(input.status) || !input.note.trim())
+        return false;
       if (provider.mode === 'mongodb') {
         if (!provider.recordInsuranceObservation) {
           setError('El comando seguro de seguros no está disponible; no se guardó nada.');
@@ -498,34 +560,113 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           const saved = await provider.recordInsuranceObservation(input);
           setSnapshot((current) => ({
             ...current,
-            insuranceRequests: current.insuranceRequests.some((candidate) => candidate.id === saved.request.id)
-              ? current.insuranceRequests.map((candidate) => candidate.id === saved.request.id ? saved.request : candidate)
+            insuranceRequests: current.insuranceRequests.some(
+              (candidate) => candidate.id === saved.request.id,
+            )
+              ? current.insuranceRequests.map((candidate) =>
+                  candidate.id === saved.request.id ? saved.request : candidate,
+                )
               : [...current.insuranceRequests, saved.request],
-            insuranceEvents: current.insuranceEvents.some((candidate) => candidate.id === saved.event.id)
+            insuranceEvents: current.insuranceEvents.some(
+              (candidate) => candidate.id === saved.event.id,
+            )
               ? current.insuranceEvents
               : [...current.insuranceEvents, saved.event],
           }));
           setError(null);
           return true;
         } catch (cause) {
-          setError(cause instanceof Error ? cause.message : 'No fue posible registrar la actualización del seguro.');
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : 'No fue posible registrar la actualización del seguro.',
+          );
           return false;
         }
       }
       const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
-      const patient = quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
+      const patient =
+        quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
       const insurer = patient?.insurer ?? patient?.insurance?.insurer;
       if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
-      const existing = snapshot.insuranceRequests.find((candidate) => candidate.quoteId === quote.id);
-      const request: InsuranceRequest = existing ?? { id: crypto.randomUUID(), quoteId: quote.id, patientId: patient.id, insurer, status: input.status, createdAt: input.date, updatedAt: input.date, lastNote: input.note.trim() };
-      const event: InsuranceEvent = { id: crypto.randomUUID(), requestId: request.id, status: input.status, date: input.date, note: input.note.trim() };
+      const existing = snapshot.insuranceRequests.find(
+        (candidate) => candidate.quoteId === quote.id,
+      );
+      const request: InsuranceRequest = existing ?? {
+        id: crypto.randomUUID(),
+        quoteId: quote.id,
+        patientId: patient.id,
+        insurer,
+        status: input.status,
+        createdAt: input.date,
+        updatedAt: input.date,
+        lastNote: input.note.trim(),
+      };
+      const event: InsuranceEvent = {
+        id: crypto.randomUUID(),
+        requestId: request.id,
+        status: input.status,
+        date: input.date,
+        note: input.note.trim(),
+      };
       try {
-        const appended = appendInsuranceEvent(request, snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id), event);
-        commit((current) => ({ ...current, insuranceRequests: existing ? current.insuranceRequests.map((candidate) => candidate.id === request.id ? appended.request : candidate) : [...current.insuranceRequests, appended.request], insuranceEvents: [...current.insuranceEvents, event], auditEntries: [audit(existing ? 'Actualización de seguro registrada' : 'Preautorización registrada', existing ? event.id : request.id), ...current.auditEntries] }));
+        const appended = appendInsuranceEvent(
+          request,
+          snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id),
+          event,
+        );
+        commit((current) => ({
+          ...current,
+          insuranceRequests: existing
+            ? current.insuranceRequests.map((candidate) =>
+                candidate.id === request.id ? appended.request : candidate,
+              )
+            : [...current.insuranceRequests, appended.request],
+          insuranceEvents: [...current.insuranceEvents, event],
+          auditEntries: [
+            audit(
+              existing ? 'Actualización de seguro registrada' : 'Preautorización registrada',
+              existing ? event.id : request.id,
+            ),
+            ...current.auditEntries,
+          ],
+        }));
         return true;
-      } catch { return false; }
+      } catch {
+        return false;
+      }
     },
-    [can, commit, provider, snapshot.insuranceEvents, snapshot.insuranceRequests, snapshot.patients, snapshot.quotes],
+    [
+      can,
+      commit,
+      provider,
+      snapshot.insuranceEvents,
+      snapshot.insuranceRequests,
+      snapshot.patients,
+      snapshot.quotes,
+    ],
+  );
+  const saveCommand = useCallback(
+    async (
+      command: unknown,
+      mockChange: (current: WorkspaceSnapshot) => WorkspaceSnapshot,
+    ): Promise<boolean> => {
+      if (provider.mode !== 'mongodb') {
+        commit(mockChange);
+        return true;
+      }
+      try {
+        if (!provider.executeCommand) throw new Error('El comando seguro no está disponible.');
+        await provider.executeCommand(command);
+        setSnapshot(await provider.load());
+        setError(null);
+        return true;
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : 'No se guardó el registro.');
+        return false;
+      }
+    },
+    [commit, provider],
   );
   const value = useMemo<WorkspaceContextValue>(
     () => ({
@@ -569,14 +710,17 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           auditEntries: [audit('Hora de enfermería registrada', entry.id), ...current.auditEntries],
         })),
       addInventoryMovement: (movement) =>
-        commit((current) => ({
-          ...current,
-          inventoryMovements: [...current.inventoryMovements, movement],
-          auditEntries: [
-            audit('Movimiento de inventario registrado', movement.id),
-            ...current.auditEntries,
-          ],
-        })),
+        saveCommand(
+          { command: 'inventory.record', movement, idempotencyKey: movement.id },
+          (current) => ({
+            ...current,
+            inventoryMovements: [...current.inventoryMovements, movement],
+            auditEntries: [
+              audit('Movimiento de inventario registrado', movement.id),
+              ...current.auditEntries,
+            ],
+          }),
+        ),
       addShift: (shift) => {
         if (!can('agenda:write')) return;
         commit((current) => ({
@@ -592,7 +736,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       updateQuote: (quote) => saveQuote(quote, 'replace'),
       sendQuote: sendStoredQuote,
       addPayment: (payment) =>
-        commit((current) => {
+        saveCommand({ command: 'payment.apply', payment }, (current) => {
           if (
             current.payments.some(
               (candidate) => candidate.idempotencyKey === payment.idempotencyKey,
@@ -606,7 +750,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           };
         }),
       voidPayment: (paymentId, reason) =>
-        commit((current) => {
+        saveCommand({ command: 'payment.void', paymentId, reason }, (current) => {
           const voidReason = reason.trim();
           const payment = current.payments.find((candidate) => candidate.id === paymentId);
           if (!voidReason || payment?.status !== 'APPLIED') return current;
@@ -688,7 +832,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           };
         }),
       addCatalogItem: (item) =>
-        commit((current) => {
+        saveCommand({ command: 'catalog.create', item }, (current) => {
           if (
             current.catalogItems.some(
               (candidate) =>
@@ -783,6 +927,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       provider.mode,
       refreshPatients,
       saveDoctor,
+      saveCommand,
       saveHospitalization,
       saveInsuranceObservation,
       savePatient,
@@ -835,12 +980,21 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   );
 }
 
+function SessionWorkspace({ children }: PropsWithChildren) {
+  const { session } = useAuth();
+  return (
+    <WorkspaceProvider key={`${session?.mode}:${session?.userId}:${session?.role}`}>
+      {children}
+    </WorkspaceProvider>
+  );
+}
+
 export function AppProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <WorkspaceProvider>{children}</WorkspaceProvider>
+        <SessionWorkspace>{children}</SessionWorkspace>
       </AuthProvider>
     </QueryClientProvider>
   );

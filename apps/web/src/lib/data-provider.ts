@@ -139,6 +139,7 @@ export function normalizeQuote(quote: Quote): Quote {
 
 export interface DataProvider {
   readonly mode: 'mock' | 'supabase' | 'mongodb';
+  executeCommand?(input: unknown): Promise<void>;
   load(): Promise<WorkspaceSnapshot>;
   saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void>;
   createPatient?(patient: Patient): Promise<Patient>;

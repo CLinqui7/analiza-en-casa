@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-09T18:15:12.823Z",
-  "next_action": "Upgrade the existing Vercel team to a plan that permits Static IP for Preview and provide an authenticated Atlas session. Then enable fixed egress without broadening Deployment Protection, provision a least-privilege application user for only analiza_en_casa, run the audited bootstrap with synthetic seed, and execute the A/B/C multi-session isolation proof.",
+  "updated_at": "2026-09-10T07:02:09.876Z",
+  "next_action": "Deploy the reviewed Studio candidate as protected Preview, record its READY id/URL/SHA and capture the published pages. Fixed Preview egress requires an authorized paid Vercel plan before Mongo can be connected remotely.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -24,37 +24,33 @@
     "packages/contracts/src/index.ts"
   ],
   "tests": [
-    "npm run typecheck --workspace=@analiza/web (passed)",
-    "npm run test --workspace=@analiza/web -- --run (23 files, 90 passed)",
-    "npm run lint --workspace=@analiza/web (passed)",
-    "npm test (103 passed)",
-    "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
-    "npm run audit:verify (17/17 chapters passed)",
-    "npm run security:scan (599 files, passed)",
-    "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
-    "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
-    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
-    "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
-    "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
-    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections",
-    "published Preview browser review at 1440x1000: Dashboard, Patients, Hospitalizations, Quotes, Agenda and Insurance opened behind preserved Deployment Protection",
-    "published Preview browser review: patient identity-file state, invoice/tax-credit classification, tablet/blister quantity controls, inventory link and nursing assignment controls are visible",
-    "published Preview browser review: sidebar collapsed state remained true after navigation to Patients",
-    "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
-    "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
+    "npm test: 103 passed",
+    "npm run test:react: 98 passed / 25 files",
+    "npm run typecheck: passed",
+    "npm run lint: passed",
+    "npm run build: Next 16.3.4 stable with dynamic server functions",
+    "PLAYWRIGHT_SERVER_MODE=production npm run test:browser:react: 178 passed, 0 skipped (5.3m)",
+    "Mongo live HTTP + Atlas verification: passed 2026-09-10T06:55:48.539Z qa-f818838c",
+    "npm run qa:client-changes: 32/32 registry gates passed (not 32 complete functions)",
+    "CH01, CH02, CH03 traceability gates: passed",
+    "npm run audit:verify: 17/17 structural ledgers passed",
+    "npm run security:scan: passed; npm run react:boundaries: passed"
   ],
   "failures": [
-    "Atlas application credentials and approved protected network access are not available in this session, so no remote Mongo write/read, synthetic seed, multi-session authorization or tenant-isolation success is claimed.",
-    "The Vercel team is on Hobby. The authorized Static IP API request returned HTTP 402, so fixed Preview egress cannot be enabled on the current plan; broad 0.0.0.0/0 Atlas access remains prohibited.",
-    "The existing Vercel Preview has no Mongo or WhatsApp provider variables; it therefore remains explicitly in synthetic DEMO mode.",
-    "The operator preflight records the presence of two ignored local environment files. They are not tracked or included in the deployment and were preserved without reading or printing their values.",
-    "Direct PDF attachment delivery by WhatsApp is not implemented or claimed; the implemented channel uses a short-lived secure portal URL and OTP without clinical or financial content in the message."
+    "Vercel Hobby does not provide the requested fixed Preview egress; authorization for paid plan remains unanswered. No 0.0.0.0/0 was enabled.",
+    "Preview must remain synthetic DEMO until fixed egress is approved and Mongo sessions are retested there.",
+    "WhatsApp/OTP provider, institutional clinical/fiscal rules and source-data imports remain pending.",
+    "Selenium was not rerun for the Studio candidate; no new clinical or full video parity certification is claimed."
   ],
   "atlas": {
     "project_id": "6aa160fb84024a21784cb906",
     "cluster": "analiza-cluster",
     "database": "analiza_en_casa",
-    "verified_from_application": false
+    "verified_from_application": true,
+    "bootstrap_indexes": 41,
+    "verification_run": "qa-f818838c",
+    "verified_at": "2026-09-10T06:55:48.539Z",
+    "network": "operator IPv4 only"
   },
   "candidate_sha": "fdab19b3cf93108766f8f5e41b2493387ea60b29",
   "deployment": {
@@ -105,9 +101,42 @@
     ]
   },
   "pending_ids": [
-    "MONGO-REMOTE-BOOTSTRAP",
-    "MONGO-A-B-C-MULTISESSION",
+    "VERCEL-PREVIEW-FIXED-EGRESS",
+    "MONGO-PREVIEW-A-B-C",
     "WHATSAPP-PROVIDER-PREVIEW",
-    "CR-031"
-  ]
+    "CLINICAL-SCALE-APPROVAL",
+    "SOURCE-DATA-IMPORT",
+    "CR-031-REMAINING-MODULES"
+  ],
+  "previous_release_tests": [
+    "npm run typecheck --workspace=@analiza/web (passed)",
+    "npm run test --workspace=@analiza/web -- --run (23 files, 90 passed)",
+    "npm run lint --workspace=@analiza/web (passed)",
+    "npm test (103 passed)",
+    "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
+    "npm run audit:verify (17/17 chapters passed)",
+    "npm run security:scan (599 files, passed)",
+    "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
+    "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
+    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
+    "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
+    "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
+    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections",
+    "published Preview browser review at 1440x1000: Dashboard, Patients, Hospitalizations, Quotes, Agenda and Insurance opened behind preserved Deployment Protection",
+    "published Preview browser review: patient identity-file state, invoice/tax-credit classification, tablet/blister quantity controls, inventory link and nursing assignment controls are visible",
+    "published Preview browser review: sidebar collapsed state remained true after navigation to Patients",
+    "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
+    "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
+  ],
+  "studio_candidate_sha": "PENDING_COMMIT",
+  "protection_verified": {
+    "previous_effective_value": null,
+    "current": {
+      "deploymentType": "preview"
+    },
+    "unauthenticated_login_status": 302,
+    "redirect_origin": "https://vercel.com",
+    "preview_comments_enabled": false,
+    "preview_feedback_environment": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0"
+  }
 }

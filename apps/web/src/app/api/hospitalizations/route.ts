@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
     const hospitalizations = await new MongoHospitalizationRepository(
       database.collection('hospitalizations'),
       database.collection('patients'),
+      {
+        resources: database.collection('nursingResources'),
+        memberships: database.collection('memberships'),
+      },
     ).listWithVersions(actor);
     return NextResponse.json({ hospitalizations }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
@@ -49,6 +53,10 @@ export async function POST(request: NextRequest) {
     const hospitalization = await new MongoHospitalizationRepository(
       database.collection('hospitalizations'),
       database.collection('patients'),
+      {
+        resources: database.collection('nursingResources'),
+        memberships: database.collection('memberships'),
+      },
     ).create(actor, await request.json());
     return NextResponse.json(hospitalization, {
       status: 201,

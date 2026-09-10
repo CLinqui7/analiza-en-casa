@@ -38,14 +38,23 @@ async function fillRequiredPatientData(
 
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
   await login(page);
-  await page.getByRole('button', { name: 'Clínico' }).click();
+  const clinical = page.getByRole('button', { name: 'Clínico' });
+  await expect(clinical).toHaveAttribute('aria-expanded', 'true');
+  await clinical.click();
+  await expect(clinical).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('link', { name: 'Reporte de salud' })).toHaveCount(0);
+  await clinical.click();
+  await expect(clinical).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
   await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
-  await page.getByRole('button', { name: 'Inventario' }).click();
+  const inventory = page.getByRole('button', { name: 'Inventario' });
+  if ((await inventory.getAttribute('aria-expanded')) === 'false') await inventory.click();
   await page.getByRole('link', { name: 'Kárdex' }).click();
   await expect(page).toHaveURL(/\/inventory\/kardex$/);
-  await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Kárdex de inventario', exact: true }),
+  ).toBeVisible();
 });
 
 test('primary navigation requires a session and hides patient access for inventory', async ({
@@ -73,8 +82,11 @@ test('dashboard presents unclassified measurements and opens authorized operatio
   page,
 }) => {
   await login(page);
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-  await expect(page.getByText('Sin clasificar')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Una vista clara de tu operación' }),
+  ).toBeVisible();
+  await page.getByText('Mediciones, filtros y control de migración', { exact: true }).click();
+  await expect(page.getByText('Sin clasificar', { exact: true })).toBeVisible();
   await expect(page.getByText('normalmente', { exact: false })).toHaveCount(0);
 
   await page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]').click();
@@ -282,6 +294,7 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('Importado Uno');
   await expect(page.getByText('Importado Uno')).toBeVisible();
+  await page.locator('.patient-more-actions > summary').click();
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar CSV' }).click();
   const content = await (await download).createReadStream();
@@ -351,7 +364,7 @@ test('patient list supports tabs, search, sorting, pagination, persisted status 
   await page.goto('/patients');
 
   await page.getByRole('tab', { name: /Activos/ }).click();
-  await expect(page.getByText('8 visibles')).toBeVisible();
+  await expect(page.getByText('8 resultados', { exact: true })).toBeVisible();
   await page.getByLabel('Buscar paciente').fill('Celeste');
   await expect(page.getByRole('row', { name: /Paciente Demo Celeste/ })).toBeVisible();
   await page.getByLabel('Buscar paciente').fill('DEMO-005');

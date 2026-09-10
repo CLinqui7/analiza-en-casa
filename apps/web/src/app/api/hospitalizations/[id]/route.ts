@@ -34,6 +34,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     const hospitalization = await new MongoHospitalizationRepository(
       database.collection('hospitalizations'),
       database.collection('patients'),
+      {
+        resources: database.collection('nursingResources'),
+        memberships: database.collection('memberships'),
+      },
     ).get(actor, id);
     if (resourceStatus(hospitalization) === 404) return errorResponse(404);
     return NextResponse.json(hospitalization, { headers: { 'Cache-Control': 'no-store' } });
@@ -53,6 +57,10 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const hospitalization = await new MongoHospitalizationRepository(
       database.collection('hospitalizations'),
       database.collection('patients'),
+      {
+        resources: database.collection('nursingResources'),
+        memberships: database.collection('memberships'),
+      },
     ).replace(actor, id, await request.json());
     return NextResponse.json(hospitalization, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {

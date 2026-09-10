@@ -140,6 +140,7 @@ export class MongoShiftRepository {
     return rows.map((row) =>
       nursingResourceSchema.parse({
         id: row.id,
+        userId: row.userId,
         displayName: row.displayName,
         territory: row.territory,
         shift: row.shift,

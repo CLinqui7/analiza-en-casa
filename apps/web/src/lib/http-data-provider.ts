@@ -48,7 +48,7 @@ export class HttpDataProvider implements DataProvider {
   readonly mode = 'mongodb' as const;
 
   constructor(
-    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly fetchImpl: typeof fetch = (...argumentsList) => fetch(...argumentsList),
     private readonly endpoint = '/api/workspace',
     private readonly mutationHeaders: () => Record<string, string> = mongoMutationHeaders,
   ) {}
@@ -56,6 +56,16 @@ export class HttpDataProvider implements DataProvider {
   private doctorVersions = new Map<string, number>();
   private hospitalizationVersions = new Map<string, number>();
   private quoteVersions = new Map<string, number>();
+
+  async executeCommand(input: unknown): Promise<void> {
+    const response = await this.fetchImpl('/api/operations', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw await responseError(response, 'No se guardó la operación.');
+  }
 
   private loadVersions(raw: Record<string, unknown> | undefined) {
     return new Map(
@@ -253,8 +263,13 @@ export class HttpDataProvider implements DataProvider {
 
   async createQuote(quote: Quote): Promise<Quote> {
     const response = await this.fetchImpl('/api/quotes', {
-      method: 'POST', credentials: 'same-origin',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
       body: JSON.stringify({ quote }),
     });
     if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
@@ -265,10 +280,16 @@ export class HttpDataProvider implements DataProvider {
 
   async replaceQuote(quote: Quote): Promise<Quote> {
     const expectedVersion = this.quoteVersions.get(quote.id);
-    if (!expectedVersion) throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    if (!expectedVersion)
+      throw new Error('No se conoce la versión de la cotización; actualice el listado.');
     const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quote.id)}`, {
-      method: 'PUT', credentials: 'same-origin',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
       body: JSON.stringify({ quote, expectedVersion }),
     });
     if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
@@ -279,10 +300,16 @@ export class HttpDataProvider implements DataProvider {
 
   async sendQuote(quoteId: string): Promise<Quote> {
     const expectedVersion = this.quoteVersions.get(quoteId);
-    if (!expectedVersion) throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    if (!expectedVersion)
+      throw new Error('No se conoce la versión de la cotización; actualice el listado.');
     const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quoteId)}/send`, {
-      method: 'POST', credentials: 'same-origin',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
       body: JSON.stringify({ expectedVersion }),
     });
     if (!response.ok) throw await responseError(response, 'No fue posible enviar la cotización.');
@@ -298,13 +325,22 @@ export class HttpDataProvider implements DataProvider {
     date: string;
   }): Promise<{ request: InsuranceRequest; event: InsuranceEvent }> {
     const response = await this.fetchImpl('/api/insurance-observations', {
-      method: 'POST', credentials: 'same-origin',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
       body: JSON.stringify({ ...input, idempotencyKey: crypto.randomUUID() }),
     });
-    if (!response.ok) throw await responseError(response, 'No fue posible registrar la actualización del seguro.');
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible registrar la actualización del seguro.');
     const payload = (await response.json()) as { request?: unknown; event?: unknown };
-    return { request: insuranceRequestSchema.parse(payload.request), event: insuranceEventSchema.parse(payload.event) };
+    return {
+      request: insuranceRequestSchema.parse(payload.request),
+      event: insuranceEventSchema.parse(payload.event),
+    };
   }
 
   async saveChanges(_changes: Partial<WorkspaceSnapshot>): Promise<void> {

@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-09T15:49:32.172Z",
+  "generated_at": "2026-09-10T05:26:25.808Z",
   "passed": false,
-  "files": 11025,
-  "total_mib": 631.4,
+  "files": 11059,
+  "total_mib": 636.47,
   "largest_file": {
     "size": 23837696,
     "file": ".analiza-runtime\\bin\\chromedriver.exe"

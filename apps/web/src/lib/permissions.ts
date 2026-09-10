@@ -1,4 +1,12 @@
-export const roles = ['ADMIN', 'DOCTOR', 'NURSE', 'INVENTORY', 'FINANCE', 'AUDITOR'] as const;
+export const roles = [
+  'ADMIN',
+  'DOCTOR',
+  'NURSE',
+  'NURSE_MANAGER',
+  'INVENTORY',
+  'FINANCE',
+  'AUDITOR',
+] as const;
 export type Role = (typeof roles)[number];
 
 export type Permission =
@@ -17,6 +25,7 @@ export type Permission =
   | 'clinical:write'
   | 'clinical:sign'
   | 'nursing:write'
+  | 'nurses:manage'
   | 'medical-orders:write'
   | 'agenda:read'
   | 'agenda:write'
@@ -56,6 +65,7 @@ const allWrite: Permission[] = [
   'clinical:write',
   'clinical:sign',
   'nursing:write',
+  'nurses:manage',
   'medical-orders:write',
   'agenda:write',
   'inventory:write',
@@ -66,6 +76,23 @@ const allWrite: Permission[] = [
 
 const permissions: Record<Role, readonly Permission[]> = {
   ADMIN: [...allRead, ...allWrite],
+  NURSE_MANAGER: [
+    'dashboard:read',
+    'patients:read',
+    'patients:write',
+    'cases:read',
+    'cases:write',
+    'clinical:read',
+    'clinical:write',
+    'nursing:write',
+    'nurses:manage',
+    'agenda:read',
+    'agenda:write',
+    'catalogs:read',
+    'catalogs:write',
+    'reports:read',
+    'inventory:read',
+  ],
   DOCTOR: [
     'dashboard:read',
     'patients:read',
@@ -129,6 +156,8 @@ export function can(role: Role | undefined, permission: Permission): boolean {
 }
 
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
+  { prefix: '/nursing-team', permission: 'nurses:manage' },
+  { prefix: '/changes', permission: 'dashboard:read' },
   { prefix: '/patients', permission: 'patients:read' },
   { prefix: '/hospitalizations', permission: 'cases:read' },
   { prefix: '/quotes', permission: 'quotes:read' },

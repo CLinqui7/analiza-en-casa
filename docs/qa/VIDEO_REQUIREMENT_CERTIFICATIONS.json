@@ -3,7 +3,8 @@
   "implementation_sha": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "verification_status": "VERIFIED_AT_COMMITTED_SHA",
   "verification_blocker": "CH16-Q001/Q002/Q003/Q005 leave discount profiles, values, calculation, source, roles and audit undefined. CH15-Q004/Q006 and CH14-F07 remain explicitly blocked; real Supabase/RLS, provider and client-approval gates remain external.",
-  "functional_fingerprint": "ed4afce3ee133ada69ffcb83f1a9e477d34103cd848e33aaa5a13637d5d53e68",
+  "functional_fingerprint": "a5ce9d2c1cb736539e0f05406a871bf6560b8b2e93509911fbb37ba6e72d8c90",
+  "studio_verification": {"implementation_sha": "PENDING_COMMIT", "status": "LOCAL_PLAYWRIGHT_VERIFIED_SELENIUM_PENDING", "evidence": "178/178 Playwright against fresh Next production server; includes CH01-CH03, route roles and portal safety. Historical certification fields below retain their original verification SHA. No new EXACT promotion."},
   "certification_created_at": "2026-09-03T05:56:00-06:00",
   "certification_test_evidence": "Release verification at implementation SHA 58030d1419e179a4bc51145106c7314cb6417c6c passed format, lint, TypeScript, 98 domain tests, 37 React tests, 178/178 fresh-server Playwright tests, 181/181 Selenium tests, declared Selenium coverage 334/334, client changes 32/32, video traceability 210/210, mirror checks and the 17/17 video audit. The Leaflet patient-map teardown path is covered by the shared-editor Playwright test, which asserts no page error after closing the dialog. No undefined financial, clinical, provider or external operation is certified.",
   "certifications": {

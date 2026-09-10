@@ -1,4 +1,5 @@
 import { z } from 'zod';
+export * from './operations';
 
 export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER']);
 
@@ -85,6 +86,7 @@ export const vitalReadingSchema = z.object({
 
 export const nursingResourceSchema = z.object({
   id: z.string(),
+  userId: z.string().optional(),
   displayName: z.string().trim().min(1),
   territory: z.string().trim().min(1),
   shift: z.enum(['MORNING', 'AFTERNOON', 'NIGHT']),
@@ -167,6 +169,7 @@ export const hospitalizationSchema = z.object({
   devices: z.array(z.string().trim().min(1)).optional(),
   /** Resources assigned to the case; account-level visibility requires a server-side user link. */
   assignedNursingResourceIds: z.array(z.string().trim().min(1)).optional(),
+  assignedNurseUserIds: z.array(z.string().trim().min(1)).optional(),
   /**
    * Administrative execution-profile fields observed in CH08. They are
    * descriptive only and never create insurance, billing, coverage, tax, or

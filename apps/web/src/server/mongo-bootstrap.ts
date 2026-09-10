@@ -7,6 +7,7 @@ import { mongoPatientIndexes } from './mongo-patients';
 import { mongoQuoteIndexes } from './mongo-quotes';
 import { mongoPortalIndexes } from './mongo-portal';
 import { mongoShiftIndexes } from './mongo-shifts';
+import { mongoOperationsIndexes } from './mongo-operations';
 
 type IndexDefinition = {
   collection: string;
@@ -36,6 +37,7 @@ export const mongoSchemaIndexes: readonly IndexDefinition[] = [
   ...mongoPortalIndexes,
   ...mongoFinancialIndexes,
   ...mongoFileMetadataIndexes,
+  ...mongoOperationsIndexes,
 ];
 
 export type MongoBootstrapReport = Readonly<{

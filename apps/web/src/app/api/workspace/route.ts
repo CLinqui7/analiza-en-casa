@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { emptySnapshot } from '@/lib/data-provider';
+import { paymentSchema, catalogItemSchema, inventoryMovementSchema } from '@analiza/contracts';
+import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { can } from '@/lib/permissions';
 import { authorizationStatus } from '@/server/http-auth';
 import { MongoDoctorRepository } from '@/server/mongo-doctors';
@@ -37,8 +38,21 @@ export async function GET(request?: Request) {
         .find((part) => part.startsWith(`${sessionCookieName}=`))
         ?.slice(sessionCookieName.length + 1),
     );
-    const [patients, doctors, hospitalizations, agenda, quotes, insurance] = await Promise.all([
-      new MongoPatientRepository(database.collection('patients')).listWithVersions(session),
+    const [
+      patients,
+      doctors,
+      hospitalizations,
+      agenda,
+      quotes,
+      insurance,
+      catalogItems,
+      payments,
+      inventoryMovements,
+      auditEvents,
+    ] = await Promise.all([
+      can(session.role, 'patients:read')
+        ? new MongoPatientRepository(database.collection('patients')).listWithVersions(session)
+        : Promise.resolve([]),
       can(session.role, 'settings:write')
         ? new MongoDoctorRepository(database.collection('doctors')).listWithVersions(session)
         : Promise.resolve([]),
@@ -60,10 +74,36 @@ export async function GET(request?: Request) {
       can(session.role, 'insurance:read')
         ? new MongoInsuranceRepository(database).list(session)
         : Promise.resolve({ requests: [], events: [] }),
+      can(session.role, 'catalogs:read')
+        ? database
+            .collection('catalogItems')
+            .find({ organizationId: session.organizationId })
+            .toArray()
+        : Promise.resolve([]),
+      can(session.role, 'payments:read')
+        ? database.collection('payments').find({ organizationId: session.organizationId }).toArray()
+        : Promise.resolve([]),
+      can(session.role, 'inventory:read')
+        ? database
+            .collection('inventoryMovements')
+            .find({ organizationId: session.organizationId })
+            .toArray()
+        : Promise.resolve([]),
+      can(session.role, 'audit:read')
+        ? database
+            .collection('auditEvents')
+            .find(
+              { organizationId: session.organizationId },
+              { projection: { id: 1, action: 1, resourceId: 1, occurredAt: 1 } },
+            )
+            .sort({ occurredAt: -1 })
+            .limit(100)
+            .toArray()
+        : Promise.resolve([]),
     ]);
     return NextResponse.json(
       {
-        ...emptySnapshot(),
+        ...emptyServerWorkspace(),
         patients: patients.map(({ patient }) => patient),
         doctors: doctors.map(({ doctor }) => doctor),
         hospitalizations: hospitalizations.map(({ hospitalization }) => hospitalization),
@@ -72,6 +112,15 @@ export async function GET(request?: Request) {
         quotes: quotes.map(({ quote }) => quote),
         insuranceRequests: insurance.requests,
         insuranceEvents: insurance.events,
+        catalogItems: catalogItems.map((item) => catalogItemSchema.parse(item)),
+        payments: payments.map((item) => paymentSchema.parse(item)),
+        inventoryMovements: inventoryMovements.map((item) => inventoryMovementSchema.parse(item)),
+        auditEntries: auditEvents.map((item) => ({
+          id: String(item.id),
+          action: String(item.action),
+          subject: String(item.resourceId ?? ''),
+          at: new Date(item.occurredAt).toISOString(),
+        })),
         patientVersions: Object.fromEntries(
           patients.map(({ patient, version }) => [patient.id, version]),
         ),

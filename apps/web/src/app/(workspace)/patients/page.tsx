@@ -21,6 +21,7 @@ import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { useOperations } from '@/lib/use-operations';
 import {
   companyOptions,
   insuranceProviderOptions,
@@ -279,8 +280,16 @@ function previewPatientImport(
 }
 
 export default function PatientsPage() {
-  const { addPatient, addPatients, patients, providerMode, refreshPatients, updatePatient } =
-    useWorkspace();
+  const operations = useOperations();
+  const {
+    addPatient,
+    addPatients,
+    patients,
+    providerMode,
+    refreshPatients,
+    updatePatient,
+    error: persistenceError,
+  } = useWorkspace();
   const { can } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -301,6 +310,7 @@ export default function PatientsPage() {
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [saving, setSaving] = useState(false);
   const [pendingIdentityFiles, setPendingIdentityFiles] = useState<File[]>([]);
+  const [pendingResponsibleFiles, setPendingResponsibleFiles] = useState<File[]>([]);
   const [identityFiles, setIdentityFiles] = useState<PrivateFileMetadata[]>([]);
   const form = useForm<PatientForm>({
     resolver: zodResolver(patientFormSchema),
@@ -409,6 +419,7 @@ export default function PatientsPage() {
     setCoverageNotice(null);
     setHolderDialogOpen(false);
     setPendingIdentityFiles([]);
+    setPendingResponsibleFiles([]);
     setIdentityFiles([]);
     form.reset();
     if (searchParams.has('create') || searchParams.has('edit')) router.replace('/patients');
@@ -494,7 +505,7 @@ export default function PatientsPage() {
     setImportPreview(previewPatientImport(file.name, await file.text(), patients));
   }
   function confirmImport() {
-    if (!importPreview?.rows.length || importPreview.errors.length) return;
+    if (providerMode === 'mongodb' || !importPreview?.rows.length || importPreview.errors.length) return;
     addPatients(importPreview.rows);
     setResult(`${importPreview.rows.length} pacientes sintéticos importados.`);
     setImportOpen(false);
@@ -616,9 +627,21 @@ export default function PatientsPage() {
       setSaving(false);
       return;
     }
-    if (providerMode === 'mongodb' && pendingIdentityFiles.length) {
+    if (
+      providerMode === 'mongodb' &&
+      (pendingIdentityFiles.length || pendingResponsibleFiles.length)
+    ) {
       try {
-        const uploaded = await uploadPrivateFiles('patient', patient.id, pendingIdentityFiles);
+        const uploaded = await uploadPrivateFiles('patient', patient.id, [
+          ...pendingIdentityFiles,
+          ...pendingResponsibleFiles.map(
+            (file) =>
+              new File([file], `Responsable - ${file.name}`, {
+                type: file.type,
+                lastModified: file.lastModified,
+              }),
+          ),
+        ]);
         setIdentityFiles((current) => [...uploaded, ...current]);
       } catch {
         setSaving(false);
@@ -665,21 +688,24 @@ export default function PatientsPage() {
           <Button
             className="button-secondary"
             data-action-id="PATIENT-EXPORT-XLSX"
+            aria-label="Exportar Excel"
             onClick={() => {
               void exportPatientsXlsx();
             }}
             type="button"
           >
-            Exportar todos
+            Exportar Excel
           </Button>
           {can('patients:write') ? (
             <Button
               className="patient-create-button"
               data-action-id="PATIENT-CREATE"
+              aria-label="Agregar paciente"
               onClick={() => {
                 setResult(null);
                 setActionError(null);
                 setPendingIdentityFiles([]);
+                setPendingResponsibleFiles([]);
                 setDismissedLinkedDialog(false);
                 setIsOpen(true);
               }}
@@ -732,6 +758,7 @@ export default function PatientsPage() {
             <span aria-hidden="true">⌕</span>
             <input
               className="patient-search-input"
+              aria-label="Buscar paciente"
               id="patient-search"
               data-action-id="PATIENT-SEARCH"
               onChange={(event) => {
@@ -826,7 +853,9 @@ export default function PatientsPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Paciente</th>
+                  <th aria-sort={sort === 'fullName' ? (direction === 1 ? 'ascending' : 'descending') : 'none'}>
+                    <Button aria-label="Ordenar por nombre completo" data-action-id="PATIENT-SORT-NAME" onClick={() => { setDirection(sort === 'fullName' ? ((direction * -1) as 1 | -1) : 1); setSort('fullName'); setPage(1); }} type="button">Paciente {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : ''}</Button>
+                  </th>
                   <th
                     aria-sort={
                       sort === 'documentId'
@@ -849,24 +878,7 @@ export default function PatientsPage() {
                       Documento {sort === 'documentId' ? (direction === 1 ? '↑' : '↓') : ''}
                     </Button>
                   </th>
-                  <th
-                    aria-sort={
-                      sort === 'fullName' ? (direction === 1 ? 'ascending' : 'descending') : 'none'
-                    }
-                  >
-                    <Button
-                      aria-label="Ordenar por nombre completo"
-                      data-action-id="PATIENT-SORT-NAME"
-                      onClick={() => {
-                        setDirection(sort === 'fullName' ? ((direction * -1) as 1 | -1) : 1);
-                        setSort('fullName');
-                        setPage(1);
-                      }}
-                      type="button"
-                    >
-                      Contacto {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : ''}
-                    </Button>
-                  </th>
+                  <th>Contacto</th>
                   <th>Cobertura registrada</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -877,20 +889,30 @@ export default function PatientsPage() {
                   <tr key={patient.id}>
                     <td className="patient-person-cell">
                       <span aria-hidden="true" className="patient-avatar">
-                        {patient.fullName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()}
+                        {patient.fullName
+                          .split(/\s+/)
+                          .slice(0, 2)
+                          .map((part) => part[0])
+                          .join('')
+                          .toUpperCase()}
                       </span>
                       <div>
-                        <Link href={`/patients/${patient.id}`}>
-                          {patient.fullName}
-                        </Link>
+                        <Link href={`/patients/${patient.id}`}>{patient.fullName}</Link>
                         <small>{patient.id}</small>
                       </div>
                     </td>
                     <td>
-                      {patient.documentType}<small>{patient.documentId}</small>
+                      {patient.documentType}
+                      <small>{patient.documentId}</small>
                     </td>
-                    <td>{patient.phone || 'Sin teléfono'}<small>{patient.email || ''}</small></td>
-                    <td>{patient.insurer ?? patient.insurance?.insurer ?? 'Particular'}<small>{patient.company ?? ''}</small></td>
+                    <td>
+                      {patient.phone || 'Sin teléfono'}
+                      <small>{patient.email || ''}</small>
+                    </td>
+                    <td>
+                      {patient.insurer ?? patient.insurance?.insurer ?? 'Particular'}
+                      <small>{patient.company ?? ''}</small>
+                    </td>
                     <td>
                       <StatusTag tone={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {patient.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -899,7 +921,7 @@ export default function PatientsPage() {
                     <td>
                       <div className="patient-row-actions">
                         <Link
-                          aria-label={`Abrir ${patient.fullName}`}
+                          aria-label={`Detalle de ${patient.fullName}`}
                           data-action-id="PATIENT-DETAIL-NAVIGATE"
                           href={`/patients/${patient.id}`}
                           title="Abrir paciente"
@@ -908,10 +930,23 @@ export default function PatientsPage() {
                         </Link>
                         {can('patients:write') ? (
                           <Button
-                            aria-label={patient.status === 'ACTIVE' ? `Inactivar ${patient.fullName}` : `Reactivar ${patient.fullName}`}
+                            aria-label={
+                              patient.status === 'ACTIVE'
+                                ? `Inactivar ${patient.fullName}`
+                                : `Reactivar ${patient.fullName}`
+                            }
                             className="button-secondary"
-                            data-action-id={patient.status === 'ACTIVE' ? 'PATIENT-INACTIVATE' : 'PATIENT-REACTIVATE'}
-                            onClick={() => void updatePatient({ ...patient, status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })}
+                            data-action-id={
+                              patient.status === 'ACTIVE'
+                                ? 'PATIENT-INACTIVATE'
+                                : 'PATIENT-REACTIVATE'
+                            }
+                            onClick={() =>
+                              void updatePatient({
+                                ...patient,
+                                status: patient.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE',
+                              })
+                            }
                             title={patient.status === 'ACTIVE' ? 'Inactivar' : 'Reactivar'}
                             type="button"
                           >
@@ -966,6 +1001,11 @@ export default function PatientsPage() {
         description="Los datos administrativos sintéticos se validan y persisten en el proveedor configurado."
         footer={
           <>
+            {persistenceError ? (
+              <p className="field-error dialog-save-error" role="alert">
+                {persistenceError}
+              </p>
+            ) : null}
             <Button
               className="button-secondary"
               data-action-id={editingPatient ? 'PATIENT-EDIT-CANCEL' : 'PATIENT-BACK'}
@@ -1200,6 +1240,26 @@ export default function PatientsPage() {
                 ? 'Hasta 5 MB por archivo. Se almacena de forma privada y cada lectura vuelve a validar organización y permisos.'
                 : 'La carga está disponible únicamente con el almacenamiento privado Mongo activo; la demo no conserva archivos.'}
             </p>
+            <label>
+              Documento de identidad del responsable
+              <input
+                accept="image/jpeg,image/png,application/pdf"
+                data-action-id="PATIENT-RESPONSIBLE-ATTACHMENTS"
+                disabled={providerMode !== 'mongodb'}
+                multiple
+                type="file"
+                onChange={(event) =>
+                  setPendingResponsibleFiles(Array.from(event.currentTarget.files ?? []))
+                }
+              />
+            </label>
+            {pendingResponsibleFiles.length ? (
+              <ul className="private-file-list" aria-label="Documentos del responsable preparados">
+                {pendingResponsibleFiles.map((file) => (
+                  <li key={`${file.name}-${file.lastModified}`}>Responsable · {file.name}</li>
+                ))}
+              </ul>
+            ) : null}
             {pendingIdentityFiles.length ? (
               <ul className="private-file-list" aria-label="Documentos preparados para cargar">
                 {pendingIdentityFiles.map((file) => (
@@ -1272,7 +1332,13 @@ export default function PatientsPage() {
                           field.onChange(value);
                           if (value) setHolderDialogOpen(true);
                         }}
-                        options={insuranceProviderOptions}
+                        options={
+                          providerMode === 'mongodb'
+                            ? operations.configuration
+                                .filter((entry) => entry.category === 'INSURER' && entry.active)
+                                .map((entry) => ({ value: entry.label, label: entry.label }))
+                            : insuranceProviderOptions
+                        }
                         value={field.value}
                       />
                     )}

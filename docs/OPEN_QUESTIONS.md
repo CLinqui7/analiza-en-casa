@@ -275,7 +275,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Integraciones
 
-- `DB01-MONGODB`: aprobar y provisionar identidad de aplicación, membresías/roles por organización, cluster Atlas separado de staging/producción, usuario técnico de mínimos privilegios, conectividad segura, secretos gestionados, bootstrap revisado, storage privado de adjuntos y backup/restauración. Hasta contar con ello `/api/workspace` falla cerrado y no se certifica Mongo remoto ni persistencia multiusuario.
+- `DB01-MONGODB` actualizado 2026-09-10: el clúster existente `analiza-cluster` ya tiene usuario limitado a `analiza_en_casa`, bootstrap, semilla ficticia, adjuntos privados y pruebas reales A/B/C desde la aplicación local. Pendiente salida fija de Vercel para repetir esas pruebas en Preview, respaldo/restauración y aprobación institucional antes de datos reales. No crear otro clúster.
 - Proveedor y credenciales de WhatsApp.
 - Proveedor y credenciales de SMS.
 - Correo transaccional.
@@ -306,11 +306,11 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 ## M01 · identidad MongoDB
 
 - Seleccionar proveedor aprobado para verificación de correo y restablecimiento de acceso; no existe envío ni recuperación habilitados en la aplicación local. Debe definir límites, contenido mínimo, expiración, auditoría y protección contra enumeración antes de publicar esa función.
-- Proveer por canal seguro el mecanismo de bootstrap, secretos administrados y aprobación de la matriz definitiva de membresías/roles. El código local no crea un administrador por signup público, no contiene cuentas reales y no puede validar Atlas remoto sin una infraestructura autorizada.
+- Actualizado 2026-09-10: bootstrap privado ejecutado y Atlas remoto verificado desde la aplicación local con cuentas QA y roles de servidor. El código no permite signup público de administrador. Restan aprobación institucional de membresías, rotación/custodia de secretos para operación y salida fija de Preview.
 
 ## Solicitudes de reunión · 2026-09-09
 
 - `MEETING-Q001`: identificar qué control significa “selección de fin” y en qué pantalla debe retirarse. No se elimina un campo ambiguo sin confirmar su propósito.
-- `MEETING-Q002`: definir período, actor, denominador, moneda y fuente aprobada de “visitas”, “ventas” y “meta”. El panel actual muestra visitas documentadas, valor de cotizaciones enviadas —no ventas ni cobros— y “Sin meta definida”.
-- `MEETING-Q003`: aprobar el vínculo por organización entre recurso de enfermería y cuenta autenticada, vigencia de la asignación, reasignación/revocación, acceso al paciente y Balance Hídrico, y auditoría. La hospitalización ya guarda recursos asignados, pero el navegador no concede acceso exclusivo por sí solo.
+- `MEETING-Q002` actualizado: la aclaración del usuario define una página separada por profesional y mes. Se implementaron visitas realizadas, ventas explícitas con referencia y objetivos configurables; Atlas verificó el guardado. Pendiente fuente de conciliación y definición institucional de venta, no inferida de cotizaciones.
+- `MEETING-Q003` actualizado: cuentas NURSE vinculadas a recursos, asignación al crear/editar hospitalización y restricción de escritura en servidor ya verificadas con dos enfermeras y otra organización. Todas las enfermeras de la misma organización pueden consultar el balance; sólo asignadas y administrador pueden editar. Pendiente política institucional de vigencia, reasignación y retención, sin ampliar accesos entre organizaciones.
 - `MEETING-Q004`: definir campos fiscales, emisor, numeración y reglas tributarias de factura/crédito fiscal. La cotización actual conserva únicamente la clasificación administrativa y no calcula impuestos.

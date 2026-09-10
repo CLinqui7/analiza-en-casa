@@ -95,7 +95,7 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await dialog.getByRole('button', { name: 'Editar' }).click();
   await dialog.getByLabel('Cantidad').fill('2');
   await dialog.getByRole('button', { name: 'Actualizar línea' }).click();
-  await dialog.getByLabel('Tipo').selectOption('PERCENT');
+  await dialog.locator('select[data-action-id="QUOTE-DISCOUNT-UPDATE"]').selectOption('PERCENT');
   await dialog.getByLabel('Porcentaje de descuento').fill('10');
   await dialog.getByLabel('Responsabilidad explícita de aseguradora').fill('5');
   await expect(dialog.getByLabel('Totales de cotización')).toContainText('USD 65.70');
@@ -139,6 +139,7 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.reload();
   await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Enviar versión' })).toHaveCount(0);
+  const sentVersionUrl = page.url();
   await page.getByRole('button', { name: 'Revisar / nueva versión' }).click();
   dialog = page.getByRole('dialog', { name: /Revisar/ });
   await page.getByRole('button', { name: 'Crear revisión' }).click();
@@ -164,10 +165,25 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.getByRole('button', { name: 'Abrir pagos' }).click();
   await expect(page).toHaveURL(/\/payments\?quote=/);
   await page.goBack();
-  await page.getByRole('button', { name: 'Enviar WhatsApp' }).click();
-  await expect(page.getByRole('status')).toContainText('Proveedor de mensajería no configurado');
-  await page.getByRole('button', { name: 'Copiar enlace portal' }).click();
-  await expect(page.getByRole('status')).toContainText('Portal seguro no configurado');
+  await expect(page.locator('[data-action-id="QUOTE-PORTAL"]')).toHaveCount(0);
+  await page.goto(sentVersionUrl);
+  let browserPortalRequests = 0;
+  page.on('request', (request) => {
+    if (request.url().endsWith('/api/portal-links') && request.method() === 'POST')
+      browserPortalRequests++;
+  });
+  await page.getByRole('button', { name: 'Crear QR y enlace seguro' }).click();
+  await expect(page.getByRole('status')).toContainText(
+    'El portal seguro requiere la conexión Mongo y la sesión protegida.',
+  );
+  expect(browserPortalRequests).toBe(0);
+  const unauthenticatedPortalResponse = await page.request.post('/api/portal-links', {
+    data: { quoteId: 'not-authorized' },
+  });
+  expect(unauthenticatedPortalResponse.status()).toBe(503);
+  await expect(page.getByRole('img', { name: 'Código QR del portal seguro' })).toHaveCount(0);
+  await expect(page.locator('[data-action-id="QUOTE-WHATSAPP"]')).toHaveCount(0);
+  await expect(page.locator('.notice.success')).toHaveCount(0);
 });
 
 // test-id: playwright:quotes-metadata-filters-pagination

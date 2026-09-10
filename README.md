@@ -4,6 +4,18 @@ Analiza en Casa es una aplicación web de demostración para la operación de at
 
 > Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
 
+## React Studio y Atlas verificados · septiembre 2026
+
+La aplicación del checkout actual conserva sus rutas y menú plegable y adopta el estilo del HTML Studio. El backend Mongo se comprobó contra el clúster Atlas existente con datos QA: pacientes, hospitalizaciones, cotizaciones, adjuntos privados, roles de enfermería, balance hídrico, catálogos, pagos, visitas y consumo transaccional de inventario. Consulte `docs/release/MONGO_STUDIO_VERIFICATION_20260910.md` y `docs/release/DESKTOP_DELIVERY_STATE.json` para evidencia y límites; el preview visual no implica certificación productiva.
+
+Con los archivos privados del operador configurados fuera de Git y el servidor local conectado, la prueba real se ejecuta desde `apps/web`:
+
+```powershell
+node --env-file=.env.local --env-file=../../.env.mongodb.operator.local --import tsx src/server/mongo-live-verification.ts
+```
+
+Esta prueba crea exclusivamente registros sintéticos QA y conserva su auditoría. La prueba visual de navegador está en `scripts/verify-local-mongo-browser.mjs`. Los secretos, capturas locales y resultados temporales se excluyen del commit y del deploy. No habilite Atlas para todo Internet: Preview requiere salida de red fija autorizada.
+
 ## Objetivo y módulos
 
 El sistema concentra pacientes, responsables, hospitalizaciones, cotizaciones versionadas, preautorizaciones, cobros, portal del paciente, documentos clínicos, agenda, compras, inventario, kits, cuentas por pagar, catálogos, auditoría y QA de paridad del video.

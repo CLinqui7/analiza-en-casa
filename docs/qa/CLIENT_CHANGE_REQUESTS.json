@@ -57,14 +57,21 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "73e43817ca6648247df2b6aa366a2549f459d7eb1049bc38824db604488cf1fa",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
+      "notes": "DUI conserva validación y formulario React. Hay proveedor Mongo real con persistencia de pacientes; la prueba A/B/C usa identificadores QA OTHER, no acredita todas las variantes documentales.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-002",
@@ -114,14 +121,21 @@
       "blocker_reason": "La UI y el contrato existen en modo demo, pero la certificación de persistencia por organización requiere un proyecto Supabase de prueba con RLS y dos sesiones autorizadas.",
       "client_question": "¿Qué proyecto de prueba, organizaciones y cuentas de dos roles autorizados se usarán para certificar RLS y visibilidad multiusuario del Carnet de residente?",
       "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
-      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "73e43817ca6648247df2b6aa366a2549f459d7eb1049bc38824db604488cf1fa",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Carnet de residente existe en contrato, formulario, importación y migración; la persistencia multiusuario sigue sin certificación."
+      "notes": "Carnet de residente se crea, recarga y edita en pruebas React demo. El proveedor Mongo ya está conectado localmente; la variante de documento requiere repetición específica en preview.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-003",
@@ -181,7 +195,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "CSV/XLSX exporta la vista filtrada/ordenada; la descarga XLSX se verifica como paquete OOXML y no evalúa el conjunto autorizado completo."
+      "notes": "CSV/XLSX exporta los resultados filtrados y ordenados, no todo el universo autorizado. El botón se identifica como Exportar Excel. La descarga OOXML está probada; el alcance completo continúa parcial.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-004",
@@ -213,7 +234,8 @@
       ],
       "react_files": [
         "packages/contracts/src/index.ts",
-        "apps/web/src/app/(workspace)/patients/page.tsx"
+        "apps/web/src/app/(workspace)/patients/page.tsx",
+        "apps/web/src/server/mongo-files.ts"
       ],
       "db_objects": [
         "supabase/migrations/202609020001_b1_patient_contact_documents.sql"
@@ -240,7 +262,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El formulario, contrato y migración guardan tipo/número de documento administrativo; falta certificación multiusuario de Supabase."
+      "notes": "Tipo y número del documento del responsable se validan como pareja y persisten en la prueba React. Se añadieron controles de adjunto para paciente y responsable; el servicio privado guarda bytes en Atlas y deniega descargas de otra organización. Falta repetir ambos adjuntos desde el formulario y en preview conectado.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-005",
@@ -291,14 +320,21 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Separar altas, rutas y modelos de médico y recurso",
-      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-      "functional_fingerprint": "f982436a19817459ccb233e52512e1e75d584fb7f2801357ead774150fc26b53",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "556d26c4994fbf4546270a717071198954d8290f9216504dcd80e434b440bb4c",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
+      "notes": "Médico y recurso conservan altas separadas. Se agrega Equipo de enfermería con alta de cuenta NURSE por encargada, probada contra Mongo; el servidor impide que la encargada inyecte ADMIN. La prueba de médico continúa siendo demo.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-006",
@@ -363,7 +399,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "La alta y edición de médico se verifican en demo; los adjuntos no almacenan bytes ni tienen descarga privada autorizada."
+      "notes": "Alta y edición de médico se verifican en demo. El servicio genérico de adjuntos privados ya funciona contra Atlas, pero la integración específica de expedientes de médicos continúa pendiente.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-007",
@@ -393,7 +436,9 @@
       "video_requirement_ids": [],
       "react_files": [
         "apps/web/src/app/(workspace)/doctors/page.tsx",
-        "apps/web/src/lib/doctor-catalog.ts"
+        "apps/web/src/lib/doctor-catalog.ts",
+        "apps/web/src/components/operational-catalogs.tsx",
+        "apps/web/src/server/mongo-operations.ts"
       ],
       "db_objects": [],
       "action_ids": [
@@ -415,14 +460,21 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Catálogo buscable y persistente de especialidades/profesiones",
-      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-      "functional_fingerprint": "26fe627c4d4714d37fb949540f3201ad992d12992016fb3f7511685ffb63cbab",
-      "certification_status": "DEMO_CERTIFIED",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "07335e55237244a74aa929d1b3ed6d43d64ad46fb7dabf48ca3e0320c1a1db6b",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El selector de especialidades solicitado funciona y persiste en modo demo por navegador; la certificación de servicio compartido queda fuera de este alcance demo."
+      "notes": "Catálogos operativos permite a la encargada configurar especialidades, dosis, medicamentos y seguros. El selector de médicos consulta las especialidades compartidas en modo Mongo. Medicamento/dosis y permisos se probaron con Atlas; catálogo institucional completo y preview conectado pendientes.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-008",
@@ -453,7 +505,8 @@
         "CH03-F005"
       ],
       "react_files": [
-        "apps/web/src/app/(workspace)/hospitalizations/page.tsx"
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
+        "apps/web/src/server/mongo-files.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
@@ -480,7 +533,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Hay tablas destino, sin UI, Storage privado ni descarga segura."
+      "notes": "Existe control de adjunto de hospitalización y servicio de bytes privado Mongo, con descarga autorizada y 404 entre organizaciones. La prueba integral de carga desde esta pantalla sigue pendiente; no se certifica por existir la UI.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-009",
@@ -543,7 +603,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El contrato tiene start/end opcional, la UI sólo presenta fecha de inicio."
+      "notes": "La prueba React conserva múltiples períodos de ingreso/egreso. Al crear hospitalización se asignan recursos vinculados a usuarios NURSE reales; la prueba Mongo crea, edita y relee el caso. 'Selección de fin' requiere identificar el control antes de retirar fechas necesarias.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-010",
@@ -593,7 +660,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
+      "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-011",
@@ -643,14 +717,21 @@
       "blocker_reason": "La asignación de médico a un honorario requiere elegibilidad profesional, fuente de precio, impuestos/descuentos, cálculo, liquidación, reversión y auditoría aprobados.",
       "client_question": "¿Qué médicos son elegibles, cuál es la fuente de honorario y cuáles son los roles, cálculos, impuestos, liquidación, reversión y auditoría autorizados?",
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "90f93af45f7aaf3ebfa9e95dc051e4081983656b86bd3aea926790d5e6ebc91e",
-      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "e5141db4ed24fae7de83fbbc02fb34dc771b6ddcefa4dc88ac4aaf7fa989f8dd",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Las siete categorías están en la UI React y se persisten sólo en el proveedor demo. La accesibilidad de selección cambió en 0e0626f; el runtime enfocado fresco y Selenium siguen pendientes, por lo que no se reemite DEMO_CERTIFIED."
+      "notes": "Las siete categorías y sus importes manuales se conservan. Cotizaciones Mongo admite crear, editar y recuperar desde otra sesión; el preview sigue DEMO por falta de salida fija de red. Selenium actual y la prueba de todas las categorías en preview conectado permanecen pendientes.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-012",
@@ -684,7 +765,8 @@
       ],
       "react_files": [
         "apps/web/src/app/(workspace)/quotes/page.tsx",
-        "apps/web/src/lib/data-provider.ts"
+        "apps/web/src/lib/data-provider.ts",
+        "apps/web/src/lib/http-data-provider.ts"
       ],
       "db_objects": [],
       "action_ids": [
@@ -702,14 +784,21 @@
       "blocker_reason": "La UI demo persiste por navegador; la solicitud exige visibilidad entre usuarios autorizados, por organización, con RLS, refetch/Realtime y auditoría comprobables.",
       "client_question": "¿Qué proyecto de prueba, organizaciones y dos cuentas autorizadas se usarán para certificar creación, aislamiento y visibilidad multiusuario de pacientes?",
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
-      "functional_fingerprint": "0ce94838a03b2cd28ab6f2ad966aa6e2133b61513b1220f443348b3fd24efabb",
-      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
+      "implementation_sha": "PENDING_COMMIT",
+      "functional_fingerprint": "509994a1de15af505bc4f247577432335fe2240a40cfc97c1506df45cfde3054",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": true,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. La accesibilidad de selección cambió en 0e0626f y requiere runtime enfocado fresco antes de reemitir DEMO_CERTIFIED; Selenium sigue pendiente."
+      "notes": "Actualizar pacientes usa ahora la instantánea compartida Mongo. La prueba HTTP A/B/C demuestra lectura autorizada entre sesiones y exclusión de otra organización. Falta repetir el recorrido exacto del selector React desde dos sesiones del preview conectado.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-013",
@@ -731,7 +820,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-14"
       ],
-      "status": "MISSING",
+      "status": "PARTIAL",
       "production_status": "MISSING",
       "route_ids": [
         "ROUTE-QUOTES",
@@ -757,12 +846,19 @@
       "acceptance_criteria": "Vincular médico y honorario trazable a línea FEES",
       "implementation_sha": null,
       "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "certification_status": "PARTIAL",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "Existe categoría genérica, no médico ni honorario asociado."
+      "technical_status": "IMPLEMENTED_PARTIAL",
+      "notes": "El compositor vincula una línea de honorarios manuales al médico elegido y la conserva después de recargar en la prueba B4. No se inventan tarifas ni se certifica conciliación institucional.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-014",
@@ -814,7 +910,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere."
+      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-015",
@@ -836,8 +939,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-16"
       ],
-      "status": "BLOCKED_CLIENT",
-      "production_status": "BLOCKED_CLIENT",
+      "status": "PARTIAL",
+      "production_status": "PENDING_INTEGRATION",
       "route_ids": [
         "ROUTE-AGENDA",
         "ROUTE-DOCTORS"
@@ -846,7 +949,9 @@
         "CH11-F01"
       ],
       "react_files": [
-        "apps/web/src/app/(workspace)/agenda/page.tsx"
+        "apps/web/src/app/(workspace)/agenda/page.tsx",
+        "apps/web/src/app/(workspace)/reports/visits-goals/page.tsx",
+        "apps/web/src/server/mongo-operations.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -857,17 +962,24 @@
         "B4"
       ],
       "blocker_type": "CLIENT_DEFINITION",
-      "blocker_reason": "¿Qué cuenta como visita, cuál es la meta y cómo se calcula cumplimiento?",
+      "blocker_reason": "Pendientes conciliación institucional de ventas, validación del indicador y prueba en preview conectado.",
       "client_question": "¿Qué cuenta como visita, cuál es la meta y cómo se calcula cumplimiento?",
       "acceptance_criteria": "Definir visita válida, meta, período y fórmula de cumplimiento",
       "implementation_sha": null,
       "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "certification_status": "PARTIAL",
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "No existen médicos, metas ni fórmula aprobada."
+      "technical_status": "IMPLEMENTED_PARTIAL",
+      "notes": "La solicitud posterior precisa una página independiente de visitas a domicilio por enfermera/médico, ventas y metas mensuales. /reports/visits-goals persiste visitas realizadas, ventas con referencia y metas en Atlas. No transforma cotizaciones en ventas. La conciliación institucional y el preview conectado siguen pendientes.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Mongo real: evidencia acotada en MONGO_STUDIO_VERIFICATION_20260910.md",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-016",
@@ -889,7 +1001,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-17"
       ],
-      "status": "MISSING",
+      "status": "PARTIAL",
       "production_status": "MISSING",
       "route_ids": [
         "ROUTE-DASHBOARD"
@@ -914,12 +1026,19 @@
       "acceptance_criteria": "Métrica/gráfica con datos de seguro y permisos",
       "implementation_sha": null,
       "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "certification_status": "PARTIAL",
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "El dato existe en Patient; Dashboard no lo muestra."
+      "technical_status": "IMPLEMENTED_PARTIAL",
+      "notes": "Dashboard muestra pacientes particulares y con seguro a partir de los pacientes autorizados. La prueba B4 verifica los conteos; no se infieren montos de cobertura ni facturación.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-017",
@@ -975,14 +1094,21 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
-      "implementation_sha": "0e0626fccc8d464b98458c4a40bf185a992f2a90",
+      "implementation_sha": "PENDING_COMMIT",
       "functional_fingerprint": "486a24921979ed881208c141d2350f7b915227a90ff68678082f79586b7b8718",
-      "certification_status": "PENDING_RUNTIME_CERTIFICATION",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador. La derivación de paciente cambió en 0e0626f y requiere runtime enfocado fresco antes de reemitir DEMO_CERTIFIED; Selenium sigue pendiente."
+      "notes": "La agenda crea turnos por fecha, rechaza repeticiones y colisiones y conserva la selección del paciente. Pruebas React demo; falta repetir las series sobre el preview conectado y Selenium actual.",
+      "verification_stages": {
+        "implemented": "Alcance descrito implementado",
+        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-018",
@@ -1043,7 +1169,14 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010."
+      "notes": "Presets 6h/8h persisten duración incluso al cruzar medianoche. El alta Mongo relaciona hospitalización y enfermeras por usuario. Puntual y la eliminación de 'selección de fin' siguen pendientes de identificación/definición.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Evidencia y límites descritos en notas",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-019",
@@ -1095,7 +1228,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
+      "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-020",
@@ -1117,14 +1257,17 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-21"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PENDING_INTEGRATION",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/clinical",
+        "apps/web/src/app/(workspace)/clinical/balance/page.tsx",
+        "apps/web/src/server/mongo-operations.ts",
+        "packages/contracts/src/operations.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1135,17 +1278,24 @@
         "B5"
       ],
       "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
+      "blocker_reason": "Pendientes aprobación clínica del formulario institucional y prueba en preview conectado.",
       "client_question": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
       "acceptance_criteria": "Entradas append-only por turno, totales 24h y cierre auditado",
       "implementation_sha": null,
       "functional_fingerprint": null,
-      "certification_status": "NOT_CERTIFIED",
+      "certification_status": "PARTIAL",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica. No se enlaza a CH17-F11 porque esa evidencia trata signos vitales, no Balance Hídrico."
+      "technical_status": "IMPLEMENTED_PARTIAL",
+      "notes": "Se implementó /clinical/balance con períodos, entradas append-only, sumas de entradas/salidas, cierre y corrección auditada. Atlas verifica lectura de enfermeras de la organización y escritura sólo asignada, rechaza organización ajena y conserva originales. No equivale a aprobación clínica; formulario institucional y preview conectado pendientes.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Mongo real: evidencia acotada en MONGO_STUDIO_VERIFICATION_20260910.md",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-021",
@@ -1195,7 +1345,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-022",
@@ -1245,7 +1402,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-023",
@@ -1295,7 +1459,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni formulario aprobado."
+      "notes": "No existe motor ni formulario aprobado.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-024",
@@ -1345,7 +1516,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-025",
@@ -1395,7 +1573,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      "notes": "No existe motor ni definición institucional de dominios/incompletos.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-026",
@@ -1445,7 +1630,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-027",
@@ -1495,7 +1687,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni versión aprobada."
+      "notes": "No existe motor ni versión aprobada.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-028",
@@ -1545,7 +1744,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-029",
@@ -1595,7 +1801,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-030",
@@ -1645,7 +1858,14 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "El texto dice Branden y la imagen parece Braden."
+      "notes": "El texto dice Branden y la imagen parece Braden.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     },
     {
       "change_id": "CR-031",
@@ -1669,7 +1889,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-33-34"
       ],
       "status": "PARTIAL",
-      "production_status": "PARTIAL",
+      "production_status": "PENDING_INTEGRATION",
       "route_ids": [
         "ROUTE-PATIENTS"
       ],
@@ -1677,7 +1897,10 @@
         "CH02-F002"
       ],
       "react_files": [
-        "apps/web/src/lib/data-provider.ts"
+        "apps/web/src/lib/data-provider.ts",
+        "apps/web/src/server/mongo-live-verification.ts",
+        "apps/web/src/server/mongo-operations.ts",
+        "apps/web/src/lib/http-data-provider.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260002_security_rls_functions.sql"
@@ -1694,7 +1917,7 @@
         "B1"
       ],
       "blocker_type": "INTEGRATION",
-      "blocker_reason": "La UI demo persiste por navegador; la solicitud exige visibilidad entre usuarios autorizados, por organización, con RLS, refetch/Realtime y auditoría comprobables.",
+      "blocker_reason": "Falta salida fija de Vercel para conectar Preview sin 0.0.0.0/0 y completar los módulos restantes.",
       "client_question": "¿Qué proyecto de prueba, organizaciones y dos cuentas autorizadas se usarán para certificar creación, aislamiento y visibilidad multiusuario de pacientes?",
       "acceptance_criteria": "Persistencia multiusuario por organización, RLS, refetch/Realtime y auditoría",
       "implementation_sha": null,
@@ -1704,7 +1927,14 @@
       "multiuser_required": true,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Supabase/RLS existe, pero demo usa localStorage por navegador y no hay E2E de dos usuarios."
+      "notes": "Atlas existente está conectado y su bootstrap aplicó 41 índices. Pacientes, hospitalizaciones, cotizaciones, pagos, adjuntos, balance, administración de unidades y visitas tienen pruebas reales de persistencia e integridad locales. Los límites organizacionales se validan en el servidor; no se afirma RLS Mongo. Preview requiere salida fija autorizada; otros módulos aún no integrados siguen abiertos.",
+      "verification_stages": {
+        "implemented": "Parcial",
+        "local": "Mongo real: evidencia acotada en MONGO_STUDIO_VERIFICATION_20260910.md",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
+        "definition": "Sin nueva regla clínica/financiera inferida"
+      }
     },
     {
       "change_id": "CR-032",
@@ -1754,7 +1984,15 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación.",
+      "verification_stages": {
+        "implemented": "No certificado",
+        "local": "Sin nueva prueba funcional de este lote",
+        "preview": "Pendiente de prueba funcional del candidato Studio",
+        "integration": "No certificada por esta actualización",
+        "definition": "Conservar confirmación pendiente y conflictos de fuente"
+      }
     }
-  ]
+  ],
+  "updated_at": "2026-09-10T06:44:13.847Z"
 }

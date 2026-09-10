@@ -81,6 +81,7 @@ export class MongoHospitalizationRepository {
   constructor(
     private readonly hospitalizations: HospitalizationCollection,
     private readonly patients: PatientLookup,
+    private readonly nurseAccounts?: { resources: PatientLookup; memberships: PatientLookup },
   ) {}
 
   async listWithVersions(actor: ServerActor): Promise<HospitalizationWithVersion[]> {
@@ -108,9 +109,43 @@ export class MongoHospitalizationRepository {
     if (!patient) throw new MongoInputError('El paciente asociado no está disponible.');
   }
 
+  private async resolveNurses(actor: ServerActor, hospitalization: Hospitalization) {
+    const resourceIds = [...new Set(hospitalization.assignedNursingResourceIds ?? [])];
+    if (!this.nurseAccounts) {
+      if (resourceIds.length || hospitalization.assignedNurseUserIds?.length)
+        throw new MongoInputError('La validación de cuentas de enfermería no está disponible.');
+      return hospitalization;
+    }
+    if (!resourceIds.length)
+      throw new MongoInputError('Asigne al menos una enfermera con cuenta de usuario.');
+    const userIds: string[] = [];
+    for (const id of resourceIds) {
+      const resource = (await this.nurseAccounts.resources.findOne({
+        id,
+        organizationId: actor.organizationId,
+      })) as { userId?: string } | null;
+      if (
+        !resource?.userId ||
+        !(await this.nurseAccounts.memberships.findOne({
+          userId: resource.userId,
+          organizationId: actor.organizationId,
+          active: true,
+          role: { $in: ['NURSE', 'NURSE_MANAGER'] },
+        }))
+      )
+        throw new MongoInputError('Una enfermera no tiene una cuenta activa en esta organización.');
+      userIds.push(resource.userId);
+    }
+    return {
+      ...hospitalization,
+      assignedNursingResourceIds: resourceIds,
+      assignedNurseUserIds: [...new Set(userIds)],
+    };
+  }
+
   async create(actor: ServerActor, input: unknown, now = new Date()): Promise<Hospitalization> {
     authorize(actor, 'cases:write');
-    const hospitalization = parseHospitalizationCreate(input);
+    const hospitalization = await this.resolveNurses(actor, parseHospitalizationCreate(input));
     await this.requirePatient(actor, hospitalization.patientId);
     const timestamp = now.toISOString();
     const stored: StoredHospitalization = {
@@ -131,7 +166,9 @@ export class MongoHospitalizationRepository {
     now = new Date(),
   ): Promise<Hospitalization> {
     authorize(actor, 'cases:write');
-    const { hospitalization, expectedVersion } = parseHospitalizationReplace(input);
+    const parsed = parseHospitalizationReplace(input);
+    const { expectedVersion } = parsed;
+    const hospitalization = await this.resolveNurses(actor, parsed.hospitalization);
     if (hospitalization.id !== id)
       throw new MongoInputError('El identificador de ruta no coincide.');
     await this.requirePatient(actor, hospitalization.patientId);

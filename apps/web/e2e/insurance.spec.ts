@@ -87,23 +87,24 @@ test('insurance cancellation, invalid quote, safe channels and role guards are e
   await admin.getByRole('button', { name: 'Registrar actualización' }).first().click();
   await admin.getByRole('button', { name: 'Cancelar' }).click();
   await admin.reload();
-  await expect(admin.getByText('Sin solicitud registrada', { exact: true })).toBeVisible();
+  await expect(admin.getByText('No existe una solicitud persistida todavía.', { exact: false })).toBeVisible();
   await admin.goto('/insurance?quote=missing-quote');
   await expect(admin.getByText('Cotización no disponible')).toBeVisible();
   await admin.getByRole('button', { name: 'WhatsApp' }).click();
-  await expect(admin.locator('.notice.success')).toContainText(
+  await expect(admin.locator('.notice.warning')).toContainText(
     'proveedor/canal externo no configurado',
   );
   await admin.getByRole('button', { name: 'Email' }).click();
-  await expect(admin.locator('.notice.success')).toContainText(
+  await expect(admin.locator('.notice.warning')).toContainText(
     'proveedor/canal externo no configurado',
   );
   await admin.getByRole('button', { name: 'Enviar al seguro' }).click();
-  await expect(admin.locator('.notice.success')).toContainText(
+  await expect(admin.locator('.notice.warning')).toContainText(
     'proveedor/canal externo no configurado',
   );
   await admin.getByRole('button', { name: 'Reclamo' }).click();
-  await expect(admin.locator('.notice.success')).toContainText('CH08-Q002');
+  await expect(admin.locator('.notice.warning')).toContainText('CH08-Q002');
+  await expect(admin.locator('.notice.success')).toHaveCount(0);
   await adminContext.close();
 
   for (const role of [

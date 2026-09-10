@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useWorkspace } from '@/components/providers';
 import { useAuth } from '@/components/providers';
+import { useRouter } from 'next/navigation';
 
 const resourceFormSchema = z.object({
   displayName: z.string().trim().min(1, 'Ingrese el nombre visible.'),
@@ -36,7 +37,8 @@ const availabilityTone = {
 } as const;
 
 export default function NursingBoardPage() {
-  const { addNursingResource, nursingResources } = useWorkspace();
+  const { addNursingResource, nursingResources, providerMode } = useWorkspace();
+  const router = useRouter();
   const { can } = useAuth();
   const [isOpen, setOpen] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -74,6 +76,11 @@ export default function NursingBoardPage() {
           <Button
             data-action-id="NURSING-RESOURCE-CREATE"
             onClick={() => {
+              if (providerMode === 'mongodb') {
+                if (can('nurses:manage')) router.push('/nursing-team');
+                else setResult('Solicite la creación de cuentas a la enfermera encargada.');
+                return;
+              }
               setResult(null);
               setOpen(true);
             }}

@@ -10,11 +10,11 @@ import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
 
-const itemCatalog: Record<string, { name: string; sku: string }> = {
+const demoItemCatalog: Record<string, { name: string; sku: string }> = {
   'inventory-demo-kit': { name: 'Kit operativo demo', sku: 'KIT-DEMO-001' },
   'inventory-demo-supplies': { name: 'Insumos demo', sku: 'INS-DEMO-001' },
 };
-const warehouses: Record<string, string> = {
+const demoWarehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
@@ -54,7 +54,27 @@ function direction(movement: InventoryMovement) {
 
 export default function KardexPage() {
   const pathname = usePathname();
-  const { addInventoryMovement, inventoryMovements } = useWorkspace();
+  const { addInventoryMovement, inventoryMovements, catalogItems, providerMode } = useWorkspace();
+  const itemCatalog = useMemo(
+    () => ({
+      ...(providerMode === 'mock' ? demoItemCatalog : {}),
+      ...Object.fromEntries(
+        catalogItems.map((item) => [item.id, { name: item.name, sku: item.sku }]),
+      ),
+    }),
+    [catalogItems, providerMode],
+  );
+  const warehouses: Record<string, string> = {
+    ...(providerMode === 'mock' ? demoWarehouses : { central: 'Bodega central' }),
+    ...Object.fromEntries(
+      inventoryMovements
+        .filter((item) => item.warehouseId)
+        .map((item) => [
+          item.warehouseId!,
+          item.warehouseId === 'central' ? 'Bodega central' : item.warehouseId!,
+        ]),
+    ),
+  };
   const { can, session } = useAuth();
   const isMovementView = pathname.endsWith('/movements');
   const [isOpen, setOpen] = useState(false);
@@ -74,7 +94,7 @@ export default function KardexPage() {
         ...inventoryMovements.map((movement) => movement.itemId),
       ]),
     ],
-    [inventoryMovements],
+    [inventoryMovements, itemCatalog],
   );
   const allRows = useMemo(
     () =>
@@ -135,7 +155,7 @@ export default function KardexPage() {
   function resetFilters() {
     setFilters({ itemId: '', from: '', to: '', warehouseId: '', kind: '', reference: '' });
   }
-  function submit(values: MovementForm) {
+  async function submit(values: MovementForm) {
     const movement: InventoryMovement = {
       id: crypto.randomUUID(),
       itemId: values.itemId,
@@ -157,7 +177,12 @@ export default function KardexPage() {
       });
       return;
     }
-    addInventoryMovement(movement);
+    if (!(await addInventoryMovement(movement))) {
+      form.setError('quantity', {
+        message: 'No se guardó el movimiento. Revise el artículo, las existencias y la conexión.',
+      });
+      return;
+    }
     setResult('Movimiento persistido. El saldo se recalculó desde el historial cronológico.');
     closeDialog();
   }
@@ -476,7 +501,7 @@ export default function KardexPage() {
             <Button className="button-secondary" onClick={closeDialog} type="button">
               Cancelar
             </Button>
-            <Button form="movement-form" type="submit">
+            <Button form="movement-form" type="submit" disabled={form.formState.isSubmitting}>
               Guardar movimiento
             </Button>
           </>

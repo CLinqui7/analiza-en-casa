@@ -52,23 +52,27 @@ test('CH01-F002 patient-tabs-import exposes the bulk import surface', async ({ p
   await expect(dialog).toHaveCount(0);
 });
 
-test('CH01-F003 patient-video-columns presents the observed administrative columns', async ({
+test('CH01-F003 Studio directory preserves administrative data in the patient detail', async ({
   page,
 }) => {
   await login(page, '/patients');
-  expect(await page.locator('thead th').allTextContents()).toEqual([
-    'Acción',
-    'Documento ↕',
-    'Nombre completo ↑',
-    'Edad',
-    'Empresa',
-    'Triage',
-    'Notif. Botmaker',
+  expect((await page.locator('thead th').allTextContents()).map((value) => value.trim())).toEqual([
+    'Paciente ↑',
+    'Documento',
+    'Contacto',
+    'Cobertura registrada',
     'Estado',
+    'Acciones',
   ]);
-  await expect(
-    page.getByRole('cell', { name: 'Sin clasificar', exact: true }).first(),
-  ).toBeVisible();
+  await page.getByRole('link', { name: 'Paciente Demo Aurora', exact: true }).click();
+  for (const field of [
+    'Fecha de nacimiento',
+    'Empresa',
+    'Triage administrativo',
+    'Notificaciones operativas',
+  ])
+    await expect(page.getByText(field, { exact: true })).toBeVisible();
+  await expect(page.getByText('Sin clasificar', { exact: true })).toBeVisible();
 });
 
 test('CH01-F004 search-pagination filters and pages patient records', async ({ page }) => {
@@ -87,7 +91,8 @@ test('CH01-F006 list state represents an empty filtered result safely', async ({
 
 test('CH01-F008 hierarchical menu exposes only live routes', async ({ page }) => {
   await login(page);
-  await page.getByRole('button', { name: 'Clínico' }).click();
+  const clinical = page.getByRole('button', { name: 'Clínico' });
+  if ((await clinical.getAttribute('aria-expanded')) === 'false') await clinical.click();
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
 });
@@ -134,17 +139,17 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('CH01-CONSENT');
-  await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText('No');
-  await expect(page.getByRole('row', { name: /Paciente Consentimiento CH01/ })).toContainText(
-    'Pendiente administrativo',
-  );
+  await page.getByRole('link', { name: 'Paciente Consentimiento CH01', exact: true }).click();
+  await expect(page.getByText('No autorizadas', { exact: true })).toBeVisible();
+  await expect(page.getByText('Pendiente administrativo', { exact: true })).toBeVisible();
 });
 
 test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe', async ({
   page,
 }) => {
   await login(page);
-  const operationalIndicators = page.getByLabel('Indicadores operativos');
+  await page.getByText('Mediciones, filtros y control de migración', { exact: true }).click();
+  const operationalIndicators = page.getByLabel('Indicadores clínicos documentados');
   for (const metric of [
     'Pacientes con alertas',
     'Pacientes activos',
@@ -168,7 +173,11 @@ test('CH01-F009 dashboard-six-metrics and CH01-F010 measurement table are safe',
     'Fecha',
     'Recurso',
   ])
-    await expect(page.getByRole('columnheader', { name: header, exact: true })).toBeVisible();
+    await expect(
+      page
+        .getByRole('table', { name: 'Últimas mediciones individuales' })
+        .getByRole('columnheader', { name: header, exact: true }),
+    ).toBeVisible();
   await expect(page.getByText('Sin clasificar', { exact: true })).toBeVisible();
 });
 

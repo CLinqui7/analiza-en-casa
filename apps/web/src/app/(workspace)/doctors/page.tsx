@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { doctorSpecialtyOptions, toDoctorAttachmentMetadata } from '@/lib/doctor-catalog';
+import { useOperations } from '@/lib/use-operations';
 import {
   privateFileDownloadHref,
   type PrivateFileMetadata,
@@ -46,6 +47,7 @@ const emptyDoctor: DoctorForm = {
 };
 
 export default function DoctorsPage() {
+  const operations = useOperations();
   const { can } = useAuth();
   const { addDoctor, doctors, providerMode, updateDoctor } = useWorkspace();
   const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
@@ -149,12 +151,12 @@ export default function DoctorsPage() {
         </div>
       </header>
       {providerMode === 'mock' ? (
-        <p className="notice warning" role="status">
+        <p className="notice warning">
           Los médicos y archivos en este modo son datos demo locales. No se presentan como
           integración compartida ni como almacenamiento privado.
         </p>
       ) : mongoMode ? (
-        <p className="notice warning" role="status">
+        <p className="notice warning">
           En Mongo, guarde primero el médico. Los adjuntos privados se cargan por bytes mediante la
           ruta autorizada y no se registran sólo por nombre.
         </p>
@@ -293,7 +295,13 @@ export default function DoctorsPage() {
                 actionId="DOCTOR-SPECIALTY-SELECT"
                 ariaLabel="Especialidad o profesión"
                 onChange={field.onChange}
-                options={doctorSpecialtyOptions}
+                options={
+                  providerMode === 'mongodb'
+                    ? operations.configuration
+                        .filter((entry) => entry.category === 'SPECIALTY' && entry.active)
+                        .map((entry) => ({ value: entry.label, label: entry.label }))
+                    : doctorSpecialtyOptions
+                }
                 placeholder="Buscar especialidad o profesión"
                 value={field.value}
               />

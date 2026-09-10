@@ -846,6 +846,7 @@ export default function HospitalizationsPage() {
                   <label key={resource.id}>
                     <input
                       data-action-id="HOSPITALIZATION-NURSE-ASSIGNMENT"
+                      disabled={providerMode === 'mongodb' && !resource.userId}
                       type="checkbox"
                       value={resource.id}
                       {...form.register('assignedNursingResourceIds')}
@@ -859,6 +860,9 @@ export default function HospitalizationsPage() {
                             ? 'Tarde'
                             : 'Noche'}{' '}
                         · {resource.territory}
+                        {providerMode === 'mongodb' && !resource.userId
+                          ? ' · Sin cuenta vinculada'
+                          : ''}
                       </small>
                     </span>
                   </label>
@@ -868,9 +872,9 @@ export default function HospitalizationsPage() {
               <p className="field-help">Primero registre recursos de enfermería en Agenda.</p>
             )}
             <p className="field-help">
-              La asignación se guarda con el caso. La visibilidad exclusiva requiere que cada
-              recurso esté vinculado a una cuenta autorizada del servidor; no se concede acceso
-              desde el navegador.
+              Todo el equipo puede consultar el balance; sólo las enfermeras asignadas pueden
+              registrar o corregir entradas. Seleccione las cuentas que atenderán cada turno.{' '}
+              <Link href="/nursing-team">Administrar cuentas de enfermería</Link>
             </p>
           </fieldset>
         </form>

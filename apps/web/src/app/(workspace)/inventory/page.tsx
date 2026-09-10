@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { useWorkspace } from '@/components/providers';
 
-const itemCatalog: Record<string, { name: string; sku: string }> = {
+const demoItemCatalog: Record<string, { name: string; sku: string }> = {
   'inventory-demo-kit': { name: 'Kit operativo demo', sku: 'KIT-DEMO-001' },
   'inventory-demo-supplies': { name: 'Insumos demo', sku: 'INS-DEMO-001' },
 };
@@ -70,7 +70,16 @@ const emptyClosureCopy: Record<
 };
 
 export default function InventoryPage() {
-  const { inventoryMovements } = useWorkspace();
+  const { inventoryMovements, catalogItems, providerMode } = useWorkspace();
+  const itemCatalog = useMemo(
+    () => ({
+      ...(providerMode === 'mock' ? demoItemCatalog : {}),
+      ...Object.fromEntries(
+        catalogItems.map((item) => [item.id, { name: item.name, sku: item.sku }]),
+      ),
+    }),
+    [catalogItems, providerMode],
+  );
   const [surface, setSurface] = useState<Surface>('ITEMS');
   const [acknowledgementTab, setAcknowledgementTab] = useState<AcknowledgementTab>('PATIENTS');
   const [closureTab, setClosureTab] = useState<ClosureTab>('PENDING');
@@ -104,7 +113,7 @@ export default function InventoryPage() {
           .toLocaleLowerCase('es')
           .includes(query.toLocaleLowerCase('es')),
       );
-  }, [inventoryMovements, query]);
+  }, [inventoryMovements, query, itemCatalog]);
   const historyItem =
     rows.find((row) => row.itemId === historyItemId) ??
     (historyItemId

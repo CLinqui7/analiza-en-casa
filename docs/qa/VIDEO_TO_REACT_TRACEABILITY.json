@@ -1,5 +1,6 @@
 {
   "schema_version": 2,
+  "studio_verification": {"implementation_sha": "PENDING_COMMIT", "functional_fingerprint": "a5ce9d2c1cb736539e0f05406a871bf6560b8b2e93509911fbb37ba6e72d8c90", "runtime": "178/178 Playwright, 98 React/server tests, 103 baseline tests; local synthetic only", "visual_override": "Client-authorized Studio HTML redesign preserves actions, fields and permissions; prior video layout is not claimed pixel-identical.", "scope": "All 210 source requirements and their open statuses preserved. No new EXACT promotion. Selenium and connected Preview verification remain pending."},
   "generated_at": "2026-09-03T05:56:26-06:00",
   "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",

@@ -11,7 +11,12 @@ import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
-type PortalShare = { portalUrl: string; whatsappPhone: string; expiresAt: string; qrDataUrl: string };
+type PortalShare = {
+  portalUrl: string;
+  whatsappPhone: string;
+  expiresAt: string;
+  qrDataUrl: string;
+};
 
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -66,15 +71,27 @@ export default function QuoteDetailPage() {
       });
       const payload: unknown = await response.json().catch(() => null);
       if (!response.ok || !payload || typeof payload !== 'object') {
-        const detail = payload && typeof payload === 'object' && typeof (payload as { error?: unknown }).error === 'string'
-          ? (payload as { error: string }).error
-          : 'No fue posible crear el acceso seguro.';
+        const detail =
+          payload &&
+          typeof payload === 'object' &&
+          typeof (payload as { error?: unknown }).error === 'string'
+            ? (payload as { error: string }).error
+            : 'No fue posible crear el acceso seguro.';
         setMessage(detail);
         return;
       }
       const { portalUrl, whatsappPhone, expiresAt } = payload as Record<string, unknown>;
-      if (typeof portalUrl !== 'string' || typeof whatsappPhone !== 'string' || typeof expiresAt !== 'string') throw new Error();
-      const qrDataUrl = await QRCode.toDataURL(portalUrl, { width: 280, margin: 1, color: { dark: '#082f45', light: '#ffffff' } });
+      if (
+        typeof portalUrl !== 'string' ||
+        typeof whatsappPhone !== 'string' ||
+        typeof expiresAt !== 'string'
+      )
+        throw new Error();
+      const qrDataUrl = await QRCode.toDataURL(portalUrl, {
+        width: 280,
+        margin: 1,
+        color: { dark: '#082f45', light: '#ffffff' },
+      });
       setPortalShare({ portalUrl, whatsappPhone, expiresAt, qrDataUrl });
       setMessage('Acceso seguro creado. El QR y el enlace vencen automáticamente.');
     } catch {
@@ -134,7 +151,7 @@ export default function QuoteDetailPage() {
         </div>
       </header>
       {message ? (
-        <p className="notice success" role="status">
+        <p className="notice" role="status">
           {message}
         </p>
       ) : null}
@@ -204,7 +221,7 @@ export default function QuoteDetailPage() {
                     {items.map((item) => (
                       <tr key={item.id}>
                         <td>
-                          {item.name}
+                          <span>{item.name}</span>
                           {item.doctorName ? (
                             <>
                               <br />
@@ -315,12 +332,25 @@ export default function QuoteDetailPage() {
           </p>
           {portalShare ? (
             <div className="portal-share-card">
-              <Image alt="Código QR del portal seguro" height={280} src={portalShare.qrDataUrl} unoptimized width={280} />
+              <Image
+                alt="Código QR del portal seguro"
+                height={280}
+                src={portalShare.qrDataUrl}
+                unoptimized
+                width={280}
+              />
               <div>
                 <strong>Acceso de consulta</strong>
                 <span>Vence {new Date(portalShare.expiresAt).toLocaleString('es-SV')}</span>
                 <div className="action-row">
-                  <Button className="button-secondary" data-action-id="QUOTE-PORTAL-COPY" onClick={() => void copyPortalLink()} type="button">Copiar enlace</Button>
+                  <Button
+                    className="button-secondary"
+                    data-action-id="QUOTE-PORTAL-COPY"
+                    onClick={() => void copyPortalLink()}
+                    type="button"
+                  >
+                    Copiar enlace
+                  </Button>
                   <a
                     className="button"
                     data-action-id="QUOTE-WHATSAPP"

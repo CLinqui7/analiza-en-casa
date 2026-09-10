@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
+import Link from 'next/link';
 
 const itemSchema = z.object({
   sku: z.string().trim().min(1, 'El SKU es obligatorio.'),
@@ -27,7 +28,7 @@ export default function CatalogsPage() {
     setOpen(false);
     form.reset();
   }
-  function submit(values: ItemForm) {
+  async function submit(values: ItemForm) {
     if (
       catalogItems.some(
         (item) => item.sku.toLocaleUpperCase('es') === values.sku.toLocaleUpperCase('es'),
@@ -43,7 +44,12 @@ export default function CatalogsPage() {
       status: 'ACTIVE',
       createdAt: new Date().toISOString(),
     };
-    addCatalogItem(item);
+    if (!(await addCatalogItem(item))) {
+      form.setError('root', {
+        message: 'No se pudo guardar el artículo. Revise la conexión e inténtelo nuevamente.',
+      });
+      return;
+    }
     setMessage('Ítem de catálogo persistido con evidencia de auditoría.');
     close();
   }
@@ -71,6 +77,23 @@ export default function CatalogsPage() {
           </Button>
         ) : null}
       </header>
+      <div className="card-grid">
+        {[
+          ['Especialidades médicas', 'Opciones para el registro de médicos'],
+          ['Medicamentos y dosis', 'Presentaciones vinculadas al inventario'],
+          ['Seguros y descuentos', 'Catálogos compartidos para el equipo'],
+        ].map(([title, detail]) => (
+          <Link
+            key={title}
+            href="/catalogs/operational"
+            className="panel catalog-category-card"
+            style={{ textDecoration: 'none' }}
+          >
+            <strong>{title}</strong>
+            <small>{detail}</small>
+          </Link>
+        ))}
+      </div>
       {message ? (
         <p className="notice success" role="status">
           {message}
@@ -117,7 +140,7 @@ export default function CatalogsPage() {
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
-            <Button form="catalog-item-form" type="submit">
+            <Button form="catalog-item-form" type="submit" disabled={form.formState.isSubmitting}>
               Guardar ítem
             </Button>
           </>
@@ -132,6 +155,11 @@ export default function CatalogsPage() {
           noValidate
           onSubmit={form.handleSubmit(submit)}
         >
+          {form.formState.errors.root ? (
+            <p className="field-error full" role="alert">
+              {form.formState.errors.root.message}
+            </p>
+          ) : null}
           <label>
             SKU
             <input {...form.register('sku')} />

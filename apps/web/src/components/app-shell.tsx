@@ -26,7 +26,7 @@ type NavigationGroup = {
 
 const navigation: NavigationGroup[] = [
   {
-    label: 'Inicio',
+    label: 'Dashboard',
     href: '/dashboard',
     permission: 'dashboard:read',
     actionId: 'DASHBOARD-NAVIGATE',
@@ -77,6 +77,18 @@ const navigation: NavigationGroup[] = [
   {
     label: 'Clínico',
     children: [
+      {
+        label: 'Balance hídrico',
+        href: '/clinical/balance',
+        permission: 'clinical:read',
+        actionId: 'BALANCE-NAVIGATE',
+      },
+      {
+        label: 'Administración de medicamentos',
+        href: '/clinical/administrations',
+        permission: 'clinical:read',
+        actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
+      },
       {
         label: 'Expediente clínico',
         href: '/clinical',
@@ -160,6 +172,18 @@ const navigation: NavigationGroup[] = [
     label: 'Administración',
     children: [
       {
+        label: 'Equipo y cuentas de enfermería',
+        href: '/nursing-team',
+        permission: 'nurses:manage',
+        actionId: 'NURSE-TEAM-NAVIGATE',
+      },
+      {
+        label: 'Catálogos operativos',
+        href: '/catalogs/operational',
+        permission: 'catalogs:read',
+        actionId: 'OPERATIONAL-CATALOG-NAVIGATE',
+      },
+      {
         label: 'Médicos y recursos',
         href: '/doctors',
         permission: 'settings:write',
@@ -183,6 +207,12 @@ const navigation: NavigationGroup[] = [
     label: 'Reportes',
     children: [
       {
+        label: 'Visitas y metas',
+        href: '/reports/visits-goals',
+        permission: 'reports:read',
+        actionId: 'VISITS-GOALS-NAVIGATE',
+      },
+      {
         label: 'Horas de enfermería',
         href: '/reports/nurse-hours',
         permission: 'reports:read',
@@ -192,28 +222,47 @@ const navigation: NavigationGroup[] = [
   },
   { label: 'Auditoría', href: '/audit', permission: 'audit:read', actionId: 'AUDIT-NAVIGATE' },
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
+  {
+    label: 'Cambios solicitados',
+    href: '/changes',
+    permission: 'dashboard:read',
+    actionId: 'CLIENT-CHANGES-NAVIGATE',
+  },
 ];
 
-const navigationGlyphs: Record<string, string> = {
-  Inicio: '⌂',
-  Pacientes: '♙',
-  Agenda: '▣',
-  Financiero: '$',
-  Pagos: '$',
-  Clínico: '+',
-  Inventario: '▤',
-  Catálogos: '▦',
-  Administración: '⚙',
-  Compras: '◇',
-  Reportes: '▥',
-  Auditoría: '✓',
-  Ayuda: '?',
-};
-
 function NavigationGlyph({ label }: { label: string }) {
+  const path =
+    label === 'Dashboard'
+      ? 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z'
+      : label === 'Pacientes'
+        ? 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M20 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8'
+        : label === 'Agenda'
+          ? 'M4 5h16v16H4z M16 3v4 M8 3v4 M4 11h16 M8 15h3'
+          : label === 'Inventario' || label === 'Compras'
+            ? 'M12 3 3 8v9l9 5 9-5V8z M3 8l9 5 9-5 M12 13v9 M7 5l9 5'
+            : label === 'Clínico'
+              ? 'M2 12h4l3-8 6 16 3-8h4'
+              : label === 'Reportes'
+                ? 'M4 3v18h18 M9 16V9 M14 16V5 M19 16v-5'
+                : label === 'Financiero' || label === 'Pagos'
+                  ? 'M12 2v20 M17 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H5'
+                  : label === 'Auditoría'
+                    ? 'M4 12l5 5L20 5'
+                    : 'M5 3h10l4 4v14H5z M14 3v5h5 M8 12h8 M8 16h8';
   return (
     <span aria-hidden="true" className="nav-item-glyph">
-      {navigationGlyphs[label] ?? '·'}
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d={path} />
+      </svg>
     </span>
   );
 }
@@ -273,15 +322,11 @@ export function AppShell({ children }: PropsWithChildren) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Financiero:
-      pathname.startsWith('/hospitalizations') ||
-      pathname.startsWith('/receivables') ||
-      pathname.startsWith('/payables') ||
-      pathname.startsWith('/insurance') ||
-      pathname.startsWith('/quotes'),
-    Clínico: pathname.startsWith('/clinical'),
-    Inventario: pathname.startsWith('/inventory'),
-    Reportes: pathname.startsWith('/reports'),
+    Financiero: true,
+    Clínico: true,
+    Inventario: true,
+    Reportes: true,
+    Administración: true,
   });
   const required = permissionForPath(pathname);
 
@@ -573,7 +618,11 @@ export function AppShell({ children }: PropsWithChildren) {
                       ›
                     </span>
                   </button>
-                  <div className={`nav-sublist-shell${open ? ' open' : ''}`}>
+                  <div
+                    className={`nav-sublist-shell${open ? ' open' : ''}`}
+                    inert={!open}
+                    aria-hidden={!open}
+                  >
                     <ul className="nav-sublist">
                       {childrenForRole.map((child) => (
                         <li key={child.href}>

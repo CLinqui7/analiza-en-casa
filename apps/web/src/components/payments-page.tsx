@@ -7,6 +7,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { receivableAccounts } from '@/lib/receivables';
+const money = (value: number) =>
+  new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(value);
 
 const paymentSchema = z.object({
   quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
@@ -18,7 +21,7 @@ type PaymentForm = z.infer<typeof paymentSchema>;
 const paymentStatus = { APPLIED: 'Aplicado', VOIDED: 'Reversado' };
 
 export function PaymentsPage({ receivables = false }: { receivables?: boolean }) {
-  const { addPayment, payments, quotes, voidPayment } = useWorkspace();
+  const { addPayment, payments, quotes, patients, voidPayment, error } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
@@ -42,7 +45,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       idempotencyKey: crypto.randomUUID(),
     });
   }
-  function submit(values: PaymentForm) {
+  async function submit(values: PaymentForm) {
     if (payments.some((payment) => payment.idempotencyKey === values.idempotencyKey)) {
       form.setError('idempotencyKey', {
         type: 'duplicate',
@@ -56,11 +59,16 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       status: 'APPLIED',
       createdAt: new Date().toISOString(),
     };
-    addPayment(payment);
+    if (!(await addPayment(payment))) {
+      form.setError('root', {
+        message: 'No se pudo guardar el pago; no se confirmó la operación.',
+      });
+      return;
+    }
     setMessage('Pago aplicado una sola vez con clave idempotente y evidencia de auditoría.');
     close();
   }
-  function voidSubmit(values: { reason: string }) {
+  async function voidSubmit(values: { reason: string }) {
     if (!voiding || !values.reason.trim()) {
       voidForm.setError('reason', {
         type: 'required',
@@ -68,38 +76,147 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       });
       return;
     }
-    voidPayment(voiding, values.reason);
+    if (!(await voidPayment(voiding, values.reason))) {
+      voidForm.setError('reason', { message: 'No se pudo guardar la reversión.' });
+      return;
+    }
     setMessage('Pago reversado con motivo y evidencia de auditoría.');
     setVoiding(null);
     voidForm.reset();
   }
   const sentQuotes = quotes.filter((quote) => quote.status === 'SENT');
+  const accounts = receivableAccounts(quotes, payments);
+  const totals = accounts.reduce(
+    (sum, item) => ({
+      responsibility: sum.responsibility + item.responsibility,
+      paid: sum.paid + item.paid,
+      balance: sum.balance + item.balance,
+    }),
+    { responsibility: 0, paid: 0, balance: 0 },
+  );
   const title = receivables ? 'Cuentas por cobrar' : 'Pagos';
   return (
-    <div className="page-stack">
+    <div className="page-stack payments-page">
       <header className="page-header page-header-actions">
         <div>
-          <p className="eyebrow">Facturación</p>
+          <p className="eyebrow">Analiza en Casa</p>
           <h1>{title}</h1>
-          <p>
-            Registro financiero sintético con referencia y clave idempotente. No calcula saldos,
-            impuestos ni cobertura sin reglas aprobadas.
-          </p>
+          <p>Responsabilidad del paciente, pagos, comprobantes y estado de cuenta.</p>
         </div>
-        {can('payments:write') ? (
-          <Button
-            data-action-id="PAYMENT-APPLY"
-            disabled={!sentQuotes.length}
-            onClick={() => {
-              setMessage(null);
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Aplicar pago
+        <div className="header-actions">
+          {can('payments:write') ? (
+            <Button
+              data-action-id="PAYMENT-APPLY"
+              disabled={!sentQuotes.length}
+              onClick={() => {
+                form.setValue('quoteId', sentQuotes[0]?.id ?? '');
+                setMessage(null);
+                setOpen(true);
+              }}
+              type="button"
+            >
+              Aplicar pago
+            </Button>
+          ) : null}
+          <Button className="button-secondary" onClick={() => window.print()}>
+            Imprimir estado global
           </Button>
-        ) : null}
+        </div>
       </header>
+      <section className="studio-metrics" aria-label="Resumen de cuentas">
+        {[
+          ['$', 'Responsabilidad total', totals.responsibility, 'Suma de cuentas de pacientes'],
+          ['✓', 'Pagos aplicados', totals.paid, 'Movimientos confirmados'],
+          ['◷', 'Saldo abierto', totals.balance, 'Responsabilidad menos pagos'],
+        ].map(([icon, label, value, detail]) => (
+          <Panel key={label}>
+            <article>
+              <span aria-hidden="true">{icon}</span>
+              <div>
+                <small>{label}</small>
+                <strong>{money(Number(value))}</strong>
+                <p>{detail}</p>
+              </div>
+            </article>
+          </Panel>
+        ))}
+      </section>
+      {error ? (
+        <p className="notice" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <Panel>
+        <div className="table-heading">
+          <h2>Estado de cuentas</h2>
+          <StatusTag>{accounts.length} cuentas</StatusTag>
+        </div>
+        {accounts.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cotización</th>
+                  <th>Paciente</th>
+                  <th>Responsabilidad</th>
+                  <th>Pagado</th>
+                  <th>Saldo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accounts.map((account) => (
+                  <tr key={account.quote.id}>
+                    <td>
+                      <strong>{account.quote.id}</strong>
+                      <small style={{ display: 'block' }}>v{account.quote.version}</small>
+                    </td>
+                    <td>
+                      {patients.find((patient) => patient.id === account.quote.patientId)
+                        ?.fullName ?? 'Paciente'}
+                    </td>
+                    <td>{money(account.responsibility)}</td>
+                    <td>{money(account.paid)}</td>
+                    <td>{money(account.balance)}</td>
+                    <td>
+                      <StatusTag tone={account.balance > 0 ? 'neutral' : 'success'}>
+                        {account.balance > 0
+                          ? 'Pendiente'
+                          : account.balance < 0
+                            ? 'Saldo a favor'
+                            : 'Pagado'}
+                      </StatusTag>
+                    </td>
+                    <td>
+                      {can('payments:write') ? (
+                        <Button
+                          className="button-secondary"
+                          data-action-id="PAYMENT-APPLY"
+                          onClick={() => {
+                            form.setValue('quoteId', account.quote.id);
+                            form.setValue('amount', Math.max(account.balance, 0.01));
+                            setOpen(true);
+                          }}
+                        >
+                          Registrar pago
+                        </Button>
+                      ) : (
+                        'Lectura'
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyState
+            title="Sin cuentas por cobrar"
+            detail="Las cotizaciones enviadas aparecerán aquí con la responsabilidad registrada del paciente."
+          />
+        )}
+      </Panel>
       {!sentQuotes.length ? (
         <p className="notice" role="status">
           Envíe una cotización antes de aplicar un pago sintético.
@@ -112,7 +229,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       ) : null}
       <Panel>
         <div className="table-heading">
-          <h2>Aplicaciones</h2>
+          <h2>Pagos y comprobantes</h2>
           <StatusTag>{payments.length} registros</StatusTag>
         </div>
         {payments.length ? (
@@ -134,9 +251,14 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                   <tr key={payment.id}>
                     <td>{new Date(payment.createdAt).toLocaleString('es-SV')}</td>
                     <td>{payment.quoteId}</td>
-                    <td>{payment.amount}</td>
+                    <td>{money(payment.amount)}</td>
                     <td>{payment.reference}</td>
-                    <td>{payment.idempotencyKey}</td>
+                    <td>
+                      <details>
+                        <summary>Ver clave</summary>
+                        <small>{payment.idempotencyKey}</small>
+                      </details>
+                    </td>
                     <td>{paymentStatus[payment.status]}</td>
                     <td>
                       {payment.status === 'APPLIED' && can('payments:write') ? (
@@ -168,7 +290,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
-            <Button form="payment-form" type="submit">
+            <Button form="payment-form" type="submit" disabled={form.formState.isSubmitting}>
               Aplicar pago
             </Button>
           </>
@@ -183,6 +305,11 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           noValidate
           onSubmit={form.handleSubmit(submit)}
         >
+          {form.formState.errors.root ? (
+            <p className="field-error full" role="alert">
+              {form.formState.errors.root.message}
+            </p>
+          ) : null}
           <label>
             Cotización enviada
             <select {...form.register('quoteId')}>
