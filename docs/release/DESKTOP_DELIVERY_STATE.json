@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-10 12:41:00 UTC",
-  "next_action": "Paid fixed Preview egress is authorized, but Vercel still reports Hobby with no billing address/payment completion. After the owner completes the private Billing checkout: enable the iad1 static-IP pair, allowlist only those addresses in Atlas, deploy e4ef3f2 as Preview and repeat A/B/C, file, inventory, purchase and save-failure checks remotely.",
+  "updated_at": "2026-09-10 12:50:00 UTC",
+  "next_action": "Paid fixed Preview egress is authorized, but Vercel still reports Hobby with no billing address/payment completion. After the owner completes the private Billing checkout: enable the iad1 static-IP pair, allowlist only those addresses in Atlas, deploy the Mongo candidate as Preview and repeat A/B/C, file, inventory, purchase and save-failure checks remotely.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -37,7 +37,7 @@
     "CH01, CH02, CH03 traceability gates: passed",
     "npm run audit:verify: 17/17 structural ledgers passed",
     "npm run security:scan: passed; npm run react:boundaries: passed",
-    "Published Preview: 32 navigation routes, 7 desktop/mobile dialogs, persistent collapsed sidebar, no JS errors or global horizontal overflow; 2026-09-10T07:14:11.710Z",
+    "Published Preview e78430b: 32 navigation routes, 7 desktop/mobile dialogs, persistent collapsed sidebar, no JS errors or global horizontal overflow; 2026-09-10T12:47:28.945Z",
     "Mongo React paired patient/responsible file creation + byte comparison from fresh authenticated session passed 2026-09-10T07:13:04.490Z",
     "Mongo React purchase draft: tenant-scoped save, reload and simulated 503 without false success passed 2026-09-10T12:25:24.870Z",
     "Independent video reaudit: 210/210 traced; 50 overclassified statuses corrected to 36 EXACT, 70 PARTIAL, 49 MISSING, 16 blocked and 39 NOT_TESTABLE",
@@ -59,15 +59,15 @@
     "verified_at": "2026-09-10T12:25:24.870Z",
     "network": "operator IPv4 only"
   },
-  "candidate_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-  "next_candidate_sha": "e4ef3f293ad4fbd32730bc2ffdfb53c76f3ebb39",
+  "candidate_sha": "e78430b045a3a8ee6531906c1e6e6872a94459d6",
+  "next_candidate_sha": null,
   "deployment": {
     "environment": "preview",
-    "url": "https://web-nrj9qg9ad-clinqui7s-projects.vercel.app",
-    "id": "dpl_G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
+    "url": "https://web-1qw7hapn8-clinqui7s-projects.vercel.app",
+    "id": "dpl_HKhG234BuEDdPTcRVSPdyigVJooq",
     "status": "READY",
     "mode": "PROTECTED_DEMO",
-    "sha": "4572c898518c9fef049451e926e57b21ed57e63b",
+    "sha": "e78430b045a3a8ee6531906c1e6e6872a94459d6",
     "project": "clinqui7s-projects/web",
     "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
     "framework": "nextjs",
@@ -77,25 +77,19 @@
     "preview_comments_environment_variable": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0",
     "deployment_protection_preserved": true,
     "unauthenticated_login_status": 302,
-    "inspector_url": "https://vercel.com/clinqui7s-projects/web/G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
-    "verified_at": "2026-09-10T07:14:11.710Z",
-    "browser_report": "docs/release/PREVIEW_STUDIO_BROWSER_REPORT_20260910.json",
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/HKhG234BuEDdPTcRVSPdyigVJooq",
+    "verified_at": "2026-09-10T12:47:28.945Z",
+    "browser_report": "docs/release/PREVIEW_STUDIO_BROWSER_REPORT_E78430B_20260910.json",
     "screenshots": [
-      "docs/parity/screenshots/studio-preview-dashboard-4572c89.png",
-      "docs/parity/screenshots/studio-preview-patients-4572c89.png",
-      "docs/parity/screenshots/studio-preview-patients-dialog-4572c89.png",
-      "docs/parity/screenshots/studio-preview-patients-mobile-dialog-4572c89.png",
-      "docs/parity/screenshots/studio-preview-quotes-dialog-4572c89.png",
-      "docs/parity/screenshots/studio-preview-hospitalizations-dialog-4572c89.png",
-      "docs/parity/screenshots/studio-preview-receivables-4572c89.png",
-      "docs/parity/screenshots/studio-preview-insurance-4572c89.png",
-      "docs/parity/screenshots/studio-preview-inventory-kardex-4572c89.png",
-      "docs/parity/screenshots/studio-preview-inventory-movements-4572c89.png",
-      "docs/parity/screenshots/studio-preview-changes-4572c89.png",
-      "docs/parity/screenshots/studio-preview-nursing-team-4572c89.png",
-      "docs/parity/screenshots/studio-preview-reports-visits-goals-4572c89.png",
-      "docs/parity/screenshots/studio-preview-dashboard-collapsed-4572c89.png",
-      "docs/parity/screenshots/studio-preview-dashboard-mobile-4572c89.png"
+      "docs/parity/screenshots/studio-preview-dashboard-e78430b.png",
+      "docs/parity/screenshots/studio-preview-dashboard-mobile-e78430b.png",
+      "docs/parity/screenshots/studio-preview-dashboard-collapsed-e78430b.png",
+      "docs/parity/screenshots/studio-preview-patients-e78430b.png",
+      "docs/parity/screenshots/studio-preview-patients-dialog-e78430b.png",
+      "docs/parity/screenshots/studio-preview-patients-mobile-dialog-e78430b.png",
+      "docs/parity/screenshots/studio-preview-quotes-dialog-e78430b.png",
+      "docs/parity/screenshots/studio-preview-purchases-e78430b.png",
+      "docs/parity/screenshots/studio-preview-changes-e78430b.png"
     ],
     "attempts": [
       {
@@ -118,6 +112,12 @@
         "id": "dpl_G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
         "status": "READY",
         "sha": "4572c898518c9fef049451e926e57b21ed57e63b"
+      },
+      {
+        "id": "dpl_HKhG234BuEDdPTcRVSPdyigVJooq",
+        "status": "READY",
+        "sha": "e78430b045a3a8ee6531906c1e6e6872a94459d6",
+        "mode": "PROTECTED_DEMO"
       }
     ]
   },
