@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-10 07:15:27 UTC",
-  "next_action": "Protected Studio Preview delivered and browser-verified. Local Atlas integration verified. Await authorization for paid fixed Preview egress, then configure server-only credentials and repeat A/B/C, file, inventory and save-failure checks remotely. Continue open source/provider/clinical-definition requirements without treating their screens as complete.",
+  "updated_at": "2026-09-10 12:41:00 UTC",
+  "next_action": "Paid fixed Preview egress is authorized, but Vercel still reports Hobby with no billing address/payment completion. After the owner completes the private Billing checkout: enable the iad1 static-IP pair, allowlist only those addresses in Atlas, deploy e4ef3f2 as Preview and repeat A/B/C, file, inventory, purchase and save-failure checks remotely.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -12,6 +12,8 @@
     "apps/web/src/app/(workspace)/agenda/page.tsx",
     "apps/web/src/app/(workspace)/insurance/page.tsx",
     "apps/web/src/app/(workspace)/inventory/kardex/page.tsx",
+    "apps/web/src/app/(workspace)/purchases/page.tsx",
+    "apps/web/src/server/mongo-operations.ts",
     "apps/web/src/server/mongo-quotes.ts",
     "apps/web/src/server/mongo-portal.ts",
     "apps/web/src/server/mongo-files.ts",
@@ -25,7 +27,7 @@
   ],
   "tests": [
     "npm test: 103 passed",
-    "npm run test:react: 98 passed / 25 files",
+    "npm run test:react: 99 passed / 25 files",
     "npm run typecheck: passed",
     "npm run lint: passed",
     "npm run build: Next 16.3.4 stable with dynamic server functions",
@@ -37,10 +39,12 @@
     "npm run security:scan: passed; npm run react:boundaries: passed",
     "Published Preview: 32 navigation routes, 7 desktop/mobile dialogs, persistent collapsed sidebar, no JS errors or global horizontal overflow; 2026-09-10T07:14:11.710Z",
     "Mongo React paired patient/responsible file creation + byte comparison from fresh authenticated session passed 2026-09-10T07:13:04.490Z",
+    "Mongo React purchase draft: tenant-scoped save, reload and simulated 503 without false success passed 2026-09-10T12:25:24.870Z",
+    "Independent video reaudit: 210/210 traced; 50 overclassified statuses corrected to 36 EXACT, 70 PARTIAL, 49 MISSING, 16 blocked and 39 NOT_TESTABLE",
     "CLI upload traversal regression: QA parent reachable, registry included, .env and .local excluded; subsequent source build READY"
   ],
   "failures": [
-    "Vercel Hobby does not provide the requested fixed Preview egress; authorization for paid plan remains unanswered. No 0.0.0.0/0 was enabled.",
+    "Vercel Hobby does not provide the requested fixed Preview egress. The owner authorized the cost, but Vercel Billing still reports Hobby and no completed private payment method/address. No 0.0.0.0/0 was enabled.",
     "Preview must remain synthetic DEMO until fixed egress is approved and Mongo sessions are retested there.",
     "WhatsApp/OTP provider, institutional clinical/fiscal rules and source-data imports remain pending.",
     "Selenium was not rerun for the Studio candidate; no new clinical or full video parity certification is claimed."
@@ -50,12 +54,13 @@
     "cluster": "analiza-cluster",
     "database": "analiza_en_casa",
     "verified_from_application": true,
-    "bootstrap_indexes": 41,
-    "verification_run": "qa-f818838c",
-    "verified_at": "2026-09-10T06:55:48.539Z",
+    "bootstrap_indexes": 42,
+    "verification_run": "qa-f818838c + purchase-browser-20260910T122524Z",
+    "verified_at": "2026-09-10T12:25:24.870Z",
     "network": "operator IPv4 only"
   },
   "candidate_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
+  "next_candidate_sha": "e4ef3f293ad4fbd32730bc2ffdfb53c76f3ebb39",
   "deployment": {
     "environment": "preview",
     "url": "https://web-nrj9qg9ad-clinqui7s-projects.vercel.app",
