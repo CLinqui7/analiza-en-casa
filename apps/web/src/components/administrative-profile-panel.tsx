@@ -10,9 +10,8 @@ type Props = {
 };
 
 /**
- * The mock profile is deliberately isolated from the secured Supabase RPC.
- * Supabase must not receive an incomplete execution profile through the
- * generic hospitalizations table upsert.
+ * Mongo persists this profile through the tenant-scoped hospitalization command.
+ * Supabase remains isolated until its dedicated audited RPC is available.
  */
 export function AdministrativeProfilePanel({
   hospitalization,
@@ -21,7 +20,7 @@ export function AdministrativeProfilePanel({
   providerMode,
 }: Props) {
   const profile = hospitalization.administrativeProfile;
-  const mockProfileEnabled = providerMode === 'mock';
+  const profileEditingEnabled = providerMode === 'mock' || providerMode === 'mongodb';
   return (
     <Panel>
       <div className="table-heading">
@@ -32,7 +31,7 @@ export function AdministrativeProfilePanel({
             reglas clínicas.
           </p>
         </div>
-        {canWrite && mockProfileEnabled ? (
+        {canWrite && profileEditingEnabled ? (
           <Button
             data-action-id="HOSPITALIZATION-ADMIN-PROFILE-OPEN"
             onClick={onOpen}
@@ -52,7 +51,7 @@ export function AdministrativeProfilePanel({
           cotización y versión vinculadas; no se guarda un perfil parcial.
         </p>
       ) : null}
-      <dl className="detail-list">
+      <dl className="hospitalization-detail-grid hospitalization-administrative-grid">
         <div>
           <dt>Health manager</dt>
           <dd>{profile?.healthManager ?? 'Sin registrar'}</dd>

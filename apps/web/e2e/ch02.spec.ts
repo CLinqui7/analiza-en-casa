@@ -201,6 +201,7 @@ test('CH02-F013-F016 contacts, safe link import, map, back and persistence', asy
     .fill('https://maps.example/?q=13.692900,-89.218200');
   await dialog.getByRole('button', { name: 'Importar enlace' }).click();
   await expect(dialog.getByLabel('Ubicación geográfica')).toHaveValue('13.692900, -89.218200');
+  await dialog.locator('[data-action-id="PATIENT-MAP-TOGGLE"]').click();
   await expect(dialog.getByLabel('Mapa de ubicación')).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();

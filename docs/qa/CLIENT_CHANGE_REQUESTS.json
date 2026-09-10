@@ -58,8 +58,8 @@
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
-      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "functional_fingerprint": "4b5fe2d4dcb20c5a24793289962fb029f23c5758dbfc3238ded9b85fd5f410be",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
@@ -67,7 +67,7 @@
       "notes": "DUI conserva validación y formulario React. Hay proveedor Mongo real con persistencia de pacientes; la prueba A/B/C usa identificadores QA OTHER, no acredita todas las variantes documentales.",
       "verification_stages": {
         "implemented": "Alcance descrito implementado",
-        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "local": "Pruebas React y navegador aprobadas; regresión Selenium 188/188 sin skips.",
         "preview": "Pendiente de prueba funcional del candidato Studio",
         "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
         "definition": "Sin nueva regla clínica/financiera inferida"
@@ -122,8 +122,8 @@
       "client_question": "¿Qué proyecto de prueba, organizaciones y cuentas de dos roles autorizados se usarán para certificar RLS y visibilidad multiusuario del Carnet de residente?",
       "acceptance_criteria": "Agregar tipo de documento Carnet de residente",
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
-      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "functional_fingerprint": "4b5fe2d4dcb20c5a24793289962fb029f23c5758dbfc3238ded9b85fd5f410be",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
@@ -131,7 +131,7 @@
       "notes": "Carnet de residente se crea, recarga y edita en pruebas React demo. El proveedor Mongo ya está conectado localmente; la variante de documento requiere repetición específica en preview.",
       "verification_stages": {
         "implemented": "Alcance descrito implementado",
-        "local": "Pruebas React y navegador aprobadas; 98 unitarias y regresión 178/178. Selenium actual pendiente.",
+        "local": "Pruebas React y navegador aprobadas; regresión Selenium 188/188 sin skips.",
         "preview": "Pendiente de prueba funcional del candidato Studio",
         "integration": "Mongo probado localmente en alcance acotado; preview conectado pendiente",
         "definition": "Sin nueva regla clínica/financiera inferida"

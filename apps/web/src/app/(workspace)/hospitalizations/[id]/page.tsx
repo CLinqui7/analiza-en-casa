@@ -52,6 +52,12 @@ export default function HospitalizationDetailPage() {
     );
 
   const patient = patients.find((item) => item.id === hospitalization.patientId);
+  const patientInitials = (patient?.fullName ?? 'Paciente')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toLocaleUpperCase('es');
   const linkedQuotes = quotes.filter((item) => item.caseId === hospitalization.id);
   const linkedDocuments = clinicalDocuments.filter((item) => item.caseId === hospitalization.id);
   const linkedVitals = vitalReadings.filter((item) => item.caseId === hospitalization.id);
@@ -62,11 +68,11 @@ export default function HospitalizationDetailPage() {
         ? 'warning'
         : 'neutral';
   const profile = hospitalization.administrativeProfile;
-  const mockProfileEnabled = providerMode === 'mock';
+  const profileEditingEnabled = providerMode === 'mock' || providerMode === 'mongodb';
   const closeProfile = () => setProfileOpen(false);
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!mockProfileEnabled) return;
+    if (!profileEditingEnabled) return;
     const values = new FormData(event.currentTarget);
     const value = (name: string) => String(values.get(name) ?? '').trim() || undefined;
     setProfileSaving(true);
@@ -96,7 +102,7 @@ export default function HospitalizationDetailPage() {
   };
 
   return (
-    <div className="page-stack">
+    <div className="page-stack hospitalization-detail-page">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Hospitalización</p>
@@ -106,7 +112,7 @@ export default function HospitalizationDetailPage() {
             {hospitalization.startDate}
           </p>
         </div>
-        <div>
+        <div className="action-row">
           <Button
             className="button-secondary"
             data-action-id="HOSPITALIZATION-BACK-TO-LIST"
@@ -128,67 +134,85 @@ export default function HospitalizationDetailPage() {
           ) : null}
         </div>
       </header>
-      <Panel>
-        <div className="table-heading">
-          <h2>Resumen operativo</h2>
-          <StatusTag tone={tone}>{labels[hospitalization.status]}</StatusTag>
+      <Panel className="hospitalization-summary-panel">
+        <div className="hospitalization-summary-layout">
+          <section>
+            <div className="hospitalization-profile-hero">
+              <span className="hospitalization-avatar" aria-hidden="true">
+                {patientInitials}
+              </span>
+              <div>
+                <p className="eyebrow">Resumen operativo</p>
+                <h2>{patient?.fullName ?? 'Paciente no disponible'}</h2>
+                <p>{hospitalization.diagnosisSummary ?? 'Sin resumen diagnóstico documentado.'}</p>
+                <div className="hospitalization-status-row">
+                  <StatusTag tone={tone}>{labels[hospitalization.status]}</StatusTag>
+                  <StatusTag>
+                    Prioridad{' '}
+                    {hospitalization.priority === 'LOW'
+                      ? 'Baja'
+                      : hospitalization.priority === 'HIGH'
+                        ? 'Alta'
+                        : 'Media'}
+                  </StatusTag>
+                </div>
+              </div>
+            </div>
+            <dl className="hospitalization-detail-grid">
+              <div>
+                <dt>Documento</dt>
+                <dd>{patient?.documentId ?? 'No disponible'}</dd>
+              </div>
+              <div>
+                <dt>Ingreso</dt>
+                <dd>{hospitalization.startDate}</dd>
+              </div>
+              <div>
+                <dt>Finalización</dt>
+                <dd>{hospitalization.endDate ?? 'En curso'}</dd>
+              </div>
+              <div>
+                <dt>Cuenta</dt>
+                <dd>{hospitalization.accountType}</dd>
+              </div>
+              <div>
+                <dt>Aseguradora</dt>
+                <dd>{hospitalization.insurer ?? patient?.insurer ?? 'Sin aseguradora'}</dd>
+              </div>
+              <div>
+                <dt>Responsable</dt>
+                <dd>{hospitalization.manager ?? 'No asignado'}</dd>
+              </div>
+              <div className="full">
+                <dt>Dispositivos / accesos</dt>
+                <dd>
+                  {hospitalization.devices?.length
+                    ? hospitalization.devices.join(', ')
+                    : 'Ninguno documentado'}
+                </dd>
+              </div>
+            </dl>
+          </section>
+          <aside className="hospitalization-next-action">
+            <span className="hospitalization-next-action-icon" aria-hidden="true">
+              ✓
+            </span>
+            <p className="eyebrow">Próxima acción</p>
+            <h2>Seguimiento del caso</h2>
+            <p>{hospitalization.nextAction ?? 'Sin acción documentada'}</p>
+            {can('cases:write') ? (
+              <Button
+                className="button-secondary"
+                onClick={() =>
+                  router.push(`/hospitalizations?edit=${encodeURIComponent(hospitalization.id)}`)
+                }
+                type="button"
+              >
+                Editar caso
+              </Button>
+            ) : null}
+          </aside>
         </div>
-        <dl className="detail-list">
-          <div>
-            <dt>Paciente</dt>
-            <dd>{patient?.fullName ?? 'No disponible'}</dd>
-          </div>
-          <div>
-            <dt>Documento</dt>
-            <dd>{patient?.documentId ?? 'No disponible'}</dd>
-          </div>
-          <div>
-            <dt>Fecha de ingreso</dt>
-            <dd>{hospitalization.startDate}</dd>
-          </div>
-          <div>
-            <dt>Fecha de finalización</dt>
-            <dd>{hospitalization.endDate ?? 'Actual'}</dd>
-          </div>
-          <div>
-            <dt>Tipo de cuenta</dt>
-            <dd>{hospitalization.accountType}</dd>
-          </div>
-          <div>
-            <dt>Aseguradora registrada</dt>
-            <dd>{hospitalization.insurer ?? patient?.insurer ?? 'Sin aseguradora registrada'}</dd>
-          </div>
-          <div>
-            <dt>Prioridad</dt>
-            <dd>
-              {hospitalization.priority === 'LOW'
-                ? 'Baja'
-                : hospitalization.priority === 'HIGH'
-                  ? 'Alta'
-                  : 'Media'}
-            </dd>
-          </div>
-          <div>
-            <dt>Responsable administrativo</dt>
-            <dd>{hospitalization.manager ?? 'No asignado'}</dd>
-          </div>
-          <div className="full">
-            <dt>Próxima acción</dt>
-            <dd>{hospitalization.nextAction ?? 'Sin acción documentada'}</dd>
-          </div>
-          <div className="full">
-            <dt>Resumen diagnóstico</dt>
-            <dd>{hospitalization.diagnosisSummary ?? 'Sin resumen documentado'}</dd>
-          </div>
-          <div className="full">
-            <dt>Dispositivos / accesos</dt>
-            <dd>
-              {hospitalization.devices?.length
-                ? hospitalization.devices.join(', ')
-                : 'Ninguno documentado'}
-            </dd>
-          </div>
-        </dl>
       </Panel>
       <AdministrativeProfilePanel
         canWrite={can('cases:write')}
@@ -233,7 +257,7 @@ export default function HospitalizationDetailPage() {
           </p>
         </Panel>
       </div>
-      {mockProfileEnabled ? (
+      {profileEditingEnabled ? (
         <Dialog
           description="Conserva campos administrativos observados. No aplica tarifas, cobertura, impuestos ni decisiones de aseguradora."
           footer={

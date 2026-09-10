@@ -314,13 +314,11 @@ export default function HospitalizationsPage() {
             ))}
         </p>
       ) : null}
-      <Panel>
-        <div className="table-heading">
+      <div className="hospitalization-tabs-shell">
+        <div className="hospitalization-tabs-heading">
           <div>
             <h2>Relación de pacientes por empresa</h2>
-            <p>
-              Conteo no configurado <span aria-label="Fórmula de badges pendiente">—</span>
-            </p>
+            <p>Organización administrativa de casos y seguimiento.</p>
           </div>
           <StatusTag>Conteo no configurado</StatusTag>
         </div>
@@ -356,43 +354,49 @@ export default function HospitalizationsPage() {
             PIC Ejecución
           </button>
         </div>
-      </Panel>
+      </div>
       {tab === 'ACTIVE' ? (
         <>
-          <Panel>
+          <Panel className="hospitalization-filter-panel">
             <div className="table-heading">
-              <h2>Activos</h2>
+              <div>
+                <h2>Buscar y filtrar</h2>
+                <p>Encuentre rápidamente un caso por paciente, documento o identificador.</p>
+              </div>
               <StatusTag>{entries.length} hospitalizaciones</StatusTag>
             </div>
-            <div className="form-grid">
-              <label className="full" htmlFor="hospitalization-search">
-                Buscar hospitalización
+            <div className="hospitalization-filter-bar">
+              <label className="hospitalization-search-field" htmlFor="hospitalization-search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  aria-label="Buscar hospitalización"
+                  data-action-id="HOSPITALIZATION-SEARCH"
+                  id="hospitalization-search"
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setPage(1);
+                  }}
+                  placeholder="Paciente, documento o caso"
+                  type="search"
+                  value={query}
+                />
+                {query ? (
+                  <button
+                    aria-label="Limpiar búsqueda"
+                    className="hospitalization-search-clear"
+                    data-action-id="HOSPITALIZATION-SEARCH-CLEAR"
+                    onClick={() => {
+                      setQuery('');
+                      setPage(1);
+                    }}
+                    type="button"
+                  >
+                    ×
+                  </button>
+                ) : null}
               </label>
-              <input
-                data-action-id="HOSPITALIZATION-SEARCH"
-                id="hospitalization-search"
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setPage(1);
-                }}
-                placeholder="Nombre, documento u hospitalización"
-                type="search"
-                value={query}
-              />
-              <Button
-                className="button-secondary"
-                data-action-id="HOSPITALIZATION-SEARCH-CLEAR"
-                disabled={!query}
-                onClick={() => {
-                  setQuery('');
-                  setPage(1);
-                }}
-                type="button"
-              >
-                Limpiar búsqueda
-              </Button>
               <label>
-                Estado administrativo
+                <span>Estado</span>
                 <select
                   data-action-id="HOSPITALIZATION-FILTER-STATUS"
                   onChange={(event) =>
@@ -412,7 +416,7 @@ export default function HospitalizationsPage() {
                 </select>
               </label>
               <label>
-                Fecha de ingreso
+                <span>Ingreso</span>
                 <input
                   data-action-id="HOSPITALIZATION-FILTER-DATE"
                   onChange={(event) =>
@@ -423,7 +427,7 @@ export default function HospitalizationsPage() {
                 />
               </label>
               <label>
-                Tipo de cuenta
+                <span>Cuenta</span>
                 <select
                   data-action-id="HOSPITALIZATION-FILTER-ACCOUNT-TYPE"
                   onChange={(event) =>
@@ -439,7 +443,7 @@ export default function HospitalizationsPage() {
                   ))}
                 </select>
               </label>
-              <div className="action-row">
+              <div className="action-row hospitalization-filter-actions">
                 <Button
                   data-action-id="HOSPITALIZATION-FILTER-APPLY"
                   onClick={() => {
@@ -461,11 +465,18 @@ export default function HospitalizationsPage() {
               </div>
             </div>
           </Panel>
-          <Panel>
+          <Panel className="hospitalization-table-panel">
             {loading ? (
               <p role="status">Cargando hospitalizaciones…</p>
             ) : entries.length ? (
               <>
+                <div className="table-heading">
+                  <div>
+                    <h2>Gestión de hospitalizaciones</h2>
+                    <p>Casos activos y seguimiento administrativo.</p>
+                  </div>
+                  <StatusTag>{visibleEntries.length} visibles</StatusTag>
+                </div>
                 <div className="table-wrap">
                   <table>
                     <thead>
@@ -489,22 +500,27 @@ export default function HospitalizationsPage() {
                         return (
                           <tr key={item.id}>
                             <td>
-                              <Link
-                                data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"
-                                href={`/hospitalizations/${item.id}`}
-                              >
-                                Ver
-                              </Link>
-                              {can('cases:write') ? (
-                                <Button
-                                  className="button-link"
-                                  data-action-id="HOSPITALIZATION-EDIT"
-                                  onClick={() => openEdit(item)}
-                                  type="button"
+                              <div className="hospitalization-row-actions">
+                                <Link
+                                  className="hospitalization-manage-link"
+                                  data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"
+                                  href={`/hospitalizations/${item.id}`}
                                 >
-                                  Editar
-                                </Button>
-                              ) : null}
+                                  Gestionar <span aria-hidden="true">→</span>
+                                </Link>
+                                {can('cases:write') ? (
+                                  <Button
+                                    aria-label={`Editar ${item.id}`}
+                                    className="button-secondary hospitalization-edit-action"
+                                    data-action-id="HOSPITALIZATION-EDIT"
+                                    onClick={() => openEdit(item)}
+                                    title={`Editar ${item.id}`}
+                                    type="button"
+                                  >
+                                    ✎
+                                  </Button>
+                                ) : null}
+                              </div>
                             </td>
                             <td>
                               <Link

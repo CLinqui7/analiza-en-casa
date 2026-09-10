@@ -309,6 +309,7 @@ export default function PatientsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [saving, setSaving] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
   const [pendingIdentityFiles, setPendingIdentityFiles] = useState<File[]>([]);
   const [pendingResponsibleFiles, setPendingResponsibleFiles] = useState<File[]>([]);
   const [identityFiles, setIdentityFiles] = useState<PrivateFileMetadata[]>([]);
@@ -421,6 +422,7 @@ export default function PatientsPage() {
     setPendingIdentityFiles([]);
     setPendingResponsibleFiles([]);
     setIdentityFiles([]);
+    setMapVisible(false);
     form.reset();
     if (searchParams.has('create') || searchParams.has('edit')) router.replace('/patients');
   }
@@ -505,7 +507,8 @@ export default function PatientsPage() {
     setImportPreview(previewPatientImport(file.name, await file.text(), patients));
   }
   function confirmImport() {
-    if (providerMode === 'mongodb' || !importPreview?.rows.length || importPreview.errors.length) return;
+    if (providerMode === 'mongodb' || !importPreview?.rows.length || importPreview.errors.length)
+      return;
     addPatients(importPreview.rows);
     setResult(`${importPreview.rows.length} pacientes sintéticos importados.`);
     setImportOpen(false);
@@ -707,6 +710,7 @@ export default function PatientsPage() {
                 setPendingIdentityFiles([]);
                 setPendingResponsibleFiles([]);
                 setDismissedLinkedDialog(false);
+                setMapVisible(false);
                 setIsOpen(true);
               }}
               type="button"
@@ -853,8 +857,23 @@ export default function PatientsPage() {
             <table>
               <thead>
                 <tr>
-                  <th aria-sort={sort === 'fullName' ? (direction === 1 ? 'ascending' : 'descending') : 'none'}>
-                    <Button aria-label="Ordenar por nombre completo" data-action-id="PATIENT-SORT-NAME" onClick={() => { setDirection(sort === 'fullName' ? ((direction * -1) as 1 | -1) : 1); setSort('fullName'); setPage(1); }} type="button">Paciente {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : ''}</Button>
+                  <th
+                    aria-sort={
+                      sort === 'fullName' ? (direction === 1 ? 'ascending' : 'descending') : 'none'
+                    }
+                  >
+                    <Button
+                      aria-label="Ordenar por nombre completo"
+                      data-action-id="PATIENT-SORT-NAME"
+                      onClick={() => {
+                        setDirection(sort === 'fullName' ? ((direction * -1) as 1 | -1) : 1);
+                        setSort('fullName');
+                        setPage(1);
+                      }}
+                      type="button"
+                    >
+                      Paciente {sort === 'fullName' ? (direction === 1 ? '↑' : '↓') : ''}
+                    </Button>
                   </th>
                   <th
                     aria-sort={
@@ -1586,16 +1605,34 @@ export default function PatientsPage() {
                 {addressNotice}
               </p>
             ) : null}
-            <Controller
-              control={form.control}
-              name="address.coordinates"
-              render={({ field }) => (
-                <PatientLocationMap
-                  coordinates={field.value}
-                  onCoordinatesChange={field.onChange}
-                />
-              )}
-            />
+            <div className="patient-map-disclosure">
+              <div>
+                <strong>Mapa de ubicación</strong>
+                <span className="field-help">
+                  Cárguelo sólo cuando necesite colocar o revisar el marcador.
+                </span>
+              </div>
+              <Button
+                className="button-secondary"
+                data-action-id="PATIENT-MAP-TOGGLE"
+                onClick={() => setMapVisible((current) => !current)}
+                type="button"
+              >
+                {mapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+              </Button>
+            </div>
+            {mapVisible ? (
+              <Controller
+                control={form.control}
+                name="address.coordinates"
+                render={({ field }) => (
+                  <PatientLocationMap
+                    coordinates={field.value}
+                    onCoordinatesChange={field.onChange}
+                  />
+                )}
+              />
+            ) : null}
           </fieldset>
           <fieldset>
             <legend>Estados administrativos</legend>

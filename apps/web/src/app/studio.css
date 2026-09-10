@@ -907,3 +907,345 @@ table th .button:hover {
     padding: 12px 16px;
   }
 }
+
+/* Dialog performance: a full-screen backdrop blur repainted the entire workspace
+   and made the larger patient form visibly stall on open. */
+.main-content > * {
+  animation: none !important;
+}
+.dialog-backdrop {
+  background: rgb(11 34 48 / 68%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  animation: none;
+}
+.dialog {
+  contain: layout paint;
+  animation: none;
+}
+.patient-map-disclosure {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.patient-map-disclosure > div {
+  display: grid;
+  gap: 3px;
+}
+.patient-map-disclosure .field-help {
+  margin: 0;
+}
+
+/* Hospitalizations: compact Studio layout and a clear action hierarchy. */
+.hospitalization-tabs-shell {
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #eaf1f5;
+}
+.hospitalization-tabs-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px 6px;
+}
+.hospitalization-tabs-heading h2 {
+  margin: 0;
+  font-size: 13px;
+}
+.hospitalization-tabs-heading p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.hospitalization-tabs-shell .tabs {
+  margin: 0;
+}
+.hospitalization-filter-panel {
+  padding: 18px 20px;
+}
+.hospitalization-filter-panel .table-heading {
+  margin-bottom: 14px;
+}
+.hospitalization-filter-panel .table-heading p,
+.hospitalization-table-panel .table-heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.hospitalization-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) repeat(3, minmax(135px, 0.8fr)) auto;
+  align-items: end;
+  gap: 10px;
+}
+.hospitalization-filter-bar label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.hospitalization-filter-bar input,
+.hospitalization-filter-bar select {
+  min-height: 42px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.hospitalization-search-field {
+  position: relative;
+  display: block !important;
+}
+.hospitalization-search-field > span {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 14px;
+  translate: 0 -50%;
+  color: var(--muted);
+  font-size: 20px;
+}
+.hospitalization-search-field input {
+  width: 100%;
+  padding-right: 42px;
+  padding-left: 42px;
+}
+.hospitalization-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  translate: 0 -50%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+.hospitalization-search-clear:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+.hospitalization-filter-actions {
+  flex-wrap: nowrap;
+}
+.hospitalization-filter-actions .button {
+  min-height: 42px;
+  white-space: nowrap;
+}
+.hospitalization-table-panel {
+  overflow: hidden;
+  padding: 0;
+}
+.hospitalization-table-panel > .table-heading {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.hospitalization-table-panel .table-wrap {
+  border: 0;
+  border-radius: 0;
+}
+.hospitalization-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 126px;
+}
+.hospitalization-manage-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #087774;
+  font-weight: 800;
+  text-decoration: none;
+}
+.hospitalization-manage-link:hover {
+  text-decoration: underline;
+}
+.hospitalization-edit-action {
+  width: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.hospitalization-detail-page {
+  gap: 18px;
+}
+.hospitalization-summary-panel {
+  overflow: hidden;
+  padding: 0;
+}
+.hospitalization-summary-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 0;
+}
+.hospitalization-summary-layout > section {
+  padding: 24px;
+}
+.hospitalization-profile-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.hospitalization-profile-hero h2 {
+  margin: 2px 0 4px;
+  font-size: 22px;
+}
+.hospitalization-profile-hero p:not(.eyebrow) {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+}
+.hospitalization-avatar {
+  display: grid;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 15px;
+  background: #d9f3f0;
+  color: #087774;
+  font-size: 16px;
+  font-weight: 900;
+}
+.hospitalization-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+.hospitalization-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 26px;
+  margin: 22px 0 0;
+}
+.hospitalization-detail-grid > div {
+  min-width: 0;
+}
+.hospitalization-detail-grid .full {
+  grid-column: 1 / -1;
+}
+.hospitalization-detail-grid dt {
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.hospitalization-detail-grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+.hospitalization-next-action {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px;
+  background: #173b55;
+  color: #fff;
+}
+.hospitalization-next-action .eyebrow {
+  margin: 16px 0 3px;
+  color: #72dfd4;
+}
+.hospitalization-next-action h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+}
+.hospitalization-next-action p:not(.eyebrow) {
+  margin: 10px 0 22px;
+  color: #c8d8e2;
+  line-height: 1.55;
+}
+.hospitalization-next-action .button-secondary {
+  border-color: rgb(255 255 255 / 30%);
+  background: rgb(255 255 255 / 10%);
+  color: #fff;
+}
+.hospitalization-next-action-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #21b8aa;
+  font-size: 18px;
+  font-weight: 900;
+}
+.hospitalization-administrative-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 1080px) {
+  .hospitalization-filter-bar {
+    grid-template-columns: minmax(240px, 1.5fr) repeat(2, minmax(130px, 1fr));
+  }
+  .hospitalization-filter-actions {
+    grid-column: 2 / -1;
+    justify-self: end;
+  }
+  .hospitalization-summary-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hospitalization-next-action {
+    min-height: auto;
+  }
+  .hospitalization-administrative-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 620px) {
+  .patient-map-disclosure {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .hospitalization-filter-panel {
+    padding: 16px;
+  }
+  .hospitalization-filter-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hospitalization-filter-actions {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+  .hospitalization-filter-actions .button {
+    flex: 1;
+  }
+  .hospitalization-summary-layout > section,
+  .hospitalization-next-action {
+    padding: 20px;
+  }
+  .hospitalization-profile-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .hospitalization-detail-grid,
+  .hospitalization-administrative-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

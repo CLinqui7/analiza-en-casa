@@ -46,6 +46,8 @@ class CH02(unittest.TestCase):
   t=time.time(); s.a('PATIENT-COVERAGE-ADD').click(); s.w.until(EC.visibility_of_element_located((By.XPATH,"//*[contains(.,'Cobertura única preparada')]"))); s.passed('PATIENT-COVERAGE-ADD',t)
   s.d.find_element(By.CSS_SELECTOR,'input[name="address.locationUrl"]').send_keys('https://maps.example/?q=13.692900,-89.218200')
   t=time.time(); s.a('PATIENT-ADDRESS-IMPORT').click(); s.w.until(lambda _:s.d.find_element(By.CSS_SELECTOR,'input[name="address.coordinates"]').get_attribute('value')=='13.692900, -89.218200'); s.passed('PATIENT-ADDRESS-IMPORT',t)
+  s.a('PATIENT-MAP-TOGGLE').click()
+  s.w.until(EC.presence_of_element_located((By.CSS_SELECTOR,'[data-action-id="PATIENT-MAP-ZOOM-IN"]')))
   for action in ('PATIENT-MAP-ZOOM-IN','PATIENT-MAP-ZOOM-OUT','PATIENT-MAP-LAYER'):
    t=time.time(); s.a(action).click(); s.assertTrue(s.a(action).is_displayed()); s.passed(action,t)
   t=time.time(); s.a('PATIENT-BACK').click(); s.w.until(EC.invisibility_of_element_located((By.ID,'patient-form'))); s.passed('PATIENT-BACK',t)
