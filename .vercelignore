@@ -1,7 +1,7 @@
 references/
 video-audit-reviews/
 docs/*
-!docs/qa/
+!docs/qa
 docs/qa/*
 !docs/qa/CLIENT_CHANGE_REQUESTS.json
 .local/
