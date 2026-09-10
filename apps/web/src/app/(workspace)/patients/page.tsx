@@ -299,7 +299,7 @@ export default function PatientsPage() {
   const [tab, setTab] = useState<'ACTIVE' | 'INACTIVE' | 'IMPORT'>('ACTIVE');
   const [sort, setSort] = useState<'fullName' | 'documentId'>('fullName');
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);

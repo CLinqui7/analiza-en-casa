@@ -58,6 +58,7 @@ export default function DashboardPage() {
   } = useDashboardWorkspace();
   const { can } = useAuth();
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
+  const [dashboardMonth, setDashboardMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const supabaseConfigured = Boolean(getSupabaseBrowserClient());
   const recentReadings = filterDashboardReadings(vitalReadings, dateRange);
   const actions = getDashboardActions(shifts, hospitalizations, patients, dateRange);
@@ -85,18 +86,19 @@ export default function DashboardPage() {
     .filter((shift) => shift.status === 'SCHEDULED')
     .slice()
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
-  const currentMonth = new Date().toISOString().slice(0, 7);
   const visitsThisMonth = shifts.filter(
-    (shift) => shift.status !== 'CANCELLED' && shift.startsAt.startsWith(currentMonth),
+    (shift) => shift.status !== 'CANCELLED' && shift.startsAt.startsWith(dashboardMonth),
   ).length;
   const sentQuoteValueThisMonth = latestQuotes
     .filter(
       (quote) =>
-        quote.status === 'SENT' && (quote.sentAt ?? quote.createdAt).startsWith(currentMonth),
+        quote.status === 'SENT' && (quote.sentAt ?? quote.createdAt).startsWith(dashboardMonth),
     )
     .reduce((sum, quote) => sum + quote.total, 0);
   const appliedPaymentsThisMonth = payments
-    .filter((payment) => payment.status === 'APPLIED' && payment.createdAt.startsWith(currentMonth))
+    .filter(
+      (payment) => payment.status === 'APPLIED' && payment.createdAt.startsWith(dashboardMonth),
+    )
     .reduce((sum, payment) => sum + payment.amount, 0);
   const quoteFunnel = [
     { label: 'Borradores', value: latestQuotes.filter((quote) => quote.status === 'DRAFT').length },
@@ -143,27 +145,27 @@ export default function DashboardPage() {
     <div className="page-stack dashboard-page">
       <header className="page-header page-header-actions dashboard-hero">
         <div>
-          <p className="eyebrow">Centro de operación</p>
+          <span className="dashboard-studio-pill">Operación domiciliaria · Studio</span>
           <h1>Una vista clara de tu operación</h1>
-          <p>Pacientes, atención domiciliaria y seguimiento del equipo en un solo lugar.</p>
+          <p>Pacientes, coordinación y seguimiento, en un solo lugar.</p>
         </div>
         <div className="header-actions">
+          <label className="dashboard-month-control">
+            <input
+              aria-label="Mes del dashboard"
+              data-action-id="DASHBOARD-MONTH"
+              onChange={(event) => setDashboardMonth(event.target.value)}
+              type="month"
+              value={dashboardMonth}
+            />
+          </label>
           {can('patients:write') ? (
             <Link
-              className="button button-secondary"
+              className="button"
               data-action-id="DASHBOARD-PATIENT-CREATE"
               href="/patients?create=1"
             >
               + Nuevo paciente
-            </Link>
-          ) : null}
-          {can('quotes:write') ? (
-            <Link
-              className="button"
-              data-action-id="DASHBOARD-QUOTE-CREATE"
-              href="/quotes?create=1"
-            >
-              + Nueva cotización
             </Link>
           ) : null}
         </div>
@@ -277,44 +279,42 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="studio-shortcuts">
-                {can('patients:write') ? (
-                  <Link href="/patients?create=1">
-                    <span>＋</span>
-                    <div>
-                      <strong>Nuevo paciente</strong>
-                      <small>Crear registro y adjuntar documentos</small>
-                    </div>
-                    <span>→</span>
+                {can('patients:read') ? (
+                  <Link href="/patients">
+                    <span>♙</span>
+                    <strong>Pacientes</strong>
                   </Link>
                 ) : null}
                 {can('cases:write') ? (
                   <Link href="/hospitalizations">
                     <span>⊞</span>
-                    <div>
-                      <strong>Hospitalizaciones</strong>
-                      <small>Asignar atención y enfermeras</small>
-                    </div>
-                    <span>→</span>
+                    <strong>Hospitalización</strong>
                   </Link>
                 ) : null}
-                {can('reports:read') ? (
-                  <Link href="/reports/visits-goals">
-                    <span>◎</span>
-                    <div>
-                      <strong>Visitas y metas</strong>
-                      <small>Resultados de atención a domicilio</small>
-                    </div>
-                    <span>→</span>
+                {can('quotes:write') ? (
+                  <Link data-action-id="DASHBOARD-QUOTE-CREATE" href="/quotes?create=1">
+                    <span>▧</span>
+                    <strong>Cotizaciones</strong>
                   </Link>
                 ) : null}
-                <Link href="/changes">
-                  <span>✓</span>
-                  <div>
-                    <strong>Cambios solicitados</strong>
-                    <small>Seguimiento de las 32 solicitudes</small>
-                  </div>
-                  <span>→</span>
-                </Link>
+                {can('agenda:read') ? (
+                  <Link href="/agenda">
+                    <span>▦</span>
+                    <strong>Agenda</strong>
+                  </Link>
+                ) : null}
+                {can('insurance:read') ? (
+                  <Link href="/insurance">
+                    <span>✓</span>
+                    <strong>Preautorizaciones</strong>
+                  </Link>
+                ) : null}
+                {can('clinical:read') ? (
+                  <Link href="/clinical">
+                    <span>∿</span>
+                    <strong>Clínica</strong>
+                  </Link>
+                ) : null}
               </div>
               <div className="studio-overview-foot">
                 <span>{scheduledShifts.length} turnos programados</span>
