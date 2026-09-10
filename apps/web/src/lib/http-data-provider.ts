@@ -2,6 +2,7 @@
 
 import {
   doctorSchema,
+  clinicalDocumentSchema,
   hospitalizationSchema,
   insuranceEventSchema,
   insuranceRequestSchema,
@@ -104,6 +105,9 @@ export class HttpDataProvider implements DataProvider {
         nursingResourceSchema.parse(resource),
       ),
       quotes: (payload.quotes ?? []).map((quote) => quoteSchema.parse(quote)),
+      clinicalDocuments: (payload.clinicalDocuments ?? []).map((document) =>
+        clinicalDocumentSchema.parse(document),
+      ),
       insuranceRequests: (payload.insuranceRequests ?? []).map((request) =>
         insuranceRequestSchema.parse(request),
       ),

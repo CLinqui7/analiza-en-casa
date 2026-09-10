@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { emptyOperations, type OperationsSnapshot } from '@analiza/contracts';
 import { useAuth } from '@/components/providers';
 import { mongoMutationHeaders } from './auth';
+import { demoOperationsConfiguration } from './demo-data';
 
 export function useOperations() {
   const { session } = useAuth();
@@ -63,5 +64,8 @@ export function useOperations() {
       setBusy(false);
     }
   };
-  return { ...data, error, busy, connected, execute, reload };
+  const visibleData = connected
+    ? data
+    : { ...emptyOperations(), configuration: demoOperationsConfiguration };
+  return { ...visibleData, error, busy, connected, execute, reload };
 }

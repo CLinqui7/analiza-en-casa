@@ -12,6 +12,7 @@ import type {
   ClinicalDocument,
   CatalogItem,
   Purchase,
+  ConfigurationEntry,
 } from '@analiza/contracts';
 
 export const demoPatients: Patient[] = [
@@ -227,11 +228,62 @@ export const demoCatalogItems: CatalogItem[] = [
     status: 'ACTIVE',
     createdAt: '2026-08-28T08:00:00.000Z',
   },
+  {
+    id: 'catalog-demo-medication-qa',
+    sku: 'MED-QA-001',
+    name: 'Unidad inerte QA (sin uso clínico)',
+    status: 'ACTIVE',
+    createdAt: '2026-08-28T08:00:00.000Z',
+  },
+];
+
+/** Synthetic selector values only. They demonstrate configuration and packaging arithmetic; they
+ * are not prescriptions, approved doses, commercial products, or clinical recommendations. */
+export const demoOperationsConfiguration: ConfigurationEntry[] = [
+  {
+    id: 'configuration-demo-specialty-qa',
+    category: 'SPECIALTY',
+    label: 'Especialidad QA configurable',
+    active: true,
+  },
+  {
+    id: 'configuration-demo-insurer-qa',
+    category: 'INSURER',
+    label: 'Aseguradora de demostración',
+    active: true,
+    discountPercent: 0,
+  },
+  {
+    id: 'configuration-demo-medication-qa',
+    category: 'MEDICATION',
+    label: 'Unidad inerte QA (sin uso clínico)',
+    active: true,
+    inventoryItemId: 'catalog-demo-medication-qa',
+    tabletsPerBlister: 5,
+    tabletsPerBox: 20,
+  },
+  {
+    id: 'configuration-demo-dose-qa',
+    category: 'DOSE',
+    label: 'Etiqueta de dosis QA — requiere validación clínica',
+    active: true,
+  },
 ];
 
 export const demoPurchases: Purchase[] = [];
 
 export const demoInventoryMovements: InventoryMovement[] = [
+  {
+    id: 'movement-demo-medication-qa',
+    itemId: 'catalog-demo-medication-qa',
+    createdAt: '2026-08-28T08:00:00.000Z',
+    kind: 'ENTRY',
+    quantity: 100,
+    reason: 'Semilla sintética para pruebas de presentaciones',
+    warehouseId: 'central',
+    reference: 'SEED-MED-QA-001',
+    user: 'Bootstrap QA',
+  },
   {
     id: 'movement-demo-001',
     itemId: 'inventory-demo-kit',

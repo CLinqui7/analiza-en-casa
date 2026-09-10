@@ -29,6 +29,7 @@ export default function HospitalizationDetailPage() {
   const { can } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
   const hospitalization = hospitalizations.find((item) => item.id === params.id);
 
   if (loading)
@@ -63,12 +64,13 @@ export default function HospitalizationDetailPage() {
   const profile = hospitalization.administrativeProfile;
   const mockProfileEnabled = providerMode === 'mock';
   const closeProfile = () => setProfileOpen(false);
-  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
+  const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!mockProfileEnabled) return;
     const values = new FormData(event.currentTarget);
     const value = (name: string) => String(values.get(name) ?? '').trim() || undefined;
-    updateHospitalization({
+    setProfileSaving(true);
+    const saved = await updateHospitalization({
       ...hospitalization,
       administrativeProfile: {
         healthManager: value('healthManager'),
@@ -86,8 +88,11 @@ export default function HospitalizationDetailPage() {
         patientClass: value('patientClass'),
       },
     });
-    setProfileMessage('Perfil administrativo de ejecución guardado.');
-    closeProfile();
+    setProfileSaving(false);
+    if (saved) {
+      setProfileMessage('Perfil administrativo de ejecución guardado.');
+      closeProfile();
+    }
   };
 
   return (
@@ -243,10 +248,11 @@ export default function HospitalizationDetailPage() {
               </Button>
               <Button
                 data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"
+                disabled={profileSaving}
                 form="administrative-profile-form"
                 type="submit"
               >
-                Guardar
+                {profileSaving ? 'Guardando…' : 'Guardar'}
               </Button>
             </>
           }
@@ -254,7 +260,11 @@ export default function HospitalizationDetailPage() {
           open={profileOpen}
           title={`Perfil administrativo de ejecución: ${hospitalization.id}`}
         >
-          <form className="form-grid" id="administrative-profile-form" onSubmit={saveProfile}>
+          <form
+            className="form-grid"
+            id="administrative-profile-form"
+            onSubmit={(event) => void saveProfile(event)}
+          >
             <label>
               Health manager
               <input defaultValue={profile?.healthManager ?? ''} name="healthManager" />

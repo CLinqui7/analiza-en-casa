@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   paymentSchema,
   catalogItemSchema,
+  clinicalDocumentSchema,
   inventoryMovementSchema,
   purchaseSchema,
 } from '@analiza/contracts';
@@ -54,6 +55,7 @@ export async function GET(request?: Request) {
       payments,
       inventoryMovements,
       purchases,
+      clinicalDocuments,
       auditEvents,
     ] = await Promise.all([
       can(session.role, 'patients:read')
@@ -101,6 +103,12 @@ export async function GET(request?: Request) {
             .find({ organizationId: session.organizationId })
             .toArray()
         : Promise.resolve([]),
+      can(session.role, 'clinical:read')
+        ? database
+            .collection('clinicalDocuments')
+            .find({ organizationId: session.organizationId })
+            .toArray()
+        : Promise.resolve([]),
       can(session.role, 'audit:read')
         ? database
             .collection('auditEvents')
@@ -128,6 +136,7 @@ export async function GET(request?: Request) {
         payments: payments.map((item) => paymentSchema.parse(item)),
         inventoryMovements: inventoryMovements.map((item) => inventoryMovementSchema.parse(item)),
         purchases: purchases.map((item) => purchaseSchema.parse(item)),
+        clinicalDocuments: clinicalDocuments.map((item) => clinicalDocumentSchema.parse(item)),
         auditEntries: auditEvents.map((item) => ({
           id: String(item.id),
           action: String(item.action),

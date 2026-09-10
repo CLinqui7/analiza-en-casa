@@ -64,6 +64,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [correcting, setCorrecting] = useState<ClinicalDocument | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
   const form = useForm<DocumentForm>({
     resolver: zodResolver(documentSchema),
     defaultValues: { caseId: hospitalizations[0]?.id ?? '', title: '', summary: '', author: '' },
@@ -80,7 +81,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
     setCorrecting(null);
     correctionForm.reset();
   };
-  const submit = (values: DocumentForm) => {
+  const submit = async (values: DocumentForm) => {
     const hospitalization = hospitalizations.find((candidate) => candidate.id === values.caseId);
     if (!hospitalization) {
       form.setError('caseId', {
@@ -89,7 +90,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
       });
       return;
     }
-    addClinicalDocument({
+    const saved = await addClinicalDocument({
       id: crypto.randomUUID(),
       caseId: hospitalization.id,
       patientId: hospitalization.patientId,
@@ -101,18 +102,28 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
       version: 1,
       createdAt: new Date().toISOString(),
     });
+    if (!saved) return;
     setMessage('Documento clínico sintético persistido como borrador con evidencia de auditoría.');
     closeCreate();
   };
-  const sign = (documentId: string) => {
-    signClinicalDocument(documentId);
-    setMessage(
-      'Documento firmado e inmutable. Las correcciones crearán una nueva versión con motivo.',
-    );
+  const sign = async (documentId: string) => {
+    setPendingDocumentId(documentId);
+    const saved = await signClinicalDocument(documentId);
+    setPendingDocumentId(null);
+    if (saved)
+      setMessage(
+        'Documento firmado e inmutable. Las correcciones crearán una nueva versión con motivo.',
+      );
   };
-  const submitCorrection = (values: CorrectionForm) => {
+  const submitCorrection = async (values: CorrectionForm) => {
     if (!correcting) return;
-    correctClinicalDocument(correcting.id, values.reason, values.summary, values.author);
+    const saved = await correctClinicalDocument(
+      correcting.id,
+      values.reason,
+      values.summary,
+      values.author,
+    );
+    if (!saved) return;
     setMessage('Corrección creada como nuevo borrador; la versión firmada original se conserva.');
     closeCorrection();
   };
@@ -188,6 +199,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
                         <Button
                           data-action-id="CLINICAL-DOCUMENT-SIGN"
                           className="button-secondary"
+                          disabled={pendingDocumentId === document.id}
                           onClick={() => sign(document.id)}
                           type="button"
                         >
@@ -233,7 +245,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
               Cancelar
             </Button>
             <Button form="clinical-document-form" type="submit">
-              Guardar borrador
+              {form.formState.isSubmitting ? 'Guardando…' : 'Guardar borrador'}
             </Button>
           </>
         }
@@ -293,7 +305,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
               Cancelar
             </Button>
             <Button form="clinical-correction-form" type="submit">
-              Crear corrección
+              {correctionForm.formState.isSubmitting ? 'Guardando…' : 'Crear corrección'}
             </Button>
           </>
         }

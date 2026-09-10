@@ -232,7 +232,8 @@ class Quotes(unittest.TestCase):
 
     def test_admin_can_navigate_and_write_quotes(self) -> None:
         started = time.time()
-        self.click('FINANCIERO-TOGGLE')
+        if self.action('FINANCIERO-TOGGLE').get_attribute('aria-expanded') != 'true':
+            self.click('FINANCIERO-TOGGLE')
         self.click('QUOTE-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/quotes')); self.quotes_ready()
         self.d.refresh(); self.quotes_ready()
@@ -316,7 +317,7 @@ class Quotes(unittest.TestCase):
         self.assertIn('USD 65.70', totals)
         self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
-        self.d.refresh(); self.open_detail(quote['id'])
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id'])
         body = self.d.find_element(By.TAG_NAME, 'body').text
         for category in ('Servicios', 'Estudios Dx', 'Medicamentos', 'Insumos', 'Equipos', 'Honorarios', 'Extras'):
             self.assertIn(category, body); self.assertIn(f'Concepto {category}', body)
@@ -328,7 +329,7 @@ class Quotes(unittest.TestCase):
         remove_started = time.time(); self.click('QUOTE-ITEM-REMOVE')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'No hay conceptos en esta categoría')]")))
         self.click('QUOTE-EDIT-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
-        self.d.refresh(); self.open_detail(quote['id'])
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id'])
         body = self.d.find_element(By.TAG_NAME, 'body').text
         self.assertNotIn('Concepto Extras', body); self.assertIn('Concepto Honorarios', body)
         self.pass_('QUOTE-ITEM-REMOVE', 'SEL-QUOTE-ITEMS', remove_started)
@@ -356,6 +357,7 @@ class Quotes(unittest.TestCase):
         self.assertEqual(item['unitPrice'], 55)
         self.open_detail(quote['id'])
         self.d.refresh()
+        self.w.until(EC.visibility_of_element_located((By.XPATH, f"//*[contains(.,'Médico: {doctor_name}')]")))
         self.assertIn(f'Médico: {doctor_name}', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('QUOTE-FEE-DOCTOR-SELECT', 'SEL-B4-DOCTOR-FEE', started)
         self.pass_('QUOTE-FEE-AMOUNT', 'SEL-B4-DOCTOR-FEE', started)
@@ -389,7 +391,7 @@ class Quotes(unittest.TestCase):
         self.assertEqual(quote['referralSelections'], ['Redes Sociales'])
         self.assertEqual(quote['giftCardCode'], 'GIFT-SEL-B4')
         self.assertEqual(quote['comments'], 'Comentarios Selenium B4')
-        self.d.refresh(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
         self.assertEqual(self.action('QUOTE-PATIENT-SELECT').get_attribute('value'), 'patient-demo-001')
         self.pass_('QUOTE-PATIENT-SELECT', 'SEL-QUOTE-METADATA', patient_select_started)
@@ -488,7 +490,7 @@ class Quotes(unittest.TestCase):
         persisted_item = next(item for item in quote['items'] if item['name'] == 'Servicio sintético disponible')
         self.assertEqual(persisted_item['businessPartnerLabel'], 'Socio sintético A')
         self.assertEqual(persisted_item['unitPrice'], 10)
-        self.d.refresh(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id']); self.click('QUOTE-EDIT')
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT-SUBMIT"]')))
         selected_referrals = self.d.find_element(By.CSS_SELECTOR, '[aria-label="Referidos seleccionados"]')
         self.assertIn('Redes Sociales', selected_referrals.text)
@@ -539,7 +541,7 @@ class Quotes(unittest.TestCase):
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Medicamento sintético disponible')]")))
         self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
-        self.d.refresh(); self.open_detail(quote['id'])
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id'])
         body = self.d.find_element(By.TAG_NAME, 'body').text
         self.assertIn('Servicio sintético disponible', body); self.assertIn('Medicamento sintético disponible', body)
         self.assertEqual([(item['name'], item['unitPrice']) for item in self.quote_data(quote['id'])['items']], [('Servicio sintético disponible', 12), ('Medicamento sintético disponible', 9)])
@@ -594,7 +596,7 @@ class Quotes(unittest.TestCase):
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'Seguimiento sintético disponible')]")))
         self.click('QUOTE-CREATE-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         quote = next(item for item in self.snapshot()['quotes'] if item['summary'] == marker)
-        self.d.refresh(); self.open_detail(quote['id'])
+        self.d.refresh(); self.quotes_ready(); self.open_detail(quote['id'])
         persisted = self.quote_data(quote['id'])['items']
         self.assertEqual([(item['name'], item['unitPrice']) for item in persisted], [
             ('INS-SYN-001 | Insumo sintético disponible — Fabricante sintético (1)', 12),
@@ -637,7 +639,8 @@ class Quotes(unittest.TestCase):
         submit_started = time.time(); self.fill('Resumen operativo', 'Editar Selenium persistido')
         self.click('QUOTE-EDIT-SUBMIT'); self.w.until(EC.url_to_be(f'{BASE}/quotes'))
         self.open_detail(quote_id); self.assertIn('Editar Selenium persistido', self.d.find_element(By.TAG_NAME, 'body').text)
-        self.d.refresh(); self.assertIn('Editar Selenium persistido', self.d.find_element(By.TAG_NAME, 'body').text)
+        self.d.refresh(); self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Editar Selenium persistido')]")))
+        self.assertIn('Editar Selenium persistido', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('QUOTE-EDIT-SUBMIT', 'SEL-QUOTE-EDIT', submit_started)
 
     def test_send_and_immutability(self) -> None:
@@ -649,7 +652,8 @@ class Quotes(unittest.TestCase):
         actions = [entry['action'] for entry in self.snapshot()['auditEntries'] if entry['subject'] == quote_id]
         self.assertIn('Cotización marcada como enviada e inmutable', actions)
         self.assertTrue(all('enlace seguro' not in action.lower() for action in actions))
-        self.d.refresh(); self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT"], [data-action-id="QUOTE-SEND"]'))
+        self.d.refresh(); self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="QUOTE-REVISE"]')))
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-EDIT"], [data-action-id="QUOTE-SEND"]'))
         self.assertTrue(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-REVISE"]'))
         self.pass_('QUOTE-SEND', 'SEL-QUOTE-SEND', started)
 
@@ -682,18 +686,20 @@ class Quotes(unittest.TestCase):
         self.pass_('QUOTE-PRINT', 'SEL-QUOTE-PRINT', started)
 
     def test_related_actions(self) -> None:
-        quote_id = self.create_fixture('Relacionadas Selenium'); self.open_detail(quote_id)
+        quote_id = self.create_fixture('Relacionadas Selenium'); self.send_fixture(quote_id)
         insurance_started = time.time(); self.click('QUOTE-OPEN-INSURANCE')
         self.w.until(EC.url_contains(f'/insurance?quote={quote_id}')); self.pass_('QUOTE-OPEN-INSURANCE', 'SEL-QUOTE-RELATED', insurance_started)
         self.d.back(); self.w.until(EC.url_contains(f'/quotes/{quote_id}'))
         payment_started = time.time(); self.click('QUOTE-OPEN-PAYMENT')
         self.w.until(EC.url_contains(f'/payments?quote={quote_id}')); self.pass_('QUOTE-OPEN-PAYMENT', 'SEL-QUOTE-RELATED', payment_started)
         self.d.back(); self.w.until(EC.url_contains(f'/quotes/{quote_id}'))
-        whatsapp_started = time.time(); url_before = self.d.current_url; self.click('QUOTE-WHATSAPP')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and contains(.,'Proveedor de mensajería no configurado')]")))
-        self.assertEqual(self.d.current_url, url_before); self.pass_('QUOTE-WHATSAPP', 'SEL-QUOTE-RELATED', whatsapp_started)
+        url_before = self.d.current_url
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-WHATSAPP"]'))
         portal_started = time.time(); self.click('QUOTE-PORTAL')
-        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[@role='status' and contains(.,'Portal seguro no configurado')]")))
+        portal_status = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="status"]')))
+        self.assertIn('portal seguro', portal_status.text.lower())
+        self.assertIn('mongo', portal_status.text.lower())
+        self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-WHATSAPP"]'))
         self.assertEqual(self.d.current_url, url_before); self.pass_('QUOTE-PORTAL', 'SEL-QUOTE-RELATED', portal_started)
 
     def test_mobile(self) -> None:

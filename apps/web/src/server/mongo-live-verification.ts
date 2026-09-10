@@ -139,6 +139,45 @@ try {
     data: { quote: { ...quote, summary: 'Cotización QA editada' }, expectedVersion: 1 },
   });
   assert.equal(editQuote.status(), 200);
+  const clinicalDocument = {
+    id: `${run}-clinical`,
+    caseId: hospitalization.id,
+    patientId: patient.id,
+    type: 'CARE_PLAN',
+    title: 'Plan clínico sintético QA',
+    summary: 'Contenido ficticio sin instrucciones clínicas.',
+    author: 'Profesional QA',
+    status: 'DRAFT',
+    version: 1,
+    createdAt: new Date().toISOString(),
+  };
+  await op(admin, { command: 'clinical.create', document: clinicalDocument });
+  await op(assigned, { command: 'clinical.sign', documentId: clinicalDocument.id }, 403);
+  await op(admin, { command: 'clinical.sign', documentId: clinicalDocument.id });
+  const correctionId = `${run}-clinical-correction`;
+  await op(admin, {
+    command: 'clinical.correct',
+    documentId: clinicalDocument.id,
+    correctionId,
+    reason: 'Corrección sintética de QA',
+    summary: 'Nueva versión ficticia sin instrucciones clínicas.',
+    author: 'Profesional QA',
+  });
+  const clinicalWorkspace = await (await admin.context.get('/api/workspace')).json();
+  const originalClinical = clinicalWorkspace.clinicalDocuments.find(
+    (row: { id: string }) => row.id === clinicalDocument.id,
+  );
+  const correctedClinical = clinicalWorkspace.clinicalDocuments.find(
+    (row: { id: string }) => row.id === correctionId,
+  );
+  assert.equal(originalClinical.status, 'SIGNED');
+  assert.equal(originalClinical.summary, clinicalDocument.summary);
+  assert.equal(correctedClinical.status, 'DRAFT');
+  assert.equal(correctedClinical.correctionOf, clinicalDocument.id);
+  assert.equal(correctedClinical.version, 2);
+  passed.push(
+    'Clinical draft persists; signing requires server permission; correction preserves signed original and creates version 2',
+  );
   const loaded = await (await reader.context.get('/api/workspace')).json();
   assert.ok(
     loaded.patients.some(

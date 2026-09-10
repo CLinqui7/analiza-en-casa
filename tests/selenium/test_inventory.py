@@ -199,7 +199,10 @@ class InventoryList(unittest.TestCase):
         started = time.time()
         self.login('admin@demo.local', 'demo-admin')
         before = self.driver.execute_script("return localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')")
-        self.driver.find_elements(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')[0].click()
+        kit_row = self.wait.until(
+            conditions.visibility_of_element_located((By.XPATH, "//tbody/tr[contains(.,'KIT-DEMO-001')]") )
+        )
+        kit_row.find_element(By.CSS_SELECTOR, '[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]').click()
         dialog = self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
         self.assertIn('Movimientos de item', dialog.text)
         self.assertEqual(dialog.find_element(By.XPATH, ".//label[contains(., 'Código')]//input").get_attribute('value'), 'KIT-DEMO-001')

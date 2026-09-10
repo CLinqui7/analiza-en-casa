@@ -5,6 +5,7 @@ import {
   administrationInputSchema,
   visitInputSchema,
   type BalanceEntry,
+  type ClinicalDocument,
   type Purchase,
 } from '@analiza/contracts';
 import {
@@ -13,7 +14,12 @@ import {
   canEditAssignedBalance,
   MongoOperationsRepository,
 } from './mongo-operations';
-import { MongoConflictError, MongoInputError, type ServerActor } from './mongo-patients';
+import {
+  MongoAccessError,
+  MongoConflictError,
+  MongoInputError,
+  type ServerActor,
+} from './mongo-patients';
 
 const nurse: ServerActor = { userId: 'nurse-a', organizationId: 'org-a', role: 'NURSE' };
 describe('assigned clinical operations', () => {
@@ -160,6 +166,187 @@ describe('assigned clinical operations', () => {
         actorUserId: 'inventory-user',
         action: 'PURCHASE_DRAFT_CREATED',
         resourceId: purchase.id,
+      }),
+      { session },
+    );
+  });
+
+  // test-id: vitest:operations-clinical-create-tenant-audit
+  it('creates a clinical draft only for an active tenant hospitalization and audits it', async () => {
+    const document: ClinicalDocument = {
+      id: 'clinical-synthetic-01',
+      caseId: 'case-synthetic-01',
+      patientId: 'patient-synthetic-01',
+      type: 'CARE_PLAN',
+      title: 'Plan sintético',
+      summary: 'Contenido sintético sin reglas clínicas.',
+      author: 'Profesional QA',
+      status: 'DRAFT',
+      version: 1,
+      createdAt: '2026-09-10T07:00:00.000Z',
+    };
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const clinicalInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'hospitalizations')
+          return {
+            findOne: vi.fn().mockResolvedValue({
+              id: document.caseId,
+              patientId: document.patientId,
+              organizationId: 'org-a',
+              status: 'ACTIVE',
+            }),
+          };
+        if (name === 'clinicalDocuments')
+          return { findOne: vi.fn().mockResolvedValue(null), insertOne: clinicalInsert };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+
+    await expect(
+      new MongoOperationsRepository(database).execute(
+        { userId: 'doctor-a', organizationId: 'org-a', role: 'DOCTOR' },
+        { command: 'clinical.create', document },
+      ),
+    ).resolves.toEqual({ id: document.id });
+    expect(clinicalInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ...document,
+        organizationId: 'org-a',
+        createdBy: 'doctor-a',
+        createdAt: expect.any(String),
+      }),
+      { session },
+    );
+    expect(auditInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: 'org-a',
+        action: 'CLINICAL_DOCUMENT_CREATED',
+        resourceId: document.id,
+      }),
+      { session },
+    );
+  });
+
+  // test-id: vitest:operations-clinical-sign-permission
+  it('signs a draft atomically and denies a nurse signing authority', async () => {
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const updateOne = vi.fn().mockResolvedValue({ modifiedCount: 1 });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'clinicalDocuments')
+          return {
+            findOne: vi.fn().mockResolvedValue({
+              id: 'clinical-synthetic-01',
+              organizationId: 'org-a',
+              status: 'DRAFT',
+            }),
+            updateOne,
+          };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const repository = new MongoOperationsRepository(database);
+
+    await expect(
+      repository.execute(
+        { userId: 'doctor-a', organizationId: 'org-a', role: 'DOCTOR' },
+        { command: 'clinical.sign', documentId: 'clinical-synthetic-01' },
+      ),
+    ).resolves.toEqual({ id: 'clinical-synthetic-01' });
+    expect(updateOne).toHaveBeenCalledWith(
+      { organizationId: 'org-a', id: 'clinical-synthetic-01', status: 'DRAFT' },
+      {
+        $set: {
+          status: 'SIGNED',
+          signedAt: expect.any(String),
+          signedBy: 'doctor-a',
+        },
+      },
+      { session },
+    );
+    await expect(
+      repository.execute(nurse, {
+        command: 'clinical.sign',
+        documentId: 'clinical-synthetic-01',
+      }),
+    ).rejects.toThrow(MongoAccessError);
+  });
+
+  // test-id: vitest:operations-clinical-correction-immutable
+  it('creates a versioned correction without updating the signed original', async () => {
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const original = {
+      id: 'clinical-synthetic-01',
+      organizationId: 'org-a',
+      caseId: 'case-synthetic-01',
+      patientId: 'patient-synthetic-01',
+      type: 'CLINICAL_EVOLUTION',
+      title: 'Evolución sintética',
+      summary: 'Versión firmada',
+      author: 'Profesional QA',
+      status: 'SIGNED',
+      version: 1,
+    };
+    const findOne = vi.fn().mockResolvedValueOnce(original).mockResolvedValueOnce(null);
+    const insertOne = vi.fn().mockResolvedValue({ acknowledged: true });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const updateOne = vi.fn();
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'clinicalDocuments')
+          return {
+            findOne,
+            find: vi.fn().mockReturnValue({
+              toArray: vi.fn().mockResolvedValue([{ version: 1 }, { version: 2 }]),
+            }),
+            insertOne,
+            updateOne,
+          };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+
+    await expect(
+      new MongoOperationsRepository(database).execute(
+        { userId: 'doctor-a', organizationId: 'org-a', role: 'DOCTOR' },
+        {
+          command: 'clinical.correct',
+          documentId: original.id,
+          correctionId: 'clinical-synthetic-02',
+          reason: 'Corrección sintética de QA',
+          summary: 'Nueva versión sintética',
+          author: 'Profesional QA',
+        },
+      ),
+    ).resolves.toEqual({ id: 'clinical-synthetic-02' });
+    expect(updateOne).not.toHaveBeenCalled();
+    expect(insertOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'clinical-synthetic-02',
+        organizationId: 'org-a',
+        correctionOf: original.id,
+        correctionReason: 'Corrección sintética de QA',
+        status: 'DRAFT',
+        version: 3,
       }),
       { session },
     );

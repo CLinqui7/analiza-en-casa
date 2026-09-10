@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 
 const root = process.cwd();
 const req = [
@@ -12,15 +13,20 @@ const errors = [];
 const warnings = [];
 for (const rel of req) if (!fs.existsSync(path.join(root, rel))) errors.push(`Missing: ${rel}`);
 
-function walk(dir, out=[]) {
-  for (const e of fs.readdirSync(dir, {withFileTypes:true})) {
-    if ([".git","node_modules",".next","dist","coverage"].includes(e.name)) continue;
-    const p=path.join(dir,e.name);
-    if (e.isDirectory()) walk(p,out); else out.push(p);
-  }
-  return out;
+function committableFiles() {
+  const output = execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+    { cwd: root, encoding: "buffer" },
+  );
+  return output
+    .toString("utf8")
+    .split("\0")
+    .filter(Boolean)
+    .map((file) => path.join(root, file))
+    .filter((file) => fs.existsSync(file) && fs.statSync(file).isFile());
 }
-const files=walk(root);
+const files=committableFiles();
 let total=0; let max={size:0,file:""};
 const suspect=[];
 const secretPatterns=[

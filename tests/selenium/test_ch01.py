@@ -48,9 +48,10 @@ class CH01(unittest.TestCase):
         if SERVER: SERVER.terminate()
     def setUp(self):
         self.driver.get(BASE + '/login')
+        self.wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        self.driver.execute_script('localStorage.clear()')
+        self.driver.get(BASE + '/login')
         self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]')))
-        self.driver.execute_script("localStorage.removeItem('analiza.en.casa.mock-session.v1'); localStorage.removeItem('analiza.en.casa.workspace.v2');")
-        self.driver.refresh(); self.wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]')))
     def action(self, action_id): return self.driver.find_element(By.CSS_SELECTOR, f'[data-action-id="{action_id}"]')
     def pass_(self, action_id, test_id, began): record_pass(action_id, test_id, began, self.driver.current_url)
     def login(self):

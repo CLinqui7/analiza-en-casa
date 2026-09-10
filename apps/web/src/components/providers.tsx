@@ -83,14 +83,14 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   sendQuote: (quoteId: string) => Promise<boolean>;
   addPayment: (payment: Payment) => Promise<boolean>;
   voidPayment: (paymentId: string, reason: string) => Promise<boolean>;
-  addClinicalDocument: (document: ClinicalDocument) => void;
-  signClinicalDocument: (documentId: string) => void;
+  addClinicalDocument: (document: ClinicalDocument) => Promise<boolean>;
+  signClinicalDocument: (documentId: string) => Promise<boolean>;
   correctClinicalDocument: (
     documentId: string,
     reason: string,
     summary: string,
     author: string,
-  ) => void;
+  ) => Promise<boolean>;
   addCatalogItem: (item: CatalogItem) => Promise<boolean>;
   addPurchase: (purchase: Purchase) => Promise<boolean>;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
@@ -230,6 +230,26 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [provider],
   );
+  const persistMockChange = useCallback(
+    async (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot): Promise<boolean> => {
+      if (provider.mode === 'mongodb') {
+        setError('El cambio local no es válido en modo MongoDB; no se guardó ningún cambio.');
+        return false;
+      }
+      try {
+        const next = change(snapshot);
+        const changes = changedSlices(snapshot, next);
+        if (Object.keys(changes).length) await provider.saveChanges(changes);
+        setSnapshot(next);
+        setError(null);
+        return true;
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : 'Error de persistencia.');
+        return false;
+      }
+    },
+    [provider, snapshot],
+  );
   const savePatient = useCallback(
     async (patient: Patient, operation: 'create' | 'replace'): Promise<boolean> => {
       if (provider.mode === 'mongodb') {
@@ -258,7 +278,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      commit((current) => ({
+      return persistMockChange((current) => ({
         ...current,
         patients:
           operation === 'create'
@@ -274,9 +294,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current.auditEntries,
         ],
       }));
-      return true;
     },
-    [commit, provider],
+    [persistMockChange, provider],
   );
   const refreshPatients = useCallback(async (): Promise<boolean> => {
     try {
@@ -318,7 +337,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      commit((current) => ({
+      return persistMockChange((current) => ({
         ...current,
         doctors:
           operation === 'create'
@@ -329,9 +348,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current.auditEntries,
         ],
       }));
-      return true;
     },
-    [can, commit, provider],
+    [can, persistMockChange, provider],
   );
   const saveHospitalization = useCallback(
     async (hospitalization: Hospitalization, operation: 'create' | 'replace'): Promise<boolean> => {
@@ -365,7 +383,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      commit((current) => ({
+      return persistMockChange((current) => ({
         ...current,
         hospitalizations:
           operation === 'create'
@@ -381,9 +399,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current.auditEntries,
         ],
       }));
-      return true;
     },
-    [can, commit, provider],
+    [can, persistMockChange, provider],
   );
   const saveShiftSeries = useCallback(
     async (shifts: Shift[], idempotencyKey: string): Promise<boolean> => {
@@ -413,7 +430,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      commit((current) => ({
+      return persistMockChange((current) => ({
         ...current,
         shifts: [...current.shifts, ...shifts],
         auditEntries: [
@@ -421,9 +438,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current.auditEntries,
         ],
       }));
-      return true;
     },
-    [can, commit, provider],
+    [can, persistMockChange, provider],
   );
   const saveQuote = useCallback(
     async (quote: Quote, operation: 'create' | 'replace'): Promise<boolean> => {
@@ -474,7 +490,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           status: 'DRAFT',
           sentAt: undefined,
         };
-        commit((current) => ({
+        return persistMockChange((current) => ({
           ...current,
           quotes:
             operation === 'create'
@@ -494,12 +510,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
             ...current.auditEntries,
           ],
         }));
-        return true;
       } catch {
         return false;
       }
     },
-    [can, commit, provider, snapshot.hospitalizations, snapshot.quotes],
+    [can, persistMockChange, provider, snapshot.hospitalizations, snapshot.quotes],
   );
   const sendStoredQuote = useCallback(
     async (quoteId: string): Promise<boolean> => {
@@ -526,7 +541,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      commit((current) => ({
+      return persistMockChange((current) => ({
         ...current,
         quotes: current.quotes.map((candidate) =>
           candidate.id === quoteId
@@ -538,9 +553,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current.auditEntries,
         ],
       }));
-      return true;
     },
-    [can, commit, provider, snapshot.quotes],
+    [can, persistMockChange, provider, snapshot.quotes],
   );
   const saveInsuranceObservation = useCallback(
     async (input: {
@@ -615,7 +629,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           snapshot.insuranceEvents.filter((candidate) => candidate.requestId === request.id),
           event,
         );
-        commit((current) => ({
+        return persistMockChange((current) => ({
           ...current,
           insuranceRequests: existing
             ? current.insuranceRequests.map((candidate) =>
@@ -631,14 +645,13 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
             ...current.auditEntries,
           ],
         }));
-        return true;
       } catch {
         return false;
       }
     },
     [
       can,
-      commit,
+      persistMockChange,
       provider,
       snapshot.insuranceEvents,
       snapshot.insuranceRequests,
@@ -652,8 +665,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       mockChange: (current: WorkspaceSnapshot) => WorkspaceSnapshot,
     ): Promise<boolean> => {
       if (provider.mode !== 'mongodb') {
-        commit(mockChange);
-        return true;
+        return persistMockChange(mockChange);
       }
       try {
         if (!provider.executeCommand) throw new Error('El comando seguro no está disponible.');
@@ -666,7 +678,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         return false;
       }
     },
-    [commit, provider],
+    [persistMockChange, provider],
   );
   const value = useMemo<WorkspaceContextValue>(
     () => ({
@@ -765,13 +777,13 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           };
         }),
       addClinicalDocument: (document) =>
-        commit((current) => ({
+        saveCommand({ command: 'clinical.create', document }, (current) => ({
           ...current,
           clinicalDocuments: [...current.clinicalDocuments, document],
           auditEntries: [audit('Documento clínico creado', document.id), ...current.auditEntries],
         })),
       signClinicalDocument: (documentId) =>
-        commit((current) => {
+        saveCommand({ command: 'clinical.sign', documentId }, (current) => {
           const document = current.clinicalDocuments.find(
             (candidate) => candidate.id === documentId,
           );
@@ -786,51 +798,56 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
             auditEntries: [audit('Documento clínico firmado', documentId), ...current.auditEntries],
           };
         }),
-      correctClinicalDocument: (documentId, reason, summary, author) =>
-        commit((current) => {
-          const original = current.clinicalDocuments.find(
-            (candidate) => candidate.id === documentId,
-          );
-          const correctionReason = reason.trim();
-          if (
-            !original ||
-            original.status !== 'SIGNED' ||
-            !correctionReason ||
-            !summary.trim() ||
-            !author.trim()
-          )
-            return current;
-          const nextVersion =
-            Math.max(
-              ...current.clinicalDocuments
-                .filter(
-                  (candidate) =>
-                    candidate.id === original.id || candidate.correctionOf === original.id,
-                )
-                .map((candidate) => candidate.version),
-              original.version,
-            ) + 1;
-          const correction: ClinicalDocument = {
-            ...original,
-            id: crypto.randomUUID(),
-            summary: summary.trim(),
-            author: author.trim(),
-            status: 'DRAFT',
-            version: nextVersion,
-            createdAt: new Date().toISOString(),
-            signedAt: undefined,
-            correctionOf: original.id,
-            correctionReason,
-          };
-          return {
-            ...current,
-            clinicalDocuments: [...current.clinicalDocuments, correction],
-            auditEntries: [
-              audit('Corrección clínica creada', correction.id),
-              ...current.auditEntries,
-            ],
-          };
-        }),
+      correctClinicalDocument: (documentId, reason, summary, author) => {
+        const correctionId = crypto.randomUUID();
+        return saveCommand(
+          { command: 'clinical.correct', documentId, correctionId, reason, summary, author },
+          (current) => {
+            const original = current.clinicalDocuments.find(
+              (candidate) => candidate.id === documentId,
+            );
+            const correctionReason = reason.trim();
+            if (
+              !original ||
+              original.status !== 'SIGNED' ||
+              !correctionReason ||
+              !summary.trim() ||
+              !author.trim()
+            )
+              return current;
+            const nextVersion =
+              Math.max(
+                ...current.clinicalDocuments
+                  .filter(
+                    (candidate) =>
+                      candidate.id === original.id || candidate.correctionOf === original.id,
+                  )
+                  .map((candidate) => candidate.version),
+                original.version,
+              ) + 1;
+            const correction: ClinicalDocument = {
+              ...original,
+              id: correctionId,
+              summary: summary.trim(),
+              author: author.trim(),
+              status: 'DRAFT',
+              version: nextVersion,
+              createdAt: new Date().toISOString(),
+              signedAt: undefined,
+              correctionOf: original.id,
+              correctionReason,
+            };
+            return {
+              ...current,
+              clinicalDocuments: [...current.clinicalDocuments, correction],
+              auditEntries: [
+                audit('Corrección clínica creada', correction.id),
+                ...current.auditEntries,
+              ],
+            };
+          },
+        );
+      },
       addCatalogItem: (item) =>
         saveCommand({ command: 'catalog.create', item }, (current) => {
           if (

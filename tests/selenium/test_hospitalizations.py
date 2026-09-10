@@ -543,6 +543,7 @@ class Hospitalizations(unittest.TestCase):
         self.click('HOSPITALIZATION-ADMIN-PROFILE-CANCEL')
         self.w.until(EC.invisibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')))
         self.d.refresh()
+        self.w.until(EC.visibility_of_element_located((By.XPATH, f"//h1[normalize-space()='{case_id}']")))
         self.assertNotIn('No persistir CH08 Selenium', self.d.find_element(By.TAG_NAME, 'body').text)
         self.pass_('HOSPITALIZATION-ADMIN-PROFILE-CANCEL', 'SEL-CH08-ADMINISTRATIVE-PROFILE', cancel_started)
 
@@ -565,6 +566,7 @@ class Hospitalizations(unittest.TestCase):
         self.click('HOSPITALIZATION-ADMIN-PROFILE-SAVE')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(text(),'Perfil administrativo de ejecución guardado')]")))
         self.d.refresh()
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Coordinación Selenium CH08')]")))
         body = self.d.find_element(By.TAG_NAME, 'body').text
         for value in ('Coordinación Selenium CH08', 'Referencia Selenium CH08', 'Recurrente', 'Aseguradora sintética Selenium'):
             self.assertIn(value, body)

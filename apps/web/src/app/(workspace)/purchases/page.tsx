@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Purchase } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -18,6 +18,9 @@ export default function PurchasesPage() {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Purchase | null>(null);
   const form = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: { catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' },
@@ -28,11 +31,22 @@ export default function PurchasesPage() {
       form.setValue('catalogItemId', catalogItems[0].id, { shouldValidate: true });
     }
   }, [catalogItems, form]);
-  const visible = purchases.filter((purchase) =>
-    `${purchase.reference} ${catalogItems.find((item) => item.id === purchase.catalogItemId)?.name ?? ''}`
-      .toLocaleLowerCase('es-SV')
-      .includes(query.toLocaleLowerCase('es-SV')),
+  const itemNames = useMemo(
+    () => new Map(catalogItems.map((item) => [item.id, item.name])),
+    [catalogItems],
   );
+  const visible = useMemo(
+    () =>
+      purchases.filter((purchase) =>
+        `${purchase.reference} ${itemNames.get(purchase.catalogItemId) ?? ''}`
+          .toLocaleLowerCase('es-SV')
+          .includes(query.toLocaleLowerCase('es-SV')),
+      ),
+    [itemNames, purchases, query],
+  );
+  const pages = Math.max(1, Math.ceil(visible.length / pageSize));
+  const currentPage = Math.min(page, pages);
+  const pageRows = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   function close() {
     setOpen(false);
     form.reset({ catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' });
@@ -110,15 +124,28 @@ export default function PurchasesPage() {
         <div className="filter-grid">
           <label>
             Registros
-            <select aria-label="Registros por página" disabled value="10">
+            <select
+              aria-label="Registros por página"
+              data-action-id="PURCHASE-PAGE-SIZE"
+              onChange={(event) => {
+                setPageSize(Number(event.target.value));
+                setPage(1);
+              }}
+              value={pageSize}
+            >
+              <option value="5">5</option>
               <option value="10">10</option>
+              <option value="25">25</option>
             </select>
           </label>
           <label>
             Buscar compras
             <input
               data-action-id="PURCHASE-LIST-SEARCH"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
               type="search"
               value={query}
             />
@@ -144,9 +171,18 @@ export default function PurchasesPage() {
               </tr>
             </thead>
             <tbody>
-              {visible.map((purchase) => (
+              {pageRows.map((purchase) => (
                 <tr key={purchase.id}>
-                  <td>—</td>
+                  <td>
+                    <Button
+                      className="button-secondary"
+                      data-action-id="PURCHASE-DETAIL-OPEN"
+                      onClick={() => setSelected(purchase)}
+                      type="button"
+                    >
+                      Abrir
+                    </Button>
+                  </td>
                   <td>Borrador sintético</td>
                   <td>
                     <code>{purchase.reference}</code>
@@ -177,7 +213,30 @@ export default function PurchasesPage() {
             </tbody>
           </table>
         </div>
-        <p className="field-help">Mostrando página 0 de 0 · Anterior · Siguiente</p>
+        <nav aria-label="Paginación de compras" className="pagination">
+          <Button
+            className="button-secondary"
+            data-action-id="PURCHASE-PAGE-PREVIOUS"
+            disabled={currentPage === 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            type="button"
+          >
+            Anterior
+          </Button>
+          <span>
+            Página {visible.length ? currentPage : 0} de {visible.length ? pages : 0} ·{' '}
+            {visible.length} registros
+          </span>
+          <Button
+            className="button-secondary"
+            data-action-id="PURCHASE-PAGE-NEXT"
+            disabled={!visible.length || currentPage === pages}
+            onClick={() => setPage((current) => Math.min(pages, current + 1))}
+            type="button"
+          >
+            Siguiente
+          </Button>
+        </nav>
       </Panel>
       <Dialog
         description="Este registro no ejecuta una recepción ni cambia inventario."
@@ -186,8 +245,8 @@ export default function PurchasesPage() {
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
-            <Button form="purchase-form" type="submit">
-              Guardar borrador
+            <Button disabled={form.formState.isSubmitting} form="purchase-form" type="submit">
+              {form.formState.isSubmitting ? 'Guardando…' : 'Guardar borrador'}
             </Button>
           </>
         }
@@ -226,6 +285,47 @@ export default function PurchasesPage() {
             <textarea {...form.register('note')} rows={3} />
           </label>
         </form>
+      </Dialog>
+      <Dialog
+        description="Sólo se muestran los campos persistidos. No se infieren proveedor, factura, impuestos, recepción ni total."
+        footer={
+          <Button
+            className="button-secondary"
+            data-action-id="PURCHASE-DETAIL-CLOSE"
+            onClick={() => setSelected(null)}
+            type="button"
+          >
+            Cerrar
+          </Button>
+        }
+        onClose={() => setSelected(null)}
+        open={Boolean(selected)}
+        title="Detalle de compra sintética"
+      >
+        {selected ? (
+          <dl className="detail-grid">
+            <div>
+              <dt>Referencia</dt>
+              <dd>{selected.reference}</dd>
+            </div>
+            <div>
+              <dt>Ítem de catálogo</dt>
+              <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
+            </div>
+            <div>
+              <dt>Estado</dt>
+              <dd>Borrador</dd>
+            </div>
+            <div>
+              <dt>Fecha de creación</dt>
+              <dd>{new Date(selected.createdAt).toLocaleString('es-SV')}</dd>
+            </div>
+            <div>
+              <dt>Nota</dt>
+              <dd>{selected.note || 'Sin nota documentada'}</dd>
+            </div>
+          </dl>
+        ) : null}
       </Dialog>
     </div>
   );

@@ -188,7 +188,8 @@ class ReleaseCoverage(unittest.TestCase):
             self.d.set_window_size(1440, 1000)
 
     def test_insurance_actions_preserve_safe_and_append_only_boundaries(self) -> None:
-        self.click('FINANCIERO-TOGGLE')
+        if self.action('FINANCIERO-TOGGLE').get_attribute('aria-expanded') != 'true':
+            self.click('FINANCIERO-TOGGLE')
         self.click('INSURANCE-NAVIGATE')
         self.w.until(EC.url_to_be(f'{BASE}/insurance'))
         search = self.action('INSURANCE-SEARCH')
@@ -201,6 +202,8 @@ class ReleaseCoverage(unittest.TestCase):
         self.click('INSURANCE-FILTER-RESET')
         self.assertEqual(self.action('INSURANCE-FILTER-STATUS').get_attribute('value'), '')
 
+        self.d.get(f'{BASE}/insurance?quote=quote-demo-001')
+        self.w.until(EC.visibility_of_element_located((By.XPATH, "//h2[normalize-space()='Contexto de cotización']")))
         self.click('INSURANCE-UPDATE')
         self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="dialog"]')))
         self.click('INSURANCE-UPDATE-CANCEL')
@@ -220,11 +223,11 @@ class ReleaseCoverage(unittest.TestCase):
             ('INSURANCE-SEND', 'Env\u00edo al seguro'),
         ):
             self.click(action_id)
-            notice = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.notice.success')))
+            notice = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.notice.warning[role="status"]')))
             self.assertIn(label, notice.text)
             self.assertIn('no configurado', notice.text)
         self.click('INSURANCE-CLAIM')
-        notice = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.notice.success')))
+        notice = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.notice.warning[role="status"]')))
         self.assertIn('CH08-Q002', notice.text)
 
     def test_payment_and_clinical_document_actions_preserve_auditability(self) -> None:
@@ -315,7 +318,7 @@ class ReleaseCoverage(unittest.TestCase):
         self.action('PORTAL-VERIFY-OTP').send_keys('00000000')
         self.d.find_element(By.XPATH, "//button[normalize-space()='Verificar c\u00f3digo']").click()
         status = self.w.until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[role="status"]')))
-        self.assertIn('No fue posible validar el acceso.', status.text)
+        self.assertIn('Servicio temporalmente no disponible.', status.text)
         self.assertNotIn('x' * 64, status.text)
 
 

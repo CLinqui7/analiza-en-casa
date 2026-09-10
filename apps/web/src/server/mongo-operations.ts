@@ -17,6 +17,7 @@ import {
   type OperationsSnapshot,
   paymentSchema,
   catalogItemSchema,
+  clinicalDocumentSchema,
   inventoryMovementSchema,
   purchaseSchema,
 } from '@analiza/contracts';
@@ -42,6 +43,20 @@ const commands = z.discriminatedUnion('command', [
     .strict(),
   z.object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() }).strict(),
   z.object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() }).strict(),
+  z
+    .object({ command: z.literal('clinical.create'), document: clinicalDocumentSchema.strict() })
+    .strict(),
+  z.object({ command: z.literal('clinical.sign'), documentId: identifier }).strict(),
+  z
+    .object({
+      command: z.literal('clinical.correct'),
+      documentId: identifier,
+      correctionId: identifier,
+      reason: z.string().trim().min(1).max(2000),
+      summary: z.string().trim().min(1).max(12000),
+      author: z.string().trim().min(1).max(240),
+    })
+    .strict(),
   z
     .object({
       command: z.literal('payment.void'),
@@ -344,6 +359,117 @@ export class MongoOperationsRepository {
             .insertOne({ ...purchase, ...scoped }, { session });
           await audit('PURCHASE_DRAFT_CREATED', purchase.id);
           return { id: purchase.id };
+        }
+        if (input.command === 'clinical.create') {
+          permission('clinical:write');
+          const document = input.document;
+          if (
+            document.status !== 'DRAFT' ||
+            document.version !== 1 ||
+            document.signedAt ||
+            document.correctionOf ||
+            document.correctionReason
+          )
+            throw new MongoInputError('Un documento nuevo debe iniciar como borrador versión 1.');
+          const hospitalization = await this.database.collection('hospitalizations').findOne(
+            {
+              ...scoped,
+              id: document.caseId,
+              patientId: document.patientId,
+              status: { $ne: 'CLOSED' },
+            },
+            { session },
+          );
+          if (!hospitalization)
+            throw new MongoInputError(
+              'Seleccione una hospitalización activa de esta organización.',
+            );
+          if (
+            await this.database
+              .collection('clinicalDocuments')
+              .findOne({ ...scoped, id: document.id }, { session })
+          )
+            throw new MongoConflictError();
+          await this.database.collection('clinicalDocuments').insertOne(
+            {
+              ...document,
+              ...scoped,
+              createdAt: new Date().toISOString(),
+              createdBy: actor.userId,
+            },
+            { session },
+          );
+          await audit('CLINICAL_DOCUMENT_CREATED', document.id);
+          return { id: document.id };
+        }
+        if (input.command === 'clinical.sign') {
+          permission('clinical:sign');
+          const document = await this.database
+            .collection('clinicalDocuments')
+            .findOne({ ...scoped, id: input.documentId }, { session });
+          if (!document) throw new MongoAccessError();
+          if (document.status === 'SIGNED') return { id: document.id };
+          if (document.status !== 'DRAFT') throw new MongoConflictError();
+          const signedAt = new Date().toISOString();
+          const updated = await this.database
+            .collection('clinicalDocuments')
+            .updateOne(
+              { ...scoped, id: input.documentId, status: 'DRAFT' },
+              { $set: { status: 'SIGNED', signedAt, signedBy: actor.userId } },
+              { session },
+            );
+          if (updated.modifiedCount !== 1) throw new MongoConflictError();
+          await audit('CLINICAL_DOCUMENT_SIGNED', input.documentId);
+          return { id: input.documentId };
+        }
+        if (input.command === 'clinical.correct') {
+          permission('clinical:sign');
+          const original = await this.database
+            .collection('clinicalDocuments')
+            .findOne({ ...scoped, id: input.documentId, status: 'SIGNED' }, { session });
+          if (!original) throw new MongoAccessError();
+          if (
+            await this.database
+              .collection('clinicalDocuments')
+              .findOne({ ...scoped, id: input.correctionId }, { session })
+          )
+            throw new MongoConflictError();
+          const versions = await this.database
+            .collection('clinicalDocuments')
+            .find(
+              {
+                ...scoped,
+                $or: [{ id: original.id }, { correctionOf: original.id }],
+              },
+              { session, projection: { version: 1 } },
+            )
+            .toArray();
+          const nextVersion =
+            Math.max(
+              Number(original.version) || 1,
+              ...versions.map((document) => Number(document.version) || 1),
+            ) + 1;
+          await this.database.collection('clinicalDocuments').insertOne(
+            {
+              id: input.correctionId,
+              organizationId: actor.organizationId,
+              caseId: original.caseId,
+              patientId: original.patientId,
+              type: original.type,
+              title: original.title,
+              summary: input.summary,
+              author: input.author,
+              status: 'DRAFT',
+              version: nextVersion,
+              createdAt: new Date().toISOString(),
+              correctionOf: original.id,
+              correctionReason: input.reason,
+              createdBy: actor.userId,
+            },
+            { session },
+          );
+          await audit('CLINICAL_CORRECTION_CREATED', input.correctionId);
+          return { id: input.correctionId };
         }
         if (input.command === 'payment.void') {
           permission('payments:write');
@@ -749,6 +875,7 @@ export const mongoOperationsIndexes: Array<{
     'nursingResources',
     'catalogItems',
     'purchases',
+    'clinicalDocuments',
   ].map((collection) => ({
     collection,
     key: { organizationId: 1, id: 1 },

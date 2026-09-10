@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-10T05:26:25.808Z",
-  "passed": false,
-  "files": 11059,
-  "total_mib": 636.47,
+  "generated_at": "2026-09-10T13:30:57.083Z",
+  "passed": true,
+  "files": 6998,
+  "total_mib": 531.84,
   "largest_file": {
-    "size": 23837696,
-    "file": ".analiza-runtime\\bin\\chromedriver.exe"
+    "size": 9031144,
+    "file": "references\\video-audit\\chapters\\CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits\\chapter_video_exact_reference.mp4"
   },
   "chapters": 17,
   "events": 1359,
@@ -13,9 +13,6 @@
   "exact_clips": 17,
   "event_contact_sheets": 158,
   "safety_contact_sheets": 212,
-  "errors": [
-    "Environment file must not be committed: .env.local",
-    "Environment file must not be committed: .vercel\\.env.preview.local"
-  ],
+  "errors": [],
   "warnings": []
 }

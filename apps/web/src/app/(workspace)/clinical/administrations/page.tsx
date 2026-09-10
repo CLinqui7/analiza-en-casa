@@ -148,10 +148,19 @@ export default function AdministrationsPage() {
         description="No es una prescripción. Seleccione la dosis previamente definida y verifique la presentación administrada."
         footer={
           <>
-            <Button className="button-secondary" onClick={() => setOpen(false)}>
+            <Button
+              className="button-secondary"
+              data-action-id="MEDICATION-ADMINISTRATION-CANCEL"
+              onClick={() => setOpen(false)}
+            >
               Cancelar
             </Button>
-            <Button type="submit" form="administration-form" disabled={operations.busy || !factor}>
+            <Button
+              data-action-id="MEDICATION-ADMINISTRATION-CONFIRM"
+              type="submit"
+              form="administration-form"
+              disabled={operations.busy || !factor}
+            >
               Confirmar y descontar
             </Button>
           </>
@@ -160,7 +169,7 @@ export default function AdministrationsPage() {
         <form id="administration-form" className="form-grid" onSubmit={submit}>
           <label>
             Hospitalización
-            <select name="caseId" required>
+            <select data-action-id="MEDICATION-ADMINISTRATION-CASE" name="caseId" required>
               {cases.map((item) => (
                 <option key={item.id} value={item.id}>
                   {patients.find((patient) => patient.id === item.patientId)?.fullName} · {item.id}
@@ -170,11 +179,17 @@ export default function AdministrationsPage() {
           </label>
           <label>
             Hora de administración
-            <input name="administeredAt" type="datetime-local" required />
+            <input
+              data-action-id="MEDICATION-ADMINISTRATION-DATETIME"
+              name="administeredAt"
+              type="datetime-local"
+              required
+            />
           </label>
           <label>
             Medicamento
             <select
+              data-action-id="MEDICATION-ADMINISTRATION-MEDICATION"
               required
               value={medicationId}
               onChange={(event) => setMedicationId(event.target.value)}
@@ -189,7 +204,7 @@ export default function AdministrationsPage() {
           </label>
           <label>
             Dosis del catálogo
-            <select name="doseId" required>
+            <select data-action-id="MEDICATION-ADMINISTRATION-DOSE" name="doseId" required>
               <option value="">Seleccionar dosis registrada</option>
               {doses.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -200,7 +215,11 @@ export default function AdministrationsPage() {
           </label>
           <label>
             Presentación
-            <select value={presentation} onChange={(event) => setPresentation(event.target.value)}>
+            <select
+              data-action-id="MEDICATION-ADMINISTRATION-PRESENTATION"
+              value={presentation}
+              onChange={(event) => setPresentation(event.target.value)}
+            >
               <option value="TABLET">Tableta</option>
               <option value="BLISTER">Blíster</option>
               <option value="BOX">Caja</option>
@@ -209,6 +228,7 @@ export default function AdministrationsPage() {
           <label>
             Cantidad de presentaciones
             <input
+              data-action-id="MEDICATION-ADMINISTRATION-QUANTITY"
               type="number"
               min="1"
               step="1"
@@ -219,7 +239,7 @@ export default function AdministrationsPage() {
           </label>
           <label>
             Bodega
-            <select name="warehouseId">
+            <select data-action-id="MEDICATION-ADMINISTRATION-WAREHOUSE" name="warehouseId">
               {warehouses.map((id) => (
                 <option key={id} value={id}>
                   {id === 'central' ? 'Bodega central' : id}
@@ -234,7 +254,7 @@ export default function AdministrationsPage() {
           </p>
           <label className="full">
             Observaciones
-            <textarea name="note" rows={3} />
+            <textarea data-action-id="MEDICATION-ADMINISTRATION-NOTE" name="note" rows={3} />
           </label>
           {operations.error ? (
             <p className="field-error full" role="alert">

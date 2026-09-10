@@ -38,6 +38,7 @@
     "test:browser:react": "playwright test -c apps/web/playwright.config.ts",
     "test:browser:quotes": "playwright test -c apps/web/playwright.config.ts e2e/quotes.spec.ts",
     "test:selenium": "py tests/selenium/smoke.py",
+    "test:selenium:all": "node scripts/run-selenium.mjs",
     "test:selenium:patients": "py tests/selenium/test_patients.py",
     "test:selenium:patients:all": "py -m unittest discover -s tests/selenium -p test_patients.py -v",
     "test:selenium:hospitalizations": "py tests/selenium/test_hospitalizations.py",

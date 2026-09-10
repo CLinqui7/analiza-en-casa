@@ -7,7 +7,7 @@ from urllib.request import urlopen
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as conditions
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 from helpers.action_recorder import record_pass, reset
 ROOT=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))); BASE=os.getenv('SELENIUM_BASE_URL','http://127.0.0.1:4174'); SERVER=None
 def ready():
@@ -22,7 +22,7 @@ class Purchases(unittest.TestCase):
    if ready(): break
    time.sleep(1)
   else: raise RuntimeError('El servidor React local no inició en 60 segundos.')
-  options=webdriver.ChromeOptions(); options.add_argument('--headless=new'); cls.driver=webdriver.Chrome(options=options); cls.wait=WebDriverWait(cls.driver,12)
+  options=webdriver.ChromeOptions(); options.add_argument('--headless=new'); options.add_argument('--window-size=1440,1000'); cls.driver=webdriver.Chrome(options=options); cls.wait=WebDriverWait(cls.driver,12)
  @classmethod
  def tearDownClass(cls):
   cls.driver.quit()
@@ -39,3 +39,9 @@ class Purchases(unittest.TestCase):
   self.login('auditor@demo.local','demo-auditor'); self.assertIn('Listado',self.driver.find_element(By.TAG_NAME,'main').text)
  def test_nurse_is_denied_purchases_direct_route(self):
   self.login('nurse@demo.local','demo-nurse'); self.assertIn('Acceso restringido para el rol NURSE',self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR,'main[role="alert"]'))).text)
+ def test_admin_creates_opens_and_reloads_factual_purchase_draft(self):
+  started=time.time(); self.login('admin@demo.local','demo-admin'); self.wait.until(conditions.element_to_be_clickable((By.CSS_SELECTOR,'[data-action-id="PURCHASE-CREATE"]'))).click(); dialog=self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR,'[role="dialog"]')))
+  dialog.find_element(By.CSS_SELECTOR,'input[name="reference"]').send_keys('PURCHASE-SELENIUM-001'); dialog.find_element(By.CSS_SELECTOR,'textarea[name="note"]').send_keys('Nota sintética Selenium'); dialog.find_element(By.CSS_SELECTOR,'button[type="submit"]').click(); self.wait.until(conditions.text_to_be_present_in_element((By.CSS_SELECTOR,'[role="status"]'),'guardada como borrador'))
+  Select(self.driver.find_element(By.CSS_SELECTOR,'[data-action-id="PURCHASE-PAGE-SIZE"]')).select_by_value('5'); self.assertIn('Página 1 de 1',self.driver.find_element(By.CSS_SELECTOR,'nav[aria-label="Paginación de compras"]').text); record_pass('PURCHASE-PAGE-SIZE','SEL-CH13-PURCHASE-LIST',started,self.driver.current_url)
+  self.driver.find_element(By.CSS_SELECTOR,'[data-action-id="PURCHASE-DETAIL-OPEN"]').click(); detail=self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR,'[role="dialog"]'))); self.assertIn('PURCHASE-SELENIUM-001',detail.text); self.assertIn('Nota sintética Selenium',detail.text); self.assertIn('No se infieren proveedor, factura, impuestos, recepción ni total',detail.text); record_pass('PURCHASE-DETAIL-OPEN','SEL-CH13-PURCHASE-LIST',started,self.driver.current_url)
+  detail.find_element(By.CSS_SELECTOR,'[data-action-id="PURCHASE-DETAIL-CLOSE"]').click(); self.driver.refresh(); self.assertIn('PURCHASE-SELENIUM-001',self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR,'main'))).text)
