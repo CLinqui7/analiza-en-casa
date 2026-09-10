@@ -3,7 +3,7 @@
   "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -13,7 +13,7 @@
       "notes": "DUI conserva validación y formulario React. Hay proveedor Mongo real con persistencia de pacientes; la prueba A/B/C usa identificadores QA OTHER, no acredita todas las variantes documentales."
     },
     "CR-002": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "9c6d4e464cd71d333620c31be2cb1f9992c945bc232a04e1a8438234a46150d4",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -41,7 +41,7 @@
       "notes": "Tipo y número del documento del responsable se validan como pareja y persisten en la prueba React. Se añadieron controles de adjunto para paciente y responsable; el servicio privado guarda bytes en Atlas y deniega descargas de otra organización. Falta repetir ambos adjuntos desde el formulario y en preview conectado."
     },
     "CR-005": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "556d26c4994fbf4546270a717071198954d8290f9216504dcd80e434b440bb4c",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -62,7 +62,7 @@
       "notes": "Alta y edición de médico se verifican en demo. El servicio genérico de adjuntos privados ya funciona contra Atlas, pero la integración específica de expedientes de médicos continúa pendiente."
     },
     "CR-007": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "07335e55237244a74aa929d1b3ed6d43d64ad46fb7dabf48ca3e0320c1a1db6b",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -99,7 +99,7 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "e5141db4ed24fae7de83fbbc02fb34dc771b6ddcefa4dc88ac4aaf7fa989f8dd",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -108,7 +108,7 @@
       "notes": "Las siete categorías y sus importes manuales se conservan. Cotizaciones Mongo admite crear, editar y recuperar desde otra sesión; el preview sigue DEMO por falta de salida fija de red. Selenium actual y la prueba de todas las categorías en preview conectado permanecen pendientes."
     },
     "CR-012": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "509994a1de15af505bc4f247577432335fe2240a40cfc97c1506df45cfde3054",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -145,7 +145,7 @@
       "notes": "Dashboard muestra pacientes particulares y con seguro a partir de los pacientes autorizados. La prueba B4 verifica los conteos; no se infieren montos de cobertura ni facturación."
     },
     "CR-017": {
-      "implementation_sha": "PENDING_COMMIT",
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
       "functional_fingerprint": "486a24921979ed881208c141d2350f7b915227a90ff68678082f79586b7b8718",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
@@ -276,7 +276,7 @@
     }
   },
   "current_verification": {
-    "implementation_sha": "PENDING_COMMIT",
+    "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
     "runtime": "178/178 fresh-server Playwright against Next production build; 98 React/server tests; 103 baseline tests",
     "scope": "Local synthetic verification only; no clinical approval, Selenium rerun, complete video parity or connected Preview claimed.",
     "mongo_report": "docs/release/MONGO_STUDIO_VERIFICATION_20260910.md"

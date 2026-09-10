@@ -128,7 +128,7 @@
     "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
     "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
   ],
-  "studio_candidate_sha": "PENDING_COMMIT",
+  "studio_candidate_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
   "protection_verified": {
     "previous_effective_value": null,
     "current": {
