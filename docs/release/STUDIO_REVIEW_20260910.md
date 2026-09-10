@@ -13,6 +13,7 @@ Base preservada: `c47bb2ae94d08152836d9a98fc001d6dba043440`, rama `codex/ui-poli
 - La tabla del Dashboard carecía de roles de celda; se añadieron y se corrigió contraste sin eliminar la prueba axe.
 - Avisos de integración no disponible aparecían verdes; ya no se representan como éxito.
 - La configuración efectiva de Vercel estaba sin Deployment Protection pese al estado anterior; se habilitó exclusivamente Preview y se comprobó la redirección de visitantes sin autorización.
+- Se reprodujo la omisión del registro de cambios en dos subidas CLI: el recorrido excluía `docs/qa` antes de alcanzar la excepción del JSON. Se quitó la barra final de la excepción del directorio y se comprobó con el mismo motor de reglas que el padre es recorrible, el JSON se incluye y los secretos siguen excluidos. El siguiente deployment CLI llegó a READY con las funciones Next intactas.
 
 ## Límites no cerrados
 

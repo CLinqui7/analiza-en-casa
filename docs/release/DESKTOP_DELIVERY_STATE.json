@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-10T07:02:09.876Z",
-  "next_action": "Deploy the reviewed Studio candidate as protected Preview, record its READY id/URL/SHA and capture the published pages. Fixed Preview egress requires an authorized paid Vercel plan before Mongo can be connected remotely.",
+  "updated_at": "2026-09-10 07:15:27 UTC",
+  "next_action": "Protected Studio Preview delivered and browser-verified. Local Atlas integration verified. Await authorization for paid fixed Preview egress, then configure server-only credentials and repeat A/B/C, file, inventory and save-failure checks remotely. Continue open source/provider/clinical-definition requirements without treating their screens as complete.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",
@@ -34,7 +34,10 @@
     "npm run qa:client-changes: 32/32 registry gates passed (not 32 complete functions)",
     "CH01, CH02, CH03 traceability gates: passed",
     "npm run audit:verify: 17/17 structural ledgers passed",
-    "npm run security:scan: passed; npm run react:boundaries: passed"
+    "npm run security:scan: passed; npm run react:boundaries: passed",
+    "Published Preview: 32 navigation routes, 7 desktop/mobile dialogs, persistent collapsed sidebar, no JS errors or global horizontal overflow; 2026-09-10T07:14:11.710Z",
+    "Mongo React paired patient/responsible file creation + byte comparison from fresh authenticated session passed 2026-09-10T07:13:04.490Z",
+    "CLI upload traversal regression: QA parent reachable, registry included, .env and .local excluded; subsequent source build READY"
   ],
   "failures": [
     "Vercel Hobby does not provide the requested fixed Preview egress; authorization for paid plan remains unanswered. No 0.0.0.0/0 was enabled.",
@@ -52,8 +55,107 @@
     "verified_at": "2026-09-10T06:55:48.539Z",
     "network": "operator IPv4 only"
   },
-  "candidate_sha": "fdab19b3cf93108766f8f5e41b2493387ea60b29",
+  "candidate_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
   "deployment": {
+    "environment": "preview",
+    "url": "https://web-nrj9qg9ad-clinqui7s-projects.vercel.app",
+    "id": "dpl_G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
+    "status": "READY",
+    "mode": "PROTECTED_DEMO",
+    "sha": "4572c898518c9fef049451e926e57b21ed57e63b",
+    "project": "clinqui7s-projects/web",
+    "project_id": "prj_QHWtVw9lEuH3OZ6thfDB1RC4eImZ",
+    "framework": "nextjs",
+    "output_directory": "apps/web/.next",
+    "server_functions_preserved": true,
+    "preview_comments_enabled": false,
+    "preview_comments_environment_variable": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0",
+    "deployment_protection_preserved": true,
+    "unauthenticated_login_status": 302,
+    "inspector_url": "https://vercel.com/clinqui7s-projects/web/G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
+    "verified_at": "2026-09-10T07:14:11.710Z",
+    "browser_report": "docs/release/PREVIEW_STUDIO_BROWSER_REPORT_20260910.json",
+    "screenshots": [
+      "docs/parity/screenshots/studio-preview-dashboard-4572c89.png",
+      "docs/parity/screenshots/studio-preview-patients-4572c89.png",
+      "docs/parity/screenshots/studio-preview-patients-dialog-4572c89.png",
+      "docs/parity/screenshots/studio-preview-patients-mobile-dialog-4572c89.png",
+      "docs/parity/screenshots/studio-preview-quotes-dialog-4572c89.png",
+      "docs/parity/screenshots/studio-preview-hospitalizations-dialog-4572c89.png",
+      "docs/parity/screenshots/studio-preview-receivables-4572c89.png",
+      "docs/parity/screenshots/studio-preview-insurance-4572c89.png",
+      "docs/parity/screenshots/studio-preview-inventory-kardex-4572c89.png",
+      "docs/parity/screenshots/studio-preview-inventory-movements-4572c89.png",
+      "docs/parity/screenshots/studio-preview-changes-4572c89.png",
+      "docs/parity/screenshots/studio-preview-nursing-team-4572c89.png",
+      "docs/parity/screenshots/studio-preview-reports-visits-goals-4572c89.png",
+      "docs/parity/screenshots/studio-preview-dashboard-collapsed-4572c89.png",
+      "docs/parity/screenshots/studio-preview-dashboard-mobile-4572c89.png"
+    ],
+    "attempts": [
+      {
+        "id": "dpl_HhS3SAHkb2Hyc3wjNcSQTxDUnAiQ",
+        "source": "git",
+        "status": "READY",
+        "sha": "25206a6b0b56351fe93e9f8d05f2342b37dbb19c"
+      },
+      {
+        "id": "dpl_BZYsmRLA2qg42GbWBhFew5DebQr2",
+        "status": "ERROR",
+        "cause": "CLI omitted docs/qa registry"
+      },
+      {
+        "id": "dpl_7sryQUsYTQRbi2SkjT7SwHfxdH8D",
+        "status": "ERROR",
+        "cause": "directory exception with trailing slash was pruned before file exception"
+      },
+      {
+        "id": "dpl_G4ZNE6eFsnqJUZp7ZacbCM7GvW69",
+        "status": "READY",
+        "sha": "4572c898518c9fef049451e926e57b21ed57e63b"
+      }
+    ]
+  },
+  "pending_ids": [
+    "VERCEL-PREVIEW-FIXED-EGRESS",
+    "MONGO-PREVIEW-A-B-C",
+    "WHATSAPP-PROVIDER-PREVIEW",
+    "CLINICAL-SCALE-APPROVAL",
+    "SOURCE-DATA-IMPORT",
+    "CR-031-REMAINING-MODULES"
+  ],
+  "previous_release_tests": [
+    "npm run typecheck --workspace=@analiza/web (passed)",
+    "npm run test --workspace=@analiza/web -- --run (23 files, 90 passed)",
+    "npm run lint --workspace=@analiza/web (passed)",
+    "npm test (103 passed)",
+    "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
+    "npm run audit:verify (17/17 chapters passed)",
+    "npm run security:scan (599 files, passed)",
+    "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
+    "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
+    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
+    "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
+    "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
+    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections",
+    "published Preview browser review at 1440x1000: Dashboard, Patients, Hospitalizations, Quotes, Agenda and Insurance opened behind preserved Deployment Protection",
+    "published Preview browser review: patient identity-file state, invoice/tax-credit classification, tablet/blister quantity controls, inventory link and nursing assignment controls are visible",
+    "published Preview browser review: sidebar collapsed state remained true after navigation to Patients",
+    "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
+    "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
+  ],
+  "studio_candidate_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+  "protection_verified": {
+    "previous_effective_value": null,
+    "current": {
+      "deploymentType": "preview"
+    },
+    "unauthenticated_login_status": 302,
+    "redirect_origin": "https://vercel.com",
+    "preview_comments_enabled": false,
+    "preview_feedback_environment": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0"
+  },
+  "previous_deployment": {
     "environment": "preview",
     "url": "https://web-33i2fxgya-clinqui7s-projects.vercel.app",
     "id": "dpl_8iJ5feMwfiPJizWZZGNpWr4gnawi",
@@ -99,44 +201,5 @@
       "docs/parity/screenshots/preview-hospitalization-nurses-fdab19b.png",
       "docs/parity/screenshots/preview-preauthorizations-fdab19b.png"
     ]
-  },
-  "pending_ids": [
-    "VERCEL-PREVIEW-FIXED-EGRESS",
-    "MONGO-PREVIEW-A-B-C",
-    "WHATSAPP-PROVIDER-PREVIEW",
-    "CLINICAL-SCALE-APPROVAL",
-    "SOURCE-DATA-IMPORT",
-    "CR-031-REMAINING-MODULES"
-  ],
-  "previous_release_tests": [
-    "npm run typecheck --workspace=@analiza/web (passed)",
-    "npm run test --workspace=@analiza/web -- --run (23 files, 90 passed)",
-    "npm run lint --workspace=@analiza/web (passed)",
-    "npm test (103 passed)",
-    "npm run build --workspace=@analiza/web (passed with Mongo, portal and quote server routes)",
-    "npm run audit:verify (17/17 chapters passed)",
-    "npm run security:scan (599 files, passed)",
-    "protected Preview browser review: Dashboard, Patients dialog, Hospitalizations, Quotes, Agenda and Insurance; no Next.js error overlay or global horizontal overflow",
-    "protected Preview browser review: official logo visible, five navigation groups, sidebar collapses to 78px and remains collapsed after route navigation",
-    "protected Preview browser review: Insurance renders six status columns and the mobile patient dialog has no internal overflow",
-    "protected Preview browser review: Movimientos and Kárdex have route-specific headings, columns, totals, filters and a responsive movement dialog",
-    "protected Preview browser review: sidebar collapsed state remained true after navigation to Patients; 390px viewport measured 390px document width with no global overflow",
-    "local axe accessibility review: zero violations after collapsed-navigation labels and inventory contrast corrections",
-    "published Preview browser review at 1440x1000: Dashboard, Patients, Hospitalizations, Quotes, Agenda and Insurance opened behind preserved Deployment Protection",
-    "published Preview browser review: patient identity-file state, invoice/tax-credit classification, tablet/blister quantity controls, inventory link and nursing assignment controls are visible",
-    "published Preview browser review: sidebar collapsed state remained true after navigation to Patients",
-    "published Preview browser review at 390x844: quote dialog measured 370px wide at x=10 and html/body scrollWidth equaled the 390px viewport",
-    "published Preview axe-core 4.12.1 review on mobile quote dialog: 0 violations (1 contrast check incomplete because of gradients/overlay)"
-  ],
-  "studio_candidate_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-  "protection_verified": {
-    "previous_effective_value": null,
-    "current": {
-      "deploymentType": "preview"
-    },
-    "unauthenticated_login_status": 302,
-    "redirect_origin": "https://vercel.com",
-    "preview_comments_enabled": false,
-    "preview_feedback_environment": "VERCEL_PREVIEW_FEEDBACK_ENABLED=0"
   }
 }
