@@ -92,7 +92,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
     author: string,
   ) => void;
   addCatalogItem: (item: CatalogItem) => Promise<boolean>;
-  addPurchase: (purchase: Purchase) => void;
+  addPurchase: (purchase: Purchase) => Promise<boolean>;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
   addInsuranceEvent: (event: InsuranceEvent) => boolean;
   recordInsuranceObservation: (input: {
@@ -847,7 +847,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           };
         }),
       addPurchase: (purchase) =>
-        commit((current) => ({
+        saveCommand({ command: 'purchase.create', purchase }, (current) => ({
           ...current,
           purchases: [...current.purchases, purchase],
           auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],

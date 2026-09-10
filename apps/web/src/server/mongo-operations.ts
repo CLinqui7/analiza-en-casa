@@ -18,6 +18,7 @@ import {
   paymentSchema,
   catalogItemSchema,
   inventoryMovementSchema,
+  purchaseSchema,
 } from '@analiza/contracts';
 import { can } from '@/lib/permissions';
 import { hashPassword } from './mongo-auth';
@@ -40,6 +41,7 @@ const commands = z.discriminatedUnion('command', [
     })
     .strict(),
   z.object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() }).strict(),
+  z.object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() }).strict(),
   z
     .object({
       command: z.literal('payment.void'),
@@ -320,6 +322,28 @@ export class MongoOperationsRepository {
             .insertOne({ ...payment, ...scoped, createdAt: new Date().toISOString() }, { session });
           await audit('PAYMENT_APPLIED', payment.id);
           return { id: payment.id };
+        }
+        if (input.command === 'purchase.create') {
+          permission('purchases:write');
+          const purchase = input.purchase;
+          const previous = await this.database
+            .collection('purchases')
+            .findOne({ ...scoped, id: purchase.id }, { session });
+          if (previous) {
+            assertSameRetry(previous, purchase);
+            return { id: previous.id };
+          }
+          if (
+            !(await this.database
+              .collection('catalogItems')
+              .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session }))
+          )
+            throw new MongoInputError('Seleccione un artículo activo de esta organización.');
+          await this.database
+            .collection('purchases')
+            .insertOne({ ...purchase, ...scoped }, { session });
+          await audit('PURCHASE_DRAFT_CREATED', purchase.id);
+          return { id: purchase.id };
         }
         if (input.command === 'payment.void') {
           permission('payments:write');
@@ -724,6 +748,7 @@ export const mongoOperationsIndexes: Array<{
     'visitGoals',
     'nursingResources',
     'catalogItems',
+    'purchases',
   ].map((collection) => ({
     collection,
     key: { organizationId: 1, id: 1 },

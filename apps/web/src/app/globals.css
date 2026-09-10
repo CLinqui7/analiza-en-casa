@@ -339,6 +339,11 @@ a:focus-visible,
   background: #edfff2;
   color: #166534;
 }
+.notice.danger {
+  border-color: #f5b8b8;
+  background: #fff4f4;
+  color: var(--danger);
+}
 .table-heading {
   display: flex;
   align-items: flex-start;

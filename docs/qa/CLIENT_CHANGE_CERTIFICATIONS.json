@@ -63,7 +63,7 @@
     },
     "CR-007": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "07335e55237244a74aa929d1b3ed6d43d64ad46fb7dabf48ca3e0320c1a1db6b",
+      "functional_fingerprint": "c09bf0608e266257fa849c8dda689d59bd7048cc349a03c5455056e8c4f688b9",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
         "vitest:cr007-professional-specialties",

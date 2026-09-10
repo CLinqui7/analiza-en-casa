@@ -2,7 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Purchase } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -13,7 +13,7 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
-  const { addPurchase, catalogItems, purchases } = useWorkspace();
+  const { addPurchase, catalogItems, error, purchases } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -22,6 +22,12 @@ export default function PurchasesPage() {
     resolver: zodResolver(schema),
     defaultValues: { catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' },
   });
+  useEffect(() => {
+    const current = form.getValues('catalogItemId');
+    if (!catalogItems.some((item) => item.id === current) && catalogItems[0]) {
+      form.setValue('catalogItemId', catalogItems[0].id, { shouldValidate: true });
+    }
+  }, [catalogItems, form]);
   const visible = purchases.filter((purchase) =>
     `${purchase.reference} ${catalogItems.find((item) => item.id === purchase.catalogItemId)?.name ?? ''}`
       .toLocaleLowerCase('es-SV')
@@ -31,9 +37,9 @@ export default function PurchasesPage() {
     setOpen(false);
     form.reset({ catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' });
   }
-  function submit(values: Form) {
+  async function submit(values: Form) {
     if (!catalogItems.some((item) => item.id === values.catalogItemId)) return;
-    addPurchase({
+    const saved = await addPurchase({
       id: crypto.randomUUID(),
       catalogItemId: values.catalogItemId,
       reference: values.reference,
@@ -41,6 +47,7 @@ export default function PurchasesPage() {
       status: 'DRAFT',
       createdAt: new Date().toISOString(),
     } satisfies Purchase);
+    if (!saved) return;
     setMessage('Compra sintética guardada como borrador con evidencia de auditoría.');
     close();
   }
@@ -72,6 +79,11 @@ export default function PurchasesPage() {
       {message ? (
         <p className="notice success" role="status">
           {message}
+        </p>
+      ) : null}
+      {!message && error ? (
+        <p className="notice danger" role="alert">
+          {error}
         </p>
       ) : null}
       <Panel>
@@ -198,6 +210,9 @@ export default function PurchasesPage() {
                 </option>
               ))}
             </select>
+            {form.formState.errors.catalogItemId ? (
+              <span className="field-error">{form.formState.errors.catalogItemId.message}</span>
+            ) : null}
           </label>
           <label>
             Referencia de compra

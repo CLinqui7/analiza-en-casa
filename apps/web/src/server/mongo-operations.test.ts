@@ -5,8 +5,14 @@ import {
   administrationInputSchema,
   visitInputSchema,
   type BalanceEntry,
+  type Purchase,
 } from '@analiza/contracts';
-import { applyStockDelta, assertSameRetry, canEditAssignedBalance } from './mongo-operations';
+import {
+  applyStockDelta,
+  assertSameRetry,
+  canEditAssignedBalance,
+  MongoOperationsRepository,
+} from './mongo-operations';
 import { MongoConflictError, MongoInputError, type ServerActor } from './mongo-patients';
 
 const nurse: ServerActor = { userId: 'nurse-a', organizationId: 'org-a', role: 'NURSE' };
@@ -95,5 +101,67 @@ describe('assigned clinical operations', () => {
     };
     expect(visitInputSchema.safeParse(visit).success).toBe(false);
     expect(visitInputSchema.safeParse({ ...visit, saleAmount: 0 }).success).toBe(true);
+  });
+
+  // test-id: vitest:operations-purchase-draft-tenant-audit
+  it('persists an auditable purchase draft only against an active tenant catalog item', async () => {
+    const purchase: Purchase = {
+      id: 'purchase-synthetic-01',
+      catalogItemId: 'item-synthetic-01',
+      reference: 'PURCHASE-SYNTHETIC-01',
+      note: 'Datos sintéticos',
+      status: 'DRAFT',
+      createdAt: '2026-09-10T07:00:00.000Z',
+    };
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const purchaseFind = vi.fn().mockResolvedValue(null);
+    const catalogFind = vi.fn().mockResolvedValue({
+      id: purchase.catalogItemId,
+      organizationId: 'org-a',
+      status: 'ACTIVE',
+    });
+    const purchaseInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases') return { findOne: purchaseFind, insertOne: purchaseInsert };
+        if (name === 'catalogItems') return { findOne: catalogFind };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const actor: ServerActor = {
+      userId: 'inventory-user',
+      organizationId: 'org-a',
+      role: 'INVENTORY',
+    };
+
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.create',
+        purchase,
+      }),
+    ).resolves.toEqual({ id: purchase.id });
+    expect(catalogFind).toHaveBeenCalledWith(
+      { organizationId: 'org-a', id: purchase.catalogItemId, status: 'ACTIVE' },
+      { session },
+    );
+    expect(purchaseInsert).toHaveBeenCalledWith(
+      { ...purchase, organizationId: 'org-a' },
+      { session },
+    );
+    expect(auditInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organizationId: 'org-a',
+        actorUserId: 'inventory-user',
+        action: 'PURCHASE_DRAFT_CREATED',
+        resourceId: purchase.id,
+      }),
+      { session },
+    );
   });
 });

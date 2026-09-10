@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { paymentSchema, catalogItemSchema, inventoryMovementSchema } from '@analiza/contracts';
+import {
+  paymentSchema,
+  catalogItemSchema,
+  inventoryMovementSchema,
+  purchaseSchema,
+} from '@analiza/contracts';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { can } from '@/lib/permissions';
 import { authorizationStatus } from '@/server/http-auth';
@@ -48,6 +53,7 @@ export async function GET(request?: Request) {
       catalogItems,
       payments,
       inventoryMovements,
+      purchases,
       auditEvents,
     ] = await Promise.all([
       can(session.role, 'patients:read')
@@ -89,6 +95,12 @@ export async function GET(request?: Request) {
             .find({ organizationId: session.organizationId })
             .toArray()
         : Promise.resolve([]),
+      can(session.role, 'purchases:read')
+        ? database
+            .collection('purchases')
+            .find({ organizationId: session.organizationId })
+            .toArray()
+        : Promise.resolve([]),
       can(session.role, 'audit:read')
         ? database
             .collection('auditEvents')
@@ -115,6 +127,7 @@ export async function GET(request?: Request) {
         catalogItems: catalogItems.map((item) => catalogItemSchema.parse(item)),
         payments: payments.map((item) => paymentSchema.parse(item)),
         inventoryMovements: inventoryMovements.map((item) => inventoryMovementSchema.parse(item)),
+        purchases: purchases.map((item) => purchaseSchema.parse(item)),
         auditEntries: auditEvents.map((item) => ({
           id: String(item.id),
           action: String(item.action),

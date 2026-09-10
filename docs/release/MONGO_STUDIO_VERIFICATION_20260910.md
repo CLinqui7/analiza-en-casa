@@ -11,7 +11,7 @@ Se trasladó la paleta final del HTML (azul oscuro, rojo, fondo gris claro), anc
 - Proyecto existente `6aa160fb84024a21784cb906`, clúster `analiza-cluster`, base `analiza_en_casa`.
 - Usuario técnico limitado a `readWrite` sobre esa base y a ese clúster. Secretos sólo en archivos ignorados del operador; no se publican valores.
 - Lista de acceso restringida a una IPv4 del operador; no se habilitó `0.0.0.0/0`.
-- Se ejecutó el bootstrap existente, con semilla exclusivamente ficticia y 41 índices idempotentes. El URI estándar de réplica proporcionado por Atlas resolvió el fallo DNS SRV local, conservando TLS y autenticación.
+- Se ejecutó el bootstrap existente, con semilla exclusivamente ficticia y 42 índices idempotentes. El URI estándar de réplica proporcionado por Atlas resolvió el fallo DNS SRV local, conservando TLS y autenticación.
 - Prueba HTTP real más consultas Atlas: `apps/web/src/server/mongo-live-verification.ts`, última ejecución completa `2026-09-10T06:55:48.539Z`, lote `qa-f818838c`, contra las funciones del build Next.
 - La prueba crea datos sintéticos identificables QA; las ejecuciones dejan sus registros de prueba y auditoría para inspección. No hay información clínica real.
 
@@ -28,8 +28,9 @@ Se trasladó la paleta final del HTML (azul oscuro, rojo, fondo gris claro), anc
 | Pagos | Persiste entre sesiones; idempotencia; cambio de importe en reintento rechazado; anulación auditada conserva fila | Facturación fiscal, conciliación y proveedor de pagos |
 | Visitas y metas | Página separada, profesional autenticado, mes, visitas realizadas y ventas con referencia explícita; metas persistidas | Conciliación de ventas con fuente institucional |
 | Error de guardado | Formulario React con POST rechazado: muestra error, sigue abierto, no modifica localStorage ni Atlas | Repetición en preview conectado |
+| Compras | Borrador mínimo creado con comando Mongo por organización, artículo activo y auditoría; recarga confirmada; un 503 simulado conserva el diálogo y no anuncia éxito | Proveedor, factura, líneas, totales, recepción e integración de inventario requieren alcance/reglas aprobadas |
 
-`scripts/verify-local-mongo-browser.mjs` comprobó navegación, formularios de escritorio y móvil a 390px, y ausencia de errores JavaScript. Evidencia de ejecución y capturas reales: `.local/mongo-verification/`. Las capturas no constituyen certificación de equivalencia clínica ni de todos los eventos del video.
+`scripts/verify-local-mongo-browser.mjs` comprobó navegación, formularios de escritorio y móvil a 390px, ausencia de errores JavaScript y el flujo React → API → Atlas de Compras. La última ejecución aprobó el `2026-09-10T12:25:24.870Z`. Evidencia de ejecución y capturas reales: `.local/mongo-verification/`. Las capturas no constituyen certificación de equivalencia clínica ni de todos los eventos del video.
 
 `scripts/verify-patient-private-files.mjs` pasó el 2026-09-10T07:13:04.490Z: crea el paciente desde el formulario React, carga dos imágenes ficticias de un píxel y compara los bytes descargados desde una sesión nueva autenticada. Se ejecuta con `node --env-file=.env.mongodb.operator.local scripts/verify-patient-private-files.mjs`; no imprime credenciales.
 

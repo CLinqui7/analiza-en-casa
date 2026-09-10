@@ -15,6 +15,7 @@ describe('Mongo deployment schema bootstrap', () => {
     expect(report.plannedIndexes).toContain('shifts.shifts_org_id_unique');
     expect(report.plannedIndexes).toContain('doctors.doctors_org_id_unique');
     expect(report.plannedIndexes).toContain('hospitalizations.hospitalizations_org_id_unique');
+    expect(report.plannedIndexes).toContain('purchases.purchases_org_id');
     expect(createIndex).not.toHaveBeenCalled();
   });
 
