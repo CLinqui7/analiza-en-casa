@@ -1,4 +1,5 @@
 'use client';
+import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Hospitalization, Quote } from '@analiza/contracts';
@@ -314,47 +315,49 @@ export default function HospitalizationsPage() {
             ))}
         </p>
       ) : null}
-      <div className="hospitalization-tabs-shell">
-        <div className="hospitalization-tabs-heading">
-          <div>
-            <h2>Relación de pacientes por empresa</h2>
-            <p>Organización administrativa de casos y seguimiento.</p>
+      {!isCoreRelease && (
+        <div className="hospitalization-tabs-shell">
+          <div className="hospitalization-tabs-heading">
+            <div>
+              <h2>Relación de pacientes por empresa</h2>
+              <p>Organización administrativa de casos y seguimiento.</p>
+            </div>
+            <StatusTag>Conteo no configurado</StatusTag>
           </div>
-          <StatusTag>Conteo no configurado</StatusTag>
+          <div className="tabs" role="tablist" aria-label="Hospitalización administrativa">
+            <button
+              aria-selected={tab === 'ACTIVE'}
+              className={`tab ${tab === 'ACTIVE' ? 'active' : ''}`}
+              data-action-id="HOSPITALIZATION-TAB-ACTIVE"
+              onClick={() => setTab('ACTIVE')}
+              role="tab"
+              type="button"
+            >
+              Activos
+            </button>
+            <button
+              aria-selected={tab === 'QUOTES'}
+              className={`tab ${tab === 'QUOTES' ? 'active' : ''}`}
+              data-action-id="HOSPITALIZATION-TAB-QUOTES"
+              onClick={() => setTab('QUOTES')}
+              role="tab"
+              type="button"
+            >
+              Cotizaciones
+            </button>
+            <button
+              aria-selected={tab === 'PIC'}
+              className={`tab ${tab === 'PIC' ? 'active' : ''}`}
+              data-action-id="HOSPITALIZATION-TAB-PIC"
+              onClick={() => setTab('PIC')}
+              role="tab"
+              type="button"
+            >
+              PIC Ejecución
+            </button>
+          </div>
         </div>
-        <div className="tabs" role="tablist" aria-label="Hospitalización administrativa">
-          <button
-            aria-selected={tab === 'ACTIVE'}
-            className={`tab ${tab === 'ACTIVE' ? 'active' : ''}`}
-            data-action-id="HOSPITALIZATION-TAB-ACTIVE"
-            onClick={() => setTab('ACTIVE')}
-            role="tab"
-            type="button"
-          >
-            Activos
-          </button>
-          <button
-            aria-selected={tab === 'QUOTES'}
-            className={`tab ${tab === 'QUOTES' ? 'active' : ''}`}
-            data-action-id="HOSPITALIZATION-TAB-QUOTES"
-            onClick={() => setTab('QUOTES')}
-            role="tab"
-            type="button"
-          >
-            Cotizaciones
-          </button>
-          <button
-            aria-selected={tab === 'PIC'}
-            className={`tab ${tab === 'PIC' ? 'active' : ''}`}
-            data-action-id="HOSPITALIZATION-TAB-PIC"
-            onClick={() => setTab('PIC')}
-            role="tab"
-            type="button"
-          >
-            PIC Ejecución
-          </button>
-        </div>
-      </div>
+      )}
       {tab === 'ACTIVE' ? (
         <>
           <Panel className="hospitalization-filter-panel">
@@ -398,6 +401,7 @@ export default function HospitalizationsPage() {
               <label>
                 <span>Estado</span>
                 <select
+                  aria-label="Estado administrativo"
                   data-action-id="HOSPITALIZATION-FILTER-STATUS"
                   onChange={(event) =>
                     setDraftFilters((current) => ({
@@ -418,6 +422,7 @@ export default function HospitalizationsPage() {
               <label>
                 <span>Ingreso</span>
                 <input
+                  aria-label="Fecha de ingreso"
                   data-action-id="HOSPITALIZATION-FILTER-DATE"
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, startDate: event.target.value }))
@@ -429,6 +434,7 @@ export default function HospitalizationsPage() {
               <label>
                 <span>Cuenta</span>
                 <select
+                  aria-label="Tipo de cuenta"
                   data-action-id="HOSPITALIZATION-FILTER-ACCOUNT-TYPE"
                   onChange={(event) =>
                     setDraftFilters((current) => ({ ...current, accountType: event.target.value }))

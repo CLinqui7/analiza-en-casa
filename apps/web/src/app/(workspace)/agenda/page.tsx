@@ -1,4 +1,5 @@
 'use client';
+import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
@@ -279,10 +280,12 @@ export default function AgendaPage() {
         </div>
         <div className="agenda-filters">
           <label>
-            Filtrar por
-            <select aria-label="Filtrar por" disabled value="patient">
-              <option value="patient">Paciente</option>
-            </select>
+            {isCoreRelease ? 'Vista por paciente' : 'Filtrar por'}
+            {!isCoreRelease && (
+              <select aria-label="Filtrar por" disabled value="patient">
+                <option value="patient">Paciente</option>
+              </select>
+            )}
           </label>
           <label>
             Buscar paciente
@@ -390,19 +393,21 @@ export default function AgendaPage() {
               Lista por día
             </Button>
           </div>
-          <div className="agenda-blocked-action">
-            <Button
-              aria-describedby="agenda-delete-visits-help"
-              data-action-id="AGENDA-VISITS-DELETE"
-              disabled
-              type="button"
-            >
-              Eliminar visitas
-            </Button>
-            <span className="field-help" id="agenda-delete-visits-help">
-              Requiere definición de selección, permisos, motivo y auditoría (CH11-Q004/Q006).
-            </span>
-          </div>
+          {!isCoreRelease && (
+            <div className="agenda-blocked-action">
+              <Button
+                aria-describedby="agenda-delete-visits-help"
+                data-action-id="AGENDA-VISITS-DELETE"
+                disabled
+                type="button"
+              >
+                Eliminar visitas
+              </Button>
+              <span className="field-help" id="agenda-delete-visits-help">
+                Requiere definición de selección, permisos, motivo y auditoría (CH11-Q004/Q006).
+              </span>
+            </div>
+          )}
         </section>
         {calendarView === 'MONTH' || calendarView === 'WEEK' ? (
           <section aria-label={`Calendario de ${calendarTitle}`} className="agenda-calendar">
@@ -502,19 +507,23 @@ export default function AgendaPage() {
               <span aria-current="page" className="button">
                 Agenda
               </span>
-              <Button
-                aria-describedby="agenda-shift-detail-updates-help"
-                data-action-id="AGENDA-SHIFT-DETAIL-UPDATES"
-                disabled
-                type="button"
-              >
-                Actualizaciones
-              </Button>
+              {!isCoreRelease && (
+                <Button
+                  aria-describedby="agenda-shift-detail-updates-help"
+                  data-action-id="AGENDA-SHIFT-DETAIL-UPDATES"
+                  disabled
+                  type="button"
+                >
+                  Actualizaciones
+                </Button>
+              )}
             </div>
-            <p className="field-help" id="agenda-shift-detail-updates-help">
-              Las actualizaciones requieren definición clínica, estados, permisos y auditoría
-              (CH11-Q002/Q006).
-            </p>
+            {!isCoreRelease && (
+              <p className="field-help" id="agenda-shift-detail-updates-help">
+                Las actualizaciones requieren definición clínica, estados, permisos y auditoría
+                (CH11-Q002/Q006).
+              </p>
+            )}
             <Panel>
               <dl className="detail-list">
                 <div>
@@ -547,7 +556,11 @@ export default function AgendaPage() {
         </Dialog>
       ) : null}
       <Dialog
-        description="Puede crear una serie de días sin duplicados ni colisiones del mismo recurso. Puntual sigue pendiente de definición del cliente."
+        description={
+          isCoreRelease
+            ? 'Programa los días y horarios; se comprueba la disponibilidad del recurso antes de guardar.'
+            : 'Puede crear una serie de días sin duplicados ni colisiones del mismo recurso. Puntual sigue pendiente de definición del cliente.'
+        }
         footer={
           <>
             <Button
@@ -704,16 +717,19 @@ export default function AgendaPage() {
             >
               Turno 8 horas
             </Button>
-            <Button
-              data-action-id="AGENDA-SHIFT-PRESET-PUNTUAL"
-              disabled
-              title="Requiere definición del cliente"
-              type="button"
-            >
-              Puntual (pendiente de definición)
-            </Button>
+            {!isCoreRelease && (
+              <Button
+                data-action-id="AGENDA-SHIFT-PRESET-PUNTUAL"
+                disabled
+                title="Requiere definición del cliente"
+                type="button"
+              >
+                Puntual (pendiente de definición)
+              </Button>
+            )}
           </div>
           <section
+            hidden={isCoreRelease}
             aria-labelledby="agenda-observed-classification-title"
             className="full"
             data-action-id="AGENDA-SHIFT-CLASSIFICATION-OBSERVED"

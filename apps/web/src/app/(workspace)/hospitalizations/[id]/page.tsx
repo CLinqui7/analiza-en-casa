@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { AdministrativeProfilePanel } from '@/components/administrative-profile-panel';
+import { isCoreRelease } from '@/lib/release-profile';
 
 const labels = {
   ACTIVE: 'Activo',
@@ -214,50 +215,54 @@ export default function HospitalizationDetailPage() {
           </aside>
         </div>
       </Panel>
-      <AdministrativeProfilePanel
-        canWrite={can('cases:write')}
-        hospitalization={hospitalization}
-        onOpen={() => {
-          setProfileMessage(null);
-          setProfileOpen(true);
-        }}
-        providerMode={providerMode}
-      />
+      {!isCoreRelease && (
+        <AdministrativeProfilePanel
+          canWrite={can('cases:write')}
+          hospitalization={hospitalization}
+          onOpen={() => {
+            setProfileMessage(null);
+            setProfileOpen(true);
+          }}
+          providerMode={providerMode}
+        />
+      )}
       {profileMessage ? (
         <p className="notice success" role="status">
           {profileMessage}
         </p>
       ) : null}
-      <div className="dashboard-grid">
-        <Panel>
-          <h2>Cotización y seguro</h2>
-          {linkedQuotes.length ? (
-            <ul>
-              {linkedQuotes.map((quote) => (
-                <li key={quote.id}>
-                  <Link href={`/quotes/${quote.id}`}>
-                    {quote.id} · v{quote.version}
-                  </Link>{' '}
-                  · {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              detail="No se ha creado una cotización para este caso."
-              title="Sin cotización"
-            />
-          )}
-        </Panel>
-        <Panel>
-          <h2>Resumen clínico</h2>
-          <p>
-            {linkedDocuments.length} documentos clínicos · {linkedVitals.length} registros de signos
-            vitales
-          </p>
-        </Panel>
-      </div>
-      {profileEditingEnabled ? (
+      {!isCoreRelease && (
+        <div className="dashboard-grid">
+          <Panel>
+            <h2>Cotización y seguro</h2>
+            {linkedQuotes.length ? (
+              <ul>
+                {linkedQuotes.map((quote) => (
+                  <li key={quote.id}>
+                    <Link href={`/quotes/${quote.id}`}>
+                      {quote.id} · v{quote.version}
+                    </Link>{' '}
+                    · {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                detail="No se ha creado una cotización para este caso."
+                title="Sin cotización"
+              />
+            )}
+          </Panel>
+          <Panel>
+            <h2>Resumen clínico</h2>
+            <p>
+              {linkedDocuments.length} documentos clínicos · {linkedVitals.length} registros de
+              signos vitales
+            </p>
+          </Panel>
+        </div>
+      )}
+      {!isCoreRelease && profileEditingEnabled ? (
         <Dialog
           description="Conserva campos administrativos observados. No aplica tarifas, cobertura, impuestos ni decisiones de aseguradora."
           footer={

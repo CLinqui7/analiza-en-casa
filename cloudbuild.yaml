@@ -1,0 +1,43 @@
+# PREPARED ONLY. Do not run under the current zero-cost instruction.
+# Future manual/approval-required repository trigger; no automatic production promotion.
+steps:
+  - id: test
+    name: node:24-bookworm-slim
+    entrypoint: bash
+    args: ['-euc', 'npm ci && npm test && npm run test:react && npm run typecheck && npm run lint']
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA', '.']
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA']
+  - id: deploy-preview
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:stable
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - '${_SERVICE}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA'
+      - '--region=${_REGION}'
+      - '--service-account=${_RUNTIME_SERVICE_ACCOUNT}'
+      - '--port=8080'
+      - '--no-allow-unauthenticated'
+      - '--min-instances=0'
+      - '--max-instances=1'
+      - '--network=${_NETWORK}'
+      - '--subnet=${_SUBNET}'
+      - '--vpc-egress=all-traffic'
+      - '--set-env-vars=ANALIZA_DATA_MODE=mongodb,MONGODB_DB=analiza_en_casa,NEXT_PUBLIC_DATA_MODE=mongodb,NEXT_PUBLIC_RELEASE_PROFILE=core'
+      - '--set-secrets=MONGODB_URI=${_MONGODB_SECRET_VERSION}'
+options:
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _REGION: us-central1
+  _SERVICE: analiza-core-preview
+  _REPOSITORY: analiza
+  # Configure these nonsecret identifiers on the approval-required trigger.
+  _RUNTIME_SERVICE_ACCOUNT: REQUIRED
+  _NETWORK: REQUIRED
+  _SUBNET: REQUIRED
+  _MONGODB_SECRET_VERSION: REQUIRED

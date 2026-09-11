@@ -8,6 +8,7 @@ import {
 } from '@analiza/contracts';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { can } from '@/lib/permissions';
+import { isCoreRelease } from '@/lib/release-profile';
 import { authorizationStatus } from '@/server/http-auth';
 import { MongoDoctorRepository } from '@/server/mongo-doctors';
 import { MongoHospitalizationRepository } from '@/server/mongo-hospitalizations';
@@ -76,10 +77,10 @@ export async function GET(request?: Request) {
             new MongoShiftRepository(database as never).listResources(session),
           ])
         : Promise.resolve([[], []] as const),
-      can(session.role, 'quotes:read')
+      !isCoreRelease && can(session.role, 'quotes:read')
         ? new MongoQuoteRepository(database).listWithVersions(session)
         : Promise.resolve([]),
-      can(session.role, 'insurance:read')
+      !isCoreRelease && can(session.role, 'insurance:read')
         ? new MongoInsuranceRepository(database).list(session)
         : Promise.resolve({ requests: [], events: [] }),
       can(session.role, 'catalogs:read')
@@ -88,22 +89,22 @@ export async function GET(request?: Request) {
             .find({ organizationId: session.organizationId })
             .toArray()
         : Promise.resolve([]),
-      can(session.role, 'payments:read')
+      !isCoreRelease && can(session.role, 'payments:read')
         ? database.collection('payments').find({ organizationId: session.organizationId }).toArray()
         : Promise.resolve([]),
-      can(session.role, 'inventory:read')
+      !isCoreRelease && can(session.role, 'inventory:read')
         ? database
             .collection('inventoryMovements')
             .find({ organizationId: session.organizationId })
             .toArray()
         : Promise.resolve([]),
-      can(session.role, 'purchases:read')
+      !isCoreRelease && can(session.role, 'purchases:read')
         ? database
             .collection('purchases')
             .find({ organizationId: session.organizationId })
             .toArray()
         : Promise.resolve([]),
-      can(session.role, 'clinical:read')
+      !isCoreRelease && can(session.role, 'clinical:read')
         ? database
             .collection('clinicalDocuments')
             .find({ organizationId: session.organizationId })

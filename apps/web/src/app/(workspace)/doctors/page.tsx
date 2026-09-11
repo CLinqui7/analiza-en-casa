@@ -1,4 +1,5 @@
 'use client';
+import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Doctor } from '@analiza/contracts';
@@ -139,7 +140,7 @@ export default function DoctorsPage() {
           <Link
             className="button button-secondary"
             data-action-id="DOCTOR-RESOURCE-CREATE"
-            href="/clinical/nursing"
+            href={isCoreRelease ? '/nursing-team' : '/clinical/nursing'}
           >
             Nuevo recurso
           </Link>

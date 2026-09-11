@@ -7,6 +7,7 @@ import {
   sessionCookieName,
 } from '@/server/mongo-auth';
 import { mongoDatabase } from '@/server/mongodb';
+import { authCookieOptions } from '@/server/auth-cookie';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,10 +20,7 @@ export async function POST(request: NextRequest) {
     await auth.logout(sessionToken);
     const response = NextResponse.json({}, { headers: { 'Cache-Control': 'no-store' } });
     response.cookies.set(sessionCookieName, '', {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: request.nextUrl.protocol === 'https:',
-      path: '/',
+      ...authCookieOptions(request.nextUrl.protocol),
       maxAge: 0,
     });
     return response;

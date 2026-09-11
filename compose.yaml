@@ -1,0 +1,16 @@
+# Optional container verification. The deployed service uses Atlas, never local MongoDB.
+services:
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      MONGODB_URI: ${MONGODB_URI:?Set the private Atlas URI in the process environment}
+      MONGODB_DB: analiza_en_casa
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache:uid=1000,gid=1000
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]

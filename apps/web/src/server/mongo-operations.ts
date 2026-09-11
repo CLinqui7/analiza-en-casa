@@ -170,7 +170,7 @@ export class MongoOperationsRepository {
             );
           })
         : undefined,
-      can(actor.role, 'clinical:read')
+      process.env.NEXT_PUBLIC_RELEASE_PROFILE !== 'core' && can(actor.role, 'clinical:read')
         ? Promise.all([
             read('balancePeriods').then((rows) => {
               result.periods = rows.map((row) => balancePeriodSchema.parse(row));
@@ -183,7 +183,7 @@ export class MongoOperationsRepository {
             }),
           ])
         : undefined,
-      can(actor.role, 'reports:read')
+      process.env.NEXT_PUBLIC_RELEASE_PROFILE !== 'core' && can(actor.role, 'reports:read')
         ? Promise.all([
             read('homeVisits').then((rows) => {
               result.visits = rows.map((row) => visitSchema.strip().parse(row));

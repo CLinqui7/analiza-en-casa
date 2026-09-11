@@ -2,6 +2,7 @@
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { isRole, type Role } from '@/lib/permissions';
+import { isCoreRelease } from '@/lib/release-profile';
 
 const mockSessionKey = 'analiza.en.casa.mock-session.v1';
 let mongoCsrfToken: string | null = null;
@@ -21,7 +22,7 @@ export function isSupabaseMode() {
 }
 
 function isMongoMode() {
-  return process.env.NEXT_PUBLIC_DATA_MODE === 'mongodb';
+  return isCoreRelease || process.env.NEXT_PUBLIC_DATA_MODE === 'mongodb';
 }
 
 /** Demo credentials are only a local fixture and must never be advertised by a configured backend. */

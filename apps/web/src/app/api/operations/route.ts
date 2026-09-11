@@ -9,6 +9,7 @@ import { mongoDatabase } from '@/server/mongodb';
 import { MongoOperationsRepository } from '@/server/mongo-operations';
 import { MongoConflictError, MongoInputError } from '@/server/mongo-patients';
 import { authorizationStatus } from '@/server/http-auth';
+import { isReleasedCommand } from '@/lib/release-profile';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -56,10 +57,14 @@ export async function POST(request: NextRequest) {
     const token = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(token);
     await auth.requireCsrf(token, request.headers.get(csrfHeaderName) ?? undefined);
-    const result = await new MongoOperationsRepository(database).execute(
-      actor,
-      await request.json(),
-    );
+    const input = await request.json();
+    if (!isReleasedCommand(input?.command)) {
+      return NextResponse.json(
+        { error: 'Operación no disponible en esta edición.' },
+        { status: 404, headers },
+      );
+    }
+    const result = await new MongoOperationsRepository(database).execute(actor, input);
     return NextResponse.json(result, { status: 200, headers });
   } catch (error) {
     return failure(error);

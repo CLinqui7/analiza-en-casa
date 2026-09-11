@@ -397,6 +397,7 @@ export class SupabaseDataProvider implements DataProvider {
 
 export function createDataProvider(): DataProvider {
   const dataMode = process.env.NEXT_PUBLIC_DATA_MODE;
+  if (process.env.NEXT_PUBLIC_RELEASE_PROFILE === 'core') return new HttpDataProvider();
   if (dataMode === 'mongodb') return new HttpDataProvider();
   if (dataMode && dataMode !== 'mock' && dataMode !== 'supabase') {
     throw new Error('NEXT_PUBLIC_DATA_MODE no es un modo de datos reconocido.');

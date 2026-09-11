@@ -8,17 +8,13 @@ import {
   sessionCookieName,
 } from '@/server/mongo-auth';
 import { mongoDatabase } from '@/server/mongodb';
+import { authCookieOptions } from '@/server/auth-cookie';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function cookieOptions(request: NextRequest) {
-  return {
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: request.nextUrl.protocol === 'https:',
-    path: '/',
-  };
+  return authCookieOptions(request.nextUrl.protocol);
 }
 
 export async function POST(request: NextRequest) {

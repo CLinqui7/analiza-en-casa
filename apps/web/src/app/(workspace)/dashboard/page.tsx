@@ -8,6 +8,8 @@ import { useAuth, useDashboardWorkspace } from '@/components/providers';
 import { filterDashboardReadings, getDashboardActions } from '@/lib/dashboard-activity';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { videoParitySummary } from '@/lib/video-parity-summary';
+import { isCoreRelease } from '@/lib/release-profile';
+import { CoreDashboard } from '@/components/core-dashboard';
 
 const currency = new Intl.NumberFormat('es-SV', {
   style: 'currency',
@@ -40,6 +42,10 @@ function BarRow({ label, value, maximum }: { label: string; value: number; maxim
 }
 
 export default function DashboardPage() {
+  return isCoreRelease ? <CoreDashboard /> : <FullDashboard />;
+}
+
+function FullDashboard() {
   const {
     auditEntries,
     catalogItems,

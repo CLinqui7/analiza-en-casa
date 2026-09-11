@@ -1,4 +1,5 @@
 'use client';
+import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { patientDocumentTypeSchema, type Patient } from '@analiza/contracts';
@@ -675,7 +676,7 @@ export default function PatientsPage() {
           <p>La búsqueda normaliza mayúsculas, acentos y espacios en todos los resultados.</p>
         </div>
         <div className="patient-header-actions">
-          {can('patients:write') ? (
+          {!isCoreRelease && can('patients:write') ? (
             <Button
               className="button-secondary"
               data-action-id="PATIENT-IMPORT"
@@ -801,19 +802,21 @@ export default function PatientsPage() {
             >
               Inactivos ({patients.filter((patient) => patient.status === 'INACTIVE').length})
             </Button>
-            <Button
-              aria-selected={false}
-              className="tab"
-              data-action-id="PATIENT-TAB-IMPORT"
-              onClick={() => {
-                setImportPreview(null);
-                setImportOpen(true);
-              }}
-              role="tab"
-              type="button"
-            >
-              Carga masiva
-            </Button>
+            {!isCoreRelease && (
+              <Button
+                aria-selected={false}
+                className="tab"
+                data-action-id="PATIENT-TAB-IMPORT"
+                onClick={() => {
+                  setImportPreview(null);
+                  setImportOpen(true);
+                }}
+                role="tab"
+                type="button"
+              >
+                Carga masiva
+              </Button>
+            )}
           </div>
           {query ? (
             <Button

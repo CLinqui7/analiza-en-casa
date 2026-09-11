@@ -38,8 +38,22 @@ function clientFor(config: MongoRuntimeConfig): Promise<MongoClient> {
   if (!globalMongo.__analizaMongoClientPromise) {
     const client = new MongoClient(config.uri, {
       serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true },
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      waitQueueTimeoutMS: 5000,
+      socketTimeoutMS: 20000,
+      maxPoolSize: 10,
+      maxIdleTimeMS: 60000,
     });
-    globalMongo.__analizaMongoClientPromise = client.connect();
+    const connection = client.connect().catch(async (error: unknown) => {
+      // A transient outage must not poison every request until the process restarts.
+      if (globalMongo.__analizaMongoClientPromise === connection) {
+        globalMongo.__analizaMongoClientPromise = undefined;
+      }
+      await client.close().catch(() => undefined);
+      throw error;
+    });
+    globalMongo.__analizaMongoClientPromise = connection;
   }
   return globalMongo.__analizaMongoClientPromise;
 }

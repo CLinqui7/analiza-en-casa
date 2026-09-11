@@ -14,6 +14,7 @@ import {
 } from 'react';
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
+import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
 
 type NavigationItem = { label: string; href: string; permission: Permission; actionId: string };
 type NavigationGroup = {
@@ -374,7 +375,9 @@ export function AppShell({ children }: PropsWithChildren) {
           : normalized.includes('agenda') || normalized.includes('turno')
             ? '/agenda'
             : '/patients';
-    router.push(`${route}?search=${encodeURIComponent(query)}`);
+    router.push(
+      `${isReleasedPath(route) ? route : '/patients'}?search=${encodeURIComponent(query)}`,
+    );
   }
 
   const closeUserProfile = useCallback(() => {
@@ -571,7 +574,7 @@ export function AppShell({ children }: PropsWithChildren) {
           <ul className="nav-list">
             {navigation.map((group) => {
               if (group.href && group.permission && group.actionId) {
-                if (!can(group.permission)) return null;
+                if (!can(group.permission) || !isReleasedPath(group.href)) return null;
                 return (
                   <li key={group.href}>
                     <Link
@@ -592,7 +595,9 @@ export function AppShell({ children }: PropsWithChildren) {
               }
 
               const childrenForRole =
-                group.children?.filter((child) => can(child.permission)) ?? [];
+                group.children?.filter(
+                  (child) => can(child.permission) && isReleasedPath(child.href),
+                ) ?? [];
               if (!childrenForRole.length) return null;
               const open = expanded[group.label] ?? false;
               const hasCurrentChild = childrenForRole.some((child) =>
@@ -760,7 +765,11 @@ export function AppShell({ children }: PropsWithChildren) {
               <input
                 aria-label="Buscar en Analiza en Casa"
                 onChange={(event) => setGlobalSearch(event.target.value)}
-                placeholder="Buscar paciente, caso, cotización o comando…"
+                placeholder={
+                  isCoreRelease
+                    ? 'Buscar paciente, hospitalización o turno…'
+                    : 'Buscar paciente, caso, cotización o comando…'
+                }
                 ref={globalSearchRef}
                 type="search"
                 value={globalSearch}

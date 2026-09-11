@@ -1,0 +1,23 @@
+# Optional FREE preview backend. No new database or paid resource is provisioned.
+services:
+  - type: web
+    name: analiza-core-preview
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: codex/ui-polish-final-20260904
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: 'off'
+    healthCheckPath: /api/health/live
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: analiza_en_casa
+      - key: ANALIZA_DATA_MODE
+        value: mongodb
+      - key: NEXT_PUBLIC_DATA_MODE
+        value: mongodb
+      - key: NEXT_PUBLIC_RELEASE_PROFILE
+        value: core

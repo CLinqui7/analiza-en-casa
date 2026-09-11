@@ -4,6 +4,24 @@ Analiza en Casa es una aplicación web de demostración para la operación de at
 
 > Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
 
+## Entrega Core Mongo y Docker · 11 septiembre 2026
+
+Por solicitud del cliente se prepara una edición reducida, exclusivamente con persistencia
+MongoDB de servidor: pacientes, hospitalizaciones, agenda, médicos, enfermería y catálogos
+operativos. Las funciones pendientes se ocultan y sus rutas quedan cerradas sin borrar el
+código ni las matrices del video/Excel. La edición completa histórica sigue disponible
+para regresión, no como certificación de todas sus funciones.
+
+Consulte [preparación cloud](docs/release/CORE_CLOUD_DEPLOYMENT.md) y
+[verificación Core](docs/release/CORE_RELEASE_VERIFICATION.json).
+`npm run docker:build` construye frontend y API; `npm run test:core:mongo` verifica
+React → HTTP → Atlas y aislamiento entre organizaciones. `npm run test:core:selenium`
+ejecuta comprobaciones Chrome contra el servidor indicado mediante variables privadas.
+La imagen no incluye credenciales. Render está configurado explícitamente como Free;
+Google Cloud queda preparado, pero no se han creado recursos facturables.
+**La prueba del contenedor contra Atlas no equivale a un Preview conectado:** el alta
+de Render y la verificación desde Vercel siguen pendientes.
+
 ## React Studio y Atlas verificados · septiembre 2026
 
 La aplicación del checkout actual conserva sus rutas y menú plegable y adopta el estilo del HTML Studio. El backend Mongo se comprobó contra el clúster Atlas existente con datos QA: pacientes, hospitalizaciones, cotizaciones, adjuntos privados, roles de enfermería, balance hídrico, catálogos, pagos, visitas y consumo transaccional de inventario. Consulte `docs/release/MONGO_STUDIO_VERIFICATION_20260910.md` y `docs/release/DESKTOP_DELIVERY_STATE.json` para evidencia y límites; el preview visual no implica certificación productiva.

@@ -34,8 +34,13 @@ test('CH14 lists only factual synthetic balances and keeps undefined inventory o
   await expect(page.getByText('Items', { exact: true })).toHaveAttribute('aria-current', 'page');
   for (const header of ['Acciones', 'Tipo', 'Código', 'Nombre', 'Bodega', 'Disp', 'Comp', 'Total'])
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
-  await expect(page.getByText('No definido')).toHaveCount(2);
-  await expect(page.getByText('No calculable')).toHaveCount(2);
+  // The current synthetic seed also includes the explicitly inert medication SKU.
+  // Check all three rows instead of silently dropping the new selector fixture.
+  await expect(page.getByText('No definido')).toHaveCount(3);
+  await expect(page.getByText('No calculable')).toHaveCount(3);
+  const inertMedication = page.getByRole('row').filter({ hasText: 'MED-QA-001' });
+  await expect(inertMedication).toHaveCount(1);
+  await expect(inertMedication.getByRole('cell', { name: '100', exact: true })).toBeVisible();
   await expect(page.locator('[data-action-id="INVENTORY-ITEM-EXPORT"]')).toBeDisabled();
   await expect(page.locator('[data-action-id="INVENTORY-TRANSFERS"]')).toBeDisabled();
   await page.getByLabel('Buscar inventario').fill('sin-inventario-ch14');
@@ -77,7 +82,11 @@ test('CH14 opens an item-scoped factual history and filters existing movement da
   const auditBefore = await page.evaluate(() =>
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   );
-  await page.locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]').first().click();
+  await page
+    .getByRole('row')
+    .filter({ hasText: 'KIT-DEMO-001' })
+    .locator('[data-action-id="INVENTORY-ITEM-HISTORY-OPEN"]')
+    .click();
   const dialog = page.getByRole('dialog', { name: 'Movimientos de item' });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByLabel('Código')).toHaveValue('KIT-DEMO-001');

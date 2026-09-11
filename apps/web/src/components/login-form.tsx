@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers';
 import { isDemoAuthMode, mockCredentialHint, safeNextPath } from '@/lib/auth';
 import { InstallApp } from '@/components/install-app';
+import { isCoreRelease } from '@/lib/release-profile';
 
 export function LoginForm() {
   const { login, loading, session } = useAuth();
@@ -137,19 +138,21 @@ export function LoginForm() {
           </button>
         </form>
 
-        <button
-          className="text-link login-recovery-link"
-          data-action-id="AUTH-RECOVER-OPEN"
-          onClick={() => {
-            setRecoveryOpen(true);
-            setRecoveryNotice(null);
-          }}
-          type="button"
-        >
-          Recuperar acceso
-        </button>
+        {!isCoreRelease && (
+          <button
+            className="text-link login-recovery-link"
+            data-action-id="AUTH-RECOVER-OPEN"
+            onClick={() => {
+              setRecoveryOpen(true);
+              setRecoveryNotice(null);
+            }}
+            type="button"
+          >
+            Recuperar acceso
+          </button>
+        )}
 
-        {recoveryOpen ? (
+        {!isCoreRelease && recoveryOpen ? (
           <section aria-label="Recuperar acceso" className="notice">
             <p>
               La recuperación requiere un proveedor de identidad configurado; no se envió ningún
