@@ -3,8 +3,13 @@
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
 Commit generador: `58030d1419e179a4bc51145106c7314cb6417c6c`
-SHA de implementación: `58030d1419e179a4bc51145106c7314cb6417c6c`
-Fingerprint funcional CH01: `ed4afce3ee133ada69ffcb83f1a9e477d34103cd848e33aaa5a13637d5d53e68`
+SHA de regresión de implementación: `532048263a6e17de698b0fbed8594067a8c75714`
+Fingerprint funcional CH01: `f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc`
+
+Regresión de la edición completa mock: 178 pruebas aprobadas; no nuevas promociones EXACT.
+La edición Core oculta temporalmente módulos pendientes por autorización del cliente.
+La certificación conectada a Atlas del contenedor y el bloqueo cloud se distinguen en
+`docs/release/CORE_RELEASE_VERIFICATION.json`. Los estados individuales históricos se conservan.
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|

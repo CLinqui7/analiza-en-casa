@@ -1,0 +1,65 @@
+{
+  "status": "CONTAINER_ATLAS_VERIFIED_CLOUD_PENDING",
+  "checked_at": "2026-09-11T05:41:20Z",
+  "implementation_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+  "base_sha": "206699c5434270a222b0a9f6c33ab29d3eb74ec8",
+  "branch": "codex/ui-polish-final-20260904",
+  "scope": "Reduced Mongo-only release explicitly requested by client; full edition retained for regression, not certified for production.",
+  "current_tests": {
+    "root_unit_tests": "103 passed",
+    "react_unit_tests": "117 passed / 30 files",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "changed_typescript_format": "PASS",
+    "security_scan": "PASS / 662 files",
+    "react_boundaries": "PASS / 175 files",
+    "compose_configuration": "PASS",
+    "container_operator_bootstrap": "PASS; existing bootstrap --dry-run reports 43 indexes from the operator image",
+    "docker_build": "PASS; Next standalone includes dynamic API functions, non-root runtime, no build credentials",
+    "full_edition_browser_regression": "178 passed in 5.6 minutes; 0 skipped; full mock edition preserved",
+    "focused_regression_repairs": "3 passed: hospitalization filter accessible names and inventory expectations updated to include existing inert QA seed",
+    "connected_atlas_core": "PASS; core-efd0f6f4; origin http://localhost:3182; final Docker candidate",
+    "connected_selenium": "3 passed in 9.017 seconds; Chrome real login, navigation, patient dialog and mobile hospitalization",
+    "video_structural_verification": "17/17 ledgers PASS; not full behavioral parity",
+    "client_registry": "32/32 gates passed; no request status promoted; current regression SHA recorded",
+    "video_traceability": "CH01 14/14, CH02 16/16, CH03 13/13 gates and JSON/CSV/certification mirror passed; no new EXACT promotion",
+    "preflight": "PASS; existing local changes preserved; no other active implementation writer"
+  },
+  "connected_assertions": [
+    "Atlas readiness; anonymous API denial; hidden endpoint gates",
+    "Real nurse account created via authenticated server API",
+    "Nurse creates patient through React; direct Atlas read confirms it; independent authorized browser reads it",
+    "Simulated 503 leaves patient dialog open, adds no Mongo record, changes no localStorage and shows no success",
+    "Patient edit, CSRF denial and cross-organization exclusion",
+    "Hospitalization create/edit with assigned nurse; prohibited role and foreign organization cannot change it",
+    "Doctor React create uses Mongo specialty option; server edit and foreign-tenant denial",
+    "Patient, hospitalization and doctor PNG uploads persist privately; another session downloads exact bytes; foreign access denied",
+    "Catalog options persist; shift retry is idempotent and collisions are rejected",
+    "Seven Core routes render; hidden routes redirect; mobile dialog has no viewport overflow"
+  ],
+  "evidence": {
+    "docker_image": "sha256:bfb1f1a7c9755138a65364ac4bc6f32d72f729e4498658506f2f80f95c90267a",
+    "connected_report": ".local/core-verification/core-efd0f6f4/report.json",
+    "patient_mobile_screenshot": ".local/core-verification/core-efd0f6f4/patient-mobile.png",
+    "selenium_patient_screenshot": ".local/core-selenium/patient-dialog.png",
+    "selenium_hospitalization_screenshot": ".local/core-selenium/hospitalization-mobile.png",
+    "selenium_timing": ".local/core-selenium/timing.json",
+    "qa_data": "Synthetic isolated QA organizations; generated accounts/memberships/sessions revoked after verification; audit data retained"
+  },
+  "deployment": {
+    "new_preview_url": null,
+    "new_deployment_id": null,
+    "cloud_mongo_verified": false,
+    "render": "Awaiting owner CAPTCHA/email verification; account and free service not confirmed",
+    "vercel": "Existing Hobby unchanged; no paid upgrade and no new Core deployment",
+    "atlas": "Existing analiza-cluster / analiza_en_casa; no new cluster or network changes; existing bootstrap seed rerun without overwrites, 43 indexes verified",
+    "google_cloud": "Docker/Cloud Build/Cloud Run configuration prepared only; no services provisioned or paid deployments authorized"
+  },
+  "limitations": [
+    "Container-to-Atlas tests are not tests of Vercel-to-Render networking or cloud cookie forwarding; repeat against actual protected Preview",
+    "Render Free sleeps after inactivity and has limited resources; it is a functional synthetic preview option, not clinical production readiness",
+    "Finance, insurance, clinical records, QR/portal/messaging, inventory and unfinished controls are temporarily excluded by explicit user request",
+    "32 Excel requests and 210 video entries remain tracked with their existing unresolved statuses; this batch claims no full parity or clinical/fiscal certification",
+    "Historical full-edition mock browser tests prove regression behavior, not Mongo persistence of those excluded modules"
+  ]
+}

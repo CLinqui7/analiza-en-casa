@@ -2,7 +2,7 @@
   "schema_version": 2,
   "studio_verification": {
     "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-    "functional_fingerprint": "a5ce9d2c1cb736539e0f05406a871bf6560b8b2e93509911fbb37ba6e72d8c90",
+    "functional_fingerprint": "f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc",
     "runtime": "178/178 Playwright, 98 React/server tests, 103 baseline tests; local synthetic only",
     "visual_override": "Client-authorized Studio HTML redesign preserves actions, fields and permissions; prior video layout is not claimed pixel-identical.",
     "scope": "Las 210 solicitudes siguen trazadas. La reauditoría independiente degradó afirmaciones sobreclasificadas; los gates estructurales no equivalen a paridad funcional."
@@ -10,8 +10,12 @@
   "generated_at": "2026-09-03T05:56:26-06:00",
   "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "58030d1419e179a4bc51145106c7314cb6417c6c",
-  "functional_fingerprint": "ed4afce3ee133ada69ffcb83f1a9e477d34103cd848e33aaa5a13637d5d53e68",
+  "implementation_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+  "core_release_regression": {
+    "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
+    "scope": "Full mock edition regression only. Individual historical statuses and source evidence retained. Core visibility exclusions are authorized by the client; not full video parity or cloud certification."
+  },
+  "functional_fingerprint": "f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc",
   "requirements": [
     {
       "requirement_id": "CH01-F001",

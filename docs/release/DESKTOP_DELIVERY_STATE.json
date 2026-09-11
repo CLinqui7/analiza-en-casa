@@ -1,6 +1,21 @@
 {
-  "updated_at": "2026-09-10 12:50:00 UTC",
-  "next_action": "Paid fixed Preview egress is authorized, but Vercel still reports Hobby with no billing address/payment completion. After the owner completes the private Billing checkout: enable the iad1 static-IP pair, allowlist only those addresses in Atlas, deploy the Mongo candidate as Preview and repeat A/B/C, file, inventory, purchase and save-failure checks remotely.",
+  "updated_at": "2026-09-11 05:41:20 UTC",
+  "next_action": "ZERO COST ONLY. User revoked paid plans and authorized a Render Free account. Registration is awaiting the owner's CAPTCHA/email verification in the prepared Chrome window; no Render account/service is confirmed. After that, create only the free backend, read its effective outbound ranges, allowlist those ranges on existing Atlas, configure Vercel Preview same-origin API routing, and repeat the connected Core tests against the actual Preview. No 0.0.0.0/0, paid provisioning or production promotion.",
+  "current_core_release": {
+    "status": "CONTAINER_ATLAS_VERIFIED_CLOUD_PENDING",
+    "implementation_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+    "verification": "docs/release/CORE_RELEASE_VERIFICATION.json",
+    "docker_image": "sha256:bfb1f1a7c9755138a65364ac4bc6f32d72f729e4498658506f2f80f95c90267a",
+    "connected_run": "core-efd0f6f4",
+    "connected_origin": "http://localhost:3182",
+    "cloud_mongo_verified": false,
+    "new_preview_deployment": null,
+    "paid_services_authorized": false,
+    "atlas_allowlist_changed": false,
+    "render_account_created": false,
+    "scope": "Temporary reduced Core release requested by client; all historical code and 32 Excel/210 video requirements retained without new completion claims."
+  },
+  "historical_snapshot_notice": "The remaining fields below preserve earlier Studio delivery evidence. They are not the current Core deployment or a current authorization for paid services. current_core_release and its verification file take precedence.",
   "files": [
     "apps/web/src/components/app-shell.tsx",
     "apps/web/src/components/login-form.tsx",

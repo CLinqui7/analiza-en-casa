@@ -1,10 +1,15 @@
 {
   "schema_version": 1,
+  "core_release_regression": {
+    "verification_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+    "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
+    "scope": "Full mock edition regression passed; refreshed fingerprints do not promote any status or repeat all historical Selenium document variants. Reduced Core has separate connected Atlas and three Selenium checks."
+  },
   "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
   "certifications": {
     "CR-001": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "e4208363190cb1edc0478f0eb4c04a57c296a173c936f17afc8c9508fbf63c79",
+      "functional_fingerprint": "90dc252c1c4cef3bf92c0989f51e44d9e5bcc56a9d424cda611d64fe63e8a15f",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -14,7 +19,7 @@
     },
     "CR-002": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "e4208363190cb1edc0478f0eb4c04a57c296a173c936f17afc8c9508fbf63c79",
+      "functional_fingerprint": "90dc252c1c4cef3bf92c0989f51e44d9e5bcc56a9d424cda611d64fe63e8a15f",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
       "test_ids": [
         "vitest:cr002-resident-card"
@@ -23,7 +28,7 @@
     },
     "CR-003": {
       "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
-      "functional_fingerprint": "04ca99b81c0ba3cfaf2ea0538c1973a13aa7b288582ae17069e8623279aadd8b",
+      "functional_fingerprint": "39f4840ccdd054a33fbb5de03c89baba525abb096d2f67f09a09fc4b581830e7",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "test_ids": [
         "playwright:ch01-xlsx-export",
@@ -42,7 +47,7 @@
     },
     "CR-005": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "556d26c4994fbf4546270a717071198954d8290f9216504dcd80e434b440bb4c",
+      "functional_fingerprint": "16bca8397e5a3be9f0b3e95415a636be221145ee82d5e077fdddd6e95aacb620",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
         "playwright:cr005-independent-doctor-resource",
@@ -52,7 +57,7 @@
     },
     "CR-006": {
       "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
-      "functional_fingerprint": "33c59f3a46dfb7270b231aeb96e808331528f3e6ad0f7085b1d4f2e683ed3b1b",
+      "functional_fingerprint": "5646a8d04a279b837b636f30a9bfe9514797e1d62b8ff5c27c66b176b544e01b",
       "certification_status": "PARTIAL",
       "test_ids": [
         "vitest:cr006-doctor-attachment-metadata",
@@ -63,7 +68,7 @@
     },
     "CR-007": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "95e395d018244a9d1e580fccda6bb4737d8f1b5e73e92fe2d950d7be02cb6e57",
+      "functional_fingerprint": "6539bc93237c123f4ac51838254fa72d9b80dad99b05d4921ee26942a90418ff",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
         "vitest:cr007-professional-specialties",
@@ -109,7 +114,7 @@
     },
     "CR-012": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "315ee2384db3e0b4090d48e40e06e43feb1b0b84d32d1c637deaa70cdd00ffcd",
+      "functional_fingerprint": "09efe2be7ab87c10490f12260f9aa4ea95420c3c270db43fc1f3806fc8e6a912",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -146,7 +151,7 @@
     },
     "CR-017": {
       "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-      "functional_fingerprint": "486a24921979ed881208c141d2350f7b915227a90ff68678082f79586b7b8718",
+      "functional_fingerprint": "a69cc9b1d4bb3dc2ca6c43068fb3a49b7f732ce520ee159bde05bd2cb1884f26",
       "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
@@ -157,7 +162,7 @@
     },
     "CR-018": {
       "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
-      "functional_fingerprint": "e12cdf1a9d82e4e34f5ac4a528a709a7705b4ecc493dc6954421f253746e7714",
+      "functional_fingerprint": "a69cc9b1d4bb3dc2ca6c43068fb3a49b7f732ce520ee159bde05bd2cb1884f26",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "production_status": "PARTIAL",
       "blocker_type": "CLIENT_DEFINITION",
