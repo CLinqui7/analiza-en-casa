@@ -1,6 +1,8 @@
 locals {
-  connection_name = var.create_sql_instance ? google_sql_database_instance.staging[0].connection_name : var.existing_sql_connection_name
-  secret_ids      = toset([var.db_user_secret_id, var.db_password_secret_id])
+  connection_name     = var.create_sql_instance ? google_sql_database_instance.staging[0].connection_name : var.existing_sql_connection_name
+  secret_ids          = toset([var.db_user_secret_id, var.db_password_secret_id])
+  operator_secret_ids = var.prepare_operator || var.deploy_operator ? setunion(toset([var.migration_user_secret_id, var.migration_password_secret_id, var.qa_password_secret_id]), var.provision_runtime_role ? toset([var.db_password_secret_id]) : toset([])) : toset([])
+  all_secret_ids      = setunion(local.secret_ids, local.operator_secret_ids)
 }
 resource "google_artifact_registry_repository" "images" {
   count         = var.create_artifact_repository ? 1 : 0
@@ -15,7 +17,7 @@ resource "google_artifact_registry_repository" "images" {
   }
 }
 resource "google_service_account" "runtime" {
-  account_id   = "analiza-staging-runtime"
+  account_id   = "analiza-run-staging"
   display_name = "Analiza staging runtime (no migration privileges)"
 }
 resource "google_service_account" "migrator" {
@@ -72,7 +74,7 @@ resource "google_storage_bucket_iam_member" "runtime_files" {
   depends_on = [google_storage_bucket.private_files]
 }
 resource "google_secret_manager_secret" "db" {
-  for_each  = var.create_secret_containers ? local.secret_ids : toset([])
+  for_each  = var.create_secret_containers ? local.all_secret_ids : toset([])
   secret_id = each.value
   replication {
     auto {
@@ -233,7 +235,7 @@ resource "google_cloud_run_v2_service" "staging" {
       error_message = "An approved SQL connection must exist before deploying."
     }
     precondition {
-      condition     = var.max_instances * var.pool_max + var.sql_reserved_connections <= var.sql_connection_budget
+      condition     = 2 * var.max_instances * var.pool_max + var.sql_reserved_connections <= var.sql_connection_budget
       error_message = "Instance pools exceed the approved database connection budget."
     }
   }

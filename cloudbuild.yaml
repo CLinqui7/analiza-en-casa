@@ -26,12 +26,19 @@ steps:
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
     args: ['scripts/deployment/smoke-image.sh', '/workspace/.local/cloud-run/image-ref.txt']
+  - id: build-operator
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '--platform', 'linux/amd64', '--target', 'operator', '--build-arg', 'SOURCE_SHA=${_SOURCE_SHA}', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}-operator:${_SOURCE_SHA}', '.']
+  - id: validate-operator
+    name: gcr.io/cloud-builders/docker
+    args: ['run', '--rm', '--read-only', '--cap-drop', 'ALL', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}-operator:${_SOURCE_SHA}', '--dry-run']
   - id: push
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
-    args: ['-euc', 'docker push "$$(cat /workspace/.local/cloud-run/image-ref.txt)"']
+    args: ['-euc', 'docker push "$$(cat /workspace/.local/cloud-run/image-ref.txt)" && docker push "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}-operator:${_SOURCE_SHA}"']
 images:
-  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:core-postgresql-${_SOURCE_SHA}'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:${_SOURCE_SHA}'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}-operator:${_SOURCE_SHA}'
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:

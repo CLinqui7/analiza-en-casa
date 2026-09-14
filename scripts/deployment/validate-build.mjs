@@ -17,7 +17,7 @@ export function buildIdentity(env) {
   const name = required('IMAGE_NAME', /^[a-z0-9][a-z0-9._-]*$/);
   const sha = required('SOURCE_SHA', /^[a-f0-9]{40}$/);
   assert.ok(!env.TRIGGER_SHA || env.TRIGGER_SHA === sha, 'Trigger SHA differs from tested source');
-  return `${region}-docker.pkg.dev/${project}/${repository}/${name}:core-postgresql-${sha}`;
+  return `${region}-docker.pkg.dev/${project}/${repository}/${name}:${sha}`;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

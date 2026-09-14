@@ -13,12 +13,13 @@ $info = (docker image inspect $LocalImage | ConvertFrom-Json)[0]
 Assert-NativeSuccess 'Inspect candidate'
 $sourceSha = $info.Config.Labels.'org.opencontainers.image.revision'
 if ($sourceSha -notmatch '^[a-f0-9]{40}$') { throw 'Image must identify its full committed source SHA.' }
+if ((git rev-parse HEAD).Trim() -ne $sourceSha) { throw 'HEAD changed since this image was built. Rebuild and repeat final-image QA before publishing.' }
 git merge-base --is-ancestor $sourceSha HEAD
 Assert-NativeSuccess 'Verify source commit ancestry'
 $dirty = @(git status --porcelain)
 Assert-NativeSuccess 'Check source state'
 if ($dirty.Count -gt 0) { throw 'Publish from a clean checkout of the tested commit.' }
-# Evidence-only commits may follow the implementation. Every image build input must still match.
+# Defense in depth: every image build input must match the verified commit.
 git diff --quiet $sourceSha -- Dockerfile .dockerignore package.json package-lock.json apps/web packages docs/qa database/postgresql scripts/deployment
 Assert-NativeSuccess 'Verify all image build inputs match the tested source commit'
 $env:GCP_PROJECT_ID=$ProjectId

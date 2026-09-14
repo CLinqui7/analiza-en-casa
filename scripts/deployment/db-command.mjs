@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash, randomBytes, scryptSync } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { Client } from 'pg';
+import { assertProvisionTarget, assertSyntheticTarget } from './operator-target.mjs';
 
 const directory = new URL('../../database/postgresql/migrations/', import.meta.url);
 const files = (await readdir(directory)).filter((name) => /^\d+_[a-z_]+\.sql$/.test(name)).sort();
@@ -32,11 +33,12 @@ assert.equal(
   '1',
   'Explicit migration identity/target approval is required',
 );
-if (seed)
-  assert.ok(
-    process.env.ANALIZA_QA_MODE === '1' && !process.env.K_SERVICE,
-    'Synthetic seed is local QA only',
-  );
+if (seed) assertSyntheticTarget(process.env);
+const provision = process.argv.includes('--provision-runtime');
+if (provision) {
+  assert.ok(!seed, 'Provisioning belongs to the explicit migration operation');
+  assertProvisionTarget(process.env);
+}
 assert.ok(
   process.env.PGHOST && process.env.PGDATABASE && process.env.PGUSER && process.env.PGPASSWORD,
   'Private operator PostgreSQL configuration is required',
@@ -49,6 +51,43 @@ try {
   );
   assert.ok(version >= 180000 && version < 190000, 'This migration is validated for PostgreSQL 18');
   await client.query("SELECT pg_advisory_lock(hashtextextended('analiza:migrations',0))");
+  if (provision) {
+    const name = process.env.ANALIZA_PG_RUNTIME_ROLE;
+    assert.ok(
+      name && /^[a-z][a-z0-9_]{0,62}$/.test(name) && name !== process.env.PGUSER,
+      'Separate runtime role required',
+    );
+    const previous = (await client.query('SELECT rolname FROM pg_roles WHERE rolname=$1', [name]))
+      .rows[0];
+    if (!previous) {
+      // PostgreSQL defaults are NOSUPERUSER/NOCREATEDB/NOCREATEROLE/NOBYPASSRLS.
+      // No password or administrative role is overwritten on a repeat invocation.
+      await client.query(
+        `CREATE ROLE ${client.escapeIdentifier(name)} LOGIN NOINHERIT PASSWORD ${client.escapeLiteral(process.env.ANALIZA_PG_RUNTIME_PASSWORD)}`,
+      );
+    }
+    const role = (
+      await client.query(
+        'SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname=$1',
+        [name],
+      )
+    ).rows[0];
+    const memberships = (
+      await client.query(
+        'SELECT 1 FROM pg_auth_members WHERE member=(SELECT oid FROM pg_roles WHERE rolname=$1)',
+        [name],
+      )
+    ).rowCount;
+    assert.ok(
+      role &&
+        !role.rolsuper &&
+        !role.rolbypassrls &&
+        !role.rolcreatedb &&
+        !role.rolcreaterole &&
+        !memberships,
+      'Existing runtime role has elevated privileges; refusing to change it silently',
+    );
+  }
   if (!seed) {
     await client.query('CREATE SCHEMA IF NOT EXISTS analiza');
     await client.query('REVOKE ALL ON SCHEMA analiza FROM PUBLIC');
@@ -108,6 +147,19 @@ try {
       `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events TO ${role}`,
     );
     await client.query(`GRANT SELECT ON analiza.catalog_items TO ${role}`);
+    if (provision) {
+      const runtimeCheck = new Client({
+        user: runtimeRole,
+        password: process.env.ANALIZA_PG_RUNTIME_PASSWORD,
+        connectionTimeoutMillis: 5000,
+      });
+      try {
+        await runtimeCheck.connect();
+        await runtimeCheck.query('SELECT version FROM analiza.schema_migrations LIMIT 1');
+      } finally {
+        await runtimeCheck.end();
+      }
+    }
     console.log(
       JSON.stringify({
         operation: 'MIGRATED',
@@ -159,6 +211,7 @@ try {
       capacity: 1,
       boardRegistrationNumber: 'QA-000',
     };
+    await client.query("SELECT set_config('analiza.organization_id',$1,true)", ['qa-org-a']);
     await client.query(
       'INSERT INTO analiza.nursing_resources(organization_id,id,user_id,body) VALUES($1,$2,$3,$4) ON CONFLICT(organization_id,id) DO NOTHING',
       ['qa-org-a', resource.id, resource.userId, JSON.stringify(resource)],

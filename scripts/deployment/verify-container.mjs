@@ -129,14 +129,65 @@ await admin.query(
   'CREATE ROLE analiza_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS PASSWORD ' +
     admin.escapeLiteral(appSecret),
 );
+const migrationSecret = randomBytes(32).toString('base64url');
+await admin.query(
+  'CREATE ROLE analiza_migrator LOGIN NOINHERIT PASSWORD ' + admin.escapeLiteral(migrationSecret),
+);
+await admin.query('GRANT CREATE ON DATABASE analiza_qa TO analiza_migrator');
 for (const operation of ['--migrate', '--migrate', '--seed-synthetic']) {
   const p = spawnSync(process.execPath, ['scripts/deployment/db-command.mjs', operation], {
-    env: operatorEnv,
+    env: { ...operatorEnv, PGUSER: 'analiza_migrator', PGPASSWORD: migrationSecret },
     encoding: 'utf8',
   });
   await writeFile(out + '/' + operation.slice(2) + '.log', p.stdout + p.stderr);
   assert.equal(p.status, 0, operation + ' must pass');
 }
+await writeFile(
+  out + '/migration-identity.json',
+  JSON.stringify({
+    role: 'analiza_migrator',
+    superuser: false,
+    bypassRls: false,
+    repeatedMigrations: true,
+    seedWithForcedRls: true,
+  }),
+);
+const provisionSecret = randomBytes(32).toString('base64url');
+const provisionEnv = {
+  ...operatorEnv,
+  ANALIZA_PG_RUNTIME_ROLE: 'analiza_provision_probe',
+  ANALIZA_PG_RUNTIME_PASSWORD: provisionSecret,
+  ANALIZA_PROVISION_RUNTIME_APPROVED: '1',
+};
+for (let attempt = 0; attempt < 2; attempt++) {
+  const p = spawnSync(
+    process.execPath,
+    ['scripts/deployment/db-command.mjs', '--migrate', '--provision-runtime'],
+    { env: provisionEnv, encoding: 'utf8' },
+  );
+  assert.equal(p.status, 0, 'Explicit runtime provisioning must pass and be repeatable');
+}
+const mismatch = spawnSync(
+  process.execPath,
+  ['scripts/deployment/db-command.mjs', '--migrate', '--provision-runtime'],
+  {
+    env: { ...provisionEnv, ANALIZA_PG_RUNTIME_PASSWORD: randomBytes(32).toString('base64url') },
+    encoding: 'utf8',
+  },
+);
+assert.notEqual(
+  mismatch.status,
+  0,
+  'Existing role with a mismatched secret must fail instead of reporting success',
+);
+await writeFile(
+  out + '/runtime-provisioning.json',
+  JSON.stringify({
+    createdAndRepeated: true,
+    mismatchedSecretRejected: true,
+    passwordsPrinted: false,
+  }),
+);
 const runtimeEnv = { ...operatorEnv, PGUSER: 'analiza_runtime', PGPASSWORD: appSecret };
 const limited = await connect(runtimeEnv);
 assert.equal(

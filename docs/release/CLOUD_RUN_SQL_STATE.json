@@ -32,20 +32,24 @@
   "terraform": {
     "fmt_check": "PASS",
     "validate": "PASS",
-    "plan": "ATTEMPTED; missing real project and required variables; no plan approved or applied",
+    "mock_provider_tests": "4/4 PASS; no cloud calls",
+    "plan": "PASS: 24 to add, 0 to change, 0 to destroy; preparation only",
+    "plan_applied": false,
     "applied": false
   },
   "gcloud": {
-    "method": "official CLI container; auth list empty and project unset",
-    "auth_list": [],
-    "project": null
+    "method": "Official Windows Google Cloud SDK 584.0.0; browser OAuth completed",
+    "authenticated": true,
+    "project": "probable-sprite-508007-q2",
+    "project_role": "roles/owner",
+    "billing_enabled": false,
+    "api_enable_attempt": "FAILED_PRECONDITION: billing not enabled; no apply"
   },
   "pending": [
-    "Real approved GCP project, access, Artifact Registry repository/image and private bucket",
-    "Existing Cloud SQL connection/database, adoption or mapping of analiza schema and SQL identities",
-    "Secret Manager IDs/versions, named staging invokers, corporate network requirements and Terraform state backend",
-    "Cost approval and infrastructure/build permissions; optional Cloud Build repository connection",
-    "Real GCS/IAM and Cloud Run staging verification"
+    "Future deployment authorization, billing and API activation for the detected project",
+    "Provision actual SQL migration identity and private secret versions when cloud creation is authorized",
+    "Official GitHub/Cloud Build connection and private browser access setup",
+    "Publication and real Cloud Run/Cloud SQL/GCS verification deferred by user"
   ],
   "scope_limits": [
     "Core only; quotes, clinical, financial and portal modules remain excluded as in the inherited Core release",
@@ -154,5 +158,11 @@
     "github_pushed": true,
     "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/7",
     "pull_request_status": "DRAFT"
+  },
+  "current_request": "PREPARE_MIGRATION_ONLY; user explicitly postponed deployment and resource creation",
+  "preparation_extension": {
+    "operator_jobs": "migrate and seed; explicit execution only",
+    "remote_state": "private versioned GCS bootstrap prepared",
+    "local_revalidation": "PENDING final candidate rebuild after source commit"
   }
 }

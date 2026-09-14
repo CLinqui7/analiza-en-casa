@@ -19,16 +19,19 @@ variable "service_name" {
   }
 }
 variable "artifact_repository" {
-  type = string
+  type    = string
+  default = "analiza"
 }
 variable "private_bucket" {
   type = string
 }
 variable "database_name" {
-  type = string
+  type    = string
+  default = "analiza_en_casa"
 }
 variable "sql_instance_name" {
-  type = string
+  type    = string
+  default = "analiza-sql-staging"
 }
 variable "existing_sql_connection_name" {
   type    = string
@@ -141,5 +144,59 @@ variable "build_repository_resource" {
   description = "Existing Cloud Build v2 repository resource; GitHub app connection must already be approved."
 }
 variable "image_name" {
-  type = string
+  type    = string
+  default = "analiza-web"
+}
+
+variable "create_state_bucket" {
+  type    = bool
+  default = false
+}
+variable "deploy_operator" {
+  type    = bool
+  default = false
+}
+variable "prepare_operator" {
+  type    = bool
+  default = false
+}
+variable "provision_runtime_role" {
+  type    = bool
+  default = false
+}
+variable "operator_image_digest_uri" {
+  type    = string
+  default = null
+  validation {
+    condition     = var.operator_image_digest_uri == null || can(regex("^[a-z0-9-]+-docker.pkg.dev/.+@sha256:[a-f0-9]{64}$", var.operator_image_digest_uri))
+    error_message = "The explicit migration operator must also use a verified registry digest."
+  }
+}
+variable "migration_user_secret_id" {
+  type    = string
+  default = "analiza-staging-migration-user"
+}
+variable "migration_password_secret_id" {
+  type    = string
+  default = "analiza-staging-migration-password"
+}
+variable "qa_password_secret_id" {
+  type    = string
+  default = "analiza-staging-qa-password"
+}
+variable "operator_secret_versions" {
+  type    = object({ user = string, password = string, qa = string })
+  default = null
+  validation {
+    condition     = var.operator_secret_versions == null || alltrue([for version in values(var.operator_secret_versions) : can(regex("^[1-9][0-9]*$", version))])
+    error_message = "Pin actual numeric operator secret versions."
+  }
+}
+variable "runtime_sql_role" {
+  type    = string
+  default = "analiza_runtime"
+  validation {
+    condition     = can(regex("^[a-z][a-z0-9_]{0,62}$", var.runtime_sql_role))
+    error_message = "Supply a valid separate PostgreSQL runtime role."
+  }
 }

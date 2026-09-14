@@ -1,3 +1,5 @@
+Estado vigente: **migración preparada, despliegue aplazado**. Guía: [MIGRATION_HANDOFF](docs/deployment/MIGRATION_HANDOFF.md).
+
 # Analiza en Casa
 
 Analiza en Casa es una aplicación web de demostración para la operación de atención domiciliar. Reconstruye los flujos visibles de 17 capítulos de referencia y añade controles de seguridad, trazabilidad e integridad para una evolución productiva.

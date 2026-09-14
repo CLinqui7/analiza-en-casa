@@ -28,6 +28,11 @@ RUN test -f apps/web/.next/standalone/apps/web/server.js \
 # Explicit migration/seed operator; never run it from web startup or a public endpoint.
 FROM build AS operator
 WORKDIR /app
+ARG SOURCE_SHA=local-unversioned
+LABEL org.opencontainers.image.revision=$SOURCE_SHA \
+    com.analiza.operator="explicit-postgresql-migration"
+ENV NODE_ENV=production
+USER node
 ENTRYPOINT ["node", "scripts/deployment/db-command.mjs"]
 CMD ["--dry-run"]
 

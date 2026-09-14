@@ -38,3 +38,4 @@ video-audit-reviews/**/scratch/
 *.tfplan
 *.tfvars
 !*.example.tfvars
+backend.generated.tf

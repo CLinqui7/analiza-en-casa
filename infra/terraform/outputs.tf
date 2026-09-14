@@ -16,3 +16,6 @@ output "cloud_sql_connection" {
 output "staging_url" {
   value = try(google_cloud_run_v2_service.staging[0].uri, null)
 }
+output "database_jobs" {
+  value = { for operation, job in google_cloud_run_v2_job.database : operation => job.name }
+}

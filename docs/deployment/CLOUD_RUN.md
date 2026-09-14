@@ -6,6 +6,11 @@ privados en GCS, secretos en Secret Manager, infraestructura Terraform y Cloud B
 Región inicial `us-central1`, servicio `analiza-staging`. Producción no está autorizada.
 No se necesita crear una cuenta Docker Hub para esta entrega.
 
+Actualización del alcance: el cliente pidió entregar la migración conectada y
+probada para un despliegue posterior. No ejecutar publicación, creación de recursos
+ni deployment. Los comandos cloud de este documento son instrucciones futuras.
+Ver `MIGRATION_HANDOFF.md` para el estado vigente.
+
 ## Reproducir la validación local
 
 Desde la raíz del mismo repositorio/rama, con Node 24, npm 11.18.0, Docker Linux
@@ -67,12 +72,12 @@ gcloud artifacts repositories describe $env:ARTIFACT_REGISTRY_REPOSITORY --locat
 ```
 
 El script exige checkout limpio, SHA de código, etiqueta OCI e ID de imagen
-coincidentes con el reporte. Publica `core-postgresql-<SHA completo>` y consulta
+coincidentes con el reporte. Publica `<SHA completo>` y consulta
 el digest de Artifact Registry. `published.json` registra SHA, tag, digest y URI.
 El ID local y un digest de exportación OCI **no acreditan publicación en un registro**.
 No se emplea `latest` para desplegar ni se reemplaza un tag inmutable.
-Puede haber commits posteriores de evidencia: el script verifica que todos los
-archivos usados por el build sigan idénticos al commit indicado por la imagen.
+Si HEAD cambió, el script exige reconstruir y repetir QA antes de publicar.
+También comprueba que todos los archivos usados por el build sigan idénticos.
 
 Cloud Build (`cloudbuild.yaml`) valida las sustituciones, instala desde el lock,
 ejecuta pruebas estáticas/unitarias, construye amd64, prueba la imagen sin DB y
@@ -114,9 +119,9 @@ terraform -chdir=infra/terraform show staging.tfplan
 En esta máquina se puede usar el binario oficial en Docker para fmt/validate,
 montando la carpeta Terraform en `/infra` y trabajando allí. `plan` sin Project ID,
 variables obligatorias ni ADC falla; ese resultado no es un plan aprobado.
-La CLI oficial ejecutada en Docker encontró `gcloud auth list = []` y proyecto
-`(unset)`; no hay un proyecto activo verificable. El estado remoto y su acceso
-deben confirmarse antes del primer apply.
+La CLI oficial Windows 584.0.0 ya está autenticada. Se detectó el proyecto propio
+`probable-sprite-508007-q2`, sin facturación habilitada. Las APIs facturables no
+pudieron activarse; no se ejecutó apply. La preparación no equivale a conectividad cloud.
 
 La preparación contempla AR con tags inmutables; GCS privado con versionado;
 contenedores de secretos sin valores; SA separadas de runtime, migración y build;
@@ -126,7 +131,7 @@ inyectan desde versiones numéricas independientes de Secret Manager.
 
 Configuración inicial revisable de staging: Cloud Run 1 CPU, 512 MiB, concurrencia
 20, mínimo 0/máximo 3 instancias, pool 5 por instancia, timeout HTTP 60 s. El
-presupuesto de conexiones SQL debe cubrir `max_instances × pool_max + reservas`.
+presupuesto de conexiones SQL debe cubrir `2 × max_instances × pool_max + reservas` (dos revisiones).
 Las revisiones simultáneas durante un rollout pueden elevar ese consumo: reservar
 capacidad para ambas o reducir límites antes del rollout. Los límites no son un SLO.
 

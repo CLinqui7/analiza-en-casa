@@ -8,10 +8,10 @@ const input = {
   IMAGE_NAME: 'app',
   SOURCE_SHA: 'a'.repeat(40),
 };
-test('image identity records both profile and driver with a full source SHA', () => {
+test('image identity uses the full source SHA as the registry tag', () => {
   assert.equal(
     buildIdentity(input),
-    `us-central1-docker.pkg.dev/synthetic-project/synthetic/app:core-postgresql-${'a'.repeat(40)}`,
+    `us-central1-docker.pkg.dev/synthetic-project/synthetic/app:${'a'.repeat(40)}`,
   );
 });
 test('publication rejects missing identifiers, shell payloads and mismatched provenance', () => {
