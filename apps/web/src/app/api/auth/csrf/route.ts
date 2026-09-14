@@ -1,7 +1,7 @@
 import { persistence } from '@/server/persistence';
 import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { loginCsrfCookieName, sessionCookieName } from '@/server/auth-service';
+import { loginCsrfCookieName, sessionCookieName, SessionError } from '@/server/auth-service';
 
 import { authCookieOptions } from '@/server/auth-cookie';
 
@@ -19,11 +19,13 @@ export async function GET(request: NextRequest) {
       const auth = (await persistence()).auth;
       const csrfToken = await auth.rotateCsrf(sessionToken);
       return NextResponse.json({ csrfToken }, { headers: { 'Cache-Control': 'no-store' } });
-    } catch {
-      return NextResponse.json(
-        { error: 'No autorizado.' },
-        { status: 401, headers: { 'Cache-Control': 'no-store' } },
-      );
+    } catch (error) {
+      if (!(error instanceof SessionError)) {
+        return NextResponse.json(
+          { error: 'El acceso seguro no está disponible.' },
+          { status: 503, headers: { 'Cache-Control': 'no-store' } },
+        );
+      }
     }
   }
   const token = randomBytes(32).toString('base64url');
@@ -35,5 +37,10 @@ export async function GET(request: NextRequest) {
     ...authCookieOptions(request.nextUrl.protocol),
     maxAge: 10 * 60,
   });
+  if (sessionToken)
+    response.cookies.set(sessionCookieName, '', {
+      ...authCookieOptions(request.nextUrl.protocol),
+      maxAge: 0,
+    });
   return response;
 }

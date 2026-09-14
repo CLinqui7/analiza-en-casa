@@ -1,44 +1,24 @@
 import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  AuthenticationError,
-  csrfHeaderName,
-  loginCsrfCookieName,
-  sessionCookieName,
-} from '@/server/auth-service';
-
-import { authCookieOptions } from '@/server/auth-cookie';
+import { AuthenticationError, csrfHeaderName } from '@/server/auth-service';
+import { boundedJson, sessionResponse, validPreAuthCsrf } from '@/server/auth-http';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function cookieOptions(request: NextRequest) {
-  return authCookieOptions(request.nextUrl.protocol);
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const loginCsrf = request.cookies.get(loginCsrfCookieName)?.value;
-    const presentedCsrf = request.headers.get(csrfHeaderName);
-    if (!loginCsrf || !presentedCsrf || loginCsrf !== presentedCsrf) {
+    if (!validPreAuthCsrf(request)) {
       return NextResponse.json(
         { error: 'La solicitud no pudo verificarse.' },
         { status: 403, headers: { 'Cache-Control': 'no-store' } },
       );
     }
+    const input = await boundedJson(request);
     const backend = await persistence();
     const auth = backend.auth;
-    const result = await auth.login(await request.json());
-    const response = NextResponse.json(
-      { userId: result.session.userId, role: result.session.role, csrfToken: result.csrfToken },
-      { headers: { 'Cache-Control': 'no-store' } },
-    );
-    response.cookies.set(sessionCookieName, result.sessionToken, {
-      ...cookieOptions(request),
-      maxAge: Math.floor((result.session.expiresAt.getTime() - Date.now()) / 1000),
-    });
-    response.cookies.set(loginCsrfCookieName, '', { ...cookieOptions(request), maxAge: 0 });
-    return response;
+    const result = await auth.login(input);
+    return sessionResponse(request, result);
   } catch (error) {
     if (error instanceof AuthenticationError || error instanceof SyntaxError) {
       return NextResponse.json(

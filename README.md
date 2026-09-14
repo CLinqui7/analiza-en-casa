@@ -2,10 +2,28 @@
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
-PostgreSQL 18.
+PostgreSQL 18. El preview de registro individual en Vercel utiliza MongoDB.
 
 **Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
-diferido. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
+diferido. El preview Vercel se publica mediante un flujo independiente con
+migraciones previas. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
+
+## Registro, cuestionario y migraciones
+
+El preview permite crear una cuenta y completar organización, personal y servicios
+en un espacio separado por usuario. El login no incluye credenciales demo precargadas.
+El backend conserva sesiones privadas, RBAC, aislamiento por organización y CSRF.
+
+Las [variables y comandos para el ingeniero](docs/deployment/MIGRATIONS_AND_ENV.md)
+incluyen las plantillas MongoDB, PostgreSQL y operator. Para publicar el preview:
+
+```sh
+npm run deploy:preview -- .local/preview.env
+```
+
+El comando aplica migraciones versionadas de MongoDB y detiene la publicación si
+fallan. PostgreSQL conserva el operator separado y dispone de una secuencia
+preparada de migración antes de actualizar staging. No ejecuta seeds automáticamente.
 
 ## Alcance
 
@@ -46,7 +64,8 @@ Seguir su README para descargar y cargar los archivos, preparar QA y ejecutar
 migraciones se distribuye como imagen separada.
 
 Fuente de las imágenes publicadas: `6fae1890af99a7913092aea248cb120bd595e335`.
-Los cambios posteriores de documentación no sustituyen esos artefactos.
+Los cambios posteriores no sustituyen esos artefactos. El nuevo registro y
+cuestionario MongoDB del preview no están incluidos en las imágenes de ese commit.
 Consultar [la evidencia de entrega](https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json)
 y [las instrucciones Docker](docs/deployment/DOCKER_HANDOFF.md).
 

@@ -1,0 +1,428 @@
+{
+  "indexes": [
+    {
+      "collection": "organizations",
+      "key": {
+        "id": 1
+      },
+      "name": "organizations_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "users",
+      "key": {
+        "id": 1
+      },
+      "name": "users_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "users",
+      "key": {
+        "emailNormalized": 1
+      },
+      "name": "users_email_normalized_unique",
+      "unique": true
+    },
+    {
+      "collection": "memberships",
+      "key": {
+        "userId": 1,
+        "organizationId": 1
+      },
+      "name": "memberships_user_org_unique",
+      "unique": true
+    },
+    {
+      "collection": "sessions",
+      "key": {
+        "sessionHash": 1
+      },
+      "name": "sessions_hash_unique",
+      "unique": true
+    },
+    {
+      "collection": "sessions",
+      "key": {
+        "expiresAt": 1
+      },
+      "name": "sessions_expiry_ttl",
+      "expireAfterSeconds": 0
+    },
+    {
+      "collection": "authRateLimits",
+      "key": {
+        "key": 1
+      },
+      "name": "auth_rate_limits_key_unique",
+      "unique": true
+    },
+    {
+      "collection": "authRateLimits",
+      "key": {
+        "expiresAt": 1
+      },
+      "name": "auth_rate_limits_expiry_ttl",
+      "expireAfterSeconds": 0
+    },
+    {
+      "collection": "patients",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "patients_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "patients",
+      "key": {
+        "organizationId": 1,
+        "documentType": 1,
+        "documentIdNormalized": 1
+      },
+      "name": "patients_organization_document_unique",
+      "unique": true,
+      "partialFilterExpression": {
+        "documentIdNormalized": {
+          "$exists": true
+        }
+      }
+    },
+    {
+      "collection": "doctors",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "doctors_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "doctors",
+      "key": {
+        "organizationId": 1,
+        "fullName": 1
+      },
+      "name": "doctors_org_name"
+    },
+    {
+      "collection": "hospitalizations",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "hospitalizations_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "hospitalizations",
+      "key": {
+        "organizationId": 1,
+        "patientId": 1,
+        "startDate": -1
+      },
+      "name": "hospitalizations_org_patient_admission"
+    },
+    {
+      "collection": "shifts",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "shifts_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "shifts",
+      "key": {
+        "organizationId": 1,
+        "resourceId": 1,
+        "startsAt": 1
+      },
+      "name": "shifts_org_resource_start"
+    },
+    {
+      "collection": "shiftSeriesCommands",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "shift_series_org_idempotency_unique",
+      "unique": true
+    },
+    {
+      "collection": "quotes",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "quotes_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "quotes",
+      "key": {
+        "organizationId": 1,
+        "rootQuoteId": 1,
+        "version": 1
+      },
+      "name": "quotes_org_root_version_unique",
+      "unique": true
+    },
+    {
+      "collection": "insuranceRequests",
+      "key": {
+        "organizationId": 1,
+        "quoteId": 1
+      },
+      "name": "insurance_requests_org_quote_unique",
+      "unique": true
+    },
+    {
+      "collection": "insuranceEvents",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "insurance_events_org_idempotency_unique",
+      "unique": true
+    },
+    {
+      "collection": "portalLinks",
+      "key": {
+        "tokenHash": 1
+      },
+      "name": "portal_links_token_hash_unique",
+      "unique": true
+    },
+    {
+      "collection": "portalLinks",
+      "key": {
+        "expiresAt": 1
+      },
+      "name": "portal_links_expiry_ttl",
+      "expireAfterSeconds": 0
+    },
+    {
+      "collection": "portalAccessLogs",
+      "key": {
+        "portalLinkId": 1,
+        "occurredAt": -1
+      },
+      "name": "portal_access_link_occurred"
+    },
+    {
+      "collection": "payments",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "payments_org_idempotency_unique",
+      "unique": true
+    },
+    {
+      "collection": "inventoryMovements",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "inventory_movements_org_idempotency_unique",
+      "unique": true
+    },
+    {
+      "collection": "auditEvents",
+      "key": {
+        "organizationId": 1,
+        "occurredAt": -1
+      },
+      "name": "audit_events_org_occurred_at"
+    },
+    {
+      "collection": "fileMetadata",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "file_metadata_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "fileMetadata",
+      "key": {
+        "organizationId": 1,
+        "ownerType": 1,
+        "ownerId": 1
+      },
+      "name": "file_metadata_org_owner"
+    },
+    {
+      "collection": "configurationEntries",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "configurationEntries_org_id",
+      "unique": true
+    },
+    {
+      "collection": "balancePeriods",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "balancePeriods_org_id",
+      "unique": true
+    },
+    {
+      "collection": "balanceEntries",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "balanceEntries_org_id",
+      "unique": true
+    },
+    {
+      "collection": "medicationAdministrations",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "medicationAdministrations_org_id",
+      "unique": true
+    },
+    {
+      "collection": "homeVisits",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "homeVisits_org_id",
+      "unique": true
+    },
+    {
+      "collection": "visitGoals",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "visitGoals_org_id",
+      "unique": true
+    },
+    {
+      "collection": "nursingResources",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "nursingResources_org_id",
+      "unique": true
+    },
+    {
+      "collection": "catalogItems",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "catalogItems_org_id",
+      "unique": true
+    },
+    {
+      "collection": "purchases",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "purchases_org_id",
+      "unique": true
+    },
+    {
+      "collection": "clinicalDocuments",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "clinicalDocuments_org_id",
+      "unique": true
+    },
+    {
+      "collection": "balancePeriods",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "balancePeriods_idempotency",
+      "unique": true
+    },
+    {
+      "collection": "balanceEntries",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "balanceEntries_idempotency",
+      "unique": true
+    },
+    {
+      "collection": "medicationAdministrations",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "medicationAdministrations_idempotency",
+      "unique": true
+    },
+    {
+      "collection": "homeVisits",
+      "key": {
+        "organizationId": 1,
+        "idempotencyKey": 1
+      },
+      "name": "homeVisits_idempotency",
+      "unique": true
+    },
+    {
+      "collection": "inventoryBalances",
+      "key": {
+        "organizationId": 1,
+        "itemId": 1,
+        "warehouseId": 1
+      },
+      "name": "stock_org_item_warehouse",
+      "unique": true
+    },
+    {
+      "collection": "catalogItems",
+      "key": {
+        "organizationId": 1,
+        "skuNormalized": 1
+      },
+      "name": "catalog_org_sku",
+      "unique": true,
+      "partialFilterExpression": {
+        "skuNormalized": {
+          "$type": "string"
+        }
+      }
+    },
+    {
+      "collection": "organizationStaff",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "organization_staff_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "organizationServices",
+      "key": {
+        "organizationId": 1,
+        "id": 1
+      },
+      "name": "organization_services_org_id_unique",
+      "unique": true
+    }
+  ]
+}

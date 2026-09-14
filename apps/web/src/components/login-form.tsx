@@ -1,20 +1,24 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers';
 import { isDemoAuthMode, mockCredentialHint, safeNextPath } from '@/lib/auth';
 import { InstallApp } from '@/components/install-app';
 import { isCoreRelease } from '@/lib/release-profile';
+import { isRegistrationEnabled } from '@/lib/registration';
+import './account-access.css';
 
 export function LoginForm() {
   const { login, loading, session } = useAuth();
   const router = useRouter();
   const params = useSearchParams();
   const demoMode = isDemoAuthMode();
-  const [email, setEmail] = useState(() => (demoMode ? 'admin@demo.local' : ''));
-  const [password, setPassword] = useState(() => (demoMode ? 'demo-admin' : ''));
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -44,8 +48,12 @@ export function LoginForm() {
     try {
       await login(email, password);
       router.replace(destination);
-    } catch {
-      setError('No fue posible iniciar sesión. Revise sus datos e intente de nuevo.');
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'No fue posible iniciar sesión. Revise sus datos e intente de nuevo.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -86,6 +94,8 @@ export function LoginForm() {
               aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
               aria-invalid={Boolean(fieldErrors.email)}
               autoComplete="username"
+              name="email"
+              maxLength={254}
               data-action-id="AUTH-LOGIN-EMAIL"
               disabled={loading || submitting}
               onChange={(event) => {
@@ -108,13 +118,15 @@ export function LoginForm() {
               aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
               aria-invalid={Boolean(fieldErrors.password)}
               autoComplete="current-password"
+              name="password"
+              maxLength={1024}
               data-action-id="AUTH-LOGIN-PASSWORD"
               disabled={loading || submitting}
               onChange={(event) => {
                 setPassword(event.target.value);
                 setFieldErrors((current) => ({ ...current, password: undefined }));
               }}
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
             />
             {fieldErrors.password ? (
@@ -123,6 +135,14 @@ export function LoginForm() {
               </span>
             ) : null}
           </label>
+          <button
+            className="text-link"
+            type="button"
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((visible) => !visible)}
+          >
+            {showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          </button>
           {error ? (
             <p className="field-error login-error" role="alert">
               {error}
@@ -137,6 +157,12 @@ export function LoginForm() {
             {submitting ? 'Validando…' : 'Iniciar sesión'}
           </button>
         </form>
+
+        {isRegistrationEnabled() ? (
+          <p className="login-registration-link">
+            ¿Primera vez aquí? <Link href="/register">Crea tu cuenta y tu espacio</Link>
+          </p>
+        ) : null}
 
         {!isCoreRelease && (
           <button

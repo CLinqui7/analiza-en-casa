@@ -1,0 +1,14 @@
+# WEB runtime only. Choose this configuration instead of MongoDB.
+PORT=8080
+ANALIZA_DATA_MODE=postgresql
+NEXT_PUBLIC_DATA_MODE=postgresql
+NEXT_PUBLIC_RELEASE_PROFILE=core
+PGHOST=
+PGPORT=5432
+PGDATABASE=
+PGUSER=
+PGPASSWORD=
+GCS_PRIVATE_BUCKET=
+# Cloud Run uses its Service Account and /cloudsql/PROJECT:REGION:INSTANCE socket.
+# Never bake a JSON service-account key into the image.
+# Registration/onboarding in the new Vercel trial currently require MongoDB.

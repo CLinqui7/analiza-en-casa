@@ -7,6 +7,7 @@ import {
 } from 'node:crypto';
 import { promisify } from 'node:util';
 import { isRole, type Role } from '@/lib/permissions';
+import { registrationSchema } from '@/lib/registration';
 
 const scrypt = promisify(nodeScrypt);
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
@@ -46,6 +47,27 @@ export type StoredSession = Readonly<{
   revokedAt?: Date;
 }>;
 
+export type RegisteredAccount = Readonly<{
+  user: UserRecord & { displayName: string };
+  membership: MembershipRecord;
+  session: StoredSession;
+  createdAt: Date;
+}>;
+
+export class RegistrationError extends Error {
+  constructor() {
+    super('No fue posible crear la cuenta con esos datos.');
+    this.name = 'RegistrationError';
+  }
+}
+
+export class RegistrationUnavailableError extends Error {
+  constructor() {
+    super('El registro no está disponible.');
+    this.name = 'RegistrationUnavailableError';
+  }
+}
+
 export class AuthenticationError extends Error {
   constructor() {
     super('No fue posible iniciar sesión.');
@@ -76,7 +98,7 @@ export class BootstrapError extends Error {
 
 /**
  * This boundary deliberately exposes only fixed identity operations. It never accepts a role or
- * organization from HTTP input, and it does not offer public account creation.
+ * organization from HTTP input. Registration creates a new isolated organization atomically.
  */
 export interface AuthStore {
   hasAnyUser(): Promise<boolean>;
@@ -88,7 +110,13 @@ export interface AuthStore {
   findSession(sessionHash: string): Promise<StoredSession | null>;
   updateSessionCsrf(sessionHash: string, csrfHash: string): Promise<void>;
   revokeSession(sessionHash: string, now: Date): Promise<void>;
-  consumeLoginAttempt(key: string, now: Date): Promise<boolean>;
+  consumeLoginAttempt(
+    key: string,
+    now: Date,
+    maximum?: number,
+    windowMs?: number,
+  ): Promise<boolean>;
+  createAccount?(account: RegisteredAccount): Promise<void>;
 }
 
 function hashSecret(secret: string) {
@@ -119,6 +147,12 @@ async function passwordMatches(password: string, storedHash: string) {
   return expectedBytes.length === actual.length && timingSafeEqual(expectedBytes, actual);
 }
 
+// Unknown and disabled accounts perform the same password derivation as valid accounts.
+let dummyPasswordHash: Promise<string> | undefined;
+function unknownAccountHash() {
+  return (dummyPasswordHash ??= hashPassword(randomSecret()));
+}
+
 function sessionFrom(stored: StoredSession, membership: MembershipRecord): ServerSession {
   return {
     id: stored.sessionHash,
@@ -147,12 +181,17 @@ export class AuthService {
     if (typeof body.email !== 'string' || typeof body.password !== 'string')
       throw new AuthenticationError();
     const email = normalizeEmail(body.email);
-    if (!email || body.password.length > 1024) throw new AuthenticationError();
+    if (!email || email.length > 254 || !body.password || body.password.length > 1024)
+      throw new AuthenticationError();
     if (!(await this.store.consumeLoginAttempt(hashSecret(email), this.now())))
       throw new AuthenticationError();
 
     const user = await this.store.findUserByEmail(email);
-    if (!user || user.disabledAt || !(await passwordMatches(body.password, user.passwordHash))) {
+    const matches = await passwordMatches(
+      body.password,
+      user?.passwordHash ?? (await unknownAccountHash()),
+    );
+    if (!user || user.disabledAt || !matches) {
       throw new AuthenticationError();
     }
     const memberships = (await this.store.findActiveMemberships(user.id)).filter(
@@ -174,6 +213,45 @@ export class AuthService {
     };
     await this.store.createSession(stored);
     return { sessionToken, csrfToken, session: sessionFrom(stored, memberships[0]) };
+  }
+
+  async register(input: unknown) {
+    if (!this.store.createAccount) throw new RegistrationUnavailableError();
+    const parsed = registrationSchema.safeParse(input);
+    if (!parsed.success) throw new RegistrationError();
+    const { displayName, email, password } = parsed.data;
+    const now = this.now();
+    const hour = 60 * 60 * 1000;
+    if (
+      !(await this.store.consumeLoginAttempt(hashSecret(`register:${email}`), now, 5, hour)) ||
+      !(await this.store.consumeLoginAttempt(hashSecret('register:global'), now, 100, hour))
+    ) {
+      throw new RegistrationError();
+    }
+    const user = {
+      id: randomUUID(),
+      emailNormalized: email,
+      displayName,
+      passwordHash: await hashPassword(password),
+    };
+    const membership: MembershipRecord = {
+      userId: user.id,
+      organizationId: randomUUID(),
+      role: 'ADMIN',
+      active: true,
+    };
+    const sessionToken = randomSecret();
+    const csrfToken = randomSecret();
+    const stored: StoredSession = {
+      sessionHash: hashSecret(sessionToken),
+      csrfHash: hashSecret(csrfToken),
+      userId: user.id,
+      organizationId: membership.organizationId,
+      expiresAt: new Date(now.getTime() + SESSION_TTL_MS),
+    };
+    // User, organization, membership, session and audit event either all persist or none do.
+    await this.store.createAccount({ user, membership, session: stored, createdAt: now });
+    return { sessionToken, csrfToken, session: sessionFrom(stored, membership) };
   }
 
   /**

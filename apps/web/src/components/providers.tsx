@@ -39,9 +39,11 @@ import {
 import {
   loadSession,
   login as authenticate,
+  register as registerAccount,
   logout as endSession,
   type AuthSession,
 } from '@/lib/auth';
+import type { RegistrationInput } from '@/lib/registration';
 import { can, type Permission, type Role } from '@/lib/permissions';
 import {
   createDataProvider,
@@ -57,6 +59,7 @@ type AuthContextValue = {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (input: RegistrationInput) => Promise<void>;
   logout: () => Promise<void>;
   can: (permission: Permission) => boolean;
 };
@@ -161,19 +164,24 @@ function AuthProvider({ children }: PropsWithChildren) {
   }, []);
   const logout = useCallback(async () => {
     setError(null);
-    setSession(null);
     await endSession(session);
+    setSession(null);
   }, [session]);
+  const register = useCallback(async (input: RegistrationInput) => {
+    setError(null);
+    setSession(await registerAccount(input));
+  }, []);
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
       loading,
       error,
       login,
+      register,
       logout,
       can: (permission) => can(session?.role, permission),
     }),
-    [error, loading, login, logout, session],
+    [error, loading, login, register, logout, session],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

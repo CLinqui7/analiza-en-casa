@@ -1,8 +1,10 @@
 import type { Db } from 'mongodb';
+import { randomUUID } from 'node:crypto';
 import { isRole } from '@/lib/permissions';
 import {
   LOGIN_WINDOW_MS,
   LOGIN_MAX_ATTEMPTS,
+  RegistrationError,
   type UserRecord,
   type MembershipRecord,
   type StoredSession,
@@ -97,6 +99,8 @@ export function mongoAuthStore(database: Db): MongoAuthStore {
       await users.insertOne({ ...user, createdAt: new Date() });
     },
     async findActiveMemberships(userId) {
+      const user = await users.findOne({ id: userId });
+      if (!user || user.disabledAt) return [];
       return (await memberships.find({ userId, active: true }).toArray())
         .map(asMembership)
         .filter((membership): membership is MembershipRecord => membership !== null);
@@ -122,33 +126,89 @@ export function mongoAuthStore(database: Db): MongoAuthStore {
         { $set: { revokedAt: now } },
       );
     },
-    async consumeLoginAttempt(key, now) {
-      const cutoff = new Date(now.getTime() - LOGIN_WINDOW_MS);
+    async consumeLoginAttempt(key, now, maximum = LOGIN_MAX_ATTEMPTS, windowMs = LOGIN_WINDOW_MS) {
+      const cutoff = new Date(now.getTime() - windowMs);
       const updated = await rateLimits.findOneAndUpdate(
         { key },
         [
           {
             $set: {
               windowStartedAt: {
-                $cond: [{ $lte: ['$windowStartedAt', cutoff] }, now, '$windowStartedAt'],
+                $cond: [
+                  { $lte: [{ $ifNull: ['$windowStartedAt', new Date(0)] }, cutoff] },
+                  now,
+                  '$windowStartedAt',
+                ],
               },
               attempts: {
-                $cond: [{ $lte: ['$windowStartedAt', cutoff] }, 1, { $add: ['$attempts', 1] }],
+                $cond: [
+                  { $lte: [{ $ifNull: ['$windowStartedAt', new Date(0)] }, cutoff] },
+                  1,
+                  { $add: [{ $ifNull: ['$attempts', 0] }, 1] },
+                ],
               },
-              expiresAt: new Date(now.getTime() + LOGIN_WINDOW_MS),
+              expiresAt: new Date(now.getTime() + windowMs),
             },
           },
         ] as unknown as Record<string, unknown>,
         { upsert: true, returnDocument: 'after' },
       );
       return Boolean(
-        updated && typeof updated.attempts === 'number' && updated.attempts <= LOGIN_MAX_ATTEMPTS,
+        updated && typeof updated.attempts === 'number' && updated.attempts <= maximum,
       );
+    },
+    async createAccount(account) {
+      const transaction = database.client.startSession();
+      try {
+        await transaction.withTransaction(
+          async () => {
+            const options = { session: transaction };
+            await database
+              .collection('users')
+              .insertOne({ ...account.user, createdAt: account.createdAt }, options);
+            await database.collection('organizations').insertOne(
+              {
+                id: account.membership.organizationId,
+                createdBy: account.user.id,
+                createdAt: account.createdAt,
+                onboardingVersion: 0,
+              },
+              options,
+            );
+            await database
+              .collection('memberships')
+              .insertOne({ ...account.membership, createdAt: account.createdAt }, options);
+            await database
+              .collection('sessions')
+              .insertOne({ ...account.session, createdAt: account.createdAt }, options);
+            await database.collection('auditEvents').insertOne(
+              {
+                id: randomUUID(),
+                organizationId: account.membership.organizationId,
+                actorUserId: account.user.id,
+                resourceId: account.user.id,
+                action: 'account.registered',
+                occurredAt: account.createdAt,
+              },
+              options,
+            );
+          },
+          { writeConcern: { w: 'majority' }, maxCommitTimeMS: 5000, timeoutMS: 10000 },
+        );
+      } catch (error) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 11000)
+          throw new RegistrationError();
+        throw error;
+      } finally {
+        await transaction.endSession();
+      }
     },
   };
 }
 
 export const mongoAuthIndexes = [
+  { collection: 'organizations', key: { id: 1 }, name: 'organizations_id_unique', unique: true },
+  { collection: 'users', key: { id: 1 }, name: 'users_id_unique', unique: true },
   {
     collection: 'users',
     key: { emailNormalized: 1 },

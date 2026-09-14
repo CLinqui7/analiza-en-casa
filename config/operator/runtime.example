@@ -1,0 +1,10 @@
+# Separate identity with migration privileges, never used by the web container.
+PGHOST=
+PGPORT=5432
+PGDATABASE=
+PGUSER=
+PGPASSWORD=
+ANALIZA_PG_RUNTIME_ROLE=
+# Set only for the database target approved by the engineer.
+ANALIZA_MIGRATION_APPROVED=1
+# No seed runs during an ordinary migration/release.

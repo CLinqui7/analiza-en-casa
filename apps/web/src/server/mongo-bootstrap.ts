@@ -8,6 +8,7 @@ import { mongoQuoteIndexes } from './mongo-quotes';
 import { mongoPortalIndexes } from './mongo-portal';
 import { mongoShiftIndexes } from './mongo-shifts';
 import { mongoOperationsIndexes } from './mongo-operations';
+import { workspaceSetupIndexes } from './mongo-workspace-setup';
 
 type IndexDefinition = {
   collection: string;
@@ -38,6 +39,7 @@ export const mongoSchemaIndexes: readonly IndexDefinition[] = [
   ...mongoFinancialIndexes,
   ...mongoFileMetadataIndexes,
   ...mongoOperationsIndexes,
+  ...workspaceSetupIndexes,
 ];
 
 export type MongoBootstrapReport = Readonly<{
