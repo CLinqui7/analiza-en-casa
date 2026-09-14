@@ -6,7 +6,8 @@ Se inspeccionó la diferencia de integración respecto a `main`
 La rama de origen ya contiene 538 archivos distintos de main. La revisión de esta
 entrega se concentra en los adapters, límites de autoridad, archivos, runtime e
 infraestructura añadidos; la regresión completa cubre las páginas conservadas.
-La PR compara contra esa rama de origen para que la migración sea revisable por sí sola.
+La revisión inicial comparó contra esa rama de origen. Para la integración
+autorizada, el PR #7 pasa a comparar contra main e incluye sus ramas antecesoras.
 
 Hallazgos corregidos y comprobados:
 
@@ -37,7 +38,8 @@ Los resultados ejecutables y el ID exacto de la imagen final están en
 las modificaciones revisadas. Esto no certifica todos los módulos históricos,
 esquemas corporativos, capacidad de producción ni integraciones cloud pendientes.
 Se mantienen las clasificaciones y bloqueos existentes, sin promociones EXACT,
-sin cambios en evidencia de video, sin GitHub Actions y sin merge a main.
+sin cambios en evidencia de video ni GitHub Actions. La integración en main
+se documenta al final de esta revisión.
 
 ## Ampliación de preparación, sin despliegue
 
@@ -58,4 +60,31 @@ El usuario aplazó todo deployment. Vercel aún estaba conectado a GitHub; se ve
 con su CLI que la raíz del proyecto es el repositorio y se configuró
 `git.deploymentEnabled["codex/cloud-run-cloud-sql"]=false` sólo para esta rama,
 siguiendo la [configuración oficial de Git](https://vercel.com/docs/project-configuration/git-configuration).
-La configuración de las otras ramas y la producción existente se conserva.
+En esa fase se conservó la configuración de las otras ramas. Para la integración
+posterior se amplía el bloqueo a todas las ramas; el tráfico existente se conserva.
+
+## Integración de ramas autorizada
+
+El usuario autorizó expresamente integrar los pull requests en main. Se comprobó
+que b06103f (PR #5) es ancestro de dbf9182 (PR #6), y que ambos son ancestros
+del PR #7. El main anterior, 4d99060, también es ancestro. Un merge del PR #7
+contra main conserva los tres conjuntos de commits y produce el árbol revisado
+sin introducir una versión intermedia. Se utiliza merge commit, sin squash ni
+force-push.
+
+Antes de integrar se configura `git.deploymentEnabled=false` en vercel.json
+para respetar el alcance sin despliegue. No se habilitan workflows de GitHub
+Actions, recursos GCP, facturación ni migraciones corporativas. Las imágenes
+publicadas siguen fijadas a 6fae189 y no se sustituyen durante la integración.
+
+El check externo GitGuardian conserva sus incidencias históricas documentadas:
+36747982 corresponde a la etiqueta UI Password del inventario de acciones;
+37265105 corresponde al literal sintético del test de configuración PostgreSQL.
+No se deshabilita el scanner ni se presenta su estado externo como PASS.
+
+Verificación previa al merge: 108/108 pruebas de base, 127/127 React/backend,
+escaneo local de secretos y preflight PASS. La primera ejecución React agotó
+el límite de 5000 ms en una importación; la suite completa pasó después,
+también con `npm run test --workspace=@analiza/web -- --no-file-parallelism`,
+sin cambiar pruebas ni límites. La auditoría estructural de 17 capítulos y
+1359 eventos pasa; no se añade una certificación de paridad funcional.

@@ -65,7 +65,7 @@ se utiliza para la prueba integrada PostgreSQL. Esa prueba de navegador requiere
 Google Chrome.
 
 ```powershell
-git clone --branch codex/cloud-run-cloud-sql https://github.com/CLinqui7/analiza-en-casa.git
+git clone https://github.com/CLinqui7/analiza-en-casa.git
 cd analiza-en-casa
 npm exec --yes --package=npm@11.18.0 -- npm ci
 npm run repo:preflight

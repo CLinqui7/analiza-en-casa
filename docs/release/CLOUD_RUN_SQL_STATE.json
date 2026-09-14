@@ -285,5 +285,19 @@
     "application_behavior_changed": false,
     "published_docker_artifacts_changed": false,
     "source_evidence_modified": false
+  },
+  "integration": {
+    "authorized": true,
+    "target_branch": "main",
+    "source_branch": "codex/cloud-run-cloud-sql",
+    "pull_requests": [
+      5,
+      6,
+      7
+    ],
+    "method": "merge commit; preserve ancestry",
+    "vercel_automatic_deployments": false,
+    "cloud_deployment": "DEFERRED",
+    "published_docker_source_unchanged": "6fae1890af99a7913092aea248cb120bd595e335"
   }
 }

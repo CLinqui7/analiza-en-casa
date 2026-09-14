@@ -2,9 +2,11 @@
 
 El alcance vigente es dejar la aplicación existente conectada y probada para un
 despliegue posterior. No publicar ni desplegar ahora. Se conserva la rama
-`codex/cloud-run-cloud-sql`, el repositorio `CLinqui7/analiza-en-casa` y el PR #7.
-La configuración de esta rama desactiva sus despliegues automáticos de Vercel.
-No modifica el comportamiento de otras ramas ni despliegues existentes.
+`codex/cloud-run-cloud-sql` como origen de la integración en `main` mediante el PR #7
+del repositorio `CLinqui7/analiza-en-casa`.
+La configuración versionada desactiva los despliegues automáticos de Vercel
+(`git.deploymentEnabled=false`), incluido el merge a `main`. Los deployments
+ya existentes conservan su tráfico; integrar código no autoriza un deployment.
 
 ## Qué está conectado
 

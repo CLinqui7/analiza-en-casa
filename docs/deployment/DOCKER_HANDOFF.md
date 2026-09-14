@@ -10,7 +10,8 @@ crear recursos cloud ni desplegar durante esta entrega.
 repositorio como submódulo `source` en el SHA verificado. El README allí contiene
 los comandos completos para PowerShell, instalación local y descarga de imágenes.
 Los Dockerfile, ignore, migraciones y código canónicos permanecen en este proyecto.
-La rama de trabajo continúa siendo `codex/cloud-run-cloud-sql`; no se modifica main.
+La integración en `main` conserva los commits de `codex/cloud-run-cloud-sql`.
+La publicación del código no ejecuta un despliegue cloud.
 
 La evidencia definitiva se guarda en
 [evidence/final-manifest.json](https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json)
