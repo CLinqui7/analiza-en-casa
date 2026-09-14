@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
-ARG SOURCE_SHA=local-unversioned
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
@@ -26,12 +25,15 @@ RUN test -f apps/web/.next/standalone/apps/web/server.js \
     && test -d apps/web/public
 
 # Explicit migration/seed operator; never run it from web startup or a public endpoint.
-FROM build AS operator
+FROM node:24-bookworm-slim AS operator
 WORKDIR /app
 ARG SOURCE_SHA=local-unversioned
 LABEL org.opencontainers.image.revision=$SOURCE_SHA \
     com.analiza.operator="explicit-postgresql-migration"
 ENV NODE_ENV=production
+COPY --from=build --chown=node:node /app/apps/web/.next/standalone/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/scripts/deployment/db-command.mjs /app/scripts/deployment/operator-target.mjs ./scripts/deployment/
+COPY --from=build --chown=node:node /app/database/postgresql/migrations ./database/postgresql/migrations
 USER node
 ENTRYPOINT ["node", "scripts/deployment/db-command.mjs"]
 CMD ["--dry-run"]

@@ -9,6 +9,7 @@ import { Client } from 'pg';
 import { chromium, request } from '@playwright/test';
 
 const image = process.env.ANALIZA_VERIFY_IMAGE || 'analiza-web:cloudrun';
+const operatorImage = process.env.ANALIZA_VERIFY_OPERATOR_IMAGE;
 const run = 'analiza-sqlqa-' + Date.now(),
   out = '.local/cloud-run/' + run;
 await mkdir(out, { recursive: true });
@@ -41,6 +42,45 @@ function docker(args, options = {}) {
   return p.stdout.trim();
 }
 const imageInfo = JSON.parse(docker(['image', 'inspect', image]))[0];
+if (operatorImage) {
+  const operatorInfo = JSON.parse(docker(['image', 'inspect', operatorImage]))[0];
+  assert.equal(operatorInfo.Config.User, 'node');
+  assert.equal(
+    operatorInfo.Config.Labels['org.opencontainers.image.revision'],
+    imageInfo.Config.Labels['org.opencontainers.image.revision'],
+  );
+}
+function runOperator(args, env) {
+  if (!operatorImage)
+    return spawnSync(process.execPath, ['scripts/deployment/db-command.mjs', ...args], {
+      env,
+      encoding: 'utf8',
+    });
+  const privateEnv = { ...env, PGHOST: 'db', PGPORT: '5432' };
+  const keys = Object.keys(privateEnv).filter((key) =>
+    /^(PG(HOST|PORT|DATABASE|USER|PASSWORD)|ANALIZA_(QA_|MIGRATION_|PG_RUNTIME_|PROVISION_))/.test(
+      key,
+    ),
+  );
+  return spawnSync(
+    'docker',
+    [
+      'run',
+      '--rm',
+      '--read-only',
+      '--cap-drop',
+      'ALL',
+      '--security-opt',
+      'no-new-privileges',
+      '--network',
+      names.network,
+      ...keys.flatMap((key) => ['--env', key]),
+      operatorImage,
+      ...args,
+    ],
+    { env: privateEnv, encoding: 'utf8', timeout: 120000 },
+  );
+}
 assert.equal(imageInfo.Os, 'linux');
 assert.equal(imageInfo.Architecture, 'amd64');
 assert.equal(imageInfo.Config.User, 'node');
@@ -135,9 +175,10 @@ await admin.query(
 );
 await admin.query('GRANT CREATE ON DATABASE analiza_qa TO analiza_migrator');
 for (const operation of ['--migrate', '--migrate', '--seed-synthetic']) {
-  const p = spawnSync(process.execPath, ['scripts/deployment/db-command.mjs', operation], {
-    env: { ...operatorEnv, PGUSER: 'analiza_migrator', PGPASSWORD: migrationSecret },
-    encoding: 'utf8',
+  const p = runOperator([operation], {
+    ...operatorEnv,
+    PGUSER: 'analiza_migrator',
+    PGPASSWORD: migrationSecret,
   });
   await writeFile(out + '/' + operation.slice(2) + '.log', p.stdout + p.stderr);
   assert.equal(p.status, 0, operation + ' must pass');
@@ -160,21 +201,13 @@ const provisionEnv = {
   ANALIZA_PROVISION_RUNTIME_APPROVED: '1',
 };
 for (let attempt = 0; attempt < 2; attempt++) {
-  const p = spawnSync(
-    process.execPath,
-    ['scripts/deployment/db-command.mjs', '--migrate', '--provision-runtime'],
-    { env: provisionEnv, encoding: 'utf8' },
-  );
+  const p = runOperator(['--migrate', '--provision-runtime'], provisionEnv);
   assert.equal(p.status, 0, 'Explicit runtime provisioning must pass and be repeatable');
 }
-const mismatch = spawnSync(
-  process.execPath,
-  ['scripts/deployment/db-command.mjs', '--migrate', '--provision-runtime'],
-  {
-    env: { ...provisionEnv, ANALIZA_PG_RUNTIME_PASSWORD: randomBytes(32).toString('base64url') },
-    encoding: 'utf8',
-  },
-);
+const mismatch = runOperator(['--migrate', '--provision-runtime'], {
+  ...provisionEnv,
+  ANALIZA_PG_RUNTIME_PASSWORD: randomBytes(32).toString('base64url'),
+});
 assert.notEqual(
   mismatch.status,
   0,

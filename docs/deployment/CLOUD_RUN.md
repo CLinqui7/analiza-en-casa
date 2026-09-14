@@ -27,7 +27,9 @@ docker version
 docker info
 $sourceSha = (git rev-parse HEAD).Trim()
 docker build --progress=plain --build-arg SOURCE_SHA=$sourceSha -t analiza-web:cloudrun .
+docker build --target operator --build-arg SOURCE_SHA=$sourceSha -t analiza-operator:postgresql .
 docker image inspect analiza-web:cloudrun
+$env:ANALIZA_VERIFY_OPERATOR_IMAGE = 'analiza-operator:postgresql'
 npm run test:postgresql
 docker save --output .local/cloud-run/candidate-image.tar analiza-web:cloudrun
 py scripts/deployment/scan-image.py .local/cloud-run/candidate-image.tar
