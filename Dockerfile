@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24-bookworm-slim AS build
+FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
@@ -25,7 +25,7 @@ RUN test -f apps/web/.next/standalone/apps/web/server.js \
     && test -d apps/web/public
 
 # Explicit migration/seed operator; never run it from web startup or a public endpoint.
-FROM node:24-bookworm-slim AS operator
+FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS operator
 WORKDIR /app
 ARG SOURCE_SHA=local-unversioned
 LABEL org.opencontainers.image.revision=$SOURCE_SHA \
@@ -38,7 +38,7 @@ USER node
 ENTRYPOINT ["node", "scripts/deployment/db-command.mjs"]
 CMD ["--dry-run"]
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runtime
 WORKDIR /app
 ARG SOURCE_SHA=local-unversioned
 LABEL org.opencontainers.image.source="https://github.com/CLinqui7/analiza-en-casa" \

@@ -6,6 +6,34 @@ Analiza en Casa es una aplicación web de demostración para la operación de at
 
 > Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
 
+## Docker: entrega clonable y ejecución local
+
+**Docker = READY · Cloud deployment = DEFERRED · Billing = NOT REQUIRED FOR THIS HANDOFF.**
+
+El repositorio [analiza-docker](https://github.com/CLinqui7/analiza-docker) contiene
+la entrega Docker y referencia este proyecto mediante un submódulo fijado al commit
+verificado. `git clone --recurse-submodules https://github.com/CLinqui7/analiza-docker.git`
+descarga ambos. Las imágenes exportadas, sus SHA256 y la evidencia final están en
+su release y en `evidence/final-manifest.json`. No hay una segunda aplicación.
+
+Desde la raíz de este proyecto, en PowerShell:
+
+```powershell
+$sourceSha = (git rev-parse HEAD).Trim()
+docker build --platform linux/amd64 --progress=plain --build-arg "SOURCE_SHA=$sourceSha" -t analiza-web:cloudrun .
+docker build --platform linux/amd64 --progress=plain --target operator --build-arg "SOURCE_SHA=$sourceSha" -t analiza-operator:postgresql .
+docker run --rm analiza-operator:postgresql --dry-run
+```
+
+La web integra frontend y API Next standalone, escucha en `8080` como `node`
+(no-root), y recibe secretos solamente en runtime. PostgreSQL 18 y los archivos
+privados viven fuera de la imagen. El operator ejecuta migraciones explícitas.
+Consulte [DOCKER_HANDOFF](docs/deployment/DOCKER_HANDOFF.md) para cargar los `.tar`,
+preparar QA sintético y ejecutar la web con `docker run` o Compose.
+El digest de la base Node y `package-lock.json` fijan los insumos del build;
+`docker load` de los archivos con SHA256 verificado reproduce el artefacto exacto.
+Una compilación nueva puede generar metadatos y un ID diferentes.
+
 ## Entrega Cloud Run / PostgreSQL 18 · 14 septiembre 2026
 
 La entrega actual conserva el frontend y migra el backend Core a PostgreSQL 18:
