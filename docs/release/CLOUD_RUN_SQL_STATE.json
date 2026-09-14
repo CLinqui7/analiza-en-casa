@@ -171,10 +171,11 @@
     "artifact_registry": "DEFERRED_BY_USER; real project detected, resources not created",
     "cloud_run": "NOT_DEPLOYED",
     "terraform_apply": false,
-    "github_pushed": false,
+    "github_pushed": true,
     "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/7",
     "pull_request_status": "DRAFT",
-    "automatic_vercel_deploy": "Disabled for codex/cloud-run-cloud-sql via root vercel.json; other branches retain their existing behavior"
+    "automatic_vercel_deploy": "Disabled for codex/cloud-run-cloud-sql via root vercel.json; other branches retain their existing behavior",
+    "verified_github_commit": "824580e"
   },
   "current_request": "PREPARE_MIGRATION_ONLY; user explicitly postponed deployment and resource creation",
   "preparation_extension": {
