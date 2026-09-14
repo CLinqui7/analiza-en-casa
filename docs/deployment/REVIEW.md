@@ -38,3 +38,24 @@ las modificaciones revisadas. Esto no certifica todos los módulos históricos,
 esquemas corporativos, capacidad de producción ni integraciones cloud pendientes.
 Se mantienen las clasificaciones y bloqueos existentes, sin promociones EXACT,
 sin cambios en evidencia de video, sin GitHub Actions y sin merge a main.
+
+## Ampliación de preparación, sin despliegue
+
+Se verificaron en Docker los comandos del operador con un migrador sin SUPERUSER
+ni BYPASSRLS, el seed bajo FORCE RLS, aprovisionamiento repetible de un rol runtime
+y rechazo de contraseña discordante. Los jobs privados reciben secretos separados
+del runtime. Terraform fmt/validate y cuatro pruebas del proveedor simulado pasan;
+el plan con proyecto real propone 24 altas, cero cambios y cero bajas. No se aplicó.
+
+GitGuardian detectó el literal de prueba `synthetic-unit-test-only` en
+`apps/web/src/server/persistence/postgres-pool.test.ts`, commit `5b92c7f`, incidente
+37265105. Se revisó la prueba: la configuración es ficticia y no abre una conexión
+con esa contraseña. Es un falso positivo, no una credencial real expuesta. Se
+conserva el chequeo externo sin desactivarlo, sin ignorar archivos y sin reescribir
+historia. Su estado pendiente no debe anunciarse como PASS.
+
+El usuario aplazó todo deployment. Vercel aún estaba conectado a GitHub; se verificó
+con su CLI que la raíz del proyecto es el repositorio y se configuró
+`git.deploymentEnabled["codex/cloud-run-cloud-sql"]=false` sólo para esta rama,
+siguiendo la [configuración oficial de Git](https://vercel.com/docs/project-configuration/git-configuration).
+La configuración de las otras ramas y la producción existente se conserva.

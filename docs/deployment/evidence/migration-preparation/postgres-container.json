@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "run": "analiza-sqlqa-1789410627541",
+  "image": "sha256:2e0ff979a7ccf2b2ae4881eb8204a2325b5f317fb083fee70fc17d49b58afac0",
+  "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+  "base": "http://localhost:50662",
+  "checks": [
+    "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+    "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+    "React doctor create and API edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+    "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+    "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+    "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+    "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+    "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+    "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
+  ],
+  "connections": 5,
+  "p95Ms": 1034,
+  "database": "PostgreSQL 18 local QA",
+  "databaseVersion": "18.6 (Debian 18.6-1.pgdg12+2)",
+  "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+  "checkedAt": "2026-09-14T18:31:37.852Z"
+}

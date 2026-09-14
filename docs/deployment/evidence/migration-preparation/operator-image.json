@@ -1,0 +1,26 @@
+{
+  "id": "sha256:c62d3da7df78d50e5a2fe70173b18bcbffa9d5bb92a03ca1b5b37774d9409590",
+  "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+  "os": "linux",
+  "architecture": "amd64",
+  "user": "node",
+  "labels": {
+    "com.analiza.operator": "explicit-postgresql-migration",
+    "org.opencontainers.image.revision": "9dd308e1ac785f025497a0b813e66e1a586fe87c"
+  },
+  "sizeBytes": 101434684,
+  "rootFsLayers": [
+    "sha256:1d69a5fd31932841d7825ef4780c06f008eea65aaa9f3110fe09d5832ed5c7d8",
+    "sha256:8b44269dd12bb3a948a3fc91ba0ee4544375637bbc5995edabbbf2824d2a2e35",
+    "sha256:bd4b733ad7053e873d389686452b3ee8fb8009f4f1d5311b1af1fa9352ff5624",
+    "sha256:6b1a9ecc458f8b83983c566340ece48c9a605f1e13377190c686fb6f1e58a34a",
+    "sha256:a63f71a5ecc2aaf6cb0f20266a9a732c760b63f3a0f9e8a2bfee9a2fea576ab6",
+    "sha256:65c96b96342bc29999e64ab1e05031da529b149f0ddfdb44501b0ffc01bcd81e",
+    "sha256:80cc06f359a2312dc32e2cf1f94de6102f233c4abc801825a84f570a63d59aad",
+    "sha256:b524d6939c7559fecd6e589a78d24a163ba33c5035de447d51df0c08219296a4",
+    "sha256:faec0fe97a7dcb1c1dfdc0e627139852a636365fd808f8b663fa9a7175a2622a"
+  ],
+  "registryPublished": false,
+  "registryDigest": null,
+  "localTag": "analiza-operator:postgresql"
+}

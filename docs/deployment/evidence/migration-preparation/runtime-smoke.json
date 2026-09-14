@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "port": 8080,
+      "output": "{\"passed\":true,\"platform\":\"linux/amd64\",\"uid\":1000,\"port\":\"8080\",\"assets\":11,\"database\":\"unconfigured-safe-failure\",\"scope\":\"Runtime smoke only; connected persistence gate is separate\"}",
+      "gracefulExit": 143
+    },
+    {
+      "port": 9090,
+      "output": "{\"passed\":true,\"platform\":\"linux/amd64\",\"uid\":1000,\"port\":\"9090\",\"assets\":11,\"database\":\"unconfigured-safe-failure\",\"scope\":\"Runtime smoke only; connected persistence gate is separate\"}",
+      "gracefulExit": 143
+    }
+  ],
+  "operator": {
+    "id": "sha256:c62d3da7df78d50e5a2fe70173b18bcbffa9d5bb92a03ca1b5b37774d9409590",
+    "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+    "user": "node",
+    "noFrontendSource": true,
+    "noDevDependencies": true,
+    "dryRun": {
+      "operation": "MIGRATION_PLAN_ONLY",
+      "migrations": [
+        {
+          "version": "001_core.sql",
+          "sha256": "d265c58ef7c5a672a6361db17261aefb27e20287dfe1bc4dadeb77407967b46a"
+        }
+      ],
+      "target": "analiza schema, PostgreSQL 18",
+      "automaticRuntimeDdl": false
+    }
+  }
+}

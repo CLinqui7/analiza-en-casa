@@ -3,6 +3,8 @@
 El alcance vigente es dejar la aplicación existente conectada y probada para un
 despliegue posterior. No publicar ni desplegar ahora. Se conserva la rama
 `codex/cloud-run-cloud-sql`, el repositorio `CLinqui7/analiza-en-casa` y el PR #7.
+La configuración de esta rama desactiva sus despliegues automáticos de Vercel.
+No modifica el comportamiento de otras ramas ni despliegues existentes.
 
 ## Qué está conectado
 
@@ -124,3 +126,7 @@ La migración SQL corresponde al alcance Core heredado. Cotizaciones, finanzas,
 clínica y portal completos permanecen en el código histórico y en su regresión,
 pero siguen excluidos del runtime Core. No se declara paridad clínica completa ni
 capacidad de producción a partir de QA local. Mongo/mock no son fallback de SQL.
+
+La revisión externa de GitGuardian conserva un aviso sobre un valor ficticio de
+una prueba unitaria, documentado en `REVIEW.md`. No se desactivó el chequeo ni se
+declara que todos los checks externos del PR estén aprobados.

@@ -1,5 +1,6 @@
 {
     "$schema":  "https://openapi.vercel.sh/vercel.json",
+    "git": { "deploymentEnabled": { "codex/cloud-run-cloud-sql": false } },
     "cleanUrls":  true,
     "trailingSlash":  false,
     "headers":  [
