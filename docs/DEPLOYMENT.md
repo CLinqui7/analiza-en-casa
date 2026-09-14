@@ -1,12 +1,19 @@
-# Despliegue
+# Distribución y preparación de despliegue
 
-El despliegue objetivo es Vercel desde GitHub, empezando siempre con preview. No haga merge ni producción desde esta rama sin aprobación.
+El alcance vigente es **Docker local y preparación de migración**.
+El despliegue cloud está diferido; no requiere activar facturación para revisar
+o ejecutar la entrega local.
 
-1. Confirme `npm run check`, `npm run audit:verify` y `npm run codex:preflight`.
-2. Importe `CLinqui7/analiza-en-casa` en Vercel con preset **Other**.
-3. Configure las variables de [`.env.example`](../.env.example), separando variables publicables de secretos server-side.
-4. Conecte el proyecto Supabase de prueba y aplique migraciones antes de elegir `DATA_MODE=supabase`.
-5. Cree un preview de `codex/overnight-audit-hardening`, compruebe `/`, `/api/health`, login demo y una ruta protegida.
-6. Registre URL, commit, fecha, smoke tests y resultado en `docs/overnight/DEPLOYMENT_STATUS.md`.
+- [Entrega Docker](deployment/DOCKER_HANDOFF.md): imágenes, construcción y QA local.
+- [Preparación de migración](deployment/MIGRATION_HANDOFF.md): infraestructura y configuración.
+- [Cloud Run](deployment/CLOUD_RUN.md): procedimiento futuro para el ingeniero.
+- [PostgreSQL](deployment/POSTGRESQL.md): esquema, operaciones y permisos.
+- [Estado verificable](release/CLOUD_RUN_SQL_STATE.json): evidencia y límites.
 
-Nunca defina `SUPABASE_SERVICE_ROLE_KEY`, tokens de proveedor o `CRON_SECRET` como variables `NEXT_PUBLIC_*`.
+El destino preparado integra frontend y API en Cloud Run, PostgreSQL 18 en Cloud SQL,
+archivos privados en GCS y secretos de runtime en Secret Manager.
+Terraform y Cloud Build están preparados; esta guía no autoriza crear recursos,
+activar facturación, ejecutar apply ni desplegar.
+
+Los documentos Vercel/Supabase corresponden a integraciones históricas y se
+conservan para trazabilidad. No son instrucciones de la entrega Docker actual.

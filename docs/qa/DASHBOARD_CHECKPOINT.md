@@ -1,9 +1,9 @@
-# Checkpoint de continuación de bajo consumo
+# Checkpoint del dashboard — registro histórico
 
 - Rama: `codex/react-full-parity-selenium-100`.
 - Último checkpoint: `react: complete dashboard operational parity` (`cda0a87`).
 - Acabado ahora: `ROUTE-DASHBOARD` tiene acciones operativas con permisos, métricas sintéticas sin inferencia clínica, tabla accesible por teclado y evidencia focalizada. No se añadió persistencia clínica. `MEDICAL-ORDER-CREATE` sigue siendo estado local y está marcado `PARTIAL`.
-- Archivos locales de este checkpoint: `docs/qa/REACT_ROLE_MATRIX.json`, `docs/qa/CREDIT_HANDOFF.md`.
+- Archivos locales de este checkpoint: `docs/qa/REACT_ROLE_MATRIX.json`, `docs/qa/DASHBOARD_CHECKPOINT.md`.
 
 ## Estado funcional ya cerrado (sin afirmar paridad exacta)
 
@@ -41,7 +41,7 @@ Pacientes y detalle, hospitalizaciones, cotizaciones inmutables, pagos idempoten
 - `npm run selenium:coverage` — not re-run; expected 0/42, 0.00%.
 - Bug/gap conocido: crear una acción en `/clinical/orders` no sobrevive a recarga; se mantiene `PARTIAL` y no se afirma como orden clínica.
 
-## Reanudar
+## Trabajo pendiente registrado en ese checkpoint
 
 - Primer `route_id`: `ROUTE-PATIENTS` (primero `MIGRATED_PARTIAL` del manifiesto).
 - Primer `action_id`: `INSURANCE-APPROVE` (primera acción `MISSING`; requiere regla de cliente antes de implementar).

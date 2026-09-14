@@ -8,7 +8,7 @@
     "apps/*",
     "packages/*"
   ],
-  "description": "Analiza full-stack Next.js: Cloud Run, PostgreSQL 18 y archivos privados GCS; QA sint\u00e9tico.",
+  "description": "Analiza full-stack Next.js: Cloud Run, PostgreSQL 18 y archivos privados GCS; QA sintético.",
   "scripts": {
     "dev": "npm run dev --workspace=@analiza/web",
     "start": "npm run start --workspace=@analiza/web",
@@ -51,10 +51,9 @@
     "test:selenium:quotes": "py tests/selenium/test_quotes.py",
     "test:selenium:quotes:all": "py -m unittest discover -s tests/selenium -p test_quotes.py -v",
     "qa": "node scripts/qa-check.mjs",
-    "qa:local": "npm run codex:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
+    "qa:local": "npm run repo:preflight && npm run security:scan && npm run check && npm run audit:verify && npm run react:boundaries && npm run typecheck && npm run lint && npm run format:check && npm run test:react && npm run test:browser:react && npm run test:selenium",
     "check": "npm test && npm run qa && npm run build:standalone",
     "build:standalone": "node scripts/build-standalone.mjs",
-    "codex:preflight": "node scripts/codex-preflight.mjs",
     "github:preflight": "node scripts/github-preflight.mjs",
     "audit:status": "node scripts/audit-status.mjs",
     "audit:verify": "node scripts/verify-video-audit.mjs",
@@ -89,7 +88,8 @@
     "db:plan": "node scripts/deployment/db-command.mjs --dry-run",
     "db:migrate": "node scripts/deployment/db-command.mjs --migrate",
     "db:seed:qa": "node scripts/deployment/db-command.mjs --seed-synthetic",
-    "test:postgresql": "node scripts/deployment/verify-container.mjs"
+    "test:postgresql": "node scripts/deployment/verify-container.mjs",
+    "repo:preflight": "node scripts/repository-preflight.mjs"
   },
   "engines": {
     "node": ">=20"

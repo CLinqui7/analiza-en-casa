@@ -16,8 +16,9 @@ La evidencia definitiva se guarda en
 [evidence/final-manifest.json](https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json)
 y en los assets del release Docker. Incluye SHA del proyecto, ID de ambas imágenes,
 SHA256 de los dos archivos tar y resultados de pruebas. Se registra después de
-congelar el último commit del proyecto: así la imagen corresponde exactamente a
-HEAD y una actualización de evidencia no cambia nuevamente ese HEAD.
+congelar el commit de la entrega Docker,
+`6fae1890af99a7913092aea248cb120bd595e335`. Las actualizaciones posteriores de
+documentación no sustituyen las imágenes ni cambian su SHA de fuente.
 `CLOUD_RUN_SQL_STATE.json` conserva aparte la evidencia de la entrega anterior.
 
 ## Construcción y ejecución

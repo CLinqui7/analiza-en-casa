@@ -1,7 +1,18 @@
-# Handoff final
+# Entrega técnica
 
-La rama de trabajo es `codex/overnight-audit-hardening`. Instale con `npm install`, valide con `npm run check`, inicie con `npm start` y use las credenciales demo del README.
+Consultar el [índice de documentación](README.md) para revisar el proyecto.
+La entrega actual es Docker con PostgreSQL 18; el despliegue cloud está diferido.
 
-La evidencia de los 17 capítulos permanece en `references/video-audit/`; los resultados y 73 decisiones pendientes están en `docs/MASTER_VIDEO_REQUIREMENTS.json`, `docs/VIDEO_VS_PLATFORM_GAP_MATRIX.csv` y `docs/MASTER_OPEN_QUESTIONS.md`.
+La distribución verificada está en
+[analiza-docker](https://github.com/CLinqui7/analiza-docker), con fuente fijada al
+commit `6fae1890af99a7913092aea248cb120bd595e335`, imágenes exportadas y SHA256.
+Los cambios posteriores de mantenimiento del repositorio no alteran esos archivos.
 
-Antes de datos reales, complete [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md), valide Supabase según [SUPABASE_SETUP.md](SUPABASE_SETUP.md) y cree un preview según [DEPLOYMENT.md](DEPLOYMENT.md). El informe de ejecución está en `docs/overnight/FINAL_REPORT.md`.
+El código de la aplicación está en `apps/web/`. Revisar
+[arquitectura](ARCHITECTURE.md), [persistencia](deployment/POSTGRESQL.md),
+[operación](RUNBOOK.md) y [contribución](../CONTRIBUTING.md).
+La evidencia del contenedor se enlaza desde
+[el estado de entrega](release/CLOUD_RUN_SQL_STATE.json).
+
+Las matrices y los registros históricos conservan los requisitos y asuntos
+pendientes; no amplían el alcance Core certificado ni implican un despliegue.

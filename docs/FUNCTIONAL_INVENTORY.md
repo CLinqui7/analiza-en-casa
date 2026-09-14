@@ -1,5 +1,9 @@
 # Inventario funcional
 
+> Registro histórico generado antes de la entrega PostgreSQL. Las rutas y líneas
+> corresponden a esa captura; consultar [el índice técnico](README.md) para la versión vigente.
+
+
 Generado de forma determinista desde el código fuente. No sustituye la revisión de evidencia de video; sirve para clasificar y proteger la migración.
 
 Archivos inspeccionados: 72. Funciones o manejadores nombrados: 723.

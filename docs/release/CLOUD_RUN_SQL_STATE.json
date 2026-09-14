@@ -18,7 +18,8 @@
     "repository": "https://github.com/CLinqui7/analiza-docker",
     "manifest": "https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json",
     "release": "https://github.com/CLinqui7/analiza-docker/releases",
-    "provenance": "Final source SHA, image IDs, tar SHA256 and final container results are recorded in the Docker repository after freezing this repository HEAD. Previous image IDs below are historical, not the final candidate."
+    "provenance": "The published Docker artifacts are pinned to source commit 6fae1890af99a7913092aea248cb120bd595e335. Later repository documentation/tooling changes do not replace or re-certify these images. Earlier image IDs below are historical.",
+    "source_sha": "6fae1890af99a7913092aea248cb120bd595e335"
   },
   "architecture": {
     "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
@@ -278,5 +279,11 @@
       "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
       "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
     }
+  },
+  "repository_maintenance": {
+    "scope": "Documentation, repository presentation and maintenance tooling",
+    "application_behavior_changed": false,
+    "published_docker_artifacts_changed": false,
+    "source_evidence_modified": false
   }
 }

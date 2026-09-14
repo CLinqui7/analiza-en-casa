@@ -1,37 +1,24 @@
-.env
-.env.local
-.DS_Store
-node_modules/
-.vercel/
-coverage/
-*.log
-
-# Local and Codex runtime
-.env
-.env.*
+# Private runtime configuration
+.env*
 !.env.example
-node_modules/
 .vercel/
+.local/
+.analiza-runtime/
+.npm-cache/
+
+# Dependencies, builds and test output
+node_modules/
 .next/
-*.tsbuildinfo
 dist/
 coverage/
 playwright-report/
 test-results/
-.codex-log/
 .qa-results/
-__pycache__/
+*.tsbuildinfo
 *.log
-.DS_Store
-Thumbs.db
+__pycache__/
 
-# Local review scratch, keep committed review ledgers/results only
-video-audit-reviews/**/scratch/
-.vercel
-.env*
-.npm-cache/
-.local/
-.analiza-runtime/
+# Infrastructure state and private inputs
 **/.terraform/
 *.tfstate
 *.tfstate.*
@@ -39,3 +26,15 @@ video-audit-reviews/**/scratch/
 *.tfvars
 !*.example.tfvars
 backend.generated.tf
+
+# Local review scratch; committed ledgers remain versioned
+video-audit-reviews/**/scratch/
+
+# Editor/tool metadata and operating-system files
+AGENTS.md
+CLAUDE.md
+.codex/
+.claude/
+.codex-log/
+.DS_Store
+Thumbs.db

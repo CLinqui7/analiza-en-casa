@@ -1,4 +1,4 @@
-# Continuación Terra después del checkpoint CH15
+# Checkpoint CH15 — registro histórico
 
 ## 1. Rama actual
 

@@ -1,52 +1,60 @@
-# Arquitectura propuesta
+# Arquitectura
 
-## Objetivo
+## Aplicación actual
 
-Mantener una aplicación que funcione inmediatamente en modo QA, pero que pueda cambiar a persistencia Supabase sin reescribir la interfaz.
+Analiza utiliza una aplicación Next.js full-stack: las páginas y componentes
+React están en `apps/web/src/app/` y `apps/web/src/components/`; las rutas HTTP,
+en `apps/web/src/app/api/`. El contenedor ejecuta el servidor standalone de
+Next.js sobre Node.js 24, como usuario no-root y con `PORT=8080`.
 
 ```text
 Navegador
-  ├─ UI y rutas hash
-  ├─ App Store
-  │    ├─ localStorage, modo QA
-  │    └─ Supabase Adapter, modo productivo
-  ├─ Impresión / plantillas
-  └─ Portal externo
-
-Vercel Functions
-  ├─ Runtime config
-  ├─ Health
-  ├─ Mensajería segura
-  ├─ Portal status
-  └─ Retry worker
-
-Supabase
-  ├─ Auth
-  ├─ PostgreSQL
-  ├─ RLS
-  ├─ Storage privado
-  ├─ RPC transaccionales
-  └─ Auditoría
+  → Next.js: frontend + rutas API
+    → validación Zod, sesión y permisos por organización
+      → servicios y repositories PostgreSQL
+        → PostgreSQL 18: datos, transacciones, RLS y auditoría
+      → adaptador de archivos privados
+        → Google Cloud Storage: contenido binario
 ```
 
-## Decisiones
+El destino cloud preparado es Cloud Run con Cloud SQL PostgreSQL mediante conexión
+administrada/Unix socket y Service Account. Secret Manager proporciona referencias
+privadas de runtime. El despliegue está diferido.
 
-1. **Modo dual:** el producto se puede validar sin infraestructura. En modo Supabase usa el mismo contrato de datos.
-2. **RLS por organización:** ningún cliente debe depender únicamente de filtros del frontend.
-3. **Operaciones sensibles server-side:** mensajería, portal y jobs no reciben claves de servicio en el navegador.
-4. **Eventos y versiones:** cotizaciones enviadas, pagos, inventario y documentos firmados no se sobrescriben silenciosamente.
-5. **Idempotencia:** reintentos no deben duplicar pagos, movimientos o mensajes.
-6. **Plantillas provisionales:** la estructura es reemplazable cuando el cliente entregue formatos oficiales.
-7. **Auditoría append-only:** no existe política de actualización o eliminación para la bitácora.
-8. **Datos sintéticos:** fixtures claramente identificados para evitar confusión con producción.
+## Persistencia y límites
 
-## Escalamiento recomendado
+La interfaz consume contratos compartidos y proveedores HTTP.
+`apps/web/src/server/persistence/` contiene los contratos y adaptadores.
+`database/postgresql/migrations/` contiene las migraciones ordenadas.
+El driver `pg` utiliza un pool acotado; las escrituras usan transacciones,
+aislamiento por organización y controles de versión donde corresponden.
 
-Para una segunda versión:
+La sesión y los permisos se verifican en servidor. La identidad de runtime no es
+superusuario, no evita RLS y no recibe DDL ni DELETE. El operator ejecuta
+migraciones explícitas con una identidad separada: la web no migra al arrancar.
+El esquema exacto y las operaciones concedidas se documentan en
+[POSTGRESQL](deployment/POSTGRESQL.md).
 
-- Mover la SPA a Next.js App Router si se requiere SSR, middleware complejo o múltiples portales.
-- Añadir cola gestionada para mensajería.
-- Crear Edge Functions separadas por proveedor.
-- Implementar pruebas RLS en CI contra Supabase local.
-- Introducir versionado formal de APIs.
-- Añadir observabilidad, alertas y trazas.
+Los archivos se almacenan como objetos privados; SQL mantiene sus metadatos.
+Las pruebas locales usan el SDK de Google contra un emulador explícito.
+Un fallo de SQL produce un error observable; no cambia a MongoDB ni localStorage.
+
+## Alcance y compatibilidad
+
+La edición Core comprende pacientes, médicos, hospitalizaciones, turnos, recursos
+de enfermería y catálogos operativos. Los módulos excluidos conservan su código y
+pruebas históricas; no se declaran migrados por compartir la interfaz.
+
+Los adaptadores Mongo y la demo anterior con Supabase pertenecen a fases previas.
+Se conservan para regresión. No son dependencias de respaldo del runtime PostgreSQL.
+
+## Entrega y operación
+
+El Dockerfile produce dos targets: `runtime` para frontend/API y `operator` para
+migraciones/seed. La base Node está fijada por digest y npm utiliza el lockfile.
+Los secretos se inyectan al ejecutar; no forman parte del build.
+
+La entrega verificada de imágenes apunta a
+`6fae1890af99a7913092aea248cb120bd595e335`. Consultar
+[Docker](deployment/DOCKER_HANDOFF.md), [operación local](RUNBOOK.md) y
+[preparación cloud](deployment/MIGRATION_HANDOFF.md).

@@ -1,190 +1,126 @@
-Estado vigente: **migración preparada, despliegue aplazado**. Guía: [MIGRATION_HANDOFF](docs/deployment/MIGRATION_HANDOFF.md).
-
 # Analiza en Casa
 
-Analiza en Casa es una aplicación web de demostración para la operación de atención domiciliar. Reconstruye los flujos visibles de 17 capítulos de referencia y añade controles de seguridad, trazabilidad e integridad para una evolución productiva.
+Aplicación para la gestión de atención domiciliar, con frontend y API integrados
+en Next.js. La entrega actual comprende los módulos Core y su persistencia en
+PostgreSQL 18.
 
-> Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
+**Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
+diferido. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
 
-## Docker: entrega clonable y ejecución local
+## Alcance
 
-**Docker = READY · Cloud deployment = DEFERRED · Billing = NOT REQUIRED FOR THIS HANDOFF.**
+Pacientes, médicos, hospitalizaciones, agenda y turnos, recursos de enfermería,
+catálogos operativos, autenticación y permisos por usuario y organización.
+Las cotizaciones y los demás módulos históricos permanecen en el código para su
+regresión; no forman parte del alcance PostgreSQL certificado de esta entrega.
 
-El repositorio [analiza-docker](https://github.com/CLinqui7/analiza-docker) contiene
-la entrega Docker y referencia este proyecto mediante un submódulo fijado al commit
-verificado. `git clone --recurse-submodules https://github.com/CLinqui7/analiza-docker.git`
-descarga ambos. Las imágenes exportadas, sus SHA256 y la evidencia final están en
-su release y en `evidence/final-manifest.json`. No hay una segunda aplicación.
+## Tecnologías
 
-Desde la raíz de este proyecto, en PowerShell:
+| Componente                | Tecnología                                                    |
+| ------------------------- | ------------------------------------------------------------- |
+| Aplicación                | Next.js 16, React 19, TypeScript                              |
+| API y validación          | Route Handlers de Next.js, Zod                                |
+| Persistencia              | PostgreSQL 18, driver pg, transacciones y RLS                 |
+| Archivos privados         | Google Cloud Storage; metadatos en PostgreSQL                 |
+| Runtime                   | Node.js 24, Docker, Next standalone                           |
+| Infraestructura preparada | Cloud Run, Cloud SQL, Secret Manager, Terraform y Cloud Build |
+
+La autorización se aplica en el backend. Los errores SQL no activan almacenamiento
+local ni otro adaptador. La base de datos y los archivos se mantienen fuera de la
+imagen web.
+
+## Docker
+
+La entrega reproducible está en
+[analiza-docker](https://github.com/CLinqui7/analiza-docker). Incluye las imágenes
+exportadas, sus SHA256, la preparación local con PostgreSQL 18 y el proyecto como
+submódulo fijado al commit verificado.
+
+```powershell
+git clone --recurse-submodules https://github.com/CLinqui7/analiza-docker.git
+cd analiza-docker
+```
+
+Seguir su README para descargar y cargar los archivos, preparar QA y ejecutar
+`docker run`. La web escucha en `8080` como usuario no-root. El operator de
+migraciones se distribuye como imagen separada.
+
+Fuente de las imágenes publicadas: `6fae1890af99a7913092aea248cb120bd595e335`.
+Los cambios posteriores de documentación no sustituyen esos artefactos.
+Consultar [la evidencia de entrega](https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json)
+y [las instrucciones Docker](docs/deployment/DOCKER_HANDOFF.md).
+
+Para construir el checkout actual desde la raíz de este proyecto:
 
 ```powershell
 $sourceSha = (git rev-parse HEAD).Trim()
 docker build --platform linux/amd64 --progress=plain --build-arg "SOURCE_SHA=$sourceSha" -t analiza-web:cloudrun .
 docker build --platform linux/amd64 --progress=plain --target operator --build-arg "SOURCE_SHA=$sourceSha" -t analiza-operator:postgresql .
-docker run --rm analiza-operator:postgresql --dry-run
 ```
 
-La web integra frontend y API Next standalone, escucha en `8080` como `node`
-(no-root), y recibe secretos solamente en runtime. PostgreSQL 18 y los archivos
-privados viven fuera de la imagen. El operator ejecuta migraciones explícitas.
-Consulte [DOCKER_HANDOFF](docs/deployment/DOCKER_HANDOFF.md) para cargar los `.tar`,
-preparar QA sintético y ejecutar la web con `docker run` o Compose.
-El digest de la base Node y `package-lock.json` fijan los insumos del build;
-`docker load` de los archivos con SHA256 verificado reproduce el artefacto exacto.
-Una compilación nueva puede generar metadatos y un ID diferentes.
+## Desarrollo
 
-## Entrega Cloud Run / PostgreSQL 18 · 14 septiembre 2026
-
-La entrega actual conserva el frontend y migra el backend Core a PostgreSQL 18:
-Next.js full-stack, una imagen Docker standalone, archivos privados en GCS,
-Secret Manager, Terraform y Cloud Build. Consulte [despliegue y validación](docs/deployment/CLOUD_RUN.md),
-[esquema/operaciones SQL](docs/deployment/POSTGRESQL.md) y
-[estado verificable](docs/release/CLOUD_RUN_SQL_STATE.json).
-
-Comandos: `npm run docker:build`, `npm run db:plan`, `npm run test:postgresql`.
-La última prueba crea una base **local sintética**, ejecuta migraciones y seed,
-y comprueba el contenedor final. `npm run db:migrate` y `npm run db:seed:qa`
-requieren un operador/configuración privada explícitos. El código de la edición
-histórica permanece; cotizaciones y los demás módulos excluidos del Core no
-se declaran migrados. GCP sigue sujeto a datos reales y autorización de costos.
-
-## Antecedente Core Mongo y Docker · 11 septiembre 2026
-
-Por solicitud del cliente se prepara una edición reducida, exclusivamente con persistencia
-MongoDB de servidor: pacientes, hospitalizaciones, agenda, médicos, enfermería y catálogos
-operativos. Las funciones pendientes se ocultan y sus rutas quedan cerradas sin borrar el
-código ni las matrices del video/Excel. La edición completa histórica sigue disponible
-para regresión, no como certificación de todas sus funciones.
-
-Consulte [preparación cloud](docs/release/CORE_CLOUD_DEPLOYMENT.md) y
-[verificación Core](docs/release/CORE_RELEASE_VERIFICATION.json).
-`npm run docker:build` construye frontend y API; `npm run test:core:mongo` verifica
-React → HTTP → Atlas y aislamiento entre organizaciones. `npm run test:core:selenium`
-ejecuta comprobaciones Chrome contra el servidor indicado mediante variables privadas.
-La imagen no incluye credenciales. Render está configurado explícitamente como Free;
-Google Cloud queda preparado, pero no se han creado recursos facturables.
-**La prueba del contenedor contra Atlas no equivale a un Preview conectado:** el alta
-de Render y la verificación desde Vercel siguen pendientes.
-
-## React Studio y Atlas verificados · septiembre 2026
-
-La aplicación del checkout actual conserva sus rutas y menú plegable y adopta el estilo del HTML Studio. El backend Mongo se comprobó contra el clúster Atlas existente con datos QA: pacientes, hospitalizaciones, cotizaciones, adjuntos privados, roles de enfermería, balance hídrico, catálogos, pagos, visitas y consumo transaccional de inventario. Consulte `docs/release/MONGO_STUDIO_VERIFICATION_20260910.md` y `docs/release/DESKTOP_DELIVERY_STATE.json` para evidencia y límites; el preview visual no implica certificación productiva.
-
-Con los archivos privados del operador configurados fuera de Git y el servidor local conectado, la prueba real se ejecuta desde `apps/web`:
+Requisitos: Git, Node.js 24 y npm 11.18.0. Docker Desktop con contenedores Linux
+se utiliza para la prueba integrada PostgreSQL. Esa prueba de navegador requiere
+Google Chrome.
 
 ```powershell
-node --env-file=.env.local --env-file=../../.env.mongodb.operator.local --import tsx src/server/mongo-live-verification.ts
+git clone --branch codex/cloud-run-cloud-sql https://github.com/CLinqui7/analiza-en-casa.git
+cd analiza-en-casa
+npm exec --yes --package=npm@11.18.0 -- npm ci
+npm run repo:preflight
 ```
 
-Esta prueba crea exclusivamente registros sintéticos QA y conserva su auditoría. La prueba visual de navegador está en `scripts/verify-local-mongo-browser.mjs`. Los secretos, capturas locales y resultados temporales se excluyen del commit y del deploy. No habilite Atlas para todo Internet: Preview requiere salida de red fija autorizada.
+Para desarrollar contra PostgreSQL, configurar las variables privadas indicadas
+en [POSTGRESQL](docs/deployment/POSTGRESQL.md) y ejecutar `npm run dev`.
+El servidor de desarrollo no reemplaza la validación de la imagen final.
+La configuración de QA Docker y sus credenciales generadas se documentan en el
+repositorio de distribución; no se versionan contraseñas.
 
-## Objetivo y módulos
+## Pruebas
 
-El sistema concentra pacientes, responsables, hospitalizaciones, cotizaciones versionadas, preautorizaciones, cobros, portal del paciente, documentos clínicos, agenda, compras, inventario, kits, cuentas por pagar, catálogos, auditoría y QA de paridad del video.
+| Comando                              | Alcance                                                  |
+| ------------------------------------ | -------------------------------------------------------- |
+| `npm run repo:preflight`             | Estructura, evidencia fuente y archivos publicables      |
+| `npm test`                           | Dominio y contratos de la base histórica                 |
+| `npm run test:react`                 | Pruebas unitarias React y servidor                       |
+| `npm run typecheck` / `npm run lint` | Tipos y análisis estático                                |
+| `npm run test:browser:react`         | Regresión de navegador                                   |
+| `npm run test:postgresql`            | Contenedor final, SQL, permisos, archivos y persistencia |
+| `npm run qa:local`                   | Conjunto amplio de verificaciones locales                |
+| `npm run audit:verify`               | Integridad de los registros de revisión                  |
 
-Los seis controles P0 están implementados a nivel de aplicación, contrato SQL y prueba estática/focalizada. Su estado es `IMPLEMENTED_PARTIAL` hasta ejecutar las migraciones y pruebas de RLS/RPC contra un proyecto Supabase real. La matriz trazable está en [docs/VIDEO_VS_PLATFORM_GAP_MATRIX.csv](docs/VIDEO_VS_PLATFORM_GAP_MATRIX.csv).
-
-## Arquitectura actual
-
-- `apps/web/`: aplicación principal Next.js App Router con React y TypeScript estricto.
-- `packages/domain/`: lógica pura de búsqueda, formatos configurables, mediciones, CSV y kárdex.
-- `packages/contracts/`: contratos Zod y tipos compartidos.
-- `packages/ui/`: diálogo y componentes visuales reutilizables.
-- `packages/testing/`: utilidades de prueba compartidas.
-- `legacy-demo/`: referencia temporal de la SPA previa; sus archivos permanecen en la raíz mientras se completa la migración y nunca se cargan dentro de React.
-- `api/`: funciones server-side para portal y cola segura de notificaciones.
-- `supabase/migrations/`: esquema incremental, RLS, RPCs y auditoría.
-- `supabase/seed.sql`: datos exclusivamente sintéticos.
-- `tests/` y `scripts/`: pruebas de dominio, contratos P0, QA, build y verificadores.
-- `Analiza_en_Casa_Demo_QA.html`: build autónomo para una demo offline.
-
-## Requisitos
-
-- Node.js 20 o posterior (`node --version`).
-- Git.
-- Opcional para validación persistente: Supabase CLI y Docker Desktop en ejecución.
-- Opcional para preview: Vercel CLI autenticado o importación desde el panel de Vercel.
-
-## Descargar e iniciar en Windows PowerShell
+Para ejecutar las migraciones y el seed de la prueba desde la imagen operator:
 
 ```powershell
-git clone https://github.com/CLinqui7/analiza-en-casa.git
-Set-Location analiza-en-casa
-git switch codex/client-audio-selenium-hardening
-npm ci
-npm run qa:local
-npm run dev
+$env:ANALIZA_VERIFY_OPERATOR_IMAGE = 'analiza-operator:postgresql'
+npm run test:postgresql
 ```
-
-Abra `http://localhost:3000`. Para detener el servidor, presione `Ctrl+C` en la misma consola. El demo heredado se mantiene sólo como respaldo de evidencia y se inicia explícitamente con `npm run start:legacy` en `http://localhost:4173`; también existe `Analiza_en_Casa_Demo_QA.html` para la demo autónoma.
-
-Si aparece `EADDRINUSE`, el puerto 4173 ya está ocupado. Identifique el proceso con `Get-NetTCPConnection -LocalPort 4173`, detenga únicamente el proceso que corresponda o ejecute la app en otro puerto si el script admite su variable de puerto. No finalice procesos desconocidos.
-
-## Variables de entorno
-
-Copie `.env.example` a `.env.local`; nunca suba ese archivo ni secretos al repositorio.
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Para modo local basta `DATA_MODE=mock`. Para Supabase configure `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y los equivalentes `NEXT_PUBLIC_*` necesarios para el navegador. Sólo las claves publicables/anon pueden ir al cliente. `SUPABASE_SERVICE_ROLE_KEY`, tokens de WhatsApp/SMS/email y `CRON_SECRET` son exclusivamente server-side en Vercel/Supabase.
-
-## Comandos frecuentes
-
-```powershell
-npm run dev               # aplicación React principal
-npm run build             # build optimizado de Next.js
-npm test                  # regresiones del demo heredado
-npm run test:react        # pruebas Vitest de dominio React
-npm run test:browser:react # Playwright + axe sobre React
-npm run test:browser:quotes # Playwright focalizado de Cotizaciones React
-npm run test:selenium     # Selenium + Chrome sin autenticación
-npm run qa:local          # compuerta local completa
-npm run check             # regresiones heredadas + QA + demo autónoma
-npm run audit:verify      # integridad de los 17 capítulos
-npm run audit:master      # regenera matrices desde el JSON canónico
-npm run codex:preflight   # preflight del repositorio/evidencia
-npm run react:boundaries  # impide iframe, HTML peligroso y carga del demo en React
-npm run inventory:generate # regenera inventarios funcionales y de textos
-git status --short --branch
-```
-
-Los resultados de QA se escriben en `docs/QA_AUTOMATED_RESULTS.*`; las capturas y resultados de navegador de baseline están en `docs/QA_BROWSER_RESULTS.*`.
-
-## Usuarios demo y roles
-
-El demo heredado conserva seis roles sintéticos para sus regresiones: Administración, Médico, Enfermería, Inventario, Finanzas y Auditoría. Las claves de prueba no se publican ni se almacenan en claro en código productivo; las pruebas las construyen localmente. En producción, Supabase Auth, invitaciones verificadas, RLS y permisos reemplazan ese mecanismo.
-
-## Seguridad y límites
-
-- Organización, permiso y destinatario se validan en servidor/RPC; el navegador no envía `organization_id`, teléfono, correo, contenido clínico ni service-role.
-- El portal requiere token hasheado, expiración, OTP y respuestas anti-enumeración.
-- Cotizaciones enviadas, pagos, movimientos y documentos firmados conservan historial y auditoría; una corrección/reversión es una nueva evidencia, no un borrado.
-- Mensajería usa plantillas administrativas genéricas y proveedor simulado hasta recibir credenciales. `SIMULATED` nunca significa entrega real.
-- La firma clínica actual es metadato de aplicación, no una firma electrónica legal.
-
-Faltan confirmaciones del cliente sobre firmas legales, reglas clínicas, precios, seguros, impuestos, retención, consentimiento, proveedores y reglas de operación. Consulte [docs/MASTER_OPEN_QUESTIONS.md](docs/MASTER_OPEN_QUESTIONS.md) y [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md).
-
-## Supabase y Vercel
-
-Use [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) para aplicar las seis migraciones, cargar el seed sintético y ejecutar la matriz RLS. Use [docs/VERCEL_SETUP.md](docs/VERCEL_SETUP.md) y [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) para el preview. El estado actual está en [docs/overnight/DEPLOYMENT_STATUS.md](docs/overnight/DEPLOYMENT_STATUS.md).
 
 ## Estructura
 
-```text
-app/                 interfaz y lógica de demo
-apps/web/            aplicación React / Next.js principal
-packages/            dominio, contratos, UI y pruebas compartidas
-legacy-demo/         documentación de la referencia temporal heredada
-api/                 endpoints server-side
-supabase/            migraciones, RLS, seed sintético
-tests/               pruebas de dominio y P0
-scripts/             QA, build y auditoría
-docs/                runbooks, matrices y handoff
-references/          evidencia inmutable de video
-video-audit-reviews/ ledgers de revisión
-```
+| Ruta                        | Responsabilidad                                        |
+| --------------------------- | ------------------------------------------------------ |
+| `apps/web/`                 | Frontend, rutas HTTP y servicios del backend           |
+| `packages/`                 | Dominio, contratos y componentes compartidos           |
+| `database/postgresql/`      | Contrato de datos y migraciones                        |
+| `scripts/deployment/`       | Operador y verificaciones Docker/PostgreSQL            |
+| `infra/terraform/`          | Infraestructura parametrizada                          |
+| `tests/`                    | Pruebas y regresiones                                  |
+| `docs/`                     | Arquitectura, operación, requisitos y resultados       |
+| `references/video-audit/`   | Evidencia fuente inmutable                             |
+| `video-audit-reviews/`      | Observaciones y referencias de revisión                |
+| `app/`, `api/`, `supabase/` | Implementaciones históricas conservadas para regresión |
 
-Para operación, recuperación y rollback consulte [docs/RUNBOOK.md](docs/RUNBOOK.md). Para la entrega completa consulte [docs/FINAL_HANDOFF.md](docs/FINAL_HANDOFF.md).
+## Revisión técnica
+
+Comenzar por [arquitectura](docs/ARCHITECTURE.md),
+[esquema PostgreSQL](docs/deployment/POSTGRESQL.md),
+[operación local](docs/RUNBOOK.md) y [notas de versión](RELEASE_NOTES.md).
+El [índice de documentación](docs/README.md) distingue las guías vigentes de los
+registros históricos. [CONTRIBUTING](CONTRIBUTING.md) describe los controles de
+seguridad, pruebas y trazabilidad para cambios.
+
+Las pruebas locales no certifican capacidad productiva ni IAM en Google Cloud.
+Las reglas de negocio pendientes se conservan en
+[OPEN_QUESTIONS](docs/OPEN_QUESTIONS.md).

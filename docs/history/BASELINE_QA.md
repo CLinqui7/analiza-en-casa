@@ -1,8 +1,8 @@
-# QA previo a Codex
+# QA del baseline inicial — registro histórico
 
 ## Resultado de la prueba
 
-La prueba construye un baseline funcional completo con datos ficticios. El objetivo no es declarar un sistema clínico certificado, sino comprobar que la especificación entregada a Codex puede convertirse en una aplicación coherente sin perder los módulos vistos en el video.
+La prueba construye un baseline funcional completo con datos ficticios. El objetivo no es declarar un sistema clínico certificado, sino comprobar que la especificación funcional puede convertirse en una aplicación coherente sin perder los módulos vistos en el video.
 
 ## Cobertura funcional comprobada
 
@@ -32,9 +32,9 @@ La prueba construye un baseline funcional completo con datos ficticios. El objet
 5. Se mantuvieron brechas abiertas para formatos impresos, precios, seguros, honorarios y proveedores reales.
 6. La app necesita una prueba UAT con usuarios del negocio antes de cargar datos reales.
 
-## Criterio para continuar con Codex
+## Criterio registrado para la siguiente fase
 
-Codex puede comenzar a partir de este repositorio, pero cada tarea debe:
+La siguiente fase partía de este baseline con estos criterios:
 
 - Referenciar una brecha o requisito concreto.
 - No cambiar reglas clínicas o financieras sin aprobación.
