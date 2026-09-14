@@ -1,0 +1,1 @@
+{"operation":"MIGRATED","migrations":[{"version":"001_core.sql","sha256":"d265c58ef7c5a672a6361db17261aefb27e20287dfe1bc4dadeb77407967b46a"}],"runtimeRole":"analiza_runtime","deleteGranted":false}

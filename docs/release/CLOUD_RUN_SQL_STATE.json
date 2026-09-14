@@ -150,6 +150,9 @@
     "github_branch": "codex/cloud-run-cloud-sql",
     "artifact_registry": "PENDING_REAL_DESTINATION_AND_ACCESS",
     "cloud_run": "NOT_DEPLOYED",
-    "terraform_apply": false
+    "terraform_apply": false,
+    "github_pushed": true,
+    "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/7",
+    "pull_request_status": "DRAFT"
   }
 }
