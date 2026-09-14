@@ -1,0 +1,66 @@
+{
+  "lot": "B2",
+  "source_sha": null,
+  "base_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "packages/contracts/src/index.ts",
+    "apps/web/src/lib/doctor-catalog.ts",
+    "apps/web/src/lib/doctor-catalog.test.ts",
+    "apps/web/src/lib/permissions.test.ts",
+    "apps/web/src/lib/demo-data.ts",
+    "apps/web/src/lib/data-provider.ts",
+    "apps/web/src/components/providers.tsx",
+    "apps/web/src/lib/permissions.ts",
+    "apps/web/src/components/app-shell.tsx",
+    "apps/web/src/app/(workspace)/doctors/page.tsx",
+    "apps/web/src/app/(workspace)/clinical/nursing/page.tsx",
+    "apps/web/e2e/b2.spec.ts",
+    "apps/web/e2e/workspace.spec.ts",
+    "tests/selenium/test_doctors.py",
+    "tests/selenium/smoke.py",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.json",
+    "docs/qa/CLIENT_CHANGE_CERTIFICATIONS.json",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/handoffs/B2_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "client_changes": {
+    "affected": ["CR-005", "CR-006", "CR-007"],
+    "implemented_demo_only": ["CR-005", "CR-007"],
+    "partial": ["CR-006"],
+    "blocked": ["CR-006 private Supabase Storage/RLS and organization mapping"]
+  },
+  "tests": [
+    "npm run typecheck",
+    "npm run test --workspace=@analiza/web -- src/lib/doctor-catalog.test.ts src/lib/permissions.test.ts (4 passed)",
+    "PLAYWRIGHT_PORT=4188 npx playwright test -c apps/web/playwright.config.ts e2e/b2.spec.ts (6 passed; ADMIN lifecycle plus DOCTOR/NURSE/INVENTORY/FINANCE/AUDITOR direct-route denial)",
+    "node scripts/verify-client-changes.mjs --batch B1 --self-test",
+    "node scripts/verify-client-changes.mjs --batch B2 --self-test",
+    "npm run qa:light-mode",
+    "node scripts/verify-video-react-parity.mjs --chapter CH01 --self-test",
+    "node scripts/verify-video-react-parity.mjs --chapter CH02 --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "npm run qa:video-parity:chapter -- CH02",
+    "node scripts/verify-selenium-coverage.mjs --prefix DOCTOR- (8/8 declarations; runtime pending)"
+  ],
+  "gates": {"client_changes_b1": "PASS", "client_changes_b2": "PASS", "typecheck": "PASS", "unit_doctor_authorization": "PASS", "playwright_b2": "PASS", "light_only": "PASS", "ch01_parity": "PASS", "ch02_parity": "PASS"},
+  "repair": {
+    "authorization_boundary": "Repaired /doctors route and sidebar from settings:read to ADMIN-only settings:write.",
+    "denied_roles_verified_by_playwright": ["DOCTOR", "NURSE", "INVENTORY", "FINANCE", "AUDITOR"],
+    "sensitive_content_assertion": "Each denied direct-navigation test asserts the restricted alert and absence of doctor data and controls."
+  },
+  "failures": ["Selenium focal execution did not run: neither py nor python is installed or discoverable."],
+  "blockers": [
+    "CR-006 remains PARTIAL: demo persists attachment metadata only; Supabase organization mapping plus a private Storage bucket and RLS are required before bytes can be uploaded or downloaded.",
+    "Git metadata is read-only: git add/commit cannot create .git/index.lock and git fetch cannot create .git/FETCH_HEAD, so no stable SHA, push, or fresh local==remote verification is available.",
+    "B1_REPAIR certification remains PENDING_GIT_WRITE; this B2 handoff does not replace its SHA, Selenium, or two-user Supabase evidence."
+  ],
+  "next_batch": "B3"
+}

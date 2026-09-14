@@ -1,0 +1,110 @@
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 1:
+│    1: variable "project_id" {
+│
+│ The root module input variable "project_id" is not set, and has no default
+│ value. Use a -var or -var-file command line argument to provide a value for
+│ this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 21:
+│   21: variable "artifact_repository" {
+│
+│ The root module input variable "artifact_repository" is not set, and has no
+│ default value. Use a -var or -var-file command line argument to provide a
+│ value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 24:
+│   24: variable "private_bucket" {
+│
+│ The root module input variable "private_bucket" is not set, and has no
+│ default value. Use a -var or -var-file command line argument to provide a
+│ value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 27:
+│   27: variable "database_name" {
+│
+│ The root module input variable "database_name" is not set, and has no
+│ default value. Use a -var or -var-file command line argument to provide a
+│ value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 30:
+│   30: variable "sql_instance_name" {
+│
+│ The root module input variable "sql_instance_name" is not set, and has no
+│ default value. Use a -var or -var-file command line argument to provide a
+│ value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 89:
+│   89: variable "sql_connection_budget" {
+│
+│ The root module input variable "sql_connection_budget" is not set, and has
+│ no default value. Use a -var or -var-file command line argument to provide
+│ a value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 96:
+│   96: variable "db_user_secret_id" {
+│
+│ The root module input variable "db_user_secret_id" is not set, and has no
+│ default value. Use a -var or -var-file command line argument to provide a
+│ value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 99:
+│   99: variable "db_password_secret_id" {
+│
+│ The root module input variable "db_password_secret_id" is not set, and has
+│ no default value. Use a -var or -var-file command line argument to provide
+│ a value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 102:
+│  102: variable "db_user_secret_version" {
+│
+│ The root module input variable "db_user_secret_version" is not set, and has
+│ no default value. Use a -var or -var-file command line argument to provide
+│ a value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 110:
+│  110: variable "db_password_secret_version" {
+│
+│ The root module input variable "db_password_secret_version" is not set, and
+│ has no default value. Use a -var or -var-file command line argument to
+│ provide a value for this variable.
+╵
+╷
+│ Error: No value for required variable
+│
+│   on variables.tf line 143:
+│  143: variable "image_name" {
+│
+│ The root module input variable "image_name" is not set, and has no default
+│ value. Use a -var or -var-file command line argument to provide a value for
+│ this variable.
+╵

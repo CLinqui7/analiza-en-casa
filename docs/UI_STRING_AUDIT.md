@@ -1,5 +1,9 @@
 # Auditoría de textos visibles
 
+> Registro histórico generado antes de la entrega PostgreSQL. Las rutas y líneas
+> corresponden a esa captura; consultar [el índice técnico](README.md) para la versión vigente.
+
+
 Generado de forma determinista desde el código fuente. Incluye candidatos literales para internacionalización o centralización; valores sensibles se redactan automáticamente.
 
 Candidatos únicos encontrados: 2664.

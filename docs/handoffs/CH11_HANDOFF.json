@@ -1,0 +1,86 @@
+{
+  "lot": "CH11_F04_F05_EVIDENCE_REVIEW",
+  "source_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
+  "base_sha": "9ba208fd7faafca628743d3f50fe37f4ece09d1a",
+  "verification_status": "PENDING_REMOTE_VERIFICATION",
+  "final_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "remote_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "commits": ["c371d47f43096b76b26d2eadc5dbfa48924322a6"],
+  "changed_files": [
+    "apps/web/src/lib/video-parity-summary.ts",
+    "apps/web/src/app/(workspace)/agenda/page.tsx",
+    "apps/web/e2e/b3.spec.ts",
+    "apps/web/e2e/ch11.spec.ts",
+    "apps/web/e2e/workspace.spec.ts",
+    "tests/selenium/test_agenda_patient_filter.py",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.json",
+    "docs/qa/CLIENT_CHANGE_REQUESTS.csv",
+    "docs/qa/CLIENT_CHANGE_CERTIFICATIONS.json",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/overnight/VIDEO_AUDIT_VERIFY.json",
+    "docs/handoffs/CH11_HANDOFF.json",
+    "docs/handoffs/CH11_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "client_changes": {
+    "implemented_demo_only": ["CR-017"],
+    "partial": ["CR-018"],
+    "blocked": ["CR-010 Puntual client definition"],
+    "video_mapping": "CR-010, CR-017 and CR-018 have no CH11-F01 mapping; Puntual and the client-originated series/preset behavior are not evidenced by the patient-filter calendar."
+  },
+  "requirements": {
+    "verified_partial": ["CH11-F01", "CH11-F02", "CH11-F03", "CH11-F04", "CH11-F05", "CH11-F06"],
+    "corrected_to_partial": [],
+    "not_testable": ["CH11-F07", "CH11-F08", "CH11-F09"],
+    "remaining_partial": []
+  },
+  "tests": [
+    "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/ch11.spec.ts",
+    "npm --workspace @analiza/web run typecheck",
+    "npm run qa:client-changes:batch -- B3",
+    "npm --workspace @analiza/web exec vitest run src/lib/agenda-series.test.ts",
+    "PLAYWRIGHT_PORT=4323 npx playwright test -c apps/web/playwright.config.ts e2e/b3.spec.ts",
+    "npm run qa:video-parity:generate",
+    "node scripts/verify-video-react-parity.mjs --chapter CH11 --self-test",
+    "npm run qa:traceability-mirror -- --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "npm run qa:video-parity:chapter -- CH02",
+    "npm run qa:video-parity:chapter -- CH03",
+    "npm run qa:light-mode",
+    "npm run audit:verify"
+  ],
+  "gates": {
+    "functional_fingerprint": "PASS: a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
+    "playwright_ch11": "PASS: 8/8; patient filtering, DOCTOR calendar/detail view, INVENTORY direct-route denial, non-mutating patient context, persisted/reloaded B3 synthetic shift patient linkage, observed labels without mutation, and ADMIN navigation/views",
+    "typecheck": "PASS",
+    "ch11_parity_self_test": "PASS: 9/9; F04/F05 show only observed non-selectable labels",
+    "client_changes_b3": "PASS: 5/32; CR-017 DEMO_CERTIFIED and CR-018 PARTIAL_CLIENT_DEFINITION",
+    "agenda_series_unit": "PASS: 3/3",
+    "playwright_b3": "PASS: 7/7; series persistence, overnight presets and discrete write-denial roles",
+    "traceability_mirror": "PASS",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
+    "light_mode": "PASS: 79 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable"
+  },
+  "evidence": {
+    "ch11_f01": "CH11-E0010/E0015 show the patient criterion, selected patient and colored calendar events. React now searches/selects existing synthetic patients and filters only existing shifts in a calendar/table; no visit data is mutated.",
+    "ch11_precheck": "F04/F05 exact frames and detail crops were opened before implementation. F04 shows Puntual/Turno; F05 shows six readable labels: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría and Laboratorio Tercerizado.",
+    "ch11_f04_f05": "React exposes only frame-cited observed labels in the authorized shift dialog: F04 as non-selectable factual text and F05 as a non-selectable disclosure. F05 is constrained to CH11-E0040, including Visita Respiratoria General rather than the adjacent-frame label Visita Espiritual. Focused Playwright expands the disclosure and verifies reload leaves shifts/audit unchanged. No type/classification is saved or used to create a clinical visit, service, rate, discount, availability or state.",
+    "ch11_f03": "CH11-E0022 supports the authorized patient-turn dialog with factual read-only document/company context and Cerrar/Guardar controls. Playwright proves Cerrar leaves shifts and audit entries unchanged, while Guardar persists and reloads only the existing B3 synthetic shift with its selected factual patient linkage; visit semantics remain blocked.",
+    "ch11_f06": "CH11-E0050 visibly supports Agenda/Actualizaciones and factual start/end, patient and assigned-resource detail. React exposes only a read-only synthetic-shift detail: DOCTOR opens/closes it without state mutation and INVENTORY is denied the route; Actualizaciones remains visibly disabled under CH11-Q002/Q006. Finalization, observations, availability, deletion, payments and clinical semantics remain blocked.",
+    "cr017_cr018": "CR-017 restores multi-date add/remove, duplicate/collision protection and demo-local reload evidence. CR-018 restores only 6h/8h preset evidence, including overnight duration, and records the tested disabled AGENDA-SHIFT-PRESET-PUNTUAL action; Puntual remains blocked by CR-010.",
+    "ch11_f02": "CH11-E0010 shows previous/today/next plus Mes, Semana, Lista por semana and Lista por día. React implements them as read-only projections over existing synthetic shifts; Playwright proves period/view changes and confirms disabled Eliminar visitas leaves shifts and audit entries unchanged after reload."
+  },
+  "blockers": [
+    "CR-010 / CH11-Q001-Q003/Q006: Puntual, series semantics, statuses, permissions and financial rules are undefined; no clinical or financial behavior was invented.",
+    "CH11-Q004/Q005/Q007/Q008: deletion, Pool/links, auxiliary operations, notifications and resource-availability rules remain unimplemented.",
+    "Python is unavailable, so assertion-specific Selenium source remains PENDING_RUNTIME; it is not represented as PASS."
+  ],
+  "next_batch": "CH12_PRECHECK_AND_FIRST_SAFE_REQUIREMENT"
+}

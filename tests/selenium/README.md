@@ -7,3 +7,7 @@ WhatsApp inventado. Inicia Next sólo si `http://127.0.0.1:4174` no está dispon
 Instalación local: `py -m pip install --user -r tests/selenium/requirements.txt`.
 Ejecución: `npm run test:selenium`. Selenium Manager resuelve ChromeDriver compatible
 con el Chrome instalado; no hay credenciales ni datos clínicos en la suite.
+
+La certificación de cotizaciones se ejecuta con `npm run test:selenium:quotes:all` y
+se verifica con `npm run selenium:coverage:quotes`. La evidencia efímera queda en
+`.qa-results/selenium-quotes.json` y se rechaza si no coincide con el SHA actual.

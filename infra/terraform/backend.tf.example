@@ -1,0 +1,4 @@
+# Copy to backend.generated.tf ONLY after the approved state bucket exists.
+terraform {
+  backend "gcs" {}
+}

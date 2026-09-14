@@ -1,0 +1,30 @@
+# PostgreSQL 18. No database in the web image; supply external private runtime settings.
+services:
+  web:
+    image: ${ANALIZA_IMAGE:-analiza-web:cloudrun}
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        SOURCE_SHA: ${SOURCE_SHA:-local-unversioned}
+    ports:
+      - "127.0.0.1:${ANALIZA_HOST_PORT:-8080}:${PORT:-8080}"
+    environment:
+      PORT: ${PORT:-8080}
+      HOSTNAME: 0.0.0.0
+      PGHOST: ${PGHOST:?Set the approved Cloud SQL socket or QA host}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${PGDATABASE:?Set the database name}
+      PGUSER: ${PGUSER:?Set the restricted database user}
+      PGPASSWORD: ${PGPASSWORD:?Load the runtime secret privately}
+      PGPOOL_MAX: ${PGPOOL_MAX:-5}
+      GCS_PRIVATE_BUCKET: ${GCS_PRIVATE_BUCKET:?Set the private bucket}
+      ANALIZA_QA_MODE: ${ANALIZA_QA_MODE:-0}
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache:uid=1000,gid=1000
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 10s

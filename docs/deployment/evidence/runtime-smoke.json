@@ -1,0 +1,25 @@
+{
+  "image": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+  "sourceSha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+  "node": "v24.21.0",
+  "checks": [
+    {
+      "passed": true,
+      "platform": "linux/amd64",
+      "uid": 1000,
+      "port": "8080",
+      "assets": 11,
+      "database": "unconfigured-safe-failure",
+      "scope": "Runtime smoke only; connected persistence gate is separate"
+    },
+    {
+      "passed": true,
+      "platform": "linux/amd64",
+      "uid": 1000,
+      "port": "9090",
+      "assets": 11,
+      "database": "unconfigured-safe-failure",
+      "scope": "Runtime smoke only; connected persistence gate is separate"
+    }
+  ]
+}

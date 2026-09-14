@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useId,
   type ButtonHTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
@@ -45,6 +46,8 @@ export function Dialog({
   onClose: () => void;
   footer?: ReactNode;
 }>) {
+  const titleId = useId();
+  const descriptionId = useId();
   useEffect(() => {
     if (!open) return;
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -57,8 +60,8 @@ export function Dialog({
   return (
     <div className="dialog-backdrop" role="presentation" onMouseDown={onClose}>
       <section
-        aria-describedby={description ? 'dialog-description' : undefined}
-        aria-labelledby="dialog-title"
+        aria-describedby={description ? descriptionId : undefined}
+        aria-labelledby={titleId}
         aria-modal="true"
         className="dialog"
         role="dialog"
@@ -66,8 +69,8 @@ export function Dialog({
       >
         <header className="dialog-header">
           <div>
-            <h2 id="dialog-title">{title}</h2>
-            {description ? <p id="dialog-description">{description}</p> : null}
+            <h2 id={titleId}>{title}</h2>
+            {description ? <p id={descriptionId}>{description}</p> : null}
           </div>
           <button
             aria-label="Cerrar diálogo"

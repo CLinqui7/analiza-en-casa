@@ -1,0 +1,9 @@
+tests/staging.tftest.hcl... in progress
+  run "connected_staging_plan"... pass
+  run "reject_public_invoker"... pass
+  run "reject_production"... pass
+  run "reserve_connections_for_two_revisions"... pass
+tests/staging.tftest.hcl... tearing down
+tests/staging.tftest.hcl... pass
+
+Success! 4 passed, 0 failed.

@@ -1,6 +1,11 @@
 * text=auto
+Dockerfile text eol=lf
+.dockerignore text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
 *.js text eol=lf
 *.mjs text eol=lf
 *.sql text eol=lf
@@ -15,3 +20,8 @@
 *.png binary
 *.mp4 binary
 references/video-audit/** linguist-generated=true
+
+# Documentation and generated artifacts in GitHub language statistics
+docs/** linguist-documentation=true
+video-audit-reviews/** linguist-documentation=true
+Analiza_en_Casa_Demo_QA.html linguist-generated=true

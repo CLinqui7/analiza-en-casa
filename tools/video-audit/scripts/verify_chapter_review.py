@@ -17,7 +17,7 @@ def evidence_path_exists(repo_root: Path, source_root: Path, value: str) -> bool
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description='Verifica que Codex declare revisada toda la evidencia obligatoria de un capítulo.')
+    ap = argparse.ArgumentParser(description='Verifica la cobertura documentada de toda la evidencia obligatoria de un capítulo.')
     ap.add_argument('chapter_dir')
     ap.add_argument(
         '--review-dir',

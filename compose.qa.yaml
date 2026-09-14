@@ -1,0 +1,11 @@
+# Local synthetic QA only; combine with compose.yaml and a private runtime env file.
+# PostgreSQL and the storage emulator are separate containers on this existing network.
+services:
+  web:
+    environment:
+      ANALIZA_QA_MODE: "1"
+      ANALIZA_QA_STORAGE_EMULATOR: http://gcs:4443
+networks:
+  default:
+    external: true
+    name: ${ANALIZA_QA_NETWORK:?Set the isolated QA network created by Initialize-LocalQa.ps1}

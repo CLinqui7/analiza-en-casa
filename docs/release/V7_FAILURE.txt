@@ -1,0 +1,11 @@
+﻿TIME=2026-09-06T00:11:02.4051582-06:00
+GATE=PLAYWRIGHT_178
+
+Exit 1: npx.cmd playwright test -c apps\web\playwright.config.ts
+En S:\Usuarios\Carlos\carlo\ANALIZA_RECOVERY_V7_FINAL\RUN_ANALIZA_RECOVERY_V7.ps1: 20 Carácter: 32
++ ... EXITCODE -ne 0) { throw "Exit $LASTEXITCODE`: $exe $($a -join ' ')" }
++                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Exit 1: npx.cmd...right.config.ts:String) [], RuntimeException
+    + FullyQualifiedErrorId : Exit 1: npx.cmd playwright test -c apps\web\playwright.config.ts
+ 
+

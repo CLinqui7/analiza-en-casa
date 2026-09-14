@@ -1,0 +1,53 @@
+{
+  "lot": "CH12_SELENIUM_SOURCE_REPAIR",
+  "source_sha": "a61bc0a85cb4fc92944963687647dabf29a8090d",
+  "base_sha": "a61bc0a85cb4fc92944963687647dabf29a8090d",
+  "implementation_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": ["c371d47f43096b76b26d2eadc5dbfa48924322a6", "a61bc0a85cb4fc92944963687647dabf29a8090d"],
+  "functional_fingerprint": "a5e9bd4c17a6831a16a8534615b2c600109a26420970288bf4d1f6753824979c",
+  "changed_files": [
+    "apps/web/src/app/(workspace)/payables/page.tsx",
+    "apps/web/src/lib/permissions.ts",
+    "apps/web/src/components/app-shell.tsx",
+    "apps/web/e2e/ch12.spec.ts",
+    "tests/selenium/test_payables.py",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/REACT_ROUTE_PARITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.csv",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.md"
+  ],
+  "requirements": {
+    "verified_partial": ["CH12-F01"],
+    "explicitly_blocked": ["CH12-F02", "CH12-F04", "CH12-F07"],
+    "not_implemented": ["CH12-F03", "CH12-F05", "CH12-F06", "CH12-F08"]
+  },
+  "evidence": {
+    "ch12_f01": "CH12-E0004 and its detail crop were opened. They support the Cuentas por pagar heading, Resumen/Pagos de Servicio tabs, Facturas/Reclamos, search and four visible controls. React provides an authorized, factual empty summary only; it generates no financial data, planilla, restriction, download, deletion, claim, payment or audit entry.",
+    "permissions": "payments:read permits ADMIN, FINANCE and AUDITOR. Focused Playwright proves ADMIN and FINANCE can read the surface and INVENTORY receives direct-route denial.",
+    "selenium_source_repair": "SEL-CH12-PAYABLES-SUMMARY now locates tbody .empty-state and asserts the rendered title Sin facturas documentadas plus the actual query-specific no-record message before recording PAYABLES-INVOICE-SEARCH."
+  },
+  "gates": {
+    "typecheck": "PASS",
+    "playwright_ch12": "PASS: 3/3 on isolated current-worktree server",
+    "playwright_ch11": "PASS: 8/8; F05 source-correct labels remain non-selectable/non-persistent",
+    "ch12_parity_self_test": "PASS: 8/8",
+    "ch11_parity_self_test": "PASS: 9/9",
+    "protected_parity": "PASS: CH01 14/14; CH02 16/16; CH03 13/13",
+    "traceability_generation": "PASS",
+    "traceability_mirror": "PASS with negative self-tests",
+    "light_mode": "PASS: 81 product source files",
+    "audit_verify": "PASS: 17/17 chapters",
+    "selenium_runtime": "PENDING_RUNTIME: Python unavailable; source tests are action-specific"
+  },
+  "blockers": [
+    "CH12-Q001/Q002/Q003/Q005/Q006/Q007/Q008/Q009/Q010/Q011: payment records, financial states, period, amounts, authorization, report/export, clearing, claims, reason catalog and audit/reversal rules require approved client definitions.",
+    "Python/Selenium runtime is unavailable; no runtime PASS is claimed.",
+    "The implementation checkpoint is c371d47f43096b76b26d2eadc5dbfa48924322a6. Its local tracking ref matches, but fresh remote fetch verification is blocked by unavailable Windows Schannel credentials."
+  ],
+  "next_batch": "CH13_PRECHECK"
+}

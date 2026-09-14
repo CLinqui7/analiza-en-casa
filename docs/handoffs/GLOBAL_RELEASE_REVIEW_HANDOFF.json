@@ -1,0 +1,57 @@
+{
+  "lot": "GLOBAL_RELEASE_REVIEW",
+  "source_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
+  "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
+  "verification_status": "STATIC_RELEASE_REVIEW_COMPLETE_RUNTIME_AND_GIT_EVIDENCE_PENDING",
+  "final_sha": null,
+  "remote_sha": null,
+  "release_status": "NOT_READY",
+  "global_complete": false,
+  "review_scope": {
+    "chapters": 17,
+    "video_requirements": 210,
+    "video_status_counts": {
+      "EXACT": 52,
+      "PARTIAL": 87,
+      "MISSING": 20,
+      "NOT_TESTABLE": 40,
+      "BLOCKED_CLIENT": 6,
+      "BLOCKED_INTEGRATION": 3,
+      "NOT_APPLICABLE": 2
+    },
+    "client_requests": 32,
+    "client_status_counts": {
+      "IMPLEMENTED_DEMO_ONLY": 7,
+      "PARTIAL": 7,
+      "BLOCKED_CLIENT": 4,
+      "MISSING": 12,
+      "SOURCE_CONFLICT": 2
+    }
+  },
+  "safe_work_review": {
+    "result": "NO_UNCLOSED_SAFE_PRODUCT_WORK_IDENTIFIED",
+    "evidence": "The remaining non-exact video requirements and non-demo client requests name source, clinical, financial, provider, role, audit, retention, integration, or conflict boundaries in their canonical ledgers. No clinical-data, external-provider, financial, inventory, or multi-user behavior was inferred from the missing contracts."
+  },
+  "verified_gates": {
+    "preflight": "PASS: 17 chapters, 1,359 events, no errors.",
+    "security_scan": "PASS: self-test confirms demo fixture exemption is path- and demo-value-scoped.",
+    "legacy_check": "PASS: 98 node tests, 76 QA checks, standalone build.",
+    "format": "PASS: all matched application and package source files use Prettier.",
+    "lint": "PASS_WITH_4_PREEXISTING_WARNINGS: no lint errors.",
+    "typecheck": "PASS: tsc --noEmit.",
+    "production_build": "PASS: 36 routes.",
+    "light_mode": "PASS: 92 product source files contain no Dark/System UI support.",
+    "video_parity": "PASS: 210/210 requirements traced.",
+    "traceability_mirror": "PASS: normal and self-test mirror checks.",
+    "client_changes": "PASS: 32/32 and self-tests.",
+    "video_audit": "PASS: 17/17 chapters, 0 pending, 0 failed."
+  },
+  "runtime_and_provenance_gaps": [
+    "The only completed new browser result is B3 against a reused development server (7/7); it is focused evidence, not fresh-server release certification.",
+    "The protected CH01-CH03 run reached all 20 cases but has no final Playwright exit summary; the full suite has no completed fresh-server exit result.",
+    "A stale Next development server owns the development lock. Its known PID could not be terminated because Windows returned Access denied.",
+    "Selenium remains PENDING_RUNTIME because the Python launcher is unavailable.",
+    "The reviewed code is committed at f13c8325, but current release-review metadata is dirty: git add cannot create .git/index.lock, push has no schannel credentials, and fetch cannot write .git/FETCH_HEAD. No remote equality claim is made."
+  ],
+  "next_batch": "GLOBAL_RELEASE_RUNTIME_EVIDENCE"
+}

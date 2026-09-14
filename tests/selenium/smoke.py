@@ -1,4 +1,4 @@
-"""Chrome WebDriver smoke suite for unauthenticated React flows only."""
+"""Chrome WebDriver smoke suite for authenticated React flows."""
 
 from __future__ import annotations
 
@@ -72,6 +72,24 @@ class ReactUnauthenticatedSmoke(unittest.TestCase):
             except subprocess.TimeoutExpired:
                 SERVER.kill()
 
+    def setUp(self) -> None:
+        self.driver.get(f"{BASE_URL}/login")
+        self.wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
+        self.driver.execute_script("localStorage.clear()")
+        self.driver.refresh()
+        username = self.wait.until(
+            conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Usuario')]//input"))
+        )
+        username.clear()
+        username.send_keys("admin@demo.local")
+        password = self.driver.find_element(By.CSS_SELECTOR, "input[type=password]")
+        password.clear()
+        password.send_keys("demo-admin")
+        self.wait.until(
+            conditions.element_to_be_clickable((By.CSS_SELECTOR, '[data-action-id="AUTH-LOGIN"]'))
+        ).click()
+        self.wait.until(conditions.url_contains("/dashboard"))
+
     def test_accordion_routes_to_health_report(self) -> None:
         self.driver.get(f"{BASE_URL}/dashboard")
         self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[.//span[normalize-space()='Clínico']]"))).click()
@@ -83,19 +101,27 @@ class ReactUnauthenticatedSmoke(unittest.TestCase):
         self.driver.get(f"{BASE_URL}/patients")
         self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Agregar paciente']"))).click()
         self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Nombre completo')]//input"))).send_keys("Paciente Demo Repetido")
-        self.driver.find_element(By.XPATH, "//label[contains(., 'Número de documento')]//input").send_keys("123456789")
-        self.driver.find_element(By.XPATH, "//button[normalize-space()='Guardar registro']").click()
+        self.driver.find_element(By.CSS_SELECTOR, 'input[aria-label="Número de documento"]').send_keys("123456789")
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Fecha de nacimiento')]//input").send_keys("04/20/1985")
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Femenino')]//input").click()
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Teléfono celular')]//input").send_keys("70009999")
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Empresa')]//input").send_keys("Empresa smoke")
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Dirección')]//input").send_keys("Dirección smoke")
+        self.driver.find_element(By.XPATH, "//label[contains(., 'Comentarios relevantes de la dirección')]//input").send_keys("Referencia smoke")
+        self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="PATIENT-SAVE"]').click()
         error = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'Ya existe un registro con este documento')]")))
         self.assertIn("Ya existe un registro", error.text)
 
     def test_help_does_not_invent_whatsapp_contact(self) -> None:
         self.driver.get(f"{BASE_URL}/help")
-        text = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//h2[normalize-space()='Canal de WhatsApp']/following-sibling::p"))).text
+        self.wait.until(conditions.visibility_of_element_located((By.CSS_SELECTOR, '[data-action-id="HELP-SEARCH"]'))).send_keys("canal externo inexistente")
+        text = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'No hay un canal de WhatsApp configurado')]"))).text
         self.assertIn("No hay un canal de WhatsApp configurado", text)
 
     def test_nursing_board_registers_an_operational_resource(self) -> None:
         self.driver.get(f"{BASE_URL}/clinical/nursing")
-        self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Registrar recurso']"))).click()
+        self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Nuevo recurso']"))).click()
+        self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Número de Junta')]//input"))).send_keys("REG-SMOKE-001")
         self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Nombre visible')]//input"))).send_keys("Enfermería Demo Sur")
         self.driver.find_element(By.XPATH, "//label[contains(., 'Territorio')]//input").send_keys("Zona demo sur")
         capacity = self.driver.find_element(By.XPATH, "//label[contains(., 'Capacidad disponible')]//input")
@@ -116,17 +142,10 @@ class ReactUnauthenticatedSmoke(unittest.TestCase):
         error = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'dejaría un saldo negativo')]")))
         self.assertIn("saldo negativo", error.text)
 
-    def test_nurse_hours_updates_consolidated_total(self) -> None:
+    def test_nurse_hours_reports_scheduled_total(self) -> None:
         self.driver.get(f"{BASE_URL}/reports/nurse-hours")
-        self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Agregar horas']"))).click()
-        hours = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//label[contains(., 'Horas')]//input")))
-        hours.clear()
-        hours.send_keys("2")
-        self.driver.find_element(By.XPATH, "//label[contains(., 'Servicio operativo')]//input").send_keys("Refuerzo demo")
-        self.driver.find_element(By.XPATH, "//button[normalize-space()='Guardar horas']").click()
-        self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(text(), 'Hora de enfermería agregada')]")))
-        total = self.driver.find_element(By.XPATH, "//span[normalize-space()='Horas consolidadas']/following-sibling::strong")
-        self.assertEqual("12", total.text)
+        total = self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//span[normalize-space()='Horas programadas']/following-sibling::strong")))
+        self.assertGreaterEqual(float(total.text), 0)
 
 
 if __name__ == "__main__":

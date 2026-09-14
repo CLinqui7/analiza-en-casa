@@ -1,0 +1,23 @@
+# Copy to an ignored *.tfvars file OUTSIDE Git and fill real approved values.
+project_id               = ""
+region                   = "us-central1"
+service_name             = "analiza-staging"
+artifact_repository      = ""
+image_name               = ""
+private_bucket           = ""
+sql_instance_name        = ""
+existing_sql_connection_name = null
+database_name            = ""
+db_user_secret_id        = ""
+db_user_secret_version   = ""
+db_password_secret_id    = ""
+db_password_secret_version = ""
+sql_connection_budget   = 0 # Engineer's allocation; must cover web pools plus reserved connections.
+image_digest_uri         = null # Real Artifact Registry URI@sha256 required only when deploy_service=true.
+invokers                 = [] # Named IAM identities for staging, never allUsers.
+create_artifact_repository = false
+create_private_bucket    = false
+create_secret_containers = false
+create_sql_instance      = false # Corporate existing instance by default.
+deploy_service           = false
+# Enabling flags/applying creates billable resources or modifies IAM: review/approve the plan first.

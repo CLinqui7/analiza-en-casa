@@ -1,0 +1,359 @@
+'use client';
+import { configuredServerDataMode } from '@/lib/data-mode';
+
+import {
+  doctorSchema,
+  clinicalDocumentSchema,
+  hospitalizationSchema,
+  insuranceEventSchema,
+  insuranceRequestSchema,
+  nursingResourceSchema,
+  quoteSchema,
+  shiftSchema,
+  patientSchema,
+  type Doctor,
+  type Hospitalization,
+  type Patient,
+  type InsuranceEvent,
+  type InsuranceRequest,
+  type InsuranceRequestStatus,
+  type Quote,
+  type Shift,
+} from '@analiza/contracts';
+import { mongoMutationHeaders } from '@/lib/auth';
+import type { DataProvider, WorkspaceSnapshot } from '@/lib/data-provider';
+
+type WorkspaceResponse = WorkspaceSnapshot & {
+  patientVersions?: Record<string, unknown>;
+  doctorVersions?: Record<string, unknown>;
+  hospitalizationVersions?: Record<string, unknown>;
+  quoteVersions?: Record<string, unknown>;
+};
+
+function responseError(response: Response, fallback: string): Promise<Error> {
+  return response
+    .json()
+    .then((body: unknown) => {
+      if (
+        body &&
+        typeof body === 'object' &&
+        typeof (body as { error?: unknown }).error === 'string'
+      ) {
+        return new Error((body as { error: string }).error);
+      }
+      return new Error(fallback);
+    })
+    .catch(() => new Error(fallback));
+}
+
+export class HttpDataProvider implements DataProvider {
+  readonly mode = configuredServerDataMode();
+
+  constructor(
+    private readonly fetchImpl: typeof fetch = (...argumentsList) => fetch(...argumentsList),
+    private readonly endpoint = '/api/workspace',
+    private readonly mutationHeaders: () => Record<string, string> = mongoMutationHeaders,
+  ) {}
+  private patientVersions = new Map<string, number>();
+  private doctorVersions = new Map<string, number>();
+  private hospitalizationVersions = new Map<string, number>();
+  private quoteVersions = new Map<string, number>();
+
+  async executeCommand(input: unknown): Promise<void> {
+    const response = await this.fetchImpl('/api/operations', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', ...this.mutationHeaders() },
+      body: JSON.stringify(input),
+    });
+    if (!response.ok) throw await responseError(response, 'No se guardó la operación.');
+  }
+
+  private loadVersions(raw: Record<string, unknown> | undefined) {
+    return new Map(
+      Object.entries(raw ?? {}).flatMap(([id, version]) =>
+        typeof version === 'number' && Number.isInteger(version) && version > 0
+          ? [[id, version]]
+          : [],
+      ),
+    );
+  }
+
+  async load(): Promise<WorkspaceSnapshot> {
+    const response = await this.fetchImpl(this.endpoint, {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible cargar el espacio de trabajo seguro.');
+    const payload = (await response.json()) as WorkspaceResponse;
+    if (!Array.isArray(payload.patients))
+      throw new Error('La respuesta segura de pacientes no es válida.');
+    this.patientVersions = this.loadVersions(payload.patientVersions);
+    this.doctorVersions = this.loadVersions(payload.doctorVersions);
+    this.hospitalizationVersions = this.loadVersions(payload.hospitalizationVersions);
+    this.quoteVersions = this.loadVersions(payload.quoteVersions);
+    return {
+      ...payload,
+      patients: payload.patients.map((patient) => patientSchema.parse(patient)),
+      doctors: (payload.doctors ?? []).map((doctor) => doctorSchema.parse(doctor)),
+      hospitalizations: (payload.hospitalizations ?? []).map((item) =>
+        hospitalizationSchema.parse(item),
+      ),
+      shifts: (payload.shifts ?? []).map((shift) => shiftSchema.parse(shift)),
+      nursingResources: (payload.nursingResources ?? []).map((resource) =>
+        nursingResourceSchema.parse(resource),
+      ),
+      quotes: (payload.quotes ?? []).map((quote) => quoteSchema.parse(quote)),
+      clinicalDocuments: (payload.clinicalDocuments ?? []).map((document) =>
+        clinicalDocumentSchema.parse(document),
+      ),
+      insuranceRequests: (payload.insuranceRequests ?? []).map((request) =>
+        insuranceRequestSchema.parse(request),
+      ),
+      insuranceEvents: (payload.insuranceEvents ?? []).map((event) =>
+        insuranceEventSchema.parse(event),
+      ),
+    };
+  }
+
+  async createPatient(patient: Patient): Promise<Patient> {
+    const response = await this.fetchImpl('/api/patients', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ patient }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar el paciente.');
+    const saved = patientSchema.parse(await response.json());
+    this.patientVersions.set(saved.id, 1);
+    return saved;
+  }
+
+  async replacePatient(patient: Patient): Promise<Patient> {
+    const expectedVersion = this.patientVersions.get(patient.id);
+    if (!expectedVersion)
+      throw new Error(
+        'No se conoce la versión del paciente; actualice el listado antes de editar.',
+      );
+    const response = await this.fetchImpl(`/api/patients/${encodeURIComponent(patient.id)}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ patient, expectedVersion }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar los cambios.');
+    const saved = patientSchema.parse(await response.json());
+    this.patientVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async createDoctor(doctor: Doctor): Promise<Doctor> {
+    const response = await this.fetchImpl('/api/doctors', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ doctor }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar el médico.');
+    const saved = doctorSchema.parse(await response.json());
+    this.doctorVersions.set(saved.id, 1);
+    return saved;
+  }
+
+  async replaceDoctor(doctor: Doctor): Promise<Doctor> {
+    const expectedVersion = this.doctorVersions.get(doctor.id);
+    if (!expectedVersion)
+      throw new Error('No se conoce la versión del médico; actualice el listado antes de editar.');
+    const response = await this.fetchImpl(`/api/doctors/${encodeURIComponent(doctor.id)}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ doctor, expectedVersion }),
+    });
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible guardar los cambios del médico.');
+    const saved = doctorSchema.parse(await response.json());
+    this.doctorVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async createHospitalization(hospitalization: Hospitalization): Promise<Hospitalization> {
+    const response = await this.fetchImpl('/api/hospitalizations', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ hospitalization }),
+    });
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible guardar la hospitalización.');
+    const saved = hospitalizationSchema.parse(await response.json());
+    this.hospitalizationVersions.set(saved.id, 1);
+    return saved;
+  }
+
+  async replaceHospitalization(hospitalization: Hospitalization): Promise<Hospitalization> {
+    const expectedVersion = this.hospitalizationVersions.get(hospitalization.id);
+    if (!expectedVersion)
+      throw new Error(
+        'No se conoce la versión de la hospitalización; actualice el listado antes de editar.',
+      );
+    const response = await this.fetchImpl(
+      `/api/hospitalizations/${encodeURIComponent(hospitalization.id)}`,
+      {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          ...this.mutationHeaders(),
+        },
+        body: JSON.stringify({ hospitalization, expectedVersion }),
+      },
+    );
+    if (!response.ok)
+      throw await responseError(
+        response,
+        'No fue posible guardar los cambios de la hospitalización.',
+      );
+    const saved = hospitalizationSchema.parse(await response.json());
+    this.hospitalizationVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async createShiftSeries(shifts: Shift[], idempotencyKey: string): Promise<Shift[]> {
+    const response = await this.fetchImpl('/api/shifts', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ shifts, idempotencyKey }),
+    });
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible guardar la serie de turnos.');
+    const payload: unknown = await response.json();
+    if (
+      !payload ||
+      typeof payload !== 'object' ||
+      !Array.isArray((payload as { shifts?: unknown }).shifts)
+    ) {
+      throw new Error('La respuesta de la serie de turnos no es válida.');
+    }
+    return (payload as { shifts: unknown[] }).shifts.map((shift) => shiftSchema.parse(shift));
+  }
+
+  async createQuote(quote: Quote): Promise<Quote> {
+    const response = await this.fetchImpl('/api/quotes', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ quote }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, 1);
+    return saved;
+  }
+
+  async replaceQuote(quote: Quote): Promise<Quote> {
+    const expectedVersion = this.quoteVersions.get(quote.id);
+    if (!expectedVersion)
+      throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quote.id)}`, {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ quote, expectedVersion }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible guardar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async sendQuote(quoteId: string): Promise<Quote> {
+    const expectedVersion = this.quoteVersions.get(quoteId);
+    if (!expectedVersion)
+      throw new Error('No se conoce la versión de la cotización; actualice el listado.');
+    const response = await this.fetchImpl(`/api/quotes/${encodeURIComponent(quoteId)}/send`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ expectedVersion }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible enviar la cotización.');
+    const saved = quoteSchema.parse(await response.json());
+    this.quoteVersions.set(saved.id, expectedVersion + 1);
+    return saved;
+  }
+
+  async recordInsuranceObservation(input: {
+    quoteId: string;
+    status: InsuranceRequestStatus;
+    note: string;
+    date: string;
+  }): Promise<{ request: InsuranceRequest; event: InsuranceEvent }> {
+    const response = await this.fetchImpl('/api/insurance-observations', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ ...input, idempotencyKey: crypto.randomUUID() }),
+    });
+    if (!response.ok)
+      throw await responseError(response, 'No fue posible registrar la actualización del seguro.');
+    const payload = (await response.json()) as { request?: unknown; event?: unknown };
+    return {
+      request: insuranceRequestSchema.parse(payload.request),
+      event: insuranceEventSchema.parse(payload.event),
+    };
+  }
+
+  async saveChanges(_changes: Partial<WorkspaceSnapshot>): Promise<void> {
+    void _changes;
+    // The legacy provider emits changed arrays, which are full collection snapshots.
+    // Mongo commands are per-resource with versions; never convert this into bulk upserts.
+    throw new Error(
+      'La escritura Mongo requiere comandos por recurso con versión; no se guardó ningún cambio.',
+    );
+  }
+}

@@ -1,0 +1,29 @@
+import { persistence } from '@/server/persistence';
+import { NextRequest, NextResponse } from 'next/server';
+import { CsrfError, csrfHeaderName, sessionCookieName } from '@/server/auth-service';
+
+import { authCookieOptions } from '@/server/auth-cookie';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+export async function POST(request: NextRequest) {
+  try {
+    const auth = (await persistence()).auth;
+    const sessionToken = request.cookies.get(sessionCookieName)?.value;
+    await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
+    await auth.logout(sessionToken);
+    const response = NextResponse.json({}, { headers: { 'Cache-Control': 'no-store' } });
+    response.cookies.set(sessionCookieName, '', {
+      ...authCookieOptions(request.nextUrl.protocol),
+      maxAge: 0,
+    });
+    return response;
+  } catch (error) {
+    const status = error instanceof CsrfError ? 403 : 401;
+    return NextResponse.json(
+      { error: status === 403 ? 'La solicitud no pudo verificarse.' : 'No autorizado.' },
+      { status, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
+}

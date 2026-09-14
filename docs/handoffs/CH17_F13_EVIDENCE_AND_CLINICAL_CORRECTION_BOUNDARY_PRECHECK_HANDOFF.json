@@ -1,0 +1,39 @@
+{
+  "lot": "CH17_F13_EVIDENCE_AND_CLINICAL_CORRECTION_BOUNDARY_PRECHECK",
+  "source_sha": "c83fd53a59435ebea141c4eaa19aad381ea61305",
+  "base_sha": "c83fd53a59435ebea141c4eaa19aad381ea61305",
+  "implementation_sha": "PENDING_COMMIT",
+  "verification_status": "PRECHECK_COMPLETE_PENDING_COMMIT",
+  "final_sha": null,
+  "remote_sha": null,
+  "requirements": {
+    "missing": ["CH17-F13"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q010", "CH17-Q011"],
+    "preserved_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11", "CH17-F12"],
+    "preserved_not_testable": ["CH17-F07"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0048": "Opened detail crop at 00:52:14.800: a nursing-note context visibly presents an edit affordance; the frame contains sensitive clinical content that is not copied into the product.",
+    "safety_005": "Opened the safety contact sheet at 00:52:14–00:52:29: it shows editable-text/save anatomy in the same sensitive note context, but no authorization, correction, version, audit or preservation contract."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped Reporte de salud source, organization context, sensitive fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q010 controls nursing-note fields/content, shift/resource context, lifecycle, signature and audit.",
+    "CH17-Q011 controls correction authorization, reason, signed-original immutability, replacement version, conflicts and append-only audit evidence.",
+    "No clinical note, editor, save control, query, persistence, print/export, navigation or clinical write was added.",
+    "/clinical/hospitalizations is not a source or authorization bridge for /clinical/reports; CH09-F03 remains independently PARTIAL there.",
+    "CR-020 remains separately blocked for fluid-balance form, closure/correction rules and shift permissions; it does not authorize nursing-note editing."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA c83fd53a59435ebea141c4eaa19aad381ea61305; PARTIAL 87; MISSING 20).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17 requirements traced).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files; no Dark/System UI support).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters verified; 0 pending; 0 failed).",
+    "cross_requirement_isolation": "PASS: F13 alone maps to /clinical/reports under CH16-Q008/CH17-Q010/CH17-Q011; CH09-F03 remains /clinical/hospitalizations PARTIAL with no CH17 blocker.",
+    "selenium_runtime": "NOT_APPLICABLE: F13 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "BLOCKED_ENVIRONMENT: git add and git commit could not create .git/index.lock (Permission denied); git push failed with schannel SEC_E_NO_CREDENTIALS; git fetch could not open .git/FETCH_HEAD (Permission denied). At batch start local HEAD and cached origin/codex/react-full-parity-selenium-100 were both c83fd53a59435ebea141c4eaa19aad381ea61305."
+  },
+  "next_batch": "CH17_REVIEW"
+}

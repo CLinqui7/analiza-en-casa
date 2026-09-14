@@ -1,0 +1,37 @@
+{
+  "lot": "CH17_F05_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "0e6d9befeddd9771a6368889cf795b7d3c24240a",
+  "base_sha": "0e6d9befeddd9771a6368889cf795b7d3c24240a",
+  "implementation_sha": "7214fe01af9545cac5dc6e269b594ecf946a35ba",
+  "verification_status": "F05_PRECHECK_VERIFIED_AT_COMMITTED_SHA_PENDING_ISOLATION_COMMIT",
+  "final_sha": null,
+  "remote_sha": "7214fe01af9545cac5dc6e269b594ecf946a35ba",
+  "requirements": {
+    "missing": ["CH17-F05"],
+    "explicitly_blocked": ["CH16-Q008"],
+    "preserved_missing": ["CH17-F04"],
+    "preserved_partial": ["CH17-F01", "CH17-F02", "CH17-F03"]
+  },
+  "evidence": {
+    "CH17-E0019": "Opened: the Reporte de salud Informacion Principal tab visibly contains patient identity, identification number, birth date, age, sex, hospitalization period, and status."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped report source, organization isolation, allowed sensitive fields by role, access audit, retention, minimization, and redaction.",
+    "The existing /clinical/hospitalizations synthetic workspace collection is not an authorized source or authorization bridge for /clinical/reports.",
+    "No patient or hospitalization field, selector, query, print/export, navigation, persistence, or clinical write was rendered, copied, queried, or reused.",
+    "CR-020 remains unrelated and clinically blocked."
+  ],
+  "gates": {
+    "typecheck": "PASS: npm.cmd run typecheck.",
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; generator source SHA 7214fe01af9545cac5dc6e269b594ecf946a35ba; current metadata isolation remains pending commit).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-test (17/17).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters).",
+    "f01_f03_regression": "PRESERVED: focused CH17 Playwright completed 6/6 at fec4aef2d984afc95e4f54c2703d20651116c8c9; no application code changed in this precheck.",
+    "cross_requirement_isolation": "PASS: CH09-F03 remains /clinical/hospitalizations PARTIAL with no CH16-Q008 blocker, and CH17-F01 remains NOT_TESTABLE in the chapter inventory.",
+    "selenium_runtime": "NOT_APPLICABLE: F05 has no implemented action; Python Selenium runtime remains unavailable.",
+    "git_sync": "PENDING_ENVIRONMENT: F05 precheck exists at 7214fe01af9545cac5dc6e269b594ecf946a35ba and cached origin matches it; the CH09-F03 isolation restoration still needs an environment checkpoint because direct git add/commit/fetch are blocked by .git ACL and direct push lacks HTTPS credentials."
+  },
+  "next_batch": "CH17_REVIEW"
+}

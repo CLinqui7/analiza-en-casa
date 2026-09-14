@@ -1,0 +1,40 @@
+{
+  "lot": "CH17_F12_EVIDENCE_AND_DATA_BOUNDARY_PRECHECK",
+  "source_sha": "0b961b7bd15ab063f317d98b56aa307973932dfb",
+  "base_sha": "0b961b7bd15ab063f317d98b56aa307973932dfb",
+  "implementation_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
+  "verification_status": "VERIFIED_AT_COMMITTED_SHA",
+  "final_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
+  "remote_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
+  "requirements": {
+    "missing": ["CH17-F12"],
+    "explicitly_blocked": ["CH16-Q008", "CH17-Q001", "CH17-Q010"],
+    "preserved_missing": ["CH17-F04", "CH17-F05", "CH17-F06", "CH17-F08", "CH17-F09", "CH17-F10", "CH17-F11"],
+    "preserved_not_testable": ["CH17-F07"],
+    "preserved_isolation": ["CH09-F03"]
+  },
+  "evidence": {
+    "CH17-E0043": "Opened detail crop at 00:52:08.400: Notas de enfermería visibly shows selection for Imprimir, Acciones, Fecha nota, Información, Nota, records-per-page, paging, and search alongside clinical-note anatomy.",
+    "CH17-E0046": "Opened event frame at 00:52:09.800: the same table visibly shows sensitive clinical narrative and time/shift/resource context. The narrative is source evidence only and is not copied into the product."
+  },
+  "boundary": [
+    "CH16-Q008 controls the authorized tenant-scoped Reporte de salud source, organization context, fields by role, access audit, retention, minimization and redaction.",
+    "CH17-Q001 controls row selection and the content, format, destination, authority, audit and retention of print output.",
+    "CH17-Q010 controls nursing-note fields/content, shift/resource context, lifecycle, signature, correction/versioning and audit.",
+    "No nursing-note content, resource/shift data, table, search, pagination, selection, actions, print/export, query, persistence or clinical write was added.",
+    "/clinical/hospitalizations is not an authorized source or authorization bridge for /clinical/reports; CH09-F03 remains independently mapped there as PARTIAL.",
+    "CR-020 remains separately clinically blocked for fluid-balance form, closure/correction rules and shift permissions; it does not authorize nursing-note behavior or print output."
+  ],
+  "gates": {
+    "traceability_generation": "PASS: npm.cmd run qa:video-parity:generate (210 requirements; source SHA 0b961b7bd15ab063f317d98b56aa307973932dfb).",
+    "traceability_mirror": "PASS: node scripts/verify-video-traceability-mirror.mjs --self-test.",
+    "ch17_parity": "PASS: node scripts/verify-video-react-parity.mjs --chapter CH17 --self-check (17/17 requirements traced).",
+    "light_mode": "PASS: npm.cmd run qa:light-mode (92 product source files; no Dark/System UI support).",
+    "audit": "PASS: npm.cmd run audit:verify (17/17 chapters verified; 0 pending; 0 failed).",
+    "f04_f11_regression": "PASS: CH17 parity self-check preserves F04-F06 and F08-F11 as MISSING and F07 as NOT_TESTABLE; no product code changed.",
+    "cross_requirement_isolation": "PASS: generated traceability keeps CH17-F12 alone on /clinical/reports with CH16-Q008, CH17-Q001 and CH17-Q010; CH09-F03 remains /clinical/hospitalizations PARTIAL without those blockers.",
+    "selenium_runtime": "NOT_APPLICABLE: F12 has no implemented action; no Selenium runtime claim is made.",
+    "git_sync": "PARTIAL: platform checkpoint 740b6bde8177d078fda24602a7c1e9e2d980b638 contains the F12 precheck and cached origin/codex/react-full-parity-selenium-100 equals that SHA. Manual git add/commit could not create .git/index.lock (Permission denied); push failed with schannel SEC_E_NO_CREDENTIALS; fetch could not open .git/FETCH_HEAD (Permission denied)."
+  },
+  "next_batch": "CH17_REVIEW"
+}

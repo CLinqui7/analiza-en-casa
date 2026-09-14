@@ -1,0 +1,147 @@
+{
+  "verifiedAt": "2026-09-10T07:14:11.710Z",
+  "url": "https://web-nrj9qg9ad-clinqui7s-projects.vercel.app",
+  "mode": "PROTECTED_PREVIEW_DEMO",
+  "reviewed": [
+    {
+      "path": "/dashboard",
+      "heading": "Una vista clara de tu operación"
+    },
+    {
+      "path": "/patients",
+      "heading": "Pacientes"
+    },
+    {
+      "path": "/agenda",
+      "heading": "Agenda y turnos"
+    },
+    {
+      "path": "/hospitalizations",
+      "heading": "Hospitalización"
+    },
+    {
+      "path": "/receivables",
+      "heading": "Cuentas por cobrar"
+    },
+    {
+      "path": "/payables",
+      "heading": "Cuentas por pagar"
+    },
+    {
+      "path": "/insurance",
+      "heading": "Preautorizaciones y seguros"
+    },
+    {
+      "path": "/quotes",
+      "heading": "Cotizaciones"
+    },
+    {
+      "path": "/payments",
+      "heading": "Pagos"
+    },
+    {
+      "path": "/clinical/balance",
+      "heading": "Balance hídrico"
+    },
+    {
+      "path": "/clinical/administrations",
+      "heading": "Administración de medicamentos"
+    },
+    {
+      "path": "/clinical",
+      "heading": "Expediente clínico"
+    },
+    {
+      "path": "/clinical/hospitalizations",
+      "heading": "Hospitalización Clínica"
+    },
+    {
+      "path": "/clinical/reports",
+      "heading": "Reporte de salud"
+    },
+    {
+      "path": "/clinical/orders",
+      "heading": "Orden Médica"
+    },
+    {
+      "path": "/clinical/medication-cards",
+      "heading": "Tarjetas de medicamentos"
+    },
+    {
+      "path": "/clinical/care-plans",
+      "heading": "Planes de cuidado"
+    },
+    {
+      "path": "/clinical/evolutions",
+      "heading": "Evoluciones"
+    },
+    {
+      "path": "/clinical/nursing",
+      "heading": "Tablero de enfermería"
+    },
+    {
+      "path": "/inventory",
+      "heading": "Gestión de inventario"
+    },
+    {
+      "path": "/inventory/movements",
+      "heading": "Movimientos de inventario"
+    },
+    {
+      "path": "/inventory/kardex",
+      "heading": "Kárdex de inventario"
+    },
+    {
+      "path": "/catalogs",
+      "heading": "Catálogos"
+    },
+    {
+      "path": "/nursing-team",
+      "heading": "Equipo de enfermería"
+    },
+    {
+      "path": "/catalogs/operational",
+      "heading": "Catálogos operativos"
+    },
+    {
+      "path": "/doctors",
+      "heading": "Médicos y recursos"
+    },
+    {
+      "path": "/purchases",
+      "heading": "Compras"
+    },
+    {
+      "path": "/reports/visits-goals",
+      "heading": "Visitas y metas"
+    },
+    {
+      "path": "/reports/nurse-hours",
+      "heading": "Horas de enfermería"
+    },
+    {
+      "path": "/audit",
+      "heading": "Auditoría"
+    },
+    {
+      "path": "/help",
+      "heading": "Centro de ayuda"
+    },
+    {
+      "path": "/changes",
+      "heading": "Cambios solicitados"
+    }
+  ],
+  "desktopAndMobileDialogs": [
+    "/patients",
+    "/hospitalizations",
+    "/quotes",
+    "/clinical/administrations",
+    "/nursing-team",
+    "/catalogs/operational",
+    "/reports/visits-goals"
+  ],
+  "collapsedNavigationPersists": true,
+  "browserErrors": [],
+  "mongoInPreview": false
+}

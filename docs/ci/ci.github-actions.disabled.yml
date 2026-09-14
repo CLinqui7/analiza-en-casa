@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci
-      - run: npm run codex:preflight
+      - run: npm run repo:preflight
       - run: npm run check
       - run: npm run audit:status
       - name: Verify completed chapter receipts

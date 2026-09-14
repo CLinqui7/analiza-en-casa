@@ -1,4 +1,23 @@
-import type { InventoryMovement, NurseHourEntry, Patient, VitalReading } from '@analiza/contracts';
+import type {
+  Hospitalization,
+  InsuranceEvent,
+  InsuranceRequest,
+  InsuranceRequestStatus,
+  InventoryMovement,
+  NurseHourEntry,
+  Patient,
+  Payment,
+  Quote,
+  QuoteDiscount,
+  QuoteItem,
+  QuoteItemCategory,
+  VitalReading,
+} from '@analiza/contracts';
+import {
+  insuranceEventSchema,
+  insuranceRequestSchema,
+  insuranceRequestStatusSchema,
+} from '@analiza/contracts';
 
 export type DocumentRule = {
   label: string;
@@ -19,6 +38,10 @@ export const documentRules: Record<Patient['documentType'], DocumentRule> = {
     label: 'Pasaporte',
     help: 'Formato oficial pendiente de configuración por el cliente.',
   },
+  RESIDENT_CARD: {
+    label: 'Carnet de residente',
+    help: 'Formato oficial pendiente de configuración por el cliente; se requiere un identificador no vacío.',
+  },
   OTHER: {
     label: 'Otro documento',
     help: 'Indique el identificador tal como aparece en el documento.',
@@ -38,6 +61,29 @@ export function normalizeDocument(value: string): string {
   return value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
 }
 
+export function normalizePhone(value: string): string {
+  return value.replace(/\D/g, '');
+}
+
+/** Returns the completed years for an ISO calendar date without relying on a
+ * clinical interpretation or a browser timezone. */
+export function ageFromBirthDate(birthDate?: string, today = new Date()): number | undefined {
+  if (!birthDate || !/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return undefined;
+  const [year, month, day] = birthDate.split('-').map(Number);
+  const birth = new Date(Date.UTC(year, month - 1, day));
+  if (
+    birth.getUTCFullYear() !== year ||
+    birth.getUTCMonth() !== month - 1 ||
+    birth.getUTCDate() !== day
+  )
+    return undefined;
+  const age = today.getUTCFullYear() - year;
+  const anniversaryPending =
+    today.getUTCMonth() < month - 1 ||
+    (today.getUTCMonth() === month - 1 && today.getUTCDate() < day);
+  return age - Number(anniversaryPending) >= 0 ? age - Number(anniversaryPending) : undefined;
+}
+
 export function maskDui(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 9);
   return digits.length > 8 ? `${digits.slice(0, 8)}-${digits.slice(8)}` : digits;
@@ -55,6 +101,20 @@ export function validateDocument(
   return undefined;
 }
 
+/** Administrative contact documents are optional, but the type and number are
+ * one record. This mirrors the database pair constraint without claiming a
+ * format for documents whose authoritative validation rule is still pending. */
+export function validateContactDocumentPair(
+  documentType: Patient['documentType'] | '' | undefined,
+  documentId: string | undefined,
+): string | undefined {
+  const hasType = Boolean(documentType);
+  const hasDocumentId = Boolean(documentId?.trim());
+  if (hasType && !hasDocumentId) return 'Ingrese el número de documento del contacto.';
+  if (!hasType && hasDocumentId) return 'Seleccione el tipo de documento del contacto.';
+  return undefined;
+}
+
 export function findDuplicatePatient(
   patients: readonly Patient[],
   candidate: Pick<Patient, 'documentType' | 'documentId'>,
@@ -69,12 +129,328 @@ export function findDuplicatePatient(
 
 export function searchPatients(patients: readonly Patient[], query: string): Patient[] {
   const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  const phoneNeedle = normalizePhone(query);
   if (!needle) return [...patients];
-  return patients.filter((patient) =>
-    [patient.fullName, patient.documentId, patient.insurer ?? ''].some((value) =>
-      normalizeText(value).includes(needle),
-    ),
+  return patients.filter(
+    (patient) =>
+      normalizeText(patient.fullName).includes(needle) ||
+      normalizeText(patient.insurer ?? '').includes(needle) ||
+      normalizeDocument(patient.documentId).includes(documentNeedle) ||
+      (phoneNeedle.length > 0 && normalizePhone(patient.phone ?? '').includes(phoneNeedle)),
   );
+}
+
+/** Search the preauthorization surface without treating a quote status as an
+ * insurance decision. All visible identifiers use the same normalization as
+ * patient lookup. */
+export function searchInsuranceRequests(
+  requests: readonly InsuranceRequest[],
+  patients: readonly Patient[],
+  query: string,
+): InsuranceRequest[] {
+  const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  const phoneNeedle = normalizePhone(query);
+  if (!needle) return [...requests];
+  return requests.filter((request) => {
+    const patient = patients.find((candidate) => candidate.id === request.patientId);
+    return (
+      normalizeText(request.quoteId).includes(needle) ||
+      normalizeDocument(request.quoteId).includes(documentNeedle) ||
+      normalizeText(request.insurer).includes(needle) ||
+      normalizeText(patient?.fullName ?? '').includes(needle) ||
+      normalizeDocument(patient?.documentId ?? '').includes(documentNeedle) ||
+      (phoneNeedle.length > 0 && normalizePhone(patient?.phone ?? '').includes(phoneNeedle))
+    );
+  });
+}
+
+export function isInsuranceRequestStatus(value: unknown): value is InsuranceRequestStatus {
+  return insuranceRequestStatusSchema.safeParse(value).success;
+}
+
+export function hasValidInsuranceRequestContext(
+  request: InsuranceRequest,
+  quotes: readonly Quote[],
+  patients: readonly Patient[],
+): boolean {
+  if (!insuranceRequestSchema.safeParse(request).success) return false;
+  const quote = quotes.find((candidate) => candidate.id === request.quoteId);
+  const patient = patients.find((candidate) => candidate.id === request.patientId);
+  const insurer = patient?.insurer ?? patient?.insurance?.insurer;
+  return Boolean(
+    quote && patient && quote.patientId === patient.id && insurer && insurer === request.insurer,
+  );
+}
+
+/** Append a locally observed administrative fact. There is deliberately no
+ * state-machine check here: the client has not approved transition rules. */
+export function appendInsuranceEvent(
+  request: InsuranceRequest,
+  events: readonly InsuranceEvent[],
+  event: InsuranceEvent,
+): { request: InsuranceRequest; events: InsuranceEvent[] } {
+  if (event.requestId !== request.id || !insuranceEventSchema.safeParse(event).success) {
+    throw new Error('La actualización de seguro no es válida.');
+  }
+  if (events.some((candidate) => candidate.id === event.id)) {
+    throw new Error('La actualización de seguro ya existe.');
+  }
+  return {
+    request: { ...request, status: event.status, lastNote: event.note, updatedAt: event.date },
+    events: [...events, event],
+  };
+}
+
+/** Search the fields the legacy hospitalization register exposes, using the
+ * same accent-, case-, whitespace-, and document-separator-insensitive rules
+ * as patient lookup. */
+export function searchHospitalizations(
+  hospitalizations: readonly Hospitalization[],
+  patients: readonly Patient[],
+  query: string,
+): Hospitalization[] {
+  const needle = normalizeText(query);
+  const documentNeedle = normalizeDocument(query);
+  if (!needle) return [...hospitalizations];
+  return hospitalizations.filter((hospitalization) => {
+    const patient = patients.find((candidate) => candidate.id === hospitalization.patientId);
+    return (
+      [
+        normalizeText(hospitalization.id),
+        normalizeText(hospitalization.status),
+        normalizeText(hospitalization.accountType),
+        normalizeText(patient?.fullName ?? ''),
+        normalizeText(patient?.company ?? ''),
+      ].some((value) => value.includes(needle)) ||
+      normalizeDocument(hospitalization.id).includes(documentNeedle) ||
+      normalizeDocument(patient?.documentId ?? '').includes(documentNeedle)
+    );
+  });
+}
+
+export type HospitalizationFilters = {
+  status?: Hospitalization['status'] | '';
+  startDate?: string;
+  accountType?: string;
+};
+
+/** Applies only the three filters demonstrated in CH03 as one explicit
+ * operation.  The caller owns when this function is invoked (the UI uses
+ * Aplicar), so choosing a value never changes results prematurely. */
+export function filterHospitalizations(
+  hospitalizations: readonly Hospitalization[],
+  filters: HospitalizationFilters,
+): Hospitalization[] {
+  return hospitalizations.filter(
+    (item) =>
+      (!filters.status || item.status === filters.status) &&
+      (!filters.startDate || item.startDate === filters.startDate) &&
+      (!filters.accountType || item.accountType === filters.accountType),
+  );
+}
+
+/** Operational elapsed calendar days from available administrative dates.
+ * It deliberately does not characterize care or a clinical duration. */
+export function hospitalizationDurationDays(
+  item: Pick<Hospitalization, 'startDate' | 'endDate'>,
+  now = new Date(),
+): number | undefined {
+  const start = new Date(`${item.startDate}T00:00:00.000Z`);
+  const end = new Date(`${item.endDate ?? now.toISOString().slice(0, 10)}T00:00:00.000Z`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return undefined;
+  return Math.floor((end.getTime() - start.getTime()) / 86_400_000);
+}
+
+export const quoteCategories: ReadonlyArray<{ value: QuoteItemCategory; label: string }> = [
+  { value: 'SERVICES', label: 'Servicios' },
+  { value: 'STUDIES', label: 'Estudios Dx' },
+  { value: 'MEDICATIONS', label: 'Medicamentos' },
+  { value: 'SUPPLIES', label: 'Insumos' },
+  { value: 'EQUIPMENT', label: 'Equipos' },
+  { value: 'FEES', label: 'Honorarios' },
+  { value: 'EXTRAS', label: 'Extras' },
+];
+
+export function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function quoteItemGross(item: Pick<QuoteItem, 'quantity' | 'unitPrice'>): number {
+  return roundMoney(item.quantity * item.unitPrice);
+}
+
+export function quoteItemSubtotal(item: QuoteItem): number {
+  return roundMoney(quoteItemGross(item) - item.discountAmount);
+}
+
+export function validateQuoteItem(item: QuoteItem): string | undefined {
+  if (!item.name.trim()) return 'El concepto es obligatorio.';
+  if (!Number.isFinite(item.quantity) || item.quantity <= 0)
+    return 'La cantidad debe ser mayor que cero.';
+  if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0)
+    return 'El precio manual no puede ser negativo.';
+  if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0)
+    return 'El descuento manual no puede ser negativo.';
+  if (item.discountAmount > quoteItemGross(item))
+    return 'El descuento manual no puede superar el importe de la línea.';
+  return undefined;
+}
+
+export type QuoteTotals = {
+  subtotal: number;
+  itemDiscountAmount: number;
+  generalDiscountAmount: number;
+  discountAmount: number;
+  total: number;
+  insurerAmount: number;
+  patientAmount: number;
+};
+
+function generalQuoteDiscount(
+  items: readonly QuoteItem[],
+  netBeforeGeneralDiscount: number,
+  discount?: QuoteDiscount,
+): number {
+  if (!discount) return 0;
+  if (discount.type === 'FIXED')
+    return Math.min(netBeforeGeneralDiscount, roundMoney(discount.value ?? 0));
+  if (discount.type === 'PERCENT')
+    return Math.min(
+      netBeforeGeneralDiscount,
+      roundMoney((netBeforeGeneralDiscount * (discount.value ?? 0)) / 100),
+    );
+  return roundMoney(
+    items.reduce((sum, item) => {
+      const percentage = discount.categories?.[item.category] ?? 0;
+      return sum + (quoteItemSubtotal(item) * percentage) / 100;
+    }, 0),
+  );
+}
+
+/** Pure quote calculation. All prices, discounts, and insurer responsibility
+ * are explicit caller-provided values; no taxes, prices, or coverage are inferred. */
+export function calculateQuoteTotals(
+  items: readonly QuoteItem[],
+  discount?: QuoteDiscount,
+  insurerAmount = 0,
+): QuoteTotals {
+  for (const item of items) {
+    const error = validateQuoteItem(item);
+    if (error) throw new Error(error);
+  }
+  if (!Number.isFinite(insurerAmount) || insurerAmount < 0)
+    throw new Error('El importe explícito de aseguradora no puede ser negativo.');
+  const subtotal = roundMoney(items.reduce((sum, item) => sum + quoteItemGross(item), 0));
+  const itemDiscountAmount = roundMoney(items.reduce((sum, item) => sum + item.discountAmount, 0));
+  const netBeforeGeneralDiscount = roundMoney(subtotal - itemDiscountAmount);
+  const generalDiscountAmount = generalQuoteDiscount(items, netBeforeGeneralDiscount, discount);
+  const total = roundMoney(netBeforeGeneralDiscount - generalDiscountAmount);
+  const explicitInsurerAmount = roundMoney(insurerAmount);
+  if (explicitInsurerAmount > total)
+    throw new Error('El importe explícito de aseguradora no puede superar el total.');
+  return {
+    subtotal,
+    itemDiscountAmount,
+    generalDiscountAmount,
+    discountAmount: roundMoney(itemDiscountAmount + generalDiscountAmount),
+    total,
+    insurerAmount: explicitInsurerAmount,
+    patientAmount: roundMoney(total - explicitInsurerAmount),
+  };
+}
+
+export function calculateQuoteBalance(
+  quote: Pick<Quote, 'id' | 'patientAmount'>,
+  payments: readonly Payment[],
+) {
+  const paid = roundMoney(
+    payments
+      .filter((payment) => payment.quoteId === quote.id && payment.status === 'APPLIED')
+      .reduce((sum, payment) => sum + payment.amount, 0),
+  );
+  return { paid, balance: roundMoney(quote.patientAmount - paid) };
+}
+
+export function searchQuotes(
+  quotes: readonly Quote[],
+  patients: readonly Patient[],
+  query: string,
+): Quote[] {
+  const needle = normalizeText(query);
+  const normalizedNeedle = normalizeDocument(query);
+  if (!needle) return [...quotes];
+  return quotes.filter((quote) => {
+    const patient = patients.find((candidate) => candidate.id === quote.patientId);
+    return (
+      [quote.id, quote.caseId, quote.status, patient?.fullName ?? ''].some((value) =>
+        normalizeText(value).includes(needle),
+      ) ||
+      normalizeDocument(quote.id).includes(normalizedNeedle) ||
+      normalizeDocument(quote.caseId).includes(normalizedNeedle)
+    );
+  });
+}
+
+export type QuoteListFilters = { status?: Quote['status'] | ''; createdDate?: string };
+
+export function filterQuotes(quotes: readonly Quote[], filters: QuoteListFilters): Quote[] {
+  return quotes.filter(
+    (quote) =>
+      (!filters.status || quote.status === filters.status) &&
+      (!filters.createdDate || quote.createdAt.slice(0, 10) === filters.createdDate),
+  );
+}
+
+/** Backward-compatible defaults for administrative CH03 fields.  No value
+ * returned here is a discount, referral, or gift-card business rule. */
+export function normalizeQuoteInvoiceMetadata(
+  quote: Pick<
+    Quote,
+    'createdAt' | 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'
+  >,
+): Pick<Quote, 'invoiceDate' | 'discountGroup' | 'referralLabel' | 'giftCardCode'> {
+  return {
+    invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
+    discountGroup: quote.discountGroup ?? 'Regular',
+    referralLabel: quote.referralLabel ?? undefined,
+    giftCardCode: quote.giftCardCode ?? undefined,
+  };
+}
+
+export function canEditQuote(quote: Pick<Quote, 'status' | 'immutable'>): boolean {
+  return quote.status === 'DRAFT' && quote.immutable !== true;
+}
+
+export function createQuoteRevision(
+  source: Quote,
+  id: string,
+  revisionReason: string,
+  createdAt = new Date().toISOString(),
+): Quote {
+  const reason = revisionReason.trim();
+  if (!reason) throw new Error('El motivo de revisión es obligatorio.');
+  const rootQuoteId = source.rootQuoteId ?? source.originalQuoteId ?? source.id;
+  return {
+    ...source,
+    id,
+    version: source.version + 1,
+    status: 'DRAFT',
+    immutable: false,
+    createdAt,
+    sentAt: undefined,
+    originalQuoteId: rootQuoteId,
+    rootQuoteId,
+    revisionReason: reason,
+    items: source.items.map((item) => ({ ...item })),
+    discount: source.discount
+      ? {
+          ...source.discount,
+          categories: source.discount.categories ? { ...source.discount.categories } : undefined,
+        }
+      : undefined,
+  };
 }
 
 export type VitalMetric = {
@@ -84,12 +460,15 @@ export type VitalMetric = {
 };
 
 export const vitalMetrics: readonly VitalMetric[] = [
+  { key: 'heartRate', label: 'FC', unit: 'lpm' },
+  { key: 'respiratoryRate', label: 'FR', unit: 'rpm' },
   { key: 'systolic', label: 'Sistólica', unit: 'mmHg' },
   { key: 'diastolic', label: 'Diastólica', unit: 'mmHg' },
   { key: 'pulse', label: 'Pulso', unit: 'lpm' },
   { key: 'temperature', label: 'Temperatura', unit: '°C' },
-  { key: 'oxygenSaturation', label: 'Saturación O₂', unit: '%' },
-  { key: 'glucose', label: 'Glucosa', unit: 'mg/dL' },
+  { key: 'oxygenSaturation', label: 'SpO₂', unit: '%' },
+  { key: 'pain', label: 'Dolor', unit: 'escala' },
+  { key: 'glucose', label: 'Glicemia', unit: 'mg/dL' },
 ];
 
 export function measuredVitalMetrics(reading: VitalReading) {
@@ -102,8 +481,8 @@ export function measuredVitalMetrics(reading: VitalReading) {
 export type KardexRow = InventoryMovement & { delta: number; balance: number };
 
 export function movementDelta(movement: InventoryMovement): number {
-  if (movement.kind === 'ENTRY') return movement.quantity;
-  if (movement.kind === 'EXIT') return -movement.quantity;
+  if (movement.kind === 'ENTRY' || movement.kind === 'RETURN') return movement.quantity;
+  if (movement.kind === 'EXIT' || movement.kind === 'TRANSFER') return -movement.quantity;
   return movement.adjustmentDirection === 'OUT' ? -movement.quantity : movement.quantity;
 }
 

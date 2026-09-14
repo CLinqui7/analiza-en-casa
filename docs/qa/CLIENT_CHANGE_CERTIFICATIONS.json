@@ -1,0 +1,290 @@
+{
+  "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
+  "schema_version": 1,
+  "core_release_regression": {
+    "verification_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+    "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
+    "scope": "Full mock edition regression passed; refreshed fingerprints do not promote any status or repeat all historical Selenium document variants. Reduced Core has separate connected Atlas and three Selenium checks."
+  },
+  "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+  "certifications": {
+    "CR-001": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "10e51487f808a9513317c96fc5a551fdd61346430eef985902091b2d34899bf0",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
+      "test_ids": [
+        "vitest:ch02-patient-form",
+        "SEL-PAT-DOCUMENT"
+      ],
+      "notes": "DUI conserva validación y formulario React. Hay proveedor Mongo real con persistencia de pacientes; la prueba A/B/C usa identificadores QA OTHER, no acredita todas las variantes documentales."
+    },
+    "CR-002": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "10e51487f808a9513317c96fc5a551fdd61346430eef985902091b2d34899bf0",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM",
+      "test_ids": [
+        "vitest:cr002-resident-card"
+      ],
+      "notes": "Carnet de residente se crea, recarga y edita en pruebas React demo. El proveedor Mongo ya está conectado localmente; la variante de documento requiere repetición específica en preview."
+    },
+    "CR-003": {
+      "implementation_sha": "4b2f2b8275a19268fecd1cceddbbb19fd3ec6cce",
+      "functional_fingerprint": "39f4840ccdd054a33fbb5de03c89baba525abb096d2f67f09a09fc4b581830e7",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
+      "test_ids": [
+        "playwright:ch01-xlsx-export",
+        "SEL-PAT-EXPORT"
+      ],
+      "notes": "CSV/XLSX exporta los resultados filtrados y ordenados, no todo el universo autorizado. El botón se identifica como Exportar Excel. La descarga OOXML está probada; el alcance completo continúa parcial."
+    },
+    "CR-004": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-PAT-CONTACTS"
+      ],
+      "notes": "Tipo y número del documento del responsable se validan como pareja y persisten en la prueba React. Se añadieron controles de adjunto para paciente y responsable; el servicio privado guarda bytes en Atlas y deniega descargas de otra organización. Falta repetir ambos adjuntos desde el formulario y en preview conectado."
+    },
+    "CR-005": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "10022df56a425855a36e2589923929ec9295d46b7ba389f24dd51a4a1562a306",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "test_ids": [
+        "playwright:cr005-independent-doctor-resource",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "Médico y recurso conservan altas separadas. Se agrega Equipo de enfermería con alta de cuenta NURSE por encargada, probada contra Mongo; el servidor impide que la encargada inyecte ADMIN. La prueba de médico continúa siendo demo."
+    },
+    "CR-006": {
+      "implementation_sha": "f13c8325ffbd841d3d9e0fdfb71add8ff1fd47c5",
+      "functional_fingerprint": "5646a8d04a279b837b636f30a9bfe9514797e1d62b8ff5c27c66b176b544e01b",
+      "certification_status": "PARTIAL",
+      "test_ids": [
+        "vitest:cr006-doctor-attachment-metadata",
+        "playwright:cr006-doctor-save-reload-edit",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "Alta y edición de médico se verifican en demo. El servicio genérico de adjuntos privados ya funciona contra Atlas, pero la integración específica de expedientes de médicos continúa pendiente."
+    },
+    "CR-007": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "28cc150ed3b01d189a32c01e9f02242ee17e912b004244196f5d8b0110c5d878",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "test_ids": [
+        "vitest:cr007-professional-specialties",
+        "playwright:cr007-professional-specialties",
+        "SEL-DOCTOR-LIFECYCLE"
+      ],
+      "notes": "Catálogos operativos permite a la encargada configurar especialidades, dosis, medicamentos e insurers/seguros. El selector de médicos consulta las especialidades compartidas en modo Mongo. Medicamento/dosis y permisos se probaron con Atlas; catálogo institucional completo y preview conectado pendientes."
+    },
+    "CR-008": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-HOSP-CREATE"
+      ],
+      "notes": "Existe control de adjunto de hospitalización y servicio de bytes privado Mongo, con descarga autorizada y 404 entre organizaciones. La prueba integral de carga desde esta pantalla sigue pendiente; no se certifica por existir la UI."
+    },
+    "CR-009": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "vitest:ch03-hospitalization-filters",
+        "SEL-HOSP-CREATE"
+      ],
+      "notes": "La prueba React conserva múltiples períodos de ingreso/egreso. Al crear hospitalización se asignan recursos vinculados a usuarios NURSE reales; la prueba Mongo crea, edita y relee el caso. 'Selección de fin' requiere identificar el control antes de retirar fechas necesarias."
+    },
+    "CR-010": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
+    },
+    "CR-011": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "37eae079f6ae719303d0392c123e2b330ff8b2d98fe3c982463e56ef6d658802",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "test_ids": [
+        "SEL-QUOTE-ITEMS"
+      ],
+      "notes": "Las siete categorías y sus importes manuales se conservan. Cotizaciones Mongo admite crear, editar y recuperar desde otra sesión; el preview sigue DEMO por falta de salida fija de red. Selenium actual y la prueba de todas las categorías en preview conectado permanecen pendientes."
+    },
+    "CR-012": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "f5e2dd64dee4c34f692883aac75aac7d1ea00000f1b15be0fe81bfaa9f937936",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "test_ids": [
+        "SEL-QUOTE-CREATE"
+      ],
+      "notes": "Actualizar pacientes usa ahora la instantánea compartida Mongo. La prueba HTTP A/B/C demuestra lectura autorizada entre sesiones y exclusión de otra organización. Falta repetir el recorrido exacto del selector React desde dos sesiones del preview conectado."
+    },
+    "CR-013": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "PARTIAL",
+      "test_ids": [],
+      "notes": "El compositor vincula una línea de honorarios manuales al médico elegido y la conserva después de recargar en la prueba B4. No se inventan tarifas ni se certifica conciliación institucional."
+    },
+    "CR-014": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere."
+    },
+    "CR-015": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "PARTIAL",
+      "test_ids": [],
+      "notes": "La solicitud posterior precisa una página independiente de visitas a domicilio por enfermera/médico, ventas y metas mensuales. /reports/visits-goals persiste visitas realizadas, ventas con referencia y metas en Atlas. No transforma cotizaciones en ventas. La conciliación institucional y el preview conectado siguen pendientes."
+    },
+    "CR-016": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "PARTIAL",
+      "test_ids": [],
+      "notes": "Dashboard muestra pacientes particulares y con seguro a partir de los pacientes autorizados. La prueba B4 verifica los conteos; no se infieren montos de cobertura ni facturación."
+    },
+    "CR-017": {
+      "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+      "functional_fingerprint": "6d0204c853a7db13ab0ddb7ee93883568af28dcd9381fa8a0dae03d71ee86720",
+      "certification_status": "LOCAL_REACT_VERIFIED_SELENIUM_PENDING",
+      "test_ids": [
+        "vitest:cr017-multi-day-shifts",
+        "playwright:cr017-multi-day-shifts",
+        "SEL-B3-AGENDA-SERIES"
+      ],
+      "notes": "La agenda crea turnos por fecha, rechaza repeticiones y colisiones y conserva la selección del paciente. Pruebas React demo; falta repetir las series sobre el preview conectado y Selenium actual."
+    },
+    "CR-018": {
+      "implementation_sha": "d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c",
+      "functional_fingerprint": "6d0204c853a7db13ab0ddb7ee93883568af28dcd9381fa8a0dae03d71ee86720",
+      "certification_status": "PARTIAL_CLIENT_DEFINITION",
+      "production_status": "PARTIAL",
+      "blocker_type": "CLIENT_DEFINITION",
+      "blocker_reason": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "test_ids": [
+        "vitest:cr018-shift-presets",
+        "playwright:cr018-shift-presets",
+        "SEL-B3-AGENDA-SERIES"
+      ],
+      "notes": "Presets 6h/8h persisten duración incluso al cruzar medianoche. El alta Mongo relaciona hospitalización y enfermeras por usuario. Puntual y la eliminación de 'selección de fin' siguen pendientes de identificación/definición."
+    },
+    "CR-019": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "production_status": "NEEDS_CLIENT_DEFINITION",
+      "blocker_type": "CLINICAL_APPROVAL",
+      "blocker_reason": "Aprobar el formulario versionado de tarjeta de medicamentos, el alcance por ítem/general, roles autorizados y la política de auditoría, versionado, corrección y firma; definir el manejo seguro de texto de diluciones/cuidados especiales.",
+      "technical_status": "NEEDS_CLIENT_DEFINITION",
+      "test_ids": [],
+      "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
+    },
+    "CR-020": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "PARTIAL",
+      "test_ids": [],
+      "notes": "Se implementó /clinical/balance con períodos, entradas append-only, sumas de entradas/salidas, cierre y corrección auditada. Atlas verifica lectura de enfermeras de la organización y escritura sólo asignada, rechaza organización ajena y conserva originales. No equivale a aprobación clínica; formulario institucional y preview conectado pendientes."
+    },
+    "CR-021": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+    },
+    "CR-022": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+    },
+    "CR-023": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni formulario aprobado."
+    },
+    "CR-024": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+    },
+    "CR-025": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+    },
+    "CR-026": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+    },
+    "CR-027": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "No existe motor ni versión aprobada."
+    },
+    "CR-028": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+    },
+    "CR-029": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+    },
+    "CR-030": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "El texto dice Branden y la imagen parece Braden."
+    },
+    "CR-031": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [
+        "SEL-PAT-CREATE"
+      ],
+      "notes": "Atlas existente está conectado y su bootstrap aplicó 41 índices. Pacientes, hospitalizaciones, cotizaciones, pagos, adjuntos, balance, administración de unidades y visitas tienen pruebas reales de persistencia e integridad locales. Los límites organizacionales se validan en el servidor; no se afirma RLS Mongo. Preview requiere salida fija autorizada; otros módulos aún no integrados siguen abiertos."
+    },
+    "CR-032": {
+      "implementation_sha": null,
+      "functional_fingerprint": null,
+      "certification_status": "NOT_CERTIFIED",
+      "test_ids": [],
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+    }
+  },
+  "current_verification": {
+    "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
+    "runtime": "178/178 fresh-server Playwright against Next production build; 98 React/server tests; 103 baseline tests",
+    "scope": "Local synthetic verification only; no clinical approval, Selenium rerun, complete video parity or connected Preview claimed.",
+    "mongo_report": "docs/release/MONGO_STUDIO_VERIFICATION_20260910.md"
+  }
+}

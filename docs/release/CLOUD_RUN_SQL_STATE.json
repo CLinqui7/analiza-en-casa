@@ -1,0 +1,303 @@
+{
+  "schema_version": 2,
+  "date": "2026-09-14",
+  "branch": "codex/cloud-run-cloud-sql",
+  "scope": "DOCKER_AND_MIGRATION_PREPARATION_ONLY",
+  "Docker": "READY",
+  "Cloud deployment": "DEFERRED",
+  "Billing": "NOT REQUIRED FOR THIS HANDOFF",
+  "status": {
+    "prepared": true,
+    "built": true,
+    "tested_local": true,
+    "cloud_published": false,
+    "deployed": false,
+    "staging_verified": false
+  },
+  "final_evidence": {
+    "repository": "https://github.com/CLinqui7/analiza-docker",
+    "manifest": "https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json",
+    "release": "https://github.com/CLinqui7/analiza-docker/releases",
+    "provenance": "The published Docker artifacts are pinned to source commit 6fae1890af99a7913092aea248cb120bd595e335. Later repository documentation/tooling changes do not replace or re-certify these images. Earlier image IDs below are historical.",
+    "source_sha": "6fae1890af99a7913092aea248cb120bd595e335"
+  },
+  "architecture": {
+    "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
+    "runtime": "Node.js 24 / Docker linux/amd64 / Next standalone / PORT=8080 / user=node",
+    "database": "PostgreSQL 18, pg, relational keys + existing DTO JSONB, transactions and forced tenant RLS",
+    "storage": "Private GCS via Google SDK and ADC; metadata only in PostgreSQL",
+    "cloud": "Artifact Registry, Cloud Run, Secret Manager, Terraform and Cloud Build",
+    "region": "us-central1",
+    "service": "analiza-staging"
+  },
+  "scope_limits": [
+    "Core only; quotes, clinical, financial and portal modules remain excluded as in the inherited Core release",
+    "Historical Mongo adapters and mock UI remain in source for regression; PostgreSQL never falls back to them",
+    "No corporate/production migrations, GridFS data transfer, paid resource creation, cloud registry publication or deployment executed",
+    "GCS tested with SDK + local emulator, not real cloud IAM; 30 concurrent reads are not a production capacity certification"
+  ],
+  "external_security_check": {
+    "provider": "GitGuardian",
+    "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
+    "incident": "37265105",
+    "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
+    "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+    "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
+  },
+  "previous_verified_delivery": {
+    "schema_version": 1,
+    "date": "2026-09-14",
+    "branch": "codex/cloud-run-cloud-sql",
+    "source_baseline": "dbf91821d138a6bff09e66c72a409fb6f89de8b5",
+    "status": {
+      "prepared": true,
+      "built": true,
+      "tested_local": true,
+      "published": false,
+      "deployed": false,
+      "staging_verified": false,
+      "final_image_provenance": "VERIFIED_COMMITTED_SOURCE_AND_EXACT_IMAGE"
+    },
+    "architecture": {
+      "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
+      "runtime": "Node.js 24 / Docker linux/amd64 / Next standalone / PORT=8080 / user=node",
+      "database": "PostgreSQL 18, pg, relational keys + existing DTO JSONB, transactions and forced tenant RLS",
+      "storage": "Private GCS via Google SDK and ADC; metadata only in PostgreSQL",
+      "cloud": "Artifact Registry, Cloud Run, Secret Manager, Terraform and Cloud Build",
+      "region": "us-central1",
+      "service": "analiza-staging"
+    },
+    "regression": {
+      "root_tests": 108,
+      "react_server_tests": 127,
+      "full_mock_production_browser": 178,
+      "video_audit": "17 chapters / 1359 events; structural audit only, no new visual re-audit",
+      "client_gate": "32/32",
+      "traceability": "210/210; CH01, CH02, CH03 retained; no status promotions"
+    },
+    "terraform": {
+      "fmt_check": "PASS",
+      "validate": "PASS",
+      "mock_provider_tests": "4/4 PASS; no cloud calls",
+      "plan": "PASS: 24 to add, 0 to change, 0 to destroy; preparation only",
+      "plan_applied": false,
+      "applied": false,
+      "plan_evidence": "docs/deployment/evidence/migration-preparation/terraform-plan.txt",
+      "plan_counts": {
+        "add": 24,
+        "change": 0,
+        "destroy": 0
+      }
+    },
+    "gcloud": {
+      "method": "Official Windows Google Cloud SDK 584.0.0; browser OAuth completed",
+      "authenticated": true,
+      "project": "probable-sprite-508007-q2",
+      "project_role": "roles/owner",
+      "billing_enabled": false,
+      "api_enable_attempt": "FAILED_PRECONDITION: billing not enabled; no apply"
+    },
+    "pending": [
+      "Future deployment authorization, billing and API activation for the detected project",
+      "Provision actual SQL migration identity and private secret versions when cloud creation is authorized",
+      "Official GitHub/Cloud Build connection and private browser access setup",
+      "Publication and real Cloud Run/Cloud SQL/GCS verification deferred by user"
+    ],
+    "scope_limits": [
+      "Core only; quotes, clinical, financial and portal modules remain excluded as in the inherited Core release",
+      "Historical Mongo adapters and mock UI remain in source for regression; PostgreSQL never falls back to them",
+      "No corporate/production migrations, GridFS data transfer, paid resource creation, public image publication or deployment executed",
+      "GCS tested with SDK + local emulator, not real cloud IAM; 30 concurrent reads are not a production capacity certification"
+    ],
+    "source_sha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+    "implementation_sha": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+    "image": {
+      "id": "sha256:2e0ff979a7ccf2b2ae4881eb8204a2325b5f317fb083fee70fc17d49b58afac0",
+      "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+      "os": "linux",
+      "architecture": "amd64",
+      "user": "node",
+      "labels": {
+        "com.analiza.cloud-sql": "postgresql-18",
+        "com.analiza.data-mode": "postgresql",
+        "com.analiza.release-profile": "core",
+        "com.analiza.schema-contract": "analiza-core-v1",
+        "org.opencontainers.image.revision": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+        "org.opencontainers.image.source": "https://github.com/CLinqui7/analiza-en-casa"
+      },
+      "sizeBytes": 103658430,
+      "rootFsLayers": [
+        "sha256:1d69a5fd31932841d7825ef4780c06f008eea65aaa9f3110fe09d5832ed5c7d8",
+        "sha256:8b44269dd12bb3a948a3fc91ba0ee4544375637bbc5995edabbbf2824d2a2e35",
+        "sha256:bd4b733ad7053e873d389686452b3ee8fb8009f4f1d5311b1af1fa9352ff5624",
+        "sha256:6b1a9ecc458f8b83983c566340ece48c9a605f1e13377190c686fb6f1e58a34a",
+        "sha256:a63f71a5ecc2aaf6cb0f20266a9a732c760b63f3a0f9e8a2bfee9a2fea576ab6",
+        "sha256:65c96b96342bc29999e64ab1e05031da529b149f0ddfdb44501b0ffc01bcd81e",
+        "sha256:99cbea53f6ba4c6a4080b883429f5fec545a14d4744f4230d5e86ce887bbc1d6",
+        "sha256:3d777327f778b804745c7cf06bffc158a136fcdfa0e78c4cbf89d6ceace6a411",
+        "sha256:7d3defb107011a25f858643a8896cfebc5b202ca56fb1f7d5b690f2178fedcaf"
+      ],
+      "registryPublished": false,
+      "registryDigest": null,
+      "localTag": "analiza-web:cloudrun",
+      "port": 8080,
+      "standalone": true,
+      "node": "v24.21.0",
+      "testedContainer": "analiza-sqlqa-1789410627541-web",
+      "containerImage": "sha256:2e0ff979a7ccf2b2ae4881eb8204a2325b5f317fb083fee70fc17d49b58afac0",
+      "readOnlyFilesystem": true
+    },
+    "local_validation": {
+      "passed": true,
+      "run": "analiza-sqlqa-1789410627541",
+      "image": "sha256:2e0ff979a7ccf2b2ae4881eb8204a2325b5f317fb083fee70fc17d49b58afac0",
+      "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+      "base": "http://localhost:50662",
+      "checks": [
+        "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+        "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+        "React doctor create and API edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+        "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+        "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+        "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+        "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+        "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+        "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
+      ],
+      "connections": 5,
+      "p95Ms": 1034,
+      "database": "PostgreSQL 18 local QA",
+      "databaseVersion": "18.6 (Debian 18.6-1.pgdg12+2)",
+      "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+      "checkedAt": "2026-09-14T18:31:37.852Z"
+    },
+    "archive": {
+      "path": "C:/Temp/analiza-ui-polish-final-v5/.local/cloud-run/candidate-image.tar",
+      "sha256": "80717c15c2de395dca3e9fdf9c4198ad8f739ae34d937b68f3365739abb80128"
+    },
+    "validation": {
+      "typecheck": "PASS",
+      "lint": "PASS",
+      "format": "PASS",
+      "security_scan": "PASS",
+      "root_tests": "108/108 PASS",
+      "react_server_tests": "127/127 PASS",
+      "full_mock_production_browser": "178/178 PASS",
+      "baseline_qa": "76/76 PASS",
+      "standalone_legacy": "PASS",
+      "runtime_smoke": "PASS; exact final image, PORT=8080 and 9090, 11 assets",
+      "sql_and_storage": "PASS; real local PostgreSQL 18.6 + Google SDK/GCS emulator",
+      "layers": {
+        "passed": true,
+        "application_files_scanned": 2592,
+        "reviewed_sdk_placeholders": [
+          "app/node_modules/@google-cloud/storage/build/esm/src/storage.js"
+        ],
+        "violations": []
+      },
+      "video_client_gates": "PASS; 17/17 chapters structural audit, 210 requirements, 32 client changes and CH01-CH03; no new parity promotions",
+      "dependency_audit": "0 reported production vulnerabilities; npm 11.18 workspace override verified",
+      "operator_layers": {
+        "passed": true,
+        "application_files_scanned": 1398,
+        "reviewed_sdk_placeholders": [
+          "app/node_modules/@google-cloud/storage/build/esm/src/storage.js"
+        ],
+        "violations": []
+      },
+      "react_test_retry": "First concurrent build/typecheck run timed out at 5000ms; unchanged tests passed 127/127 on sequential retry. No limit or assertion weakened.",
+      "preserved_previous_regression": "178/178 full mock browser tests from the earlier delivery; apps/web, packages and docs/qa are byte-identical to 9e83870. New Docker Core browser/SQL/operator verification passed separately."
+    },
+    "evidence_directory": "docs/deployment/evidence/migration-preparation",
+    "completed_local_at": "2026-09-14T18:39:27.569Z",
+    "review": "docs/deployment/REVIEW.md",
+    "backup": "C:/Users/carlo/CodexBackups/analiza-cloud-run-20260914-100503",
+    "publication": {
+      "github_branch": "codex/cloud-run-cloud-sql",
+      "artifact_registry": "DEFERRED_BY_USER; real project detected, resources not created",
+      "cloud_run": "NOT_DEPLOYED",
+      "terraform_apply": false,
+      "github_pushed": true,
+      "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/7",
+      "pull_request_status": "DRAFT",
+      "automatic_vercel_deploy": "Disabled for codex/cloud-run-cloud-sql via root vercel.json; other branches retain their existing behavior",
+      "verified_github_commit": "824580e"
+    },
+    "current_request": "PREPARE_MIGRATION_ONLY; user explicitly postponed deployment and resource creation",
+    "preparation_extension": {
+      "operator_jobs": "migrate and seed; explicit execution only",
+      "remote_state": "private versioned GCS bootstrap prepared",
+      "local_revalidation": "PASS on web and operator images from 9dd308e1ac785f025497a0b813e66e1a586fe87c"
+    },
+    "previous_candidate": {
+      "sourceSha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+      "imageId": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+      "evidence_directory": "docs/deployment/evidence",
+      "archive": "C:/Temp/analiza-ui-polish-final-v5/.local/cloud-run/candidate-image-previous-7eaf64200e52.tar"
+    },
+    "operator": {
+      "id": "sha256:c62d3da7df78d50e5a2fe70173b18bcbffa9d5bb92a03ca1b5b37774d9409590",
+      "sourceSha": "9dd308e1ac785f025497a0b813e66e1a586fe87c",
+      "os": "linux",
+      "architecture": "amd64",
+      "user": "node",
+      "labels": {
+        "com.analiza.operator": "explicit-postgresql-migration",
+        "org.opencontainers.image.revision": "9dd308e1ac785f025497a0b813e66e1a586fe87c"
+      },
+      "sizeBytes": 101434684,
+      "rootFsLayers": [
+        "sha256:1d69a5fd31932841d7825ef4780c06f008eea65aaa9f3110fe09d5832ed5c7d8",
+        "sha256:8b44269dd12bb3a948a3fc91ba0ee4544375637bbc5995edabbbf2824d2a2e35",
+        "sha256:bd4b733ad7053e873d389686452b3ee8fb8009f4f1d5311b1af1fa9352ff5624",
+        "sha256:6b1a9ecc458f8b83983c566340ece48c9a605f1e13377190c686fb6f1e58a34a",
+        "sha256:a63f71a5ecc2aaf6cb0f20266a9a732c760b63f3a0f9e8a2bfee9a2fea576ab6",
+        "sha256:65c96b96342bc29999e64ab1e05031da529b149f0ddfdb44501b0ffc01bcd81e",
+        "sha256:80cc06f359a2312dc32e2cf1f94de6102f233c4abc801825a84f570a63d59aad",
+        "sha256:b524d6939c7559fecd6e589a78d24a163ba33c5035de447d51df0c08219296a4",
+        "sha256:faec0fe97a7dcb1c1dfdc0e627139852a636365fd808f8b663fa9a7175a2622a"
+      ],
+      "registryPublished": false,
+      "registryDigest": null,
+      "localTag": "analiza-operator:postgresql",
+      "migrationCommandsExecutedFromDocker": true,
+      "migratorSuperuser": false,
+      "migratorBypassRls": false,
+      "repeatableRoleProvisioning": true,
+      "mismatchedRuntimePasswordRejected": true,
+      "seedRequiresIsolatedQaOrExactStagingJob": true
+    },
+    "operator_archive": {
+      "path": "C:/Temp/analiza-ui-polish-final-v5/.local/cloud-run/candidate-operator.tar",
+      "sha256": "b7de3de1e92cd3452509014a4b7c1aff8b6bf05eff674d8765566dde9fd3e6e5"
+    },
+    "external_security_check": {
+      "provider": "GitGuardian",
+      "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
+      "incident": "37265105",
+      "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
+      "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+      "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
+    }
+  },
+  "repository_maintenance": {
+    "scope": "Documentation, repository presentation and maintenance tooling",
+    "application_behavior_changed": false,
+    "published_docker_artifacts_changed": false,
+    "source_evidence_modified": false
+  },
+  "integration": {
+    "authorized": true,
+    "target_branch": "main",
+    "source_branch": "codex/cloud-run-cloud-sql",
+    "pull_requests": [
+      5,
+      6,
+      7
+    ],
+    "method": "merge commit; preserve ancestry",
+    "vercel_automatic_deployments": false,
+    "cloud_deployment": "DEFERRED",
+    "published_docker_source_unchanged": "6fae1890af99a7913092aea248cb120bd595e335"
+  }
+}

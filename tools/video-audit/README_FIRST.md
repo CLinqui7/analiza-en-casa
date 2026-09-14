@@ -1,20 +1,18 @@
-# Empieza aquí
+# Herramientas de revisión de video
 
-Este kit no es otra demo del sistema. Es el mecanismo para impedir que el desarrollo siga avanzando con funciones omitidas del video.
+Este directorio contiene el protocolo, plantillas y verificadores de evidencia.
+La fuente instalada está en `references/video-audit/` y se mantiene inmutable.
+Los recibos y observaciones se guardan en `video-audit-reviews/`.
 
-## Orden correcto
+Comenzar por [VIDEO_AUDIT_PROTOCOL](VIDEO_AUDIT_PROTOCOL.md) y
+[la guía de revisión](../../docs/VIDEO_AUDIT_SETUP.md).
+Cada requisito debe citar capítulo, evento, timestamp y archivo de evidencia.
 
-1. Extrae el paquete completo.
-2. Coloca `core_toolkit/` dentro del repositorio como `tools/video-audit/`.
-3. Coloca los paquetes de evidencia dentro de `references/video-audit/`.
-4. Abre el repositorio en Codex.
-5. Pega `PROMPT_CODEX_VIDEO_AUDIT_MASTER.md`.
-6. Asigna un capítulo por thread o agente.
-7. Ejecuta el verificador antes de aceptar cada capítulo.
-8. Consolida los 17 inventarios.
-9. Genera la matriz video vs plataforma.
-10. Solo entonces programa las brechas aprobadas.
+```powershell
+npm run audit:status
+npm run audit:verify
+```
 
-## Idea central
-
-Codex no debe “recordar” el video entero. Debe trabajar con unidades pequeñas y trazables. Cada afirmación queda atada a una captura y a un timestamp. Así, una omisión deja de ser invisible: el verificador la convierte en un error comprobable.
+El verificador por capítulo está en `scripts/verify_chapter_review.py`.
+Los scripts de extracción conservan el procedimiento de generación original;
+no deben ejecutarse sobre la evidencia instalada para sustituir sus archivos.

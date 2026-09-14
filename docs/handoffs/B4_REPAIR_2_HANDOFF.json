@@ -1,0 +1,57 @@
+{
+  "lot": "B4_REPAIR_2",
+  "source_sha": null,
+  "base_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "apps/web/e2e/quotes.spec.ts",
+    "tests/selenium/test_quotes.py",
+    "docs/handoffs/B4_REPAIR_2_HANDOFF.json",
+    "docs/handoffs/B4_REPAIR_2_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "client_changes": {
+    "affected": ["CR-011", "CR-013"],
+    "implemented_demo_only": ["CR-011", "CR-013"],
+    "blocked": [
+      "CR-010 Puntual remains blocked pending the client-defined entity, fields, duration, states and relationship.",
+      "CR-014 billing/monthly definitions remain client-blocked.",
+      "CR-015 valid doctor visits, targets, period and fulfilment formula remain client-blocked."
+    ]
+  },
+  "tests": [
+    "PLAYWRIGHT_PORT=4275 npm run test:browser:quotes (4 passed; fresh server)",
+    "npm run selenium:coverage:quotes (39/39 source declarations; runtime pending Python)",
+    "npm run qa:light-mode",
+    "node scripts/verify-client-changes.mjs --batch B4 --self-test",
+    "node scripts/verify-video-react-parity.mjs --chapter CH01 --self-test",
+    "npm run qa:video-parity:chapter -- CH01",
+    "node scripts/verify-video-react-parity.mjs --chapter CH02 --self-test",
+    "npm run qa:video-parity:chapter -- CH02",
+    "node scripts/verify-video-react-parity.mjs --chapter CH03 --self-test",
+    "npm run qa:video-parity:chapter -- CH03"
+  ],
+  "gates": {
+    "playwright_quotes": "PASS",
+    "quote_selenium_declaration_coverage": "PASS",
+    "quote_selenium_runtime": "PENDING_RUNTIME_PYTHON_UNAVAILABLE",
+    "client_changes_b4": "PASS",
+    "light_only": "PASS",
+    "ch01_parity": "PASS",
+    "ch02_parity": "PASS",
+    "ch03_parity": "PASS"
+  },
+  "evidence": {
+    "quote_metadata": "The focused Playwright flow saves/reopens Regular discountGroup, produces one SENT quote and separate DRAFT rows, proves a known nonmatching date reaches Sin cotizaciones, and proves clear restores rows. Selenium mirrors those action-specific assertions and records each action after its asserted outcome without aggregate PASS loops.",
+    "functional_fingerprint": "921ba34c5b9c94b7e2c4e1ebf2f1401dca01729e2651e42310d63313e92859f3"
+  },
+  "blockers": [
+    "Python is absent, so no Selenium runtime PASS records are claimed.",
+    "Git metadata writes remain denied; no commit, push, fresh fetch or remote SHA verification is claimed.",
+    "CR-010, CR-014 and CR-015 remain client-definition blockers and no product semantics were invented."
+  ],
+  "next_batch": "CH04"
+}

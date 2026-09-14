@@ -1,0 +1,57 @@
+{
+  "lot": "CH07",
+  "source_sha": null,
+  "base_sha": "bd17a47b9300f8f018c2cb1052e6da364186bd88",
+  "verification_status": "PENDING_GIT_WRITE",
+  "final_sha": null,
+  "remote_sha": null,
+  "commits": [],
+  "changed_files": [
+    "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
+    "apps/web/e2e/ch03.spec.ts",
+    "apps/web/e2e/ch07.spec.ts",
+    "tests/selenium/test_hospitalizations.py",
+    "scripts/verify-video-react-parity.mjs",
+    "docs/qa/UI_ACTION_INVENTORY.json",
+    "docs/qa/VIDEO_TO_REACT_TRACEABILITY.json",
+    "docs/qa/VIDEO_REQUIREMENT_CERTIFICATIONS.json",
+    "docs/handoffs/CH07_HANDOFF.json",
+    "docs/handoffs/CH07_HANDOFF.md",
+    "docs/handoffs/LATEST.json"
+  ],
+  "requirements": {
+    "exact": ["CH07-F01", "CH07-F02", "CH07-F03"],
+    "partial": ["CH07-F04", "CH07-F05", "CH07-F07"],
+    "not_testable": ["CH07-F06", "CH07-F08", "CH07-F09"]
+  },
+  "tests": [
+    "npm run typecheck",
+    "PLAYWRIGHT_PORT=4277 npx playwright test -c apps/web/playwright.config.ts e2e/ch03.spec.ts e2e/ch07.spec.ts",
+    "npm run qa:light-mode",
+    "npm run qa:video-parity:chapter -- CH01 --self-test through CH07 --self-test",
+    "node scripts/verify-selenium-hospitalization-coverage.mjs"
+  ],
+  "gates": {
+    "typecheck": "PASS",
+    "playwright_ch03_ch07": "PASS",
+    "light_only": "PASS",
+    "ch01_to_ch07_parity": "PASS",
+    "hospitalization_selenium_declaration_coverage": "HISTORICAL_DECLARATION_PASS_35_OF_35",
+    "hospitalization_selenium_runtime": "PENDING_RUNTIME (executed=0; Python unavailable, not FAILED_RUNTIME)"
+  },
+  "evidence": {
+    "functional_fingerprint": "d3fb6e0235b24077ab8241ad09fe2c55a1b912cee488d6e27e08c353b0ad2a31",
+    "ch07_flow": "Synthetic quote rows exercise visible columns, status/date filtering, no-result recovery, search and two-page navigation. The table never sends preauthorization, insurer responses or claims.",
+    "hospitalization_verifier": "The declaration checker now reports PENDING_RUNTIME when no runtime file/Python execution exists. FAILED_RUNTIME is reserved for a started or completed Selenium run with missing, stale, or non-PASS required actions."
+  },
+  "blockers": [
+    "CH07-F04 remains PARTIAL pending CH07-Q004/Q008 document variants, role matrix, duplication and deletion semantics.",
+    "CH07-F05 remains PARTIAL: email and WhatsApp are safe blocked channels pending CH07-Q005.",
+    "CH07-F06 remains NOT_TESTABLE: direct PDF/WhatsApp delivery is verbal only and undefined by CH07-Q005.",
+    "CH07-F07/F09 do not establish an insurer state machine or transition outcome; CH07-Q002 remains open.",
+    "CH07-F08 saved-versus-activated semantics remain undefined by CH07-Q003.",
+    "Python is unavailable, so no Selenium runtime PASS records are claimed.",
+    "Git metadata writes remain denied; no commit, push, fresh fetch or remote SHA verification is claimed."
+  ],
+  "next_batch": "CH08"
+}

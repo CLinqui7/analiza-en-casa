@@ -14,7 +14,7 @@ La fuente de verdad es el archivo original:
 
 ## Por qué no se entregan 81,774 imágenes sueltas
 
-Convertir cada fotograma nativo en un archivo produciría una montaña de duplicados y saturaría la revisión humana y el contexto de Codex. El video original se conserva como evidencia exacta, mientras que la revisión utiliza cuatro niveles:
+Convertir cada fotograma nativo en un archivo produciría una montaña de duplicados y saturaría la revisión detallada. El video original se conserva como evidencia exacta, mientras que la revisión utiliza cuatro niveles:
 
 1. **Clips exactos por capítulo:** conservan video y audio, con un segundo de solape en cada borde.
 2. **Safety frames:** una captura determinística por segundo, aunque el detector no encuentre cambios.
@@ -61,7 +61,7 @@ Ninguna función se marca como implementada sin evidencia de código y una prueb
 
 ### Etapa 1 · Auditoría del capítulo
 
-Codex revisa las hojas de contacto, luego cada event frame y su detail crop. Después comprueba las hojas de safety frames. No modifica código.
+La revisión cubre las hojas de contacto, luego cada event frame y su detail crop. Después comprueba las hojas de safety frames. No modifica código.
 
 ### Etapa 2 · Inventario estructurado
 

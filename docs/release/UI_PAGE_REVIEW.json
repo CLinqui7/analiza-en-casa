@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "task_id": "UI00",
+  "updated_at": "2026-09-09",
+  "data_source": "DEMO_ONLY",
+  "tests_executed": [
+    "node --test tests/dashboard-action-layout.test.mjs tests/ui00-shell-accessibility.test.mjs (3 passed)",
+    "npm.cmd run typecheck --workspace=@analiza/web (passed)",
+    "npm.cmd run lint --workspace=@analiza/web (passed)"
+  ],
+  "validation_receipt": "C:/Temp/analiza-jornada-control/runs/20260909-000254-8176/turn-004-UI00/evidence/UI00_VALIDATION.json",
+  "pages": [
+    {
+      "route": "/dashboard",
+      "scope": "shell visual baseline",
+      "changed_files": ["apps/web/src/components/app-shell.tsx", "apps/web/src/app/globals.css"],
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_test": "tests/ui00-shell-accessibility.test.mjs",
+      "result": "PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "No browser is certified inside the worker sandbox. The owner-browser verifier must capture the real dashboard before and after this snapshot."
+    },
+    {
+      "route": "/patients",
+      "scope": "shell visual baseline",
+      "changed_files": ["apps/web/src/components/app-shell.tsx", "apps/web/src/app/globals.css"],
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_test": "tests/ui00-shell-accessibility.test.mjs",
+      "result": "PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "Owner-browser verification must exercise patient navigation, drawer scroll, account access and logout visibility; no screenshot is claimed from this sandbox."
+    },
+    {
+      "route": "shared account modal",
+      "scope": "dialog geometry and focus",
+      "changed_files": ["apps/web/src/components/app-shell.tsx", "apps/web/src/app/globals.css"],
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_test": "tests/ui00-shell-accessibility.test.mjs",
+      "result": "PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "The account modal now uses a body portal, focus trap and Escape/focus return. Real opening, clipping and geometry still require owner-browser capture."
+    },
+    {
+      "route": "/login",
+      "scope": "Mongo server-session authentication wiring",
+      "changed_files": ["apps/web/src/lib/auth.ts", "apps/web/src/app/api/auth/login/route.ts", "apps/web/src/app/api/auth/logout/route.ts", "apps/web/src/server/mongo-auth.ts"],
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_test": "vitest:m01-server-role-tenant; vitest:m01-server-csrf-logout-revocation; vitest:m01-server-rate-and-generic-login",
+      "result": "DEMO_ONLY_PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "No browser was launched in this sandbox. The owner browser must capture login/logout at every viewport and test a configured synthetic Mongo fixture; no Atlas, email/reset provider or production identity is claimed."
+    },
+    {
+      "route": "/patients",
+      "scope": "Listado y alta/edición: comando Mongo por recurso, refetch explícito y guardado observable",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "Listado con búsqueda, estados, paginación, exportación e importación CSV sintética",
+        "Formulario de alta/edición con DUI, carnet de residente, contactos, seguro y dirección/mapa",
+        "El modo Mongo bloqueaba todas las escrituras por snapshot y no ofrecía refetch de colaboración"
+      ],
+      "changed_files": [
+        "apps/web/src/app/(workspace)/patients/page.tsx",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/lib/http-data-provider.ts",
+        "apps/web/src/lib/private-files.ts",
+        "apps/web/src/lib/private-files.test.ts",
+        "apps/web/src/app/api/patients/route.ts",
+        "apps/web/src/app/api/patients/[id]/route.ts",
+        "apps/web/src/server/mongo-patients.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/app/(workspace)/patients/page.tsx": "8721361361ce2afa19152654729209d048215767adb09ce4a587790535f5aea1",
+        "apps/web/src/components/providers.tsx": "7c8448758ad243c387f493ac4c9d8bb00410fe0f66f52b184cc27dcc176aac1f",
+        "apps/web/src/lib/http-data-provider.ts": "191bf02b89ef632f5e9685dd37341620d0232f278e4c040b7d8c0f6dd6bf47cd",
+        "apps/web/src/app/api/patients/route.ts": "c9141e95ff355654753c39553c132eb78663a8d17ed15c68957bb12dd43217bf",
+        "apps/web/src/app/api/patients/[id]/route.ts": "7c6493204d9944b62e973bce82d3950045907434babc8e04218d75384a0399cb",
+        "apps/web/src/server/mongo-patients.ts": "e817ecfa55b527412730f45189f87e44846254b10cc7891edc340ad3eeed23f0"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": [
+        "vitest:e01-patient-responsible-document",
+        "vitest:e01-patient-duplicate-scope",
+        "vitest:e01-patient-version-refetch",
+        "vitest:e01-http-patient-command-csrf-version",
+        "vitest:e01-http-patient-conflict",
+        "npm.cmd run typecheck --workspace=@analiza/web",
+        "npm.cmd run lint --workspace=@analiza/web"
+      ],
+      "data_source": "SYNTHETIC_ONLY; Mongo remote integration not configured",
+      "result": "LOCAL_CODE_VERIFIED_PENDING_OWNER_BROWSER_AND_ATLAS_FIXTURE",
+      "limits": "No browser was launched in this sandbox, therefore no capture is claimed. Owner verification must capture each viewport, open create/edit/contact/map/import dialogs, test keyboard focus and confirm two independent authorized sessions. CSV import stays fail-closed in Mongo until an idempotent server import command is reviewed."
+    },
+    {
+      "route": "/patients/[id]",
+      "scope": "Detalle administrativo: identidad, contactos con documento del responsable, seguro y dirección",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "Cabecera contextual y enlace de edición condicionado por permiso",
+        "Paneles administrativos de identificación, contactos, seguro y dirección",
+        "No se revisó ni mostró contenido clínico en esta ruta"
+      ],
+      "changed_files": ["apps/web/src/app/api/patients/[id]/route.ts", "apps/web/src/server/mongo-patients.ts"],
+      "implementation_sha256": {
+        "apps/web/src/app/api/patients/[id]/route.ts": "7c6493204d9944b62e973bce82d3950045907434babc8e04218d75384a0399cb",
+        "apps/web/src/server/mongo-patients.ts": "e817ecfa55b527412730f45189f87e44846254b10cc7891edc340ad3eeed23f0"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": [
+        "vitest:e01-patient-responsible-document",
+        "vitest:m01-cross-tenant-404",
+        "npm.cmd run typecheck --workspace=@analiza/web"
+      ],
+      "data_source": "SYNTHETIC_ONLY; Mongo remote integration not configured",
+      "result": "LOCAL_CODE_VERIFIED_PENDING_OWNER_BROWSER_AND_ATLAS_FIXTURE",
+      "limits": "The API returns 404 for a foreign tenant but requires an authorized remote fixture to prove cross-session behavior. Real responsive captures, focus/scroll checks and read-after-write are pending owner-browser verification."
+    },
+    {
+      "route": "/doctors",
+      "scope": "Directorio de médicos y recursos, alta/edición administrativa y adjuntos privados preparados para Mongo",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "Altas independientes de recurso y médico, selector buscable de especialidad/profesión y edición de médico",
+        "Adjuntos de médico conservaban únicamente metadatos en modo demo, sin bytes, descarga ni verificación de acceso"
+      ],
+      "changed_files": [
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/server/mongo-files.ts",
+        "apps/web/src/server/mongo-gridfs-storage.ts",
+        "apps/web/src/app/api/files/route.ts",
+        "apps/web/src/app/api/files/[id]/route.ts",
+        "apps/web/src/server/mongo-doctors.ts",
+        "apps/web/src/app/api/doctors/route.ts",
+        "apps/web/src/app/api/doctors/[id]/route.ts",
+        "apps/web/src/server/mongo-bootstrap.ts",
+        "apps/web/src/lib/data-provider.ts",
+        "apps/web/src/lib/http-data-provider.ts",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/app/api/workspace/route.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/server/mongo-files.ts": "63df169349cda3dc01ccf0fe579a2fe666c15711221b3d863330e47819f41440",
+        "apps/web/src/server/mongo-gridfs-storage.ts": "c18aa298e7dcf7d08970285492bbc781cbfae97ced2b8577b91d14cf14c2d5fe",
+        "apps/web/src/app/api/files/route.ts": "fa474c59aa902fa88953a40e28d8770d4abb9b913ca620400df4b1ea86565101",
+        "apps/web/src/app/api/files/[id]/route.ts": "11c4a49eb5777413cc62569591429ae23fafdbe7eb987e91f9613af577d9f787",
+        "apps/web/src/server/mongo-doctors.ts": "095d56d0cda2db410879477e11fe30c97d4e24296b7a23e4e79d739a2164e787",
+        "apps/web/src/app/api/doctors/route.ts": "3c02752f0a331ea8999b50a50f2b78fc22a45eea0e065d3c9d19d19a85c15550",
+        "apps/web/src/app/api/doctors/[id]/route.ts": "507f75a8f23e6607a7e70e2742e926044fb095314a9bfe0e955e9b3b37a5edba",
+        "apps/web/src/server/mongo-bootstrap.ts": "1dc743e9b6d6d39842f444ab3b7de8df58cfae906d48f7e8d1cc26d152a296d4",
+        "apps/web/src/app/(workspace)/doctors/page.tsx": "70bda8b0d9bf63751e67bd9d691245b82b77ad4b7ef9ee9856de853129c377b2",
+        "apps/web/src/lib/data-provider.ts": "1272602cfa388bdcead032277889b25a4b2d0964826bca6ce2d109b57e78d20f",
+        "apps/web/src/lib/http-data-provider.ts": "f9225571e40a59c17b09efed4910273c39d9426ffe2617098f1a1c27cf0c4db7",
+        "apps/web/src/lib/http-data-provider.test.ts": "a7706848d843b3155436384babd7d8c028193c77335751a59a067553c454f021",
+        "apps/web/src/lib/private-files.ts": "280aeb8bf2ad50c22cd9d25e4ebe10a5348fe542e7d6ad3ba72029ba223ec393",
+        "apps/web/src/lib/private-files.test.ts": "5c2c24562f1061e3009e780d32ec5200f3ac6787f11244f157c72a4e1da45f19",
+        "apps/web/src/components/providers.tsx": "82d0757cad8c32d4b7ca8f15145b618441997a313c6a28a70f718eaa4931098c",
+        "apps/web/src/app/api/workspace/route.ts": "0ce1e7431630fab66d32e7684c0e768ce12d4c0bdc588ebbd3d540bc6a330411"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": ["vitest:e02-private-file-bytes-metadata-download", "vitest:e02-private-file-owner-permission-and-integrity", "vitest:e02-private-file-multipart-browser-boundary", "vitest:e02-private-file-download-path-encoded", "vitest:e02-doctor-private-file-command-boundary", "vitest:e02-doctor-version-and-tenant-scope", "vitest:e02-http-doctor-hospitalization-command-csrf-version", "vitest:m02-bootstrap-dry-run", "npm.cmd run test --workspace=@analiza/web -- mongo-doctors-hospitalizations.test.ts mongo-bootstrap.test.ts mongo-files.test.ts http-data-provider.test.ts private-files.test.ts (15 passed)", "npm.cmd run typecheck --workspace=@analiza/web", "npm.cmd run lint --workspace=@analiza/web"],
+      "data_source": "SYNTHETIC_ONLY; Mongo remote integration not configured",
+      "result": "LOCAL_SERVER_CODE_VERIFIED_PENDING_OWNER_BROWSER_AND_ATLAS_FIXTURE",
+      "limits": "No browser was launched in this sandbox. The doctor directory loads only role-authorized records and its create/edit forms use server commands with CSRF and expected-version checks. Selected files are sent as authenticated multipart bytes only after the doctor exists, and download links target the server-authorized route. Owner-browser verification must still exercise upload/download and post-reload listing against an authorized synthetic Mongo fixture."
+    },
+    {
+      "route": "/hospitalizations",
+      "scope": "Listado administrativo, ingreso/egreso y períodos múltiples sin inferir su significado; adjuntos privados preparados para Mongo",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "Listado filtrable, alta/edición, fecha de ingreso/egreso y períodos adicionales sintéticos",
+        "El filtro aún decía Fecha de inicio y el listado no hacía visible la cantidad de períodos",
+        "No había carga, bytes privados ni descarga autorizada de archivos"
+      ],
+      "changed_files": [
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
+        "apps/web/src/server/mongo-files.ts",
+        "apps/web/src/server/mongo-gridfs-storage.ts",
+        "apps/web/src/app/api/files/route.ts",
+        "apps/web/src/app/api/files/[id]/route.ts",
+        "apps/web/src/server/mongo-hospitalizations.ts",
+        "apps/web/src/app/api/hospitalizations/route.ts",
+        "apps/web/src/app/api/hospitalizations/[id]/route.ts",
+        "apps/web/src/server/mongo-bootstrap.ts",
+        "apps/web/src/lib/data-provider.ts",
+        "apps/web/src/lib/http-data-provider.ts",
+        "apps/web/src/lib/private-files.ts",
+        "apps/web/src/lib/private-files.test.ts",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/app/api/workspace/route.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/server/mongo-hospitalizations.ts": "1202f1f2dcfc4c88ae12cf1cf3e5fd18510bfed7bab6cf1dffa924c49b582ba3",
+        "apps/web/src/app/api/hospitalizations/route.ts": "b5e9a47a2b33a57527c0d722ac7c918f285de1a57262b872cbe280db403e13a8",
+        "apps/web/src/app/api/hospitalizations/[id]/route.ts": "5b2544554c71ddd2425b5082feefd840d3a7180381b1193759efeb479eafa3ab",
+        "apps/web/src/server/mongo-bootstrap.ts": "1dc743e9b6d6d39842f444ab3b7de8df58cfae906d48f7e8d1cc26d152a296d4",
+        "apps/web/src/app/(workspace)/hospitalizations/page.tsx": "39cf0f847eb96f0c38752de5c112af638b393049938c955e71eeb79c80341749",
+        "apps/web/src/lib/data-provider.ts": "1272602cfa388bdcead032277889b25a4b2d0964826bca6ce2d109b57e78d20f",
+        "apps/web/src/lib/http-data-provider.ts": "f9225571e40a59c17b09efed4910273c39d9426ffe2617098f1a1c27cf0c4db7",
+        "apps/web/src/lib/http-data-provider.test.ts": "a7706848d843b3155436384babd7d8c028193c77335751a59a067553c454f021",
+        "apps/web/src/lib/private-files.ts": "280aeb8bf2ad50c22cd9d25e4ebe10a5348fe542e7d6ad3ba72029ba223ec393",
+        "apps/web/src/lib/private-files.test.ts": "5c2c24562f1061e3009e780d32ec5200f3ac6787f11244f157c72a4e1da45f19",
+        "apps/web/src/components/providers.tsx": "82d0757cad8c32d4b7ca8f15145b618441997a313c6a28a70f718eaa4931098c",
+        "apps/web/src/app/api/workspace/route.ts": "0ce1e7431630fab66d32e7684c0e768ce12d4c0bdc588ebbd3d540bc6a330411"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": ["vitest:cr009-admission-periods", "vitest:e02-private-file-bytes-metadata-download", "vitest:e02-private-file-owner-permission-and-integrity", "vitest:e02-private-file-multipart-browser-boundary", "vitest:e02-private-file-download-path-encoded", "vitest:e02-hospitalization-admission-period-command", "vitest:e02-hospitalization-command-rejects-cross-tenant-patient", "vitest:e02-http-doctor-hospitalization-command-csrf-version", "vitest:m02-bootstrap-dry-run", "npm.cmd run test --workspace=@analiza/web -- mongo-doctors-hospitalizations.test.ts mongo-bootstrap.test.ts mongo-files.test.ts http-data-provider.test.ts private-files.test.ts (15 passed)", "npm.cmd run test --workspace=@analiza/web -- hospitalization-periods.test.ts (3 passed, 2026-09-09)", "npm.cmd run typecheck --workspace=@analiza/web (passed, 2026-09-09)", "npm.cmd run lint --workspace=@analiza/web (passed, 2026-09-09)"],
+      "data_source": "SYNTHETIC_ONLY; Mongo remote integration not configured",
+      "result": "LOCAL_CODE_VERIFIED_PENDING_OWNER_BROWSER_AND_ATLAS_FIXTURE",
+      "limits": "Períodos siguen siendo información administrativa sin regla de reingreso, traslado, cierre, auditoría clínica o facturación. La página carga sólo hospitalizaciones autorizadas y usa comandos con paciente tenant-scoped, CSRF y versión esperada. Selected files are sent as authenticated multipart bytes after the hospitalization is saved; the visible download link points to the server-authorized route. Owner-browser must verify visual upload/download and persisted attachment listing after refetch against an authorized synthetic Mongo fixture. No screen was captured in this sandbox."
+    },
+    {
+      "route": "/agenda",
+      "scope": "Series de turnos: ruta de comando Mongo atómica para fechas múltiples, colisiones e idempotencia; la pantalla existente conserva las vistas día/semana/mes y los presets 6h/8h.",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "La agenda demo crea series de fechas múltiples y detecta colisiones en almacenamiento local.",
+        "No existía un comando Mongo servidor para validar una serie completa, su reintento ni su auditoría."
+      ],
+      "changed_files": [
+        "apps/web/src/server/mongo-shifts.ts",
+        "apps/web/src/server/mongo-shifts.test.ts",
+        "apps/web/src/app/api/shifts/route.ts",
+        "apps/web/src/server/mongo-bootstrap.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/server/mongo-shifts.ts": "ebc6eaa67232ecf6a9b4d8ab3817fef912721731a819e323c95fed7339dabd2f",
+        "apps/web/src/server/mongo-shifts.test.ts": "4292fa8ed3cbd87adc2e40d20745c78337f041d2160dc851c54bf03ac3d7def2",
+        "apps/web/src/app/api/shifts/route.ts": "0c7ca500642eb3bb383db531d14b5af522844a25d5ed7cdb81a73ad828d2bf5e",
+        "apps/web/src/server/mongo-bootstrap.ts": "b94aaa359dcca6bba7abad03759e64ab02fa2485252dbd7a1f46b265380ef34b"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": [
+        "vitest:e03-shift-series-atomic-idempotent-audit",
+        "vitest:e03-shift-series-collision-and-authority",
+        "vitest:e03-shift-series-retry-no-duplicate",
+        "vitest:cr017-multi-day-shifts",
+        "vitest:cr018-shift-presets",
+        "npm.cmd run test --workspace=@analiza/web -- mongo-shifts.test.ts mongo-bootstrap.test.ts (5 passed)",
+        "npm.cmd run test --workspace=@analiza/web -- agenda-series.test.ts (3 passed)",
+        "npm.cmd run typecheck --workspace=@analiza/web (passed)",
+        "npm.cmd run lint --workspace=@analiza/web (passed)"
+      ],
+      "data_source": "SYNTHETIC_ONLY; no Atlas collection or remote fixture was created",
+      "result": "LOCAL_SERVER_CODE_VERIFIED_PENDING_PROVIDER_WIRING_OWNER_BROWSER_AND_ATLAS_FIXTURE",
+      "limits": "No browser was launched in this sandbox, so no real before/after captures are claimed. The new API is intentionally not wired into the browser workspace until the server-backed nursing-resource read path and authorized synthetic Mongo fixture exist. Puntual remains disabled pending CR-010; no duration, fee, clinical state or financial rule was added."
+    }
+  ],
+  "ui01_pages": [
+    {
+      "route": "/login",
+      "scope": "Acceso: modo demo explícito, validación por campo, submitting y foco inicial",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "Logo y campos de acceso existentes",
+        "Credenciales demo precargadas y pista visible sin distinguir backend configurado",
+        "Error general de autenticación sin errores de campos vacíos",
+        "Sin estado submitting separado de la carga de sesión"
+      ],
+      "changed_files": [
+        "apps/web/src/components/login-form.tsx",
+        "apps/web/src/lib/auth.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/components/login-form.tsx": "0ebf8bf8061c375dd6c5b1bf871b07bad3d00dd2d87d5673f2255443d8eda7ec",
+        "apps/web/src/lib/auth.ts": "59a0cf82a6eb196d1bcaa7ea5f771cd5ea5cb2e9ea026b27b433c73a7d85c8a6"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": [
+        "tests/ui01-access-dashboard.test.mjs",
+        "npm.cmd run typecheck --workspace=@analiza/web",
+        "npm.cmd run lint --workspace=@analiza/web",
+        "npm.cmd run test --workspace=@analiza/web"
+      ],
+      "data_source": "DEMO_ONLY",
+      "result": "DEMO_ONLY_PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "El sandbox no tiene navegador certificado. Se debe capturar antes/después y comprobar Tab, foco inicial, errores, submitting, recuperación y logout con fixtures sintéticos en el navegador del owner; no se reclama sesión Mongo/Atlas ni recuperación por correo."
+    },
+    {
+      "route": "/dashboard",
+      "scope": "Actividad filtrable, acciones documentadas y accesos rápidos autorizados",
+      "source": "C:/Temp/analiza-jornada-control/inputs/nueva_directiva/FRONT_PAGINA_POR_PAGINA.md",
+      "before_inventory": [
+        "KPIs derivados de snapshot sintético y métricas no aprobadas mostradas como no disponibles",
+        "Tabla de últimas mediciones sin filtro temporal",
+        "Enlaces de alta por permiso, sin bloque específico de próximas acciones ni accesos rápidos"
+      ],
+      "changed_files": [
+        "apps/web/src/app/(workspace)/dashboard/page.tsx",
+        "apps/web/src/components/providers.tsx",
+        "apps/web/src/lib/dashboard-activity.ts",
+        "apps/web/src/lib/dashboard-activity.test.ts"
+      ],
+      "implementation_sha256": {
+        "apps/web/src/app/(workspace)/dashboard/page.tsx": "e364453d47404b4c7d256fdf471bb54d28e80818746633fd39ed8c47488ffd17",
+        "apps/web/src/components/providers.tsx": "f4fee981aa60715328fa55c830e9e4f2f7f84481b085410cbabfd47db2008f77",
+        "apps/web/src/lib/dashboard-activity.ts": "ae7b2490188dcd0ff7f8e5853e075553dd8fea7726573779829f44289c2e02a5",
+        "apps/web/src/lib/dashboard-activity.test.ts": "27006b999d5b45822b324246f3093e51754ae055570e330399d4104c2154ccaa"
+      },
+      "viewports_required": ["390x844", "768x1024", "1440x900"],
+      "before_captures": [],
+      "after_captures": [],
+      "flow_tests_executed": [
+        "apps/web/src/lib/dashboard-activity.test.ts",
+        "tests/ui01-access-dashboard.test.mjs",
+        "tests/dashboard-action-layout.test.mjs",
+        "npm.cmd run typecheck --workspace=@analiza/web",
+        "npm.cmd run lint --workspace=@analiza/web",
+        "npm.cmd run test --workspace=@analiza/web"
+      ],
+      "data_source": "DEMO_ONLY",
+      "result": "DEMO_ONLY_PENDING_OWNER_BROWSER_VERIFICATION",
+      "limits": "Las acciones proceden únicamente de turnos programados y nextAction documentada en casos no cerrados; no se crean alertas, reglas clínicas, importes ni gráficas. El owner debe capturar todos los viewports, comprobar filtros desde/hasta y limpiar, enlaces a agenda/pacientes/cotizaciones y visibilidad por rol."
+    }
+  ],
+  "known_blockers": [
+    {
+      "id": "UI00-BROWSER-CAPTURE",
+      "scope": "real before/after captures and visual geometry",
+      "reason": "Sandbox browser capability is NOT_REQUIRED_NOT_CERTIFIED; no Chrome launch was attempted by this worker.",
+      "required_evidence": "Owner-browser screenshots and fixed Selenium/visual regressions over the current snapshot."
+    },
+    {
+      "id": "UI00-REQUIREMENTS-REGISTRY",
+      "scope": "210 video plus 32 Excel implementation registry",
+      "reason": "docs/release/REQUIREMENTS_IMPLEMENTATION.json is absent from the checkout; only the closure template is available in INPUTS.",
+      "required_evidence": "Supervisor-provided or initialized registry before any requirement status or hash can be recorded."
+    }
+  ]
+}
