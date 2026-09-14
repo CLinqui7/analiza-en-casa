@@ -6,7 +6,8 @@ export function assertSyntheticTarget(env) {
     env.ANALIZA_QA_MODE === '1' &&
     !env.K_SERVICE &&
     !env.CLOUD_RUN_JOB &&
-    !env.PGHOST?.startsWith('/cloudsql/');
+    env.PGDATABASE === 'analiza_qa' &&
+    ['127.0.0.1', 'localhost', '::1', 'db'].includes(env.PGHOST);
   const staging =
     env.ANALIZA_ENVIRONMENT === 'staging' &&
     env.ANALIZA_STAGING_SEED_APPROVED === '1' &&

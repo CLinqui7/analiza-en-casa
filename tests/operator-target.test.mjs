@@ -28,12 +28,14 @@ test('seed requires the exact approved job, database and managed SQL socket', ()
   }
 });
 test('local QA authorization cannot be used from a deployed job or web service', () => {
-  const qa = { ANALIZA_QA_MODE: '1', PGHOST: '127.0.0.1' };
+  const qa = { ANALIZA_QA_MODE: '1', PGHOST: '127.0.0.1', PGDATABASE: 'analiza_qa' };
   assert.equal(assertSyntheticTarget(qa), 'local-qa');
   for (const invalid of [
     { CLOUD_RUN_JOB: 'some-job' },
     { K_SERVICE: 'some-service' },
     { PGHOST: staging.PGHOST },
+    { PGHOST: 'corporate.example.invalid' },
+    { PGDATABASE: 'corporate' },
   ])
     assert.throws(() => assertSyntheticTarget({ ...qa, ...invalid }));
 });
