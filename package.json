@@ -2,6 +2,7 @@
   "name": "analiza-en-casa-production-qa",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "npm@11.18.0",
   "type": "module",
   "workspaces": [
     "apps/*",

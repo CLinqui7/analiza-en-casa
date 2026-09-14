@@ -27,6 +27,11 @@ Hallazgos corregidos y comprobados:
   El scanner de imagen conserva su regla de claves y reconoce únicamente el ejemplo
   literal `xxxxxxx` de la documentación pública del SDK; no excluye el archivo completo.
 
+Se fija npm 11.18.0 en Docker/Cloud Build para evitar el fallo de npm 11.4.1 que
+ignoraba overrides al atravesar workspaces. `npm ls uuid` con la versión corregida
+confirma el override y la instalación desde lock mantiene cero vulnerabilidades
+reportadas. Referencia: [corrección del resolver npm](https://github.com/npm/cli/pull/9671).
+
 Los resultados ejecutables y el ID exacto de la imagen final están en
 `docs/release/CLOUD_RUN_SQL_STATE.json`. No quedan hallazgos P0/P1 conocidos en
 las modificaciones revisadas. Esto no certifica todos los módulos históricos,

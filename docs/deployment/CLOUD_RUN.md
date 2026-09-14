@@ -8,7 +8,9 @@ No se necesita crear una cuenta Docker Hub para esta entrega.
 
 ## Reproducir la validación local
 
-Desde la raíz del mismo repositorio/rama, con Node, Docker Linux y Chrome instalados:
+Desde la raíz del mismo repositorio/rama, con Node 24, npm 11.18.0, Docker Linux
+y Chrome instalados. Para instalar sin cambiar el npm global:
+`npm exec --yes --package=npm@11.18.0 -- npm ci`.
 
 ```powershell
 npm ci

@@ -8,7 +8,8 @@ COPY apps/web/package.json ./apps/web/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/domain/package.json ./packages/domain/package.json
 COPY packages/ui/package.json ./packages/ui/package.json
-RUN npm ci
+# npm 11.18 correctly preserves root overrides across workspace links.
+RUN npm install --global npm@11.18.0 && npm ci && npm ls uuid
 COPY apps/web ./apps/web
 COPY packages ./packages
 COPY docs/qa ./docs/qa
