@@ -7,7 +7,7 @@
     "apps/*",
     "packages/*"
   ],
-  "description": "Sistema operativo de atención domiciliaria, preparado para Supabase y Vercel, con modo demo local.",
+  "description": "Analiza full-stack Next.js: Cloud Run, PostgreSQL 18 y archivos privados GCS; QA sint\u00e9tico.",
   "scripts": {
     "dev": "npm run dev --workspace=@analiza/web",
     "start": "npm run start --workspace=@analiza/web",
@@ -20,8 +20,8 @@
     "test:react": "npm run test --workspace=@analiza/web",
     "test:core:mongo": "tsx --tsconfig apps/web/tsconfig.json apps/web/src/server/core-live-verification.ts",
     "test:core:selenium": "node scripts/verify-core-selenium.mjs",
-    "docker:build": "docker build -t analiza-core .",
-    "docker:bootstrap:build": "docker build --target operator -t analiza-operator .",
+    "docker:build": "docker build --progress=plain -t analiza-web:cloudrun .",
+    "docker:bootstrap:build": "docker build --target operator -t analiza-operator:postgresql .",
     "test": "node --test tests/*.test.mjs",
     "test:browser:ch01": "playwright test tests/e2e/ch01.spec.mjs",
     "test:browser:ch02": "playwright test tests/e2e/ch02.spec.mjs",
@@ -84,10 +84,17 @@
     "selenium:coverage:hospitalizations": "node scripts/verify-selenium-hospitalization-coverage.mjs",
     "selenium:coverage:ch03": "node scripts/verify-selenium-ch03-coverage.mjs",
     "selenium:coverage:quotes": "node scripts/verify-selenium-quote-coverage.mjs",
-    "security:scan": "node scripts/security-scan.mjs"
+    "security:scan": "node scripts/security-scan.mjs",
+    "db:plan": "node scripts/deployment/db-command.mjs --dry-run",
+    "db:migrate": "node scripts/deployment/db-command.mjs --migrate",
+    "db:seed:qa": "node scripts/deployment/db-command.mjs --seed-synthetic",
+    "test:postgresql": "node scripts/deployment/verify-container.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",

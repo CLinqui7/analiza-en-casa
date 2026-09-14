@@ -1,0 +1,77 @@
+import { Pool, type PoolClient, type PoolConfig } from 'pg';
+import type { ServerActor } from '../validation/patients';
+
+export function postgresConfig(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): PoolConfig {
+  if (env.ANALIZA_DATA_MODE !== 'postgresql') throw new Error('PostgreSQL no está configurado.');
+  const { PGHOST: host, PGDATABASE: database, PGUSER: user, PGPASSWORD: password } = env;
+  if (!host || !database || !user || !password)
+    throw new Error('Falta configuración privada PostgreSQL.');
+  const localQa = env.ANALIZA_QA_MODE === '1' && !env.K_SERVICE;
+  if (!host.startsWith('/cloudsql/') && !localQa)
+    throw new Error('Se requiere el socket administrado de Cloud SQL.');
+  const max = Number(env.PGPOOL_MAX ?? 5);
+  if (!Number.isInteger(max) || max < 1 || max > 50)
+    throw new Error('Pool PostgreSQL fuera de límites.');
+  const port = Number(env.PGPORT ?? 5432);
+  if (!Number.isInteger(port) || port < 1 || port > 65535)
+    throw new Error('Puerto PostgreSQL inválido.');
+  return {
+    host,
+    database,
+    user,
+    password,
+    port,
+    max,
+    connectionTimeoutMillis: 2000,
+    idleTimeoutMillis: 30000,
+    // Leave time for rollback and HTTP completion within Cloud Run's 10s SIGTERM grace.
+    statement_timeout: 5000,
+    query_timeout: 6000,
+    idle_in_transaction_session_timeout: 5000,
+    application_name: 'analiza-web',
+  };
+}
+const globalPg = globalThis as typeof globalThis & {
+  analizaPgPool?: Pool;
+  analizaPgClosing?: boolean;
+};
+export function postgresPool(): Pool {
+  if (globalPg.analizaPgClosing) throw new Error('El servicio se está apagando.');
+  if (!globalPg.analizaPgPool) {
+    globalPg.analizaPgPool = new Pool(postgresConfig());
+    // Idle socket errors must not crash a process or print connection credentials.
+    globalPg.analizaPgPool.on('error', () =>
+      console.error('PostgreSQL idle connection unavailable.'),
+    );
+  }
+  return globalPg.analizaPgPool;
+}
+export async function closePostgresPool() {
+  globalPg.analizaPgClosing = true;
+  const pool = globalPg.analizaPgPool;
+  if (pool) await pool.end();
+}
+export async function transaction<T>(
+  pool: Pool,
+  actor: ServerActor | null,
+  operation: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    if (actor)
+      await client.query("SELECT set_config('analiza.organization_id',$1,true)", [
+        actor.organizationId,
+      ]);
+    const result = await operation(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}

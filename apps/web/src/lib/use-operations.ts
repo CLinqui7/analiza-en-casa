@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import { useCallback, useEffect, useState } from 'react';
 import { emptyOperations, type OperationsSnapshot } from '@analiza/contracts';
@@ -11,7 +12,7 @@ export function useOperations() {
   const [data, setData] = useState<OperationsSnapshot>(emptyOperations);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const connected = session?.mode === 'mongodb';
+  const connected = isServerDataMode(session?.mode);
   const reload = useCallback(async () => {
     if (!connected) return;
     const response = await fetch('/api/operations', { cache: 'no-store' });

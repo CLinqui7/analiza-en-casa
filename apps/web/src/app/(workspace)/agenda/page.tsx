@@ -1,4 +1,6 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
+
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -245,7 +247,7 @@ export default function AgendaPage() {
           <p className="eyebrow">Operaciones</p>
           <h1>Agenda y turnos</h1>
           <p>
-            {providerMode === 'mongodb'
+            {isServerDataMode(providerMode)
               ? 'Turnos leídos y guardados mediante comandos seguros por organización.'
               : 'Turnos sintéticos auditables; las horas se derivan de su intervalo programado.'}
           </p>

@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
@@ -69,7 +70,7 @@ export default function HospitalizationDetailPage() {
         ? 'warning'
         : 'neutral';
   const profile = hospitalization.administrativeProfile;
-  const profileEditingEnabled = providerMode === 'mock' || providerMode === 'mongodb';
+  const profileEditingEnabled = providerMode === 'mock' || isServerDataMode(providerMode);
   const closeProfile = () => setProfileOpen(false);
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

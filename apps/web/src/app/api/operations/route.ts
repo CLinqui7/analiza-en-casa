@@ -1,13 +1,8 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-  csrfHeaderName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
-import { MongoOperationsRepository } from '@/server/mongo-operations';
-import { MongoConflictError, MongoInputError } from '@/server/mongo-patients';
+import { sessionCookieName, csrfHeaderName } from '@/server/auth-service';
+
+import { MongoConflictError, MongoInputError } from '@/server/validation/patients';
 import { authorizationStatus } from '@/server/http-auth';
 import { isReleasedCommand } from '@/lib/release-profile';
 
@@ -39,11 +34,9 @@ function failure(error: unknown) {
 }
 export async function GET(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const actor = await new MongoAuthService(mongoAuthStore(database)).requireSession(
-      request.cookies.get(sessionCookieName)?.value,
-    );
-    return NextResponse.json(await new MongoOperationsRepository(database).list(actor), {
+    const backend = await persistence();
+    const actor = await backend.auth.requireSession(request.cookies.get(sessionCookieName)?.value);
+    return NextResponse.json(await backend.operations.list(actor), {
       headers,
     });
   } catch (error) {
@@ -52,8 +45,8 @@ export async function GET(request: NextRequest) {
 }
 export async function POST(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const token = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(token);
     await auth.requireCsrf(token, request.headers.get(csrfHeaderName) ?? undefined);
@@ -64,7 +57,7 @@ export async function POST(request: NextRequest) {
         { status: 404, headers },
       );
     }
-    const result = await new MongoOperationsRepository(database).execute(actor, input);
+    const result = await backend.operations.execute(actor, input);
     return NextResponse.json(result, { status: 200, headers });
   } catch (error) {
     return failure(error);

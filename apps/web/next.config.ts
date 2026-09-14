@@ -4,6 +4,9 @@ import { resolve } from 'node:path';
 // Optional same-origin API routing: Vercel frontend -> cloud container -> Atlas.
 // This is a deployment setting, never a URL supplied by the browser.
 const apiOrigin = process.env.ANALIZA_API_ORIGIN;
+if (process.env.ANALIZA_CONTAINER_BUILD === '1' && apiOrigin) {
+  throw new Error('ANALIZA_API_ORIGIN is forbidden in the combined frontend/API container.');
+}
 if (apiOrigin) {
   const target = new URL(apiOrigin);
   if (
@@ -22,9 +25,12 @@ if (apiOrigin) {
 
 if (
   process.env.NEXT_PUBLIC_RELEASE_PROFILE === 'core' &&
-  (process.env.NEXT_PUBLIC_DATA_MODE !== 'mongodb' || process.env.ANALIZA_DATA_MODE !== 'mongodb')
+  (!['mongodb', 'postgresql'].includes(process.env.NEXT_PUBLIC_DATA_MODE ?? '') ||
+    process.env.ANALIZA_DATA_MODE !== process.env.NEXT_PUBLIC_DATA_MODE)
 ) {
-  throw new Error('Core requires server and browser MongoDB modes; demo fallback is forbidden.');
+  throw new Error(
+    'Core requires matching server and browser database modes; demo fallback is forbidden.',
+  );
 }
 
 const nextConfig: NextConfig = {

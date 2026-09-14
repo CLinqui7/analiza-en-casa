@@ -1,4 +1,6 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
+
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -397,7 +399,7 @@ export default function PatientsPage() {
   }, [editDialogOpen, editingPatient, form]);
 
   useEffect(() => {
-    if (!editingPatient || !editDialogOpen || providerMode !== 'mongodb') return;
+    if (!editingPatient || !editDialogOpen || !isServerDataMode(providerMode)) return;
     let active = true;
     void listPrivateFiles('patient', editingPatient.id)
       .then((files) => {
@@ -508,7 +510,11 @@ export default function PatientsPage() {
     setImportPreview(previewPatientImport(file.name, await file.text(), patients));
   }
   function confirmImport() {
-    if (providerMode === 'mongodb' || !importPreview?.rows.length || importPreview.errors.length)
+    if (
+      isServerDataMode(providerMode) ||
+      !importPreview?.rows.length ||
+      importPreview.errors.length
+    )
       return;
     addPatients(importPreview.rows);
     setResult(`${importPreview.rows.length} pacientes sintéticos importados.`);
@@ -632,7 +638,7 @@ export default function PatientsPage() {
       return;
     }
     if (
-      providerMode === 'mongodb' &&
+      isServerDataMode(providerMode) &&
       (pendingIdentityFiles.length || pendingResponsibleFiles.length)
     ) {
       try {
@@ -661,7 +667,7 @@ export default function PatientsPage() {
     setResult(
       editingPatient
         ? `Paciente ${patient.fullName} actualizado y persistido.`
-        : providerMode === 'mongodb'
+        : isServerDataMode(providerMode)
           ? `Paciente ${patient.fullName} registrado.`
           : `Registro sintético agregado para ${patient.fullName}.`,
     );
@@ -1249,7 +1255,7 @@ export default function PatientsPage() {
               <input
                 accept="image/jpeg,image/png,application/pdf"
                 data-action-id="PATIENT-IDENTITY-ATTACHMENTS"
-                disabled={providerMode !== 'mongodb'}
+                disabled={!isServerDataMode(providerMode)}
                 multiple
                 onChange={(event) =>
                   setPendingIdentityFiles(Array.from(event.currentTarget.files ?? []))
@@ -1258,7 +1264,7 @@ export default function PatientsPage() {
               />
             </label>
             <p className="field-help">
-              {providerMode === 'mongodb'
+              {isServerDataMode(providerMode)
                 ? 'Hasta 5 MB por archivo. Se almacena de forma privada y cada lectura vuelve a validar organización y permisos.'
                 : 'La carga está disponible únicamente con el almacenamiento privado Mongo activo; la demo no conserva archivos.'}
             </p>
@@ -1267,7 +1273,7 @@ export default function PatientsPage() {
               <input
                 accept="image/jpeg,image/png,application/pdf"
                 data-action-id="PATIENT-RESPONSIBLE-ATTACHMENTS"
-                disabled={providerMode !== 'mongodb'}
+                disabled={!isServerDataMode(providerMode)}
                 multiple
                 type="file"
                 onChange={(event) =>
@@ -1355,7 +1361,7 @@ export default function PatientsPage() {
                           if (value) setHolderDialogOpen(true);
                         }}
                         options={
-                          providerMode === 'mongodb'
+                          isServerDataMode(providerMode)
                             ? operations.configuration
                                 .filter((entry) => entry.category === 'INSURER' && entry.active)
                                 .map((entry) => ({ value: entry.label, label: entry.label }))
@@ -1667,7 +1673,7 @@ export default function PatientsPage() {
             <Button
               data-action-id="PATIENT-IMPORT-CONFIRM"
               disabled={
-                providerMode === 'mongodb' ||
+                isServerDataMode(providerMode) ||
                 !importPreview?.rows.length ||
                 Boolean(importPreview.errors.length)
               }
@@ -1736,7 +1742,7 @@ export default function PatientsPage() {
             )}
           </div>
         ) : null}
-        {providerMode === 'mongodb' ? (
+        {isServerDataMode(providerMode) ? (
           <p className="field-help" role="status">
             La importación masiva aún requiere un comando Mongo idempotente aprobado; no se guardará
             ninguna fila desde esta pantalla.

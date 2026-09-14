@@ -1,17 +1,8 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus } from '@/server/http-auth';
-import {
-  MongoDuplicatePatientError,
-  MongoInputError,
-  MongoPatientRepository,
-} from '@/server/mongo-patients';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+import { MongoDuplicatePatientError, MongoInputError } from '@/server/validation/patients';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,12 +20,10 @@ function secureError(status: 401 | 403 | 503) {
 /** Bounded patient collection commands. Tenant and role derive exclusively from the server session. */
 export async function GET(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
-    const patients = await new MongoPatientRepository(
-      database.collection('patients'),
-    ).listWithVersions(actor);
+    const patients = await backend.patients.listWithVersions(actor);
     return NextResponse.json({ patients }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return secureError(authorizationStatus(error));
@@ -43,15 +32,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
-    const patient = await new MongoPatientRepository(database.collection('patients')).create(
-      actor,
-      await request.json(),
-    );
+    const patient = await backend.patients.create(actor, await request.json());
     return NextResponse.json(patient, { status: 201, headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof MongoInputError || error instanceof MongoDuplicatePatientError) {

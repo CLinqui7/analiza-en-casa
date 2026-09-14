@@ -1,3 +1,4 @@
+import { isServerDataMode } from '@/lib/data-mode';
 import { Button, Panel } from '@analiza/ui';
 import type { Hospitalization } from '@analiza/contracts';
 import type { DataProvider } from '@/lib/data-provider';
@@ -20,7 +21,7 @@ export function AdministrativeProfilePanel({
   providerMode,
 }: Props) {
   const profile = hospitalization.administrativeProfile;
-  const profileEditingEnabled = providerMode === 'mock' || providerMode === 'mongodb';
+  const profileEditingEnabled = providerMode === 'mock' || isServerDataMode(providerMode);
   return (
     <Panel>
       <div className="table-heading">

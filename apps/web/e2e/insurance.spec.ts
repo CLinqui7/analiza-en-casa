@@ -87,7 +87,9 @@ test('insurance cancellation, invalid quote, safe channels and role guards are e
   await admin.getByRole('button', { name: 'Registrar actualización' }).first().click();
   await admin.getByRole('button', { name: 'Cancelar' }).click();
   await admin.reload();
-  await expect(admin.getByText('No existe una solicitud persistida todavía.', { exact: false })).toBeVisible();
+  await expect(
+    admin.getByText('No existe una solicitud persistida todavía.', { exact: false }),
+  ).toBeVisible();
   await admin.goto('/insurance?quote=missing-quote');
   await expect(admin.getByText('Cotización no disponible')).toBeVisible();
   await admin.getByRole('button', { name: 'WhatsApp' }).click();

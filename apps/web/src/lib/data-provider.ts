@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import type {
   CatalogItem,
@@ -138,7 +139,7 @@ export function normalizeQuote(quote: Quote): Quote {
 }
 
 export interface DataProvider {
-  readonly mode: 'mock' | 'supabase' | 'mongodb';
+  readonly mode: 'mock' | 'supabase' | 'mongodb' | 'postgresql';
   executeCommand?(input: unknown): Promise<void>;
   load(): Promise<WorkspaceSnapshot>;
   saveChanges(changes: Partial<WorkspaceSnapshot>): Promise<void>;
@@ -398,7 +399,7 @@ export class SupabaseDataProvider implements DataProvider {
 export function createDataProvider(): DataProvider {
   const dataMode = process.env.NEXT_PUBLIC_DATA_MODE;
   if (process.env.NEXT_PUBLIC_RELEASE_PROFILE === 'core') return new HttpDataProvider();
-  if (dataMode === 'mongodb') return new HttpDataProvider();
+  if (isServerDataMode(dataMode)) return new HttpDataProvider();
   if (dataMode && dataMode !== 'mock' && dataMode !== 'supabase') {
     throw new Error('NEXT_PUBLIC_DATA_MODE no es un modo de datos reconocido.');
   }

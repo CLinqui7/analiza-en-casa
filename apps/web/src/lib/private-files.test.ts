@@ -43,21 +43,22 @@ describe('private file browser boundary', () => {
   });
 
   it('lists authorized metadata through the same-origin route', async () => {
-    const fetchMock = vi.fn(async () =>
-      new Response(
-        JSON.stringify([
-          {
-            id: 'file-synthetic-1',
-            ownerType: 'patient',
-            ownerId: 'patient-synthetic-1',
-            name: 'dui-frente.png',
-            mimeType: 'image/png',
-            size: 3,
-            sha256: 'a'.repeat(64),
-          },
-        ]),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify([
+            {
+              id: 'file-synthetic-1',
+              ownerType: 'patient',
+              ownerId: 'patient-synthetic-1',
+              name: 'dui-frente.png',
+              mimeType: 'image/png',
+              size: 3,
+              sha256: 'a'.repeat(64),
+            },
+          ]),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
     );
     await expect(
       listPrivateFiles('patient', 'patient-synthetic-1', fetchMock as typeof fetch),

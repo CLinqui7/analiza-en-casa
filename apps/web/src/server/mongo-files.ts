@@ -1,32 +1,24 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { z } from 'zod';
 import { can, type Permission } from '@/lib/permissions';
 import { MongoAccessError, MongoInputError, type ServerActor } from './mongo-patients';
 
-export const MAX_PRIVATE_FILE_BYTES = 25 * 1024 * 1024;
-const ownerTypeSchema = z.enum(['patient', 'doctor', 'hospitalization']);
-const fileMetadataSchema = z.object({
-  id: z.string().uuid(),
-  ownerType: ownerTypeSchema,
-  ownerId: z.string().trim().min(1).max(255),
-  name: z.string().trim().min(1).max(255),
-  mimeType: z
-    .string()
-    .trim()
-    .regex(/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i),
-  size: z.number().int().nonnegative().max(MAX_PRIVATE_FILE_BYTES),
-  sha256: z.string().regex(/^[a-f0-9]{64}$/),
-});
+import {
+  ownerTypeSchema,
+  fileMetadataSchema,
+  parseUpload,
+  type FileMetadata,
+  type FileOwnerType,
+  type PrivateFileUpload,
+  type PrivateFileStorage,
+} from './validation/files';
+export {
+  MAX_PRIVATE_FILE_BYTES,
+  type FileMetadata,
+  type FileOwnerType,
+  type PrivateFileUpload,
+  type PrivateFileStorage,
+} from './validation/files';
 
-export type FileOwnerType = z.infer<typeof ownerTypeSchema>;
-export type FileMetadata = z.infer<typeof fileMetadataSchema>;
-export type PrivateFileUpload = Readonly<{
-  ownerType: FileOwnerType;
-  ownerId: string;
-  name: string;
-  mimeType: string;
-  bytes: Uint8Array;
-}>;
 type StoredFileMetadata = FileMetadata & {
   organizationId: string;
   storageKey: string;
@@ -45,12 +37,6 @@ type OwnerCollection = {
 };
 type FileAuditCollection = { insertOne(document: Record<string, unknown>): Promise<unknown> };
 
-/** The implementation is private object storage; no browser-visible URL or base64 representation. */
-export interface PrivateFileStorage {
-  putObject(input: Readonly<{ storageKey: string; bytes: Uint8Array }>): Promise<void>;
-  getObject(storageKey: string): Promise<Uint8Array | null>;
-}
-
 export type FileOwnerLookup = {
   exists(actor: ServerActor, ownerType: FileOwnerType, ownerId: string): Promise<boolean>;
 };
@@ -63,23 +49,6 @@ const ownerPermissions: Record<FileOwnerType, { read: Permission; write: Permiss
 
 function ownerPermission(ownerType: FileOwnerType, action: 'read' | 'write') {
   return ownerPermissions[ownerType][action];
-}
-
-function parseUpload(input: PrivateFileUpload): PrivateFileUpload {
-  const parsed = z
-    .object({
-      ownerType: ownerTypeSchema,
-      ownerId: z.string().trim().min(1).max(255),
-      name: z.string().trim().min(1).max(255),
-      mimeType: z
-        .string()
-        .trim()
-        .regex(/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i),
-      bytes: z.instanceof(Uint8Array).refine((bytes) => bytes.byteLength <= MAX_PRIVATE_FILE_BYTES),
-    })
-    .safeParse(input);
-  if (!parsed.success) throw new MongoInputError('El archivo privado no es válido.');
-  return parsed.data;
 }
 
 function publicMetadata(file: StoredFileMetadata): FileMetadata {

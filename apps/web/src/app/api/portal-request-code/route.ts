@@ -10,9 +10,18 @@ export async function POST(request: NextRequest) {
   try {
     if (!portalDeliveryConfigured()) throw new Error('Portal delivery is not configured.');
     const database = await mongoDatabase();
-    await new MongoPortalService(database).requestCode(await request.json().catch(() => null), request);
-    return NextResponse.json({ message }, { status: 202, headers: { 'Cache-Control': 'no-store' } });
+    await new MongoPortalService(database).requestCode(
+      await request.json().catch(() => null),
+      request,
+    );
+    return NextResponse.json(
+      { message },
+      { status: 202, headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch {
-    return NextResponse.json({ error: 'Servicio temporalmente no disponible.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json(
+      { error: 'Servicio temporalmente no disponible.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
   }
 }

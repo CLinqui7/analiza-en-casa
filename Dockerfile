@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
+ARG SOURCE_SHA=local-unversioned
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
@@ -11,29 +12,42 @@ RUN npm ci
 COPY apps/web ./apps/web
 COPY packages ./packages
 COPY docs/qa ./docs/qa
+COPY database/postgresql ./database/postgresql
+COPY scripts/deployment ./scripts/deployment
 ENV ANALIZA_CONTAINER_BUILD=1 \
     NEXT_PUBLIC_RELEASE_PROFILE=core \
-    NEXT_PUBLIC_DATA_MODE=mongodb \
-    ANALIZA_DATA_MODE=mongodb
+    NEXT_PUBLIC_DATA_MODE=postgresql \
+    ANALIZA_DATA_MODE=postgresql
 # The build needs no database credentials. Secrets enter at runtime only.
 RUN npm run build
+RUN test -f apps/web/.next/standalone/apps/web/server.js \
+    && test -d apps/web/.next/static \
+    && test -d apps/web/public
 
-# Optional operator image; never expose bootstrap as a web endpoint.
+# Explicit migration/seed operator; never run it from web startup or a public endpoint.
 FROM build AS operator
-WORKDIR /app/apps/web
-ENTRYPOINT ["npm", "run", "mongo:bootstrap", "--"]
+WORKDIR /app
+ENTRYPOINT ["node", "scripts/deployment/db-command.mjs"]
 CMD ["--dry-run"]
 
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
+ARG SOURCE_SHA=local-unversioned
+LABEL org.opencontainers.image.source="https://github.com/CLinqui7/analiza-en-casa" \
+    org.opencontainers.image.revision=$SOURCE_SHA \
+    com.analiza.release-profile="core" \
+    com.analiza.data-mode="postgresql" \
+    com.analiza.schema-contract="analiza-core-v1" \
+    com.analiza.cloud-sql="postgresql-18"
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 \
     PORT=8080 HOSTNAME=0.0.0.0 \
-    ANALIZA_DATA_MODE=mongodb NEXT_PUBLIC_DATA_MODE=mongodb \
-    NEXT_PUBLIC_RELEASE_PROFILE=core
+    ANALIZA_DATA_MODE=postgresql NEXT_PUBLIC_DATA_MODE=postgresql \
+    NEXT_PUBLIC_RELEASE_PROFILE=core ANALIZA_CONTAINER_RUNTIME=1
 COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /app/apps/web/public ./apps/web/public
 USER node
+STOPSIGNAL SIGTERM
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

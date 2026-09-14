@@ -1,13 +1,12 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   AuthenticationError,
   csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
   loginCsrfCookieName,
   sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+} from '@/server/auth-service';
+
 import { authCookieOptions } from '@/server/auth-cookie';
 
 export const runtime = 'nodejs';
@@ -27,8 +26,8 @@ export async function POST(request: NextRequest) {
         { status: 403, headers: { 'Cache-Control': 'no-store' } },
       );
     }
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const result = await auth.login(await request.json());
     const response = NextResponse.json(
       { userId: result.session.userId, role: result.session.role, csrfToken: result.csrfToken },

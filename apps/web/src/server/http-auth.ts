@@ -1,5 +1,5 @@
-import { CsrfError, SessionError } from '@/server/mongo-auth';
-import { MongoAccessError } from '@/server/mongo-patients';
+import { CsrfError, SessionError } from '@/server/auth-service';
+import { MongoAccessError } from '@/server/validation/patients';
 
 /** Maps only expected authorization failures. All other server errors stay fail-closed as 503. */
 export function authorizationStatus(error: unknown): 401 | 403 | 503 {

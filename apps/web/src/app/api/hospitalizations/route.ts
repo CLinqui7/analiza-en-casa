@@ -1,14 +1,9 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus } from '@/server/http-auth';
-import { MongoHospitalizationRepository } from '@/server/mongo-hospitalizations';
-import { MongoInputError } from '@/server/mongo-patients';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+
+import { MongoInputError } from '@/server/validation/patients';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,17 +21,10 @@ function secureError(status: 401 | 403 | 503) {
 /** Bounded hospitalization commands validate their patient against the authenticated organization. */
 export async function GET(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
-    const hospitalizations = await new MongoHospitalizationRepository(
-      database.collection('hospitalizations'),
-      database.collection('patients'),
-      {
-        resources: database.collection('nursingResources'),
-        memberships: database.collection('memberships'),
-      },
-    ).listWithVersions(actor);
+    const hospitalizations = await backend.hospitalizations.listWithVersions(actor);
     return NextResponse.json({ hospitalizations }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     return secureError(authorizationStatus(error));
@@ -45,19 +33,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
-    const hospitalization = await new MongoHospitalizationRepository(
-      database.collection('hospitalizations'),
-      database.collection('patients'),
-      {
-        resources: database.collection('nursingResources'),
-        memberships: database.collection('memberships'),
-      },
-    ).create(actor, await request.json());
+    const hospitalization = await backend.hospitalizations.create(actor, await request.json());
     return NextResponse.json(hospitalization, {
       status: 201,
       headers: { 'Cache-Control': 'no-store' },

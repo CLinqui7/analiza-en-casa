@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type NursingResource } from '@analiza/contracts';
@@ -76,7 +77,7 @@ export default function NursingBoardPage() {
           <Button
             data-action-id="NURSING-RESOURCE-CREATE"
             onClick={() => {
-              if (providerMode === 'mongodb') {
+              if (isServerDataMode(providerMode)) {
                 if (can('nurses:manage')) router.push('/nursing-team');
                 else setResult('Solicite la creación de cuentas a la enfermera encargada.');
                 return;

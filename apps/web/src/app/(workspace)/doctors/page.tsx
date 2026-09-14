@@ -1,4 +1,6 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
+
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -62,7 +64,7 @@ export default function DoctorsPage() {
     resolver: zodResolver(doctorFormSchema),
     defaultValues: emptyDoctor,
   });
-  const mongoMode = providerMode === 'mongodb';
+  const mongoMode = isServerDataMode(providerMode);
 
   function closeDialog() {
     form.reset(emptyDoctor);
@@ -297,7 +299,7 @@ export default function DoctorsPage() {
                 ariaLabel="Especialidad o profesión"
                 onChange={field.onChange}
                 options={
-                  providerMode === 'mongodb'
+                  isServerDataMode(providerMode)
                     ? operations.configuration
                         .filter((entry) => entry.category === 'SPECIALTY' && entry.active)
                         .map((entry) => ({ value: entry.label, label: entry.label }))

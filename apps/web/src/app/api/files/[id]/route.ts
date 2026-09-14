@@ -1,10 +1,9 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus } from '@/server/http-auth';
-import { MongoGridFsPrivateStorage } from '@/server/mongo-gridfs-storage';
-import { MongoFileRepository, mongoFileOwnerLookup } from '@/server/mongo-files';
-import { MongoAccessError } from '@/server/mongo-patients';
-import { MongoAuthService, mongoAuthStore, sessionCookieName } from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+
+import { MongoAccessError } from '@/server/validation/patients';
+import { sessionCookieName } from '@/server/auth-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,16 +23,11 @@ function errorResponse(status: 401 | 403 | 404 | 503) {
 /** Same-origin authenticated download; object keys and tenant IDs never cross this HTTP boundary. */
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     const { id } = await context.params;
-    const result = await new MongoFileRepository(
-      database.collection('fileMetadata') as never,
-      new MongoGridFsPrivateStorage(database),
-      mongoFileOwnerLookup(database as never),
-      database.collection('auditEvents') as never,
-    ).download(actor, id);
+    const result = await backend.files.download(actor, id);
     if (!result) return errorResponse(404);
     const body = result.bytes.buffer.slice(
       result.bytes.byteOffset,

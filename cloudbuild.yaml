@@ -1,43 +1,41 @@
-# PREPARED ONLY. Do not run under the current zero-cost instruction.
-# Future manual/approval-required repository trigger; no automatic production promotion.
+# BUILD_AND_PUSH only, after project and budget approval. No deployment step.
+# Core/PostgreSQL 18. Corporate schema adoption and staging must be approved separately.
 steps:
+  - id: validate
+    name: node:24-bookworm-slim
+    entrypoint: node
+    args: ['scripts/deployment/validate-build.mjs']
+    env:
+      - 'GCP_PROJECT_ID=$PROJECT_ID'
+      - 'GCP_REGION=${_REGION}'
+      - 'ARTIFACT_REGISTRY_REPOSITORY=${_REPOSITORY}'
+      - 'IMAGE_NAME=${_IMAGE}'
+      - 'SOURCE_SHA=${_SOURCE_SHA}'
+      - 'TRIGGER_SHA=$COMMIT_SHA'
   - id: test
     name: node:24-bookworm-slim
     entrypoint: bash
     args: ['-euc', 'npm ci && npm test && npm run test:react && npm run typecheck && npm run lint']
   - id: build
     name: gcr.io/cloud-builders/docker
-    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA', '.']
+    entrypoint: bash
+    args:
+      - -euc
+      - 'docker build --platform linux/amd64 --build-arg SOURCE_SHA="${_SOURCE_SHA}" -t "$$(cat /workspace/.local/cloud-run/image-ref.txt)" .'
+  - id: test-final-image
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args: ['scripts/deployment/smoke-image.sh', '/workspace/.local/cloud-run/image-ref.txt']
   - id: push
     name: gcr.io/cloud-builders/docker
-    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA']
-  - id: deploy-preview
-    name: gcr.io/google.com/cloudsdktool/cloud-sdk:stable
-    entrypoint: gcloud
-    args:
-      - run
-      - deploy
-      - '${_SERVICE}'
-      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA'
-      - '--region=${_REGION}'
-      - '--service-account=${_RUNTIME_SERVICE_ACCOUNT}'
-      - '--port=8080'
-      - '--no-allow-unauthenticated'
-      - '--min-instances=0'
-      - '--max-instances=1'
-      - '--network=${_NETWORK}'
-      - '--subnet=${_SUBNET}'
-      - '--vpc-egress=all-traffic'
-      - '--set-env-vars=ANALIZA_DATA_MODE=mongodb,MONGODB_DB=analiza_en_casa,NEXT_PUBLIC_DATA_MODE=mongodb,NEXT_PUBLIC_RELEASE_PROFILE=core'
-      - '--set-secrets=MONGODB_URI=${_MONGODB_SECRET_VERSION}'
+    entrypoint: bash
+    args: ['-euc', 'docker push "$$(cat /workspace/.local/cloud-run/image-ref.txt)"']
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:core-postgresql-${_SOURCE_SHA}'
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
   _REGION: us-central1
-  _SERVICE: analiza-core-preview
-  _REPOSITORY: analiza
-  # Configure these nonsecret identifiers on the approval-required trigger.
-  _RUNTIME_SERVICE_ACCOUNT: REQUIRED
-  _NETWORK: REQUIRED
-  _SUBNET: REQUIRED
-  _MONGODB_SECRET_VERSION: REQUIRED
+  _REPOSITORY: REQUIRED
+  _IMAGE: REQUIRED
+  _SOURCE_SHA: REQUIRED

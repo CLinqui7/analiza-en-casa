@@ -31,3 +31,10 @@ video-audit-reviews/**/scratch/
 .env*
 .npm-cache/
 .local/
+.analiza-runtime/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.example.tfvars

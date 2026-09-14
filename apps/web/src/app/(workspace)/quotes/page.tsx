@@ -423,7 +423,12 @@ function QuoteEditor({
       open={open}
       title={title}
     >
-      <form className="form-grid" id="quote-editor-form" noValidate onSubmit={(event) => void submit(event)}>
+      <form
+        className="form-grid"
+        id="quote-editor-form"
+        noValidate
+        onSubmit={(event) => void submit(event)}
+      >
         <fieldset className="quote-fieldset full-field">
           <legend>Datos del paciente</legend>
           <div className="form-grid form-grid-compact">
@@ -1243,7 +1248,8 @@ function QuoteEditor({
                                 : candidate.presentation === 'TABLET'
                                   ? 'Tableta'
                                   : 'Unidad'}{' '}
-                              · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)} unidades
+                              · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)}{' '}
+                              unidades
                               {candidate.inventoryItemId
                                 ? ` · Inventario ${catalogItems.find((catalogItem) => catalogItem.id === candidate.inventoryItemId)?.sku ?? candidate.inventoryItemId}`
                                 : ''}

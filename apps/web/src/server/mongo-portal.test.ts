@@ -8,11 +8,19 @@ describe('Mongo secure portal links', () => {
       collection(name: string) {
         return {
           async findOne() {
-            if (name === 'quotes') return { id: 'quote-1', patientId: 'patient-1', status: 'SENT', immutable: true };
-            if (name === 'patients') return { id: 'patient-1', phone: '+503 7000-0000', notifications: { botmakerConsent: true } };
+            if (name === 'quotes')
+              return { id: 'quote-1', patientId: 'patient-1', status: 'SENT', immutable: true };
+            if (name === 'patients')
+              return {
+                id: 'patient-1',
+                phone: '+503 7000-0000',
+                notifications: { botmakerConsent: true },
+              };
             return null;
           },
-          async insertOne(value: Record<string, unknown>) { inserted.push(value); },
+          async insertOne(value: Record<string, unknown>) {
+            inserted.push(value);
+          },
         };
       },
     };
@@ -28,17 +36,21 @@ describe('Mongo secure portal links', () => {
   });
 
   it('defines automatic expiry for portal links', () => {
-    expect(mongoPortalIndexes).toContainEqual(expect.objectContaining({ name: 'portal_links_expiry_ttl', expireAfterSeconds: 0 }));
+    expect(mongoPortalIndexes).toContainEqual(
+      expect.objectContaining({ name: 'portal_links_expiry_ttl', expireAfterSeconds: 0 }),
+    );
   });
 
   it('does not claim OTP delivery unless every private WhatsApp setting exists', () => {
     expect(portalDeliveryConfigured({ WHATSAPP_ACCESS_TOKEN: 'private' })).toBe(false);
-    expect(portalDeliveryConfigured({
-      WHATSAPP_PHONE_NUMBER_ID: 'phone-id',
-      WHATSAPP_ACCESS_TOKEN: 'private',
-      WHATSAPP_GRAPH_API_VERSION: 'v23.0',
-      WHATSAPP_PORTAL_OTP_TEMPLATE: 'portal_code',
-      WHATSAPP_PORTAL_TEMPLATE_LANGUAGE: 'es',
-    })).toBe(true);
+    expect(
+      portalDeliveryConfigured({
+        WHATSAPP_PHONE_NUMBER_ID: 'phone-id',
+        WHATSAPP_ACCESS_TOKEN: 'private',
+        WHATSAPP_GRAPH_API_VERSION: 'v23.0',
+        WHATSAPP_PORTAL_OTP_TEMPLATE: 'portal_code',
+        WHATSAPP_PORTAL_TEMPLATE_LANGUAGE: 'es',
+      }),
+    ).toBe(true);
   });
 });

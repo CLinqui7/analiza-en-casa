@@ -27,9 +27,7 @@ function repository() {
     ),
     find: vi.fn((filter: Record<string, unknown>) => ({
       sort: vi.fn(() => ({
-        toArray: vi.fn(async () =>
-          filter.organizationId === 'org-a' && row ? [row] : [],
-        ),
+        toArray: vi.fn(async () => (filter.organizationId === 'org-a' && row ? [row] : [])),
       })),
     })),
   };

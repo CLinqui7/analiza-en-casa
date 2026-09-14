@@ -1,32 +1,23 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus, resourceStatus } from '@/server/http-auth';
 import {
   MongoConflictError,
   MongoDuplicatePatientError,
   MongoInputError,
-  MongoPatientRepository,
-} from '@/server/mongo-patients';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+} from '@/server/validation/patients';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     const { id } = await context.params;
-    const patient = await new MongoPatientRepository(database.collection('patients')).get(
-      actor,
-      id,
-    );
+    const patient = await backend.patients.get(actor, id);
     if (resourceStatus(patient) === 404) {
       return NextResponse.json(
         { error: 'No encontrado.' },
@@ -52,17 +43,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
     const { id } = await context.params;
-    const patient = await new MongoPatientRepository(database.collection('patients')).replace(
-      actor,
-      id,
-      await request.json(),
-    );
+    const patient = await backend.patients.replace(actor, id, await request.json());
     return NextResponse.json(patient, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof MongoConflictError) {

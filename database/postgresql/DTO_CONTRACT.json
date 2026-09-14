@@ -1,0 +1,628 @@
+{
+  "description": "Exact existing DTO fields stored in body JSONB; no binary objects or new clinical rules.",
+  "models": {
+    "patients": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "documentType": {
+          "type": "string",
+          "enum": [
+            "DUI",
+            "PASSPORT",
+            "RESIDENT_CARD",
+            "OTHER"
+          ]
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phone": {
+          "type": "string"
+        },
+        "insurer": {
+          "type": "string"
+        },
+        "birthDate": {
+          "type": "string"
+        },
+        "sex": {
+          "type": "string",
+          "enum": [
+            "M",
+            "F"
+          ]
+        },
+        "company": {
+          "type": "string"
+        },
+        "homePhone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "retired": {
+          "type": "boolean"
+        },
+        "bloodType": {
+          "type": "string",
+          "enum": [
+            "O+",
+            "O-",
+            "A+",
+            "A-",
+            "B+",
+            "B-",
+            "AB+",
+            "AB-"
+          ]
+        },
+        "civilStatus": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "occupation": {
+          "type": "string"
+        },
+        "triageStatus": {
+          "type": "string"
+        },
+        "notifications": {
+          "type": "object",
+          "properties": {
+            "botmakerConsent": {
+              "default": true,
+              "type": "boolean"
+            },
+            "lastStatus": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "botmakerConsent"
+          ],
+          "additionalProperties": false
+        },
+        "insurance": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "default": "REGULAR",
+              "type": "string",
+              "enum": [
+                "REGULAR",
+                "INSURED"
+              ]
+            },
+            "insurer": {
+              "type": "string"
+            },
+            "isPolicyHolder": {
+              "type": "boolean"
+            },
+            "policyNumber": {
+              "type": "string"
+            },
+            "certificateOrUnit": {
+              "type": "string"
+            },
+            "holderDocumentId": {
+              "type": "string"
+            },
+            "holderFullName": {
+              "type": "string"
+            },
+            "holderBirthDate": {
+              "type": "string"
+            },
+            "effectiveDate": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "contacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "fullName": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "relationship": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "documentType": {
+                "type": "string",
+                "enum": [
+                  "DUI",
+                  "PASSPORT",
+                  "RESIDENT_CARD",
+                  "OTHER"
+                ]
+              },
+              "documentId": {
+                "type": "string"
+              },
+              "isPrimary": {
+                "default": false,
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "isPrimary"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "address": {
+          "type": "object",
+          "properties": {
+            "line": {
+              "type": "string"
+            },
+            "comments": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "string"
+            },
+            "locationUrl": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "status": {
+          "default": "ACTIVE",
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "fullName",
+        "documentType",
+        "documentId",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "doctors": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jvpm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "specialty": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attachments": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "size"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "fullName",
+        "jvpm",
+        "documentId",
+        "specialty",
+        "address",
+        "attachments"
+      ],
+      "additionalProperties": false
+    },
+    "hospitalizations": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "patientId": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "admissionPeriods": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "admissionDate": {
+                "type": "string"
+              },
+              "dischargeDate": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "admissionDate"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "PENDING_CLOSE",
+            "CLOSED"
+          ]
+        },
+        "accountType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "insurer": {
+          "type": "string"
+        },
+        "manager": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ]
+        },
+        "diagnosisSummary": {
+          "type": "string"
+        },
+        "nextAction": {
+          "type": "string"
+        },
+        "devices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "assignedNursingResourceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "assignedNurseUserIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "administrativeProfile": {
+          "type": "object",
+          "properties": {
+            "healthManager": {
+              "type": "string"
+            },
+            "referredBy": {
+              "type": "string"
+            },
+            "revenueType": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "startDate": {
+              "type": "string"
+            },
+            "durationDays": {
+              "type": "string"
+            },
+            "paymentMethod": {
+              "type": "string"
+            },
+            "insurer": {
+              "type": "string"
+            },
+            "requestType": {
+              "type": "string"
+            },
+            "majorCategory": {
+              "type": "string"
+            },
+            "subcategory": {
+              "type": "string"
+            },
+            "originatingHospital": {
+              "type": "string"
+            },
+            "patientClass": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "patientId",
+        "startDate",
+        "status",
+        "accountType"
+      ],
+      "additionalProperties": false
+    },
+    "nursing_resources": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "territory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shift": {
+          "type": "string",
+          "enum": [
+            "MORNING",
+            "AFTERNOON",
+            "NIGHT"
+          ]
+        },
+        "availability": {
+          "type": "string",
+          "enum": [
+            "AVAILABLE",
+            "ASSIGNED",
+            "OFF_DUTY"
+          ]
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "boardRegistrationNumber": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "displayName",
+        "territory",
+        "shift",
+        "availability",
+        "capacity",
+        "boardRegistrationNumber"
+      ],
+      "additionalProperties": false
+    },
+    "shifts": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "resourceId": {
+          "type": "string"
+        },
+        "patientId": {
+          "type": "string"
+        },
+        "startsAt": {
+          "type": "string"
+        },
+        "endsAt": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SCHEDULED",
+            "CANCELLED",
+            "COMPLETED"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "resourceId",
+        "startsAt",
+        "endsAt",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "configuration_entries": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "SPECIALTY",
+            "DOSE",
+            "INSURER",
+            "MEDICATION"
+          ]
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "discountPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "inventoryItemId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "tabletsPerBlister": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 10000
+        },
+        "tabletsPerBox": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "label",
+        "active"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_items": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "sku": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sku",
+        "name",
+        "status",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

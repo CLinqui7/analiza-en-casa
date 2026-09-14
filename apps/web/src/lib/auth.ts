@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode, configuredServerDataMode } from '@/lib/data-mode';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { isRole, type Role } from '@/lib/permissions';
@@ -6,7 +7,11 @@ import { isCoreRelease } from '@/lib/release-profile';
 
 const mockSessionKey = 'analiza.en.casa.mock-session.v1';
 let mongoCsrfToken: string | null = null;
-export type AuthSession = { userId: string; role: Role; mode: 'mock' | 'supabase' | 'mongodb' };
+export type AuthSession = {
+  userId: string;
+  role: Role;
+  mode: 'mock' | 'supabase' | 'mongodb' | 'postgresql';
+};
 
 const mockUsers = [
   ['admin@demo.local', 'demo-admin', 'ADMIN'],
@@ -22,7 +27,7 @@ export function isSupabaseMode() {
 }
 
 function isMongoMode() {
-  return isCoreRelease || process.env.NEXT_PUBLIC_DATA_MODE === 'mongodb';
+  return isCoreRelease || isServerDataMode(process.env.NEXT_PUBLIC_DATA_MODE);
 }
 
 /** Demo credentials are only a local fixture and must never be advertised by a configured backend. */
@@ -79,7 +84,7 @@ export async function loadSession(): Promise<AuthSession | null> {
         : null;
     if (!csrfToken) throw new Error('No fue posible preparar la sesión segura.');
     mongoCsrfToken = csrfToken;
-    return { userId, role, mode: 'mongodb' };
+    return { userId, role, mode: configuredServerDataMode() };
   }
   const client = getSupabaseBrowserClient();
   if (!client) return readMockSession();
@@ -117,7 +122,7 @@ export async function login(email: string, password: string): Promise<AuthSessio
       throw new Error('No fue posible iniciar sesión.');
     }
     mongoCsrfToken = returnedCsrf;
-    return { userId, role, mode: 'mongodb' };
+    return { userId, role, mode: configuredServerDataMode() };
   }
   const client = getSupabaseBrowserClient();
   if (client) {
@@ -145,7 +150,7 @@ export async function login(email: string, password: string): Promise<AuthSessio
 }
 
 export async function logout(session: AuthSession | null): Promise<void> {
-  if (session?.mode === 'mongodb') {
+  if (isServerDataMode(session?.mode)) {
     const response = await fetch('/api/auth/logout', {
       method: 'POST',
       credentials: 'same-origin',

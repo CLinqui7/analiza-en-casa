@@ -1,12 +1,7 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  CsrfError,
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+import { CsrfError, csrfHeaderName, sessionCookieName } from '@/server/auth-service';
+
 import { authCookieOptions } from '@/server/auth-cookie';
 
 export const runtime = 'nodejs';
@@ -14,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = new MongoAuthService(mongoAuthStore(await mongoDatabase()));
+    const auth = (await persistence()).auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
     await auth.logout(sessionToken);

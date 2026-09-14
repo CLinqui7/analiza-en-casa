@@ -8,7 +8,12 @@ import { useState } from 'react';
 const genericCodeMessage = 'Si el enlace es válido, enviamos un código al canal registrado.';
 const genericAccessMessage = 'No fue posible validar el acceso.';
 const unavailableMessage = 'Servicio temporalmente no disponible.';
-type PortalSnapshot = { quote_id?: unknown; status?: unknown; insurance_status?: unknown; updated_at?: unknown };
+type PortalSnapshot = {
+  quote_id?: unknown;
+  status?: unknown;
+  insurance_status?: unknown;
+  updated_at?: unknown;
+};
 
 function readSnapshot(value: unknown): PortalSnapshot | null {
   return value && typeof value === 'object' ? (value as PortalSnapshot) : null;
@@ -111,7 +116,11 @@ export default function PortalPage() {
             </div>
             <div>
               <dt>Preautorización</dt>
-              <dd>{typeof snapshot.insurance_status === 'string' ? snapshot.insurance_status : 'No disponible'}</dd>
+              <dd>
+                {typeof snapshot.insurance_status === 'string'
+                  ? snapshot.insurance_status
+                  : 'No disponible'}
+              </dd>
             </div>
             <div>
               <dt>Actualización</dt>

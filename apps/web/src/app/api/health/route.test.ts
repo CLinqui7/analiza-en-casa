@@ -1,14 +1,14 @@
 import { afterEach, expect, it, vi } from 'vitest';
 const database = vi.hoisted(() => ({ connect: vi.fn(), command: vi.fn() }));
-vi.mock('@/server/mongodb', () => ({ mongoDatabase: database.connect }));
+vi.mock('@/server/persistence', () => ({ persistence: database.connect }));
 import { GET } from './route';
 afterEach(() => vi.clearAllMocks());
-it('reports readiness only after the Mongo ping succeeds', async () => {
-  database.connect.mockResolvedValue({ command: database.command });
+it('reports readiness only after the selected adapter validates its schema', async () => {
+  database.connect.mockResolvedValue({ ready: database.command });
   database.command.mockResolvedValue({ ok: 1 });
   const response = await GET();
   expect(response.status).toBe(200);
-  expect(database.command).toHaveBeenCalledWith({ ping: 1 }, { timeoutMS: 2000 });
+  expect(database.command).toHaveBeenCalledOnce();
   expect(response.headers.get('Cache-Control')).toBe('no-store');
   expect(await response.json()).toEqual({ status: 'ready' });
 });

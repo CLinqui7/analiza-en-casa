@@ -1,14 +1,9 @@
+import { persistence } from '@/server/persistence';
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus, resourceStatus } from '@/server/http-auth';
-import { MongoHospitalizationRepository } from '@/server/mongo-hospitalizations';
-import { MongoConflictError, MongoInputError } from '@/server/mongo-patients';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+
+import { MongoConflictError, MongoInputError } from '@/server/validation/patients';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -27,18 +22,11 @@ function errorResponse(status: 401 | 403 | 404 | 503) {
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const actor = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     const { id } = await context.params;
-    const hospitalization = await new MongoHospitalizationRepository(
-      database.collection('hospitalizations'),
-      database.collection('patients'),
-      {
-        resources: database.collection('nursingResources'),
-        memberships: database.collection('memberships'),
-      },
-    ).get(actor, id);
+    const hospitalization = await backend.hospitalizations.get(actor, id);
     if (resourceStatus(hospitalization) === 404) return errorResponse(404);
     return NextResponse.json(hospitalization, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
@@ -48,20 +36,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
     const { id } = await context.params;
-    const hospitalization = await new MongoHospitalizationRepository(
-      database.collection('hospitalizations'),
-      database.collection('patients'),
-      {
-        resources: database.collection('nursingResources'),
-        memberships: database.collection('memberships'),
-      },
-    ).replace(actor, id, await request.json());
+    const hospitalization = await backend.hospitalizations.replace(actor, id, await request.json());
     return NextResponse.json(hospitalization, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof MongoConflictError) {

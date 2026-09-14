@@ -1,4 +1,5 @@
 'use client';
+import { configuredServerDataMode } from '@/lib/data-mode';
 
 import {
   doctorSchema,
@@ -46,7 +47,7 @@ function responseError(response: Response, fallback: string): Promise<Error> {
 }
 
 export class HttpDataProvider implements DataProvider {
-  readonly mode = 'mongodb' as const;
+  readonly mode = configuredServerDataMode();
 
   constructor(
     private readonly fetchImpl: typeof fetch = (...argumentsList) => fetch(...argumentsList),

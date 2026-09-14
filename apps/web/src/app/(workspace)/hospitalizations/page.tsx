@@ -1,4 +1,6 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
+
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -239,7 +241,7 @@ export default function HospitalizationsPage() {
       ? await updateHospitalization({ ...activeEdit, ...data })
       : await addHospitalization(record);
     if (!saved) return;
-    if (providerMode === 'mongodb' && pendingPrivateFiles.length) {
+    if (isServerDataMode(providerMode) && pendingPrivateFiles.length) {
       try {
         const uploaded = await uploadPrivateFiles(
           'hospitalization',
@@ -262,7 +264,7 @@ export default function HospitalizationsPage() {
       setMessage('Hospitalización actualizada y persistida con evidencia de auditoría.');
     } else {
       setMessage(
-        providerMode === 'mongodb'
+        isServerDataMode(providerMode)
           ? 'Hospitalización registrada.'
           : 'Hospitalización sintética persistida con evidencia de auditoría.',
       );
@@ -791,7 +793,7 @@ export default function HospitalizationsPage() {
               </div>
             ))}
           </div>
-          {providerMode === 'mongodb' ? (
+          {isServerDataMode(providerMode) ? (
             <label className="full">
               Archivos privados de hospitalización
               <input
@@ -868,7 +870,7 @@ export default function HospitalizationsPage() {
                   <label key={resource.id}>
                     <input
                       data-action-id="HOSPITALIZATION-NURSE-ASSIGNMENT"
-                      disabled={providerMode === 'mongodb' && !resource.userId}
+                      disabled={isServerDataMode(providerMode) && !resource.userId}
                       type="checkbox"
                       value={resource.id}
                       {...form.register('assignedNursingResourceIds')}
@@ -882,7 +884,7 @@ export default function HospitalizationsPage() {
                             ? 'Tarde'
                             : 'Noche'}{' '}
                         · {resource.territory}
-                        {providerMode === 'mongodb' && !resource.userId
+                        {isServerDataMode(providerMode) && !resource.userId
                           ? ' · Sin cuenta vinculada'
                           : ''}
                       </small>

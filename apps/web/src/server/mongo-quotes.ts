@@ -102,16 +102,20 @@ export class MongoQuoteRepository {
     const session = this.database.client.startSession();
     try {
       const result = await session.withTransaction(async () => {
-        const hospitalization = await this.database.collection('hospitalizations').findOne({
-          organizationId: actor.organizationId,
-          id: quote.caseId,
-          patientId: quote.patientId,
-        }, { session });
+        const hospitalization = await this.database.collection('hospitalizations').findOne(
+          {
+            organizationId: actor.organizationId,
+            id: quote.caseId,
+            patientId: quote.patientId,
+          },
+          { session },
+        );
         if (!hospitalization) throw new MongoInputError('La hospitalización no está disponible.');
 
         const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
         if (quote.version === 1) {
-          if (rootId !== quote.id) throw new MongoInputError('La primera versión debe ser su raíz.');
+          if (rootId !== quote.id)
+            throw new MongoInputError('La primera versión debe ser su raíz.');
         } else {
           const previous = await this.database
             .collection<StoredQuote>('quotes')
@@ -137,15 +141,18 @@ export class MongoQuoteRepository {
           updatedAt: now.toISOString(),
         };
         await this.database.collection<StoredQuote>('quotes').insertOne(stored, { session });
-        await this.database.collection('auditEvents').insertOne({
-          id: crypto.randomUUID(),
-          organizationId: actor.organizationId,
-          actorUserId: actor.userId,
-          action: quote.version > 1 ? 'QUOTE_REVISION_CREATED' : 'QUOTE_CREATED',
-          resourceType: 'quote',
-          resourceId: quote.id,
-          occurredAt: now,
-        }, { session });
+        await this.database.collection('auditEvents').insertOne(
+          {
+            id: crypto.randomUUID(),
+            organizationId: actor.organizationId,
+            actorUserId: actor.userId,
+            action: quote.version > 1 ? 'QUOTE_REVISION_CREATED' : 'QUOTE_CREATED',
+            resourceType: 'quote',
+            resourceId: quote.id,
+            occurredAt: now,
+          },
+          { session },
+        );
         return publicQuote(stored);
       });
       if (!result) throw new MongoConflictError();
@@ -165,14 +172,22 @@ export class MongoQuoteRepository {
     const session = this.database.client.startSession();
     try {
       const result = await session.withTransaction(async () => {
-        const current = await this.database.collection<StoredQuote>('quotes').findOne({
-          organizationId: actor.organizationId,
-          id,
-          recordVersion: expectedVersion,
-        }, { session });
+        const current = await this.database.collection<StoredQuote>('quotes').findOne(
+          {
+            organizationId: actor.organizationId,
+            id,
+            recordVersion: expectedVersion,
+          },
+          { session },
+        );
         if (!current || !canEditQuote(publicQuote(current))) throw new MongoConflictError();
         const updated = await this.database.collection<StoredQuote>('quotes').findOneAndUpdate(
-          { organizationId: actor.organizationId, id, recordVersion: expectedVersion, immutable: false },
+          {
+            organizationId: actor.organizationId,
+            id,
+            recordVersion: expectedVersion,
+            immutable: false,
+          },
           {
             $set: { ...quote, organizationId: actor.organizationId, updatedAt: now.toISOString() },
             $inc: { recordVersion: 1 },
@@ -180,10 +195,18 @@ export class MongoQuoteRepository {
           { returnDocument: 'after', session },
         );
         if (!updated) throw new MongoConflictError();
-        await this.database.collection('auditEvents').insertOne({
-          id: crypto.randomUUID(), organizationId: actor.organizationId, actorUserId: actor.userId,
-          action: 'QUOTE_DRAFT_UPDATED', resourceType: 'quote', resourceId: id, occurredAt: now,
-        }, { session });
+        await this.database.collection('auditEvents').insertOne(
+          {
+            id: crypto.randomUUID(),
+            organizationId: actor.organizationId,
+            actorUserId: actor.userId,
+            action: 'QUOTE_DRAFT_UPDATED',
+            resourceType: 'quote',
+            resourceId: id,
+            occurredAt: now,
+          },
+          { session },
+        );
         return publicQuote(updated);
       });
       if (!result) throw new MongoConflictError();
@@ -193,22 +216,49 @@ export class MongoQuoteRepository {
     }
   }
 
-  async send(actor: ServerActor, id: string, expectedVersion: number, now = new Date()): Promise<Quote> {
+  async send(
+    actor: ServerActor,
+    id: string,
+    expectedVersion: number,
+    now = new Date(),
+  ): Promise<Quote> {
     if (!can(actor.role, 'quotes:write')) throw new MongoAccessError();
     if (!Number.isInteger(expectedVersion) || expectedVersion < 1) throw new MongoInputError();
     const session = this.database.client.startSession();
     try {
       const result = await session.withTransaction(async () => {
         const updated = await this.database.collection<StoredQuote>('quotes').findOneAndUpdate(
-          { organizationId: actor.organizationId, id, recordVersion: expectedVersion, status: 'DRAFT', immutable: false },
-          { $set: { status: 'SENT', immutable: true, sentAt: now.toISOString(), updatedAt: now.toISOString() }, $inc: { recordVersion: 1 } },
+          {
+            organizationId: actor.organizationId,
+            id,
+            recordVersion: expectedVersion,
+            status: 'DRAFT',
+            immutable: false,
+          },
+          {
+            $set: {
+              status: 'SENT',
+              immutable: true,
+              sentAt: now.toISOString(),
+              updatedAt: now.toISOString(),
+            },
+            $inc: { recordVersion: 1 },
+          },
           { returnDocument: 'after', session },
         );
         if (!updated) throw new MongoConflictError();
-        await this.database.collection('auditEvents').insertOne({
-          id: crypto.randomUUID(), organizationId: actor.organizationId, actorUserId: actor.userId,
-          action: 'QUOTE_SENT_IMMUTABLE', resourceType: 'quote', resourceId: id, occurredAt: now,
-        }, { session });
+        await this.database.collection('auditEvents').insertOne(
+          {
+            id: crypto.randomUUID(),
+            organizationId: actor.organizationId,
+            actorUserId: actor.userId,
+            action: 'QUOTE_SENT_IMMUTABLE',
+            resourceType: 'quote',
+            resourceId: id,
+            occurredAt: now,
+          },
+          { session },
+        );
         return publicQuote(updated);
       });
       if (!result) throw new MongoConflictError();
@@ -222,11 +272,20 @@ export class MongoQuoteRepository {
 export class MongoInsuranceRepository {
   constructor(private readonly database: Db) {}
 
-  async list(actor: ServerActor): Promise<{ requests: InsuranceRequest[]; events: InsuranceEvent[] }> {
+  async list(
+    actor: ServerActor,
+  ): Promise<{ requests: InsuranceRequest[]; events: InsuranceEvent[] }> {
     if (!can(actor.role, 'insurance:read')) throw new MongoAccessError();
     const [requests, events] = await Promise.all([
-      this.database.collection<StoredInsuranceRequest>('insuranceRequests').find({ organizationId: actor.organizationId }).toArray(),
-      this.database.collection<StoredInsuranceEvent>('insuranceEvents').find({ organizationId: actor.organizationId }).sort({ date: -1 }).toArray(),
+      this.database
+        .collection<StoredInsuranceRequest>('insuranceRequests')
+        .find({ organizationId: actor.organizationId })
+        .toArray(),
+      this.database
+        .collection<StoredInsuranceEvent>('insuranceEvents')
+        .find({ organizationId: actor.organizationId })
+        .sort({ date: -1 })
+        .toArray(),
     ]);
     return {
       requests: requests.map((row) => insuranceRequestSchema.parse(row)),
@@ -242,7 +301,12 @@ export class MongoInsuranceRepository {
     if (!can(actor.role, 'insurance:write')) throw new MongoAccessError();
     rejectBrowserAuthority(input);
     const body = bodyObject(input);
-    if (Object.keys(body).some((key) => !['quoteId', 'status', 'note', 'date', 'idempotencyKey'].includes(key))) throw new MongoInputError();
+    if (
+      Object.keys(body).some(
+        (key) => !['quoteId', 'status', 'note', 'date', 'idempotencyKey'].includes(key),
+      )
+    )
+      throw new MongoInputError();
     if (
       typeof body.quoteId !== 'string' ||
       typeof body.note !== 'string' ||
@@ -252,43 +316,106 @@ export class MongoInsuranceRepository {
       typeof body.idempotencyKey !== 'string' ||
       !body.idempotencyKey.trim() ||
       !isInsuranceRequestStatus(body.status)
-    ) throw new MongoInputError('La actualización de seguro contiene datos no válidos.');
+    )
+      throw new MongoInputError('La actualización de seguro contiene datos no válidos.');
     const quoteId = body.quoteId as string;
     const note = (body.note as string).trim();
     const idempotencyKey = body.idempotencyKey as string;
     const status = body.status as InsuranceRequestStatus;
 
-    const quote = await this.database.collection<StoredQuote>('quotes').findOne({ organizationId: actor.organizationId, id: quoteId });
+    const quote = await this.database
+      .collection<StoredQuote>('quotes')
+      .findOne({ organizationId: actor.organizationId, id: quoteId });
     if (!quote) throw new MongoInputError('La cotización no está disponible.');
-    const patient = await this.database.collection('patients').findOne({ organizationId: actor.organizationId, id: quote.patientId });
-    const insurer = typeof patient?.insurer === 'string'
-      ? patient.insurer
-      : patient?.insurance && typeof patient.insurance === 'object' && typeof (patient.insurance as { insurer?: unknown }).insurer === 'string'
-        ? (patient.insurance as { insurer: string }).insurer
-        : null;
-    if (!patient || !insurer || insurer.toLowerCase().includes('sin aseguradora')) throw new MongoInputError('El paciente no tiene aseguradora registrada.');
+    const patient = await this.database
+      .collection('patients')
+      .findOne({ organizationId: actor.organizationId, id: quote.patientId });
+    const insurer =
+      typeof patient?.insurer === 'string'
+        ? patient.insurer
+        : patient?.insurance &&
+            typeof patient.insurance === 'object' &&
+            typeof (patient.insurance as { insurer?: unknown }).insurer === 'string'
+          ? (patient.insurance as { insurer: string }).insurer
+          : null;
+    if (!patient || !insurer || insurer.toLowerCase().includes('sin aseguradora'))
+      throw new MongoInputError('El paciente no tiene aseguradora registrada.');
 
     const session = this.database.client.startSession();
     try {
       return await session.withTransaction(async () => {
         const events = this.database.collection<StoredInsuranceEvent>('insuranceEvents');
-        const previousEvent = await events.findOne({ organizationId: actor.organizationId, idempotencyKey });
+        const previousEvent = await events.findOne({
+          organizationId: actor.organizationId,
+          idempotencyKey,
+        });
         if (previousEvent) {
-          const previousRequest = await this.database.collection<StoredInsuranceRequest>('insuranceRequests').findOne({ organizationId: actor.organizationId, id: previousEvent.requestId });
+          const previousRequest = await this.database
+            .collection<StoredInsuranceRequest>('insuranceRequests')
+            .findOne({ organizationId: actor.organizationId, id: previousEvent.requestId });
           if (!previousRequest) throw new MongoConflictError();
-          return { request: insuranceRequestSchema.parse(previousRequest), event: insuranceEventSchema.parse(previousEvent) };
+          return {
+            request: insuranceRequestSchema.parse(previousRequest),
+            event: insuranceEventSchema.parse(previousEvent),
+          };
         }
         const requests = this.database.collection<StoredInsuranceRequest>('insuranceRequests');
-        const existing = await requests.findOne({ organizationId: actor.organizationId, quoteId: quote.id });
+        const existing = await requests.findOne({
+          organizationId: actor.organizationId,
+          quoteId: quote.id,
+        });
         const date = new Date(body.date as string).toISOString();
         const request: InsuranceRequest = existing
           ? { ...insuranceRequestSchema.parse(existing), status, updatedAt: date, lastNote: note }
-          : { id: crypto.randomUUID(), quoteId: quote.id, patientId: quote.patientId, insurer, status, createdAt: date, updatedAt: date, lastNote: note };
-        if (existing) await requests.replaceOne({ organizationId: actor.organizationId, id: existing.id }, { ...request, organizationId: actor.organizationId }, { session });
-        else await requests.insertOne({ ...request, organizationId: actor.organizationId }, { session });
-        const event: InsuranceEvent = { id: crypto.randomUUID(), requestId: request.id, status: request.status, date, note: request.lastNote };
-        await events.insertOne({ ...event, organizationId: actor.organizationId, idempotencyKey, actorUserId: actor.userId }, { session });
-        await this.database.collection('auditEvents').insertOne({ id: crypto.randomUUID(), organizationId: actor.organizationId, actorUserId: actor.userId, action: existing ? 'INSURANCE_OBSERVATION_RECORDED' : 'INSURANCE_REQUEST_CREATED', resourceType: 'insuranceRequest', resourceId: request.id, occurredAt: now }, { session });
+          : {
+              id: crypto.randomUUID(),
+              quoteId: quote.id,
+              patientId: quote.patientId,
+              insurer,
+              status,
+              createdAt: date,
+              updatedAt: date,
+              lastNote: note,
+            };
+        if (existing)
+          await requests.replaceOne(
+            { organizationId: actor.organizationId, id: existing.id },
+            { ...request, organizationId: actor.organizationId },
+            { session },
+          );
+        else
+          await requests.insertOne(
+            { ...request, organizationId: actor.organizationId },
+            { session },
+          );
+        const event: InsuranceEvent = {
+          id: crypto.randomUUID(),
+          requestId: request.id,
+          status: request.status,
+          date,
+          note: request.lastNote,
+        };
+        await events.insertOne(
+          {
+            ...event,
+            organizationId: actor.organizationId,
+            idempotencyKey,
+            actorUserId: actor.userId,
+          },
+          { session },
+        );
+        await this.database.collection('auditEvents').insertOne(
+          {
+            id: crypto.randomUUID(),
+            organizationId: actor.organizationId,
+            actorUserId: actor.userId,
+            action: existing ? 'INSURANCE_OBSERVATION_RECORDED' : 'INSURANCE_REQUEST_CREATED',
+            resourceType: 'insuranceRequest',
+            resourceId: request.id,
+            occurredAt: now,
+          },
+          { session },
+        );
         return { request, event };
       });
     } finally {
@@ -298,8 +425,28 @@ export class MongoInsuranceRepository {
 }
 
 export const mongoQuoteIndexes = [
-  { collection: 'quotes', key: { organizationId: 1, id: 1 }, name: 'quotes_org_id_unique', unique: true },
-  { collection: 'quotes', key: { organizationId: 1, rootQuoteId: 1, version: 1 }, name: 'quotes_org_root_version_unique', unique: true },
-  { collection: 'insuranceRequests', key: { organizationId: 1, quoteId: 1 }, name: 'insurance_requests_org_quote_unique', unique: true },
-  { collection: 'insuranceEvents', key: { organizationId: 1, idempotencyKey: 1 }, name: 'insurance_events_org_idempotency_unique', unique: true },
+  {
+    collection: 'quotes',
+    key: { organizationId: 1, id: 1 },
+    name: 'quotes_org_id_unique',
+    unique: true,
+  },
+  {
+    collection: 'quotes',
+    key: { organizationId: 1, rootQuoteId: 1, version: 1 },
+    name: 'quotes_org_root_version_unique',
+    unique: true,
+  },
+  {
+    collection: 'insuranceRequests',
+    key: { organizationId: 1, quoteId: 1 },
+    name: 'insurance_requests_org_quote_unique',
+    unique: true,
+  },
+  {
+    collection: 'insuranceEvents',
+    key: { organizationId: 1, idempotencyKey: 1 },
+    name: 'insurance_events_org_idempotency_unique',
+    unique: true,
+  },
 ] as const;

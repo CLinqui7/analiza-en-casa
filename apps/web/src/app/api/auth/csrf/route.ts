@@ -1,12 +1,8 @@
+import { persistence } from '@/server/persistence';
 import { randomBytes } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  loginCsrfCookieName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
-import { mongoDatabase } from '@/server/mongodb';
+import { loginCsrfCookieName, sessionCookieName } from '@/server/auth-service';
+
 import { authCookieOptions } from '@/server/auth-cookie';
 
 export const runtime = 'nodejs';
@@ -20,7 +16,7 @@ export async function GET(request: NextRequest) {
   const sessionToken = request.cookies.get(sessionCookieName)?.value;
   if (sessionToken) {
     try {
-      const auth = new MongoAuthService(mongoAuthStore(await mongoDatabase()));
+      const auth = (await persistence()).auth;
       const csrfToken = await auth.rotateCsrf(sessionToken);
       return NextResponse.json({ csrfToken }, { headers: { 'Cache-Control': 'no-store' } });
     } catch {

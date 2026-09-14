@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -554,8 +555,8 @@ export function AppShell({ children }: PropsWithChildren) {
             <span className="environment-dot" aria-hidden="true" />
             {session.mode === 'supabase'
               ? 'Conectado a Supabase'
-              : session.mode === 'mongodb'
-                ? 'Conectado a MongoDB'
+              : isServerDataMode(session.mode)
+                ? 'Conectado al servidor'
                 : 'Entorno demo'}{' '}
             · {session.role}
           </p>

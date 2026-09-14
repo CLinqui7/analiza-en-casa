@@ -169,7 +169,10 @@ export default function InsurancePage() {
         </div>
       </header>
       {message ? (
-        <p className={`notice ${message.startsWith('Actualización administrativa') ? 'success' : 'warning'}`} role="status">
+        <p
+          className={`notice ${message.startsWith('Actualización administrativa') ? 'success' : 'warning'}`}
+          role="status"
+        >
           {message}
         </p>
       ) : null}
@@ -268,7 +271,9 @@ export default function InsurancePage() {
         </div>
       </Panel>
       {loading ? (
-        <Panel><p role="status">Cargando solicitudes…</p></Panel>
+        <Panel>
+          <p role="status">Cargando solicitudes…</p>
+        </Panel>
       ) : (
         <section className="insurance-board-shell" aria-label="Tablero de preautorizaciones">
           <div className="insurance-board">
@@ -317,11 +322,22 @@ export default function InsurancePage() {
               const patient = patients.find((item) => item.id === candidate.patientId);
               return (
                 <article className="insurance-pending-card" key={candidate.id}>
-                  <div><Link href={`/quotes/${candidate.id}`}>{candidate.id}</Link><StatusTag>Sin solicitud</StatusTag></div>
+                  <div>
+                    <Link href={`/quotes/${candidate.id}`}>{candidate.id}</Link>
+                    <StatusTag>Sin solicitud</StatusTag>
+                  </div>
                   <strong>{patient?.fullName ?? 'Paciente no disponible'}</strong>
                   <span>{insurerFor(patient) ?? 'Sin aseguradora'}</span>
                   <span>Total {candidate.total.toFixed(2)}</span>
-                  {can('insurance:write') ? <Button className="button-secondary" onClick={() => openUpdate(candidate)} type="button">Registrar actualización</Button> : null}
+                  {can('insurance:write') ? (
+                    <Button
+                      className="button-secondary"
+                      onClick={() => openUpdate(candidate)}
+                      type="button"
+                    >
+                      Registrar actualización
+                    </Button>
+                  ) : null}
                 </article>
               );
             })}
@@ -331,7 +347,11 @@ export default function InsurancePage() {
       {!loading && !visibleRequests.length && !unrequestedQuotes.length ? (
         <Panel>
           <EmptyState
-            detail={query || status ? 'Ajuste o restablezca los filtros para ver solicitudes existentes.' : 'Registre una actualización administrativa desde una cotización para iniciar el historial.'}
+            detail={
+              query || status
+                ? 'Ajuste o restablezca los filtros para ver solicitudes existentes.'
+                : 'Registre una actualización administrativa desde una cotización para iniciar el historial.'
+            }
             title="Sin resultados"
           />
         </Panel>
@@ -409,7 +429,11 @@ export default function InsurancePage() {
         }
       >
         {activeQuote && activePatient ? (
-          <form className="form-grid" id="insurance-update-form" onSubmit={(event) => void submitUpdate(event)}>
+          <form
+            className="form-grid"
+            id="insurance-update-form"
+            onSubmit={(event) => void submitUpdate(event)}
+          >
             <p className="full">
               <strong>Contexto:</strong> {activePatient.fullName} ·{' '}
               {insurerFor(activePatient) ?? 'Sin aseguradora'} · total{' '}
@@ -496,27 +520,46 @@ function InsuranceCard({
           <Link data-action-id="INSURANCE-OPEN-QUOTE" href={`/quotes/${quote.id}`}>
             {quote.id}
           </Link>
-        ) : <strong>{request?.quoteId}</strong>}
-        {request ? <StatusTag tone={tone(request.status)}>{labels[request.status]}</StatusTag> : null}
+        ) : (
+          <strong>{request?.quoteId}</strong>
+        )}
+        {request ? (
+          <StatusTag tone={tone(request.status)}>{labels[request.status]}</StatusTag>
+        ) : null}
       </div>
       <h3>{patient?.fullName ?? 'Paciente no disponible'}</h3>
       <p>{request?.insurer ?? insurerFor(patient) ?? 'Aseguradora no disponible'}</p>
       <dl>
-        <div><dt>Total</dt><dd>{quote ? quote.total.toFixed(2) : 'No disponible'}</dd></div>
-        <div><dt>Documento</dt><dd>{patient?.documentId ?? 'No disponible'}</dd></div>
+        <div>
+          <dt>Total</dt>
+          <dd>{quote ? quote.total.toFixed(2) : 'No disponible'}</dd>
+        </div>
+        <div>
+          <dt>Documento</dt>
+          <dd>{patient?.documentId ?? 'No disponible'}</dd>
+        </div>
       </dl>
       {request ? (
         <details className="insurance-card-history">
           <summary>{request.lastNote}</summary>
           <ol>
             {events.map((event) => (
-              <li key={event.id}><strong>{labels[event.status]}</strong> · {displayDate(event.date)}<br />{event.note}</li>
+              <li key={event.id}>
+                <strong>{labels[event.status]}</strong> · {displayDate(event.date)}
+                <br />
+                {event.note}
+              </li>
             ))}
           </ol>
         </details>
       ) : null}
       {quote && writable ? (
-        <Button className="button-secondary" data-action-id="INSURANCE-UPDATE" onClick={() => onUpdate(quote)} type="button">
+        <Button
+          className="button-secondary"
+          data-action-id="INSURANCE-UPDATE"
+          onClick={() => onUpdate(quote)}
+          type="button"
+        >
           Actualizar →
         </Button>
       ) : null}

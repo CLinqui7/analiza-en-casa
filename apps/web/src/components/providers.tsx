@@ -1,4 +1,5 @@
 'use client';
+import { isServerDataMode } from '@/lib/data-mode';
 
 import type {
   CatalogItem,
@@ -181,13 +182,13 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const { can, session } = useAuth();
   const [provider] = useState<DataProvider>(() => createDataProvider());
   const [snapshot, setSnapshot] = useState<WorkspaceSnapshot>(() =>
-    provider.mode === 'mongodb' ? emptySnapshot() : defaultSnapshot(),
+    isServerDataMode(provider.mode) ? emptySnapshot() : defaultSnapshot(),
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (provider.mode === 'mongodb' && !session) return;
+    if (isServerDataMode(provider.mode) && !session) return;
     let cancelled = false;
     void provider
       .load()
@@ -210,9 +211,9 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
 
   const commit = useCallback(
     (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot) => {
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         setError(
-          'La persistencia Mongo no está disponible hasta configurar identidad y comandos versionados; no se guardó ningún cambio.',
+          'La persistencia de servidor no está disponible hasta configurar identidad y comandos versionados; no se guardó ningún cambio.',
         );
         return;
       }
@@ -232,8 +233,8 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   );
   const persistMockChange = useCallback(
     async (change: (current: WorkspaceSnapshot) => WorkspaceSnapshot): Promise<boolean> => {
-      if (provider.mode === 'mongodb') {
-        setError('El cambio local no es válido en modo MongoDB; no se guardó ningún cambio.');
+      if (isServerDataMode(provider.mode)) {
+        setError('El cambio local no es válido en modo servidor; no se guardó ningún cambio.');
         return false;
       }
       try {
@@ -252,7 +253,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   );
   const savePatient = useCallback(
     async (patient: Patient, operation: 'create' | 'replace'): Promise<boolean> => {
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         const command = operation === 'create' ? provider.createPatient : provider.replacePatient;
         if (!command) {
           setError(
@@ -301,7 +302,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     try {
       const loaded = await provider.load();
       setSnapshot((current) =>
-        provider.mode === 'mongodb' ? loaded : { ...current, patients: loaded.patients },
+        isServerDataMode(provider.mode) ? loaded : { ...current, patients: loaded.patients },
       );
       setError(null);
       return true;
@@ -313,7 +314,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const saveDoctor = useCallback(
     async (doctor: Doctor, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('settings:write')) return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         const command = operation === 'create' ? provider.createDoctor : provider.replaceDoctor;
         if (!command) {
           setError('El comando seguro de médicos no está disponible; no se guardó ningún cambio.');
@@ -354,7 +355,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const saveHospitalization = useCallback(
     async (hospitalization: Hospitalization, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('cases:write')) return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         const command =
           operation === 'create' ? provider.createHospitalization : provider.replaceHospitalization;
         if (!command) {
@@ -405,7 +406,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const saveShiftSeries = useCallback(
     async (shifts: Shift[], idempotencyKey: string): Promise<boolean> => {
       if (!can('agenda:write')) return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         if (!provider.createShiftSeries) {
           setError('El comando seguro de Agenda no está disponible; no se guardó ningún turno.');
           return false;
@@ -444,7 +445,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const saveQuote = useCallback(
     async (quote: Quote, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('quotes:write')) return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         const command = operation === 'create' ? provider.createQuote : provider.replaceQuote;
         if (!command) {
           setError('El comando seguro de cotizaciones no está disponible; no se guardó nada.');
@@ -521,7 +522,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       if (!can('quotes:write')) return false;
       const currentQuote = snapshot.quotes.find((candidate) => candidate.id === quoteId);
       if (!currentQuote || !canEditQuote(currentQuote)) return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         if (!provider.sendQuote) {
           setError('El comando seguro de envío no está disponible; no se guardó nada.');
           return false;
@@ -565,7 +566,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     }): Promise<boolean> => {
       if (!can('insurance:write') || !isInsuranceRequestStatus(input.status) || !input.note.trim())
         return false;
-      if (provider.mode === 'mongodb') {
+      if (isServerDataMode(provider.mode)) {
         if (!provider.recordInsuranceObservation) {
           setError('El comando seguro de seguros no está disponible; no se guardó nada.');
           return false;
@@ -664,7 +665,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       command: unknown,
       mockChange: (current: WorkspaceSnapshot) => WorkspaceSnapshot,
     ): Promise<boolean> => {
-      if (provider.mode !== 'mongodb') {
+      if (!isServerDataMode(provider.mode)) {
         return persistMockChange(mockChange);
       }
       try {
