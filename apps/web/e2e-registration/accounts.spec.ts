@@ -3,6 +3,11 @@ import { test, expect, type Page } from '@playwright/test';
 
 const credentials = () => ({ email: `qa-${randomUUID()}@example.test`, password: randomUUID() });
 
+test.beforeEach(async ({ page }) => {
+  if (process.env.REGISTRATION_TEST_SHARE_URL)
+    await page.goto(process.env.REGISTRATION_TEST_SHARE_URL);
+});
+
 async function registerUi(page: Page) {
   const account = credentials();
   await page.goto('/register');
@@ -139,6 +144,8 @@ test('API rejects unauthenticated access, demo credentials, missing CSRF and ten
   ).toBe(400);
   const otherContext = await browser.newContext();
   const other = await otherContext.newPage();
+  if (process.env.REGISTRATION_TEST_SHARE_URL)
+    await other.goto(process.env.REGISTRATION_TEST_SHARE_URL);
   await other.goto(new URL('/register', page.url()).toString());
   const account = credentials();
   const created = await request(other, '/api/auth/register', {
