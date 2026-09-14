@@ -1,0 +1,5 @@
+analiza-en-casa-production-qa@1.0.0 C:\Temp\analiza-ui-polish-final-v5
+└─┬ @analiza/web@0.1.0 -> .\apps\web
+  └─┬ @google-cloud/storage@8.1.0
+    └─┬ gaxios@6.7.1
+      └── uuid@11.1.1 overridden

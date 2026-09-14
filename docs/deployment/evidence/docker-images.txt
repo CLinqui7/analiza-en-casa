@@ -1,0 +1,25 @@
+IMAGE                                                    ID             DISK USAGE   CONTENT SIZE   EXTRA
+analiza-core:verification                                bfb1f1a7c975        427MB          103MB   U
+analiza-debug-shutdown:local                             67a2ed58138d        430MB          104MB   U
+analiza-operator:verification                            1a908be8d78f       1.93GB          557MB
+analiza-web:cloudrun                                     7eaf64200e52        430MB          104MB   U
+fsouza/fake-gcs-server:1.54.0                            3730da0e31f7       82.3MB         24.2MB   U
+gcr.io/google.com/cloudsdktool/google-cloud-cli:stable   2f2d80f4be75        703MB          117MB
+hashicorp/terraform:1.14.7                               880e7eeb8da8        174MB         41.9MB
+mysql:8.0                                                64756cc92f70       1.08GB          247MB   U
+postgres:18-bookworm                                     1c59e2c3c818        630MB          163MB   U
+public.ecr.aws/supabase/edge-runtime:v1.74.3             c52405002a89       1.11GB          391MB
+public.ecr.aws/supabase/gotrue:v2.196.0                  c0c25187a6b8       92.7MB         29.4MB
+public.ecr.aws/supabase/kong:2.8.1                       1b53405d8680        203MB         49.3MB
+public.ecr.aws/supabase/logflare:1.50.4                  758946be2bb7        924MB          276MB
+public.ecr.aws/supabase/mailpit:v1.30.2                  37a38e48e933       49.7MB           14MB
+public.ecr.aws/supabase/postgres-meta:v0.98.0            cef71ba90175        543MB          108MB
+public.ecr.aws/supabase/postgres:15.8.1.085              af083ef64d04          3GB          681MB
+public.ecr.aws/supabase/postgrest:v16.1                  5922bde07147         27MB         6.53MB
+public.ecr.aws/supabase/realtime:v2.129.3                3211f8ebd59e        584MB          131MB
+public.ecr.aws/supabase/storage-api:v1.70.3              528ec49c3c32       1.38GB          244MB
+public.ecr.aws/supabase/studio:2026.08.17-sha-0c1da8f    08dc77f12e08       1.66GB          329MB
+public.ecr.aws/supabase/vector:0.53.0-alpine             ca92d617e905        209MB         56.6MB
+tableflow-be:latest                                      a81b16a110db        359MB         85.7MB   U
+tableflow-fe:latest                                      ad126941f3d9        215MB         52.2MB   U
+tableflow-kitchen:latest                                 2ce6a3b88609        237MB         58.8MB   U

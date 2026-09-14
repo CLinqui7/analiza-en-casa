@@ -1,0 +1,36 @@
+{
+  "id": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+  "sourceSha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+  "localTag": "analiza-web:cloudrun",
+  "os": "linux",
+  "architecture": "amd64",
+  "user": "node",
+  "port": 8080,
+  "standalone": true,
+  "node": "v24.21.0",
+  "labels": {
+    "com.analiza.cloud-sql": "postgresql-18",
+    "com.analiza.data-mode": "postgresql",
+    "com.analiza.release-profile": "core",
+    "com.analiza.schema-contract": "analiza-core-v1",
+    "org.opencontainers.image.revision": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+    "org.opencontainers.image.source": "https://github.com/CLinqui7/analiza-en-casa"
+  },
+  "sizeBytes": 103658611,
+  "rootFsLayers": [
+    "sha256:1d69a5fd31932841d7825ef4780c06f008eea65aaa9f3110fe09d5832ed5c7d8",
+    "sha256:8b44269dd12bb3a948a3fc91ba0ee4544375637bbc5995edabbbf2824d2a2e35",
+    "sha256:bd4b733ad7053e873d389686452b3ee8fb8009f4f1d5311b1af1fa9352ff5624",
+    "sha256:6b1a9ecc458f8b83983c566340ece48c9a605f1e13377190c686fb6f1e58a34a",
+    "sha256:a63f71a5ecc2aaf6cb0f20266a9a732c760b63f3a0f9e8a2bfee9a2fea576ab6",
+    "sha256:65c96b96342bc29999e64ab1e05031da529b149f0ddfdb44501b0ffc01bcd81e",
+    "sha256:be64341811bd0d0a868b1ede6da2d4183c8520f86231edf75f0298560dfe82a5",
+    "sha256:407e64b5c54c3bb09494c76b3a998c4eaad8029824a8152057b7fb5c1d39e9e0",
+    "sha256:af0132724b6c370287026ef171c882c3c5943bde26751ca67f4aef8c87641469"
+  ],
+  "registryPublished": false,
+  "registryDigest": null,
+  "testedContainer": "analiza-sqlqa-1789407260070-web",
+  "containerImage": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+  "readOnlyFilesystem": true
+}

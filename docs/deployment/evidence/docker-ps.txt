@@ -1,0 +1,4 @@
+CONTAINER ID   IMAGE                           COMMAND                  CREATED         STATUS                   PORTS                       NAMES
+3261624bda4a   analiza-web:cloudrun            "docker-entrypoint.s…"   2 minutes ago   Up 2 minutes (healthy)   127.0.0.1:51492->8080/tcp   analiza-sqlqa-1789407260070-web
+6de2fae27aeb   fsouza/fake-gcs-server:1.54.0   "/bin/fake-gcs-serve…"   2 minutes ago   Up 2 minutes             127.0.0.1:51489->4443/tcp   analiza-sqlqa-1789407260070-gcs-emulator
+416461a69e70   postgres:18-bookworm            "docker-entrypoint.s…"   3 minutes ago   Up 2 minutes             127.0.0.1:51470->5432/tcp   analiza-sqlqa-1789407260070-postgres18

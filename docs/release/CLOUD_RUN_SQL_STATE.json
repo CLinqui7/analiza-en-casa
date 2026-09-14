@@ -10,7 +10,7 @@
     "published": false,
     "deployed": false,
     "staging_verified": false,
-    "final_image_provenance": "PENDING_COMMITTED_REBUILD"
+    "final_image_provenance": "VERIFIED_COMMITTED_SOURCE_AND_EXACT_IMAGE"
   },
   "architecture": {
     "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
@@ -20,29 +20,6 @@
     "cloud": "Artifact Registry, Cloud Run, Secret Manager, Terraform and Cloud Build",
     "region": "us-central1",
     "service": "analiza-staging"
-  },
-  "local_validation_before_provenance": {
-    "passed": true,
-    "run": "analiza-sqlqa-1789405997194",
-    "image": "sha256:d1c00a9e41a37e91a1d553969f2c087bd720a9bcc316950f600a769af0d1c714",
-    "sourceSha": "local-unversioned",
-    "base": "http://localhost:58006",
-    "checks": [
-      "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
-      "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
-      "React doctor create/edit; hospitalization create/edit with active assigned nurse; role and organization denials",
-      "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
-      "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
-      "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
-      "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
-      "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
-      "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
-    ],
-    "connections": 5,
-    "p95Ms": 837,
-    "database": "PostgreSQL 18 local QA",
-    "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
-    "checkedAt": "2026-09-14T17:14:01.051Z"
   },
   "regression": {
     "root_tests": 105,
@@ -59,7 +36,7 @@
     "applied": false
   },
   "gcloud": {
-    "method": "official google-cloud-cli container; native executable absent",
+    "method": "official CLI container; auth list empty and project unset",
     "auth_list": [],
     "project": null
   },
@@ -75,5 +52,104 @@
     "Historical Mongo adapters and mock UI remain in source for regression; PostgreSQL never falls back to them",
     "No corporate/production migrations, GridFS data transfer, paid resource creation, public image publication or deployment executed",
     "GCS tested with SDK + local emulator, not real cloud IAM; 30 concurrent reads are not a production capacity certification"
-  ]
+  ],
+  "source_sha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+  "implementation_sha": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+  "image": {
+    "id": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+    "sourceSha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+    "localTag": "analiza-web:cloudrun",
+    "os": "linux",
+    "architecture": "amd64",
+    "user": "node",
+    "port": 8080,
+    "standalone": true,
+    "node": "v24.21.0",
+    "labels": {
+      "com.analiza.cloud-sql": "postgresql-18",
+      "com.analiza.data-mode": "postgresql",
+      "com.analiza.release-profile": "core",
+      "com.analiza.schema-contract": "analiza-core-v1",
+      "org.opencontainers.image.revision": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+      "org.opencontainers.image.source": "https://github.com/CLinqui7/analiza-en-casa"
+    },
+    "sizeBytes": 103658611,
+    "rootFsLayers": [
+      "sha256:1d69a5fd31932841d7825ef4780c06f008eea65aaa9f3110fe09d5832ed5c7d8",
+      "sha256:8b44269dd12bb3a948a3fc91ba0ee4544375637bbc5995edabbbf2824d2a2e35",
+      "sha256:bd4b733ad7053e873d389686452b3ee8fb8009f4f1d5311b1af1fa9352ff5624",
+      "sha256:6b1a9ecc458f8b83983c566340ece48c9a605f1e13377190c686fb6f1e58a34a",
+      "sha256:a63f71a5ecc2aaf6cb0f20266a9a732c760b63f3a0f9e8a2bfee9a2fea576ab6",
+      "sha256:65c96b96342bc29999e64ab1e05031da529b149f0ddfdb44501b0ffc01bcd81e",
+      "sha256:be64341811bd0d0a868b1ede6da2d4183c8520f86231edf75f0298560dfe82a5",
+      "sha256:407e64b5c54c3bb09494c76b3a998c4eaad8029824a8152057b7fb5c1d39e9e0",
+      "sha256:af0132724b6c370287026ef171c882c3c5943bde26751ca67f4aef8c87641469"
+    ],
+    "registryPublished": false,
+    "registryDigest": null,
+    "testedContainer": "analiza-sqlqa-1789407260070-web",
+    "containerImage": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+    "readOnlyFilesystem": true
+  },
+  "local_validation": {
+    "passed": true,
+    "run": "analiza-sqlqa-1789407260070",
+    "image": "sha256:7eaf64200e52e106c1d8486d42ea984c816c82ef6a00ebcf69dd9da9b46f5a67",
+    "sourceSha": "d07f80586ba32db48ce9746536d60bba9c5f4a83",
+    "base": "http://localhost:51492",
+    "checks": [
+      "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+      "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+      "React doctor create and API edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+      "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+      "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+      "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+      "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+      "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+      "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
+    ],
+    "connections": 5,
+    "p95Ms": 559,
+    "database": "PostgreSQL 18 local QA",
+    "databaseVersion": "18.6 (Debian 18.6-1.pgdg12+2)",
+    "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+    "checkedAt": "2026-09-14T17:34:53.302Z"
+  },
+  "archive": {
+    "path": "C:/Temp/analiza-ui-polish-final-v5/.local/cloud-run/candidate-image.tar",
+    "sha256": "387ad58a750e3424590b30b3f31cb6ab38ac2fb254d644028e1a7c6c69dd1401"
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "security_scan": "PASS",
+    "root_tests": "105/105 PASS",
+    "react_server_tests": "127/127 PASS",
+    "full_mock_production_browser": "178/178 PASS",
+    "baseline_qa": "76/76 PASS",
+    "standalone_legacy": "PASS",
+    "runtime_smoke": "PASS; exact final image, PORT=8080 and 9090, 11 assets",
+    "sql_and_storage": "PASS; real local PostgreSQL 18.6 + Google SDK/GCS emulator",
+    "layers": {
+      "passed": true,
+      "application_files_scanned": 2592,
+      "reviewed_sdk_placeholders": [
+        "app/node_modules/@google-cloud/storage/build/esm/src/storage.js"
+      ],
+      "violations": []
+    },
+    "video_client_gates": "PASS; 17/17 chapters structural audit, 210 requirements, 32 client changes and CH01-CH03; no new parity promotions",
+    "dependency_audit": "0 reported production vulnerabilities; npm 11.18 workspace override verified"
+  },
+  "evidence_directory": "docs/deployment/evidence",
+  "completed_local_at": "2026-09-14T17:39:52.431Z",
+  "review": "docs/deployment/REVIEW.md",
+  "backup": "C:/Users/carlo/CodexBackups/analiza-cloud-run-20260914-100503",
+  "publication": {
+    "github_branch": "codex/cloud-run-cloud-sql",
+    "artifact_registry": "PENDING_REAL_DESTINATION_AND_ACCESS",
+    "cloud_run": "NOT_DEPLOYED",
+    "terraform_apply": false
+  }
 }
