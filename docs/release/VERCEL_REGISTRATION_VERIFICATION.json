@@ -1,0 +1,54 @@
+{
+  "date": "2026-09-14T23:12:36.669Z",
+  "implementation_sha": "098621753f2b79e416921d89abfcd83900425056",
+  "branch": "codex/cloud-run-cloud-sql",
+  "tests": {
+    "root": "108/108 PASS",
+    "qa": "76/76 PASS",
+    "react_server": "142/142 PASS",
+    "full_mock_browser": "178/178 PASS",
+    "registration_browser_local_production": "4/4 PASS",
+    "atlas_integration": "PASS: atomic registration, password/session hashes, tenant isolation, permissions, CSRF, rollback, questionnaire version conflicts, persistence after reconnect and logout revocation",
+    "mongo_migrations": "PASS: apply, repeat without reapplying, checksum mismatch rejected, lock conflict rejected, recovery",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "format": "PASS",
+    "secret_scan": "PASS",
+    "repository_preflight": "PASS",
+    "ch01_ch03": "PASS: 14/14, 16/16, 13/13 structural gates; historical statuses retained",
+    "client_changes": "PASS: 32/32",
+    "video_traceability": "PASS: 210/210 traced, JSON/CSV/certification mirror consistent"
+  },
+  "preview": {
+    "status": "BUILT_AND_DEPLOYED_CONNECTIVITY_BLOCKED",
+    "environment": "Vercel Preview",
+    "deployment_id": "dpl_3pRTMgMcXnzziM3nUabpkN6KWQ7a",
+    "source_sha": "baa98a983e16d5704a61f8a3f50da7bc211baabc",
+    "url": "https://web-q3dgn6ed8-clinqui7s-projects.vercel.app",
+    "build": "PASS: Next.js 16.3.4 compiled, typechecked and published READY",
+    "migration_before_deploy": "PASS: 001_application_indexes.json, 47 indexes, checksum ledger; repeat skipped the applied version; no seed",
+    "remote_browser": "1/4 PASS: mobile registration rendering. 3 connected flows fail with 503; NOT certified as working remotely.",
+    "blocker": "Atlas access list only permits the desktop operator IP. Broadening network access awaits user approval.",
+    "database": "Existing authorized Atlas database, separate prefixed collections",
+    "secret_values_recorded": false,
+    "share_link": "Created for this preview only, expires after 7 days; private link excluded from Git"
+  },
+  "limitations": [
+    "Synthetic QA only",
+    "No email verification/recovery delivery provider",
+    "New registration/questionnaire are MongoDB only",
+    "Existing Docker exports remain pinned to 6fae1890af99a7913092aea248cb120bd595e335",
+    "GCP deployment and PostgreSQL staging execution remain deferred"
+  ],
+  "release_failure_guards": {
+    "mongodb": "PASS: unavailable database exits 1 before invoking Vercel",
+    "postgresql": "PASS: simulated migration job failure stops before updating the service; no real gcloud calls",
+    "cloud_execution": "NOT RUN"
+  },
+  "upload_manifest": {
+    "files": 398,
+    "bytes": 4693067,
+    "sensitive_paths": "EXCLUDED",
+    "note": "Source file upload succeeded. Archive upload was stopped; trailing-slash exclusions corrected to exclude directories themselves."
+  }
+}

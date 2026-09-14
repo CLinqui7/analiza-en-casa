@@ -1,5 +1,16 @@
 # Preguntas abiertas y bloqueadores
 
+## VERCEL-PREVIEW · 14 septiembre 2026
+
+- `VERCEL-Q001`: el preview de registro y cuestionario está construido, pero el
+  cluster Atlas `analiza-cluster` solo autoriza la IP de la computadora del operador.
+  Las solicitudes desde Vercel devuelven 503 por falta de conectividad. Se solicitó
+  autorización para ampliar la lista de acceso del cluster de pruebas; sigue pendiente.
+  No se cambió la lista de red ni se sustituyó la persistencia por datos locales.
+  Migraciones y pruebas de MongoDB real desde la computadora sí pasan. Ver
+  `docs/release/VERCEL_REGISTRATION_VERIFICATION.json` y
+  `docs/deployment/MIGRATIONS_AND_ENV.md`.
+
 ## CLOUD-RUN-QA · 14 septiembre 2026
 
 Arquitectura confirmada y en implementación: Next full-stack, PostgreSQL 18,

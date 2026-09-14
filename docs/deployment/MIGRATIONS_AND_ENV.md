@@ -1,5 +1,10 @@
 # Migraciones y variables de entorno
 
+Estado del preview del 14/09/2026: build publicado en Vercel; validación remota
+bloqueada por la lista de IP autorizadas de Atlas, que solo permite la computadora
+del operador. Hace falta autorizar la conectividad desde Vercel antes de usarlo.
+Las migraciones y las pruebas con MongoDB desde el entorno local sí pasaron.
+
 ## Prueba en Vercel: MongoDB
 
 La aplicación Next.js contiene frontend y API. El registro crea usuario, organización, membresía ADMIN y sesión en una transacción. Cada cuenta nueva trabaja en una organización distinta. Las contraseñas usan scrypt; las sesiones usan cookies HttpOnly y tokens almacenados como hash. Las escrituras requieren autorización y CSRF.
