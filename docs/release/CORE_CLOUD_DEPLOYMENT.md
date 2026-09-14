@@ -1,5 +1,10 @@
 # Edición Core con MongoDB — preparación cloud
 
+> Documento histórico de la entrega Mongo. La configuración Docker, compose y
+> Cloud Build actual lo sustituye por PostgreSQL 18. Para comandos vigentes use
+> [Cloud Run](../deployment/CLOUD_RUN.md) y [contrato SQL](../deployment/POSTGRESQL.md).
+> Los resultados anteriores no acreditan la entrega PostgreSQL actual.
+
 Esta edición reduce temporalmente la superficie siguiendo la nueva orden del cliente.
 No sustituye el inventario de video/Excel ni declara completadas sus funciones pendientes.
 No hay conversión a HTML estático: React/Next y sus endpoints de servidor se conservan.

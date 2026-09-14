@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-14",
+  "branch": "codex/cloud-run-cloud-sql",
+  "source_baseline": "dbf91821d138a6bff09e66c72a409fb6f89de8b5",
+  "status": {
+    "prepared": true,
+    "built": true,
+    "tested_local": true,
+    "published": false,
+    "deployed": false,
+    "staging_verified": false,
+    "final_image_provenance": "PENDING_COMMITTED_REBUILD"
+  },
+  "architecture": {
+    "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
+    "runtime": "Node.js 24 / Docker linux/amd64 / Next standalone / PORT=8080 / user=node",
+    "database": "PostgreSQL 18, pg, relational keys + existing DTO JSONB, transactions and forced tenant RLS",
+    "storage": "Private GCS via Google SDK and ADC; metadata only in PostgreSQL",
+    "cloud": "Artifact Registry, Cloud Run, Secret Manager, Terraform and Cloud Build",
+    "region": "us-central1",
+    "service": "analiza-staging"
+  },
+  "local_validation_before_provenance": {
+    "passed": true,
+    "run": "analiza-sqlqa-1789405997194",
+    "image": "sha256:d1c00a9e41a37e91a1d553969f2c087bd720a9bcc316950f600a769af0d1c714",
+    "sourceSha": "local-unversioned",
+    "base": "http://localhost:58006",
+    "checks": [
+      "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+      "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+      "React doctor create/edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+      "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+      "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+      "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+      "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+      "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+      "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
+    ],
+    "connections": 5,
+    "p95Ms": 837,
+    "database": "PostgreSQL 18 local QA",
+    "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+    "checkedAt": "2026-09-14T17:14:01.051Z"
+  },
+  "regression": {
+    "root_tests": 105,
+    "react_server_tests": 127,
+    "full_mock_production_browser": 178,
+    "video_audit": "17 chapters / 1359 events; structural audit only, no new visual re-audit",
+    "client_gate": "32/32",
+    "traceability": "210/210; CH01, CH02, CH03 retained; no status promotions"
+  },
+  "terraform": {
+    "fmt_check": "PASS",
+    "validate": "PASS",
+    "plan": "ATTEMPTED; missing real project and required variables; no plan approved or applied",
+    "applied": false
+  },
+  "gcloud": {
+    "method": "official google-cloud-cli container; native executable absent",
+    "auth_list": [],
+    "project": null
+  },
+  "pending": [
+    "Real approved GCP project, access, Artifact Registry repository/image and private bucket",
+    "Existing Cloud SQL connection/database, adoption or mapping of analiza schema and SQL identities",
+    "Secret Manager IDs/versions, named staging invokers, corporate network requirements and Terraform state backend",
+    "Cost approval and infrastructure/build permissions; optional Cloud Build repository connection",
+    "Real GCS/IAM and Cloud Run staging verification"
+  ],
+  "scope_limits": [
+    "Core only; quotes, clinical, financial and portal modules remain excluded as in the inherited Core release",
+    "Historical Mongo adapters and mock UI remain in source for regression; PostgreSQL never falls back to them",
+    "No corporate/production migrations, GridFS data transfer, paid resource creation, public image publication or deployment executed",
+    "GCS tested with SDK + local emulator, not real cloud IAM; 30 concurrent reads are not a production capacity certification"
+  ]
+}

@@ -1,4 +1,5 @@
 {
+  "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
   "schema_version": 2,
   "studio_verification": {
     "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
@@ -10,12 +11,12 @@
   "generated_at": "2026-09-03T05:56:26-06:00",
   "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+  "implementation_sha": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
   "core_release_regression": {
     "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
     "scope": "Full mock edition regression only. Individual historical statuses and source evidence retained. Core visibility exclusions are authorized by the client; not full video parity or cloud certification."
   },
-  "functional_fingerprint": "f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc",
+  "functional_fingerprint": "6f1fecc44db94405aa96c6c76ef155c87ae27295d91fdd515f8c15bc54310f22",
   "requirements": [
     {
       "requirement_id": "CH01-F001",

@@ -158,3 +158,8 @@ La migración no autoriza el uso con datos reales. Quedan por trasladar con pari
 - Se añadió certificación Selenium real para acciones transversales. La regresión global pasó 181/181 y `npm run selenium:coverage` pasó 334/334 (100%). También permanecen verdes la paridad de video 210/210, cambios de cliente 32/32 y la auditoría de video 17/17.
 - Cinco entradas permanecen `NOT_TESTABLE`, no implementadas: detalle de hospitalización desde una medición sin fuente clínica autorizada, creación de tarjeta de medicamentos (CR-019), registro de signos vitales (CH17-Q009), aprobación de descuentos (CH16-Q001–Q005) y edición de configuración sin contrato seguro. Se mantienen en `docs/OPEN_QUESTIONS.md` y no se sustituyeron por datos, reglas ni acciones simuladas.
 - La certificación final sigue `globalComplete=false`: faltan Supabase/RLS y proveedores reales, contratos clínicos/financieros aprobados y un scheduler autorizado para el cron de 15 minutos que el plan Hobby de Vercel no admite.
+
+
+### Addendum · 2026-09-14 · Cloud Run / PostgreSQL Core
+
+La orden actual conserva la aplicación y migra el Core a PostgreSQL 18 y GCS privado. Hay esquema, migrador versionado, seed sintético, repositories, RLS, RBAC y pruebas reales de la imagen local. El frontend completo histórico pasó 178/178 pruebas de regresión; no es una nueva certificación de paridad completa. El estado vigente, imagen/evidencia y límites están en `docs/release/CLOUD_RUN_SQL_STATE.json`; los comandos del ingeniero en `docs/deployment/CLOUD_RUN.md`. GCP devuelve cuentas vacías/proyecto sin configurar; no se publicó ni desplegó y no se aplicó Terraform.

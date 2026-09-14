@@ -1,5 +1,28 @@
 # Preguntas abiertas y bloqueadores
 
+## CLOUD-RUN-QA · 14 septiembre 2026
+
+Arquitectura confirmada y en implementación: Next full-stack, PostgreSQL 18,
+GCS privado, Secret Manager, Docker, Artifact Registry, Terraform y Cloud Build;
+`us-central1`, staging primero. No faltan decisiones de motor ni de frontend.
+
+- `GCP-Q001`: Project ID real con acceso autorizado, repositorio AR e imagen,
+  bucket privado y ubicación/identidades del estado Terraform. La CLI oficial
+  devuelve lista de cuentas vacía y proyecto sin configurar.
+- `GCP-Q002`: instancia/nombre de conexión y base; aprobación del esquema `analiza`
+  o diccionario/mapeo corporativo; rol SQL limitado, identidad migradora,
+  organizaciones/usuarios iniciales y presupuesto de conexiones.
+- `GCP-Q003`: referencias y versiones reales de secretos, permisos del operador,
+  invocadores IAM de staging y restricciones de red de la organización.
+- `GCP-Q004`: presupuesto/autorización de recursos facturables antes de apply o
+  Cloud Build; conexión Cloud Build al repositorio si se usará trigger automático.
+- `GCS-Q001`: política autorizada de retención/reconciliación de archivos huérfanos
+  privados. No se inventa una duración ni se implementa borrado automático.
+
+El esquema propio y el seed se aplican únicamente a PostgreSQL local sintético.
+No se migran datos de Atlas/GridFS ni se modifica la base corporativa. La entrega
+actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.json`.
+
 ## B0 · Cambios del cliente (Excel auditado)
 
 - `CR-010` / `CR-018`: definir qué entidad representa “Puntual”, sus campos, duración, estados y relación con Hospitalización o Agenda.

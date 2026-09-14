@@ -4,7 +4,22 @@ Analiza en Casa es una aplicación web de demostración para la operación de at
 
 > Estado: `SYNTHETIC_DEMO`. Todos los usuarios, pacientes, pagos, documentos y catálogos son ficticios. No use este repositorio con datos reales sin completar la lista de producción.
 
-## Entrega Core Mongo y Docker · 11 septiembre 2026
+## Entrega Cloud Run / PostgreSQL 18 · 14 septiembre 2026
+
+La entrega actual conserva el frontend y migra el backend Core a PostgreSQL 18:
+Next.js full-stack, una imagen Docker standalone, archivos privados en GCS,
+Secret Manager, Terraform y Cloud Build. Consulte [despliegue y validación](docs/deployment/CLOUD_RUN.md),
+[esquema/operaciones SQL](docs/deployment/POSTGRESQL.md) y
+[estado verificable](docs/release/CLOUD_RUN_SQL_STATE.json).
+
+Comandos: `npm run docker:build`, `npm run db:plan`, `npm run test:postgresql`.
+La última prueba crea una base **local sintética**, ejecuta migraciones y seed,
+y comprueba el contenedor final. `npm run db:migrate` y `npm run db:seed:qa`
+requieren un operador/configuración privada explícitos. El código de la edición
+histórica permanece; cotizaciones y los demás módulos excluidos del Core no
+se declaran migrados. GCP sigue sujeto a datos reales y autorización de costos.
+
+## Antecedente Core Mongo y Docker · 11 septiembre 2026
 
 Por solicitud del cliente se prepara una edición reducida, exclusivamente con persistencia
 MongoDB de servidor: pacientes, hospitalizaciones, agenda, médicos, enfermería y catálogos

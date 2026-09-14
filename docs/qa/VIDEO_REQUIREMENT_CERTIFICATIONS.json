@@ -1,6 +1,7 @@
 {
+  "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
   "schema_version": 1,
-  "implementation_sha": "532048263a6e17de698b0fbed8594067a8c75714",
+  "implementation_sha": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
   "historical_implementation_sha": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "core_release_regression": {
     "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
@@ -8,7 +9,7 @@
   },
   "verification_status": "VERIFIED_AT_COMMITTED_SHA",
   "verification_blocker": "CH16-Q001/Q002/Q003/Q005 leave discount profiles, values, calculation, source, roles and audit undefined. CH15-Q004/Q006 and CH14-F07 remain explicitly blocked; real Supabase/RLS, provider and client-approval gates remain external.",
-  "functional_fingerprint": "f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc",
+  "functional_fingerprint": "6f1fecc44db94405aa96c6c76ef155c87ae27295d91fdd515f8c15bc54310f22",
   "studio_verification": {"implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76", "status": "LOCAL_PLAYWRIGHT_VERIFIED_SELENIUM_PENDING", "evidence": "178/178 Playwright against fresh Next production server; includes CH01-CH03, route roles and portal safety. Historical certification fields below retain their original verification SHA. No new EXACT promotion."},
   "certification_created_at": "2026-09-03T05:56:00-06:00",
   "certification_test_evidence": "Release verification at implementation SHA 58030d1419e179a4bc51145106c7314cb6417c6c passed format, lint, TypeScript, 98 domain tests, 37 React tests, 178/178 fresh-server Playwright tests, 181/181 Selenium tests, declared Selenium coverage 334/334, client changes 32/32, video traceability 210/210, mirror checks and the 17/17 video audit. The Leaflet patient-map teardown path is covered by the shared-editor Playwright test, which asserts no page error after closing the dialog. No undefined financial, clinical, provider or external operation is certified.",
