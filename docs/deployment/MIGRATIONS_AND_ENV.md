@@ -1,5 +1,8 @@
 # Migraciones y variables de entorno
 
+**Entrega Cloud SQL:** seguir [CLOUD_SQL_HANDOFF.md](CLOUD_SQL_HANDOFF.md).
+Incluye imágenes PostgreSQL, variables privadas y orden de despliegue del ingeniero.
+
 Estado del preview del 14/09/2026: build publicado en Vercel y cuatro pruebas
 remotas aprobadas después de habilitar el acceso Atlas autorizado por el usuario.
 Las migraciones y las pruebas con MongoDB desde el entorno local también pasaron.
@@ -35,7 +38,9 @@ node --env-file=.local/preview.env scripts/deployment/mongo-command.mjs --migrat
 
 ## Docker / Cloud Run: PostgreSQL 18
 
-Esta ruta conserva sus migraciones SQL, RLS y contenedor `operator` separado. El registro y cuestionario nuevos del preview usan MongoDB; no se declaran implementados para PostgreSQL. La publicación cloud sigue pendiente de una entrega expresamente autorizada.
+Esta ruta incluye Core, registro individual y cuestionario con persistencia PostgreSQL,
+RLS y contenedor `operator` separado. La migración 002 agrega perfiles y directorios
+sin modificar la migración 001 ni borrar datos. El despliegue cloud queda diferido.
 
 Variables: [web PostgreSQL](../../config/postgresql/runtime.example) y [operator](../../config/operator/runtime.example). `PGPASSWORD` es secreto; en Cloud Run se inyecta mediante Secret Manager. `PGUSER` del operator debe ser distinto del usuario restringido de la web. `PGHOST` es `/cloudsql/PROJECT:REGION:INSTANCE` cuando se utiliza el socket administrado. La Service Account proporciona la identidad para Cloud SQL y GCS; no se necesita entregar una clave JSON.
 

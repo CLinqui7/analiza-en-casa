@@ -20,4 +20,13 @@ create_private_bucket    = false
 create_secret_containers = false
 create_sql_instance      = false # Corporate existing instance by default.
 deploy_service           = false
+prepare_operator         = true
+deploy_operator          = false # Set true to prepare the migration job before the web.
+deploy_seed_job          = false # Corporate migrations never require a synthetic seed.
+provision_runtime_role   = false # Engineer supplies the existing restricted SQL role.
+runtime_sql_role         = "" # Must equal the web PGUSER secret value.
+migration_user_secret_id = ""
+migration_password_secret_id = ""
+operator_secret_versions = null # Map with user/password numeric Secret Manager versions (not values).
+operator_image_digest_uri = null # Verified Artifact Registry operator URI@sha256.
 # Enabling flags/applying creates billable resources or modifies IAM: review/approve the plan first.

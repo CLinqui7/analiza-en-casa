@@ -1,0 +1,169 @@
+{
+  "checkedAt": "2026-09-15T05:29:39.543Z",
+  "sourceSha": "64e47f345b169780c1497a6999aa1b4bb819b729",
+  "branch": "codex/cloud-run-cloud-sql",
+  "Docker": "READY",
+  "Cloud deployment": "DEFERRED",
+  "Billing": "NOT REQUIRED FOR THIS HANDOFF",
+  "status": {
+    "prepared": true,
+    "built": true,
+    "testedLocal": true,
+    "publishedDockerHub": true,
+    "publishedArtifactRegistry": false,
+    "deployedCloudRun": false
+  },
+  "web": {
+    "tag": "desarrollotuvet/analiza-en-casa:postgresql-64e47f345b16",
+    "digest": "sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db",
+    "digestUri": "desarrollotuvet/analiza-en-casa@sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db",
+    "localTag": "analiza-web:cloudrun",
+    "imageId": "sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db",
+    "inspectSizeBytes": 103989541,
+    "platform": "linux/amd64",
+    "user": "node",
+    "sourceSha": "64e47f345b169780c1497a6999aa1b4bb819b729",
+    "anonymousPull": "PASS",
+    "pullByDigest": "PASS",
+    "archive": {
+      "path": ".local/cloud-run/postgresql-64e47f345b16/candidate-image.tar",
+      "sha256": "0ba3e9e4e444aaaa4763012c5cd052a159ff8a39d1827654f63e610b09bdca66",
+      "load": "PASS"
+    },
+    "layersScan": {
+      "passed": true,
+      "application_files_scanned": 2664,
+      "reviewed_sdk_placeholders": [
+        "app/node_modules/@google-cloud/storage/build/esm/src/storage.js"
+      ],
+      "violations": []
+    }
+  },
+  "operator": {
+    "tag": "desarrollotuvet/analiza-en-casa:postgresql-operator-64e47f345b16",
+    "digest": "sha256:0e250cbfee495a2f0a523bec605d6d7c5fbd921edda0526ae866f7013dfa7c76",
+    "digestUri": "desarrollotuvet/analiza-en-casa@sha256:0e250cbfee495a2f0a523bec605d6d7c5fbd921edda0526ae866f7013dfa7c76",
+    "localTag": "analiza-operator:postgresql",
+    "imageId": "sha256:0e250cbfee495a2f0a523bec605d6d7c5fbd921edda0526ae866f7013dfa7c76",
+    "inspectSizeBytes": 101434934,
+    "platform": "linux/amd64",
+    "user": "node",
+    "sourceSha": "64e47f345b169780c1497a6999aa1b4bb819b729",
+    "anonymousPull": "PASS",
+    "pullByDigest": "PASS",
+    "archive": {
+      "path": ".local/cloud-run/postgresql-64e47f345b16/candidate-operator.tar",
+      "sha256": "7429f0b1b0baa90add1421b79bbe42403ae6af94217074dc7009a1103596ed21",
+      "load": "PASS"
+    },
+    "layersScan": {
+      "passed": true,
+      "application_files_scanned": 1399,
+      "reviewed_sdk_placeholders": [
+        "app/node_modules/@google-cloud/storage/build/esm/src/storage.js"
+      ],
+      "violations": []
+    }
+  },
+  "migrations": {
+    "operation": "MIGRATION_PLAN_ONLY",
+    "migrations": [
+      {
+        "version": "001_core.sql",
+        "sha256": "d265c58ef7c5a672a6361db17261aefb27e20287dfe1bc4dadeb77407967b46a"
+      },
+      {
+        "version": "002_workspace_registration.sql",
+        "sha256": "278a8ce4eafdec4751c64860456d6a2b886e71aef46556c7fd19c4cf96a2e972"
+      }
+    ],
+    "target": "analiza schema, PostgreSQL 18",
+    "automaticRuntimeDdl": false
+  },
+  "databaseQa": {
+    "passed": true,
+    "run": "analiza-sqlqa-1789449620635",
+    "image": "sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db",
+    "sourceSha": "64e47f345b169780c1497a6999aa1b4bb819b729",
+    "base": "http://localhost:53546",
+    "checks": [
+      "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+      "PostgreSQL registration and onboarding: atomic rollback, concurrent versions, tenant RLS, CSRF, permissions and no DELETE",
+      "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+      "React doctor create and API edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+      "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+      "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+      "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+      "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+      "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+      "30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors"
+    ],
+    "connections": 5,
+    "p95Ms": 554,
+    "database": "PostgreSQL 18 local QA",
+    "databaseVersion": "18.6 (Debian 18.6-1.pgdg12+2)",
+    "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+    "checkedAt": "2026-09-15T05:21:02.001Z"
+  },
+  "browserRegistration": {
+    "passed": 4,
+    "failed": 0,
+    "target": "http://localhost:53546",
+    "imageId": "sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db"
+  },
+  "runtimeSmoke": [
+    {
+      "port": 8080,
+      "result": "{\"passed\":true,\"platform\":\"linux/amd64\",\"uid\":1000,\"port\":\"8080\",\"assets\":13,\"database\":\"unconfigured-safe-failure\",\"scope\":\"Runtime smoke only; connected persistence gate is separate\"}\n"
+    },
+    {
+      "port": 9090,
+      "result": "{\"passed\":true,\"platform\":\"linux/amd64\",\"uid\":1000,\"port\":\"9090\",\"assets\":13,\"database\":\"unconfigured-safe-failure\",\"scope\":\"Runtime smoke only; connected persistence gate is separate\"}\n"
+    }
+  ],
+  "releaseSequence": {
+    "successSteps": 3,
+    "method": "Mock gcloud function; no cloud requests",
+    "failedMigrationStopsBeforeWeb": true,
+    "passed": true
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "format": "PASS",
+    "rootTests": "108/108 PASS",
+    "serverTests": "142/142 PASS",
+    "securityScan": "PASS",
+    "clientGate": "32/32 PASS",
+    "traceability": "210/210 PASS",
+    "videoAudit": "17/17 structural audit; no new visual parity claims",
+    "terraformFmt": "PASS",
+    "terraformValidate": "PASS",
+    "terraformMockTests": "5/5 PASS",
+    "terraformPlan": {
+      "status": "PASS",
+      "add": 22,
+      "change": 0,
+      "destroy": 0,
+      "applied": false,
+      "refresh": false,
+      "project": "probable-sprite-508007-q2",
+      "scope": "Preparation plan using previously proposed local resource names; not confirmation that resources exist or that this is the engineer destination"
+    }
+  },
+  "reviewNotes": [
+    "One cold-import unit test initially timed out at 5 seconds; unchanged retry passed 142/142. No assertions or timeout limits changed.",
+    "Cloud SQL target migration is independent of the optional synthetic seed job."
+  ],
+  "limits": [
+    "Core plus registration and onboarding; advanced quotes/clinical/financial/portal modules remain excluded.",
+    "GCS SDK verified with a local emulator; real cloud IAM/network not tested.",
+    "Schema migrations do not copy existing Atlas/GridFS data.",
+    "No production changes, billing activation, Terraform apply or cloud deployment."
+  ],
+  "gcloud": {
+    "authenticatedAccount": "linquicarloss@gmail.com",
+    "activeProject": "probable-sprite-508007-q2",
+    "method": "Native Google Cloud SDK 584.0.0; auth list and config get-value project"
+  }
+}
