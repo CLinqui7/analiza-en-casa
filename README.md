@@ -14,6 +14,10 @@ El preview permite crear una cuenta y completar organización, personal y servic
 en un espacio separado por usuario. El login no incluye credenciales demo precargadas.
 El backend conserva sesiones privadas, RBAC, aislamiento por organización y CSRF.
 
+El preview Vercel ya pasó las pruebas conectadas de registro, login y cuestionario.
+La distribución Docker equivalente y su arranque con migraciones automáticas se
+describen en [Docker MongoDB](docs/deployment/DOCKER_MONGODB.md).
+
 Las [variables y comandos para el ingeniero](docs/deployment/MIGRATIONS_AND_ENV.md)
 incluyen las plantillas MongoDB, PostgreSQL y operator. Para publicar el preview:
 

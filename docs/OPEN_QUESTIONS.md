@@ -2,12 +2,12 @@
 
 ## VERCEL-PREVIEW · 14 septiembre 2026
 
-- `VERCEL-Q001`: el preview de registro y cuestionario está construido, pero el
-  cluster Atlas `analiza-cluster` solo autoriza la IP de la computadora del operador.
-  Las solicitudes desde Vercel devuelven 503 por falta de conectividad. Se solicitó
-  autorización para ampliar la lista de acceso del cluster de pruebas; sigue pendiente.
-  No se cambió la lista de red ni se sustituyó la persistencia por datos locales.
-  Migraciones y pruebas de MongoDB real desde la computadora sí pasan. Ver
+- `VERCEL-Q001` — RESUELTA: el usuario autorizó el acceso de red del cluster de
+  pruebas `analiza-cluster` desde Vercel. Se añadió `0.0.0.0/0` conservando
+  autenticación, permisos y aislamiento por organización. Las cuatro pruebas de
+  registro, login y cuestionario contra el preview pasaron; MongoDB persiste los
+  datos y los fallos no activan almacenamiento local. La regla de red no caduca
+  automáticamente; revisar su restricción al terminar las pruebas. Ver
   `docs/release/VERCEL_REGISTRATION_VERIFICATION.json` y
   `docs/deployment/MIGRATIONS_AND_ENV.md`.
 

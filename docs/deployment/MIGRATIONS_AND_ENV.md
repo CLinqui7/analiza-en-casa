@@ -1,9 +1,9 @@
 # Migraciones y variables de entorno
 
-Estado del preview del 14/09/2026: build publicado en Vercel; validación remota
-bloqueada por la lista de IP autorizadas de Atlas, que solo permite la computadora
-del operador. Hace falta autorizar la conectividad desde Vercel antes de usarlo.
-Las migraciones y las pruebas con MongoDB desde el entorno local sí pasaron.
+Estado del preview del 14/09/2026: build publicado en Vercel y cuatro pruebas
+remotas aprobadas después de habilitar el acceso Atlas autorizado por el usuario.
+Las migraciones y las pruebas con MongoDB desde el entorno local también pasaron.
+El Docker de esta versión se entrega en [DOCKER_MONGODB](DOCKER_MONGODB.md).
 
 ## Prueba en Vercel: MongoDB
 

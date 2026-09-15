@@ -20,18 +20,19 @@
     "video_traceability": "PASS: 210/210 traced, JSON/CSV/certification mirror consistent"
   },
   "preview": {
-    "status": "BUILT_AND_DEPLOYED_CONNECTIVITY_BLOCKED",
+    "status": "DEPLOYED_AND_VERIFIED",
     "environment": "Vercel Preview",
     "deployment_id": "dpl_3pRTMgMcXnzziM3nUabpkN6KWQ7a",
     "source_sha": "baa98a983e16d5704a61f8a3f50da7bc211baabc",
     "url": "https://web-q3dgn6ed8-clinqui7s-projects.vercel.app",
     "build": "PASS: Next.js 16.3.4 compiled, typechecked and published READY",
     "migration_before_deploy": "PASS: 001_application_indexes.json, 47 indexes, checksum ledger; repeat skipped the applied version; no seed",
-    "remote_browser": "1/4 PASS: mobile registration rendering. 3 connected flows fail with 503; NOT certified as working remotely.",
-    "blocker": "Atlas access list only permits the desktop operator IP. Broadening network access awaits user approval.",
+    "remote_browser": "4/4 PASS: registration, login, questionnaire read/write/reload, isolated accounts, CSRF, rejected save and mobile layout",
     "database": "Existing authorized Atlas database, separate prefixed collections",
     "secret_values_recorded": false,
-    "share_link": "Created for this preview only, expires after 7 days; private link excluded from Git"
+    "share_link": "Created for this preview only, expires after 7 days; private link excluded from Git",
+    "previous_blocker": "Resolved with explicit user authorization: Atlas permits connections from Vercel via 0.0.0.0/0; authentication and backend permissions retained",
+    "checked_at": "2026-09-15T04:57:46.122Z"
   },
   "limitations": [
     "Synthetic QA only",
@@ -50,5 +51,6 @@
     "bytes": 4693067,
     "sensitive_paths": "EXCLUDED",
     "note": "Source file upload succeeded. Archive upload was stopped; trailing-slash exclusions corrected to exclude directories themselves."
-  }
+  },
+  "docker": "docs/release/MONGODB_DOCKER_VERIFICATION.json"
 }
