@@ -1,10 +1,15 @@
 import { MongoClient, ServerApiVersion, type Db } from 'mongodb';
 
-export type MongoRuntimeConfig = Readonly<{ uri: string; database: string }>;
+export type MongoRuntimeConfig = Readonly<{
+  uri: string;
+  database: string;
+  collectionPrefix?: string;
+}>;
 export type MongoEnvironment = Readonly<{
   ANALIZA_DATA_MODE?: string;
   MONGODB_URI?: string;
   MONGODB_DB?: string;
+  MONGODB_COLLECTION_PREFIX?: string;
 }>;
 
 export class MongoConfigurationError extends Error {
@@ -28,7 +33,26 @@ export function mongoRuntimeConfig(
   if (!uri || !database) {
     throw new MongoConfigurationError('La configuración segura de MongoDB no está completa.');
   }
-  return { uri, database };
+  const collectionPrefix = environment.MONGODB_COLLECTION_PREFIX;
+  if (collectionPrefix && !/^[a-z][a-z0-9_]{0,47}_$/.test(collectionPrefix))
+    throw new MongoConfigurationError('El espacio de colecciones MongoDB no es válido.');
+  return { uri, database, ...(collectionPrefix ? { collectionPrefix } : {}) };
+}
+
+/** A deployment can isolate its collections inside an existing authorized database. */
+export function scopedMongoDatabase(database: Db, prefix?: string): Db {
+  if (!prefix) return database;
+  if (!/^[a-z][a-z0-9_]{0,47}_$/.test(prefix))
+    throw new MongoConfigurationError('Prefijo MongoDB inválido.');
+  return new Proxy(database, {
+    get(target, property) {
+      if (property === 'collection')
+        return (name: string, options?: Parameters<Db['collection']>[1]) =>
+          target.collection(`${prefix}${name}`, options);
+      const value = Reflect.get(target, property, target) as unknown;
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
 }
 
 type MongoGlobal = typeof globalThis & { __analizaMongoClientPromise?: Promise<MongoClient> };
@@ -64,7 +88,7 @@ export async function mongoDatabase(
 ): Promise<Db> {
   const config = mongoRuntimeConfig(environment);
   const client = await clientFor(config);
-  return client.db(config.database);
+  return scopedMongoDatabase(client.db(config.database), config.collectionPrefix);
 }
 
 /** Deployment commands close their pool explicitly; request handlers retain the pooled client. */

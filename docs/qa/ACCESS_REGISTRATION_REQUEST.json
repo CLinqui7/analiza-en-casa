@@ -1,0 +1,25 @@
+{
+  "source_requests": [
+    "haz un deploy con los cambios ... en vercel ... hazle un login y un registrio bien",
+    "crea una base de datos en mogno ... que funcnione bien",
+    "que cada uno tenga su esapcio",
+    "hazle un cuesitonario ... para rellenar la base de datos",
+    "Organización, personal y servicios",
+    "digale a su hermano q automatice las migraciones tambien",
+    "y que me pase las variables de entorno"
+  ],
+  "decisions": {
+    "deployment": "Vercel Preview, existing project; cloud infrastructure deferred",
+    "database": "MongoDB Atlas, new prefixed collections within the database authorized by the existing credential",
+    "tenancy": "One new organization per registration; server-scoped authorization",
+    "questionnaire": "Organization, staff directory and service catalog; no automatic staff login accounts",
+    "migration": "Versioned deployment-only MongoDB migrations before preview publication; PostgreSQL operator remains separate",
+    "secrets": "Private runtime and operator values; public templates contain no credentials"
+  },
+  "limitations": [
+    "No claim of new PostgreSQL registration/onboarding support or updated Docker exports",
+    "No integrated email verification or recovery provider",
+    "Historical video/clinical certifications retain their original statuses"
+  ],
+  "evidence": "docs/release/VERCEL_REGISTRATION_VERIFICATION.json"
+}

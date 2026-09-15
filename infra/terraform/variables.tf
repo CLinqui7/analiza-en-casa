@@ -185,12 +185,17 @@ variable "qa_password_secret_id" {
   default = "analiza-staging-qa-password"
 }
 variable "operator_secret_versions" {
-  type    = object({ user = string, password = string, qa = string })
+  type    = object({ user = string, password = string, qa = optional(string) })
   default = null
   validation {
-    condition     = var.operator_secret_versions == null || alltrue([for version in values(var.operator_secret_versions) : can(regex("^[1-9][0-9]*$", version))])
+    condition     = var.operator_secret_versions == null || alltrue([for version in values(var.operator_secret_versions) : can(regex("^[1-9][0-9]*$", version)) if version != null])
     error_message = "Pin actual numeric operator secret versions."
   }
+}
+variable "deploy_seed_job" {
+  type        = bool
+  default     = false
+  description = "Prepare the synthetic seed job only for an explicitly approved QA staging target. Never executes it."
 }
 variable "runtime_sql_role" {
   type    = string

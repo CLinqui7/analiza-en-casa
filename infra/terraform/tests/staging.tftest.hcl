@@ -21,6 +21,7 @@ run "connected_staging_plan" {
   variables {
     deploy_service           = true
     deploy_operator          = true
+    deploy_seed_job          = true
     create_state_bucket      = true
     create_private_bucket    = true
     create_secret_containers = true
@@ -50,6 +51,20 @@ run "reject_public_invoker" {
   command = plan
   variables { invokers = ["allUsers"] }
   expect_failures = [var.invokers]
+}
+run "corporate_schema_without_synthetic_seed" {
+  command = plan
+  variables {
+    deploy_operator              = true
+    database_name                = "corporate_qa"
+    operator_secret_versions     = { user = "1", password = "1" }
+    sql_instance_name            = "corporate-staging"
+    existing_sql_connection_name = "synthetic-project:us-central1:corporate-staging"
+  }
+  assert {
+    condition     = length(google_cloud_run_v2_job.database) == 1 && contains(keys(google_cloud_run_v2_job.database), "migrate") && !contains(local.operator_secret_ids, var.qa_password_secret_id)
+    error_message = "Corporate migration must not require a seed job or its synthetic credentials."
+  }
 }
 run "reject_production" {
   command = plan

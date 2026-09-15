@@ -87,6 +87,11 @@
     "security:scan": "node scripts/security-scan.mjs",
     "db:plan": "node scripts/deployment/db-command.mjs --dry-run",
     "db:migrate": "node scripts/deployment/db-command.mjs --migrate",
+    "db:plan:mongo": "node scripts/deployment/mongo-command.mjs --dry-run",
+    "db:migrate:mongo": "node scripts/deployment/mongo-command.mjs --migrate",
+    "deploy:preview": "node scripts/deployment/deploy-vercel-preview.mjs",
+    "test:registration:mongo": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-account-registration.ts",
+    "test:registration:browser": "playwright test -c apps/web/playwright.registration.config.ts",
     "db:seed:qa": "node scripts/deployment/db-command.mjs --seed-synthetic",
     "test:postgresql": "node scripts/deployment/verify-container.mjs",
     "repo:preflight": "node scripts/repository-preflight.mjs"

@@ -21,10 +21,12 @@ import { MongoGridFsPrivateStorage } from '../mongo-gridfs-storage';
 import { MongoOperationsRepository } from '../mongo-operations';
 import type { ServerActor } from '../validation/patients';
 import type { Persistence, WorkspaceResult } from './contracts';
+import { MongoWorkspaceSetupRepository } from '../mongo-workspace-setup';
 export async function mongoPersistence(): Promise<Persistence> {
   const database = await mongoDatabase();
   const operations = new MongoOperationsRepository(database);
   return {
+    onboarding: new MongoWorkspaceSetupRepository(database),
     auth: new MongoAuthService(mongoAuthStore(database)),
     patients: new MongoPatientRepository(database.collection('patients')),
     doctors: new MongoDoctorRepository(database.collection('doctors')),

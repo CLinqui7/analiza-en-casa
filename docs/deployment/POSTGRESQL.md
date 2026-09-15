@@ -23,36 +23,42 @@ No se agregaron endpoints DELETE.
 ## Tablas, campos y operaciones
 
 Todos los nombres pertenecen al esquema **propuesto `analiza`**, no a tablas
-corporativas supuestamente existentes. La migración ejecutable es
-`database/postgresql/migrations/001_core.sql`. Los campos completos de cada
+corporativas supuestamente existentes. Las migraciones ejecutables son
+`database/postgresql/migrations/001_core.sql` y `002_workspace_registration.sql`.
+Los campos completos de cada DTO Core
 `body` (tipos, obligatorios, opcionales y enumeraciones existentes) están en
 `database/postgresql/DTO_CONTRACT.json`, generado desde Zod mediante
 `npm exec -- tsx --tsconfig apps/web/tsconfig.json scripts/deployment/export-sql-contract.ts`.
 JSONB preserva los DTO de las páginas; identidades, relaciones, versiones e índices
 de concurrencia son columnas relacionales. JSONB nunca contiene bytes de adjuntos.
 
-| Tabla | Columnas | Operaciones del runtime |
-|---|---|---|
-| organizations | id, name | SELECT |
-| users | id, email_normalized, password_hash, display_name, disabled_at, created_at | SELECT, INSERT, UPDATE |
-| memberships | user_id, organization_id, role, active | SELECT, INSERT, UPDATE |
-| sessions | session_hash, csrf_hash, user_id, organization_id, expires_at, revoked_at | SELECT, INSERT, UPDATE |
-| auth_rate_limits | key, window_started_at, attempts | SELECT, INSERT, UPDATE |
-| patients | organization_id, id, document_key, body, version, created_at, updated_at | SELECT, INSERT, UPDATE |
-| doctors | organization_id, id, body, version, created_at, updated_at | SELECT, INSERT, UPDATE |
-| nursing_resources | organization_id, id, user_id, body | SELECT, INSERT, UPDATE |
-| hospitalizations | organization_id, id, patient_id, body, version, created_at, updated_at | SELECT, INSERT, UPDATE |
-| hospitalization_nurses | organization_id, hospitalization_id, resource_id, active | SELECT, INSERT, UPDATE |
-| shifts | organization_id, id, resource_id, patient_id, starts_at, ends_at, status, body | SELECT, INSERT |
-| commands | organization_id, idempotency_key, payload_hash, result, created_at | SELECT, INSERT |
-| configuration_entries | organization_id, id, body | SELECT, INSERT, UPDATE |
-| catalog_items | organization_id, id, body | SELECT |
-| file_metadata | organization_id, id, owner_type, owner_id, storage_key, name, mime_type, size, sha256, created_by, created_at | SELECT, INSERT |
-| audit_events | organization_id, id, actor_user_id, action, resource_type, resource_id, occurred_at | SELECT, INSERT |
-| schema_migrations | version, sha256, applied_at | SELECT; INSERT exclusivo del migrador |
+| Tabla                  | Columnas                                                                                                      | Operaciones del runtime               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| organizations          | id, name                                                                                                      | SELECT, INSERT                        |
+| workspace_profiles     | organization_id, profile, version, updated_at                                                                 | SELECT, INSERT, UPDATE                |
+| organization_staff     | organization_id, id UUID, body, created_at, updated_at                                                        | SELECT, INSERT, UPDATE                |
+| organization_services  | organization_id, id UUID, body, created_at, updated_at                                                        | SELECT, INSERT, UPDATE                |
+| users                  | id, email_normalized, password_hash, display_name, disabled_at, created_at                                    | SELECT, INSERT, UPDATE                |
+| memberships            | user_id, organization_id, role, active                                                                        | SELECT, INSERT, UPDATE                |
+| sessions               | session_hash, csrf_hash, user_id, organization_id, expires_at, revoked_at                                     | SELECT, INSERT, UPDATE                |
+| auth_rate_limits       | key, window_started_at, attempts                                                                              | SELECT, INSERT, UPDATE                |
+| patients               | organization_id, id, document_key, body, version, created_at, updated_at                                      | SELECT, INSERT, UPDATE                |
+| doctors                | organization_id, id, body, version, created_at, updated_at                                                    | SELECT, INSERT, UPDATE                |
+| nursing_resources      | organization_id, id, user_id, body                                                                            | SELECT, INSERT, UPDATE                |
+| hospitalizations       | organization_id, id, patient_id, body, version, created_at, updated_at                                        | SELECT, INSERT, UPDATE                |
+| hospitalization_nurses | organization_id, hospitalization_id, resource_id, active                                                      | SELECT, INSERT, UPDATE                |
+| shifts                 | organization_id, id, resource_id, patient_id, starts_at, ends_at, status, body                                | SELECT, INSERT                        |
+| commands               | organization_id, idempotency_key, payload_hash, result, created_at                                            | SELECT, INSERT                        |
+| configuration_entries  | organization_id, id, body                                                                                     | SELECT, INSERT, UPDATE                |
+| catalog_items          | organization_id, id, body                                                                                     | SELECT                                |
+| file_metadata          | organization_id, id, owner_type, owner_id, storage_key, name, mime_type, size, sha256, created_by, created_at | SELECT, INSERT                        |
+| audit_events           | organization_id, id, actor_user_id, action, resource_type, resource_id, occurred_at                           | SELECT, INSERT                        |
+| schema_migrations      | version, sha256, applied_at                                                                                   | SELECT; INSERT exclusivo del migrador |
 
-Organizaciones, catálogos de artículos y usuarios iniciales se provisionan por
-el operador autorizado; no se inventan precios, perfiles clínicos ni reglas.
+El registro crea usuario, organización, membresía ADMIN y sesión atómicamente.
+Una cuenta no puede elegir una organización ajena ni concederse otro rol.
+Los catálogos de artículos existentes se provisionan por el operador autorizado;
+no se inventan precios, perfiles clínicos ni reglas.
 `nurse.create` permite al rol autorizado crear usuario, membresía y recurso juntos.
 `configuration.save` conserva la autorización `catalogs:write` y valida referencias
 a artículos activos. La tabla de permisos existente sigue siendo la autoridad
@@ -69,7 +75,23 @@ compuestas constituyen otra barrera. La autenticación consulta sus tablas priva
 antes de conocer la organización; esas tablas no tienen la política RLS de dominio.
 El backend verifica usuario habilitado, membresía activa, sesión, CSRF y RBAC.
 No se expone SQL, credenciales, una clave de Service Account ni acceso directo a
-la base desde el navegador. No hay alta pública del administrador.
+la base desde el navegador. El registro aislado crea administradores únicamente
+en organizaciones nuevas; no administra organizaciones corporativas existentes.
+
+### Campos del cuestionario (migración 002)
+
+El contrato validado es `apps/web/src/lib/workspace-setup.ts` (Zod estricto).
+`profile` contiene `name` (obligatorio), `contactName`, `email`, `phone`, `address`,
+`city`, `country`, `coverage`. Los textos opcionales se representan con cadena
+vacía. Personal: `id` UUID, `name`, `position` obligatorios; `specialty`,
+`registrationNumber`, `email`, `phone`, `active`. Servicios: `id` UUID, `name`,
+`description`, `modality` (HOME/ONSITE/REMOTE/OTHER), `durationMinutes` opcional,
+`price` opcional, `currency` (tres letras si hay precio), `active`.
+Máximo 50 fichas de personal y 50 servicios por cuestionario; no hay precios por
+defecto. `expectedVersion` controla ediciones concurrentes. Las filas guardadas
+se conservan y pueden desactivarse, sin DELETE. Perfil, directorios y auditoría
+se guardan en una sola transacción y están sujetos a RLS por organización.
+Las fichas de personal son un directorio; no crean usuarios de acceso ni roles.
 
 El pool limita espera de conexión a 2 s y consultas SQL a 5 s en servidor / 6 s
 en cliente. El apagado impide abrir nuevos pools y termina los existentes.

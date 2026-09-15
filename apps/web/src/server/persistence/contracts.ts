@@ -10,6 +10,7 @@ import type { AuthService } from '../auth-service';
 import type { ServerActor } from '../validation/patients';
 import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validation/files';
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
+import type { WorkspaceSetup } from '@/lib/workspace-setup';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -26,7 +27,14 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
-  auth: Pick<AuthService, 'login' | 'requireSession' | 'requireCsrf' | 'rotateCsrf' | 'logout'>;
+  onboarding?: {
+    get(actor: ServerActor): Promise<WorkspaceSetup>;
+    save(actor: ServerActor, input: unknown): Promise<WorkspaceSetup>;
+  };
+  auth: Pick<
+    AuthService,
+    'login' | 'register' | 'requireSession' | 'requireCsrf' | 'rotateCsrf' | 'logout'
+  >;
   patients: EntityRepository<Patient, 'patient'>;
   doctors: EntityRepository<Doctor, 'doctor'>;
   hospitalizations: EntityRepository<Hospitalization, 'hospitalization'>;

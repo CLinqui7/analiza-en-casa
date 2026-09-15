@@ -1,0 +1,13 @@
+# Copy to an ignored private .env file. Configure the same application values on Vercel Preview.
+ANALIZA_DATA_MODE=mongodb
+NEXT_PUBLIC_DATA_MODE=mongodb
+NEXT_PUBLIC_RELEASE_PROFILE=core
+ANALIZA_REGISTRATION_MODE=isolated
+NEXT_PUBLIC_REGISTRATION_MODE=isolated
+# Secret: obtain through a private channel; never NEXT_PUBLIC_*.
+MONGODB_URI=
+MONGODB_DB=
+# Optional isolation inside one database; retain the same prefix across releases.
+MONGODB_COLLECTION_PREFIX=
+# CLI only, not a secret. Use your actual team/account scope.
+VERCEL_SCOPE=

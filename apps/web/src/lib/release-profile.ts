@@ -9,6 +9,7 @@ export const corePages = [
   '/doctors',
   '/nursing-team',
   '/catalogs/operational',
+  '/onboarding',
 ] as const;
 const coreApi = [
   '/api/auth',
@@ -20,13 +21,14 @@ const coreApi = [
   '/api/files',
   '/api/operations',
   '/api/health',
+  '/api/onboarding',
 ];
 const within = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 
 export function isReleasedPath(path: string, core = isCoreRelease): boolean {
   if (!core) return true;
   const pathname = path.split(/[?#]/, 1)[0];
-  if (pathname === '/' || pathname === '/login') return true;
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') return true;
   return [...corePages, ...coreApi].some((base) => within(pathname, base));
 }
 

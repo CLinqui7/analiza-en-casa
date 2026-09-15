@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-09-15T04:57:46.121Z",
+  "source_sha": "a05a0baa20910bce53a4f1242bfc8858ae837cb5",
+  "branch": "codex/cloud-run-cloud-sql",
+  "prepared": true,
+  "built": true,
+  "tested": true,
+  "published": true,
+  "gcp_deployed": false,
+  "images": [
+    {
+      "tag": "analiza-web:mongodb-preview",
+      "id": "sha256:4751977d9eb56f34206ab9e8d5dfefdf308b43b2e5369fcd005ecbedc821e24c",
+      "sourceSha": "a05a0baa20910bce53a4f1242bfc8858ae837cb5",
+      "bytes": 103969491,
+      "scan": {
+        "status": "PASS",
+        "files": 2664,
+        "uid": 1000,
+        "port": "8080",
+        "standalone": true
+      },
+      "registryTag": "desarrollotuvet/analiza-en-casa:mongodb-a05a0baa2091",
+      "registryDigest": "sha256:4751977d9eb56f34206ab9e8d5dfefdf308b43b2e5369fcd005ecbedc821e24c",
+      "reference": "desarrollotuvet/analiza-en-casa@sha256:4751977d9eb56f34206ab9e8d5dfefdf308b43b2e5369fcd005ecbedc821e24c"
+    },
+    {
+      "tag": "analiza-operator:mongodb-preview",
+      "id": "sha256:343874074b6e9b8ffdc167e87acd5981495d3787b176f50412713cd8dcfe7a04",
+      "sourceSha": "a05a0baa20910bce53a4f1242bfc8858ae837cb5",
+      "bytes": 101432025,
+      "scan": {
+        "status": "PASS",
+        "files": 1398,
+        "uid": 1000,
+        "standalone": false
+      },
+      "registryTag": "desarrollotuvet/analiza-en-casa:mongodb-operator-a05a0baa2091",
+      "registryDigest": "sha256:343874074b6e9b8ffdc167e87acd5981495d3787b176f50412713cd8dcfe7a04",
+      "reference": "desarrollotuvet/analiza-en-casa@sha256:343874074b6e9b8ffdc167e87acd5981495d3787b176f50412713cd8dcfe7a04"
+    }
+  ],
+  "platform": "linux/amd64",
+  "anonymous_registry_pull": "PASS HTTP 200",
+  "checks": {
+    "docker_build": "PASS",
+    "docker_run": "PASS",
+    "compose_migration_before_web": "PASS, operator exit 0 required before web start",
+    "migration_repeat": "PASS: applied version skipped after checksum verification, no demo seed",
+    "registration_browser": "4/4 PASS",
+    "core": [
+      "Atlas readiness, anonymous API rejection and hidden endpoint gates",
+      "Create a real nurse account through authenticated API",
+      "Nurse creates patient in React; rejected save stays open without localStorage; successful save is in Atlas and another browser session reads it",
+      "Patient edit, cross-organization exclusion and CSRF enforcement",
+      "Hospitalization create/edit persists and resolves assigned nurse user; unauthorized roles and foreign organizations rejected",
+      "Doctor created in React from the Mongo specialty selector; API edit and foreign-organization denial",
+      "Patient, hospitalization and doctor private PNG uploads persist; second session recovers exact bytes, foreign organization denied",
+      "Catalog options persist; scheduling is idempotent and rejects collisions; hidden commands rejected",
+      "Core pages render, hidden routes redirect, mobile patient dialog has no viewport overflow"
+    ],
+    "restart": [
+      "container restart",
+      "session survives via external MongoDB",
+      "questionnaire persisted byte-for-byte"
+    ],
+    "outage": [
+      "real database connection refused",
+      "register returns 503",
+      "no success or session",
+      "no localStorage fallback",
+      "readiness fails while liveness stays up"
+    ],
+    "root_tests": "108/108 PASS",
+    "security_scan": "PASS"
+  },
+  "evidence_scope": "New MongoDB image with real Atlas synthetic QA. Previous PostgreSQL images unchanged. No new PostgreSQL registration/onboarding or GCP deployment is claimed."
+}

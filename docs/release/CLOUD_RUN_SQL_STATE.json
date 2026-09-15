@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "date": "2026-09-14",
   "branch": "codex/cloud-run-cloud-sql",
   "scope": "DOCKER_AND_MIGRATION_PREPARATION_ONLY",
@@ -10,16 +10,18 @@
     "prepared": true,
     "built": true,
     "tested_local": true,
+    "published_dockerhub": true,
     "cloud_published": false,
     "deployed": false,
     "staging_verified": false
   },
   "final_evidence": {
-    "repository": "https://github.com/CLinqui7/analiza-docker",
-    "manifest": "https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json",
-    "release": "https://github.com/CLinqui7/analiza-docker/releases",
-    "provenance": "The published Docker artifacts are pinned to source commit 6fae1890af99a7913092aea248cb120bd595e335. Later repository documentation/tooling changes do not replace or re-certify these images. Earlier image IDs below are historical.",
-    "source_sha": "6fae1890af99a7913092aea248cb120bd595e335"
+    "source_sha": "64e47f345b169780c1497a6999aa1b4bb819b729",
+    "manifest": "docs/release/POSTGRESQL_DOCKER_VERIFICATION.json",
+    "web": "desarrollotuvet/analiza-en-casa@sha256:d220a50a4ee0c6b35cfdc4b4b91095d3f119cf9d80fa408f73b58b02481b53db",
+    "operator": "desarrollotuvet/analiza-en-casa@sha256:0e250cbfee495a2f0a523bec605d6d7c5fbd921edda0526ae866f7013dfa7c76",
+    "guide": "docs/deployment/CLOUD_SQL_HANDOFF.md",
+    "provenance": "Code and Docker images pinned to this source SHA; subsequent handoff documentation does not alter application artifacts."
   },
   "architecture": {
     "application": "Next.js 16 full-stack, React 19, TypeScript, Zod",
@@ -38,11 +40,10 @@
   ],
   "external_security_check": {
     "provider": "GitGuardian",
-    "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
-    "incident": "37265105",
-    "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
-    "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
-    "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
+    "status": "PASS",
+    "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/8",
+    "verified_commit": "4e3be60abd32bf9cb5b578b637e406ecfd6001bf",
+    "completed_at": "2026-09-15T05:32:33Z"
   },
   "previous_verified_delivery": {
     "schema_version": 1,
@@ -281,9 +282,9 @@
     }
   },
   "repository_maintenance": {
-    "scope": "Documentation, repository presentation and maintenance tooling",
-    "application_behavior_changed": false,
-    "published_docker_artifacts_changed": false,
+    "scope": "PostgreSQL registration/onboarding, safe migration jobs and engineer handoff",
+    "application_behavior_changed": true,
+    "published_docker_artifacts_changed": true,
     "source_evidence_modified": false
   },
   "integration": {
@@ -299,5 +300,41 @@
     "vercel_automatic_deployments": false,
     "cloud_deployment": "DEFERRED",
     "published_docker_source_unchanged": "6fae1890af99a7913092aea248cb120bd595e335"
+  },
+  "updated_at": "2026-09-15T05:29:39.543Z",
+  "historical_exported_delivery": {
+    "repository": "https://github.com/CLinqui7/analiza-docker",
+    "manifest": "https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json",
+    "release": "https://github.com/CLinqui7/analiza-docker/releases",
+    "provenance": "The published Docker artifacts are pinned to source commit 6fae1890af99a7913092aea248cb120bd595e335. Later repository documentation/tooling changes do not replace or re-certify these images. Earlier image IDs below are historical.",
+    "source_sha": "6fae1890af99a7913092aea248cb120bd595e335"
+  },
+  "current_registration": {
+    "postgresql": "VERIFIED: isolated accounts + questionnaire + tenant RLS",
+    "mongodb_preview": "Preserved independent preview; not the Cloud SQL image"
+  },
+  "current_handoff": {
+    "manifest": "docs/release/POSTGRESQL_DOCKER_VERIFICATION.json",
+    "terraform": {
+      "status": "PASS",
+      "add": 22,
+      "change": 0,
+      "destroy": 0,
+      "applied": false,
+      "refresh": false,
+      "project": "probable-sprite-508007-q2",
+      "scope": "Preparation plan using previously proposed local resource names; not confirmation that resources exist or that this is the engineer destination"
+    },
+    "registration_browser": "4/4 PASS",
+    "cloudDeployment": "DEFERRED",
+    "billing": "NOT REQUIRED FOR THIS HANDOFF"
+  },
+  "historical_external_security_check": {
+    "provider": "GitGuardian",
+    "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
+    "incident": "37265105",
+    "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
+    "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+    "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
   }
 }

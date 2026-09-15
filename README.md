@@ -2,10 +2,36 @@
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
-PostgreSQL 18.
+PostgreSQL 18, incluido registro individual y cuestionario. El preview independiente
+en Vercel utiliza MongoDB.
+
+**Para desplegar en Cloud Run / Cloud SQL:**
+[guía del ingeniero, imágenes y variables](docs/deployment/CLOUD_SQL_HANDOFF.md).
 
 **Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
-diferido. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
+diferido. El preview Vercel se publica mediante un flujo independiente con
+migraciones previas. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
+
+## Registro, cuestionario y migraciones
+
+La aplicación permite crear una cuenta y completar organización, personal y servicios
+en un espacio separado por usuario. El login no incluye credenciales demo precargadas.
+El backend conserva sesiones privadas, RBAC, aislamiento por organización y CSRF.
+
+El preview Vercel ya pasó las pruebas conectadas de registro, login y cuestionario.
+La distribución Docker equivalente y su arranque con migraciones automáticas se
+describen en [Docker MongoDB](docs/deployment/DOCKER_MONGODB.md).
+
+Las [variables y comandos para el ingeniero](docs/deployment/MIGRATIONS_AND_ENV.md)
+incluyen las plantillas MongoDB, PostgreSQL y operator. Para publicar el preview:
+
+```sh
+npm run deploy:preview -- .local/preview.env
+```
+
+El comando aplica migraciones versionadas de MongoDB y detiene la publicación si
+fallan. PostgreSQL conserva el operator separado y dispone de una secuencia
+preparada de migración antes de actualizar staging. No ejecuta seeds automáticamente.
 
 ## Alcance
 
@@ -45,8 +71,11 @@ Seguir su README para descargar y cargar los archivos, preparar QA y ejecutar
 `docker run`. La web escucha en `8080` como usuario no-root. El operator de
 migraciones se distribuye como imagen separada.
 
-Fuente de las imágenes publicadas: `6fae1890af99a7913092aea248cb120bd595e335`.
-Los cambios posteriores de documentación no sustituyen esos artefactos.
+Ese paquete exportado es la entrega histórica con fuente
+`6fae1890af99a7913092aea248cb120bd595e335`, anterior al registro individual.
+La entrega PostgreSQL actual está en Docker Hub, con fuente, etiquetas y digests en
+[la evidencia actual](docs/release/POSTGRESQL_DOCKER_VERIFICATION.json) y comandos en
+[CLOUD_SQL_HANDOFF](docs/deployment/CLOUD_SQL_HANDOFF.md).
 Consultar [la evidencia de entrega](https://github.com/CLinqui7/analiza-docker/blob/main/evidence/final-manifest.json)
 y [las instrucciones Docker](docs/deployment/DOCKER_HANDOFF.md).
 

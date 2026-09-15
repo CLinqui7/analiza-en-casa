@@ -1,0 +1,23 @@
+.auth-fields {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.auth-fields label {
+  display: grid;
+  gap: 7px;
+}
+.login-registration-link {
+  text-align: center;
+  line-height: 1.6;
+  margin-top: 20px;
+}
+.login-registration-link a {
+  color: #076d79;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

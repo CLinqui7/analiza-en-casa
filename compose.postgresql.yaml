@@ -1,0 +1,30 @@
+# Local QA only, layered over compose.yaml. Use an existing isolated PostgreSQL 18 QA network.
+# docker compose --env-file .local/postgresql-compose.env -f compose.yaml -f compose.postgresql.yaml up -d
+services:
+  migrate:
+    image: ${ANALIZA_OPERATOR_IMAGE:-analiza-operator:postgresql}
+    platform: linux/amd64
+    command: ['--migrate']
+    environment:
+      PGHOST: ${PGHOST:?Set the existing PostgreSQL QA container hostname}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${PGDATABASE:?Set the QA database}
+      PGUSER: ${PG_MIGRATION_USER:?Set the separate migration user}
+      PGPASSWORD: ${PG_MIGRATION_PASSWORD:?Load the migration secret privately}
+      ANALIZA_PG_RUNTIME_ROLE: ${PGUSER:?Set the existing restricted web role}
+      ANALIZA_MIGRATION_APPROVED: ${ANALIZA_MIGRATION_APPROVED:?Approve this QA target}
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: 'no'
+  web:
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      ANALIZA_QA_MODE: '1'
+      ANALIZA_QA_STORAGE_EMULATOR: ${ANALIZA_QA_STORAGE_EMULATOR:?Set the local GCS emulator URL}
+networks:
+  default:
+    external: true
+    name: ${ANALIZA_QA_NETWORK:?Set the isolated existing Docker QA network}

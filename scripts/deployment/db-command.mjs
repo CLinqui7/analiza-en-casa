@@ -139,7 +139,10 @@ try {
     );
     await client.query(`GRANT USAGE ON SCHEMA analiza TO ${role}`);
     await client.query(`GRANT SELECT ON analiza.schema_migrations TO ${role}`);
-    await client.query(`GRANT SELECT ON analiza.organizations TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.organizations TO ${role}`);
+    await client.query(
+      `GRANT SELECT,INSERT,UPDATE ON analiza.workspace_profiles,analiza.organization_staff,analiza.organization_services TO ${role}`,
+    );
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries TO ${role}`,
     );

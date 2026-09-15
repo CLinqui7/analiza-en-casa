@@ -4,6 +4,7 @@ import { isServerDataMode, configuredServerDataMode } from '@/lib/data-mode';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { isRole, type Role } from '@/lib/permissions';
 import { isCoreRelease } from '@/lib/release-profile';
+import type { RegistrationInput } from '@/lib/registration';
 
 const mockSessionKey = 'analiza.en.casa.mock-session.v1';
 let mongoCsrfToken: string | null = null;
@@ -96,34 +97,53 @@ export async function loadSession(): Promise<AuthSession | null> {
   return { userId: data.session.user.id, role, mode: 'supabase' };
 }
 
-export async function login(email: string, password: string): Promise<AuthSession> {
-  if (isMongoMode()) {
-    const csrfResponse = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
-    if (!csrfResponse.ok) throw new Error('No fue posible preparar el acceso seguro.');
-    const csrfPayload: unknown = await csrfResponse.json();
-    const csrfToken =
-      csrfPayload &&
-      typeof csrfPayload === 'object' &&
-      typeof (csrfPayload as Record<string, unknown>).csrfToken === 'string'
-        ? (csrfPayload as Record<string, string>).csrfToken
-        : null;
-    if (!csrfToken) throw new Error('No fue posible preparar el acceso seguro.');
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'X-Analiza-Csrf': csrfToken },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!response.ok) throw new Error('No fue posible iniciar sesión.');
-    const payload: unknown = await response.json();
-    if (!payload || typeof payload !== 'object') throw new Error('No fue posible iniciar sesión.');
-    const { userId, role, csrfToken: returnedCsrf } = payload as Record<string, unknown>;
-    if (typeof userId !== 'string' || !isRole(role) || typeof returnedCsrf !== 'string') {
-      throw new Error('No fue posible iniciar sesión.');
-    }
-    mongoCsrfToken = returnedCsrf;
-    return { userId, role, mode: configuredServerDataMode() };
+async function serverAuthenticate(
+  path: string,
+  input: { email: string; password: string } | RegistrationInput,
+): Promise<AuthSession> {
+  const csrfResponse = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
+  if (!csrfResponse.ok) throw new Error('No fue posible preparar el acceso seguro.');
+  const csrfPayload: unknown = await csrfResponse.json();
+  const csrfToken =
+    csrfPayload &&
+    typeof csrfPayload === 'object' &&
+    typeof (csrfPayload as Record<string, unknown>).csrfToken === 'string'
+      ? (csrfPayload as Record<string, string>).csrfToken
+      : null;
+  if (!csrfToken) throw new Error('No fue posible preparar el acceso seguro.');
+  const response = await fetch(path, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', 'X-Analiza-Csrf': csrfToken },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    if (response.status >= 500)
+      throw new Error(
+        'El servicio de acceso no está disponible. Intenta nuevamente en unos minutos.',
+      );
+    throw new Error(
+      path.endsWith('/register')
+        ? 'No fue posible crear la cuenta con esos datos. Revísalos o intenta iniciar sesión.'
+        : 'No fue posible iniciar sesión. Revisa tu correo y contraseña.',
+    );
   }
+  const payload: unknown = await response.json();
+  if (!payload || typeof payload !== 'object') throw new Error('No fue posible iniciar sesión.');
+  const { userId, role, csrfToken: returnedCsrf } = payload as Record<string, unknown>;
+  if (typeof userId !== 'string' || !isRole(role) || typeof returnedCsrf !== 'string') {
+    throw new Error('No fue posible iniciar sesión.');
+  }
+  mongoCsrfToken = returnedCsrf;
+  return { userId, role, mode: configuredServerDataMode() };
+}
+
+export async function register(input: RegistrationInput): Promise<AuthSession> {
+  return serverAuthenticate('/api/auth/register', input);
+}
+
+export async function login(email: string, password: string): Promise<AuthSession> {
+  if (isMongoMode()) return serverAuthenticate('/api/auth/login', { email, password });
   const client = getSupabaseBrowserClient();
   if (client) {
     const { data, error } = await client.auth.signInWithPassword({ email, password });
@@ -172,5 +192,7 @@ export async function logout(session: AuthSession | null): Promise<void> {
 export const mockCredentialHint = 'admin@demo.local / demo-admin';
 
 export function safeNextPath(next: string | null, fallback = '/dashboard') {
-  return next && next.startsWith('/') && !next.startsWith('//') ? next : fallback;
+  return next && next.startsWith('/') && !next.startsWith('//') && !/[\\\u0000-\u001f]/.test(next)
+    ? next
+    : fallback;
 }

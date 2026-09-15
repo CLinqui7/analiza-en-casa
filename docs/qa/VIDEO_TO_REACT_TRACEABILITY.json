@@ -1,4 +1,5 @@
 {
+  "registration_regression": {"verification_sha":"098621753f2b79e416921d89abfcd83900425056","evidence":"docs/release/VERCEL_REGISTRATION_VERIFICATION.json","scope":"178/178 full mock production-server browser regression and 142 server/component tests passed. Existing individual historical statuses and evidence are preserved; no new video, clinical or Supabase certification."},
   "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
   "schema_version": 2,
   "studio_verification": {
@@ -11,12 +12,12 @@
   "generated_at": "2026-09-03T05:56:26-06:00",
   "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+  "implementation_sha": "098621753f2b79e416921d89abfcd83900425056",
   "core_release_regression": {
     "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
     "scope": "Full mock edition regression only. Individual historical statuses and source evidence retained. Core visibility exclusions are authorized by the client; not full video parity or cloud certification."
   },
-  "functional_fingerprint": "6f1fecc44db94405aa96c6c76ef155c87ae27295d91fdd515f8c15bc54310f22",
+  "functional_fingerprint": "357f26823dc8954a90ec8feb2ea74d0fd656592f827581c13dc704a417551916",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
