@@ -7,6 +7,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Client } from 'pg';
 import { chromium, request } from '@playwright/test';
+import { verifyPostgresRegistration } from './verify-postgres-registration.mjs';
 
 const image = process.env.ANALIZA_VERIFY_IMAGE || 'analiza-web:cloudrun';
 const operatorImage = process.env.ANALIZA_VERIFY_OPERATOR_IMAGE;
@@ -344,6 +345,10 @@ try {
   assert.equal((await fetch(base + '/api/patients')).status, 401);
   assert.equal((await a.context.post('/api/patients', { data: {} })).status(), 403);
   passed.push('PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF');
+  const registration = await verifyPostgresRegistration({ base, admin, limited, clients, finance });
+  passed.push(
+    'PostgreSQL registration and onboarding: atomic rollback, concurrent versions, tenant RLS, CSRF, permissions and no DELETE',
+  );
   const pageContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } }),
     page = await pageContext.newPage();
   const errors = [];
@@ -597,6 +602,7 @@ try {
     .fill('Dirección ficticia QA');
   await failDialog.getByLabel('Comentarios relevantes de la dirección').fill('Sin datos reales');
   docker(['stop', '--time', '10', names.db]);
+  await registration.outage();
   await failDialog.locator('[data-action-id="PATIENT-SAVE"]').click();
   await failDialog
     .getByText('El acceso seguro no está disponible.', { exact: false })
@@ -649,6 +655,7 @@ try {
   );
   docker(['start', names.web]);
   await ready();
+  await registration.persistent();
   assert.equal(
     (await (await b.context.get('/api/patients/' + patient.id)).json()).fullName,
     'Paciente SQL editado',

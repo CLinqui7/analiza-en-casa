@@ -39,6 +39,7 @@ import type { EntityRepository, Persistence } from './contracts';
 import { postgresPool, transaction } from './postgres-pool';
 import { postgresAuthStore } from './postgres-auth';
 import { postgresFiles } from './postgres-files';
+import { PostgresWorkspaceSetupRepository } from './postgres-workspace-setup';
 
 export function authorize(actor: ServerActor, permission: Permission) {
   if (!can(actor.role, permission)) throw new MongoAccessError();
@@ -436,6 +437,7 @@ export function postgresPersistence(): Persistence {
   };
   return {
     auth: new AuthService(postgresAuthStore(pool)),
+    onboarding: new PostgresWorkspaceSetupRepository(pool),
     patients,
     doctors,
     hospitalizations,
@@ -444,14 +446,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version='001_core.sql')::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 180000 ||
         row.version >= 190000 ||
-        row.migrations !== 1 ||
+        row.migrations !== 2 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');

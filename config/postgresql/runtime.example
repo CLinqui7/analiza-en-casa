@@ -3,6 +3,8 @@ PORT=8080
 ANALIZA_DATA_MODE=postgresql
 NEXT_PUBLIC_DATA_MODE=postgresql
 NEXT_PUBLIC_RELEASE_PROFILE=core
+ANALIZA_REGISTRATION_MODE=isolated
+NEXT_PUBLIC_REGISTRATION_MODE=isolated
 PGHOST=
 PGPORT=5432
 PGDATABASE=
@@ -11,4 +13,4 @@ PGPASSWORD=
 GCS_PRIVATE_BUCKET=
 # Cloud Run uses its Service Account and /cloudsql/PROJECT:REGION:INSTANCE socket.
 # Never bake a JSON service-account key into the image.
-# Registration/onboarding in the new Vercel trial currently require MongoDB.
+# Registration, login and onboarding persist in PostgreSQL with this image.

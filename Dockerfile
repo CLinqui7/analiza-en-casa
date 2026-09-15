@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ARG DATA_MODE=postgresql
-ARG REGISTRATION_MODE=disabled
+ARG REGISTRATION_MODE=isolated
 FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS build
 ARG DATA_MODE
 ARG REGISTRATION_MODE
@@ -25,7 +25,7 @@ ENV ANALIZA_CONTAINER_BUILD=1 \
     ANALIZA_DATA_MODE=$DATA_MODE \
     NEXT_PUBLIC_REGISTRATION_MODE=$REGISTRATION_MODE \
     ANALIZA_REGISTRATION_MODE=$REGISTRATION_MODE
-RUN case "$DATA_MODE:$REGISTRATION_MODE" in postgresql:disabled|mongodb:disabled|mongodb:isolated) ;; *) exit 1 ;; esac
+RUN case "$DATA_MODE:$REGISTRATION_MODE" in postgresql:disabled|postgresql:isolated|mongodb:disabled|mongodb:isolated) ;; *) exit 1 ;; esac
 # The build needs no database credentials. Secrets enter at runtime only.
 RUN npm run build
 RUN test -f apps/web/.next/standalone/apps/web/server.js \

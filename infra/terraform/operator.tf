@@ -7,7 +7,7 @@ resource "google_secret_manager_secret_iam_member" "operator" {
   depends_on = [google_secret_manager_secret.db]
 }
 resource "google_cloud_run_v2_job" "database" {
-  for_each            = var.deploy_operator ? { migrate = "--migrate", seed = "--seed-synthetic" } : {}
+  for_each            = var.deploy_operator ? merge({ migrate = "--migrate" }, var.deploy_seed_job ? { seed = "--seed-synthetic" } : {}) : {}
   name                = "analiza-staging-${each.key}"
   location            = var.region
   deletion_protection = true
@@ -87,7 +87,11 @@ resource "google_cloud_run_v2_job" "database" {
       error_message = "The operator needs its published digest, real secret versions and SQL connection."
     }
     precondition {
-      condition     = var.database_name == "analiza_en_casa" && var.sql_instance_name == "analiza-sql-staging" && var.region == "us-central1"
+      condition     = each.key != "seed" || try(var.operator_secret_versions.qa != null, false)
+      error_message = "The optional synthetic seed needs its separate approved QA secret version."
+    }
+    precondition {
+      condition     = each.key != "seed" && !var.provision_runtime_role || (var.database_name == "analiza_en_casa" && var.sql_instance_name == "analiza-sql-staging" && var.region == "us-central1")
       error_message = "The synthetic seed job is restricted to the explicitly selected staging database."
     }
   }

@@ -1,7 +1,7 @@
 locals {
   connection_name     = var.create_sql_instance ? google_sql_database_instance.staging[0].connection_name : var.existing_sql_connection_name
   secret_ids          = toset([var.db_user_secret_id, var.db_password_secret_id])
-  operator_secret_ids = var.prepare_operator || var.deploy_operator ? setunion(toset([var.migration_user_secret_id, var.migration_password_secret_id, var.qa_password_secret_id]), var.provision_runtime_role ? toset([var.db_password_secret_id]) : toset([])) : toset([])
+  operator_secret_ids = var.prepare_operator || var.deploy_operator ? setunion(toset([var.migration_user_secret_id, var.migration_password_secret_id]), var.deploy_seed_job ? toset([var.qa_password_secret_id]) : toset([]), var.provision_runtime_role ? toset([var.db_password_secret_id]) : toset([])) : toset([])
   all_secret_ids      = setunion(local.secret_ids, local.operator_secret_ids)
 }
 resource "google_artifact_registry_repository" "images" {

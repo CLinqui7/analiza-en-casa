@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   if (
     process.env.ANALIZA_REGISTRATION_MODE !== 'isolated' ||
-    process.env.ANALIZA_DATA_MODE !== 'mongodb'
+    !['mongodb', 'postgresql'].includes(process.env.ANALIZA_DATA_MODE ?? '')
   ) {
     return NextResponse.json(
       { error: 'El registro no está habilitado.' },
