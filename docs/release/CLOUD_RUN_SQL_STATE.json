@@ -40,11 +40,10 @@
   ],
   "external_security_check": {
     "provider": "GitGuardian",
-    "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
-    "incident": "37265105",
-    "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
-    "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
-    "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
+    "status": "PASS",
+    "pull_request": "https://github.com/CLinqui7/analiza-en-casa/pull/8",
+    "verified_commit": "4e3be60abd32bf9cb5b578b637e406ecfd6001bf",
+    "completed_at": "2026-09-15T05:32:33Z"
   },
   "previous_verified_delivery": {
     "schema_version": 1,
@@ -329,5 +328,13 @@
     "registration_browser": "4/4 PASS",
     "cloudDeployment": "DEFERRED",
     "billing": "NOT REQUIRED FOR THIS HANDOFF"
+  },
+  "historical_external_security_check": {
+    "provider": "GitGuardian",
+    "status": "FALSE_POSITIVE_REVIEWED; external check remains unresolved",
+    "incident": "37265105",
+    "file": "apps/web/src/server/persistence/postgres-pool.test.ts",
+    "introducedIn": "5b92c7f4294442ae07c6ef4dc65e3418cd260d3a",
+    "reason": "Literal synthetic-unit-test-only is a unit-test fixture with nonexistent socket project and no database connection. Not a real credential. No secret check disabled; no history rewritten."
   }
 }
