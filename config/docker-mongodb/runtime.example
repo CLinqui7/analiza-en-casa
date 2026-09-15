@@ -1,0 +1,10 @@
+# Copy to .local/docker-mongodb.env and fill privately. Never commit actual credentials.
+MONGODB_URI=
+MONGODB_MIGRATION_URI=
+MONGODB_DB=
+MONGODB_COLLECTION_PREFIX=
+ANALIZA_HOST_PORT=8080
+# Optional: set registry references to use published images with --no-build.
+# ANALIZA_MONGO_IMAGE=
+# ANALIZA_MONGO_OPERATOR_IMAGE=
+# SOURCE_SHA=

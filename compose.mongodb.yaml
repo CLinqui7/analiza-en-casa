@@ -1,0 +1,47 @@
+# Full-stack registration preview. MongoDB stays external; migrations finish before web starts.
+services:
+  migrate:
+    image: ${ANALIZA_MONGO_OPERATOR_IMAGE:-analiza-operator:mongodb-preview}
+    platform: linux/amd64
+    build:
+      context: .
+      target: mongo-operator
+      args:
+        SOURCE_SHA: ${SOURCE_SHA:-local-unversioned}
+        DATA_MODE: mongodb
+        REGISTRATION_MODE: isolated
+    environment:
+      MONGODB_URI: ${MONGODB_MIGRATION_URI:?Set the private migration connection URI}
+      MONGODB_DB: ${MONGODB_DB:?Set the database name}
+      MONGODB_COLLECTION_PREFIX: ${MONGODB_COLLECTION_PREFIX:-}
+    command: ['--migrate']
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: 'no'
+  web:
+    image: ${ANALIZA_MONGO_IMAGE:-analiza-web:mongodb-preview}
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        SOURCE_SHA: ${SOURCE_SHA:-local-unversioned}
+        DATA_MODE: mongodb
+        REGISTRATION_MODE: isolated
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - '127.0.0.1:${ANALIZA_HOST_PORT:-8080}:8080'
+    environment:
+      MONGODB_URI: ${MONGODB_URI:?Set the private runtime connection URI}
+      MONGODB_DB: ${MONGODB_DB:?Set the database name}
+      MONGODB_COLLECTION_PREFIX: ${MONGODB_COLLECTION_PREFIX:-}
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/apps/web/.next/cache:uid=1000,gid=1000
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 10s
