@@ -4,9 +4,11 @@ import { isServerDataMode, configuredServerDataMode } from '@/lib/data-mode';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { isRole, type Role } from '@/lib/permissions';
 import { isCoreRelease } from '@/lib/release-profile';
-import type { RegistrationInput } from '@/lib/registration';
+import { registrationSchema, type RegistrationInput } from '@/lib/registration';
 
 const mockSessionKey = 'analiza.en.casa.mock-session.v1';
+const mockAccountsKey = 'analiza.en.casa.mock-accounts.v1';
+const mockPasswordIterations = 120_000;
 let mongoCsrfToken: string | null = null;
 export type AuthSession = {
   userId: string;
@@ -22,6 +24,74 @@ const mockUsers = [
   ['finance@demo.local', 'demo-finance', 'FINANCE'],
   ['auditor@demo.local', 'demo-auditor', 'AUDITOR'],
 ] as const satisfies ReadonlyArray<readonly [string, string, Role]>;
+
+type MockAccount = {
+  userId: string;
+  displayName: string;
+  email: string;
+  passwordSalt: string;
+  passwordHash: string;
+  role: Role;
+};
+
+function readMockAccounts(): MockAccount[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const candidate: unknown = JSON.parse(window.localStorage.getItem(mockAccountsKey) ?? '[]');
+    if (!Array.isArray(candidate)) return [];
+    return candidate.filter(
+      (account): account is MockAccount =>
+        account !== null &&
+        typeof account === 'object' &&
+        'userId' in account &&
+        typeof account.userId === 'string' &&
+        'displayName' in account &&
+        typeof account.displayName === 'string' &&
+        'email' in account &&
+        typeof account.email === 'string' &&
+        'passwordSalt' in account &&
+        typeof account.passwordSalt === 'string' &&
+        'passwordHash' in account &&
+        typeof account.passwordHash === 'string' &&
+        'role' in account &&
+        isRole(account.role),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function bytesToHex(bytes: ArrayBuffer) {
+  return Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashMockPassword(password: string, salt: string) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits'],
+  );
+  const digest = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      hash: 'SHA-256',
+      iterations: mockPasswordIterations,
+      salt: encoder.encode(salt),
+    },
+    key,
+    256,
+  );
+  return bytesToHex(digest);
+}
+
+function saveMockSession(userId: string, role: Role): AuthSession {
+  const session: AuthSession = { userId, role, mode: 'mock' };
+  window.localStorage.setItem(mockSessionKey, JSON.stringify(session));
+  return session;
+}
 
 export function isSupabaseMode() {
   return getSupabaseBrowserClient() !== null;
@@ -139,6 +209,28 @@ async function serverAuthenticate(
 }
 
 export async function register(input: RegistrationInput): Promise<AuthSession> {
+  if (isDemoAuthMode()) {
+    if (typeof window === 'undefined') throw new Error('El registro demo requiere un navegador.');
+    const parsed = registrationSchema.safeParse(input);
+    if (!parsed.success) throw new Error('Los datos del registro demo no son válidos.');
+    const accountInput = parsed.data;
+    const accounts = readMockAccounts();
+    const reservedEmail = mockUsers.some(([email]) => email === accountInput.email);
+    if (reservedEmail || accounts.some((account) => account.email === accountInput.email)) {
+      throw new Error('Ya existe un acceso demo con ese correo en este navegador.');
+    }
+    const passwordSalt = crypto.randomUUID();
+    const account: MockAccount = {
+      userId: `mock-account-${crypto.randomUUID()}`,
+      displayName: accountInput.displayName,
+      email: accountInput.email,
+      passwordSalt,
+      passwordHash: await hashMockPassword(accountInput.password, passwordSalt),
+      role: 'ADMIN',
+    };
+    window.localStorage.setItem(mockAccountsKey, JSON.stringify([...accounts, account]));
+    return saveMockSession(account.userId, account.role);
+  }
   return serverAuthenticate('/api/auth/register', input);
 }
 
@@ -155,18 +247,20 @@ export async function login(email: string, password: string): Promise<AuthSessio
     }
     return { userId: data.session.user.id, role, mode: 'supabase' };
   }
+  const normalizedEmail = email.trim().toLowerCase();
   const user = mockUsers.find(
     ([candidateEmail, candidatePassword]) =>
-      candidateEmail === email.trim().toLowerCase() && candidatePassword === password,
+      candidateEmail === normalizedEmail && candidatePassword === password,
   );
-  if (!user) throw new Error('Credenciales no válidas.');
-  const session: AuthSession = {
-    userId: `mock-${user[2].toLowerCase()}`,
-    role: user[2],
-    mode: 'mock',
-  };
-  window.localStorage.setItem(mockSessionKey, JSON.stringify(session));
-  return session;
+  if (user) return saveMockSession(`mock-${user[2].toLowerCase()}`, user[2]);
+  const account = readMockAccounts().find((candidate) => candidate.email === normalizedEmail);
+  if (
+    !account ||
+    (await hashMockPassword(password, account.passwordSalt)) !== account.passwordHash
+  ) {
+    throw new Error('Credenciales no válidas.');
+  }
+  return saveMockSession(account.userId, account.role);
 }
 
 export async function logout(session: AuthSession | null): Promise<void> {

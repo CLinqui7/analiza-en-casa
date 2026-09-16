@@ -10,7 +10,16 @@ export const registrationSchema = z
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
-/** Registration must be explicitly enabled for a deployment with a supported backend. */
+/**
+ * Server-backed registration stays opt-in. The public demo is the one exception:
+ * it creates an isolated browser-only account and never calls a persistence API.
+ */
 export function isRegistrationEnabled() {
-  return process.env.NEXT_PUBLIC_REGISTRATION_MODE === 'isolated';
+  const mode = process.env.NEXT_PUBLIC_REGISTRATION_MODE;
+  if (mode === 'disabled') return false;
+  if (mode === 'isolated') return true;
+  return (
+    process.env.NEXT_PUBLIC_DATA_MODE === 'mock' &&
+    process.env.NEXT_PUBLIC_RELEASE_PROFILE === 'demo'
+  );
 }
