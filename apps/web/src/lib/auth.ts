@@ -226,7 +226,7 @@ export async function register(input: RegistrationInput): Promise<AuthSession> {
       email: accountInput.email,
       passwordSalt,
       passwordHash: await hashMockPassword(accountInput.password, passwordSalt),
-      role: 'ADMIN',
+      role: 'NURSE',
     };
     window.localStorage.setItem(mockAccountsKey, JSON.stringify([...accounts, account]));
     return saveMockSession(account.userId, account.role);

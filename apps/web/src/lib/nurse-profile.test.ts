@@ -38,6 +38,7 @@ function completedProfile() {
 describe('nurse onboarding profile', () => {
   it('validates the nurse, workload, medications, and schedule sections', () => {
     const profile = completedProfile();
+    profile.completedAt = new Date().toISOString();
     profile.workload.knownMedicationIds = ['configuration-demo-medication-qa'];
     expect(nurseProfileSchema.safeParse(profile).success).toBe(true);
     expect(

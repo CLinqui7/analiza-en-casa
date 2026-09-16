@@ -52,14 +52,15 @@ describe('browser-only demo registration', () => {
   });
 
   it('registers, restores, logs out, and signs in without a backend', async () => {
+    const generatedPassword = crypto.randomUUID();
     const input = {
       displayName: 'Visitante Demo',
       email: 'visitante@example.test',
-      password: 'frase-demo-segura-123',
+      password: generatedPassword,
     };
 
     const registered = await register(input);
-    expect(registered).toMatchObject({ mode: 'mock', role: 'ADMIN' });
+    expect(registered).toMatchObject({ mode: 'mock', role: 'NURSE' });
     await expect(loadSession()).resolves.toEqual(registered);
 
     await logout(registered);
@@ -68,15 +69,16 @@ describe('browser-only demo registration', () => {
   });
 
   it('rejects duplicate local accounts and incorrect passwords', async () => {
+    const generatedPassword = crypto.randomUUID();
     const input = {
       displayName: 'Visitante Demo',
       email: 'visitante@example.test',
-      password: 'frase-demo-segura-123',
+      password: generatedPassword,
     };
 
     await register(input);
     await expect(register(input)).rejects.toThrow('Ya existe un acceso demo');
-    await expect(login(input.email, 'otra-frase-demo-456')).rejects.toThrow(
+    await expect(login(input.email, crypto.randomUUID())).rejects.toThrow(
       'Credenciales no válidas',
     );
   });

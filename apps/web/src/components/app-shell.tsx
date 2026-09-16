@@ -16,7 +16,6 @@ import {
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
-import { isRegistrationEnabled } from '@/lib/registration';
 
 type NavigationItem = { label: string; href: string; permission: Permission; actionId: string };
 type NavigationGroup = {
@@ -28,16 +27,6 @@ type NavigationGroup = {
 };
 
 const navigation: NavigationGroup[] = [
-  ...(isRegistrationEnabled()
-    ? [
-        {
-          label: 'Mi espacio',
-          href: '/onboarding',
-          permission: 'settings:write' as const,
-          actionId: 'WORKSPACE-SETUP-NAVIGATE',
-        },
-      ]
-    : []),
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -235,6 +224,12 @@ const navigation: NavigationGroup[] = [
   },
   { label: 'Auditoría', href: '/audit', permission: 'audit:read', actionId: 'AUDIT-NAVIGATE' },
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
+  {
+    label: 'Preguntas o errores encontrados',
+    href: '/feedback',
+    permission: 'dashboard:read',
+    actionId: 'FEEDBACK-NAVIGATE',
+  },
   {
     label: 'Cambios solicitados',
     href: '/changes',

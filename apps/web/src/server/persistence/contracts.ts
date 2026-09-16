@@ -12,6 +12,7 @@ import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validati
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
 import type { NurseProfile } from '@/lib/nurse-profile';
+import type { FeedbackImage, FeedbackReport } from '@/lib/feedback';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -28,6 +29,10 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  feedback?: {
+    list(actor: ServerActor): Promise<FeedbackReport[]>;
+    create(actor: ServerActor, input: unknown, image?: FeedbackImage): Promise<FeedbackReport>;
+  };
   nurseProfile?: {
     get(actor: ServerActor): Promise<NurseProfile>;
     save(actor: ServerActor, input: unknown): Promise<NurseProfile>;

@@ -6,13 +6,11 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers';
 import { isRegistrationEnabled, registrationSchema } from '@/lib/registration';
-import { isDemoAuthMode } from '@/lib/auth';
 import './account-access.css';
 
 export function RegisterForm() {
   const { register, session, loading } = useAuth();
   const router = useRouter();
-  const demoMode = isDemoAuthMode();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,23 +59,16 @@ export function RegisterForm() {
             height={702}
             priority
           />
-          <span>Tu cuenta, tu espacio de trabajo</span>
+          <span>Tu cuenta de enfermería</span>
         </div>
         <div className="login-heading">
-          <p className="eyebrow">{demoMode ? 'Registro demo' : 'Comienza aquí'}</p>
-          <h1>{demoMode ? 'Crea tu acceso de demostración' : 'Crea tu cuenta'}</h1>
+          <p className="eyebrow">Registro de enfermería</p>
+          <h1>Crea tu cuenta</h1>
           <p>
-            {demoMode
-              ? 'Tu acceso se guarda únicamente en este navegador y abre un espacio con datos sintéticos.'
-              : 'Organiza tu equipo y tus servicios en un espacio privado, separado del de otras personas.'}
+            Al entrar por primera vez completarás tu perfil profesional, experiencia y horario de
+            trabajo.
           </p>
         </div>
-        {demoMode ? (
-          <p className="notice" role="note">
-            No uses un correo ni una contraseña reales. Este registro es temporal, local y no envía
-            información a una base de datos.
-          </p>
-        ) : null}
         {isRegistrationEnabled() ? (
           <form className="form-grid login-form-grid" onSubmit={submit} aria-busy={submitting}>
             <fieldset disabled={submitting || loading} className="auth-fields">
@@ -149,11 +140,7 @@ export function RegisterForm() {
                 </p>
               ) : null}
               <button type="submit" className="button login-submit">
-                {submitting
-                  ? 'Creando tu acceso…'
-                  : demoMode
-                    ? 'Entrar al demo'
-                    : 'Crear mi cuenta'}
+                {submitting ? 'Creando tu acceso…' : 'Crear mi cuenta'}
               </button>
             </fieldset>
           </form>

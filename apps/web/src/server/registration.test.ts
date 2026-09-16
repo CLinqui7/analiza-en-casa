@@ -48,7 +48,7 @@ describe('isolated account registration', () => {
     const first = await auth.register(body);
     const second = await auth.register(input());
     expect(first.session.organizationId).not.toBe(second.session.organizationId);
-    expect(first.session.role).toBe('ADMIN');
+    expect(first.session.role).toBe('NURSE');
     expect(accounts[0].user.passwordHash).not.toContain(body.password);
     expect(accounts[0].session.sessionHash).not.toBe(first.sessionToken);
     expect(accounts[0].session.csrfHash).not.toBe(first.csrfToken);
