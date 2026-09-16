@@ -7,6 +7,7 @@ const daySchema = z.enum(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']);
 export const nurseProfileSchema = z
   .object({
     expectedVersion: z.number().int().nonnegative(),
+    completedAt: z.string().datetime().optional(),
     profile: z
       .object({
         fullName: trimmedText(160).min(2),

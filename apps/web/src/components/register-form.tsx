@@ -59,14 +59,14 @@ export function RegisterForm() {
             height={702}
             priority
           />
-          <span>Tu cuenta, tu espacio de trabajo</span>
+          <span>Tu cuenta de enfermería</span>
         </div>
         <div className="login-heading">
-          <p className="eyebrow">Comienza aquí</p>
+          <p className="eyebrow">Registro de enfermería</p>
           <h1>Crea tu cuenta</h1>
           <p>
-            Organiza tu equipo y tus servicios en un espacio privado, separado del de otras
-            personas.
+            Al entrar por primera vez completarás tu perfil profesional, experiencia y horario de
+            trabajo.
           </p>
         </div>
         {isRegistrationEnabled() ? (
@@ -140,7 +140,7 @@ export function RegisterForm() {
                 </p>
               ) : null}
               <button type="submit" className="button login-submit">
-                {submitting ? 'Creando tu espacio…' : 'Crear mi cuenta'}
+                {submitting ? 'Creando tu acceso…' : 'Crear mi cuenta'}
               </button>
             </fieldset>
           </form>

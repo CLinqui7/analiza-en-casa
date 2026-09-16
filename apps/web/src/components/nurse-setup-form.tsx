@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
@@ -72,6 +73,7 @@ function TextField({
 }
 
 export function NurseSetupForm() {
+  const router = useRouter();
   const { session, loading: sessionLoading } = useAuth();
   const workspace = useWorkspace();
   const operations = useOperations();
@@ -119,6 +121,10 @@ export function NurseSetupForm() {
           profile = loadLocalNurseProfile(window.localStorage, sessionUserId);
         }
         if (!active) return;
+        if (profile.completedAt) {
+          router.replace('/dashboard');
+          return;
+        }
         setData(profile);
         setLoaded(true);
       } catch (cause) {
@@ -132,7 +138,7 @@ export function NurseSetupForm() {
       active = false;
       controller.abort();
     };
-  }, [serverBacked, sessionLoading, sessionUserId]);
+  }, [router, serverBacked, sessionLoading, sessionUserId]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -172,10 +178,12 @@ export function NurseSetupForm() {
     }));
   }
 
-  async function save(nextStep?: number) {
+  async function save(nextStep?: number, complete = false) {
     setError(null);
     setNotice(null);
-    const parsed = nurseProfileSchema.safeParse(data);
+    const parsed = nurseProfileSchema.safeParse(
+      complete && !data.completedAt ? { ...data, completedAt: new Date().toISOString() } : data,
+    );
     if (!parsed.success) {
       const section = parsed.error.issues[0]?.path[0];
       const invalidStep = section === 'workload' ? 1 : section === 'schedule' ? 2 : 0;
@@ -218,7 +226,8 @@ export function NurseSetupForm() {
           ? 'Perfil guardado en la base de datos compartida.'
           : 'Perfil guardado en este navegador.',
       );
-      if (nextStep !== undefined) setStep(nextStep);
+      if (complete) router.replace('/dashboard');
+      else if (nextStep !== undefined) setStep(nextStep);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos guardar tu perfil.');
     } finally {
@@ -601,8 +610,8 @@ export function NurseSetupForm() {
               Guardar y continuar
             </button>
           ) : (
-            <button className="button" type="button" onClick={() => void save()}>
-              Guardar perfil
+            <button className="button" type="button" onClick={() => void save(undefined, true)}>
+              Finalizar cuestionario
             </button>
           )}
           <span className="field-help">

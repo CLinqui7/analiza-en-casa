@@ -158,6 +158,7 @@ export function can(role: Role | undefined, permission: Permission): boolean {
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/nursing-team', permission: 'nurses:manage' },
   { prefix: '/changes', permission: 'dashboard:read' },
+  { prefix: '/feedback', permission: 'dashboard:read' },
   { prefix: '/patients', permission: 'patients:read' },
   { prefix: '/hospitalizations', permission: 'cases:read' },
   { prefix: '/quotes', permission: 'quotes:read' },
@@ -173,7 +174,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/reports', permission: 'reports:read' },
   { prefix: '/audit', permission: 'audit:read' },
   { prefix: '/settings', permission: 'settings:read' },
-  { prefix: '/onboarding', permission: 'settings:write' },
+  { prefix: '/onboarding', permission: 'dashboard:read' },
   { prefix: '/doctors', permission: 'settings:write' },
   { prefix: '/dashboard', permission: 'dashboard:read' },
 ];

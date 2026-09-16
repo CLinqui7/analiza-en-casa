@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers';
 import { isDemoAuthMode, mockCredentialHint, safeNextPath } from '@/lib/auth';
+import { isServerDataMode } from '@/lib/data-mode';
+import { loadLocalNurseProfile, nurseProfileSchema } from '@/lib/nurse-profile';
 import { InstallApp } from '@/components/install-app';
 import { isCoreRelease } from '@/lib/release-profile';
 import { isRegistrationEnabled } from '@/lib/registration';
@@ -26,9 +28,10 @@ export function LoginForm() {
   const [recoveryNotice, setRecoveryNotice] = useState<string | null>(null);
   const destination = safeNextPath(params.get('next'));
   const emailRef = useRef<HTMLInputElement>(null);
+  const loginFlowRef = useRef(false);
 
   useEffect(() => {
-    if (session) router.replace(destination);
+    if (session && !loginFlowRef.current) router.replace(destination);
   }, [destination, router, session]);
 
   useEffect(() => {
@@ -45,10 +48,23 @@ export function LoginForm() {
     setFieldErrors(nextFieldErrors);
     if (nextFieldErrors.email || nextFieldErrors.password) return;
     setSubmitting(true);
+    loginFlowRef.current = true;
     try {
-      await login(email, password);
-      router.replace(destination);
+      const nextSession = await login(email, password);
+      let needsQuestionnaire = false;
+      if (isServerDataMode(nextSession.mode)) {
+        const response = await fetch('/api/nurse-profile', { cache: 'no-store' });
+        if (response.ok) {
+          const profile = nurseProfileSchema.parse(await response.json());
+          needsQuestionnaire = !profile.completedAt;
+        }
+      } else if (nextSession.mode === 'mock') {
+        needsQuestionnaire = !loadLocalNurseProfile(window.localStorage, nextSession.userId)
+          .completedAt;
+      }
+      router.replace(needsQuestionnaire ? '/onboarding' : destination);
     } catch (cause) {
+      loginFlowRef.current = false;
       setError(
         cause instanceof Error
           ? cause.message
@@ -160,7 +176,7 @@ export function LoginForm() {
 
         {isRegistrationEnabled() ? (
           <p className="login-registration-link">
-            ¿Primera vez aquí? <Link href="/register">Crea tu cuenta y tu espacio</Link>
+            ¿Primera vez aquí? <Link href="/register">Crea tu cuenta de enfermería</Link>
           </p>
         ) : null}
 

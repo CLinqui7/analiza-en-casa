@@ -11,6 +11,8 @@ describe('Core release boundary', () => {
       '/api/auth/login',
       '/api/patients/abc',
       '/api/files/abc',
+      '/api/feedback',
+      '/feedback',
       '/api/health',
     ]) {
       expect(isReleasedPath(path, true), path).toBe(true);

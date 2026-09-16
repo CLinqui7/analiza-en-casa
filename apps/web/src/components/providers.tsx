@@ -58,7 +58,7 @@ type AuthContextValue = {
   session: AuthSession | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthSession>;
   register: (input: RegistrationInput) => Promise<void>;
   logout: () => Promise<void>;
   can: (permission: Permission) => boolean;
@@ -161,6 +161,7 @@ function AuthProvider({ children }: PropsWithChildren) {
     setError(null);
     const next = await authenticate(email, password);
     setSession(next);
+    return next;
   }, []);
   const logout = useCallback(async () => {
     setError(null);
