@@ -11,6 +11,7 @@ import type { ServerActor } from '../validation/patients';
 import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validation/files';
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
+import type { NurseProfile } from '@/lib/nurse-profile';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -27,6 +28,10 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  nurseProfile?: {
+    get(actor: ServerActor): Promise<NurseProfile>;
+    save(actor: ServerActor, input: unknown): Promise<NurseProfile>;
+  };
   onboarding?: {
     get(actor: ServerActor): Promise<WorkspaceSetup>;
     save(actor: ServerActor, input: unknown): Promise<WorkspaceSetup>;
