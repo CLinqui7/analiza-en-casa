@@ -159,6 +159,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/nursing-team', permission: 'nurses:manage' },
   { prefix: '/changes', permission: 'dashboard:read' },
   { prefix: '/feedback', permission: 'dashboard:read' },
+  { prefix: '/tutorial', permission: 'dashboard:read' },
   { prefix: '/patients', permission: 'patients:read' },
   { prefix: '/hospitalizations', permission: 'cases:read' },
   { prefix: '/quotes', permission: 'quotes:read' },

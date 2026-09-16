@@ -86,6 +86,14 @@ export function parseQuoteReplace(input: unknown): { quote: Quote; expectedVersi
 export class MongoQuoteRepository {
   constructor(private readonly database: Db) {}
 
+  async get(actor: ServerActor, id: string): Promise<Quote | null> {
+    if (!can(actor.role, 'quotes:read')) throw new MongoAccessError();
+    const row = await this.database
+      .collection<StoredQuote>('quotes')
+      .findOne({ organizationId: actor.organizationId, id });
+    return row ? publicQuote(row) : null;
+  }
+
   async listWithVersions(actor: ServerActor): Promise<QuoteWithVersion[]> {
     if (!can(actor.role, 'quotes:read')) throw new MongoAccessError();
     const rows = await this.database

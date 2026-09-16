@@ -42,6 +42,7 @@ import { postgresFiles } from './postgres-files';
 import { PostgresWorkspaceSetupRepository } from './postgres-workspace-setup';
 import { PostgresNurseProfileRepository } from './postgres-nurse-profile';
 import { PostgresFeedbackRepository } from './postgres-feedback';
+import { postgresQuotes } from './postgres-quotes';
 
 export function authorize(actor: ServerActor, permission: Permission) {
   if (!can(actor.role, permission)) throw new MongoAccessError();
@@ -248,6 +249,7 @@ export function postgresPersistence(): Persistence {
       return { value: p.hospitalization, expectedVersion: p.expectedVersion };
     },
   );
+  const quotes = postgresQuotes(pool);
   const shifts: Persistence['shifts'] = {
     async list(actor) {
       authorize(actor, 'agenda:read');
@@ -418,7 +420,7 @@ export function postgresPersistence(): Persistence {
               [id, data.email.trim().toLowerCase(), hash, resource.displayName],
             );
             await c.query(
-              "INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,'ADMIN')",
+              "INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,'NURSE')",
               [id, actor.organizationId],
             );
             await c.query(
@@ -445,30 +447,32 @@ export function postgresPersistence(): Persistence {
     patients,
     doctors,
     hospitalizations,
+    quotes,
     shifts,
     operations,
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 5 ||
+        row.migrations !== 8 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
     },
     async workspace(actor) {
-      const [p, d, h, s, r, catalogs, audits] = await Promise.all([
+      const [p, d, h, s, r, q, catalogs, audits] = await Promise.all([
         can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
         can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
         can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
+        can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
         can(actor.role, 'catalogs:read')
           ? transaction(pool, actor, async (c) =>
               (
@@ -502,6 +506,7 @@ export function postgresPersistence(): Persistence {
         hospitalizations: h.map((r) => r.hospitalization),
         shifts: s,
         nursingResources: r,
+        quotes: q.map((row) => row.quote),
         catalogItems: catalogs,
         auditEntries: audits,
         patientVersions: Object.fromEntries(p.map((r) => [r.patient.id, r.version])),
@@ -509,7 +514,7 @@ export function postgresPersistence(): Persistence {
         hospitalizationVersions: Object.fromEntries(
           h.map((r) => [r.hospitalization.id, r.version]),
         ),
-        quoteVersions: {},
+        quoteVersions: Object.fromEntries(q.map((row) => [row.quote.id, row.version])),
       };
     },
   };

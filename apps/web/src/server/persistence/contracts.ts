@@ -4,6 +4,7 @@ import type {
   NursingResource,
   OperationsSnapshot,
   Patient,
+  Quote,
   Shift,
 } from '@analiza/contracts';
 import type { AuthService } from '../auth-service';
@@ -11,7 +12,7 @@ import type { ServerActor } from '../validation/patients';
 import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validation/files';
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
-import type { NurseProfile } from '@/lib/nurse-profile';
+import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
 import type { FeedbackImage, FeedbackReport } from '@/lib/feedback';
 
 export interface EntityRepository<T, Key extends string> {
@@ -36,6 +37,7 @@ export interface Persistence {
   nurseProfile?: {
     get(actor: ServerActor): Promise<NurseProfile>;
     save(actor: ServerActor, input: unknown): Promise<NurseProfile>;
+    listForAdmin(actor: ServerActor): Promise<NurseProfileSubmission[]>;
   };
   onboarding?: {
     get(actor: ServerActor): Promise<WorkspaceSetup>;
@@ -48,6 +50,9 @@ export interface Persistence {
   patients: EntityRepository<Patient, 'patient'>;
   doctors: EntityRepository<Doctor, 'doctor'>;
   hospitalizations: EntityRepository<Hospitalization, 'hospitalization'>;
+  quotes: EntityRepository<Quote, 'quote'> & {
+    send(actor: ServerActor, id: string, expectedVersion: number): Promise<Quote>;
+  };
   shifts: {
     list(actor: ServerActor): Promise<Shift[]>;
     listResources(actor: ServerActor): Promise<NursingResource[]>;

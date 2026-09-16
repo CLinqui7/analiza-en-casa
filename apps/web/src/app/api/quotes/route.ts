@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus } from '@/server/http-auth';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 import { MongoInputError } from '@/server/mongo-patients';
-import { MongoQuoteRepository } from '@/server/mongo-quotes';
-import { mongoDatabase } from '@/server/mongodb';
+import { persistence } from '@/server/persistence';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -30,12 +24,10 @@ function secureError(error: unknown) {
 
 export async function GET(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const actor = await new MongoAuthService(mongoAuthStore(database)).requireSession(
-      request.cookies.get(sessionCookieName)?.value,
-    );
+    const backend = await persistence();
+    const actor = await backend.auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     return NextResponse.json(
-      { quotes: await new MongoQuoteRepository(database).listWithVersions(actor) },
+      { quotes: await backend.quotes.listWithVersions(actor) },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {
@@ -45,12 +37,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
-    const quote = await new MongoQuoteRepository(database).create(actor, await request.json());
+    const quote = await backend.quotes.create(actor, await request.json());
     return NextResponse.json(quote, { status: 201, headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof MongoInputError)

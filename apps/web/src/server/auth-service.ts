@@ -234,10 +234,12 @@ export class AuthService {
       displayName,
       passwordHash: await hashPassword(password),
     };
+    const designatedAdminEmail = normalizeEmail(process.env.ANALIZA_ADMIN_EMAIL ?? '');
+    const sharedOrganizationId = process.env.ANALIZA_SHARED_ORGANIZATION_ID?.trim();
     const membership: MembershipRecord = {
       userId: user.id,
-      organizationId: randomUUID(),
-      role: 'ADMIN',
+      organizationId: sharedOrganizationId || randomUUID(),
+      role: email === designatedAdminEmail ? 'ADMIN' : 'NURSE',
       active: true,
     };
     const sessionToken = randomSecret();

@@ -16,15 +16,31 @@ try {
   assert.match(environment.VERCEL_SCOPE || '', /^[a-zA-Z0-9_-]+$/, 'VERCEL_SCOPE is required');
   // Environment values must already be configured on the linked Vercel Preview project/branch.
   console.log(JSON.stringify(await migrateMongo(environment)));
-  const args = ['--yes', 'vercel', 'deploy', '--yes', '--target', 'preview', '--scope', environment.VERCEL_SCOPE];
-  const child = process.platform === 'win32'
-    ? spawn(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', 'npx', ...args], { stdio: 'inherit', env: environment, windowsHide: true })
-    : spawn('npx', args, { stdio: 'inherit', env: environment });
+  const args = [
+    '--yes',
+    'vercel',
+    'deploy',
+    '--yes',
+    '--target',
+    'preview',
+    '--scope',
+    environment.VERCEL_SCOPE,
+  ];
+  const child =
+    process.platform === 'win32'
+      ? spawn(process.env.ComSpec || 'cmd.exe', ['/d', '/s', '/c', 'npx', ...args], {
+          stdio: 'inherit',
+          env: environment,
+          windowsHide: true,
+        })
+      : spawn('npx', args, { stdio: 'inherit', env: environment });
   process.exitCode = await new Promise((resolve, reject) => {
     child.once('error', reject);
     child.once('exit', (code) => resolve(code ?? 1));
   });
 } catch {
-  console.error('Preview deployment stopped. Check private configuration and MongoDB migration status.');
+  console.error(
+    'Preview deployment stopped. Check private configuration and MongoDB migration status.',
+  );
   process.exitCode = 1;
 }

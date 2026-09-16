@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authorizationStatus } from '@/server/http-auth';
-import {
-  csrfHeaderName,
-  MongoAuthService,
-  mongoAuthStore,
-  sessionCookieName,
-} from '@/server/mongo-auth';
+import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 import { MongoConflictError, MongoInputError } from '@/server/mongo-patients';
-import { MongoQuoteRepository } from '@/server/mongo-quotes';
-import { mongoDatabase } from '@/server/mongodb';
+import { persistence } from '@/server/persistence';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const database = await mongoDatabase();
-    const auth = new MongoAuthService(mongoAuthStore(database));
+    const backend = await persistence();
+    const auth = backend.auth;
     const sessionToken = request.cookies.get(sessionCookieName)?.value;
     const actor = await auth.requireSession(sessionToken);
     await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
-    const quote = await new MongoQuoteRepository(database).replace(
+    const quote = await backend.quotes.replace(
       actor,
       (await context.params).id,
       await request.json(),

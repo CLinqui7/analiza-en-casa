@@ -53,6 +53,7 @@ export const feedbackInputSchema = z
 
 export const feedbackReportSchema = feedbackInputSchema.extend({
   id: z.string().uuid(),
+  submittedBy: z.string().trim().min(1).max(254).optional(),
   imageName: z.string().trim().min(1).max(255).optional(),
   imageMime: z.string().trim().min(1).max(100).optional(),
   createdAt: z.string().datetime(),

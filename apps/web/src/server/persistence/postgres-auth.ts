@@ -79,10 +79,10 @@ export function postgresAuthStore(pool: Pool): AuthStore {
       };
       try {
         await transaction(pool, actor, async (client) => {
-          await client.query('INSERT INTO analiza.organizations(id,name) VALUES($1,$2)', [
-            actor.organizationId,
-            account.user.displayName,
-          ]);
+          await client.query(
+            'INSERT INTO analiza.organizations(id,name) VALUES($1,$2) ON CONFLICT(id) DO NOTHING',
+            [actor.organizationId, account.user.displayName],
+          );
           await client.query(
             'INSERT INTO analiza.users(id,email_normalized,password_hash,display_name,created_at) VALUES($1,$2,$3,$4,$5)',
             [
@@ -112,9 +112,10 @@ export function postgresAuthStore(pool: Pool): AuthStore {
               account.session.expiresAt,
             ],
           );
-          await client.query('INSERT INTO analiza.workspace_profiles(organization_id) VALUES($1)', [
-            actor.organizationId,
-          ]);
+          await client.query(
+            'INSERT INTO analiza.workspace_profiles(organization_id) VALUES($1) ON CONFLICT DO NOTHING',
+            [actor.organizationId],
+          );
           await client.query(
             'INSERT INTO analiza.audit_events(organization_id,id,actor_user_id,action,resource_type,resource_id) VALUES($1,$2,$3,$4,$5,$6)',
             [

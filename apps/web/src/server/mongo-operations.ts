@@ -538,7 +538,7 @@ export class MongoOperationsRepository {
           // Nurse managers cannot choose a role, reuse an existing identity, or cross organizations.
           await this.database
             .collection('memberships')
-            .insertOne({ ...scoped, userId, role: 'ADMIN', active: true }, { session });
+            .insertOne({ ...scoped, userId, role: 'NURSE', active: true }, { session });
           await this.database
             .collection('nursingResources')
             .insertOne({ ...input.resource, ...scoped, userId }, { session });

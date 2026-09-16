@@ -10,6 +10,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { videoParitySummary } from '@/lib/video-parity-summary';
 import { isCoreRelease } from '@/lib/release-profile';
 import { CoreDashboard } from '@/components/core-dashboard';
+import { DemoDataButton } from '@/components/demo-data-button';
 
 const currency = new Intl.NumberFormat('es-SV', {
   style: 'currency',
@@ -156,6 +157,10 @@ function FullDashboard() {
           <p>Pacientes, coordinación y seguimiento, en un solo lugar.</p>
         </div>
         <div className="header-actions">
+          <Link className="button button-secondary" href="/tutorial">
+            Tutorial y ayuda
+          </Link>
+          <DemoDataButton />
           <label className="dashboard-month-control">
             <input
               aria-label="Mes del dashboard"

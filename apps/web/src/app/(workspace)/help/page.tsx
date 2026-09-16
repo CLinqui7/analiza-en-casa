@@ -68,6 +68,13 @@ export default function HelpPage() {
         </div>
       </header>
       <Panel>
+        <h2>¿Es tu primera vez?</h2>
+        <p>Abre la guía paso a paso para conocer cada módulo antes de registrar información.</p>
+        <Link className="button" href="/tutorial">
+          Ver tutorial completo
+        </Link>
+      </Panel>
+      <Panel>
         <label className="search-label" htmlFor="help-search">
           ¿Qué necesitas hacer?
         </label>

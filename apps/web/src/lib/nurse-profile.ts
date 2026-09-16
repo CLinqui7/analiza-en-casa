@@ -52,6 +52,12 @@ export const nurseProfileSchema = nurseProfileDraftSchema.extend({
 
 export type NurseProfile = z.infer<typeof nurseProfileDraftSchema>;
 export type NurseWorkDay = z.infer<typeof daySchema>;
+export type NurseProfileSubmission = NurseProfile & {
+  userId: string;
+  accountEmail: string;
+  accountName: string;
+  updatedAt: string;
+};
 
 export function emptyNurseProfile(): NurseProfile {
   return {

@@ -38,3 +38,4 @@ CLAUDE.md
 .codex-log/
 .DS_Store
 Thumbs.db
+.vercel

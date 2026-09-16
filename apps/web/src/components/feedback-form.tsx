@@ -302,7 +302,11 @@ export function FeedbackForm() {
         <div className="feedback-section-heading">
           <div>
             <p className="eyebrow">Seguimiento</p>
-            <h2 id="feedback-history-title">Tus reportes enviados</h2>
+            <h2 id="feedback-history-title">
+              {session?.role === 'ADMIN'
+                ? 'Reportes enviados por el equipo'
+                : 'Tus reportes enviados'}
+            </h2>
           </div>
           <span>{reports.length}</span>
         </div>
@@ -322,6 +326,7 @@ export function FeedbackForm() {
                     {feedbackLabel(feedbackModules, report.module)}
                   </strong>
                   <small>{new Date(report.createdAt).toLocaleString('es-MX')}</small>
+                  {report.submittedBy ? <small>Enviado por: {report.submittedBy}</small> : null}
                 </div>
                 <StatusTag tone={report.status === 'RESOLVED' ? 'success' : 'warning'}>
                   {report.status === 'RESOLVED'

@@ -223,6 +223,12 @@ const navigation: NavigationGroup[] = [
     ],
   },
   { label: 'Auditoría', href: '/audit', permission: 'audit:read', actionId: 'AUDIT-NAVIGATE' },
+  {
+    label: 'Tutorial',
+    href: '/tutorial',
+    permission: 'dashboard:read',
+    actionId: 'TUTORIAL-NAVIGATE',
+  },
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
   {
     label: 'Preguntas o errores encontrados',

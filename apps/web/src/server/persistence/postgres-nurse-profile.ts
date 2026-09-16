@@ -1,7 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import type { Pool } from 'pg';
-import { emptyNurseProfile, nurseProfileSchema, type NurseProfile } from '@/lib/nurse-profile';
-import { MongoConflictError, MongoInputError, type ServerActor } from '../validation/patients';
+import {
+  emptyNurseProfile,
+  nurseProfileSchema,
+  type NurseProfile,
+  type NurseProfileSubmission,
+} from '@/lib/nurse-profile';
+import {
+  MongoAccessError,
+  MongoConflictError,
+  MongoInputError,
+  type ServerActor,
+} from '../validation/patients';
 import { transaction } from './postgres-pool';
 
 export class PostgresNurseProfileRepository {
@@ -19,6 +29,29 @@ export class PostgresNurseProfileRepository {
         ? nurseProfileSchema.parse({ ...row.body, expectedVersion: row.version })
         : emptyNurseProfile();
     });
+  }
+
+  async listForAdmin(actor: ServerActor): Promise<NurseProfileSubmission[]> {
+    if (actor.role !== 'ADMIN') throw new MongoAccessError();
+    return transaction(this.pool, actor, async (client) =>
+      (
+        await client.query(
+          `SELECT profile.user_id,profile.body,profile.version,profile.updated_at,
+          account.email_normalized,account.display_name
+          FROM analiza.nurse_profiles profile
+          JOIN analiza.users account ON account.id=profile.user_id
+          WHERE profile.organization_id=$1
+          ORDER BY profile.updated_at DESC`,
+          [actor.organizationId],
+        )
+      ).rows.map((row) => ({
+        ...nurseProfileSchema.parse({ ...row.body, expectedVersion: row.version }),
+        userId: row.user_id,
+        accountEmail: row.email_normalized,
+        accountName: row.display_name || row.email_normalized,
+        updatedAt: new Date(row.updated_at).toISOString(),
+      })),
+    );
   }
 
   async save(actor: ServerActor, input: unknown): Promise<NurseProfile> {

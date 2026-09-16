@@ -25,6 +25,7 @@ import { MongoWorkspaceSetupRepository } from '../mongo-workspace-setup';
 export async function mongoPersistence(): Promise<Persistence> {
   const database = await mongoDatabase();
   const operations = new MongoOperationsRepository(database);
+  const quotes = new MongoQuoteRepository(database);
   return {
     onboarding: new MongoWorkspaceSetupRepository(database),
     auth: new MongoAuthService(mongoAuthStore(database)),
@@ -38,6 +39,7 @@ export async function mongoPersistence(): Promise<Persistence> {
         memberships: database.collection('memberships'),
       },
     ),
+    quotes,
     shifts: new MongoShiftRepository(database as never),
     operations,
     files: new MongoFileRepository(

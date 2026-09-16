@@ -166,14 +166,17 @@ export function mongoAuthStore(database: Db): MongoAuthStore {
             await database
               .collection('users')
               .insertOne({ ...account.user, createdAt: account.createdAt }, options);
-            await database.collection('organizations').insertOne(
+            await database.collection('organizations').updateOne(
+              { id: account.membership.organizationId },
               {
-                id: account.membership.organizationId,
-                createdBy: account.user.id,
-                createdAt: account.createdAt,
-                onboardingVersion: 0,
+                $setOnInsert: {
+                  id: account.membership.organizationId,
+                  createdBy: account.user.id,
+                  createdAt: account.createdAt,
+                  onboardingVersion: 0,
+                },
               },
-              options,
+              { ...options, upsert: true },
             );
             await database
               .collection('memberships')
