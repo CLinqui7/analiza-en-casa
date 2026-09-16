@@ -1,0 +1,14 @@
+# Application data and authentication use one shared Vercel Neon database.
+ANALIZA_DATA_MODE=postgresql
+NEXT_PUBLIC_DATA_MODE=postgresql
+ANALIZA_MANAGED_POSTGRES=neon
+
+# Each registration creates an isolated organization and administrator account.
+ANALIZA_REGISTRATION_MODE=isolated
+NEXT_PUBLIC_REGISTRATION_MODE=isolated
+NEXT_PUBLIC_RELEASE_PROFILE=core
+NEXT_PUBLIC_ONBOARDING_PROFILE=nurse
+
+# Supplied by the Neon Marketplace integration. Keep these values server-only.
+DATABASE_URL=
+DATABASE_URL_UNPOOLED=

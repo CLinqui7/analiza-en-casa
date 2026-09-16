@@ -17,7 +17,7 @@ if (process.argv.includes('--dry-run')) {
     JSON.stringify({
       operation: 'MIGRATION_PLAN_ONLY',
       migrations: migrations.map(({ version, sha256 }) => ({ version, sha256 })),
-      target: 'analiza schema, PostgreSQL 18',
+      target: 'analiza schema, PostgreSQL 16 through 19',
       automaticRuntimeDdl: false,
     }),
   );
@@ -39,17 +39,34 @@ if (provision) {
   assert.ok(!seed, 'Provisioning belongs to the explicit migration operation');
   assertProvisionTarget(process.env);
 }
+const managedNeon = process.env.ANALIZA_MANAGED_POSTGRES === 'neon';
+const neonConnectionString = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
+const neonUsername =
+  managedNeon && neonConnectionString
+    ? decodeURIComponent(new URL(neonConnectionString).username)
+    : undefined;
 assert.ok(
-  process.env.PGHOST && process.env.PGDATABASE && process.env.PGUSER && process.env.PGPASSWORD,
+  managedNeon
+    ? neonConnectionString
+    : process.env.PGHOST && process.env.PGDATABASE && process.env.PGUSER && process.env.PGPASSWORD,
   'Private operator PostgreSQL configuration is required',
 );
-const client = new Client({ connectionTimeoutMillis: 5000, statement_timeout: 30000 });
+const client = new Client(
+  managedNeon
+    ? {
+        connectionString: neonConnectionString,
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000,
+        statement_timeout: 30000,
+      }
+    : { connectionTimeoutMillis: 5000, statement_timeout: 30000 },
+);
 try {
   await client.connect();
   const version = Number(
     (await client.query('SHOW server_version_num')).rows[0].server_version_num,
   );
-  assert.ok(version >= 180000 && version < 190000, 'This migration is validated for PostgreSQL 18');
+  assert.ok(version >= 160000 && version < 200000, 'PostgreSQL 16 through 19 is required');
   await client.query("SELECT pg_advisory_lock(hashtextextended('analiza:migrations',0))");
   if (provision) {
     const name = process.env.ANALIZA_PG_RUNTIME_ROLE;
@@ -122,7 +139,9 @@ try {
       }
     }
     // Existing role only. This tool never creates a corporate user/password or grants DDL/DELETE.
-    const runtimeRole = process.env.ANALIZA_PG_RUNTIME_ROLE;
+    const runtimeRole =
+      process.env.ANALIZA_PG_RUNTIME_ROLE ||
+      (managedNeon ? process.env.PGUSER || neonUsername : undefined);
     assert.ok(
       runtimeRole && /^[a-z][a-z0-9_]{0,62}$/.test(runtimeRole),
       'Specify the existing restricted runtime SQL role',
@@ -134,7 +153,10 @@ try {
       ])
     ).rows[0];
     assert.ok(
-      info && !info.rolsuper && !info.rolbypassrls && runtimeRole !== process.env.PGUSER,
+      info &&
+        !info.rolsuper &&
+        !info.rolbypassrls &&
+        (managedNeon || runtimeRole !== process.env.PGUSER),
       'Runtime role must be separate, non-superuser and NOBYPASSRLS',
     );
     await client.query(`GRANT USAGE ON SCHEMA analiza TO ${role}`);
@@ -143,6 +165,7 @@ try {
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.workspace_profiles,analiza.organization_staff,analiza.organization_services TO ${role}`,
     );
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.nurse_profiles TO ${role}`);
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries TO ${role}`,
     );

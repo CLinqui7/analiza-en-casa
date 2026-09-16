@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { isDemoAuthMode, mongoMutationHeaders } from '@/lib/auth';
+import { mongoMutationHeaders } from '@/lib/auth';
 import { NurseSetupForm } from '@/components/nurse-setup-form';
 import {
   emptyWorkspaceSetup,
@@ -56,7 +56,11 @@ function Field({
 }
 
 export function WorkspaceSetupForm() {
-  return isDemoAuthMode() ? <NurseSetupForm /> : <OrganizationWorkspaceSetupForm />;
+  return process.env.NEXT_PUBLIC_ONBOARDING_PROFILE === 'organization' ? (
+    <OrganizationWorkspaceSetupForm />
+  ) : (
+    <NurseSetupForm />
+  );
 }
 
 function OrganizationWorkspaceSetupForm() {

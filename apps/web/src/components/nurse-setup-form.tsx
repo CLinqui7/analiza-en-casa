@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { mongoMutationHeaders } from '@/lib/auth';
+import { isServerDataMode } from '@/lib/data-mode';
 import {
   emptyNurseProfile,
   loadLocalNurseProfile,
@@ -74,6 +76,7 @@ export function NurseSetupForm() {
   const workspace = useWorkspace();
   const operations = useOperations();
   const sessionUserId = session?.userId;
+  const serverBacked = isServerDataMode(session?.mode);
   const [data, setData] = useState<NurseProfile>(emptyNurseProfile);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -93,14 +96,33 @@ export function NurseSetupForm() {
   useEffect(() => {
     if (sessionLoading) return;
     let active = true;
-    void Promise.resolve().then(() => {
+    const controller = new AbortController();
+    void Promise.resolve().then(async () => {
       try {
         if (!sessionUserId) throw new Error('Inicia sesión para cargar tu perfil.');
+        let profile: NurseProfile;
+        if (serverBacked) {
+          const response = await fetch('/api/nurse-profile', {
+            cache: 'no-store',
+            signal: controller.signal,
+          });
+          const payload: unknown = await response.json();
+          if (!response.ok) {
+            const message =
+              payload && typeof payload === 'object' && 'error' in payload
+                ? String(payload.error)
+                : 'No pudimos cargar tu perfil.';
+            throw new Error(message);
+          }
+          profile = nurseProfileSchema.parse(payload);
+        } else {
+          profile = loadLocalNurseProfile(window.localStorage, sessionUserId);
+        }
         if (!active) return;
-        setData(loadLocalNurseProfile(window.localStorage, sessionUserId));
+        setData(profile);
         setLoaded(true);
       } catch (cause) {
-        if (active)
+        if (active && !(cause instanceof DOMException && cause.name === 'AbortError'))
           setError(cause instanceof Error ? cause.message : 'No pudimos cargar tu perfil.');
       } finally {
         if (active) setLoading(false);
@@ -108,8 +130,9 @@ export function NurseSetupForm() {
     });
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [sessionLoading, sessionUserId]);
+  }, [serverBacked, sessionLoading, sessionUserId]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -149,7 +172,7 @@ export function NurseSetupForm() {
     }));
   }
 
-  function save(nextStep?: number) {
+  async function save(nextStep?: number) {
     setError(null);
     setNotice(null);
     const parsed = nurseProfileSchema.safeParse(data);
@@ -169,10 +192,32 @@ export function NurseSetupForm() {
     setSaving(true);
     try {
       if (!session) throw new Error('Inicia sesión para guardar tu perfil.');
-      const saved = saveLocalNurseProfile(window.localStorage, session.userId, parsed.data);
+      let saved: NurseProfile;
+      if (serverBacked) {
+        const response = await fetch('/api/nurse-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+          body: JSON.stringify(parsed.data),
+        });
+        const payload: unknown = await response.json();
+        if (!response.ok) {
+          const message =
+            payload && typeof payload === 'object' && 'error' in payload
+              ? String(payload.error)
+              : 'No pudimos guardar tu perfil.';
+          throw new Error(message);
+        }
+        saved = nurseProfileSchema.parse(payload);
+      } else {
+        saved = saveLocalNurseProfile(window.localStorage, session.userId, parsed.data);
+      }
       setData(saved);
       setDirty(false);
-      setNotice('Perfil guardado en la base de datos demo de este navegador.');
+      setNotice(
+        serverBacked
+          ? 'Perfil guardado en la base de datos compartida.'
+          : 'Perfil guardado en este navegador.',
+      );
       if (nextStep !== undefined) setStep(nextStep);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos guardar tu perfil.');
@@ -192,7 +237,9 @@ export function NurseSetupForm() {
             trabajo de enfermería.
           </p>
         </div>
-        <span className="database-badge">● Base demo conectada</span>
+        <span className="database-badge">
+          {serverBacked ? '● Base compartida conectada' : '● Base local conectada'}
+        </span>
       </header>
 
       <div className="nurse-metrics" aria-label="Datos actuales del sistema">
@@ -209,14 +256,11 @@ export function NurseSetupForm() {
         <article>
           <span>Tu perfil</span>
           <strong>{data.expectedVersion > 0 ? 'Guardado' : 'Nuevo'}</strong>
-          <small>Solo para esta cuenta demo</small>
+          <small>
+            {serverBacked ? 'Guardado para esta enfermera' : 'Guardado en este navegador'}
+          </small>
         </article>
       </div>
-
-      <p className="setup-callout">
-        Usa datos ficticios durante la prueba. No escribas nombres de pacientes, diagnósticos, dosis
-        ni otra información clínica real.
-      </p>
 
       <nav aria-label="Secciones del perfil de enfermería" className="setup-steps">
         {steps.map((name, index) => (
@@ -292,7 +336,7 @@ export function NurseSetupForm() {
                     profile: { ...current.profile, professionalId },
                   }))
                 }
-                help="Opcional para esta demostración."
+                help="Opcional."
               />
               <label>
                 Años de experiencia
@@ -382,7 +426,7 @@ export function NurseSetupForm() {
                     workload: { ...current.workload, careExperience },
                   }))
                 }
-                help="Sin nombres ni información de pacientes."
+                help="Describe las áreas o tipos de atención."
               />
               <div className="setup-full medication-selector">
                 <h3>Medicamentos del inventario que conoces</h3>
@@ -400,10 +444,6 @@ export function NurseSetupForm() {
                 ) : (
                   <p className="setup-empty">No hay medicamentos configurados todavía.</p>
                 )}
-                <p className="field-help">
-                  Marcar un elemento solo registra familiaridad; no autoriza administración ni
-                  reemplaza una validación clínica.
-                </p>
               </div>
               <div className="setup-full">
                 <TextField
@@ -417,7 +457,7 @@ export function NurseSetupForm() {
                       workload: { ...current.workload, otherMedications },
                     }))
                   }
-                  help="Escribe solo nombres, uno por línea. No incluyas dosis ni indicaciones."
+                  help="Escribe un nombre por línea."
                 />
               </div>
             </div>
@@ -553,15 +593,15 @@ export function NurseSetupForm() {
               Anterior
             </button>
           ) : null}
-          <button className="button button-secondary" type="button" onClick={() => save()}>
+          <button className="button button-secondary" type="button" onClick={() => void save()}>
             {saving ? 'Guardando…' : 'Guardar avances'}
           </button>
           {step < steps.length - 1 ? (
-            <button className="button" type="button" onClick={() => save(step + 1)}>
+            <button className="button" type="button" onClick={() => void save(step + 1)}>
               Guardar y continuar
             </button>
           ) : (
-            <button className="button" type="button" onClick={() => save()}>
+            <button className="button" type="button" onClick={() => void save()}>
               Guardar perfil
             </button>
           )}

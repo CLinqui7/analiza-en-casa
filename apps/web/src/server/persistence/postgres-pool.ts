@@ -32,13 +32,41 @@ export function postgresConfig(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): PoolConfig {
   if (env.ANALIZA_DATA_MODE !== 'postgresql') throw new Error('PostgreSQL no está configurado.');
+  const max = Number(env.PGPOOL_MAX ?? 5);
+  if (!Number.isInteger(max) || max < 1 || max > 50)
+    throw new Error('Pool PostgreSQL fuera de límites.');
+  const connectionString = env.DATABASE_URL;
+  if (connectionString) {
+    let target: URL;
+    try {
+      target = new URL(connectionString);
+    } catch {
+      throw new Error('La conexión PostgreSQL administrada no es válida.');
+    }
+    if (
+      env.ANALIZA_MANAGED_POSTGRES !== 'neon' ||
+      env.VERCEL !== '1' ||
+      target.protocol !== 'postgresql:' ||
+      !target.hostname.endsWith('.neon.tech')
+    ) {
+      throw new Error('La conexión PostgreSQL administrada no está autorizada.');
+    }
+    return {
+      connectionString,
+      ssl: { rejectUnauthorized: false },
+      max,
+      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: 30000,
+      statement_timeout: 5000,
+      query_timeout: 6000,
+      idle_in_transaction_session_timeout: 5000,
+      application_name: 'analiza-web',
+    };
+  }
   const { PGHOST: host, PGDATABASE: database, PGUSER: user, PGPASSWORD: password } = env;
   if (!host || !database || !user || !password)
     throw new Error('Falta configuración privada PostgreSQL.');
   databaseTransport(env, host);
-  const max = Number(env.PGPOOL_MAX ?? 5);
-  if (!Number.isInteger(max) || max < 1 || max > 50)
-    throw new Error('Pool PostgreSQL fuera de límites.');
   const port = Number(env.PGPORT ?? 5432);
   if (!Number.isInteger(port) || port < 1 || port > 65535)
     throw new Error('Puerto PostgreSQL inválido.');

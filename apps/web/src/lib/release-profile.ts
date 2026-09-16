@@ -22,6 +22,7 @@ const coreApi = [
   '/api/operations',
   '/api/health',
   '/api/onboarding',
+  '/api/nurse-profile',
 ];
 const within = (path: string, base: string) => path === base || path.startsWith(`${base}/`);
 

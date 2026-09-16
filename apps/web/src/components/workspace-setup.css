@@ -51,14 +51,6 @@
   color: #123b5d;
   font-size: 24px;
 }
-.setup-callout {
-  border-left: 4px solid #ee7d89;
-  border-radius: 0 10px 10px 0;
-  padding: 12px 16px;
-  background: #fff7f8;
-  color: #71343b;
-  line-height: 1.5;
-}
 .setup-steps {
   display: flex;
   gap: 8px;
