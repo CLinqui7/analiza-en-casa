@@ -3,6 +3,7 @@ import {
   feedbackImageTypes,
   feedbackInputSchema,
   feedbackReportSchema,
+  feedbackStatusSchema,
   MAX_FEEDBACK_IMAGE_BYTES,
 } from '@/lib/feedback';
 
@@ -51,5 +52,10 @@ describe('nurse feedback', () => {
         status: 'NEW',
       }).success,
     ).toBe(true);
+  });
+
+  it('allows only the three administrative follow-up states', () => {
+    expect(feedbackStatusSchema.options).toEqual(['NEW', 'REVIEWING', 'RESOLVED']);
+    expect(feedbackStatusSchema.safeParse('DELETED').success).toBe(false);
   });
 });

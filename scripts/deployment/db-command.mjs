@@ -138,7 +138,7 @@ try {
         throw error;
       }
     }
-    // Existing role only. This tool never creates a corporate user/password or grants DDL/DELETE.
+    // Existing role only. This tool never creates a corporate user/password or grants DDL.
     const runtimeRole =
       process.env.ANALIZA_PG_RUNTIME_ROLE ||
       (managedNeon ? process.env.PGUSER || neonUsername : undefined);
@@ -166,7 +166,7 @@ try {
       `GRANT SELECT,INSERT,UPDATE ON analiza.workspace_profiles,analiza.organization_staff,analiza.organization_services TO ${role}`,
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.nurse_profiles TO ${role}`);
-    await client.query(`GRANT SELECT,INSERT ON analiza.feedback_reports TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE,DELETE ON analiza.feedback_reports TO ${role}`);
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries,analiza.quotes TO ${role}`,
     );
@@ -192,7 +192,7 @@ try {
         operation: 'MIGRATED',
         migrations: migrations.map(({ version, sha256 }) => ({ version, sha256 })),
         runtimeRole,
-        deleteGranted: false,
+        deleteGrantedOnlyForFeedback: true,
       }),
     );
   } else {

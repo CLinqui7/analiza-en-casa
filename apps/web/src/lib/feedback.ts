@@ -42,6 +42,7 @@ export const feedbackCategoryHelp: Record<(typeof feedbackCategories)[number][0]
 
 const moduleSchema = z.enum(feedbackModules.map(([value]) => value));
 const categorySchema = z.enum(feedbackCategories.map(([value]) => value));
+export const feedbackStatusSchema = z.enum(['NEW', 'REVIEWING', 'RESOLVED']);
 
 export const feedbackInputSchema = z
   .object({
@@ -57,7 +58,7 @@ export const feedbackReportSchema = feedbackInputSchema.extend({
   imageName: z.string().trim().min(1).max(255).optional(),
   imageMime: z.string().trim().min(1).max(100).optional(),
   createdAt: z.string().datetime(),
-  status: z.enum(['NEW', 'REVIEWING', 'RESOLVED']),
+  status: feedbackStatusSchema,
 });
 
 export const MAX_FEEDBACK_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -65,6 +66,7 @@ export const feedbackImageTypes = ['image/jpeg', 'image/png', 'image/webp'] as c
 
 export type FeedbackInput = z.infer<typeof feedbackInputSchema>;
 export type FeedbackReport = z.infer<typeof feedbackReportSchema>;
+export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>;
 export type FeedbackImage = Readonly<{
   name: string;
   mimeType: string;

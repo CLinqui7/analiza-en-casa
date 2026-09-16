@@ -12,9 +12,11 @@ import {
   feedbackLabel,
   feedbackModules,
   feedbackReportSchema,
+  feedbackStatusSchema,
   MAX_FEEDBACK_IMAGE_BYTES,
   type FeedbackInput,
   type FeedbackReport,
+  type FeedbackStatus,
 } from '@/lib/feedback';
 import { listLocalFeedback, saveLocalFeedback } from '@/lib/local-feedback';
 import './feedback-form.css';
@@ -33,6 +35,12 @@ const descriptionPlaceholder: Record<FeedbackInput['category'], string> = {
   IMPROVEMENT: 'Cuéntanos qué proceso podría ser más claro, rápido o sencillo.',
 };
 
+const feedbackStatuses: ReadonlyArray<readonly [FeedbackStatus, string]> = [
+  ['NEW', 'Nuevo'],
+  ['REVIEWING', 'En revisión'],
+  ['RESOLVED', 'Resuelto'],
+];
+
 export function FeedbackForm() {
   const { session } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -42,6 +50,7 @@ export function FeedbackForm() {
   const [reports, setReports] = useState<FeedbackReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [workingReportId, setWorkingReportId] = useState<string>();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -150,6 +159,69 @@ export function FeedbackForm() {
       setError('No pudimos enviar tu reporte. Revisa los datos e intenta nuevamente.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function changeStatus(id: string, status: FeedbackStatus) {
+    if (!serverBacked || session?.role !== 'ADMIN') return;
+    setError(null);
+    setNotice(null);
+    setWorkingReportId(id);
+    try {
+      const response = await fetch(`/api/feedback/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        headers: {
+          ...mongoMutationHeaders(),
+          'content-type': 'application/json',
+          'x-analiza-feedback-schema': '2',
+        },
+        body: JSON.stringify({ status: feedbackStatusSchema.parse(status) }),
+      });
+      const payload: unknown = await response.json();
+      if (!response.ok) {
+        const message =
+          payload && typeof payload === 'object' && 'error' in payload
+            ? String(payload.error)
+            : 'No pudimos cambiar el estado.';
+        throw new Error(message);
+      }
+      const updated = feedbackReportSchema.parse(payload);
+      setReports((current) =>
+        current.map((report) => (report.id === updated.id ? updated : report)),
+      );
+      setNotice('El estado del comentario fue actualizado.');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No pudimos cambiar el estado.');
+    } finally {
+      setWorkingReportId(undefined);
+    }
+  }
+
+  async function removeReport(report: FeedbackReport) {
+    if (!serverBacked || session?.role !== 'ADMIN') return;
+    if (!window.confirm('¿Eliminar este comentario? Esta acción no se puede deshacer.')) return;
+    setError(null);
+    setNotice(null);
+    setWorkingReportId(report.id);
+    try {
+      const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
+        method: 'DELETE',
+        headers: mongoMutationHeaders(),
+      });
+      if (!response.ok) {
+        const payload: unknown = await response.json();
+        const message =
+          payload && typeof payload === 'object' && 'error' in payload
+            ? String(payload.error)
+            : 'No pudimos eliminar el comentario.';
+        throw new Error(message);
+      }
+      setReports((current) => current.filter((candidate) => candidate.id !== report.id));
+      setNotice('El comentario fue eliminado.');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No pudimos eliminar el comentario.');
+    } finally {
+      setWorkingReportId(undefined);
     }
   }
 
@@ -330,13 +402,40 @@ export function FeedbackForm() {
                   <small>{new Date(report.createdAt).toLocaleString('es-MX')}</small>
                   {report.submittedBy ? <small>Enviado por: {report.submittedBy}</small> : null}
                 </div>
-                <StatusTag tone={report.status === 'RESOLVED' ? 'success' : 'warning'}>
-                  {report.status === 'RESOLVED'
-                    ? 'Resuelto'
-                    : report.status === 'REVIEWING'
-                      ? 'En revisión'
-                      : 'Nuevo'}
-                </StatusTag>
+                <div className="feedback-report-state">
+                  <StatusTag tone={report.status === 'RESOLVED' ? 'success' : 'warning'}>
+                    {feedbackLabel(feedbackStatuses, report.status)}
+                  </StatusTag>
+                  {serverBacked && session?.role === 'ADMIN' ? (
+                    <div className="feedback-admin-actions">
+                      <label>
+                        <span className="sr-only">Estado del comentario</span>
+                        <select
+                          aria-label="Estado del comentario"
+                          disabled={workingReportId === report.id}
+                          onChange={(event) =>
+                            void changeStatus(report.id, event.target.value as FeedbackStatus)
+                          }
+                          value={report.status}
+                        >
+                          {feedbackStatuses.map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button
+                        className="button secondary danger feedback-delete"
+                        disabled={workingReportId === report.id}
+                        onClick={() => void removeReport(report)}
+                        type="button"
+                      >
+                        {workingReportId === report.id ? 'Guardando…' : 'Eliminar'}
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
               <p>{report.description}</p>
               {report.imageName ? <small>Imagen adjunta: {report.imageName}</small> : null}

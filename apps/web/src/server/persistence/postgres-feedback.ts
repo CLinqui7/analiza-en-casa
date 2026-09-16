@@ -4,11 +4,13 @@ import {
   feedbackImageTypes,
   feedbackInputSchema,
   feedbackReportSchema,
+  feedbackStatusSchema,
   MAX_FEEDBACK_IMAGE_BYTES,
   type FeedbackImage,
   type FeedbackReport,
+  type FeedbackStatus,
 } from '@/lib/feedback';
-import { MongoInputError, type ServerActor } from '../validation/patients';
+import { MongoAccessError, MongoInputError, type ServerActor } from '../validation/patients';
 import { transaction } from './postgres-pool';
 
 type FeedbackRow = {
@@ -47,6 +49,10 @@ function validateImage(image: FeedbackImage | undefined) {
   ) {
     throw new MongoInputError('La imagen adjunta no es válida.');
   }
+}
+
+function requireAdministrator(actor: ServerActor) {
+  if (actor.role !== 'ADMIN') throw new MongoAccessError();
 }
 
 export class PostgresFeedbackRepository {
@@ -111,6 +117,66 @@ export class PostgresFeedbackRepository {
         ],
       );
       return publicReport(row);
+    });
+  }
+
+  async updateStatus(
+    actor: ServerActor,
+    id: string,
+    status: FeedbackStatus,
+  ): Promise<FeedbackReport | null> {
+    requireAdministrator(actor);
+    const parsedStatus = feedbackStatusSchema.safeParse(status);
+    if (!parsedStatus.success) throw new MongoInputError('El estado seleccionado no es válido.');
+    return transaction(this.pool, actor, async (client) => {
+      const row = (
+        await client.query<FeedbackRow>(
+          `UPDATE analiza.feedback_reports report
+          SET status=$3
+          WHERE report.organization_id=$1 AND report.id=$2
+          RETURNING report.id,report.module,report.category,report.description,
+          report.image_name,report.image_mime,report.status,report.created_at,
+          (SELECT coalesce(nullif(display_name,''),email_normalized)
+           FROM analiza.users WHERE id=report.user_id) AS submitted_by`,
+          [actor.organizationId, id, parsedStatus.data],
+        )
+      ).rows[0];
+      if (!row) return null;
+      await client.query(
+        'INSERT INTO analiza.audit_events(organization_id,id,actor_user_id,action,resource_type,resource_id) VALUES($1,$2,$3,$4,$5,$6)',
+        [
+          actor.organizationId,
+          randomUUID(),
+          actor.userId,
+          `feedback.status.${parsedStatus.data.toLowerCase()}`,
+          'feedback_reports',
+          id,
+        ],
+      );
+      return publicReport(row);
+    });
+  }
+
+  async remove(actor: ServerActor, id: string): Promise<boolean> {
+    requireAdministrator(actor);
+    return transaction(this.pool, actor, async (client) => {
+      const removed = await client.query(
+        'DELETE FROM analiza.feedback_reports WHERE organization_id=$1 AND id=$2',
+        [actor.organizationId, id],
+      );
+      if (removed.rowCount !== 1) return false;
+      await client.query(
+        'INSERT INTO analiza.audit_events(organization_id,id,actor_user_id,action,resource_type,resource_id) VALUES($1,$2,$3,$4,$5,$6)',
+        [
+          actor.organizationId,
+          randomUUID(),
+          actor.userId,
+          'feedback.deleted',
+          'feedback_reports',
+          id,
+        ],
+      );
+      return true;
     });
   }
 }

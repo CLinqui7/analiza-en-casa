@@ -13,7 +13,7 @@ import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validati
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
 import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
-import type { FeedbackImage, FeedbackReport } from '@/lib/feedback';
+import type { FeedbackImage, FeedbackReport, FeedbackStatus } from '@/lib/feedback';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -33,6 +33,12 @@ export interface Persistence {
   feedback?: {
     list(actor: ServerActor): Promise<FeedbackReport[]>;
     create(actor: ServerActor, input: unknown, image?: FeedbackImage): Promise<FeedbackReport>;
+    updateStatus(
+      actor: ServerActor,
+      id: string,
+      status: FeedbackStatus,
+    ): Promise<FeedbackReport | null>;
+    remove(actor: ServerActor, id: string): Promise<boolean>;
   };
   nurseProfile?: {
     get(actor: ServerActor): Promise<NurseProfile>;
