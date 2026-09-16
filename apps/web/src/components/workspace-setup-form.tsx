@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { mongoMutationHeaders } from '@/lib/auth';
+import { isDemoAuthMode, mongoMutationHeaders, readMockSession } from '@/lib/auth';
+import { loadLocalWorkspaceSetup, saveLocalWorkspaceSetup } from '@/lib/workspace-setup-local';
 import {
   emptyWorkspaceSetup,
   workspaceSetupSchema,
@@ -66,6 +67,26 @@ export function WorkspaceSetupForm() {
   const steps = ['Organización', 'Personal', 'Servicios'];
 
   useEffect(() => {
+    if (isDemoAuthMode()) {
+      let active = true;
+      void Promise.resolve().then(() => {
+        try {
+          const session = readMockSession();
+          if (!session) throw new Error('Inicia sesión para cargar tu espacio.');
+          if (!active) return;
+          setData(loadLocalWorkspaceSetup(window.localStorage, session.userId));
+          setLoaded(true);
+        } catch (cause) {
+          if (active)
+            setError(cause instanceof Error ? cause.message : 'No pudimos cargar tus datos.');
+        } finally {
+          if (active) setLoading(false);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }
     const controller = new AbortController();
     void fetch('/api/onboarding', {
       credentials: 'same-origin',
@@ -136,6 +157,16 @@ export function WorkspaceSetupForm() {
     }
     setSaving(true);
     try {
+      if (isDemoAuthMode()) {
+        const session = readMockSession();
+        if (!session) throw new Error('Inicia sesión para guardar tu espacio.');
+        const result = saveLocalWorkspaceSetup(window.localStorage, session.userId, parsed.data);
+        setData(result);
+        setDirty(false);
+        setNotice('Tus datos quedaron guardados en este navegador.');
+        if (nextStep !== undefined) setStep(nextStep);
+        return;
+      }
       const response = await fetch('/api/onboarding', {
         method: 'POST',
         credentials: 'same-origin',
