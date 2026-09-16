@@ -23,6 +23,8 @@ services:
         condition: service_completed_successfully
     environment:
       ANALIZA_QA_MODE: '1'
+      ANALIZA_DB_TRANSPORT: tcp
+      ANALIZA_FILE_STORAGE: gcs
       ANALIZA_QA_STORAGE_EMULATOR: ${ANALIZA_QA_STORAGE_EMULATOR:?Set the local GCS emulator URL}
 networks:
   default:

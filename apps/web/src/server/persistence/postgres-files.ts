@@ -12,6 +12,15 @@ import { MongoAccessError, MongoInputError, type ServerActor } from '../validati
 import type { Persistence } from './contracts';
 import { transaction } from './postgres-pool';
 import { googlePrivateStorage } from './gcs-storage';
+import { filesystemPrivateStorage } from './filesystem-storage';
+
+export function configuredPrivateStorage(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): PrivateFileStorage {
+  if (env.ANALIZA_FILE_STORAGE === 'gcs') return googlePrivateStorage(env as NodeJS.ProcessEnv);
+  if (env.ANALIZA_FILE_STORAGE === 'filesystem') return filesystemPrivateStorage(env);
+  throw new Error('ANALIZA_FILE_STORAGE debe ser gcs o filesystem.');
+}
 
 const owners = {
   patient: { table: 'analiza.patients', read: 'patients:read', write: 'patients:write' },
@@ -65,7 +74,7 @@ async function fileAudit(c: PoolClient, a: ServerActor, action: string, id: stri
 }
 export function postgresFiles(
   pool: Pool,
-  storageFactory: () => PrivateFileStorage = googlePrivateStorage,
+  storageFactory: () => PrivateFileStorage = configuredPrivateStorage,
 ): Persistence['files'] {
   return {
     async listForOwner(actor, kind, id) {

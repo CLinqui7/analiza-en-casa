@@ -30,12 +30,24 @@ export function assertProvisionTarget(env) {
     !env.CLOUD_RUN_JOB || env.CLOUD_RUN_JOB === 'analiza-staging-migrate',
     'Role provisioning is limited to the migration operator',
   );
-  const target = {
-    ...env,
-    CLOUD_RUN_JOB:
-      env.CLOUD_RUN_JOB === 'analiza-staging-migrate' ? 'analiza-staging-seed' : env.CLOUD_RUN_JOB,
-  };
-  assertSyntheticTarget(target);
+  const selfHosted =
+    env.ANALIZA_ENVIRONMENT === 'selfhosted' &&
+    env.ANALIZA_SELFHOSTED_PROVISION_APPROVED === '1' &&
+    !env.K_SERVICE &&
+    !env.CLOUD_RUN_JOB &&
+    env.ANALIZA_DB_TRANSPORT === 'unix' &&
+    env.PGHOST === '/var/run/postgresql' &&
+    env.PGDATABASE === 'analiza_en_casa';
+  if (!selfHosted) {
+    const target = {
+      ...env,
+      CLOUD_RUN_JOB:
+        env.CLOUD_RUN_JOB === 'analiza-staging-migrate'
+          ? 'analiza-staging-seed'
+          : env.CLOUD_RUN_JOB,
+    };
+    assertSyntheticTarget(target);
+  }
   assert.equal(
     env.ANALIZA_PROVISION_RUNTIME_APPROVED,
     '1',

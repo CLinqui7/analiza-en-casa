@@ -113,12 +113,14 @@ rellenarse con valores reales. No existe una contraseña predeterminada.
 
 | Variable                     | Web                 | Operator                   | Valor/origen                                        |
 | ---------------------------- | ------------------- | -------------------------- | --------------------------------------------------- |
+| `ANALIZA_DB_TRANSPORT`       | `cloudsql`          | No                         | Selección explícita del transporte administrado     |
 | `PGHOST`                     | Sí                  | Sí                         | `/cloudsql/PROJECT_ID:us-central1:INSTANCE` real    |
 | `PGPORT`                     | 5432                | 5432                       | Puerto PostgreSQL                                   |
 | `PGDATABASE`                 | Sí                  | Sí                         | Base aprobada por el ingeniero                      |
 | `PGUSER`                     | Usuario restringido | Usuario migrador diferente | Referencia y versión numérica de Secret Manager     |
 | `PGPASSWORD`                 | Secreto runtime     | Secreto migrador diferente | Secret Manager; nunca en Git o argumentos del build |
 | `PGPOOL_MAX`                 | 5                   | No                         | Pool por instancia; dimensionar con el límite SQL   |
+| `ANALIZA_FILE_STORAGE`       | `gcs`               | No                         | Selección explícita de almacenamiento privado       |
 | `GCS_PRIVATE_BUCKET`         | Sí                  | No                         | Nombre del bucket privado, sin `gs://`              |
 | `ANALIZA_PG_RUNTIME_ROLE`    | No                  | Sí                         | Mismo nombre SQL que el `PGUSER` de la web          |
 | `ANALIZA_MIGRATION_APPROVED` | No                  | `1`                        | Sólo en el job autorizado para esa base             |

@@ -94,6 +94,7 @@
     "test:registration:browser": "playwright test -c apps/web/playwright.registration.config.ts",
     "db:seed:qa": "node scripts/deployment/db-command.mjs --seed-synthetic",
     "test:postgresql": "node scripts/deployment/verify-container.mjs",
+    "test:ubuntu:selfhosted": "node scripts/deployment/verify-ubuntu-selfhosted.mjs",
     "repo:preflight": "node scripts/repository-preflight.mjs"
   },
   "engines": {

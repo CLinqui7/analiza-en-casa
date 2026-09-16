@@ -8,6 +8,9 @@ en Vercel utiliza MongoDB.
 **Para desplegar en Cloud Run / Cloud SQL:**
 [guía del ingeniero, imágenes y variables](docs/deployment/CLOUD_SQL_HANDOFF.md).
 
+**Para desplegar en Ubuntu / Docker / PostgreSQL local:**
+[guía self-hosted](docs/deployment/UBUNTU_SELF_HOSTED.md).
+
 **Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
 diferido. El preview Vercel se publica mediante un flujo independiente con
 migraciones previas. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
@@ -47,7 +50,7 @@ regresión; no forman parte del alcance PostgreSQL certificado de esta entrega.
 | Aplicación                | Next.js 16, React 19, TypeScript                              |
 | API y validación          | Route Handlers de Next.js, Zod                                |
 | Persistencia              | PostgreSQL 18, driver pg, transacciones y RLS                 |
-| Archivos privados         | Google Cloud Storage; metadatos en PostgreSQL                 |
+| Archivos privados         | GCS o filesystem local privado; metadatos en PostgreSQL       |
 | Runtime                   | Node.js 24, Docker, Next standalone                           |
 | Infraestructura preparada | Cloud Run, Cloud SQL, Secret Manager, Terraform y Cloud Build |
 
@@ -116,6 +119,7 @@ repositorio de distribución; no se versionan contraseñas.
 | `npm run typecheck` / `npm run lint` | Tipos y análisis estático                                |
 | `npm run test:browser:react`         | Regresión de navegador                                   |
 | `npm run test:postgresql`            | Contenedor final, SQL, permisos, archivos y persistencia |
+| `npm run test:ubuntu:selfhosted`      | Socket Unix, filesystem y reinicios en Docker aislado    |
 | `npm run qa:local`                   | Conjunto amplio de verificaciones locales                |
 | `npm run audit:verify`               | Integridad de los registros de revisión                  |
 

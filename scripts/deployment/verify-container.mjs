@@ -57,7 +57,13 @@ function runOperator(args, env) {
       env,
       encoding: 'utf8',
     });
-  const privateEnv = { ...env, PGHOST: 'db', PGPORT: '5432' };
+  const privateEnv = {
+    ...env,
+    ANALIZA_DB_TRANSPORT: 'tcp',
+    ANALIZA_FILE_STORAGE: 'gcs',
+    PGHOST: 'db',
+    PGPORT: '5432',
+  };
   const keys = Object.keys(privateEnv).filter((key) =>
     /^(PG(HOST|PORT|DATABASE|USER|PASSWORD)|ANALIZA_(QA_|MIGRATION_|PG_RUNTIME_|PROVISION_))/.test(
       key,
@@ -275,7 +281,7 @@ for (let i = 0; i < 40; i++) {
 const envPath = out + '/runtime.env';
 await writeFile(
   envPath,
-  `PGHOST=db\nPGPORT=5432\nPGDATABASE=analiza_qa\nPGUSER=analiza_runtime\nPGPASSWORD=${appSecret}\nPGPOOL_MAX=5\nANALIZA_QA_MODE=1\nGCS_PRIVATE_BUCKET=analiza-private-qa\nANALIZA_QA_STORAGE_EMULATOR=http://gcs:4443\n`,
+  `ANALIZA_DB_TRANSPORT=tcp\nPGHOST=db\nPGPORT=5432\nPGDATABASE=analiza_qa\nPGUSER=analiza_runtime\nPGPASSWORD=${appSecret}\nPGPOOL_MAX=5\nANALIZA_QA_MODE=1\nANALIZA_FILE_STORAGE=gcs\nGCS_PRIVATE_BUCKET=analiza-private-qa\nANALIZA_QA_STORAGE_EMULATOR=http://gcs:4443\n`,
 );
 docker([
   'run',

@@ -1,0 +1,43 @@
+services:
+  analiza-web:
+    image: ${ANALIZA_IMAGE:-analiza-web:selfhosted}
+    build:
+      context: ../..
+      args:
+        DATA_MODE: postgresql
+        SOURCE_SHA: ${SOURCE_SHA:-local-unversioned}
+    env_file:
+      - ${ANALIZA_ENV_FILE:-.env}
+    environment:
+      PORT: 8080
+      HOSTNAME: 0.0.0.0
+      ANALIZA_DATA_MODE: postgresql
+      NEXT_PUBLIC_DATA_MODE: postgresql
+      NEXT_PUBLIC_RELEASE_PROFILE: core
+      ANALIZA_DB_TRANSPORT: unix
+      PGHOST: /var/run/postgresql
+      PGPORT: 5432
+      ANALIZA_FILE_STORAGE: filesystem
+      ANALIZA_FILES_PATH: /data/private-files
+    ports:
+      - '127.0.0.1:${ANALIZA_HOST_PORT:-8080}:8080'
+    volumes:
+      - type: bind
+        source: /var/run/postgresql
+        target: /var/run/postgresql
+        read_only: true
+      - type: bind
+        source: /opt/analiza/files
+        target: /data/private-files
+    user: '1000:1000'
+    group_add:
+      - '${POSTGRES_SOCKET_GID:?Set the host postgres group GID}'
+    init: true
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,uid=1000,gid=1000,mode=1777
+      - /app/apps/web/.next/cache:rw,noexec,nosuid,size=64m,uid=1000,gid=1000,mode=0700
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 10s

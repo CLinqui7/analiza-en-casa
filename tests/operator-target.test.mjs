@@ -52,3 +52,23 @@ test('runtime role provisioning has independent authorization and requires a str
   );
   assert.throws(() => assertProvisionTarget({ ...provision, ANALIZA_PG_RUNTIME_PASSWORD: '' }));
 });
+test('self-hosted runtime provisioning requires the exact Unix socket and explicit approval', () => {
+  const selfHosted = {
+    ANALIZA_ENVIRONMENT: 'selfhosted',
+    ANALIZA_SELFHOSTED_PROVISION_APPROVED: '1',
+    ANALIZA_PROVISION_RUNTIME_APPROVED: '1',
+    ANALIZA_DB_TRANSPORT: 'unix',
+    PGHOST: '/var/run/postgresql',
+    PGDATABASE: 'analiza_en_casa',
+    ANALIZA_PG_RUNTIME_PASSWORD: 'synthetic-test-only-credential-32chars',
+  };
+  assert.doesNotThrow(() => assertProvisionTarget(selfHosted));
+  for (const invalid of [
+    { ANALIZA_SELFHOSTED_PROVISION_APPROVED: '0' },
+    { ANALIZA_DB_TRANSPORT: 'tcp' },
+    { PGHOST: '/tmp/postgresql' },
+    { PGDATABASE: 'postgres' },
+    { CLOUD_RUN_JOB: 'unexpected' },
+  ])
+    assert.throws(() => assertProvisionTarget({ ...selfHosted, ...invalid }));
+});

@@ -12,12 +12,14 @@ services:
     environment:
       PORT: ${PORT:-8080}
       HOSTNAME: 0.0.0.0
+      ANALIZA_DB_TRANSPORT: ${ANALIZA_DB_TRANSPORT:?Set cloudsql, unix, or tcp explicitly}
       PGHOST: ${PGHOST:?Set the approved Cloud SQL socket or QA host}
       PGPORT: ${PGPORT:-5432}
       PGDATABASE: ${PGDATABASE:?Set the database name}
       PGUSER: ${PGUSER:?Set the restricted database user}
       PGPASSWORD: ${PGPASSWORD:?Load the runtime secret privately}
       PGPOOL_MAX: ${PGPOOL_MAX:-5}
+      ANALIZA_FILE_STORAGE: ${ANALIZA_FILE_STORAGE:?Set gcs or filesystem explicitly}
       GCS_PRIVATE_BUCKET: ${GCS_PRIVATE_BUCKET:?Set the private bucket}
       ANALIZA_QA_MODE: ${ANALIZA_QA_MODE:-0}
     init: true

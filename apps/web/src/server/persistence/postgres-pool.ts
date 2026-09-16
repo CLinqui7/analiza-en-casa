@@ -1,6 +1,33 @@
 import { Pool, type PoolClient, type PoolConfig } from 'pg';
 import type { ServerActor } from '../validation/patients';
 
+type DatabaseTransport = 'cloudsql' | 'unix' | 'tcp';
+
+function databaseTransport(
+  env: Readonly<Record<string, string | undefined>>,
+  host: string,
+): DatabaseTransport {
+  const transport = env.ANALIZA_DB_TRANSPORT;
+  if (transport !== 'cloudsql' && transport !== 'unix' && transport !== 'tcp')
+    throw new Error('ANALIZA_DB_TRANSPORT debe ser cloudsql, unix o tcp.');
+  if (transport === 'cloudsql' && !/^\/cloudsql\/[^/]+$/.test(host))
+    throw new Error('Cloud SQL requiere un socket /cloudsql/<connection-name>.');
+  if (transport === 'unix' && host !== '/var/run/postgresql')
+    throw new Error('PostgreSQL Unix requiere PGHOST=/var/run/postgresql.');
+  if (transport === 'tcp') {
+    const validHostname =
+      host.length <= 253 &&
+      !host.includes('/') &&
+      !host.includes('://') &&
+      !/\s/.test(host) &&
+      host !== '0.0.0.0' &&
+      host !== '::' &&
+      /^(?:\[[0-9a-f:.]+\]|[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?)$/i.test(host);
+    if (!validHostname) throw new Error('TCP requiere un PGHOST válido y explícito.');
+  }
+  return transport;
+}
+
 export function postgresConfig(
   env: Readonly<Record<string, string | undefined>> = process.env,
 ): PoolConfig {
@@ -8,9 +35,7 @@ export function postgresConfig(
   const { PGHOST: host, PGDATABASE: database, PGUSER: user, PGPASSWORD: password } = env;
   if (!host || !database || !user || !password)
     throw new Error('Falta configuración privada PostgreSQL.');
-  const localQa = env.ANALIZA_QA_MODE === '1' && !env.K_SERVICE;
-  if (!host.startsWith('/cloudsql/') && !localQa)
-    throw new Error('Se requiere el socket administrado de Cloud SQL.');
+  databaseTransport(env, host);
   const max = Number(env.PGPOOL_MAX ?? 5);
   if (!Number.isInteger(max) || max < 1 || max > 50)
     throw new Error('Pool PostgreSQL fuera de límites.');

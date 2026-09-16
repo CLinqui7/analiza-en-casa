@@ -153,6 +153,10 @@ resource "google_cloud_run_v2_service" "staging" {
         cpu_idle = true
       }
       env {
+        name  = "ANALIZA_DB_TRANSPORT"
+        value = "cloudsql"
+      }
+      env {
         name  = "PGHOST"
         value = "/cloudsql/${local.connection_name}"
       }
@@ -163,6 +167,10 @@ resource "google_cloud_run_v2_service" "staging" {
       env {
         name  = "PGPOOL_MAX"
         value = tostring(var.pool_max)
+      }
+      env {
+        name  = "ANALIZA_FILE_STORAGE"
+        value = "gcs"
       }
       env {
         name  = "GCS_PRIVATE_BUCKET"

@@ -42,7 +42,7 @@ Esta ruta incluye Core, registro individual y cuestionario con persistencia Post
 RLS y contenedor `operator` separado. La migración 002 agrega perfiles y directorios
 sin modificar la migración 001 ni borrar datos. El despliegue cloud queda diferido.
 
-Variables: [web PostgreSQL](../../config/postgresql/runtime.example) y [operator](../../config/operator/runtime.example). `PGPASSWORD` es secreto; en Cloud Run se inyecta mediante Secret Manager. `PGUSER` del operator debe ser distinto del usuario restringido de la web. `PGHOST` es `/cloudsql/PROJECT:REGION:INSTANCE` cuando se utiliza el socket administrado. La Service Account proporciona la identidad para Cloud SQL y GCS; no se necesita entregar una clave JSON.
+Variables: [web PostgreSQL](../../config/postgresql/runtime.example) y [operator](../../config/operator/runtime.example). `PGPASSWORD` es secreto; en Cloud Run se inyecta mediante Secret Manager. `PGUSER` del operator debe ser distinto del usuario restringido de la web. Cloud Run selecciona explícitamente `ANALIZA_DB_TRANSPORT=cloudsql`, usa `PGHOST=/cloudsql/PROJECT:REGION:INSTANCE` y selecciona `ANALIZA_FILE_STORAGE=gcs`. La Service Account proporciona la identidad para Cloud SQL y GCS; no se necesita entregar una clave JSON.
 
 ```sh
 docker build --target operator -t analiza-operator:postgresql .
@@ -50,7 +50,7 @@ docker run --rm analiza-operator:postgresql --dry-run
 docker run --rm --env-file .local/operator.env analiza-operator:postgresql --migrate
 ```
 
-Para una base local Docker, añadir `--network NOMBRE_DE_LA_RED` y usar el nombre del contenedor PostgreSQL como `PGHOST`. El socket Cloud SQL solo existe cuando está montado por el entorno cloud/proxy. Los scripts SQL se aplican en orden, con transacciones, checksum y bloqueo asesor; un error devuelve un código distinto de cero. El seed sintético es una operación explícita separada, nunca parte automática del arranque web.
+Para una base local Docker por red, añadir `--network NOMBRE_DE_LA_RED`, seleccionar `ANALIZA_DB_TRANSPORT=tcp` y usar el nombre del contenedor PostgreSQL como `PGHOST`. Para Ubuntu en la misma máquina, seleccionar `unix` y montar `/var/run/postgresql`, como explica [UBUNTU_SELF_HOSTED](UBUNTU_SELF_HOSTED.md). El socket Cloud SQL solo existe cuando está montado por el entorno cloud/proxy. Los scripts SQL se aplican en orden, con transacciones, checksum y bloqueo asesor; un error devuelve un código distinto de cero. El seed sintético es una operación explícita separada, nunca parte automática del arranque web.
 
 `scripts/deployment/deploy-staging.ps1` prepara una secuencia sobre recursos existentes: actualizar la imagen operator por digest, ejecutar `analiza-staging-migrate --wait`, y solo después actualizar `analiza-staging`. Sin `-Execute` imprime el plan. Con `-Execute` modifica staging y puede generar costos; el ingeniero debe autorizarlo. No crea infraestructura ni toca `analiza-prod`.
 
