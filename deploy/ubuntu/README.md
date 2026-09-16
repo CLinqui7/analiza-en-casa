@@ -51,6 +51,8 @@ Sustituya `PGPASSWORD=CHANGE_ME`. No copie contraseñas en Git ni las imprima en
 
 Las migraciones no se ejecutan al arrancar la web. Cree un archivo local `deploy/ubuntu/operator.env` (queda ignorado por Git), con permisos `600`:
 
+Las cuentas registradas en esta entrega reciben acceso `ADMIN` para que todo el equipo pueda ver y usar todos los módulos. La migración `005_all_memberships_admin.sql` actualiza también las membresías existentes y conserva la validación de sesión, organización y aislamiento de datos.
+
 ```dotenv
 PGHOST=/var/run/postgresql
 PGPORT=5432

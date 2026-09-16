@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AppProviders } from '@/components/providers';
 import './globals.css';
 import './studio.css';
+import './design-system.css';
 
 export const metadata: Metadata = {
   title: {

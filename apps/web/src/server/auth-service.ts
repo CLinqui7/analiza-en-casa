@@ -237,7 +237,7 @@ export class AuthService {
     const membership: MembershipRecord = {
       userId: user.id,
       organizationId: randomUUID(),
-      role: 'NURSE',
+      role: 'ADMIN',
       active: true,
     };
     const sessionToken = randomSecret();

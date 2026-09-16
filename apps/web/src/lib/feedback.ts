@@ -4,20 +4,41 @@ export const feedbackModules = [
   ['DASHBOARD', 'Dashboard'],
   ['PATIENTS', 'Pacientes'],
   ['AGENDA', 'Agenda'],
-  ['HOSPITALIZATIONS', 'Hospitalización'],
+  ['HOSPITALIZATIONS', 'Hospitalizaciones'],
+  ['QUOTES', 'Cotizaciones'],
+  ['RECEIVABLES', 'Cuentas por cobrar'],
+  ['PAYABLES', 'Cuentas por pagar'],
+  ['PAYMENTS', 'Pagos'],
+  ['INSURANCE', 'Preautorizaciones y reclamos'],
+  ['CLINICAL', 'Expediente clínico'],
   ['NURSING', 'Enfermería'],
   ['MEDICATIONS', 'Medicamentos'],
+  ['DOCTORS', 'Médicos y recursos'],
   ['INVENTORY', 'Inventario'],
+  ['PURCHASES', 'Compras'],
+  ['CATALOGS', 'Catálogos'],
   ['REPORTS', 'Reportes'],
+  ['FILES', 'Archivos y adjuntos'],
   ['ACCESS', 'Inicio de sesión o registro'],
-  ['OTHER', 'Otro módulo'],
+  ['NAVIGATION', 'Menú o navegación'],
+  ['OTHER', 'Otra función'],
 ] as const;
 
 export const feedbackCategories = [
-  ['ERROR', 'Encontré un error'],
-  ['QUESTION', 'Tengo una pregunta'],
-  ['IMPROVEMENT', 'Quiero proponer una mejora'],
+  ['ERROR', 'Reportar un error'],
+  ['QUESTION', 'Hacer una pregunta'],
+  ['NEW_FEATURE', 'Pedir una función nueva'],
+  ['CHANGE', 'Solicitar una modificación'],
+  ['IMPROVEMENT', 'Proponer una mejora'],
 ] as const;
+
+export const feedbackCategoryHelp: Record<(typeof feedbackCategories)[number][0], string> = {
+  ERROR: 'Algo no funciona o muestra información incorrecta.',
+  QUESTION: 'Necesitas ayuda para entender o usar una función.',
+  NEW_FEATURE: 'Quieres añadir una herramienta que todavía no existe.',
+  CHANGE: 'Quieres cambiar una función o pantalla existente.',
+  IMPROVEMENT: 'Tienes una idea para hacer el trabajo más claro o rápido.',
+};
 
 const moduleSchema = z.enum(feedbackModules.map(([value]) => value));
 const categorySchema = z.enum(feedbackCategories.map(([value]) => value));

@@ -133,7 +133,11 @@ export class MongoOperationsRepository {
       can(actor.role, 'reports:read')
         ? this.database
             .collection('memberships')
-            .find({ ...query, active: true, role: { $in: ['NURSE', 'NURSE_MANAGER', 'DOCTOR'] } })
+            .find({
+              ...query,
+              active: true,
+              role: { $in: ['ADMIN', 'NURSE', 'NURSE_MANAGER', 'DOCTOR'] },
+            })
             .toArray()
             .then(async (memberships) => {
               const ids = memberships.map((row) => row.userId);
@@ -534,7 +538,7 @@ export class MongoOperationsRepository {
           // Nurse managers cannot choose a role, reuse an existing identity, or cross organizations.
           await this.database
             .collection('memberships')
-            .insertOne({ ...scoped, userId, role: 'NURSE', active: true }, { session });
+            .insertOne({ ...scoped, userId, role: 'ADMIN', active: true }, { session });
           await this.database
             .collection('nursingResources')
             .insertOne({ ...input.resource, ...scoped, userId }, { session });
@@ -752,7 +756,10 @@ export class MongoOperationsRepository {
               userId: visit.professionalUserId,
               active: true,
               role: {
-                $in: visit.profession === 'NURSE' ? ['NURSE', 'NURSE_MANAGER'] : ['DOCTOR'],
+                $in:
+                  visit.profession === 'NURSE'
+                    ? ['ADMIN', 'NURSE', 'NURSE_MANAGER']
+                    : ['ADMIN', 'DOCTOR'],
               },
             },
             { session },

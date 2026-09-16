@@ -28,7 +28,18 @@ export async function listLocalFeedback(userId: string): Promise<FeedbackReport[
     return rows
       .filter((row) => row.userId === userId)
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
-      .map((row) => feedbackReportSchema.parse(row));
+      .map((row) =>
+        feedbackReportSchema.parse({
+          id: row.id,
+          module: row.module,
+          category: row.category,
+          description: row.description,
+          imageName: row.imageName,
+          imageMime: row.imageMime,
+          createdAt: row.createdAt,
+          status: row.status,
+        }),
+      );
   } finally {
     db.close();
   }

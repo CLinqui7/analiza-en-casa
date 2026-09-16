@@ -107,5 +107,9 @@
     "@axe-core/playwright": "^4.11.0",
     "@playwright/test": "^1.62.1",
     "prettier": "^3.6.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true
   }
 }

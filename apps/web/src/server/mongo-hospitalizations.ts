@@ -99,7 +99,7 @@ export class MongoHospitalizationRepository {
           userId: resource.userId,
           organizationId: actor.organizationId,
           active: true,
-          role: { $in: ['NURSE', 'NURSE_MANAGER'] },
+          role: { $in: ['ADMIN', 'NURSE', 'NURSE_MANAGER'] },
         }))
       )
         throw new MongoInputError('Una enfermera no tiene una cuenta activa en esta organización.');

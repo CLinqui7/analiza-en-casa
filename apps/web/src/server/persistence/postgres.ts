@@ -91,7 +91,7 @@ function entityRepository<T extends Entity, K extends string>(
       throw new MongoInputError('Asigne al menos una enfermera con cuenta de usuario.');
     const nurses = await client.query(
       `SELECT r.id,r.user_id FROM analiza.nursing_resources r JOIN analiza.memberships m ON m.user_id=r.user_id AND m.organization_id=r.organization_id
-      WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('NURSE','NURSE_MANAGER')`,
+      WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER')`,
       [actor.organizationId, ids],
     );
     if (nurses.rowCount !== ids.length)
@@ -360,7 +360,7 @@ export function postgresPersistence(): Persistence {
         if (can(actor.role, 'reports:read'))
           result.professionals = (
             await c.query(
-              `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('NURSE','NURSE_MANAGER','DOCTOR')`,
+              `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
               [actor.organizationId],
             )
           ).rows.map((r) => ({
@@ -418,7 +418,7 @@ export function postgresPersistence(): Persistence {
               [id, data.email.trim().toLowerCase(), hash, resource.displayName],
             );
             await c.query(
-              "INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,'NURSE')",
+              "INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,'ADMIN')",
               [id, actor.organizationId],
             );
             await c.query(
@@ -450,14 +450,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 4 ||
+        row.migrations !== 5 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');

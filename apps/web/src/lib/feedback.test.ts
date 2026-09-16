@@ -7,7 +7,7 @@ import {
 } from '@/lib/feedback';
 
 describe('nurse feedback', () => {
-  it('accepts a structured question, error, or improvement', () => {
+  it('accepts structured errors, questions, additions, changes, and improvements', () => {
     expect(
       feedbackInputSchema.safeParse({
         module: 'MEDICATIONS',
@@ -15,6 +15,15 @@ describe('nurse feedback', () => {
         description: 'Me gustaría encontrar los medicamentos con una búsqueda más rápida.',
       }).success,
     ).toBe(true);
+    for (const category of ['ERROR', 'QUESTION', 'NEW_FEATURE', 'CHANGE', 'IMPROVEMENT']) {
+      expect(
+        feedbackInputSchema.safeParse({
+          module: 'NAVIGATION',
+          category,
+          description: 'Descripción suficientemente detallada para el equipo.',
+        }).success,
+      ).toBe(true);
+    }
   });
 
   it('rejects unknown modules and descriptions without enough detail', () => {

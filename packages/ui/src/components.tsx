@@ -4,16 +4,85 @@ import {
   useEffect,
   useId,
   type ButtonHTMLAttributes,
+  type HTMLAttributes,
   type PropsWithChildren,
   type ReactNode,
 } from 'react';
 
-export function Button({ className = '', ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button className={`button ${className}`.trim()} {...props} />;
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
+
+export function Button({
+  className = '',
+  variant = 'primary',
+  loading = false,
+  disabled,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant;
+  loading?: boolean;
+}) {
+  const variantClass = variant === 'primary' ? '' : `button-${variant}`;
+  return (
+    <button
+      aria-busy={loading || undefined}
+      className={`button ${variantClass} ${className}`.trim()}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function IconButton({
+  label,
+  className = '',
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+  return <button aria-label={label} className={`icon-button ${className}`.trim()} {...props} />;
 }
 
 export function Panel({ children, className = '' }: PropsWithChildren<{ className?: string }>) {
   return <section className={`panel ${className}`.trim()}>{children}</section>;
+}
+
+export function Card({
+  children,
+  className = '',
+  interactive = false,
+  ...props
+}: PropsWithChildren<HTMLAttributes<HTMLElement> & { interactive?: boolean }>) {
+  return (
+    <article
+      className={`card ${interactive ? 'interactive-card' : ''} ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </article>
+  );
+}
+
+export function SectionHeader({
+  title,
+  description,
+  actions,
+  className = '',
+}: {
+  title: string;
+  description?: string;
+  actions?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <header className={`section-header ${className}`.trim()}>
+      <div>
+        <h2>{title}</h2>
+        {description ? <p>{description}</p> : null}
+      </div>
+      {actions ? <div className="section-header-actions">{actions}</div> : null}
+    </header>
+  );
 }
 
 export function StatusTag({
@@ -29,6 +98,20 @@ export function EmptyState({ title, detail }: { title: string; detail: string })
       <strong>{title}</strong>
       <span>{detail}</span>
     </div>
+  );
+}
+
+export function Skeleton({
+  className = '',
+  width,
+  height = 16,
+}: {
+  className?: string;
+  width?: number | string;
+  height?: number | string;
+}) {
+  return (
+    <span aria-hidden="true" className={`skeleton ${className}`.trim()} style={{ width, height }} />
   );
 }
 
