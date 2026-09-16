@@ -13,6 +13,52 @@
   max-width: 760px;
   line-height: 1.6;
 }
+.nurse-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.database-badge {
+  flex: 0 0 auto;
+  border: 1px solid #9cd8d0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #eaf8f7;
+  color: #087367;
+  font-size: 13px;
+  font-weight: 700;
+}
+.nurse-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.nurse-metrics article {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #dce4ec;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: #fff;
+}
+.nurse-metrics span,
+.nurse-metrics small {
+  color: #64778a;
+}
+.nurse-metrics strong {
+  color: #123b5d;
+  font-size: 24px;
+}
+.setup-callout {
+  border-left: 4px solid #ee7d89;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  background: #fff7f8;
+  color: #71343b;
+  line-height: 1.5;
+}
 .setup-steps {
   display: flex;
   gap: 8px;
@@ -76,6 +122,14 @@
   font-size: 14px;
   font-weight: 600;
 }
+.setup-grid small {
+  color: #64778a;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.setup-full {
+  grid-column: 1 / -1;
+}
 .setup-grid input,
 .setup-grid textarea,
 .setup-grid select {
@@ -115,6 +169,41 @@
   width: 18px;
   height: 18px;
 }
+.medication-selector {
+  border: 1px solid #dce4ec;
+  border-radius: 12px;
+  padding: 18px;
+  background: #f8fbfd;
+}
+.medication-selector h3 {
+  margin: 0 0 10px;
+}
+.day-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0 22px;
+}
+.day-selector label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #c5d1df;
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.day-selector label.selected {
+  border-color: #087e8b;
+  background: #eaf8f7;
+  color: #075c66;
+}
+.day-selector input {
+  accent-color: #087e8b;
+}
 .setup-actions {
   display: flex;
   align-items: center;
@@ -131,6 +220,16 @@
   color: #9b2732;
 }
 @media (max-width: 640px) {
+  .nurse-heading {
+    display: block;
+  }
+  .database-badge {
+    display: inline-block;
+    margin-top: 8px;
+  }
+  .nurse-metrics {
+    grid-template-columns: 1fr;
+  }
   .setup-grid {
     grid-template-columns: 1fr;
   }

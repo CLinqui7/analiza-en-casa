@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { mongoMutationHeaders } from '@/lib/auth';
+import { isDemoAuthMode, mongoMutationHeaders } from '@/lib/auth';
+import { NurseSetupForm } from '@/components/nurse-setup-form';
 import {
   emptyWorkspaceSetup,
   workspaceSetupSchema,
@@ -55,6 +56,10 @@ function Field({
 }
 
 export function WorkspaceSetupForm() {
+  return isDemoAuthMode() ? <NurseSetupForm /> : <OrganizationWorkspaceSetupForm />;
+}
+
+function OrganizationWorkspaceSetupForm() {
   const [data, setData] = useState<WorkspaceSetup>(emptyWorkspaceSetup);
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(true);
