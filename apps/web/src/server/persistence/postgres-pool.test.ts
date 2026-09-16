@@ -35,10 +35,10 @@ it('accepts only the declared Neon integration on Vercel', () => {
       DATABASE_URL: connectionString,
     }),
   ).toMatchObject({
-    connectionString,
+    connectionString: `${connectionString}?sslmode=verify-full`,
     max: 5,
     connectionTimeoutMillis: 5000,
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: true },
   });
   expect(() =>
     postgresConfig({
@@ -69,7 +69,7 @@ it('prefers the restricted application connection over the integration owner', (
       DATABASE_URL: owner,
       ANALIZA_DATABASE_URL: restricted,
     }).connectionString,
-  ).toBe(restricted);
+  ).toBe(`${restricted}?sslmode=verify-full`);
 });
 it('rejects missing secrets and unsafe pool bounds without printing values', () => {
   expect(() => postgresConfig({ ...env, PGUSER: '' })).toThrow('configuración');

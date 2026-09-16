@@ -9,6 +9,7 @@ import { isServerDataMode } from '@/lib/data-mode';
 import {
   emptyNurseProfile,
   loadLocalNurseProfile,
+  nurseProfileDraftSchema,
   nurseProfileSchema,
   saveLocalNurseProfile,
   type NurseProfile,
@@ -116,7 +117,12 @@ export function NurseSetupForm() {
                 : 'No pudimos cargar tu perfil.';
             throw new Error(message);
           }
-          profile = nurseProfileSchema.parse(payload);
+          const parsedProfile = nurseProfileDraftSchema.safeParse(payload);
+          if (!parsedProfile.success)
+            throw new Error(
+              'No pudimos interpretar tu perfil. Recarga la página e intenta otra vez.',
+            );
+          profile = parsedProfile.data;
         } else {
           profile = loadLocalNurseProfile(window.localStorage, sessionUserId);
         }
@@ -215,7 +221,10 @@ export function NurseSetupForm() {
               : 'No pudimos guardar tu perfil.';
           throw new Error(message);
         }
-        saved = nurseProfileSchema.parse(payload);
+        const parsedProfile = nurseProfileSchema.safeParse(payload);
+        if (!parsedProfile.success)
+          throw new Error('El servidor no confirmó el perfil guardado. Intenta nuevamente.');
+        saved = parsedProfile.data;
       } else {
         saved = saveLocalNurseProfile(window.localStorage, session.userId, parsed.data);
       }

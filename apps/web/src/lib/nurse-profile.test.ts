@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   emptyNurseProfile,
   loadLocalNurseProfile,
+  nurseProfileDraftSchema,
   nurseProfileSchema,
   saveLocalNurseProfile,
 } from '@/lib/nurse-profile';
@@ -36,6 +37,12 @@ function completedProfile() {
 }
 
 describe('nurse onboarding profile', () => {
+  it('accepts a blank first-time draft without treating it as a completed questionnaire', () => {
+    const draft = emptyNurseProfile();
+    expect(nurseProfileDraftSchema.safeParse(draft).success).toBe(true);
+    expect(nurseProfileSchema.safeParse(draft).success).toBe(false);
+  });
+
   it('validates the nurse, workload, medications, and schedule sections', () => {
     const profile = completedProfile();
     profile.completedAt = new Date().toISOString();

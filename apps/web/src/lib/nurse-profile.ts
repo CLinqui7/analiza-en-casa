@@ -4,21 +4,23 @@ const trimmedText = (maximum: number) => z.string().trim().max(maximum);
 const email = z.union([z.literal(''), z.string().trim().toLowerCase().pipe(z.email().max(254))]);
 const daySchema = z.enum(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']);
 
-export const nurseProfileSchema = z
+const profileDraftSchema = z
+  .object({
+    fullName: trimmedText(160),
+    role: z.enum(['GENERAL_NURSE', 'NURSING_ASSISTANT', 'HEAD_NURSE', 'CAREGIVER', 'OTHER']),
+    professionalId: trimmedText(80),
+    email,
+    phone: trimmedText(40),
+    yearsExperience: z.number().int().min(0).max(70),
+    mainFunctions: trimmedText(2000),
+  })
+  .strict();
+
+export const nurseProfileDraftSchema = z
   .object({
     expectedVersion: z.number().int().nonnegative(),
     completedAt: z.string().datetime().optional(),
-    profile: z
-      .object({
-        fullName: trimmedText(160).min(2),
-        role: z.enum(['GENERAL_NURSE', 'NURSING_ASSISTANT', 'HEAD_NURSE', 'CAREGIVER', 'OTHER']),
-        professionalId: trimmedText(80),
-        email,
-        phone: trimmedText(40),
-        yearsExperience: z.number().int().min(0).max(70),
-        mainFunctions: trimmedText(2000).min(10),
-      })
-      .strict(),
+    profile: profileDraftSchema,
     workload: z
       .object({
         maxPatients: z.number().int().min(1).max(100),
@@ -41,7 +43,14 @@ export const nurseProfileSchema = z
   })
   .strict();
 
-export type NurseProfile = z.infer<typeof nurseProfileSchema>;
+export const nurseProfileSchema = nurseProfileDraftSchema.extend({
+  profile: profileDraftSchema.extend({
+    fullName: trimmedText(160).min(2, 'Escribe tu nombre completo.'),
+    mainFunctions: trimmedText(2000).min(10, 'Describe brevemente tus funciones principales.'),
+  }),
+});
+
+export type NurseProfile = z.infer<typeof nurseProfileDraftSchema>;
 export type NurseWorkDay = z.infer<typeof daySchema>;
 
 export function emptyNurseProfile(): NurseProfile {
@@ -84,7 +93,7 @@ export function loadLocalNurseProfile(storage: Storage, userId: string): NursePr
   try {
     const raw = storage.getItem(storageKey(userId));
     if (!raw) return emptyNurseProfile();
-    const parsed = nurseProfileSchema.safeParse(JSON.parse(raw));
+    const parsed = nurseProfileDraftSchema.safeParse(JSON.parse(raw));
     return parsed.success ? parsed.data : emptyNurseProfile();
   } catch {
     return emptyNurseProfile();

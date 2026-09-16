@@ -12,7 +12,8 @@ function restrictedNeonConnection() {
   const target = new URL(process.env.ANALIZA_DATABASE_URL);
   if (target.protocol !== 'postgresql:' || !target.hostname.endsWith('.neon.tech'))
     throw new Error('PostgreSQL target is not authorized.');
-  return process.env.ANALIZA_DATABASE_URL;
+  target.searchParams.set('sslmode', 'verify-full');
+  return target.toString();
 }
 
 /** Public readiness probe. It never returns credentials, topology, or database errors. */
@@ -22,7 +23,7 @@ export default async function handler(_request, response) {
   try {
     client = new Client({
       connectionString: restrictedNeonConnection(),
-      ssl: { rejectUnauthorized: false },
+      ssl: { rejectUnauthorized: true },
       connectionTimeoutMillis: 5000,
       statement_timeout: 5000,
       query_timeout: 6000,

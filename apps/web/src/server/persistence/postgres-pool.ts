@@ -24,9 +24,10 @@ export function postgresConfig(
     ) {
       throw new Error('La conexión PostgreSQL administrada no está autorizada.');
     }
+    target.searchParams.set('sslmode', 'verify-full');
     return {
-      connectionString,
-      ssl: { rejectUnauthorized: false },
+      connectionString: target.toString(),
+      ssl: { rejectUnauthorized: true },
       max,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,
