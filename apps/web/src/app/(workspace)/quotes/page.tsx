@@ -75,56 +75,55 @@ type CatalogEntry = { id: string; label: string; inventoryAvailable: boolean };
 const serviceCatalog: CatalogEntry[] = [
   {
     id: 'service-demo-available',
-    label: 'Servicio sintético disponible',
+    label: 'Servicio de atención disponible',
     inventoryAvailable: true,
   },
   {
     id: 'service-demo-unavailable',
-    label: 'Servicio sintético sin disponibilidad configurada',
+    label: 'Servicio sin disponibilidad configurada',
     inventoryAvailable: false,
   },
 ];
 const medicationCatalog: CatalogEntry[] = [
   {
     id: 'medication-demo-available',
-    label: 'Medicamento sintético disponible',
+    label: 'Medicamento disponible',
     inventoryAvailable: true,
   },
   {
     id: 'medication-demo-unavailable',
-    label: 'Medicamento sintético sin disponibilidad configurada',
+    label: 'Medicamento sin disponibilidad configurada',
     inventoryAvailable: false,
   },
 ];
 const supplyCatalog: CatalogEntry[] = [
   {
     id: 'supply-demo-available',
-    label: 'INS-SYN-001 | Insumo sintético disponible — Fabricante sintético (1)',
+    label: 'INS-001 | Insumo disponible (1)',
     inventoryAvailable: true,
   },
   {
     id: 'supply-demo-unavailable',
-    label:
-      'INS-SYN-002 | Insumo sintético sin disponibilidad configurada — Fabricante sintético (0)',
+    label: 'INS-002 | Insumo sin disponibilidad configurada (0)',
     inventoryAvailable: false,
   },
 ];
 const studyCatalog: CatalogEntry[] = [
   {
     id: 'study-demo-available',
-    label: 'Estudio sintético de hemoglobina disponible',
+    label: 'Estudio de hemoglobina disponible',
     inventoryAvailable: true,
   },
   {
     id: 'study-demo-unavailable',
-    label: 'Estudio sintético sin disponibilidad configurada',
+    label: 'Estudio sin disponibilidad configurada',
     inventoryAvailable: false,
   },
 ];
 const feeServiceCatalog: CatalogEntry[] = [
-  { id: 'fee-demo-follow-up', label: 'Seguimiento sintético disponible', inventoryAvailable: true },
+  { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
-const businessPartners = ['Socio sintético A', 'Socio sintético B'];
+const businessPartners = ['Socio de negocios A', 'Socio de negocios B'];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 function updatedCategoryPercentages(
   existing: QuoteDiscount['categories'],
@@ -399,7 +398,7 @@ function QuoteEditor({
         : 'QUOTE-REVISE-CANCEL';
   return (
     <Dialog
-      description="Los importes, descuentos y responsabilidad de seguro son valores manuales de demostración; no se infieren reglas, impuestos ni cobertura."
+      description="Ingrese los importes, descuentos y responsabilidad de seguro. Confirme las reglas, impuestos y cobertura antes de enviar."
       footer={
         <>
           <Button
@@ -714,8 +713,8 @@ function QuoteEditor({
             </label>
           </div>
           <p className="field-help">
-            Los referidos son etiquetas administrativas demostrativas; no aplican descuentos,
-            impuestos, saldo ni cobertura.
+            Los referidos son etiquetas administrativas; no aplican descuentos, impuestos, saldo ni
+            cobertura.
           </p>
         </fieldset>
         {mode === 'revise' ? (

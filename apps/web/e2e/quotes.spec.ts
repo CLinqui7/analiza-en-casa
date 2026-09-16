@@ -388,14 +388,14 @@ test('CH04 quote general sections select patient, referral tags, and the bounded
   await expect(dialog.locator('[data-action-id="QUOTE-SERVICE-CATALOG"] option')).toHaveCount(2);
   await dialog
     .locator('[data-action-id="QUOTE-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético A');
+    .selectOption('Socio de negocios A');
   await dialog
     .locator('[data-action-id="QUOTE-SERVICE-CATALOG"]')
-    .selectOption('Servicio sintético disponible');
+    .selectOption('Servicio de atención disponible');
   await dialog.getByLabel('Cantidad').fill('1');
   await dialog.getByLabel('Precio manual').fill('10');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
-  await expect(dialog.getByText('Socio: Socio sintético A')).toBeVisible();
+  await expect(dialog.getByText('Socio: Socio de negocios A')).toBeVisible();
   await dialog.getByLabel('Resumen operativo').fill('CH04 secciones persistidas');
   await dialog.getByLabel('Comentarios').fill('Comentario administrativo sintético');
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
@@ -406,7 +406,7 @@ test('CH04 quote general sections select patient, referral tags, and the bounded
     ),
   );
   expect(saved.referralSelections).toEqual(['Redes Sociales']);
-  expect(saved.items[0].businessPartnerLabel).toBe('Socio sintético A');
+  expect(saved.items[0].businessPartnerLabel).toBe('Socio de negocios A');
   await page.reload();
   await page
     .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${saved.id}"]`)
@@ -440,34 +440,34 @@ test('CH05 service and medication catalogs search, recover, reset, process, and 
   await expect(
     dialog
       .getByLabel('Resultados de servicios')
-      .getByRole('option', { name: 'Servicio sintético disponible' }),
+      .getByRole('option', { name: 'Servicio de atención disponible' }),
   ).toBeVisible();
   await dialog
     .getByLabel('Resultados de servicios')
-    .getByRole('option', { name: 'Servicio sintético disponible' })
+    .getByRole('option', { name: 'Servicio de atención disponible' })
     .click();
   await expect(
     dialog
       .getByLabel('Resultados de servicios')
-      .getByRole('option', { name: 'Servicio sintético disponible' }),
+      .getByRole('option', { name: 'Servicio de atención disponible' }),
   ).toHaveAttribute('aria-selected', 'true');
-  await expect(dialog.getByLabel('Concepto')).toHaveValue('Servicio sintético disponible');
+  await expect(dialog.getByLabel('Concepto')).toHaveValue('Servicio de atención disponible');
   await dialog
     .locator('[data-action-id="QUOTE-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético A');
+    .selectOption('Socio de negocios A');
   await expect(dialog.getByLabel('Cantidad')).toHaveValue('0');
   await expect(dialog.getByLabel('Cantidad')).toHaveAttribute('aria-required', 'true');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.getByRole('alert')).toHaveText('La cantidad debe ser mayor que cero.');
   await expect(
-    dialog.locator('tbody tr').filter({ hasText: 'Servicio sintético disponible' }),
+    dialog.locator('tbody tr').filter({ hasText: 'Servicio de atención disponible' }),
   ).toHaveCount(0);
   await dialog.getByLabel('Cantidad').fill('2');
   await dialog.getByLabel('Precio manual').fill('12');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.locator('.quote-processing')).toHaveText('Procesando...');
   await expect(
-    dialog.locator('tbody tr').filter({ hasText: 'Servicio sintético disponible' }),
+    dialog.locator('tbody tr').filter({ hasText: 'Servicio de atención disponible' }),
   ).toBeVisible();
 
   await dialog.getByRole('tab', { name: 'Medicamentos' }).click();
@@ -485,26 +485,26 @@ test('CH05 service and medication catalogs search, recover, reset, process, and 
   await expect(
     dialog
       .getByLabel('Resultados de medicamentos')
-      .getByRole('option', { name: 'Medicamento sintético disponible' }),
+      .getByRole('option', { name: 'Medicamento disponible' }),
   ).toBeVisible();
   await dialog
     .getByLabel('Resultados de medicamentos')
-    .getByRole('option', { name: 'Medicamento sintético disponible' })
+    .getByRole('option', { name: 'Medicamento disponible' })
     .click();
   await expect(
     dialog
       .getByLabel('Resultados de medicamentos')
-      .getByRole('option', { name: 'Medicamento sintético disponible' }),
+      .getByRole('option', { name: 'Medicamento disponible' }),
   ).toHaveAttribute('aria-selected', 'true');
   await dialog
     .locator('[data-action-id="QUOTE-MEDICATION-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético B');
+    .selectOption('Socio de negocios B');
   await dialog.getByLabel('Cantidad').fill('1');
   await dialog.getByLabel('Precio manual').fill('9');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.locator('.quote-processing')).toHaveText('Procesando...');
   await expect(
-    dialog.locator('tbody tr').filter({ hasText: 'Medicamento sintético disponible' }),
+    dialog.locator('tbody tr').filter({ hasText: 'Medicamento disponible' }),
   ).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page).toHaveURL(/\/quotes$/);
@@ -516,15 +516,15 @@ test('CH05 service and medication catalogs search, recover, reset, process, and 
   expect(
     saved.items.map((item: { name: string; unitPrice: number }) => [item.name, item.unitPrice]),
   ).toEqual([
-    ['Servicio sintético disponible', 12],
-    ['Medicamento sintético disponible', 9],
+    ['Servicio de atención disponible', 12],
+    ['Medicamento disponible', 9],
   ]);
   await page.reload();
   await page
     .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${saved.id}"]`)
     .click();
-  await expect(page.getByText('Servicio sintético disponible', { exact: true })).toBeVisible();
-  await expect(page.getByText('Medicamento sintético disponible', { exact: true })).toBeVisible();
+  await expect(page.getByText('Servicio de atención disponible', { exact: true })).toBeVisible();
+  await expect(page.getByText('Medicamento disponible', { exact: true })).toBeVisible();
 });
 
 // test-id: playwright:ch06-synthetic-catalogs
@@ -540,7 +540,7 @@ test('CH06 supply, study, and fee catalogs preserve selected synthetic concepts 
   await dialog.getByRole('tab', { name: 'Insumos' }).click();
   await dialog
     .locator('[data-action-id="QUOTE-SUPPLY-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético A');
+    .selectOption('Socio de negocios A');
   await dialog.locator('[data-action-id="QUOTE-SUPPLY-INVENTORY-ONLY"]').check();
   await expect(dialog.getByRole('option', { name: /sin disponibilidad configurada/ })).toHaveCount(
     0,
@@ -548,48 +548,48 @@ test('CH06 supply, study, and fee catalogs preserve selected synthetic concepts 
   const supplySearch = dialog.getByLabel('Buscar insumos');
   await supplySearch.fill('sin coincidencia');
   await expect(dialog.getByRole('status')).toHaveText('No results found');
-  await supplySearch.fill('INS-SYN-001');
+  await supplySearch.fill('INS-001');
   await dialog
     .getByLabel('Resultados de insumos')
-    .getByRole('option', { name: /Insumo sintético disponible/ })
+    .getByRole('option', { name: /Insumo disponible/ })
     .click();
-  await expect(dialog.getByLabel('Concepto')).toHaveValue(/INS-SYN-001/);
+  await expect(dialog.getByLabel('Concepto')).toHaveValue(/INS-001/);
   await dialog.getByLabel('Cantidad').fill('2');
   await dialog.getByLabel('Precio manual').fill('12');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
-  await expect(dialog.locator('tbody tr').filter({ hasText: 'INS-SYN-001' })).toBeVisible();
+  await expect(dialog.locator('tbody tr').filter({ hasText: 'INS-001' })).toBeVisible();
 
   await dialog.getByRole('tab', { name: 'Estudios Dx' }).click();
   await dialog
     .locator('[data-action-id="QUOTE-STUDY-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético B');
+    .selectOption('Socio de negocios B');
   await dialog.locator('[data-action-id="QUOTE-STUDY-INVENTORY-ONLY"]').check();
   const studySearch = dialog.getByLabel('Buscar estudios');
   await studySearch.fill('hemoglobina');
   await dialog
     .getByLabel('Resultados de estudios')
-    .getByRole('option', { name: 'Estudio sintético de hemoglobina disponible' })
+    .getByRole('option', { name: 'Estudio de hemoglobina disponible' })
     .click();
   await dialog.getByLabel('Cantidad').fill('1');
   await dialog.getByLabel('Precio manual').fill('9');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(
-    dialog.locator('tbody tr').filter({ hasText: 'Estudio sintético de hemoglobina disponible' }),
+    dialog.locator('tbody tr').filter({ hasText: 'Estudio de hemoglobina disponible' }),
   ).toBeVisible();
 
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   await dialog
     .locator('[data-action-id="QUOTE-FEE-BUSINESS-PARTNER"]')
-    .selectOption('Socio sintético A');
+    .selectOption('Socio de negocios A');
   await dialog
     .locator('[data-action-id="QUOTE-FEE-SERVICE-CATALOG"]')
-    .selectOption('Seguimiento sintético disponible');
+    .selectOption('Seguimiento disponible');
   await dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]').selectOption({ index: 1 });
   await dialog.getByLabel('Cantidad').fill('1');
   await dialog.getByLabel('Honorario médico (manual)').fill('15');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(
-    dialog.locator('tbody tr').filter({ hasText: 'Seguimiento sintético disponible' }),
+    dialog.locator('tbody tr').filter({ hasText: 'Seguimiento disponible' }),
   ).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page).toHaveURL(/\/quotes$/);
@@ -602,17 +602,15 @@ test('CH06 supply, study, and fee catalogs preserve selected synthetic concepts 
   expect(
     saved.items.map((item: { name: string; unitPrice: number }) => [item.name, item.unitPrice]),
   ).toEqual([
-    ['INS-SYN-001 | Insumo sintético disponible — Fabricante sintético (1)', 12],
-    ['Estudio sintético de hemoglobina disponible', 9],
-    ['Seguimiento sintético disponible', 15],
+    ['INS-001 | Insumo disponible (1)', 12],
+    ['Estudio de hemoglobina disponible', 9],
+    ['Seguimiento disponible', 15],
   ]);
   await page.reload();
   await page
     .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${saved.id}"]`)
     .click();
-  await expect(
-    page.getByText('INS-SYN-001 | Insumo sintético disponible — Fabricante sintético (1)'),
-  ).toBeVisible();
-  await expect(page.getByText('Estudio sintético de hemoglobina disponible')).toBeVisible();
-  await expect(page.getByText('Seguimiento sintético disponible')).toBeVisible();
+  await expect(page.getByText('INS-001 | Insumo disponible (1)')).toBeVisible();
+  await expect(page.getByText('Estudio de hemoglobina disponible')).toBeVisible();
+  await expect(page.getByText('Seguimiento disponible')).toBeVisible();
 });
