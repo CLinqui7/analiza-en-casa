@@ -35,7 +35,7 @@ export function postgresConfig(
   const max = Number(env.PGPOOL_MAX ?? 5);
   if (!Number.isInteger(max) || max < 1 || max > 50)
     throw new Error('Pool PostgreSQL fuera de límites.');
-  const connectionString = env.DATABASE_URL;
+  const connectionString = env.ANALIZA_DATABASE_URL || env.DATABASE_URL;
   if (connectionString) {
     let target: URL;
     try {
@@ -51,9 +51,10 @@ export function postgresConfig(
     ) {
       throw new Error('La conexión PostgreSQL administrada no está autorizada.');
     }
+    target.searchParams.set('sslmode', 'verify-full');
     return {
-      connectionString,
-      ssl: { rejectUnauthorized: false },
+      connectionString: target.toString(),
+      ssl: { rejectUnauthorized: true },
       max,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,

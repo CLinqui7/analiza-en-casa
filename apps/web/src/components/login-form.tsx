@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers';
 import { isDemoAuthMode, mockCredentialHint, safeNextPath } from '@/lib/auth';
 import { isServerDataMode } from '@/lib/data-mode';
-import { loadLocalNurseProfile, nurseProfileSchema } from '@/lib/nurse-profile';
+import { loadLocalNurseProfile, nurseProfileDraftSchema } from '@/lib/nurse-profile';
 import { InstallApp } from '@/components/install-app';
 import { isCoreRelease } from '@/lib/release-profile';
 import { isRegistrationEnabled } from '@/lib/registration';
@@ -55,8 +55,10 @@ export function LoginForm() {
       if (isServerDataMode(nextSession.mode)) {
         const response = await fetch('/api/nurse-profile', { cache: 'no-store' });
         if (response.ok) {
-          const profile = nurseProfileSchema.parse(await response.json());
-          needsQuestionnaire = !profile.completedAt;
+          const profile = nurseProfileDraftSchema.safeParse(await response.json());
+          if (!profile.success)
+            throw new Error('No pudimos interpretar tu perfil. Intenta iniciar sesión nuevamente.');
+          needsQuestionnaire = !profile.data.completedAt;
         }
       } else if (nextSession.mode === 'mock') {
         needsQuestionnaire = !loadLocalNurseProfile(window.localStorage, nextSession.userId)
