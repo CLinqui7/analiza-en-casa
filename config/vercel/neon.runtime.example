@@ -3,7 +3,7 @@ ANALIZA_DATA_MODE=postgresql
 NEXT_PUBLIC_DATA_MODE=postgresql
 ANALIZA_MANAGED_POSTGRES=neon
 
-# Each registration creates an isolated organization and administrator account.
+# Each registration creates an isolated organization and nurse account.
 ANALIZA_REGISTRATION_MODE=isolated
 NEXT_PUBLIC_REGISTRATION_MODE=isolated
 NEXT_PUBLIC_RELEASE_PROFILE=core
@@ -12,3 +12,6 @@ NEXT_PUBLIC_ONBOARDING_PROFILE=nurse
 # Supplied by the Neon Marketplace integration. Keep these values server-only.
 DATABASE_URL=
 DATABASE_URL_UNPOOLED=
+
+# Restricted LOGIN/NOBYPASSRLS role used only by the application at runtime.
+ANALIZA_DATABASE_URL=

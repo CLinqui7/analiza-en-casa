@@ -52,3 +52,19 @@ test('runtime role provisioning has independent authorization and requires a str
   );
   assert.throws(() => assertProvisionTarget({ ...provision, ANALIZA_PG_RUNTIME_PASSWORD: '' }));
 });
+test('runtime role provisioning accepts only an explicitly approved managed Neon target', () => {
+  const provision = {
+    ANALIZA_MANAGED_POSTGRES: 'neon',
+    ANALIZA_MIGRATION_APPROVED: '1',
+    ANALIZA_PROVISION_RUNTIME_APPROVED: '1',
+    ANALIZA_PG_RUNTIME_PASSWORD: 'synthetic-test-only-credential-32chars',
+    DATABASE_URL_UNPOOLED: 'postgresql://owner:synthetic@ep-example.us-east-1.aws.neon.tech/neondb',
+  };
+  assert.equal(assertProvisionTarget(provision), 'vercel-neon');
+  assert.throws(() =>
+    assertProvisionTarget({
+      ...provision,
+      DATABASE_URL_UNPOOLED: 'postgresql://owner:synthetic@database.example.invalid/neondb',
+    }),
+  );
+});

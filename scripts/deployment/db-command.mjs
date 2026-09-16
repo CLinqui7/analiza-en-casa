@@ -104,6 +104,11 @@ try {
         !memberships,
       'Existing runtime role has elevated privileges; refusing to change it silently',
     );
+    if (previous && process.env.ANALIZA_ROTATE_RUNTIME_PASSWORD_APPROVED === '1') {
+      await client.query(
+        `ALTER ROLE ${client.escapeIdentifier(name)} PASSWORD ${client.escapeLiteral(process.env.ANALIZA_PG_RUNTIME_PASSWORD)}`,
+      );
+    }
   }
   if (!seed) {
     await client.query('CREATE SCHEMA IF NOT EXISTS analiza');
@@ -175,11 +180,22 @@ try {
     );
     await client.query(`GRANT SELECT ON analiza.catalog_items TO ${role}`);
     if (provision) {
-      const runtimeCheck = new Client({
+      let runtimeConfig = {
         user: runtimeRole,
         password: process.env.ANALIZA_PG_RUNTIME_PASSWORD,
         connectionTimeoutMillis: 5000,
-      });
+      };
+      if (managedNeon && neonConnectionString) {
+        const runtimeUrl = new URL(neonConnectionString);
+        runtimeUrl.username = runtimeRole;
+        runtimeUrl.password = process.env.ANALIZA_PG_RUNTIME_PASSWORD;
+        runtimeConfig = {
+          connectionString: runtimeUrl.toString(),
+          ssl: { rejectUnauthorized: false },
+          connectionTimeoutMillis: 5000,
+        };
+      }
+      const runtimeCheck = new Client(runtimeConfig);
       try {
         await runtimeCheck.connect();
         await runtimeCheck.query('SELECT version FROM analiza.schema_migrations LIMIT 1');
@@ -193,6 +209,8 @@ try {
         migrations: migrations.map(({ version, sha256 }) => ({ version, sha256 })),
         runtimeRole,
         deleteGranted: false,
+        runtimePasswordRotated:
+          provision && process.env.ANALIZA_ROTATE_RUNTIME_PASSWORD_APPROVED === '1',
       }),
     );
   } else {

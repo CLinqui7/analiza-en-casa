@@ -56,6 +56,21 @@ it('accepts only the declared Neon integration on Vercel', () => {
     }),
   ).toThrow('no está autorizada');
 });
+it('prefers the restricted application connection over the integration owner', () => {
+  const owner =
+    'postgresql://neondb_owner:synthetic-owner@ep-example-pooler.us-east-1.aws.neon.tech/neondb';
+  const restricted =
+    'postgresql://analiza_runtime:synthetic-runtime@ep-example-pooler.us-east-1.aws.neon.tech/neondb';
+  expect(
+    postgresConfig({
+      ANALIZA_DATA_MODE: 'postgresql',
+      ANALIZA_MANAGED_POSTGRES: 'neon',
+      VERCEL: '1',
+      DATABASE_URL: owner,
+      ANALIZA_DATABASE_URL: restricted,
+    }).connectionString,
+  ).toBe(restricted);
+});
 it('rejects missing secrets and unsafe pool bounds without printing values', () => {
   expect(() => postgresConfig({ ...env, PGUSER: '' })).toThrow('configuración');
   for (const max of ['0', '100', '2.5', 'invalid'])

@@ -26,16 +26,37 @@ export function assertSyntheticTarget(env) {
 }
 
 export function assertProvisionTarget(env) {
+  let managedNeon = false;
+  if (
+    env.ANALIZA_MANAGED_POSTGRES === 'neon' &&
+    env.ANALIZA_MIGRATION_APPROVED === '1' &&
+    !env.K_SERVICE &&
+    !env.CLOUD_RUN_JOB
+  ) {
+    try {
+      const target = new URL(env.DATABASE_URL_UNPOOLED || env.DATABASE_URL);
+      managedNeon =
+        target.protocol === 'postgresql:' &&
+        target.hostname.endsWith('.neon.tech') &&
+        target.pathname.length > 1;
+    } catch {
+      managedNeon = false;
+    }
+  }
   assert.ok(
-    !env.CLOUD_RUN_JOB || env.CLOUD_RUN_JOB === 'analiza-staging-migrate',
+    managedNeon || !env.CLOUD_RUN_JOB || env.CLOUD_RUN_JOB === 'analiza-staging-migrate',
     'Role provisioning is limited to the migration operator',
   );
-  const target = {
-    ...env,
-    CLOUD_RUN_JOB:
-      env.CLOUD_RUN_JOB === 'analiza-staging-migrate' ? 'analiza-staging-seed' : env.CLOUD_RUN_JOB,
-  };
-  assertSyntheticTarget(target);
+  if (!managedNeon) {
+    const target = {
+      ...env,
+      CLOUD_RUN_JOB:
+        env.CLOUD_RUN_JOB === 'analiza-staging-migrate'
+          ? 'analiza-staging-seed'
+          : env.CLOUD_RUN_JOB,
+    };
+    assertSyntheticTarget(target);
+  }
   assert.equal(
     env.ANALIZA_PROVISION_RUNTIME_APPROVED,
     '1',
@@ -45,4 +66,5 @@ export function assertProvisionTarget(env) {
     env.ANALIZA_PG_RUNTIME_PASSWORD?.length >= 32,
     'A generated private runtime password is required',
   );
+  return managedNeon ? 'vercel-neon' : 'staging-or-local';
 }
