@@ -8,6 +8,17 @@ import { MongoInputError } from '@/server/validation/patients';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+const feedbackSchemaHeader = 'x-analiza-feedback-schema';
+
+function responseReport<T extends { submittedBy?: string }>(
+  report: T,
+  includeAttribution: boolean,
+) {
+  if (includeAttribution) return report;
+  const compatible = { ...report };
+  delete compatible.submittedBy;
+  return compatible;
+}
 
 function errorResponse(error: unknown) {
   const status =
@@ -48,7 +59,12 @@ export async function GET(request: NextRequest) {
         { status: 404, headers: privateHeaders },
       );
     }
-    return NextResponse.json(await backend.feedback.list(actor), { headers: privateHeaders });
+    const includeAttribution = request.headers.get(feedbackSchemaHeader) === '2';
+    const reports = await backend.feedback.list(actor);
+    return NextResponse.json(
+      reports.map((report) => responseReport(report, includeAttribution)),
+      { headers: privateHeaders },
+    );
   } catch (error) {
     return errorResponse(error);
   }
@@ -94,7 +110,11 @@ export async function POST(request: NextRequest) {
         },
         image,
       );
-      return NextResponse.json(report, { status: 201, headers: privateHeaders });
+      const includeAttribution = request.headers.get(feedbackSchemaHeader) === '2';
+      return NextResponse.json(responseReport(report, includeAttribution), {
+        status: 201,
+        headers: privateHeaders,
+      });
     });
   } catch (error) {
     return errorResponse(error);

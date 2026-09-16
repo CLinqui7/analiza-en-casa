@@ -52,19 +52,21 @@ export function FeedbackForm() {
     void (async () => {
       try {
         const next = serverBacked
-          ? await fetch('/api/feedback', { cache: 'no-store', signal: controller.signal }).then(
-              async (response) => {
-                const payload: unknown = await response.json();
-                if (!response.ok) {
-                  const message =
-                    payload && typeof payload === 'object' && 'error' in payload
-                      ? String(payload.error)
-                      : 'No pudimos cargar tus reportes.';
-                  throw new Error(message);
-                }
-                return feedbackReportSchema.array().parse(payload);
-              },
-            )
+          ? await fetch('/api/feedback', {
+              cache: 'no-store',
+              headers: { 'x-analiza-feedback-schema': '2' },
+              signal: controller.signal,
+            }).then(async (response) => {
+              const payload: unknown = await response.json();
+              if (!response.ok) {
+                const message =
+                  payload && typeof payload === 'object' && 'error' in payload
+                    ? String(payload.error)
+                    : 'No pudimos cargar tus reportes.';
+                throw new Error(message);
+              }
+              return feedbackReportSchema.array().parse(payload);
+            })
           : await listLocalFeedback(session.userId);
         if (active) setReports(next);
       } catch (cause) {
@@ -124,7 +126,7 @@ export function FeedbackForm() {
         if (image) body.set('image', image);
         const response = await fetch('/api/feedback', {
           method: 'POST',
-          headers: mongoMutationHeaders(),
+          headers: { ...mongoMutationHeaders(), 'x-analiza-feedback-schema': '2' },
           body,
         });
         const payload: unknown = await response.json();
