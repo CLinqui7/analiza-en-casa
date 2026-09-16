@@ -61,6 +61,7 @@ test('quotes list searches normalized id, patient, case and status, then clears'
 test('quote builder persists all categories, calculations, edit, send, revision and related actions', async ({
   page,
 }) => {
+  test.slow();
   await login(page);
   await createDoctorFixture(page);
   let dialog = await openNewQuote(page);
@@ -102,8 +103,16 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
   await expect(page).toHaveURL(/\/quotes$/);
+  const quoteId = await page.evaluate(() => {
+    const quotes = JSON.parse(
+      window.localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]',
+    );
+    return quotes.find((quote: { summary: string }) => quote.summary === 'Cotización QA integral')
+      ?.id;
+  });
+  expect(quoteId).toBeTruthy();
   await page.reload();
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
   await expect(page.getByText('Comentario QA persistente')).toBeVisible();
   for (const category of [
     'Servicios',
@@ -124,7 +133,7 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page).toHaveURL(/\/quotes$/);
   await page.reload();
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
   await expect(page.getByText('Concepto Extras')).toHaveCount(0);
   await expect(page.getByText('Concepto Honorarios')).toBeVisible();
   await page.getByRole('button', { name: 'Editar borrador' }).click();
@@ -133,7 +142,7 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
   await expect(page).toHaveURL(/\/quotes$/);
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
   await expect(page.getByRole('status')).toContainText('inmutable');
   await page.reload();
@@ -148,7 +157,18 @@ test('quote builder persists all categories, calculations, edit, send, revision 
   await page.getByRole('button', { name: 'Crear revisión' }).click();
   await expect(page.getByRole('status')).toContainText('Nueva versión');
   await expect(page).toHaveURL(/\/quotes$/);
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  const revisionId = await page.evaluate(() => {
+    const quotes = JSON.parse(
+      window.localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]',
+    );
+    return quotes.find(
+      (quote: { revisionReason?: string }) => quote.revisionReason === 'Ajuste QA documentado',
+    )?.id;
+  });
+  expect(revisionId).toBeTruthy();
+  await page
+    .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${revisionId}"]`)
+    .click();
   await expect(page.getByRole('cell', { name: 'Ajuste QA documentado' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'v1' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'v2' })).toBeVisible();

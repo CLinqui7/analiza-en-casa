@@ -15,6 +15,8 @@ import {
   type Hospitalization,
   type NursingResource,
   type OperationsSnapshot,
+  type Quote,
+  type Shift,
 } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
@@ -435,6 +437,196 @@ export function postgresPersistence(): Persistence {
             throw new MongoInputError('No fue posible crear la cuenta.');
           throw error;
         }
+      }
+      if (command.command === 'workspace.seed-demo') {
+        authorize(actor, 'patients:write');
+        authorize(actor, 'cases:write');
+        return transaction(pool, actor, async (c) => {
+          const account = (
+            await c.query(
+              `SELECT u.display_name,m.role FROM analiza.users u
+               JOIN analiza.memberships m ON m.user_id=u.id
+               WHERE u.id=$1 AND m.organization_id=$2 AND m.active`,
+              [actor.userId, actor.organizationId],
+            )
+          ).rows[0];
+          if (!account || !['ADMIN', 'NURSE', 'NURSE_MANAGER'].includes(account.role))
+            throw new MongoAccessError();
+
+          const resource: NursingResource = nursingResourceSchema.parse({
+            id: `demo-resource-${actor.userId}`,
+            userId: actor.userId,
+            displayName: `${account.display_name} · recurso de prueba`,
+            territory: 'Zona de demostración',
+            shift: 'MORNING',
+            availability: 'AVAILABLE',
+            capacity: 3,
+            boardRegistrationNumber: 'DEMO-001',
+          });
+          const resourceInsert = await c.query(
+            `INSERT INTO analiza.nursing_resources(organization_id,id,user_id,body)
+             VALUES($1,$2,$3,$4::jsonb) ON CONFLICT DO NOTHING`,
+            [actor.organizationId, resource.id, actor.userId, JSON.stringify(resource)],
+          );
+
+          const samples: Patient[] = [
+            {
+              id: 'patient-demo-001',
+              fullName: 'Paciente de prueba Aurora',
+              documentType: 'OTHER',
+              documentId: 'DEMO-001',
+              phone: '7000-0001',
+              insurer: 'Particular',
+              status: 'ACTIVE',
+            },
+            {
+              id: 'patient-demo-002',
+              fullName: 'Paciente de prueba Brisa',
+              documentType: 'OTHER',
+              documentId: 'DEMO-002',
+              phone: '7000-0002',
+              insurer: 'Aseguradora de demostración',
+              status: 'ACTIVE',
+            },
+            {
+              id: 'patient-demo-003',
+              fullName: 'Paciente de prueba Celeste',
+              documentType: 'OTHER',
+              documentId: 'DEMO-003',
+              phone: '7000-0003',
+              status: 'ACTIVE',
+            },
+          ].map((patient) => patientSchema.parse(patient));
+          let patientsCreated = 0;
+          for (const patient of samples) {
+            const inserted = await c.query(
+              `INSERT INTO analiza.patients(organization_id,id,body,document_key)
+               VALUES($1,$2,$3::jsonb,$4) ON CONFLICT DO NOTHING`,
+              [
+                actor.organizationId,
+                patient.id,
+                JSON.stringify(patient),
+                patient.documentId.replace(/\s/g, '').toUpperCase(),
+              ],
+            );
+            patientsCreated += inserted.rowCount ?? 0;
+          }
+
+          const today = new Date().toISOString().slice(0, 10);
+          const hospitalization: Hospitalization = hospitalizationSchema.parse({
+            id: 'case-demo-001',
+            patientId: samples[0].id,
+            startDate: today,
+            admissionPeriods: [{ admissionDate: today }],
+            status: 'ACTIVE',
+            accountType: 'PARTICULAR',
+            priority: 'MEDIUM',
+            diagnosisSummary: 'Caso creado exclusivamente para conocer el flujo del sistema.',
+            nextAction: 'Revisar la cotización de prueba.',
+            assignedNursingResourceIds: [resource.id],
+            assignedNurseUserIds: [actor.userId],
+          });
+          const hospitalizationInsert = await c.query(
+            `INSERT INTO analiza.hospitalizations(organization_id,id,body,patient_id)
+             VALUES($1,$2,$3::jsonb,$4) ON CONFLICT DO NOTHING`,
+            [
+              actor.organizationId,
+              hospitalization.id,
+              JSON.stringify(hospitalization),
+              hospitalization.patientId,
+            ],
+          );
+          await c.query(
+            `INSERT INTO analiza.hospitalization_nurses(organization_id,hospitalization_id,resource_id)
+             VALUES($1,$2,$3) ON CONFLICT(organization_id,hospitalization_id,resource_id)
+             DO UPDATE SET active=true`,
+            [actor.organizationId, hospitalization.id, resource.id],
+          );
+
+          const tomorrow = new Date();
+          tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+          tomorrow.setUTCHours(8, 0, 0, 0);
+          const end = new Date(tomorrow);
+          end.setUTCHours(14, 0, 0, 0);
+          const shift: Shift = shiftSchema.parse({
+            id: 'shift-demo-001',
+            resourceId: resource.id,
+            patientId: samples[0].id,
+            startsAt: tomorrow.toISOString(),
+            endsAt: end.toISOString(),
+            status: 'SCHEDULED',
+            note: 'Turno creado con el botón Datos de prueba.',
+          });
+          const shiftInsert = await c.query(
+            `INSERT INTO analiza.shifts(organization_id,id,resource_id,patient_id,starts_at,ends_at,status,body)
+             VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb) ON CONFLICT DO NOTHING`,
+            [
+              actor.organizationId,
+              shift.id,
+              shift.resourceId,
+              shift.patientId,
+              shift.startsAt,
+              shift.endsAt,
+              shift.status,
+              JSON.stringify(shift),
+            ],
+          );
+
+          let quoteCreated = 0;
+          if (can(actor.role, 'quotes:write')) {
+            const quote: Quote = {
+              id: 'quote-demo-001',
+              caseId: hospitalization.id,
+              patientId: samples[0].id,
+              version: 1,
+              status: 'DRAFT',
+              summary: 'Cotización de prueba para conocer el flujo.',
+              comments: 'Los importes son únicamente un ejemplo editable.',
+              items: [
+                {
+                  id: 'quote-item-demo-001',
+                  category: 'SERVICES',
+                  name: 'Servicio de atención de prueba',
+                  quantity: 1,
+                  unitPrice: 100,
+                  discountAmount: 0,
+                },
+              ],
+              subtotal: 100,
+              discountAmount: 0,
+              total: 100,
+              insurerAmount: 0,
+              patientAmount: 100,
+              immutable: false,
+              createdAt: new Date().toISOString(),
+              rootQuoteId: 'quote-demo-001',
+              originalQuoteId: 'quote-demo-001',
+            };
+            const quoteInsert = await c.query(
+              `INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body)
+               VALUES($1,$2,$3,$4,$5,$6,$7::jsonb) ON CONFLICT DO NOTHING`,
+              [
+                actor.organizationId,
+                quote.id,
+                quote.caseId,
+                quote.patientId,
+                quote.rootQuoteId,
+                quote.version,
+                JSON.stringify(quote),
+              ],
+            );
+            quoteCreated = quoteInsert.rowCount ?? 0;
+          }
+
+          await audit(c, actor, 'DEMO_WORKSPACE_SEEDED', 'workspace', actor.organizationId);
+          return {
+            patientsCreated,
+            resourceCreated: resourceInsert.rowCount ?? 0,
+            hospitalizationCreated: hospitalizationInsert.rowCount ?? 0,
+            shiftCreated: shiftInsert.rowCount ?? 0,
+            quoteCreated,
+          };
+        });
       }
       throw new MongoInputError('Operación no disponible en esta edición.');
     },

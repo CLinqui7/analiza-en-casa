@@ -12,8 +12,17 @@ import { mongoDatabase } from '@/server/mongodb';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+const unavailable = () =>
+  NextResponse.json(
+    { error: 'El acceso seguro no está disponible.' },
+    { status: 503, headers: { 'Cache-Control': 'no-store' } },
+  );
 
 export async function POST(request: NextRequest) {
+  if (process.env.ANALIZA_DATA_MODE !== 'mongodb') return unavailable();
+  // Avoid opening a database connection for anonymous requests. The generic
+  // response does not disclose whether a portal or account exists.
+  if (!request.cookies.get(sessionCookieName)?.value) return unavailable();
   try {
     const database = await mongoDatabase();
     const auth = new MongoAuthService(mongoAuthStore(database));
@@ -34,15 +43,9 @@ export async function POST(request: NextRequest) {
         { status: 400, headers: { 'Cache-Control': 'no-store' } },
       );
     const status = authorizationStatus(error);
+    if (status === 503) return unavailable();
     return NextResponse.json(
-      {
-        error:
-          status === 401
-            ? 'No autorizado.'
-            : status === 403
-              ? 'No tiene autorización.'
-              : 'El acceso seguro no está disponible.',
-      },
+      { error: status === 401 ? 'No autorizado.' : 'No tiene autorización.' },
       { status, headers: { 'Cache-Control': 'no-store' } },
     );
   }

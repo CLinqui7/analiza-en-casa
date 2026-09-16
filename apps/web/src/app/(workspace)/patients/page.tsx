@@ -68,7 +68,7 @@ const contactFormSchema = z.object({
 
 const patientFormSchema = z
   .object({
-    fullName: z.string().trim().min(1, 'Ingrese el nombre para el registro sintético.'),
+    fullName: z.string().trim().min(1, 'Ingrese el nombre del paciente.'),
     documentType: patientDocumentTypeSchema,
     documentId: z.string().trim().min(1, 'El número de documento es obligatorio.'),
     birthDate: z.string().min(1, 'Ingrese la fecha de nacimiento.'),
@@ -517,7 +517,7 @@ export default function PatientsPage() {
     )
       return;
     addPatients(importPreview.rows);
-    setResult(`${importPreview.rows.length} pacientes sintéticos importados.`);
+    setResult(`${importPreview.rows.length} pacientes importados.`);
     setImportOpen(false);
     setImportPreview(null);
     setTab('ACTIVE');
@@ -669,7 +669,7 @@ export default function PatientsPage() {
         ? `Paciente ${patient.fullName} actualizado y persistido.`
         : isServerDataMode(providerMode)
           ? `Paciente ${patient.fullName} registrado.`
-          : `Registro sintético agregado para ${patient.fullName}.`,
+          : `Paciente ${patient.fullName} agregado correctamente.`,
     );
     closeDialog();
   }
@@ -989,10 +989,7 @@ export default function PatientsPage() {
             </table>
           </div>
         ) : (
-          <EmptyState
-            detail="Cambie el criterio o agregue un registro sintético."
-            title="Sin resultados"
-          />
+          <EmptyState detail="Cambie el criterio o agregue un paciente." title="Sin resultados" />
         )}
       </Panel>
       <nav className="pagination" aria-label="Paginación de pacientes">
@@ -1026,7 +1023,7 @@ export default function PatientsPage() {
         </Button>
       </nav>
       <Dialog
-        description="Los datos administrativos sintéticos se validan y persisten en el proveedor configurado."
+        description="Los datos administrativos se validan y guardan en la base de datos del espacio de trabajo."
         footer={
           <>
             {persistenceError ? (
@@ -1656,7 +1653,7 @@ export default function PatientsPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Carga local CSV de datos exclusivamente sintéticos. Encabezados requeridos: document, firstName, lastName."
+        description="Carga local CSV. Encabezados requeridos: document, firstName, lastName. Revise la información antes de importarla."
         footer={
           <>
             <Button

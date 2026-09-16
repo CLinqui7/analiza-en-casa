@@ -25,8 +25,8 @@ export default function AuditPage() {
           <p className="eyebrow">Gobierno</p>
           <h1>Auditoría</h1>
           <p>
-            Bitácora sintética de mutaciones persistidas. No contiene diagnósticos, tratamiento ni
-            información enviada por canales inseguros.
+            Bitácora de cambios persistidos. No contiene diagnósticos, tratamiento ni información
+            enviada por canales inseguros.
           </p>
         </div>
         <Button data-action-id="AUDIT-EXPORT" onClick={exportAudit} type="button">

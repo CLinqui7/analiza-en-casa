@@ -249,7 +249,7 @@ export default function AgendaPage() {
           <p>
             {isServerDataMode(providerMode)
               ? 'Turnos leídos y guardados mediante comandos seguros por organización.'
-              : 'Turnos sintéticos auditables; las horas se derivan de su intervalo programado.'}
+              : 'Turnos auditables; las horas se derivan de su intervalo programado.'}
           </p>
         </div>
         {can('agenda:write') ? (
@@ -489,7 +489,7 @@ export default function AgendaPage() {
       </Panel>
       {detailShift ? (
         <Dialog
-          description="Vista factual de un turno sintético existente. No representa una visita finalizada ni permite actualizar información clínica, de disponibilidad o pagos."
+          description="Vista del turno registrado. La finalización de la visita y los datos clínicos se documentan en sus módulos correspondientes."
           footer={
             <Button
               className="button-secondary"
@@ -502,7 +502,7 @@ export default function AgendaPage() {
           }
           onClose={() => setDetailShift(null)}
           open
-          title="Detalle del turno sintético"
+          title="Detalle del turno"
         >
           <div className="page-stack">
             <div className="agenda-view-tabs" role="group" aria-label="Secciones del detalle">
@@ -549,7 +549,7 @@ export default function AgendaPage() {
                   <dd>{statusLabel[detailShift.status]}</dd>
                 </div>
                 <div>
-                  <dt>Nota del turno sintético</dt>
+                  <dt>Nota del turno</dt>
                   <dd>{detailShift.note || 'Sin notas registradas.'}</dd>
                 </div>
               </dl>

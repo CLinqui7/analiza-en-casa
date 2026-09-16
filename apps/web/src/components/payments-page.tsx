@@ -219,7 +219,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       </Panel>
       {!sentQuotes.length ? (
         <p className="notice" role="status">
-          Envíe una cotización antes de aplicar un pago sintético.
+          Envíe una cotización antes de aplicar un pago.
         </p>
       ) : null}
       {message ? (
@@ -297,7 +297,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
         }
         onClose={close}
         open={open}
-        title="Aplicar pago sintético"
+        title="Aplicar pago"
       >
         <form
           className="form-grid"

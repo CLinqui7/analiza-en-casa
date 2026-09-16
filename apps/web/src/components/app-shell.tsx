@@ -692,7 +692,7 @@ export function AppShell({ children }: PropsWithChildren) {
                 <p>
                   <strong>Organización</strong>
                   <br />
-                  Analiza en Casa · ámbito sintético
+                  Analiza en Casa · espacio conectado
                 </p>
                 <p>
                   <strong>Mi usuario</strong>
@@ -840,7 +840,7 @@ export function AppShell({ children }: PropsWithChildren) {
                     </div>
                     <div>
                       <dt>Organización</dt>
-                      <dd>Analiza en Casa · ámbito sintético</dd>
+                      <dd>Analiza en Casa · espacio conectado</dd>
                     </div>
                   </dl>
                 </div>

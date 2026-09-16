@@ -38,5 +38,10 @@ export function isReleasedPath(path: string, core = isCoreRelease): boolean {
 }
 
 export function isReleasedCommand(command: unknown, core = isCoreRelease): boolean {
-  return !core || command === 'nurse.create' || command === 'configuration.save';
+  return (
+    !core ||
+    command === 'nurse.create' ||
+    command === 'configuration.save' ||
+    command === 'workspace.seed-demo'
+  );
 }

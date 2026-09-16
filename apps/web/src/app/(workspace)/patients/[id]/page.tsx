@@ -33,7 +33,7 @@ export default function PatientDetailPage() {
         <div>
           <p className="eyebrow">Registro</p>
           <h1>{patient.fullName}</h1>
-          <p>Detalle administrativo sintético del paciente.</p>
+          <p>Detalle administrativo del paciente.</p>
         </div>
         {can('patients:write') ? (
           <Link data-action-id="PATIENT-EDIT" href={`/patients?edit=${patient.id}`}>

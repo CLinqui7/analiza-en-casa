@@ -266,7 +266,7 @@ export default function HospitalizationsPage() {
       setMessage(
         isServerDataMode(providerMode)
           ? 'Hospitalización registrada.'
-          : 'Hospitalización sintética persistida con evidencia de auditoría.',
+          : 'Hospitalización guardada con evidencia de auditoría.',
       );
     }
     close();
@@ -278,10 +278,7 @@ export default function HospitalizationsPage() {
         <div>
           <p className="eyebrow">Financiero</p>
           <h1>Hospitalización</h1>
-          <p>
-            Registros sintéticos de coordinación; no infiere reglas clínicas, financieras ni de
-            cobertura.
-          </p>
+          <p>Coordinación de ingresos, responsables, enfermería asignada y seguimiento del caso.</p>
         </div>
         {can('cases:write') ? (
           <Button data-action-id="HOSPITALIZATION-CREATE" onClick={openCreate} type="button">
@@ -649,7 +646,7 @@ export default function HospitalizationsPage() {
         </Panel>
       ) : null}
       <Dialog
-        description="Los campos se conservan como información operativa sintética; las reglas clínicas, financieras y de cobertura no se infieren."
+        description="Registre la información operativa del caso y asigne el personal de enfermería responsable."
         footer={
           <>
             <Button

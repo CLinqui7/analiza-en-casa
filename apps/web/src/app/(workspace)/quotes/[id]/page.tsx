@@ -21,7 +21,7 @@ type PortalShare = {
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { patients, payments, quotes, sendQuote } = useWorkspace();
+  const { patients, payments, providerMode, quotes, sendQuote } = useWorkspace();
   const { can } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
   const [portalShare, setPortalShare] = useState<PortalShare | null>(null);
@@ -54,9 +54,7 @@ export default function QuoteDetailPage() {
   async function send() {
     const saved = await sendQuote(currentQuote.id);
     if (saved) {
-      setMessage(
-        'La versión se marcó como enviada e inmutable. No se envió información a un canal externo.',
-      );
+      setMessage('La versión se marcó como enviada e inmutable.');
     }
   }
   async function createPortalShare() {
@@ -314,7 +312,7 @@ export default function QuoteDetailPage() {
                 Abrir pagos
               </Button>
             ) : null}
-            {can('quotes:write') && quote.immutable ? (
+            {providerMode !== 'postgresql' && can('quotes:write') && quote.immutable ? (
               <Button
                 className="button-secondary"
                 data-action-id="QUOTE-PORTAL"

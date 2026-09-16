@@ -298,7 +298,7 @@ function QuoteEditor({
     setEditingItemId(null);
     setErrors((current) => ({ ...current, item: '' }));
     setProcessingItem(true);
-    window.setTimeout(() => setProcessingItem(false), 120);
+    window.setTimeout(() => setProcessingItem(false), 300);
   }
   function editItem(candidate: QuoteItem) {
     setItem({ ...candidate });
@@ -1112,7 +1112,7 @@ function QuoteEditor({
                       : 'QUOTE-MEDICATION-SEARCH'
                   }
                   onChange={(event) => setCatalogQuery(event.target.value)}
-                  placeholder="Buscar en catálogo sintético"
+                  placeholder="Buscar en catálogo"
                   value={catalogQuery}
                 />
                 {catalogQuery ? (
@@ -1188,8 +1188,8 @@ function QuoteEditor({
                 </>
               ) : null}
               <p className="field-help full-field">
-                El catálogo es sintético: seleccionar un concepto no asigna precio, disponibilidad
-                real, reserva, dosificación, impuestos ni cobertura.
+                Seleccionar un concepto no asigna precio, reserva, dosificación, impuestos ni
+                cobertura. Confirme los importes antes de guardar.
               </p>
             </div>
           ) : null}
@@ -1445,8 +1445,8 @@ export default function QuotesPage() {
           <p className="eyebrow">Facturación</p>
           <h1>Cotizaciones</h1>
           <p>
-            Constructor manual con valores sintéticos, versiones inmutables al enviar y
-            responsabilidades explícitas. No se infieren precios, impuestos ni cobertura.
+            Crea, edita y envía cotizaciones con importes manuales e historial de versiones.
+            Confirme precios, impuestos y cobertura antes de enviarlas.
           </p>
         </div>
         {can('quotes:write') ? (

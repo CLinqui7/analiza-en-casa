@@ -28,8 +28,8 @@ export function AdministrativeProfilePanel({
         <div>
           <h2>Perfil administrativo de ejecución · PIC</h2>
           <p className="muted">
-            Datos administrativos sintéticos; no establecen cobertura, facturación, impuestos ni
-            reglas clínicas.
+            Datos administrativos del caso; confirme por separado cobertura, facturación, impuestos
+            y reglas clínicas.
           </p>
         </div>
         {canWrite && profileEditingEnabled ? (

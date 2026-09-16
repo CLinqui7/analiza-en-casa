@@ -28,7 +28,7 @@ export function OperationalCatalogs() {
     if (!editing) return;
     if (await operations.execute({ command: 'configuration.save', entry: editing })) {
       setEditing(null);
-      setMessage('Catálogo guardado en MongoDB.');
+      setMessage('Catálogo guardado en la base de datos.');
     }
   }
   return (

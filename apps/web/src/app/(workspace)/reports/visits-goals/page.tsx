@@ -54,7 +54,7 @@ export default function VisitsGoalsPage() {
     if (await operations.execute(command)) {
       setDialog(null);
       setCommandKey(crypto.randomUUID());
-      setMessage('Registro guardado en MongoDB.');
+      setMessage('Registro guardado en la base de datos.');
     }
   }
   return (

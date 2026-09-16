@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/components/providers';
-import { mongoMutationHeaders } from '@/lib/auth';
-import { demoPatients } from '@/lib/demo-data';
 import { can } from '@/lib/permissions';
+import { useOperations } from '@/lib/use-operations';
+import { isServerDataMode } from '@/lib/data-mode';
 
 export function DemoDataButton() {
   const { session } = useAuth();
+  const operations = useOperations();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   if (!can(session?.role, 'patients:write')) return null;
@@ -16,22 +17,16 @@ export function DemoDataButton() {
     if (!session || loading) return;
     setLoading(true);
     setMessage('');
-    let created = 0;
     try {
-      for (const patient of demoPatients.slice(0, 3)) {
-        const response = await fetch('/api/patients', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
-          body: JSON.stringify(patient),
-        });
-        if (response.status === 201) created += 1;
-        else if (response.status !== 400) throw new Error();
+      if (!isServerDataMode(session.mode)) {
+        setMessage('Los datos de prueba ya están disponibles en este modo.');
+        setLoading(false);
+        return;
       }
+      const saved = await operations.execute({ command: 'workspace.seed-demo' });
+      if (!saved) throw new Error(operations.error || 'No se pudo preparar el escenario.');
       setMessage(
-        created
-          ? `Se agregaron ${created} pacientes identificados como demostración.`
-          : 'Los datos de prueba ya estaban cargados.',
+        'Escenario de prueba listo: pacientes, enfermería, hospitalización, agenda y cotización.',
       );
       window.setTimeout(() => window.location.reload(), 900);
     } catch {

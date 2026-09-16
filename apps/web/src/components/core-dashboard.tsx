@@ -29,7 +29,7 @@ export function CoreDashboard() {
           </Link>
         )}
       </header>
-      <p className="notice">Prueba funcional · MongoDB · Usa únicamente datos ficticios.</p>
+      <p className="notice">Espacio de trabajo conectado y listo para registrar información.</p>
       <div className="dashboard-grid">
         {can('patients:read') && (
           <Panel>

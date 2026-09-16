@@ -72,7 +72,7 @@ export default function BalancePage() {
       setRequestKey(crypto.randomUUID());
       setDialog(null);
       setCorrection(null);
-      setMessage('Balance guardado en MongoDB.');
+      setMessage('Balance guardado en la base de datos.');
     }
   }
   const author = (userId: string) =>

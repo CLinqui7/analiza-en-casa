@@ -184,7 +184,7 @@ function FullDashboard() {
 
       {loading ? (
         <Panel>
-          <p role="status">Cargando indicadores sintéticos…</p>
+          <p role="status">Cargando indicadores…</p>
         </Panel>
       ) : null}
       {error ? (
