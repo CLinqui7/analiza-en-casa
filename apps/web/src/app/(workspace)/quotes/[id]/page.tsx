@@ -42,6 +42,11 @@ export default function QuoteDetailPage() {
   const currentQuote = quote;
   const patient = patients.find((candidate) => candidate.id === currentQuote.patientId);
   const balance = calculateQuoteBalance(currentQuote, payments);
+  const whatsappPhone = patient?.phone?.replace(/\D/g, '') ?? '';
+  const whatsappAllowed = Boolean(
+    whatsappPhone && patient?.notifications?.botmakerConsent !== false,
+  );
+  const whatsappMessage = `Analiza en Casa comparte la cotización ${currentQuote.id} (versión ${currentQuote.version}) por un total de ${money(currentQuote.total)}. Puede responder este mensaje si necesita ayuda.`;
   const historyRoot = currentQuote.rootQuoteId ?? currentQuote.originalQuoteId ?? currentQuote.id;
   const history = quotes
     .filter(
@@ -292,6 +297,17 @@ export default function QuoteDetailPage() {
         <Panel>
           <h2>Acciones relacionadas</h2>
           <div className="action-row no-print">
+            {whatsappAllowed ? (
+              <a
+                className="button"
+                data-action-id="QUOTE-WHATSAPP-DIRECT"
+                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Compartir por WhatsApp
+              </a>
+            ) : null}
             {can('insurance:read') ? (
               <Button
                 className="button-secondary"
@@ -325,8 +341,9 @@ export default function QuoteDetailPage() {
             ) : null}
           </div>
           <p className="field-help">
-            WhatsApp recibe únicamente un enlace con segundo factor; no se incluyen diagnósticos,
-            tratamientos, medicamentos ni importes en el mensaje.
+            {whatsappAllowed
+              ? 'El mensaje de WhatsApp incluye únicamente la referencia, versión y total de la cotización; no incluye diagnósticos, tratamientos ni medicamentos.'
+              : 'Registre un teléfono y confirme la autorización de WhatsApp del paciente para habilitar el envío directo.'}
           </p>
           {portalShare ? (
             <div className="portal-share-card">

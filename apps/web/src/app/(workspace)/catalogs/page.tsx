@@ -11,6 +11,9 @@ import { useAuth, useWorkspace } from '@/components/providers';
 
 const categories = [
   ['SERVICES', 'Servicios', 'SER'],
+  ['LABORATORY', 'Analiza Lab', 'LAB'],
+  ['PHYSIOTHERAPY', 'Analiza Fisio', 'FIS'],
+  ['IMAGING', 'Analiza Imágenes', 'IMG'],
   ['MEDICATIONS', 'Medicamentos', 'MED'],
   ['SUPPLIES', 'Insumos', 'INS'],
   ['EQUIPMENT', 'Equipos', 'EQU'],
@@ -18,7 +21,16 @@ const categories = [
 ] as const;
 type Category = (typeof categories)[number][0];
 const itemSchema = z.object({
-  category: z.enum(['SERVICES', 'MEDICATIONS', 'SUPPLIES', 'EQUIPMENT', 'PROVIDERS']),
+  category: z.enum([
+    'SERVICES',
+    'LABORATORY',
+    'PHYSIOTHERAPY',
+    'IMAGING',
+    'MEDICATIONS',
+    'SUPPLIES',
+    'EQUIPMENT',
+    'PROVIDERS',
+  ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
 });
 type ItemForm = z.infer<typeof itemSchema>;

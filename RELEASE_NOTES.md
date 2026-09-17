@@ -1,5 +1,28 @@
 # Notas de versión
 
+## Rediseño clínico y mejoras del equipo — 17 de septiembre de 2026
+
+- Reporte de salud reconstruido con resumen por paciente, búsqueda, indicadores,
+  navegación por secciones, signos vitales, equipo médico, línea de tiempo,
+  documentos e impresión adaptable.
+- Las capturas de los reportes de errores ahora se entregan desde una ruta privada,
+  validada por sesión, organización y autor; el administrador puede verlas dentro
+  del sistema o abrirlas en otra pestaña.
+- El constructor de cotizaciones mantiene visibles todos los ítems anexados al
+  cambiar de categoría y corrige el estado vacío de la tabla consolidada.
+- Las categorías de cotización muestran Laboratorios, Fisioterapia e Imágenes y
+  consumen catálogos administrables de Analiza Lab, Analiza Fisio y Analiza Imágenes.
+- El origen del contacto dejó de ser obligatorio para guardar un borrador. Los
+  borradores siguen siendo editables y las versiones enviadas permanecen inmutables.
+- La ficha de cotización habilita compartir por WhatsApp cuando el paciente tiene
+  teléfono y autorización; el mensaje no incluye diagnóstico ni tratamiento.
+- La migración `011_service_catalogs.sql` instala los catálogos iniciales sin
+  sobrescribir registros existentes.
+
+Orden de publicación: ejecutar la imagen operator con `--migrate`, verificar
+`/api/health` y después promover la misma imagen web. No ejecutar migraciones desde
+el proceso público de Next.js.
+
 ## Entrega Docker / PostgreSQL 18 — 14 de septiembre de 2026
 
 Fuente verificada: `6fae1890af99a7913092aea248cb120bd595e335`.

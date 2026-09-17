@@ -39,6 +39,10 @@ export interface Persistence {
   feedback?: {
     list(actor: ServerActor): Promise<FeedbackReport[]>;
     create(actor: ServerActor, input: unknown, image?: FeedbackImage): Promise<FeedbackReport>;
+    image(
+      actor: ServerActor,
+      id: string,
+    ): Promise<{ name: string; mimeType: string; bytes: Uint8Array } | null>;
     updateStatus(
       actor: ServerActor,
       id: string,

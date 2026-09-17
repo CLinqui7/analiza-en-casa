@@ -72,18 +72,6 @@ const referralCatalog = [
   'Dr. Jorge Contreras',
 ];
 type CatalogEntry = { id: string; label: string; inventoryAvailable: boolean };
-const studyCatalog: CatalogEntry[] = [
-  {
-    id: 'study-demo-available',
-    label: 'Estudio de hemoglobina disponible',
-    inventoryAvailable: true,
-  },
-  {
-    id: 'study-demo-unavailable',
-    label: 'Estudio sin disponibilidad configurada',
-    inventoryAvailable: false,
-  },
-];
 const feeServiceCatalog: CatalogEntry[] = [
   { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
@@ -101,6 +89,7 @@ function updatedCategoryPercentages(
     EQUIPMENT: existing?.EQUIPMENT ?? 0,
     FEES: existing?.FEES ?? 0,
     EXTRAS: existing?.EXTRAS ?? 0,
+    IMAGING: existing?.IMAGING ?? 0,
   };
   result[category] = value;
   return result;
@@ -168,7 +157,6 @@ function QuoteEditor({
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<QuoteItemCategory>('SERVICES');
-  const [inventoryOnly, setInventoryOnly] = useState(false);
   const [catalogQuery, setCatalogQuery] = useState('');
   const [processingItem, setProcessingItem] = useState(false);
   const [referralCatalogOpen, setReferralCatalogOpen] = useState(false);
@@ -207,30 +195,35 @@ function QuoteEditor({
     ? currentInventoryBalance(inventoryMovements, linkedInventoryItem.id)
     : undefined;
   const itemUnits = item.quantity * (item.unitsPerPresentation ?? 1);
+  const catalogCategory = {
+    SERVICES: 'SERVICES',
+    STUDIES: 'LABORATORY',
+    MEDICATIONS: 'MEDICATIONS',
+    SUPPLIES: 'SUPPLIES',
+    EQUIPMENT: 'EQUIPMENT',
+    FEES: undefined,
+    EXTRAS: 'PHYSIOTHERAPY',
+    IMAGING: 'IMAGING',
+  }[activeCategory];
   const activeCatalog =
-    activeCategory === 'SERVICES' ||
-    activeCategory === 'MEDICATIONS' ||
-    activeCategory === 'SUPPLIES'
-      ? catalogItems
-          .filter(
-            (candidate) => candidate.status === 'ACTIVE' && candidate.category === activeCategory,
-          )
-          .map((candidate) => ({
-            id: candidate.id,
-            label: `${candidate.sku} | ${candidate.name}`,
-            inventoryAvailable:
-              activeCategory === 'SERVICES' ||
-              currentInventoryBalance(inventoryMovements, candidate.id) > 0,
-          }))
-      : activeCategory === 'STUDIES'
-        ? studyCatalog
-        : activeCategory === 'FEES'
-          ? feeServiceCatalog
-          : [];
-  const catalogResults = activeCatalog.filter(
-    (entry) =>
-      (!inventoryOnly || entry.inventoryAvailable) &&
-      entry.label.toLocaleLowerCase().includes(catalogQuery.toLocaleLowerCase()),
+    activeCategory === 'FEES'
+      ? feeServiceCatalog
+      : catalogCategory
+        ? catalogItems
+            .filter(
+              (candidate) =>
+                candidate.status === 'ACTIVE' && candidate.category === catalogCategory,
+            )
+            .map((candidate) => ({
+              id: candidate.id,
+              label: `${candidate.sku} | ${candidate.name}`,
+              inventoryAvailable:
+                !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(activeCategory) ||
+                currentInventoryBalance(inventoryMovements, candidate.id) > 0,
+            }))
+        : [];
+  const catalogResults = activeCatalog.filter((entry) =>
+    entry.label.toLocaleLowerCase().includes(catalogQuery.toLocaleLowerCase()),
   );
 
   function setNumber(key: 'quantity' | 'unitPrice' | 'discountAmount', value: string) {
@@ -294,7 +287,6 @@ function QuoteEditor({
     const nextErrors: Record<string, string> = {};
     if (!selectedCase) nextErrors.caseId = 'Seleccione una hospitalización válida.';
     if (!draft.summary.trim()) nextErrors.summary = 'El resumen operativo es obligatorio.';
-    if (!draft.referralSelections?.length) nextErrors.referral = 'Seleccione al menos un referido.';
     if (mode === 'revise' && !draft.revisionReason.trim())
       nextErrors.revisionReason = 'El motivo de revisión es obligatorio.';
     try {
@@ -576,9 +568,7 @@ function QuoteEditor({
               </select>
             </label>
             <div className="full-field referral-field">
-              <label htmlFor="quote-referral">
-                Referido por <span aria-hidden="true">*</span>
-              </label>
+              <label htmlFor="quote-referral">Origen del contacto (opcional)</label>
               <div className="referral-input-row">
                 <input
                   aria-controls={referralCatalogOpen ? 'quote-referral-catalog' : undefined}
@@ -690,8 +680,8 @@ function QuoteEditor({
             </label>
           </div>
           <p className="field-help">
-            Los referidos son etiquetas administrativas; no aplican descuentos, impuestos, saldo ni
-            cobertura.
+            El origen del contacto es opcional y sólo sirve para seguimiento administrativo; no
+            aplica descuentos, impuestos, saldo ni cobertura.
           </p>
         </fieldset>
         {mode === 'revise' ? (
@@ -739,65 +729,21 @@ function QuoteEditor({
                 Seleccione un servicio ya creado en el catálogo.
               </p>
             ) : null}
-            {activeCategory === 'STUDIES' ? (
-              <>
-                <label className="full-field">
-                  <input
-                    checked={inventoryOnly}
-                    data-action-id="QUOTE-STUDY-INVENTORY-ONLY"
-                    onChange={(event) => {
-                      setInventoryOnly(event.target.checked);
-                      if (
-                        event.target.checked &&
-                        activeCatalog.some(
-                          (entry) => entry.label === item.name && !entry.inventoryAvailable,
-                        )
-                      )
-                        setItem((current) => ({ ...current, name: '' }));
-                    }}
-                    type="checkbox"
-                  />{' '}
-                  Solo disponibles en inventario
-                </label>
-                <label>
-                  Buscar estudios
-                  <input
-                    aria-label="Buscar estudios"
-                    data-action-id="QUOTE-STUDY-SEARCH"
-                    onChange={(event) => setCatalogQuery(event.target.value)}
-                    value={catalogQuery}
-                  />
-                </label>
-                <div
-                  aria-label="Resultados de estudios"
-                  className="catalog-results full-field"
-                  role="listbox"
-                >
-                  {catalogResults.map((entry) => (
-                    <button
-                      aria-selected={item.name === entry.label}
-                      data-action-id="QUOTE-STUDY-SELECT"
-                      key={entry.id}
-                      onClick={() => setItem((current) => ({ ...current, name: entry.label }))}
-                      role="option"
-                      type="button"
-                    >
-                      {entry.label}
-                    </button>
-                  ))}
-                  {!catalogResults.length ? <p role="status">No results found</p> : null}
-                </div>
-              </>
-            ) : null}
-            {activeCategory === 'SERVICES' ||
-            activeCategory === 'MEDICATIONS' ||
-            activeCategory === 'SUPPLIES' ? (
+            {catalogCategory ? (
               <label>
                 {activeCategory === 'SERVICES'
                   ? 'Servicio'
-                  : activeCategory === 'MEDICATIONS'
-                    ? 'Medicamento'
-                    : 'Insumo'}
+                  : activeCategory === 'STUDIES'
+                    ? 'Servicio de Analiza Lab'
+                    : activeCategory === 'EXTRAS'
+                      ? 'Servicio de Analiza Fisio'
+                      : activeCategory === 'IMAGING'
+                        ? 'Servicio de Analiza Imágenes'
+                        : activeCategory === 'MEDICATIONS'
+                          ? 'Medicamento'
+                          : activeCategory === 'SUPPLIES'
+                            ? 'Insumo'
+                            : 'Equipo'}
                 <select
                   data-action-id="QUOTE-CATALOG-ITEM-SELECT"
                   onChange={(event) => {
@@ -818,7 +764,7 @@ function QuoteEditor({
                   ))}
                 </select>
                 {!activeCatalog.length ? (
-                  <span className="field-help">Primero cree ítems activos en Catálogos.</span>
+                  <span className="field-help">Primero cree servicios activos en Catálogos.</span>
                 ) : null}
               </label>
             ) : (
@@ -1067,9 +1013,9 @@ function QuoteEditor({
                     </td>
                   </tr>
                 ))}
-                {!draft.items.some((candidate) => candidate.category === activeCategory) ? (
+                {!draft.items.length ? (
                   <tr>
-                    <td colSpan={6}>No hay conceptos en esta categoría.</td>
+                    <td colSpan={7}>Aún no hay ítems anexados a la cotización.</td>
                   </tr>
                 ) : null}
               </tbody>

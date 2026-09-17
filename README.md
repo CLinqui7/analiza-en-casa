@@ -90,6 +90,20 @@ docker build --platform linux/amd64 --progress=plain --build-arg "SOURCE_SHA=$so
 docker build --platform linux/amd64 --progress=plain --target operator --build-arg "SOURCE_SHA=$sourceSha" -t analiza-operator:postgresql .
 ```
 
+La versión del 17 de septiembre de 2026 requiere la migración
+`011_service_catalogs.sql`. El responsable del despliegue debe ejecutar primero el
+operator, esperar un resultado satisfactorio y sólo entonces actualizar la web:
+
+```powershell
+$env:ANALIZA_MIGRATION_APPROVED = '1'
+docker run --rm --env-file .local/postgresql-operator.env analiza-operator:postgresql --migrate
+docker compose --env-file .local/postgresql-compose.env -f compose.yaml -f compose.postgresql.yaml up -d web
+```
+
+Después debe comprobar que `/api/health` responda `status: ready`,
+`dataMode: postgresql` y `database: ready`. Las capturas de comentarios se leen por
+`GET /api/feedback/:id`, siempre con sesión privada y aislamiento por organización.
+
 ## Desarrollo
 
 Requisitos: Git, Node.js 24 y npm 11.18.0. Docker Desktop con contenedores Linux

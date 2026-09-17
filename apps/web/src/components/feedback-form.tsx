@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Panel, StatusTag } from '@analiza/ui';
+import Image from 'next/image';
 import { useAuth } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import {
@@ -51,6 +52,7 @@ export function FeedbackForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [workingReportId, setWorkingReportId] = useState<string>();
+  const [previewReport, setPreviewReport] = useState<FeedbackReport>();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -438,11 +440,74 @@ export function FeedbackForm() {
                 </div>
               </div>
               <p>{report.description}</p>
-              {report.imageName ? <small>Imagen adjunta: {report.imageName}</small> : null}
+              {report.imageName ? (
+                <div className="feedback-image-actions">
+                  <span>
+                    <strong>Imagen adjunta</strong>
+                    <small>{report.imageName}</small>
+                  </span>
+                  {serverBacked ? (
+                    <button
+                      className="button secondary"
+                      onClick={() => setPreviewReport(report)}
+                      type="button"
+                    >
+                      Ver imagen
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
             </Panel>
           ))}
         </div>
       </section>
+      {previewReport ? (
+        <div
+          aria-label={`Imagen adjunta ${previewReport.imageName ?? ''}`}
+          aria-modal="true"
+          className="feedback-image-backdrop"
+          onClick={() => setPreviewReport(undefined)}
+          role="dialog"
+        >
+          <div className="feedback-image-dialog" onClick={(event) => event.stopPropagation()}>
+            <header>
+              <div>
+                <strong>Imagen del reporte</strong>
+                <small>{previewReport.imageName}</small>
+              </div>
+              <button
+                aria-label="Cerrar imagen"
+                onClick={() => setPreviewReport(undefined)}
+                type="button"
+              >
+                ×
+              </button>
+            </header>
+            <div className="feedback-image-stage">
+              <Image
+                alt={`Captura adjunta al reporte: ${previewReport.imageName ?? 'imagen'}`}
+                height={900}
+                src={`/api/feedback/${encodeURIComponent(previewReport.id)}`}
+                unoptimized
+                width={1400}
+              />
+            </div>
+            <footer>
+              <a
+                className="button secondary"
+                href={`/api/feedback/${encodeURIComponent(previewReport.id)}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Abrir en otra pestaña
+              </a>
+              <button className="button" onClick={() => setPreviewReport(undefined)} type="button">
+                Cerrar
+              </button>
+            </footer>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

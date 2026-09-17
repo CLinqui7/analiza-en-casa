@@ -227,6 +227,7 @@ describe('quote domain', () => {
           EQUIPMENT: 0,
           FEES: 0,
           EXTRAS: 0,
+          IMAGING: 0,
         },
       }).total,
     ).toBe(23);

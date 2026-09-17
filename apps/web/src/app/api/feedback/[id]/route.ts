@@ -11,6 +11,10 @@ export const dynamic = 'force-dynamic';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+function inlineFileName(name: string) {
+  return `inline; filename*=UTF-8''${encodeURIComponent(name.replace(/[\r\n]/g, ''))}`;
+}
+
 function errorResponse(error: unknown) {
   const status = error instanceof MongoInputError ? 400 : authorizationStatus(error);
   return NextResponse.json(
@@ -36,6 +40,39 @@ async function authenticatedFeedback(request: NextRequest) {
   const actor = await backend.auth.requireSession(token);
   await backend.auth.requireCsrf(token, request.headers.get(csrfHeaderName) ?? undefined);
   return { backend, actor };
+}
+
+export async function GET(request: NextRequest, { params }: RouteContext) {
+  try {
+    const backend = await persistence();
+    const actor = await backend.auth.requireSession(request.cookies.get(sessionCookieName)?.value);
+    if (!backend.feedback) {
+      return NextResponse.json(
+        { error: 'No disponible en este ambiente.' },
+        { status: 404, headers: privateHeaders },
+      );
+    }
+    const { id } = await params;
+    const image = await backend.feedback.image(actor, id);
+    if (!image) {
+      return NextResponse.json(
+        { error: 'La imagen no existe o no está disponible.' },
+        { status: 404, headers: privateHeaders },
+      );
+    }
+    const body = new Uint8Array(image.bytes.byteLength);
+    body.set(image.bytes);
+    return new NextResponse(body.buffer, {
+      headers: {
+        ...privateHeaders,
+        'Content-Type': image.mimeType,
+        'Content-Disposition': inlineFileName(image.name),
+        'X-Content-Type-Options': 'nosniff',
+      },
+    });
+  } catch (error) {
+    return errorResponse(error);
+  }
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteContext) {

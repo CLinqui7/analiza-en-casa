@@ -120,6 +120,35 @@ export class PostgresFeedbackRepository {
     });
   }
 
+  async image(
+    actor: ServerActor,
+    id: string,
+  ): Promise<{ name: string; mimeType: string; bytes: Uint8Array } | null> {
+    return transaction(this.pool, actor, async (client) => {
+      const administrator = actor.role === 'ADMIN';
+      const row = (
+        await client.query<{
+          image_name: string;
+          image_mime: string;
+          image_bytes: Buffer;
+        }>(
+          `SELECT image_name,image_mime,image_bytes
+          FROM analiza.feedback_reports
+          WHERE organization_id=$1 AND id=$2 AND ($3::boolean OR user_id=$4)
+            AND image_name IS NOT NULL AND image_mime IS NOT NULL AND image_bytes IS NOT NULL`,
+          [actor.organizationId, id, administrator, actor.userId],
+        )
+      ).rows[0];
+      return row
+        ? {
+            name: row.image_name,
+            mimeType: row.image_mime,
+            bytes: new Uint8Array(row.image_bytes),
+          }
+        : null;
+    });
+  }
+
   async updateStatus(
     actor: ServerActor,
     id: string,

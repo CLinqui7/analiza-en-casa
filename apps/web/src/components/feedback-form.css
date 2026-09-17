@@ -177,6 +177,130 @@
   font-weight: 500;
 }
 
+.feedback-image-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 11px 12px;
+  border: 1px solid #d7e7e8;
+  border-radius: 11px;
+  background: #f4faf9;
+}
+
+.feedback-image-actions > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.feedback-image-actions small {
+  overflow: hidden;
+  color: #667c86;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedback-image-actions .button {
+  flex: 0 0 auto;
+}
+
+.feedback-image-backdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(7 26 39 / 72%);
+  backdrop-filter: blur(6px);
+}
+
+.feedback-image-dialog {
+  display: grid;
+  width: min(1080px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 28px 90px rgb(0 18 30 / 38%);
+}
+
+.feedback-image-dialog header,
+.feedback-image-dialog footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 17px;
+}
+
+.feedback-image-dialog header {
+  border-bottom: 1px solid #dce8eb;
+}
+
+.feedback-image-dialog header > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.feedback-image-dialog header small {
+  overflow: hidden;
+  color: #687f89;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedback-image-dialog header > button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d6e4e8;
+  border-radius: 10px;
+  background: white;
+  color: #274c5b;
+  font-size: 1.35rem;
+}
+
+.feedback-image-stage {
+  min-height: 280px;
+  overflow: auto;
+  padding: 16px;
+  background: #edf3f5;
+  text-align: center;
+}
+
+.feedback-image-stage img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100dvh - 220px);
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 12px 36px rgb(18 52 68 / 16%);
+}
+
+.feedback-image-dialog footer {
+  justify-content: flex-end;
+  border-top: 1px solid #dce8eb;
+}
+
+@media (max-width: 640px) {
+  .feedback-image-backdrop {
+    padding: 10px;
+  }
+
+  .feedback-image-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .feedback-image-actions .button {
+    width: 100%;
+  }
+}
+
 .feedback-module-select {
   max-width: 520px;
 }

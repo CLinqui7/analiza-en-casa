@@ -265,12 +265,13 @@ export function hospitalizationDurationDays(
 
 export const quoteCategories: ReadonlyArray<{ value: QuoteItemCategory; label: string }> = [
   { value: 'SERVICES', label: 'Servicios' },
-  { value: 'STUDIES', label: 'Estudios Dx' },
+  { value: 'STUDIES', label: 'Laboratorios' },
   { value: 'MEDICATIONS', label: 'Medicamentos' },
   { value: 'SUPPLIES', label: 'Insumos' },
   { value: 'EQUIPMENT', label: 'Equipos' },
   { value: 'FEES', label: 'Honorarios' },
-  { value: 'EXTRAS', label: 'Extras' },
+  { value: 'EXTRAS', label: 'Fisioterapia' },
+  { value: 'IMAGING', label: 'Imágenes' },
 ];
 
 export function roundMoney(value: number): number {

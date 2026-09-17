@@ -209,6 +209,7 @@ export const quoteItemCategorySchema = z.enum([
   'EQUIPMENT',
   'FEES',
   'EXTRAS',
+  'IMAGING',
 ]);
 
 export const quoteItemSchema = z.object({
@@ -298,7 +299,18 @@ export const catalogItemSchema = z.object({
   id: z.string(),
   sku: z.string().trim().min(1),
   name: z.string().trim().min(1),
-  category: z.enum(['SERVICES', 'MEDICATIONS', 'SUPPLIES', 'EQUIPMENT', 'PROVIDERS']).optional(),
+  category: z
+    .enum([
+      'SERVICES',
+      'LABORATORY',
+      'PHYSIOTHERAPY',
+      'IMAGING',
+      'MEDICATIONS',
+      'SUPPLIES',
+      'EQUIPMENT',
+      'PROVIDERS',
+    ])
+    .optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']),
   createdAt: z.string(),
 });
