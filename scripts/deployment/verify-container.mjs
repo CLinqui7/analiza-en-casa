@@ -456,7 +456,7 @@ try {
   await page.locator('[data-action-id="DOCTOR-CREATE"]').click();
   const dd = page.getByRole('dialog', { name: 'Nuevo médico' });
   await dd.getByLabel('Nombre completo').fill('Médico ficticio SQL');
-  await dd.getByLabel('JVPM', { exact: true }).fill(run);
+  await dd.getByLabel('JVPM (opcional)', { exact: true }).fill(run);
   await dd.getByLabel('DUI', { exact: true }).fill('00000000-0');
   await dd.getByLabel('Especialidad o profesión').fill('Especialidad ficticia QA');
   await dd.getByRole('option', { name: 'Especialidad ficticia QA', exact: true }).click();
