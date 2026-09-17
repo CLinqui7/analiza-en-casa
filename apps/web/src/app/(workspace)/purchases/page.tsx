@@ -23,23 +23,28 @@ export default function PurchasesPage() {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Purchase | null>(null);
+  const purchasableItems = useMemo(
+    () =>
+      catalogItems.filter((item) => item.category !== 'INSURERS' && item.category !== 'PROVIDERS'),
+    [catalogItems],
+  );
   const form = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
-      catalogItemId: catalogItems[0]?.id ?? '',
+      catalogItemId: purchasableItems[0]?.id ?? '',
       reference: '',
       note: '',
       quantity: 1,
-      unitCost: catalogItems[0]?.costPrice ?? 0,
+      unitCost: purchasableItems[0]?.costPrice ?? 0,
     },
   });
   useEffect(() => {
     const current = form.getValues('catalogItemId');
-    if (!catalogItems.some((item) => item.id === current) && catalogItems[0]) {
-      form.setValue('catalogItemId', catalogItems[0].id, { shouldValidate: true });
-      form.setValue('unitCost', catalogItems[0].costPrice ?? 0, { shouldValidate: true });
+    if (!purchasableItems.some((item) => item.id === current) && purchasableItems[0]) {
+      form.setValue('catalogItemId', purchasableItems[0].id, { shouldValidate: true });
+      form.setValue('unitCost', purchasableItems[0].costPrice ?? 0, { shouldValidate: true });
     }
-  }, [catalogItems, form]);
+  }, [form, purchasableItems]);
   const itemNames = useMemo(
     () => new Map(catalogItems.map((item) => [item.id, item.name])),
     [catalogItems],
@@ -59,15 +64,15 @@ export default function PurchasesPage() {
   function close() {
     setOpen(false);
     form.reset({
-      catalogItemId: catalogItems[0]?.id ?? '',
+      catalogItemId: purchasableItems[0]?.id ?? '',
       reference: '',
       note: '',
       quantity: 1,
-      unitCost: catalogItems[0]?.costPrice ?? 0,
+      unitCost: purchasableItems[0]?.costPrice ?? 0,
     });
   }
   async function submit(values: Form) {
-    if (!catalogItems.some((item) => item.id === values.catalogItemId)) return;
+    if (!purchasableItems.some((item) => item.id === values.catalogItemId)) return;
     const saved = await addPurchase({
       id: crypto.randomUUID(),
       catalogItemId: values.catalogItemId,
@@ -96,7 +101,7 @@ export default function PurchasesPage() {
         {can('purchases:write') ? (
           <Button
             data-action-id="PURCHASE-CREATE"
-            disabled={!catalogItems.length}
+            disabled={!purchasableItems.length}
             onClick={() => {
               setMessage(null);
               setOpen(true);
@@ -289,12 +294,12 @@ export default function PurchasesPage() {
                 form.setValue('catalogItemId', event.target.value, { shouldValidate: true });
                 form.setValue(
                   'unitCost',
-                  catalogItems.find((item) => item.id === event.target.value)?.costPrice ?? 0,
+                  purchasableItems.find((item) => item.id === event.target.value)?.costPrice ?? 0,
                   { shouldValidate: true },
                 );
               }}
             >
-              {catalogItems.map((item) => (
+              {purchasableItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.sku} · {item.name}
                 </option>
