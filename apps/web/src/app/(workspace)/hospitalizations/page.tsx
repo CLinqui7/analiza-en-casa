@@ -121,6 +121,7 @@ export default function HospitalizationsPage() {
   const [privateFiles, setPrivateFiles] = useState<Record<string, PrivateFileMetadata[]>>({});
   const [tab, setTab] = useState<'ACTIVE' | 'QUOTES' | 'PIC'>('ACTIVE');
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
+  const [patientQuery, setPatientQuery] = useState('');
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Hospitalization['status'] | '',
     startDate: '',
@@ -689,15 +690,29 @@ export default function HospitalizationsPage() {
           noValidate
           onSubmit={form.handleSubmit(submit)}
         >
-          <label className="full">
+          <label>
+            Buscar paciente por nombre o DUI
+            <input
+              onChange={(event) => setPatientQuery(event.target.value)}
+              type="search"
+              value={patientQuery}
+            />
+          </label>
+          <label>
             Paciente
             <select {...form.register('patientId')}>
               <option value="">Seleccione un paciente</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.documentId} · {patient.fullName}
-                </option>
-              ))}
+              {patients
+                .filter((patient) =>
+                  `${patient.fullName} ${patient.documentId}`
+                    .toLocaleLowerCase('es')
+                    .includes(patientQuery.toLocaleLowerCase('es')),
+                )
+                .map((patient) => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.documentId} · {patient.fullName}
+                  </option>
+                ))}
             </select>
             {form.formState.errors.patientId ? (
               <span className="field-error">{form.formState.errors.patientId.message}</span>

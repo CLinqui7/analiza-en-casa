@@ -23,6 +23,7 @@ type QuoteDraft = Pick<
   Quote,
   | 'caseId'
   | 'summary'
+  | 'careSetting'
   | 'comments'
   | 'items'
   | 'discount'
@@ -51,6 +52,7 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   patientQuery: '',
   referralQuery: '',
   summary: '',
+  careSetting: 'HOSPITALIZATION',
   comments: '',
   invoiceDate: new Date().toISOString().slice(0, 10),
   invoiceDocumentType: 'INVOICE',
@@ -111,6 +113,7 @@ function cloneDraft(quote: Quote): QuoteDraft {
     patientQuery: '',
     referralQuery: quote.referralLabel ?? '',
     summary: quote.summary,
+    careSetting: quote.careSetting ?? 'HOSPITALIZATION',
     comments: quote.comments ?? '',
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
     invoiceDocumentType: quote.invoiceDocumentType ?? 'INVOICE',
@@ -309,6 +312,7 @@ function QuoteEditor({
       caseId: selectedCase!.id,
       patientId: selectedCase!.patientId,
       summary: draft.summary.trim(),
+      careSetting: draft.careSetting,
       invoiceDate: draft.invoiceDate,
       invoiceDocumentType: draft.invoiceDocumentType,
       discountGroup: draft.discountGroup?.trim() || 'Regular',
@@ -482,7 +486,23 @@ function QuoteEditor({
           ) : null}
         </fieldset>
         <label>
-          Hospitalización compatible
+          Modalidad de atención
+          <select
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                careSetting: event.target.value as Quote['careSetting'],
+              }))
+            }
+            value={draft.careSetting ?? 'HOSPITALIZATION'}
+          >
+            <option value="HOSPITALIZATION">Hospitalización</option>
+            <option value="HOME_OUTPATIENT">Ambulatorio en domicilio del paciente</option>
+            <option value="CLINIC_OUTPATIENT">Ambulatorio en Analiza en Casa</option>
+          </select>
+        </label>
+        <label>
+          Caso compatible
           <select
             disabled={mode !== 'create'}
             onChange={(event) =>
@@ -970,7 +990,7 @@ function QuoteEditor({
             </p>
           ) : null}
           <div
-            aria-label="Detalle de la categoría activa"
+            aria-label="Todos los ítems anexados"
             className="table-wrap"
             role="region"
             tabIndex={0}
@@ -978,6 +998,7 @@ function QuoteEditor({
             <table>
               <thead>
                 <tr>
+                  <th>Categoría</th>
                   <th>Concepto</th>
                   <th>Cantidad</th>
                   <th>Precio</th>
@@ -987,64 +1008,65 @@ function QuoteEditor({
                 </tr>
               </thead>
               <tbody>
-                {draft.items
-                  .filter((candidate) => candidate.category === activeCategory)
-                  .map((candidate) => (
-                    <tr key={candidate.id}>
-                      <td>
-                        {candidate.name}
-                        {candidate.doctorName ? (
-                          <>
-                            <br />
-                            <small>Médico: {candidate.doctorName}</small>
-                          </>
-                        ) : null}
-                        {candidate.presentation ? (
-                          <>
-                            <br />
-                            <small>
-                              {candidate.presentation === 'BLISTER'
-                                ? 'Blíster'
-                                : candidate.presentation === 'TABLET'
-                                  ? 'Tableta'
-                                  : 'Unidad'}{' '}
-                              · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)}{' '}
-                              unidades
-                              {candidate.inventoryItemId
-                                ? ` · Inventario ${catalogItems.find((catalogItem) => catalogItem.id === candidate.inventoryItemId)?.sku ?? candidate.inventoryItemId}`
-                                : ''}
-                            </small>
-                          </>
-                        ) : null}
-                      </td>
-                      <td>{candidate.quantity}</td>
-                      <td>{money(candidate.unitPrice)}</td>
-                      <td>{money(candidate.discountAmount)}</td>
-                      <td>
-                        {money(candidate.quantity * candidate.unitPrice - candidate.discountAmount)}
-                      </td>
-                      <td>
-                        <div className="action-row">
-                          <Button
-                            className="button-secondary"
-                            data-action-id="QUOTE-ITEM-EDIT"
-                            onClick={() => editItem(candidate)}
-                            type="button"
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            className="button-secondary"
-                            data-action-id="QUOTE-ITEM-REMOVE"
-                            onClick={() => removeItem(candidate.id)}
-                            type="button"
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                {draft.items.map((candidate) => (
+                  <tr key={candidate.id}>
+                    <td>
+                      {quoteCategories.find((category) => category.value === candidate.category)
+                        ?.label ?? candidate.category}
+                    </td>
+                    <td>
+                      {candidate.name}
+                      {candidate.doctorName ? (
+                        <>
+                          <br />
+                          <small>Médico: {candidate.doctorName}</small>
+                        </>
+                      ) : null}
+                      {candidate.presentation ? (
+                        <>
+                          <br />
+                          <small>
+                            {candidate.presentation === 'BLISTER'
+                              ? 'Blíster'
+                              : candidate.presentation === 'TABLET'
+                                ? 'Tableta'
+                                : 'Unidad'}{' '}
+                            · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)} unidades
+                            {candidate.inventoryItemId
+                              ? ` · Inventario ${catalogItems.find((catalogItem) => catalogItem.id === candidate.inventoryItemId)?.sku ?? candidate.inventoryItemId}`
+                              : ''}
+                          </small>
+                        </>
+                      ) : null}
+                    </td>
+                    <td>{candidate.quantity}</td>
+                    <td>{money(candidate.unitPrice)}</td>
+                    <td>{money(candidate.discountAmount)}</td>
+                    <td>
+                      {money(candidate.quantity * candidate.unitPrice - candidate.discountAmount)}
+                    </td>
+                    <td>
+                      <div className="action-row">
+                        <Button
+                          className="button-secondary"
+                          data-action-id="QUOTE-ITEM-EDIT"
+                          onClick={() => editItem(candidate)}
+                          type="button"
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          className="button-secondary"
+                          data-action-id="QUOTE-ITEM-REMOVE"
+                          onClick={() => removeItem(candidate.id)}
+                          type="button"
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
                 {!draft.items.some((candidate) => candidate.category === activeCategory) ? (
                   <tr>
                     <td colSpan={6}>No hay conceptos en esta categoría.</td>

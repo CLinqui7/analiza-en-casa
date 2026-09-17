@@ -83,6 +83,9 @@ const patientFormSchema = z
     nationality: z.string().trim(),
     occupation: z.string().trim(),
     triageStatus: z.string().trim(),
+    diagnosis: z.string().trim(),
+    primaryDoctorId: z.string().trim(),
+    secondaryDoctorId: z.string().trim(),
     botmakerConsent: z.boolean(),
     insurance: z.object({
       status: z.enum(['REGULAR', 'INSURED']),
@@ -287,6 +290,7 @@ export default function PatientsPage() {
   const {
     addPatient,
     addPatients,
+    doctors,
     patients,
     providerMode,
     refreshPatients,
@@ -334,6 +338,9 @@ export default function PatientsPage() {
       nationality: '',
       occupation: '',
       triageStatus: '',
+      diagnosis: '',
+      primaryDoctorId: '',
+      secondaryDoctorId: '',
       insurance: emptyInsurance,
       contacts: [],
       address: emptyAddress,
@@ -385,6 +392,9 @@ export default function PatientsPage() {
       nationality: editingPatient.nationality ?? '',
       occupation: editingPatient.occupation ?? '',
       triageStatus: editingPatient.triageStatus ?? '',
+      diagnosis: editingPatient.diagnosis ?? '',
+      primaryDoctorId: editingPatient.primaryDoctorId ?? '',
+      secondaryDoctorId: editingPatient.secondaryDoctorId ?? '',
       insurance:
         editingPatient.insurance?.status === 'INSURED'
           ? { ...emptyInsurance, ...editingPatient.insurance, status: 'INSURED' }
@@ -619,6 +629,9 @@ export default function PatientsPage() {
       nationality: values.nationality || undefined,
       occupation: values.occupation || undefined,
       triageStatus: values.triageStatus || undefined,
+      diagnosis: values.diagnosis || undefined,
+      primaryDoctorId: values.primaryDoctorId || undefined,
+      secondaryDoctorId: values.secondaryDoctorId || undefined,
       insurance,
       contacts: values.contacts.map(
         ({ documentType: contactDocumentType, documentId: contactDocumentId, ...contact }) => ({
@@ -1117,6 +1130,32 @@ export default function PatientsPage() {
                   {form.formState.errors.fullName.message}
                 </span>
               ) : null}
+            </label>
+            <label className="full">
+              Diagnóstico
+              <textarea {...form.register('diagnosis')} rows={2} />
+            </label>
+            <label>
+              Médico tratante principal
+              <select {...form.register('primaryDoctorId')}>
+                <option value="">Sin asignar</option>
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Médico tratante secundario
+              <select {...form.register('secondaryDoctorId')}>
+                <option value="">Sin asignar</option>
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               Fecha de nacimiento{' '}

@@ -53,6 +53,9 @@ export const patientSchema = z.object({
   nationality: z.string().trim().optional(),
   occupation: z.string().trim().optional(),
   triageStatus: z.string().trim().optional(),
+  diagnosis: z.string().trim().optional(),
+  primaryDoctorId: z.string().trim().optional(),
+  secondaryDoctorId: z.string().trim().optional(),
   notifications: z
     .object({
       botmakerConsent: z.boolean().default(true),
@@ -107,6 +110,7 @@ export const doctorSchema = z.object({
   fullName: z.string().trim().min(1),
   jvpm: z.string().trim().optional(),
   conadem: z.string().trim().optional(),
+  medicalFee: z.number().nonnegative().optional(),
   documentId: z.string().trim().min(1),
   specialty: z.string().trim().min(1),
   phone: z.string().trim().optional(),
@@ -238,6 +242,7 @@ export const quoteSchema = z.object({
   version: z.number().int().positive(),
   status: z.enum(['DRAFT', 'SENT']),
   summary: z.string().trim().min(1),
+  careSetting: z.enum(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT']).optional(),
   /** Administrative invoice fields observed in CH03.  They do not alter totals. */
   invoiceDate: z.string().optional(),
   invoiceDocumentType: z.enum(['INVOICE', 'TAX_CREDIT']).optional(),
