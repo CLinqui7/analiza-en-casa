@@ -13,6 +13,105 @@
   --shadow: 0 8px 24px rgb(21 48 83 / 8%);
 }
 
+/* Administrative directory and richer professional profile controls. */
+.insurers-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, var(--teal) 20%, white);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 88% 10%, rgb(235 76 87 / 18%), transparent 30%),
+    linear-gradient(135deg, #f0fbfb 0%, #fff 62%, #fff4f5 100%);
+  box-shadow: 0 18px 45px rgb(16 50 77 / 8%);
+}
+.insurers-hero h1 {
+  margin: 0.25rem 0 0.5rem;
+}
+.insurers-hero p:last-child {
+  max-width: 48rem;
+  margin: 0;
+  color: var(--muted);
+}
+.insurer-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.insurer-metrics > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 1.15rem 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 10px 28px rgb(16 50 77 / 6%);
+}
+.insurer-metrics strong {
+  font-size: 1.75rem;
+  color: var(--teal);
+}
+.insurer-metrics span {
+  color: var(--muted);
+}
+.insurer-toolbar {
+  align-items: end;
+}
+.insurer-search {
+  min-width: min(100%, 22rem);
+}
+.insurer-search span {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+.insurer-search input {
+  width: 100%;
+}
+.checkbox-fieldset {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+}
+.checkbox-fieldset legend {
+  padding: 0 0.4rem;
+  font-weight: 700;
+}
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+  background: var(--canvas);
+  font-weight: 600;
+}
+.checkbox-option input {
+  width: auto;
+}
+@media (max-width: 760px) {
+  .insurers-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .insurer-metrics,
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+  .insurer-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

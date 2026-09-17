@@ -45,6 +45,7 @@ const ownerPermissions: Record<FileOwnerType, { read: Permission; write: Permiss
   patient: { read: 'patients:read', write: 'patients:write' },
   doctor: { read: 'settings:write', write: 'settings:write' },
   hospitalization: { read: 'cases:read', write: 'cases:write' },
+  nursing_resource: { read: 'nurses:manage', write: 'nurses:manage' },
 };
 
 function ownerPermission(ownerType: FileOwnerType, action: 'read' | 'write') {
@@ -166,7 +167,9 @@ export class MongoFileRepository {
 
 /** Mongo adapter for owner existence checks. Tenant scope is always supplied by the actor. */
 export function mongoFileOwnerLookup(database: {
-  collection(name: 'patients' | 'doctors' | 'hospitalizations'): OwnerCollection;
+  collection(
+    name: 'patients' | 'doctors' | 'hospitalizations' | 'nursingResources',
+  ): OwnerCollection;
 }): FileOwnerLookup {
   return {
     async exists(actor, ownerType, ownerId) {
@@ -175,7 +178,9 @@ export function mongoFileOwnerLookup(database: {
           ? 'patients'
           : ownerType === 'doctor'
             ? 'doctors'
-            : 'hospitalizations',
+            : ownerType === 'hospitalization'
+              ? 'hospitalizations'
+              : 'nursingResources',
       );
       return Boolean(
         await collection.findOne({ id: ownerId, organizationId: actor.organizationId }),

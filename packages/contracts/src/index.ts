@@ -96,6 +96,12 @@ export const nursingResourceSchema = z.object({
   availability: z.enum(['AVAILABLE', 'ASSIGNED', 'OFF_DUTY']),
   capacity: z.number().int().nonnegative(),
   boardRegistrationNumber: z.string().trim().min(1),
+  patientTypes: z
+    .array(
+      z.enum(['PEDIATRIC', 'GERIATRIC', 'PALLIATIVE', 'ACUTE', 'CHRONIC', 'STABLE', 'CRITICAL']),
+    )
+    .optional(),
+  comments: z.string().trim().max(2000).optional(),
 });
 
 export const doctorAttachmentSchema = z.object({
@@ -309,8 +315,14 @@ export const catalogItemSchema = z.object({
       'SUPPLIES',
       'EQUIPMENT',
       'PROVIDERS',
+      'INSURERS',
     ])
     .optional(),
+  contactName: z.string().trim().max(200).optional(),
+  landlinePhone: z.string().trim().max(50).optional(),
+  mobilePhone: z.string().trim().max(50).optional(),
+  email: z.email().optional().or(z.literal('')),
+  notes: z.string().trim().max(2000).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']),
   createdAt: z.string(),
 });

@@ -2,7 +2,7 @@
 
 import { mongoMutationHeaders } from '@/lib/auth';
 
-export type PrivateFileOwner = 'patient' | 'doctor' | 'hospitalization';
+export type PrivateFileOwner = 'patient' | 'doctor' | 'hospitalization' | 'nursing_resource';
 export type PrivateFileMetadata = Readonly<{
   id: string;
   ownerType: PrivateFileOwner;

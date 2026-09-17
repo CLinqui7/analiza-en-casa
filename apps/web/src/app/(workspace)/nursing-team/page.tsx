@@ -4,6 +4,22 @@ import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { useOperations } from '@/lib/use-operations';
 import type { NurseProfileSubmission } from '@/lib/nurse-profile';
+import {
+  listPrivateFiles,
+  privateFileDownloadHref,
+  uploadPrivateFiles,
+  type PrivateFileMetadata,
+} from '@/lib/private-files';
+
+const patientTypeOptions = [
+  ['PEDIATRIC', 'Pediátricos'],
+  ['GERIATRIC', 'Geriátricos'],
+  ['PALLIATIVE', 'Paliativos'],
+  ['ACUTE', 'Agudos'],
+  ['CHRONIC', 'Crónicos'],
+  ['STABLE', 'Estables'],
+  ['CRITICAL', 'Críticos'],
+] as const;
 
 export default function NursingTeamPage() {
   const { nursingResources, refreshPatients } = useWorkspace();
@@ -13,6 +29,7 @@ export default function NursingTeamPage() {
   const [message, setMessage] = useState('');
   const [profiles, setProfiles] = useState<NurseProfileSubmission[]>([]);
   const [profilesError, setProfilesError] = useState('');
+  const [attachments, setAttachments] = useState<Record<string, PrivateFileMetadata[]>>({});
   useEffect(() => {
     const controller = new AbortController();
     void fetch('/api/admin/nurse-profiles', { cache: 'no-store', signal: controller.signal })
@@ -28,25 +45,58 @@ export default function NursingTeamPage() {
       });
     return () => controller.abort();
   }, []);
+  useEffect(() => {
+    if (!session || !nursingResources.length) return;
+    let active = true;
+    void Promise.all(
+      nursingResources.map(
+        async (resource) =>
+          [resource.id, await listPrivateFiles('nursing_resource', resource.id)] as const,
+      ),
+    )
+      .then((entries) => {
+        if (active) setAttachments(Object.fromEntries(entries));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [nursingResources, session]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const resourceId = crypto.randomUUID();
+    const selectedFile = form.get('credentialFile');
     const result = await operations.execute({
       command: 'nurse.create',
       email: form.get('email'),
       password: form.get('password'),
       role: form.get('role'),
       resource: {
-        id: crypto.randomUUID(),
+        id: resourceId,
         displayName: form.get('name'),
         territory: form.get('territory'),
         boardRegistrationNumber: form.get('registration'),
         shift: form.get('shift'),
         capacity: 1,
         availability: 'AVAILABLE',
+        patientTypes: form.getAll('patientTypes'),
+        comments: form.get('comments') || undefined,
       },
     });
     if (result) {
+      if (selectedFile instanceof File && selectedFile.size) {
+        try {
+          const uploaded = await uploadPrivateFiles('nursing_resource', resourceId, [selectedFile]);
+          setAttachments((current) => ({ ...current, [resourceId]: uploaded }));
+        } catch {
+          setMessage(
+            'La cuenta se creó, pero el archivo no pudo adjuntarse. Puede volver a cargarlo al editar el perfil.',
+          );
+          await refreshPatients();
+          return;
+        }
+      }
       setOpen(false);
       setMessage('Perfil de usuario creado con su rol y acceso al sistema.');
       await refreshPatients();
@@ -83,6 +133,7 @@ export default function NursingTeamPage() {
                 <th>Zona</th>
                 <th>Turno</th>
                 <th>Cuenta de usuario</th>
+                <th>Pacientes y respaldo</th>
               </tr>
             </thead>
             <tbody>
@@ -90,6 +141,21 @@ export default function NursingTeamPage() {
                 <tr key={resource.id}>
                   <td>
                     <strong>{resource.displayName}</strong>
+                  </td>
+                  <td>
+                    <small>
+                      {resource.patientTypes
+                        ?.map((type) => patientTypeOptions.find(([value]) => value === type)?.[1])
+                        .filter(Boolean)
+                        .join(', ') || 'Sin especialidad indicada'}
+                    </small>
+                    {attachments[resource.id]?.map((file) => (
+                      <div key={file.id}>
+                        <a href={privateFileDownloadHref(file.id)} target="_blank" rel="noreferrer">
+                          Ver archivo · {file.name}
+                        </a>
+                      </div>
+                    ))}
                   </td>
                   <td>{resource.boardRegistrationNumber}</td>
                   <td>{resource.territory}</td>
@@ -184,13 +250,44 @@ export default function NursingTeamPage() {
             <select name="role" defaultValue="NURSE">
               {session?.role === 'ADMIN' ? <option value="ADMIN">Administrador</option> : null}
               {session?.role === 'ADMIN' ? <option value="MANAGER">Gerente</option> : null}
-              <option value="NURSE_MANAGER">Jefe de enfermería</option>
+              <option value="NURSE_MANAGER">Supervisora / jefe de enfermería</option>
               <option value="NURSE">Enfermería</option>
             </select>
           </label>
           <label>
             Registro profesional
             <input name="registration" required />
+          </label>
+          <fieldset className="full checkbox-fieldset">
+            <legend>Tipos de pacientes que está capacitada para atender</legend>
+            <div className="checkbox-grid">
+              {patientTypeOptions.map(([value, label]) => (
+                <label key={value} className="checkbox-option">
+                  <input name="patientTypes" type="checkbox" value={value} />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="full">
+            Comentarios
+            <textarea
+              name="comments"
+              maxLength={2000}
+              placeholder="Experiencia, restricciones, certificaciones u otra información útil."
+              rows={4}
+            />
+          </label>
+          <label className="full">
+            Adjuntar archivo
+            <input
+              name="credentialFile"
+              type="file"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+            />
+            <span className="field-help">
+              Credencial, certificación o documento de respaldo. Máximo 25 MB.
+            </span>
           </label>
           <label>
             Zona

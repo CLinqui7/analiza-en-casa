@@ -103,6 +103,7 @@ export default function HospitalizationsPage() {
     addHospitalization,
     error,
     doctors,
+    catalogItems,
     hospitalizations,
     loading,
     nursingResources,
@@ -161,11 +162,14 @@ export default function HospitalizationsPage() {
   const insurerOptions = useMemo(
     () =>
       [
-        ...new Set(
-          patients.map((item) => item.insurer).filter((item): item is string => Boolean(item)),
-        ),
+        ...new Set([
+          ...catalogItems
+            .filter((item) => item.category === 'INSURERS' && item.status === 'ACTIVE')
+            .map((item) => item.name),
+          ...patients.map((item) => item.insurer).filter((item): item is string => Boolean(item)),
+        ]),
       ].sort(),
-    [patients],
+    [catalogItems, patients],
   );
   const totalPages = Math.max(1, Math.ceil(entries.length / pageSize));
   const currentPage = Math.min(page, totalPages);

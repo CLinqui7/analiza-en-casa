@@ -18,6 +18,12 @@
   teléfono y autorización; el mensaje no incluye diagnóstico ni tratamiento.
 - La migración `011_service_catalogs.sql` instala los catálogos iniciales sin
   sobrescribir registros existentes.
+- El menú principal incorpora un directorio de Aseguradoras con contacto, teléfonos,
+  correo y notas. Las aseguradoras activas alimentan el selector de Hospitalización.
+- La creación de personal admite el perfil Supervisora / jefe de enfermería, tipos
+  de paciente, comentarios y un documento privado de respaldo de hasta 25 MB.
+- La migración `012_insurers_and_nurse_files.sql` instala el directorio inicial de
+  aseguradoras y habilita adjuntos privados para recursos de enfermería.
 
 Orden de publicación: ejecutar la imagen operator con `--migrate`, verificar
 `/api/health` y después promover la misma imagen web. No ejecutar migraciones desde

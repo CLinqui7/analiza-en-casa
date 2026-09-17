@@ -41,6 +41,12 @@ const navigation: NavigationGroup[] = [
   },
   { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
   {
+    label: 'Aseguradoras',
+    href: '/insurers',
+    permission: 'catalogs:read',
+    actionId: 'INSURER-NAVIGATE',
+  },
+  {
     label: 'Financiero',
     children: [
       {

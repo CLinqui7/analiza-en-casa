@@ -20,6 +20,8 @@ const categories = [
   ['PROVIDERS', 'Proveedores', 'PRO'],
 ] as const;
 type Category = (typeof categories)[number][0];
+const isCategory = (value: CatalogItem['category']): value is Category =>
+  categories.some(([category]) => category === value);
 const itemSchema = z.object({
   category: z.enum([
     'SERVICES',
@@ -73,7 +75,10 @@ export default function CatalogsPage() {
   function edit(item: CatalogItem) {
     setMessage(null);
     setEditing(item);
-    form.reset({ category: item.category ?? 'SUPPLIES', name: item.name });
+    form.reset({
+      category: isCategory(item.category) ? item.category : 'SUPPLIES',
+      name: item.name,
+    });
     setOpen(true);
   }
   async function save(values: ItemForm) {

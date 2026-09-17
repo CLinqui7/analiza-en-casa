@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { MongoInputError } from './patients';
 
 export const MAX_PRIVATE_FILE_BYTES = 25 * 1024 * 1024;
-export const ownerTypeSchema = z.enum(['patient', 'doctor', 'hospitalization']);
+export const ownerTypeSchema = z.enum(['patient', 'doctor', 'hospitalization', 'nursing_resource']);
 export const fileMetadataSchema = z.object({
   id: z.string().uuid(),
   ownerType: ownerTypeSchema,

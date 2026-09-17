@@ -26,6 +26,11 @@ const owners = {
   patient: { table: 'analiza.patients', read: 'patients:read', write: 'patients:write' },
   doctor: { table: 'analiza.doctors', read: 'settings:write', write: 'settings:write' },
   hospitalization: { table: 'analiza.hospitalizations', read: 'cases:read', write: 'cases:write' },
+  nursing_resource: {
+    table: 'analiza.nursing_resources',
+    read: 'nurses:manage',
+    write: 'nurses:manage',
+  },
 } as const;
 async function ownerAccess(
   c: PoolClient,

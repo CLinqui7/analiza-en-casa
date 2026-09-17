@@ -90,8 +90,8 @@ docker build --platform linux/amd64 --progress=plain --build-arg "SOURCE_SHA=$so
 docker build --platform linux/amd64 --progress=plain --target operator --build-arg "SOURCE_SHA=$sourceSha" -t analiza-operator:postgresql .
 ```
 
-La versión del 17 de septiembre de 2026 requiere la migración
-`011_service_catalogs.sql`. El responsable del despliegue debe ejecutar primero el
+La versión del 17 de septiembre de 2026 requiere las migraciones
+`011_service_catalogs.sql` y `012_insurers_and_nurse_files.sql`. El responsable del despliegue debe ejecutar primero el
 operator, esperar un resultado satisfactorio y sólo entonces actualizar la web:
 
 ```powershell
@@ -133,7 +133,7 @@ repositorio de distribución; no se versionan contraseñas.
 | `npm run typecheck` / `npm run lint` | Tipos y análisis estático                                |
 | `npm run test:browser:react`         | Regresión de navegador                                   |
 | `npm run test:postgresql`            | Contenedor final, SQL, permisos, archivos y persistencia |
-| `npm run test:ubuntu:selfhosted`      | Socket Unix, filesystem y reinicios en Docker aislado    |
+| `npm run test:ubuntu:selfhosted`     | Socket Unix, filesystem y reinicios en Docker aislado    |
 | `npm run qa:local`                   | Conjunto amplio de verificaciones locales                |
 | `npm run audit:verify`               | Integridad de los registros de revisión                  |
 
