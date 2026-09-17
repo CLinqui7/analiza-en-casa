@@ -20,6 +20,7 @@ export default function HospitalizationDetailPage() {
   const router = useRouter();
   const {
     clinicalDocuments,
+    doctors,
     hospitalizations,
     loading,
     patients,
@@ -63,6 +64,8 @@ export default function HospitalizationDetailPage() {
   const linkedQuotes = quotes.filter((item) => item.caseId === hospitalization.id);
   const linkedDocuments = clinicalDocuments.filter((item) => item.caseId === hospitalization.id);
   const linkedVitals = vitalReadings.filter((item) => item.caseId === hospitalization.id);
+  const primaryDoctor = doctors.find((item) => item.id === hospitalization.primaryDoctorId);
+  const secondaryDoctor = doctors.find((item) => item.id === hospitalization.secondaryDoctorId);
   const tone =
     hospitalization.status === 'ACTIVE'
       ? 'success'
@@ -98,7 +101,7 @@ export default function HospitalizationDetailPage() {
     });
     setProfileSaving(false);
     if (saved) {
-      setProfileMessage('Perfil administrativo de ejecución guardado.');
+      setProfileMessage('Perfil de ejecución de cotización guardado.');
       closeProfile();
     }
   };
@@ -184,6 +187,14 @@ export default function HospitalizationDetailPage() {
               <div>
                 <dt>Responsable</dt>
                 <dd>{hospitalization.manager ?? 'No asignado'}</dd>
+              </div>
+              <div>
+                <dt>Médico tratante principal</dt>
+                <dd>{primaryDoctor?.fullName ?? 'No asignado'}</dd>
+              </div>
+              <div>
+                <dt>Médico tratante secundario</dt>
+                <dd>{secondaryDoctor?.fullName ?? 'No asignado'}</dd>
               </div>
               <div className="full">
                 <dt>Dispositivos / accesos</dt>
@@ -288,7 +299,7 @@ export default function HospitalizationDetailPage() {
           }
           onClose={closeProfile}
           open={profileOpen}
-          title={`Perfil administrativo de ejecución: ${hospitalization.id}`}
+          title={`Ejecución de cotización: ${hospitalization.id}`}
         >
           <form
             className="form-grid"
@@ -296,7 +307,7 @@ export default function HospitalizationDetailPage() {
             onSubmit={(event) => void saveProfile(event)}
           >
             <label>
-              Health manager
+              Visitador médico
               <input defaultValue={profile?.healthManager ?? ''} name="healthManager" />
             </label>
             <label>

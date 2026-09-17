@@ -42,6 +42,8 @@ const formSchema = z.object({
   manager: z.string().trim(),
   priority: z.enum(priorities),
   diagnosisSummary: z.string().trim(),
+  primaryDoctorId: z.string().trim(),
+  secondaryDoctorId: z.string().trim(),
   nextAction: z.string().trim(),
   devices: z.string().trim(),
   assignedNursingResourceIds: z.array(z.string()),
@@ -68,6 +70,8 @@ function blankForm(): HospitalizationForm {
     manager: '',
     priority: 'MEDIUM',
     diagnosisSummary: '',
+    primaryDoctorId: '',
+    secondaryDoctorId: '',
     nextAction: '',
     devices: '',
     assignedNursingResourceIds: [],
@@ -85,6 +89,8 @@ function formFor(item: Hospitalization): HospitalizationForm {
     manager: item.manager ?? '',
     priority: item.priority ?? 'MEDIUM',
     diagnosisSummary: item.diagnosisSummary ?? '',
+    primaryDoctorId: item.primaryDoctorId ?? '',
+    secondaryDoctorId: item.secondaryDoctorId ?? '',
     nextAction: item.nextAction ?? '',
     devices: item.devices?.join(', ') ?? '',
     assignedNursingResourceIds: item.assignedNursingResourceIds ?? [],
@@ -96,6 +102,7 @@ export default function HospitalizationsPage() {
   const {
     addHospitalization,
     error,
+    doctors,
     hospitalizations,
     loading,
     nursingResources,
@@ -219,6 +226,8 @@ export default function HospitalizationsPage() {
       insurer: values.insurer || undefined,
       manager: values.manager || undefined,
       diagnosisSummary: values.diagnosisSummary || undefined,
+      primaryDoctorId: values.primaryDoctorId || undefined,
+      secondaryDoctorId: values.secondaryDoctorId || undefined,
       nextAction: values.nextAction || undefined,
       devices: values.devices
         ? values.devices
@@ -352,7 +361,7 @@ export default function HospitalizationsPage() {
               role="tab"
               type="button"
             >
-              PIC Ejecución
+              Ejecución de cotización
             </button>
           </div>
         </div>
@@ -638,7 +647,7 @@ export default function HospitalizationsPage() {
       {tab === 'QUOTES' ? <HospitalizationQuoteTracking /> : null}
       {tab === 'PIC' ? (
         <Panel>
-          <h2>PIC Ejecución</h2>
+          <h2>Ejecución de cotización</h2>
           <EmptyState
             detail="No se demuestran reglas, estados ni acciones de PIC en CH03; la superficie queda visible sin inventar un flujo."
             title="Configuración pendiente"
@@ -850,6 +859,28 @@ export default function HospitalizationsPage() {
           <label className="full">
             Resumen diagnóstico
             <textarea {...form.register('diagnosisSummary')} rows={3} />
+          </label>
+          <label>
+            Médico tratante principal
+            <select {...form.register('primaryDoctorId')}>
+              <option value="">Sin asignar</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Médico tratante secundario
+            <select {...form.register('secondaryDoctorId')}>
+              <option value="">Sin asignar</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="full">
             Próxima acción

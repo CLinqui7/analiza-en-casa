@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
-import { useWorkspace } from '@/components/providers';
+import { useAuth, useWorkspace } from '@/components/providers';
 import { useOperations } from '@/lib/use-operations';
 import type { NurseProfileSubmission } from '@/lib/nurse-profile';
 
 export default function NursingTeamPage() {
   const { nursingResources, refreshPatients } = useWorkspace();
+  const { session } = useAuth();
   const operations = useOperations();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -34,6 +35,7 @@ export default function NursingTeamPage() {
       command: 'nurse.create',
       email: form.get('email'),
       password: form.get('password'),
+      role: form.get('role'),
       resource: {
         id: crypto.randomUUID(),
         displayName: form.get('name'),
@@ -46,7 +48,7 @@ export default function NursingTeamPage() {
     });
     if (result) {
       setOpen(false);
-      setMessage('Cuenta de enfermería creada. Ya puede asignarse a una hospitalización.');
+      setMessage('Perfil de usuario creado con su rol y acceso al sistema.');
       await refreshPatients();
     }
   }
@@ -55,11 +57,11 @@ export default function NursingTeamPage() {
       <header className="page-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
-          <h1>Equipo de enfermería</h1>
-          <p>Personas, cuentas de acceso y asignación para la atención domiciliaria.</p>
+          <h1>Usuarios y equipo de enfermería</h1>
+          <p>Cuentas de acceso, roles y asignación para la atención domiciliaria.</p>
         </div>
         <Button data-action-id="NURSE-ACCOUNT-CREATE" onClick={() => setOpen(true)}>
-          + Agregar enfermera
+          + Crear perfil de usuario
         </Button>
       </header>
       {message ? (
@@ -159,8 +161,8 @@ export default function NursingTeamPage() {
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
-        title="Nueva enfermera"
-        description="La cuenta creada tendrá exclusivamente el rol Enfermera dentro de esta organización."
+        title="Nuevo perfil de usuario"
+        description="Seleccione el rol que define las funciones visibles para esta cuenta."
         footer={
           <>
             <Button className="button-secondary" onClick={() => setOpen(false)}>
@@ -176,6 +178,15 @@ export default function NursingTeamPage() {
           <label>
             Nombre completo
             <input name="name" required />
+          </label>
+          <label>
+            Rol
+            <select name="role" defaultValue="NURSE">
+              {session?.role === 'ADMIN' ? <option value="ADMIN">Administrador</option> : null}
+              {session?.role === 'ADMIN' ? <option value="MANAGER">Gerente</option> : null}
+              <option value="NURSE_MANAGER">Jefe de enfermería</option>
+              <option value="NURSE">Enfermería</option>
+            </select>
           </label>
           <label>
             Registro profesional

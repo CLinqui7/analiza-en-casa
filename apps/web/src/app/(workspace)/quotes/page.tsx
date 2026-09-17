@@ -32,7 +32,6 @@ type QuoteDraft = Pick<
   | 'discountGroup'
   | 'referralLabel'
   | 'referralSelections'
-  | 'giftCardCode'
 > & { revisionReason: string; patientId: string; patientQuery: string; referralQuery: string };
 
 const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
@@ -58,7 +57,6 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   discountGroup: 'Regular',
   referralLabel: '',
   referralSelections: [],
-  giftCardCode: '',
   items: [],
   discount: undefined,
   insurerAmount: 0,
@@ -72,42 +70,6 @@ const referralCatalog = [
   'Dr. Jorge Contreras',
 ];
 type CatalogEntry = { id: string; label: string; inventoryAvailable: boolean };
-const serviceCatalog: CatalogEntry[] = [
-  {
-    id: 'service-demo-available',
-    label: 'Servicio de atención disponible',
-    inventoryAvailable: true,
-  },
-  {
-    id: 'service-demo-unavailable',
-    label: 'Servicio sin disponibilidad configurada',
-    inventoryAvailable: false,
-  },
-];
-const medicationCatalog: CatalogEntry[] = [
-  {
-    id: 'medication-demo-available',
-    label: 'Medicamento disponible',
-    inventoryAvailable: true,
-  },
-  {
-    id: 'medication-demo-unavailable',
-    label: 'Medicamento sin disponibilidad configurada',
-    inventoryAvailable: false,
-  },
-];
-const supplyCatalog: CatalogEntry[] = [
-  {
-    id: 'supply-demo-available',
-    label: 'INS-001 | Insumo disponible (1)',
-    inventoryAvailable: true,
-  },
-  {
-    id: 'supply-demo-unavailable',
-    label: 'INS-002 | Insumo sin disponibilidad configurada (0)',
-    inventoryAvailable: false,
-  },
-];
 const studyCatalog: CatalogEntry[] = [
   {
     id: 'study-demo-available',
@@ -123,7 +85,6 @@ const studyCatalog: CatalogEntry[] = [
 const feeServiceCatalog: CatalogEntry[] = [
   { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
-const businessPartners = ['Socio de negocios A', 'Socio de negocios B'];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 function updatedCategoryPercentages(
   existing: QuoteDiscount['categories'],
@@ -156,7 +117,6 @@ function cloneDraft(quote: Quote): QuoteDraft {
     discountGroup: quote.discountGroup ?? 'Regular',
     referralLabel: quote.referralLabel ?? '',
     referralSelections: quote.referralSelections ?? [],
-    giftCardCode: quote.giftCardCode ?? '',
     items: quote.items.map((item) => ({ ...item })),
     discount: quote.discount
       ? {
@@ -245,17 +205,25 @@ function QuoteEditor({
     : undefined;
   const itemUnits = item.quantity * (item.unitsPerPresentation ?? 1);
   const activeCatalog =
-    activeCategory === 'SERVICES'
-      ? serviceCatalog
-      : activeCategory === 'MEDICATIONS'
-        ? medicationCatalog
-        : activeCategory === 'SUPPLIES'
-          ? supplyCatalog
-          : activeCategory === 'STUDIES'
-            ? studyCatalog
-            : activeCategory === 'FEES'
-              ? feeServiceCatalog
-              : [];
+    activeCategory === 'SERVICES' ||
+    activeCategory === 'MEDICATIONS' ||
+    activeCategory === 'SUPPLIES'
+      ? catalogItems
+          .filter(
+            (candidate) => candidate.status === 'ACTIVE' && candidate.category === activeCategory,
+          )
+          .map((candidate) => ({
+            id: candidate.id,
+            label: `${candidate.sku} | ${candidate.name}`,
+            inventoryAvailable:
+              activeCategory === 'SERVICES' ||
+              currentInventoryBalance(inventoryMovements, candidate.id) > 0,
+          }))
+      : activeCategory === 'STUDIES'
+        ? studyCatalog
+        : activeCategory === 'FEES'
+          ? feeServiceCatalog
+          : [];
   const catalogResults = activeCatalog.filter(
     (entry) =>
       (!inventoryOnly || entry.inventoryAvailable) &&
@@ -346,7 +314,6 @@ function QuoteEditor({
       discountGroup: draft.discountGroup?.trim() || 'Regular',
       referralLabel: draft.referralQuery.trim() || draft.referralLabel?.trim() || undefined,
       referralSelections: draft.referralSelections?.length ? draft.referralSelections : undefined,
-      giftCardCode: draft.giftCardCode?.trim() || undefined,
       comments: draft.comments?.trim() || undefined,
       items: draft.items,
       discount: draft.discount,
@@ -690,16 +657,6 @@ function QuoteEditor({
                 </div>
               ) : null}
             </div>
-            <label>
-              Giftcard
-              <input
-                data-action-id="QUOTE-GIFTCARD"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, giftCardCode: event.target.value }))
-                }
-                value={draft.giftCardCode ?? ''}
-              />
-            </label>
             <label className="full">
               Comentarios <span aria-hidden="true">*</span>
               <textarea
@@ -758,73 +715,16 @@ function QuoteEditor({
           </div>
           <div className="form-grid form-grid-compact quote-item-editor">
             {activeCategory === 'SERVICES' ? (
-              <>
-                <label className="full-field">
-                  <input
-                    checked={inventoryOnly}
-                    data-action-id="QUOTE-INVENTORY-ONLY"
-                    onChange={(event) => {
-                      setInventoryOnly(event.target.checked);
-                      if (event.target.checked && item.name === serviceCatalog[1].label)
-                        setItem((current) => ({ ...current, name: '' }));
-                    }}
-                    type="checkbox"
-                  />{' '}
-                  Solo disponibles en inventario
-                </label>
-                <label>
-                  Socio de negocios
-                  <select
-                    data-action-id="QUOTE-BUSINESS-PARTNER"
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        businessPartnerLabel: event.target.value || undefined,
-                      }))
-                    }
-                    value={item.businessPartnerLabel ?? ''}
-                  >
-                    <option value="">Seleccione un socio</option>
-                    {businessPartners.map((partner) => (
-                      <option key={partner} value={partner}>
-                        {partner}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Servicios
-                  <select
-                    data-action-id="QUOTE-SERVICE-CATALOG"
-                    onChange={(event) =>
-                      setItem((current) => ({ ...current, name: event.target.value }))
-                    }
-                    value={
-                      serviceCatalog.some((service) => service.label === item.name) ? item.name : ''
-                    }
-                  >
-                    <option value="">Seleccione un servicio</option>
-                    {serviceCatalog
-                      .filter((service) => !inventoryOnly || service.inventoryAvailable)
-                      .map((service) => (
-                        <option key={service.id} value={service.label}>
-                          {service.label}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              </>
+              <p className="field-help full-field">
+                Seleccione un servicio ya creado en el catálogo.
+              </p>
             ) : null}
-            {activeCategory === 'SUPPLIES' || activeCategory === 'STUDIES' ? (
+            {activeCategory === 'STUDIES' ? (
               <>
                 <label className="full-field">
                   <input
                     checked={inventoryOnly}
-                    data-action-id={
-                      activeCategory === 'SUPPLIES'
-                        ? 'QUOTE-SUPPLY-INVENTORY-ONLY'
-                        : 'QUOTE-STUDY-INVENTORY-ONLY'
-                    }
+                    data-action-id="QUOTE-STUDY-INVENTORY-ONLY"
                     onChange={(event) => {
                       setInventoryOnly(event.target.checked);
                       if (
@@ -840,57 +740,23 @@ function QuoteEditor({
                   Solo disponibles en inventario
                 </label>
                 <label>
-                  Socio de negocios
-                  <select
-                    data-action-id={
-                      activeCategory === 'SUPPLIES'
-                        ? 'QUOTE-SUPPLY-BUSINESS-PARTNER'
-                        : 'QUOTE-STUDY-BUSINESS-PARTNER'
-                    }
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        businessPartnerLabel: event.target.value || undefined,
-                      }))
-                    }
-                    value={item.businessPartnerLabel ?? ''}
-                  >
-                    <option value="">Seleccione un socio</option>
-                    {businessPartners.map((partner) => (
-                      <option key={partner} value={partner}>
-                        {partner}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Buscar {activeCategory === 'SUPPLIES' ? 'insumos' : 'estudios'}
+                  Buscar estudios
                   <input
-                    aria-label={
-                      activeCategory === 'SUPPLIES' ? 'Buscar insumos' : 'Buscar estudios'
-                    }
-                    data-action-id={
-                      activeCategory === 'SUPPLIES' ? 'QUOTE-SUPPLY-SEARCH' : 'QUOTE-STUDY-SEARCH'
-                    }
+                    aria-label="Buscar estudios"
+                    data-action-id="QUOTE-STUDY-SEARCH"
                     onChange={(event) => setCatalogQuery(event.target.value)}
                     value={catalogQuery}
                   />
                 </label>
                 <div
-                  aria-label={
-                    activeCategory === 'SUPPLIES'
-                      ? 'Resultados de insumos'
-                      : 'Resultados de estudios'
-                  }
+                  aria-label="Resultados de estudios"
                   className="catalog-results full-field"
                   role="listbox"
                 >
                   {catalogResults.map((entry) => (
                     <button
                       aria-selected={item.name === entry.label}
-                      data-action-id={
-                        activeCategory === 'SUPPLIES' ? 'QUOTE-SUPPLY-SELECT' : 'QUOTE-STUDY-SELECT'
-                      }
+                      data-action-id="QUOTE-STUDY-SELECT"
                       key={entry.id}
                       onClick={() => setItem((current) => ({ ...current, name: entry.label }))}
                       role="option"
@@ -903,37 +769,51 @@ function QuoteEditor({
                 </div>
               </>
             ) : null}
-            <label>
-              Concepto
-              <input
-                onChange={(event) =>
-                  setItem((current) => ({ ...current, name: event.target.value }))
-                }
-                value={item.name}
-              />
-            </label>
+            {activeCategory === 'SERVICES' ||
+            activeCategory === 'MEDICATIONS' ||
+            activeCategory === 'SUPPLIES' ? (
+              <label>
+                {activeCategory === 'SERVICES'
+                  ? 'Servicio'
+                  : activeCategory === 'MEDICATIONS'
+                    ? 'Medicamento'
+                    : 'Insumo'}
+                <select
+                  data-action-id="QUOTE-CATALOG-ITEM-SELECT"
+                  onChange={(event) => {
+                    const selected = activeCatalog.find((entry) => entry.id === event.target.value);
+                    setItem((current) => ({
+                      ...current,
+                      name: selected?.label ?? '',
+                      inventoryItemId: selected?.id,
+                    }));
+                  }}
+                  value={activeCatalog.find((entry) => entry.label === item.name)?.id ?? ''}
+                >
+                  <option value="">Seleccione del catálogo</option>
+                  {catalogResults.map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.label}
+                    </option>
+                  ))}
+                </select>
+                {!activeCatalog.length ? (
+                  <span className="field-help">Primero cree ítems activos en Catálogos.</span>
+                ) : null}
+              </label>
+            ) : (
+              <label>
+                Concepto
+                <input
+                  onChange={(event) =>
+                    setItem((current) => ({ ...current, name: event.target.value }))
+                  }
+                  value={item.name}
+                />
+              </label>
+            )}
             {activeCategory === 'FEES' ? (
               <>
-                <label>
-                  Socio de negocios
-                  <select
-                    data-action-id="QUOTE-FEE-BUSINESS-PARTNER"
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        businessPartnerLabel: event.target.value || undefined,
-                      }))
-                    }
-                    value={item.businessPartnerLabel ?? ''}
-                  >
-                    <option value="">Seleccione un socio</option>
-                    {businessPartners.map((partner) => (
-                      <option key={partner} value={partner}>
-                        {partner}
-                      </option>
-                    ))}
-                  </select>
-                </label>
                 <label>
                   Servicio de honorario
                   <select
@@ -1010,33 +890,13 @@ function QuoteEditor({
                     value={item.unitsPerPresentation ?? 1}
                   />
                 </label>
-                <label className="full-field">
-                  Vincular con inventario
-                  <select
-                    data-action-id="QUOTE-MEDICATION-INVENTORY-LINK"
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        inventoryItemId: event.target.value || undefined,
-                      }))
-                    }
-                    value={item.inventoryItemId ?? ''}
-                  >
-                    <option value="">Sin vínculo</option>
-                    {catalogItems
-                      .filter((candidate) => candidate.status === 'ACTIVE')
-                      .map((candidate) => (
-                        <option key={candidate.id} value={candidate.id}>
-                          {candidate.sku} · {candidate.name}
-                        </option>
-                      ))}
-                  </select>
+                <div className="full-field">
                   <span className="field-help">
                     {linkedInventoryItem
                       ? `${itemUnits} unidades indicadas · existencia actual ${linkedInventoryBalance ?? 0}. La cotización no reserva ni descuenta stock.`
                       : `${itemUnits} unidades indicadas. Seleccione un ítem para ver su existencia.`}
                   </span>
-                </label>
+                </div>
               </>
             ) : null}
             <label>
@@ -1099,99 +959,6 @@ function QuoteEditor({
               ) : null}
             </div>
           </div>
-          {activeCategory === 'SERVICES' || activeCategory === 'MEDICATIONS' ? (
-            <div className="form-grid form-grid-compact quote-item-catalog">
-              <label className="full-field">
-                {activeCategory === 'SERVICES' ? 'Buscar servicios' : 'Buscar medicamentos'}
-                <input
-                  aria-controls={catalogQuery ? 'quote-item-catalog' : undefined}
-                  data-action-id={
-                    activeCategory === 'SERVICES'
-                      ? 'QUOTE-SERVICE-SEARCH'
-                      : 'QUOTE-MEDICATION-SEARCH'
-                  }
-                  onChange={(event) => setCatalogQuery(event.target.value)}
-                  placeholder="Buscar en catálogo"
-                  value={catalogQuery}
-                />
-                {catalogQuery ? (
-                  <div
-                    aria-label={
-                      activeCategory === 'SERVICES'
-                        ? 'Resultados de servicios'
-                        : 'Resultados de medicamentos'
-                    }
-                    className="referral-catalog"
-                    id="quote-item-catalog"
-                    role="listbox"
-                  >
-                    {catalogResults.length ? (
-                      catalogResults.map((entry) => (
-                        <button
-                          aria-selected={item.name === entry.label}
-                          data-action-id={
-                            activeCategory === 'SERVICES'
-                              ? 'QUOTE-SERVICE-SELECT'
-                              : 'QUOTE-MEDICATION-SELECT'
-                          }
-                          key={entry.id}
-                          onClick={() => {
-                            setItem((current) => ({ ...current, name: entry.label }));
-                            setCatalogQuery(entry.label);
-                          }}
-                          role="option"
-                          type="button"
-                        >
-                          {entry.label}
-                        </button>
-                      ))
-                    ) : (
-                      <p className="field-help" role="status">
-                        No results found
-                      </p>
-                    )}
-                  </div>
-                ) : null}
-              </label>
-              {activeCategory === 'MEDICATIONS' ? (
-                <>
-                  <label>
-                    Socio de negocios
-                    <select
-                      data-action-id="QUOTE-MEDICATION-BUSINESS-PARTNER"
-                      onChange={(event) =>
-                        setItem((current) => ({
-                          ...current,
-                          businessPartnerLabel: event.target.value || undefined,
-                        }))
-                      }
-                      value={item.businessPartnerLabel ?? ''}
-                    >
-                      <option value="">Seleccione un socio</option>
-                      {businessPartners.map((partner) => (
-                        <option key={partner} value={partner}>
-                          {partner}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="full-field">
-                    <input
-                      checked={inventoryOnly}
-                      data-action-id="QUOTE-MEDICATION-INVENTORY-ONLY"
-                      onChange={(event) => setInventoryOnly(event.target.checked)}
-                      type="checkbox"
-                    />{' '}
-                    Solo disponibles en inventario
-                  </label>
-                </>
-              ) : null}
-              <p className="field-help full-field">
-                Seleccionar un concepto no asigna precio, reserva, dosificación, impuestos ni
-                cobertura. Confirme los importes antes de guardar.
-              </p>
-            </div>
-          ) : null}
           {processingItem ? (
             <div aria-live="polite" className="quote-processing" role="status">
               Procesando...
@@ -1230,12 +997,6 @@ function QuoteEditor({
                           <>
                             <br />
                             <small>Médico: {candidate.doctorName}</small>
-                          </>
-                        ) : null}
-                        {candidate.businessPartnerLabel ? (
-                          <>
-                            <br />
-                            <small>Socio: {candidate.businessPartnerLabel}</small>
                           </>
                         ) : null}
                         {candidate.presentation ? (

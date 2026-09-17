@@ -859,18 +859,27 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         );
       },
       addCatalogItem: (item) =>
-        saveCommand({ command: 'catalog.create', item }, (current) => {
+        saveCommand({ command: 'catalog.save', item }, (current) => {
+          const existing = current.catalogItems.find((candidate) => candidate.id === item.id);
           if (
             current.catalogItems.some(
               (candidate) =>
+                candidate.id !== item.id &&
                 candidate.sku.toLocaleUpperCase('es') === item.sku.toLocaleUpperCase('es'),
             )
           )
             return current;
           return {
             ...current,
-            catalogItems: [...current.catalogItems, item],
-            auditEntries: [audit('Ítem de catálogo creado', item.id), ...current.auditEntries],
+            catalogItems: existing
+              ? current.catalogItems.map((candidate) =>
+                  candidate.id === item.id ? item : candidate,
+                )
+              : [...current.catalogItems, item],
+            auditEntries: [
+              audit(existing ? 'Ítem de catálogo actualizado' : 'Ítem de catálogo creado', item.id),
+              ...current.auditEntries,
+            ],
           };
         }),
       addPurchase: (purchase) =>

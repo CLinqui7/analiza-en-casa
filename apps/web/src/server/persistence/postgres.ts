@@ -402,6 +402,26 @@ export function postgresPersistence(): Persistence {
           return entry;
         });
       }
+      if (command.command === 'catalog.save') {
+        authorize(actor, 'catalogs:write');
+        const { item } = z
+          .object({ command: z.literal('catalog.save'), item: catalogItemSchema.strict() })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const duplicate = await c.query(
+            "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND upper(body->>'sku')=upper($2) AND id<>$3",
+            [actor.organizationId, item.sku, item.id],
+          );
+          if (duplicate.rowCount) throw new MongoConflictError();
+          await c.query(
+            'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3) ON CONFLICT(organization_id,id) DO UPDATE SET body=EXCLUDED.body',
+            [actor.organizationId, item.id, JSON.stringify(item)],
+          );
+          await audit(c, actor, 'CATALOG_ITEM_SAVED', 'catalog_items', item.id);
+          return item;
+        });
+      }
       if (command.command === 'nurse.create') {
         authorize(actor, 'nurses:manage');
         const data = z
@@ -409,10 +429,13 @@ export function postgresPersistence(): Persistence {
             command: z.literal('nurse.create'),
             email: z.email(),
             password: z.string().min(12).max(1024),
+            role: z.enum(['ADMIN', 'MANAGER', 'NURSE_MANAGER', 'NURSE']).default('NURSE'),
             resource: nursingResourceSchema.omit({ userId: true }).strict(),
           })
           .strict()
           .parse(input);
+        if (['ADMIN', 'MANAGER'].includes(data.role) && actor.role !== 'ADMIN')
+          throw new MongoAccessError();
         const id = randomUUID(),
           hash = await hashPassword(data.password);
         const resource: NursingResource = { ...data.resource, userId: id };
@@ -423,14 +446,14 @@ export function postgresPersistence(): Persistence {
               [id, data.email.trim().toLowerCase(), hash, resource.displayName],
             );
             await c.query(
-              "INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,'NURSE')",
-              [id, actor.organizationId],
+              'INSERT INTO analiza.memberships(user_id,organization_id,role) VALUES($1,$2,$3)',
+              [id, actor.organizationId, data.role],
             );
             await c.query(
               'INSERT INTO analiza.nursing_resources(organization_id,id,user_id,body) VALUES($1,$2,$3,$4)',
               [actor.organizationId, resource.id, id, JSON.stringify(resource)],
             );
-            await audit(c, actor, 'NURSE_CREATED', 'nursing_resources', resource.id);
+            await audit(c, actor, 'USER_CREATED', 'nursing_resources', resource.id);
             return { id, resource };
           });
         } catch (error) {
@@ -647,14 +670,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 9 ||
+        row.migrations !== 10 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');

@@ -34,6 +34,7 @@ import {
 const identifier = z.string().trim().min(1).max(120);
 const commands = z.discriminatedUnion('command', [
   z.object({ command: z.literal('catalog.create'), item: catalogItemSchema.strict() }).strict(),
+  z.object({ command: z.literal('catalog.save'), item: catalogItemSchema.strict() }).strict(),
   z
     .object({
       command: z.literal('inventory.record'),
@@ -70,6 +71,7 @@ const commands = z.discriminatedUnion('command', [
       command: z.literal('nurse.create'),
       email: z.email(),
       password: z.string().min(12).max(1024),
+      role: z.enum(['ADMIN', 'MANAGER', 'NURSE_MANAGER', 'NURSE']).default('NURSE'),
       resource: nursingResourceSchema.omit({ userId: true }).strict(),
     })
     .strict(),
@@ -254,6 +256,23 @@ export class MongoOperationsRepository {
             .collection('catalogItems')
             .insertOne({ ...input.item, ...scoped, skuNormalized }, { session });
           await audit('CATALOG_ITEM_CREATED', input.item.id);
+          return { id: input.item.id };
+        }
+        if (input.command === 'catalog.save') {
+          permission('catalogs:write');
+          const skuNormalized = input.item.sku.toUpperCase();
+          const duplicate = await this.database
+            .collection('catalogItems')
+            .findOne({ ...scoped, skuNormalized, id: { $ne: input.item.id } }, { session });
+          if (duplicate) throw new MongoConflictError();
+          await this.database
+            .collection('catalogItems')
+            .updateOne(
+              { ...scoped, id: input.item.id },
+              { $set: { ...input.item, ...scoped, skuNormalized, updatedAt: new Date() } },
+              { upsert: true, session },
+            );
+          await audit('CATALOG_ITEM_SAVED', input.item.id);
           return { id: input.item.id };
         }
         if (input.command === 'inventory.record') {
@@ -522,6 +541,8 @@ export class MongoOperationsRepository {
         }
         if (input.command === 'nurse.create') {
           permission('nurses:manage');
+          if (['ADMIN', 'MANAGER'].includes(input.role) && actor.role !== 'ADMIN')
+            throw new MongoAccessError();
           const emailNormalized = input.email.toLowerCase();
           if (await this.database.collection('users').findOne({ emailNormalized }, { session }))
             throw new MongoConflictError();
@@ -535,14 +556,13 @@ export class MongoOperationsRepository {
             },
             { session },
           );
-          // Nurse managers cannot choose a role, reuse an existing identity, or cross organizations.
           await this.database
             .collection('memberships')
-            .insertOne({ ...scoped, userId, role: 'NURSE', active: true }, { session });
+            .insertOne({ ...scoped, userId, role: input.role, active: true }, { session });
           await this.database
             .collection('nursingResources')
             .insertOne({ ...input.resource, ...scoped, userId }, { session });
-          await audit('NURSE_ACCOUNT_CREATED', userId);
+          await audit('USER_ACCOUNT_CREATED', userId);
           return { id: userId };
         }
         if (input.command === 'balance.open') {

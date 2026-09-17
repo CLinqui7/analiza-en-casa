@@ -30,7 +30,8 @@ const optionalEmailSchema = z
 
 const doctorFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre del médico.'),
-  jvpm: z.string().trim().min(1, 'Ingrese el número de JVPM.'),
+  jvpm: z.string().trim(),
+  conadem: z.string().trim(),
   documentId: z.string().trim().min(1, 'Ingrese el DUI.'),
   specialty: z.string().trim().min(1, 'Seleccione una especialidad o profesión.'),
   phone: z.string().trim(),
@@ -42,6 +43,7 @@ type DoctorForm = z.infer<typeof doctorFormSchema>;
 const emptyDoctor: DoctorForm = {
   fullName: '',
   jvpm: '',
+  conadem: '',
   documentId: '',
   specialty: '',
   phone: '',
@@ -86,7 +88,8 @@ export default function DoctorsPage() {
     setActionError(null);
     form.reset({
       fullName: doctor.fullName,
-      jvpm: doctor.jvpm,
+      jvpm: doctor.jvpm ?? '',
+      conadem: doctor.conadem ?? '',
       documentId: doctor.documentId,
       specialty: doctor.specialty,
       phone: doctor.phone ?? '',
@@ -101,6 +104,8 @@ export default function DoctorsPage() {
     const doctor: Doctor = {
       id: editingDoctor?.id ?? crypto.randomUUID(),
       ...values,
+      jvpm: values.jvpm || undefined,
+      conadem: values.conadem || undefined,
       phone: values.phone || undefined,
       email: values.email || undefined,
       attachments: mongoMode ? [] : attachments,
@@ -182,6 +187,7 @@ export default function DoctorsPage() {
                 <tr>
                   <th>Nombre</th>
                   <th>JVPM</th>
+                  <th>CONADEM</th>
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
                   <th>Archivos</th>
@@ -192,7 +198,8 @@ export default function DoctorsPage() {
                 {doctors.map((doctor) => (
                   <tr key={doctor.id}>
                     <td>{doctor.fullName}</td>
-                    <td>{doctor.jvpm}</td>
+                    <td>{doctor.jvpm || 'No registrado'}</td>
+                    <td>{doctor.conadem || 'No registrado'}</td>
                     <td>{doctor.documentId}</td>
                     <td>{doctor.specialty}</td>
                     <td>
@@ -273,13 +280,17 @@ export default function DoctorsPage() {
             ) : null}
           </label>
           <label>
-            JVPM
+            JVPM (opcional)
             <input {...form.register('jvpm')} />
             {form.formState.errors.jvpm ? (
               <span className="field-error" role="alert">
                 {form.formState.errors.jvpm.message}
               </span>
             ) : null}
+          </label>
+          <label>
+            CONADEM (opcional)
+            <input {...form.register('conadem')} />
           </label>
           <label>
             DUI

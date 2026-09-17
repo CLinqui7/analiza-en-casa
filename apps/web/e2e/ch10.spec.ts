@@ -21,7 +21,7 @@ test('CH10 factual medical-order list filters active and inactive patients witho
   await loginToOrders(page);
   await expect(page.getByRole('columnheader', { name: 'Acciones', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Nombre', exact: true })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Cédula', exact: true })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'DUI', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Fecha Nac.', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Triage', exact: true })).toBeVisible();
   await expect(

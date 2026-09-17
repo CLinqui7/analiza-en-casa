@@ -56,7 +56,7 @@ test('CH02-F001-F005 route, list, sections, required markers, and primary docume
   for (const section of ['Datos generales', 'Información del seguro', 'Contactos', 'Dirección'])
     await expect(dialog.getByRole('group', { name: section })).toBeVisible();
   await expect(dialog.locator('.required-marker')).toHaveCount(9);
-  await expect(dialog.getByLabel('Tipo de documento')).toContainText('Cédula');
+  await expect(dialog.getByLabel('Tipo de documento')).toContainText('DUI');
   await expect(dialog.getByLabel('Tipo de documento')).toContainText('Pasaporte');
   await expect(dialog.getByLabel('Fecha de nacimiento')).toHaveAttribute('type', 'date');
 });

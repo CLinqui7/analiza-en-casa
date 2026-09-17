@@ -1,5 +1,6 @@
 export const roles = [
   'ADMIN',
+  'MANAGER',
   'DOCTOR',
   'NURSE',
   'NURSE_MANAGER',
@@ -76,6 +77,10 @@ const allWrite: Permission[] = [
 
 const permissions: Record<Role, readonly Permission[]> = {
   ADMIN: [...allRead, ...allWrite],
+  MANAGER: [
+    ...allRead.filter((permission) => permission !== 'audit:read'),
+    ...allWrite.filter((permission) => permission !== 'settings:write'),
+  ],
   NURSE_MANAGER: [
     'dashboard:read',
     'patients:read',

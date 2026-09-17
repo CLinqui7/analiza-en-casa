@@ -3,14 +3,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { CatalogItem } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
-import Link from 'next/link';
 
+const categories = [
+  ['SERVICES', 'Servicios', 'SER'],
+  ['MEDICATIONS', 'Medicamentos', 'MED'],
+  ['SUPPLIES', 'Insumos', 'INS'],
+  ['EQUIPMENT', 'Equipos', 'EQU'],
+  ['PROVIDERS', 'Proveedores', 'PRO'],
+] as const;
+type Category = (typeof categories)[number][0];
 const itemSchema = z.object({
-  sku: z.string().trim().min(1, 'El SKU es obligatorio.'),
+  category: z.enum(['SERVICES', 'MEDICATIONS', 'SUPPLIES', 'EQUIPMENT', 'PROVIDERS']),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
 });
 type ItemForm = z.infer<typeof itemSchema>;
@@ -19,81 +27,102 @@ export default function CatalogsPage() {
   const { addCatalogItem, catalogItems } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<CatalogItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState<Category>('SERVICES');
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
-    defaultValues: { sku: '', name: '' },
+    defaultValues: { category: 'SERVICES', name: '' },
   });
+  const selectedCategory = useWatch({ control: form.control, name: 'category' });
+  const visibleItems = useMemo(
+    () => catalogItems.filter((item) => (item.category ?? 'SUPPLIES') === activeCategory),
+    [activeCategory, catalogItems],
+  );
+  function nextSku(category: Category) {
+    const prefix = categories.find(([value]) => value === category)?.[2] ?? 'CAT';
+    const numbers = catalogItems
+      .filter((item) => item.sku.startsWith(`${prefix}-`))
+      .map((item) => Number(item.sku.slice(prefix.length + 1)))
+      .filter(Number.isFinite);
+    return `${prefix}-${String(Math.max(0, ...numbers) + 1).padStart(4, '0')}`;
+  }
   function close() {
     setOpen(false);
-    form.reset();
+    setEditing(null);
+    form.reset({ category: activeCategory, name: '' });
   }
-  async function submit(values: ItemForm) {
-    if (
-      catalogItems.some(
-        (item) => item.sku.toLocaleUpperCase('es') === values.sku.toLocaleUpperCase('es'),
-      )
-    ) {
-      form.setError('sku', { type: 'duplicate', message: 'Ya existe un ítem con este SKU.' });
-      return;
-    }
+  function create(category: Category = activeCategory) {
+    setMessage(null);
+    setEditing(null);
+    form.reset({ category, name: '' });
+    setOpen(true);
+  }
+  function edit(item: CatalogItem) {
+    setMessage(null);
+    setEditing(item);
+    form.reset({ category: item.category ?? 'SUPPLIES', name: item.name });
+    setOpen(true);
+  }
+  async function save(values: ItemForm) {
     const item: CatalogItem = {
-      id: crypto.randomUUID(),
-      sku: values.sku.toLocaleUpperCase('es'),
-      name: values.name,
-      status: 'ACTIVE',
-      createdAt: new Date().toISOString(),
+      id: editing?.id ?? crypto.randomUUID(),
+      sku: editing?.sku ?? nextSku(values.category),
+      name: values.name.trim(),
+      category: values.category,
+      status: editing?.status ?? 'ACTIVE',
+      createdAt: editing?.createdAt ?? new Date().toISOString(),
     };
     if (!(await addCatalogItem(item))) {
       form.setError('root', {
-        message: 'No se pudo guardar el artículo. Revise la conexión e inténtelo nuevamente.',
+        message: 'No se pudo guardar. Revise la conexión e inténtelo nuevamente.',
       });
       return;
     }
-    setMessage('Ítem de catálogo persistido con evidencia de auditoría.');
+    setActiveCategory(values.category);
+    setMessage(`${item.name} fue ${editing ? 'actualizado' : 'creado'} correctamente.`);
     close();
   }
+  async function toggle(item: CatalogItem) {
+    if (
+      !(await addCatalogItem({ ...item, status: item.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }))
+    )
+      return;
+    setMessage(`${item.name} quedó ${item.status === 'ACTIVE' ? 'inactivo' : 'activo'}.`);
+  }
+
   return (
     <div className="page-stack">
       <header className="page-header page-header-actions">
         <div>
-          <p className="eyebrow">Inventario</p>
-          <h1>Catálogos</h1>
+          <p className="eyebrow">Administración</p>
+          <h1>Catálogo general</h1>
           <p>
-            Ítems sintéticos con SKU único. No se definen precios, descuentos, impuestos, proveedor
-            ni disponibilidad sin reglas aprobadas.
+            Cree, edite, active o desactive los conceptos disponibles en cotizaciones e inventario.
           </p>
         </div>
-        {can('catalogs:write') ? (
-          <Button
-            data-action-id="CATALOG-CREATE"
-            onClick={() => {
-              setMessage(null);
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Nuevo ítem
-          </Button>
-        ) : null}
+        {can('catalogs:write') ? <Button onClick={() => create()}>Nuevo ítem</Button> : null}
       </header>
       <div className="card-grid">
-        {[
-          ['Especialidades médicas', 'Opciones para el registro de médicos'],
-          ['Medicamentos y dosis', 'Presentaciones vinculadas al inventario'],
-          ['Seguros y descuentos', 'Catálogos compartidos para el equipo'],
-        ].map(([title, detail]) => (
-          <Link
-            key={title}
-            href="/catalogs/operational"
-            className="panel catalog-category-card"
-            style={{ textDecoration: 'none' }}
+        {categories.map(([value, label]) => (
+          <button
+            aria-pressed={activeCategory === value}
+            className={`panel catalog-category-card${activeCategory === value ? ' active' : ''}`}
+            key={value}
+            onClick={() => setActiveCategory(value)}
+            type="button"
           >
-            <strong>{title}</strong>
-            <small>{detail}</small>
-          </Link>
+            <strong>{label}</strong>
+            <small>
+              {catalogItems.filter((item) => (item.category ?? 'SUPPLIES') === value).length}{' '}
+              registros
+            </small>
+          </button>
         ))}
       </div>
+      <p>
+        <Link href="/catalogs/operational">Administrar especialidades, dosis y aseguradoras</Link>
+      </p>
       {message ? (
         <p className="notice success" role="status">
           {message}
@@ -101,73 +130,92 @@ export default function CatalogsPage() {
       ) : null}
       <Panel>
         <div className="table-heading">
-          <h2>Ítems</h2>
-          <StatusTag>{catalogItems.length} registros</StatusTag>
+          <h2>{categories.find(([value]) => value === activeCategory)?.[1]}</h2>
+          <StatusTag>{visibleItems.length} registros</StatusTag>
         </div>
-        {catalogItems.length ? (
+        {visibleItems.length ? (
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>SKU</th>
+                  <th>Código</th>
                   <th>Nombre</th>
                   <th>Estado</th>
-                  <th>Creación</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {catalogItems.map((item) => (
+                {visibleItems.map((item) => (
                   <tr key={item.id}>
                     <td>
                       <code>{item.sku}</code>
                     </td>
                     <td>{item.name}</td>
-                    <td>{item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}</td>
-                    <td>{new Date(item.createdAt).toLocaleString('es-SV')}</td>
+                    <td>
+                      <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
+                        {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                      </StatusTag>
+                    </td>
+                    <td className="action-row">
+                      {can('catalogs:write') ? (
+                        <>
+                          <Button className="button-secondary" onClick={() => edit(item)}>
+                            Editar
+                          </Button>
+                          <Button className="button-secondary" onClick={() => void toggle(item)}>
+                            {item.status === 'ACTIVE' ? 'Desactivar' : 'Activar'}
+                          </Button>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         ) : (
-          <EmptyState detail="Cree un ítem sintético para comenzar." title="Sin ítems" />
+          <EmptyState detail="Cree el primer registro de esta categoría." title="Sin registros" />
         )}
       </Panel>
       <Dialog
-        description="El SKU se valida como único dentro del proveedor de datos activo. Los demás atributos requieren reglas de catálogo aprobadas."
+        description="El código se genera automáticamente y no cambia al editar."
         footer={
           <>
-            <Button className="button-secondary" onClick={close} type="button">
+            <Button className="button-secondary" onClick={close}>
               Cancelar
             </Button>
-            <Button form="catalog-item-form" type="submit" disabled={form.formState.isSubmitting}>
-              Guardar ítem
+            <Button form="catalog-item-form" type="submit">
+              Guardar
             </Button>
           </>
         }
         onClose={close}
         open={open}
-        title="Nuevo ítem de catálogo"
+        title={editing ? 'Editar ítem' : 'Nuevo ítem'}
       >
-        <form
-          className="form-grid"
-          id="catalog-item-form"
-          noValidate
-          onSubmit={form.handleSubmit(submit)}
-        >
+        <form className="form-grid" id="catalog-item-form" onSubmit={form.handleSubmit(save)}>
           {form.formState.errors.root ? (
             <p className="field-error full" role="alert">
               {form.formState.errors.root.message}
             </p>
           ) : null}
           <label>
-            SKU
-            <input {...form.register('sku')} />
-            {form.formState.errors.sku ? (
-              <span className="field-error">{form.formState.errors.sku.message}</span>
-            ) : null}
+            Categoría
+            <select {...form.register('category')} disabled={Boolean(editing)}>
+              {categories.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
+            Código automático
+            <input readOnly value={editing?.sku ?? nextSku(selectedCategory)} />
+          </label>
+          <label className="full">
             Nombre
             <input {...form.register('name')} />
             {form.formState.errors.name ? (

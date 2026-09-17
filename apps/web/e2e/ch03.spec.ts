@@ -36,7 +36,7 @@ test('CH03-F002-F008 board tabs, coherent loading/empty state, filters and activ
   await expect(
     page.getByRole('heading', { name: 'Relación de pacientes por empresa' }),
   ).toBeVisible();
-  for (const label of ['Activos', 'Cotizaciones', 'PIC Ejecución'])
+  for (const label of ['Activos', 'Cotizaciones', 'Ejecución de cotización'])
     await expect(page.getByRole('tab', { name: label })).toBeVisible();
   await expect(page.getByText('Conteo no configurado').first()).toBeVisible();
   for (const column of [
@@ -55,7 +55,7 @@ test('CH03-F002-F008 board tabs, coherent loading/empty state, filters and activ
   await page.getByRole('button', { name: 'Limpiar', exact: true }).click();
   await expect(page.locator('[data-action-id="HOSPITALIZATION-FILTER-STATUS"]')).toHaveValue('');
   await expect(page.getByText('Cargando hospitalizaciones…')).toHaveCount(0);
-  await page.getByRole('tab', { name: 'PIC Ejecución' }).click();
+  await page.getByRole('tab', { name: 'Ejecución de cotización' }).click();
   await expect(page.getByText('Configuración pendiente')).toBeVisible();
   await page.getByRole('tab', { name: 'Activos' }).click();
   await page.getByRole('link', { name: /Pacientes · Inactivos/ }).click();

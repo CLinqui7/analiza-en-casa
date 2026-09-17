@@ -6,9 +6,11 @@ import { buildShiftSeries, endForPreset, endTimeForPreset } from './agenda-serie
 // test-id: vitest:cr018-shift-presets
 
 describe('agenda series', () => {
-  it('creates one shift per selected day and derives 6h/8h endings', () => {
+  it('creates one shift per selected day and derives all supported endings', () => {
     expect(endTimeForPreset('2026-09-01', '08:00', 'SIX_HOURS')).toBe('14:00');
     expect(endTimeForPreset('2026-09-01', '08:00', 'EIGHT_HOURS')).toBe('16:00');
+    expect(endTimeForPreset('2026-09-01', '08:00', 'TWELVE_HOURS')).toBe('20:00');
+    expect(endTimeForPreset('2026-09-01', '08:00', 'TWENTY_FOUR_HOURS')).toBe('08:00');
     expect(
       buildShiftSeries({
         dates: ['2026-09-03', '2026-09-01'],
@@ -42,7 +44,7 @@ describe('agenda series', () => {
         existing: [],
         idFor: () => 'x',
       }),
-    ).toThrow('No repita');
+    ).toThrow('fecha ya está incluida');
     expect(() =>
       buildShiftSeries({
         dates: ['2026-09-01'],
@@ -63,6 +65,14 @@ describe('agenda series', () => {
     });
     expect(endForPreset('2026-09-01', '20:00', 'EIGHT_HOURS')).toEqual({
       endTime: '04:00',
+      endDayOffset: 1,
+    });
+    expect(endForPreset('2026-09-01', '20:00', 'TWELVE_HOURS')).toEqual({
+      endTime: '08:00',
+      endDayOffset: 1,
+    });
+    expect(endForPreset('2026-09-01', '20:00', 'TWENTY_FOUR_HOURS')).toEqual({
+      endTime: '20:00',
       endDayOffset: 1,
     });
     const [shift] = buildShiftSeries({

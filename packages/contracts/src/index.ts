@@ -105,7 +105,8 @@ export const doctorAttachmentSchema = z.object({
 export const doctorSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
-  jvpm: z.string().trim().min(1),
+  jvpm: z.string().trim().optional(),
+  conadem: z.string().trim().optional(),
   documentId: z.string().trim().min(1),
   specialty: z.string().trim().min(1),
   phone: z.string().trim().optional(),
@@ -165,6 +166,8 @@ export const hospitalizationSchema = z.object({
   manager: z.string().trim().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
   diagnosisSummary: z.string().trim().optional(),
+  primaryDoctorId: z.string().trim().optional(),
+  secondaryDoctorId: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
   devices: z.array(z.string().trim().min(1)).optional(),
   /** Resources assigned to the case; account-level visibility requires a server-side user link. */
@@ -290,6 +293,7 @@ export const catalogItemSchema = z.object({
   id: z.string(),
   sku: z.string().trim().min(1),
   name: z.string().trim().min(1),
+  category: z.enum(['SERVICES', 'MEDICATIONS', 'SUPPLIES', 'EQUIPMENT', 'PROVIDERS']).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']),
   createdAt: z.string(),
 });

@@ -127,7 +127,7 @@ export default function MedicalOrdersPage() {
                 <tr>
                   <th scope="col">Acciones</th>
                   <th scope="col">Nombre</th>
-                  <th scope="col">Cédula</th>
+                  <th scope="col">DUI</th>
                   <th scope="col">Fecha Nac.</th>
                   <th scope="col">Triage</th>
                   <th scope="col">Hospitalización</th>

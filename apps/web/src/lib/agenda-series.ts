@@ -1,6 +1,6 @@
 import type { Shift } from '@analiza/contracts';
 
-export type ShiftPreset = 'SIX_HOURS' | 'EIGHT_HOURS';
+export type ShiftPreset = 'SIX_HOURS' | 'EIGHT_HOURS' | 'TWELVE_HOURS' | 'TWENTY_FOUR_HOURS';
 
 export type PresetEnd = { endTime: string; endDayOffset: 0 | 1 };
 
@@ -11,7 +11,13 @@ function atLocalTime(date: string, time: string) {
 export function endForPreset(date: string, startTime: string, preset: ShiftPreset): PresetEnd {
   const startsAt = atLocalTime(date, startTime);
   const startDay = startsAt.getDate();
-  startsAt.setHours(startsAt.getHours() + (preset === 'SIX_HOURS' ? 6 : 8));
+  const duration = {
+    SIX_HOURS: 6,
+    EIGHT_HOURS: 8,
+    TWELVE_HOURS: 12,
+    TWENTY_FOUR_HOURS: 24,
+  }[preset];
+  startsAt.setHours(startsAt.getHours() + duration);
   return {
     endTime: startsAt.toTimeString().slice(0, 5),
     endDayOffset: startsAt.getDate() === startDay ? 0 : 1,
@@ -37,7 +43,9 @@ export function buildShiftSeries(input: {
   const uniqueDates = [...new Set(input.dates.filter(Boolean))].sort();
   if (!uniqueDates.length) throw new Error('Seleccione al menos una fecha.');
   if (uniqueDates.length !== input.dates.filter(Boolean).length)
-    throw new Error('No repita una fecha de turno.');
+    throw new Error(
+      'La fecha ya está incluida. Para el mismo paciente, guarde este turno y cree otro con la segunda enfermera.',
+    );
   return uniqueDates.map((date) => {
     const startsAt = atLocalTime(date, input.startTime);
     const endsAt = atLocalTime(date, input.endTime);

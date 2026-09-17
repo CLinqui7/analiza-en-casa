@@ -1073,7 +1073,7 @@ export default function PatientsPage() {
                   changeDocumentType(event.target.value as PatientForm['documentType'])
                 }
               >
-                <option value="DUI">Cédula</option>
+                <option value="DUI">DUI</option>
                 <option value="PASSPORT">Pasaporte</option>
                 <option value="RESIDENT_CARD">Carnet de residente</option>
                 <option value="OTHER">Otro documento (histórico QA)</option>

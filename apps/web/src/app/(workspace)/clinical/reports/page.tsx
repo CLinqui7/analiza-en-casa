@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const reportColumns = [
   'Acciones',
-  'Cédula',
+  'DUI',
   'Nombre',
   'Empresa',
   'Hospitalización',

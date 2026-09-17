@@ -26,7 +26,7 @@ export function AdministrativeProfilePanel({
     <Panel>
       <div className="table-heading">
         <div>
-          <h2>Perfil administrativo de ejecución · PIC</h2>
+          <h2>Perfil administrativo · Ejecución de cotización</h2>
           <p className="muted">
             Datos administrativos del caso; confirme por separado cobertura, facturación, impuestos
             y reglas clínicas.
@@ -54,7 +54,7 @@ export function AdministrativeProfilePanel({
       ) : null}
       <dl className="hospitalization-detail-grid hospitalization-administrative-grid">
         <div>
-          <dt>Health manager</dt>
+          <dt>Visitador médico</dt>
           <dd>{profile?.healthManager ?? 'Sin registrar'}</dd>
         </div>
         <div>

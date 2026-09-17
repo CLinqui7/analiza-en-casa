@@ -719,6 +719,22 @@ export default function AgendaPage() {
             >
               Turno 8 horas
             </Button>
+            <Button
+              className="button-secondary"
+              data-action-id="AGENDA-SHIFT-PRESET-12H"
+              onClick={() => choosePreset('TWELVE_HOURS')}
+              type="button"
+            >
+              Turno 12 horas
+            </Button>
+            <Button
+              className="button-secondary"
+              data-action-id="AGENDA-SHIFT-PRESET-24H"
+              onClick={() => choosePreset('TWENTY_FOUR_HOURS')}
+              type="button"
+            >
+              Turno 24 horas
+            </Button>
             {!isCoreRelease && (
               <Button
                 data-action-id="AGENDA-SHIFT-PRESET-PUNTUAL"
