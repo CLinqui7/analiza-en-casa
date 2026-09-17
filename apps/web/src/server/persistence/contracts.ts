@@ -14,6 +14,7 @@ import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
 import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
 import type { FeedbackImage, FeedbackReport, FeedbackStatus } from '@/lib/feedback';
+import type { ImportOverview, ImportPreview } from '@/lib/information-import';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -30,6 +31,11 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  informationImports?: {
+    overview(actor: ServerActor): Promise<ImportOverview>;
+    preview(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportPreview>;
+    commit(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportOverview>;
+  };
   feedback?: {
     list(actor: ServerActor): Promise<FeedbackReport[]>;
     create(actor: ServerActor, input: unknown, image?: FeedbackImage): Promise<FeedbackReport>;

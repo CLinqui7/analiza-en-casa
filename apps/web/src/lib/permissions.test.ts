@@ -9,6 +9,14 @@ describe('doctor administration authorization', () => {
     expect(permissionForPath('/doctors/doctor-1')).toBe('settings:write');
   });
 
+  it('keeps information imports restricted to administrators', () => {
+    expect(permissionForPath('/import')).toBe('settings:write');
+    expect(can('ADMIN', 'settings:write')).toBe(true);
+    for (const role of roles.filter((role) => role !== 'ADMIN')) {
+      expect(can(role, 'settings:write')).toBe(false);
+    }
+  });
+
   it('allows only ADMIN to access doctors administration', () => {
     expect(can('ADMIN', 'settings:write')).toBe(true);
     for (const role of roles.filter((role) => role !== 'ADMIN')) {

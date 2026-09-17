@@ -44,6 +44,7 @@ import { postgresFiles } from './postgres-files';
 import { PostgresWorkspaceSetupRepository } from './postgres-workspace-setup';
 import { PostgresNurseProfileRepository } from './postgres-nurse-profile';
 import { PostgresFeedbackRepository } from './postgres-feedback';
+import { PostgresInformationImportRepository } from './postgres-information-import';
 import { postgresQuotes } from './postgres-quotes';
 
 export function authorize(actor: ServerActor, permission: Permission) {
@@ -633,6 +634,7 @@ export function postgresPersistence(): Persistence {
   };
   return {
     auth: new AuthService(postgresAuthStore(pool)),
+    informationImports: new PostgresInformationImportRepository(pool),
     onboarding: new PostgresWorkspaceSetupRepository(pool),
     nurseProfile: new PostgresNurseProfileRepository(pool),
     feedback: new PostgresFeedbackRepository(pool),
@@ -645,14 +647,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 8 ||
+        row.migrations !== 9 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');

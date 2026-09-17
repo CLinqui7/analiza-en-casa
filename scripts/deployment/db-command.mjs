@@ -173,7 +173,9 @@ try {
     await client.query(
       `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events TO ${role}`,
     );
-    await client.query(`GRANT SELECT ON analiza.catalog_items TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);
     if (provision) {
       const runtimeCheck = new Client({
         user: runtimeRole,

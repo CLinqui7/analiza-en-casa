@@ -177,6 +177,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/settings', permission: 'settings:read' },
   { prefix: '/onboarding', permission: 'dashboard:read' },
   { prefix: '/doctors', permission: 'settings:write' },
+  { prefix: '/import', permission: 'settings:write' },
   { prefix: '/dashboard', permission: 'dashboard:read' },
 ];
 

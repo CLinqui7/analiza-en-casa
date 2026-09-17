@@ -9,6 +9,7 @@ export const corePages = [
   '/doctors',
   '/nursing-team',
   '/catalogs/operational',
+  '/import',
   '/onboarding',
   '/feedback',
   '/tutorial',
@@ -26,6 +27,7 @@ const coreApi = [
   '/api/onboarding',
   '/api/nurse-profile',
   '/api/feedback',
+  '/api/information-import',
   '/api/admin/nurse-profiles',
 ];
 const within = (path: string, base: string) => path === base || path.startsWith(`${base}/`);

@@ -192,6 +192,12 @@ const navigation: NavigationGroup[] = [
         actionId: 'DOCTOR-NAVIGATE',
       },
       {
+        label: 'Importar información',
+        href: '/import',
+        permission: 'settings:write',
+        actionId: 'INFORMATION-IMPORT-NAVIGATE',
+      },
+      {
         label: 'Recursos de enfermería',
         href: '/clinical/nursing',
         permission: 'clinical:read',
