@@ -323,6 +323,8 @@ export const catalogItemSchema = z.object({
   mobilePhone: z.string().trim().max(50).optional(),
   email: z.email().optional().or(z.literal('')),
   notes: z.string().trim().max(2000).optional(),
+  costPrice: z.number().finite().nonnegative().max(100000000).optional(),
+  salePriceExcludingTax: z.number().finite().nonnegative().max(100000000).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']),
   createdAt: z.string(),
 });
@@ -332,6 +334,8 @@ export const purchaseSchema = z.object({
   catalogItemId: z.string(),
   reference: z.string().trim().min(1),
   note: z.string().trim().optional(),
+  quantity: z.number().positive().optional(),
+  unitCost: z.number().nonnegative().optional(),
   status: z.literal('DRAFT'),
   createdAt: z.string(),
 });

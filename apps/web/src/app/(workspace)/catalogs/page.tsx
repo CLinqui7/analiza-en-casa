@@ -34,6 +34,11 @@ const itemSchema = z.object({
     'PROVIDERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
+  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.'),
+  salePriceExcludingTax: z
+    .number()
+    .finite()
+    .nonnegative('El precio de venta no puede ser negativo.'),
 });
 type ItemForm = z.infer<typeof itemSchema>;
 
@@ -46,7 +51,7 @@ export default function CatalogsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
-    defaultValues: { category: 'SERVICES', name: '' },
+    defaultValues: { category: 'SERVICES', name: '', costPrice: 0, salePriceExcludingTax: 0 },
   });
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
   const visibleItems = useMemo(
@@ -64,12 +69,17 @@ export default function CatalogsPage() {
   function close() {
     setOpen(false);
     setEditing(null);
-    form.reset({ category: activeCategory, name: '' });
+    form.reset({
+      category: activeCategory,
+      name: '',
+      costPrice: 0,
+      salePriceExcludingTax: 0,
+    });
   }
   function create(category: Category = activeCategory) {
     setMessage(null);
     setEditing(null);
-    form.reset({ category, name: '' });
+    form.reset({ category, name: '', costPrice: 0, salePriceExcludingTax: 0 });
     setOpen(true);
   }
   function edit(item: CatalogItem) {
@@ -78,6 +88,8 @@ export default function CatalogsPage() {
     form.reset({
       category: isCategory(item.category) ? item.category : 'SUPPLIES',
       name: item.name,
+      costPrice: item.costPrice ?? 0,
+      salePriceExcludingTax: item.salePriceExcludingTax ?? 0,
     });
     setOpen(true);
   }
@@ -89,6 +101,8 @@ export default function CatalogsPage() {
       category: values.category,
       status: editing?.status ?? 'ACTIVE',
       createdAt: editing?.createdAt ?? new Date().toISOString(),
+      costPrice: values.costPrice,
+      salePriceExcludingTax: values.salePriceExcludingTax,
     };
     if (!(await addCatalogItem(item))) {
       form.setError('root', {
@@ -157,6 +171,8 @@ export default function CatalogsPage() {
                 <tr>
                   <th>Código</th>
                   <th>Nombre</th>
+                  <th>Costo</th>
+                  <th>Venta sin IVA</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -168,6 +184,8 @@ export default function CatalogsPage() {
                       <code>{item.sku}</code>
                     </td>
                     <td>{item.name}</td>
+                    <td>USD {(item.costPrice ?? 0).toFixed(2)}</td>
+                    <td>USD {(item.salePriceExcludingTax ?? 0).toFixed(2)}</td>
                     <td>
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -237,6 +255,32 @@ export default function CatalogsPage() {
             <input {...form.register('name')} />
             {form.formState.errors.name ? (
               <span className="field-error">{form.formState.errors.name.message}</span>
+            ) : null}
+          </label>
+          <label>
+            Precio de costo
+            <input
+              min="0"
+              step="0.01"
+              type="number"
+              {...form.register('costPrice', { valueAsNumber: true })}
+            />
+            {form.formState.errors.costPrice ? (
+              <span className="field-error">{form.formState.errors.costPrice.message}</span>
+            ) : null}
+          </label>
+          <label>
+            Precio de venta sin IVA
+            <input
+              min="0"
+              step="0.01"
+              type="number"
+              {...form.register('salePriceExcludingTax', { valueAsNumber: true })}
+            />
+            {form.formState.errors.salePriceExcludingTax ? (
+              <span className="field-error">
+                {form.formState.errors.salePriceExcludingTax.message}
+              </span>
             ) : null}
           </label>
         </form>

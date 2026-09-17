@@ -71,7 +71,12 @@ const referralCatalog = [
   'Paciente recurrente',
   'Dr. Jorge Contreras',
 ];
-type CatalogEntry = { id: string; label: string; inventoryAvailable: boolean };
+type CatalogEntry = {
+  id: string;
+  label: string;
+  inventoryAvailable: boolean;
+  salePriceExcludingTax?: number;
+};
 const feeServiceCatalog: CatalogEntry[] = [
   { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
@@ -220,6 +225,7 @@ function QuoteEditor({
               inventoryAvailable:
                 !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(activeCategory) ||
                 currentInventoryBalance(inventoryMovements, candidate.id) > 0,
+              salePriceExcludingTax: candidate.salePriceExcludingTax,
             }))
         : [];
   const catalogResults = activeCatalog.filter((entry) =>
@@ -752,6 +758,7 @@ function QuoteEditor({
                       ...current,
                       name: selected?.label ?? '',
                       inventoryItemId: selected?.id,
+                      unitPrice: selected?.salePriceExcludingTax ?? 0,
                     }));
                   }}
                   value={activeCatalog.find((entry) => entry.label === item.name)?.id ?? ''}
@@ -877,7 +884,7 @@ function QuoteEditor({
               />
             </label>
             <label>
-              {activeCategory === 'FEES' ? 'Honorario médico (manual)' : 'Precio manual'}
+              {activeCategory === 'FEES' ? 'Honorario médico (manual)' : 'Precio de venta sin IVA'}
               <input
                 data-action-id={activeCategory === 'FEES' ? 'QUOTE-FEE-AMOUNT' : undefined}
                 min="0"

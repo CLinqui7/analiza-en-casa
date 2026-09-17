@@ -24,6 +24,8 @@
   de paciente, comentarios y un documento privado de respaldo de hasta 25 MB.
 - La migración `012_insurers_and_nurse_files.sql` instala el directorio inicial de
   aseguradoras y habilita adjuntos privados para recursos de enfermería.
+- Los ítems del catálogo guardan costo y precio de venta sin IVA. Cotizaciones
+  precarga el precio de venta y Compras precarga y conserva el costo unitario.
 
 Orden de publicación: ejecutar la imagen operator con `--migrate`, verificar
 `/api/health` y después promover la misma imagen web. No ejecutar migraciones desde

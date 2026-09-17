@@ -10,6 +10,8 @@ const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
   reference: z.string().trim().min(1, 'Ingrese una referencia de compra.'),
   note: z.string().trim(),
+  quantity: z.number().positive('La cantidad debe ser mayor que cero.'),
+  unitCost: z.number().nonnegative('El costo no puede ser negativo.'),
 });
 type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
@@ -23,12 +25,19 @@ export default function PurchasesPage() {
   const [selected, setSelected] = useState<Purchase | null>(null);
   const form = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' },
+    defaultValues: {
+      catalogItemId: catalogItems[0]?.id ?? '',
+      reference: '',
+      note: '',
+      quantity: 1,
+      unitCost: catalogItems[0]?.costPrice ?? 0,
+    },
   });
   useEffect(() => {
     const current = form.getValues('catalogItemId');
     if (!catalogItems.some((item) => item.id === current) && catalogItems[0]) {
       form.setValue('catalogItemId', catalogItems[0].id, { shouldValidate: true });
+      form.setValue('unitCost', catalogItems[0].costPrice ?? 0, { shouldValidate: true });
     }
   }, [catalogItems, form]);
   const itemNames = useMemo(
@@ -49,7 +58,13 @@ export default function PurchasesPage() {
   const pageRows = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   function close() {
     setOpen(false);
-    form.reset({ catalogItemId: catalogItems[0]?.id ?? '', reference: '', note: '' });
+    form.reset({
+      catalogItemId: catalogItems[0]?.id ?? '',
+      reference: '',
+      note: '',
+      quantity: 1,
+      unitCost: catalogItems[0]?.costPrice ?? 0,
+    });
   }
   async function submit(values: Form) {
     if (!catalogItems.some((item) => item.id === values.catalogItemId)) return;
@@ -58,6 +73,8 @@ export default function PurchasesPage() {
       catalogItemId: values.catalogItemId,
       reference: values.reference,
       note: values.note || undefined,
+      quantity: values.quantity,
+      unitCost: values.unitCost,
       status: 'DRAFT',
       createdAt: new Date().toISOString(),
     } satisfies Purchase);
@@ -188,7 +205,11 @@ export default function PurchasesPage() {
                     <code>{purchase.reference}</code>
                     <p className="field-help">{purchase.note ?? 'Sin nota documentada'}</p>
                   </td>
-                  <td>No documentado</td>
+                  <td>
+                    {purchase.unitCost === undefined
+                      ? 'No documentado'
+                      : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
+                  </td>
                   <td>No documentado</td>
                   <td>No documentado</td>
                   <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
@@ -262,7 +283,17 @@ export default function PurchasesPage() {
         >
           <label>
             Ítem de catálogo
-            <select {...form.register('catalogItemId')}>
+            <select
+              {...form.register('catalogItemId')}
+              onChange={(event) => {
+                form.setValue('catalogItemId', event.target.value, { shouldValidate: true });
+                form.setValue(
+                  'unitCost',
+                  catalogItems.find((item) => item.id === event.target.value)?.costPrice ?? 0,
+                  { shouldValidate: true },
+                );
+              }}
+            >
               {catalogItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.sku} · {item.name}
@@ -271,6 +302,31 @@ export default function PurchasesPage() {
             </select>
             {form.formState.errors.catalogItemId ? (
               <span className="field-error">{form.formState.errors.catalogItemId.message}</span>
+            ) : null}
+          </label>
+          <label>
+            Cantidad
+            <input
+              min="0.01"
+              step="0.01"
+              type="number"
+              {...form.register('quantity', { valueAsNumber: true })}
+            />
+            {form.formState.errors.quantity ? (
+              <span className="field-error">{form.formState.errors.quantity.message}</span>
+            ) : null}
+          </label>
+          <label>
+            Costo unitario
+            <input
+              min="0"
+              step="0.01"
+              type="number"
+              {...form.register('unitCost', { valueAsNumber: true })}
+            />
+            <span className="field-help">Se completa con el costo definido en Catálogos.</span>
+            {form.formState.errors.unitCost ? (
+              <span className="field-error">{form.formState.errors.unitCost.message}</span>
             ) : null}
           </label>
           <label>
@@ -315,6 +371,13 @@ export default function PurchasesPage() {
             <div>
               <dt>Estado</dt>
               <dd>Borrador</dd>
+            </div>
+            <div>
+              <dt>Cantidad y costo</dt>
+              <dd>
+                {selected.quantity ?? 1} × USD {(selected.unitCost ?? 0).toFixed(2)} = USD{' '}
+                {((selected.quantity ?? 1) * (selected.unitCost ?? 0)).toFixed(2)}
+              </dd>
             </div>
             <div>
               <dt>Fecha de creación</dt>
