@@ -239,7 +239,7 @@ export class AuthService {
     const membership: MembershipRecord = {
       userId: user.id,
       organizationId: sharedOrganizationId || randomUUID(),
-      role: email === designatedAdminEmail ? 'ADMIN' : 'NURSE',
+      role: email === designatedAdminEmail || !sharedOrganizationId ? 'ADMIN' : 'NURSE',
       active: true,
     };
     const sessionToken = randomSecret();
