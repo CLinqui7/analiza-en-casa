@@ -23,11 +23,20 @@ export function CoreDashboard() {
           <h1>Dashboard</h1>
           <p>Pacientes, hospitalizaciones y turnos de tu organización.</p>
         </div>
-        {can('patients:write') && (
-          <Link className="button" href="/patients?create=1">
-            Nuevo paciente
+        <div className="header-actions">
+          <Link
+            className="button button-secondary"
+            data-action-id="DASHBOARD-TUTORIAL"
+            href="/tutorial"
+          >
+            Tutorial y ayuda
           </Link>
-        )}
+          {can('patients:write') ? (
+            <Link className="button" href="/patients?create=1">
+              Nuevo paciente
+            </Link>
+          ) : null}
+        </div>
       </header>
       <p className="notice">Espacio de trabajo conectado y listo para registrar información.</p>
       <div className="dashboard-grid">

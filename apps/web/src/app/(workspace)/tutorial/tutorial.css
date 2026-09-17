@@ -1,0 +1,182 @@
+.tutorial-page {
+  width: min(100%, 1220px);
+}
+
+.tutorial-hero {
+  padding-bottom: 4px;
+}
+
+.tutorial-start,
+.tutorial-safety {
+  display: grid;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 30px);
+}
+
+.tutorial-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.tutorial-section-heading h2,
+.tutorial-section-heading p {
+  margin: 0;
+}
+
+.tutorial-step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.tutorial-step-grid li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand-soft, #fff0f1) 22%, var(--surface));
+}
+
+.tutorial-step-grid li > span,
+.tutorial-module-title > span {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brand-soft, #fff0f1);
+  color: var(--blue-dark);
+  font-weight: 800;
+}
+
+.tutorial-step-grid li > span {
+  width: 30px;
+  height: 30px;
+}
+
+.tutorial-step-grid strong {
+  color: var(--ink);
+}
+
+.tutorial-step-grid p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.tutorial-modules {
+  display: grid;
+  gap: 16px;
+}
+
+.tutorial-module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.tutorial-module-card {
+  display: grid;
+  align-content: start;
+  gap: 15px;
+}
+
+.tutorial-module-card > div:not(.tutorial-module-title) {
+  display: grid;
+  gap: 4px;
+}
+
+.tutorial-module-card strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.tutorial-module-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.tutorial-module-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tutorial-module-title > span {
+  width: 34px;
+  height: 34px;
+}
+
+.tutorial-module-title h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.tutorial-module-card .text-link,
+.tutorial-permission {
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tutorial-permission {
+  color: var(--muted);
+}
+
+.tutorial-safety {
+  grid-template-columns: minmax(200px, 0.7fr) minmax(0, 1.3fr);
+  background: color-mix(in srgb, #e5f8f5 55%, var(--surface));
+}
+
+.tutorial-safety h2,
+.tutorial-safety p {
+  margin: 0;
+}
+
+.tutorial-safety ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+@media (max-width: 980px) {
+  .tutorial-step-grid,
+  .tutorial-module-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .tutorial-section-heading,
+  .tutorial-safety {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .tutorial-section-heading {
+    flex-direction: column;
+  }
+
+  .tutorial-section-heading .button {
+    width: 100%;
+  }
+
+  .tutorial-step-grid,
+  .tutorial-module-grid {
+    grid-template-columns: 1fr;
+  }
+}

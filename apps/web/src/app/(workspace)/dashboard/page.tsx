@@ -157,7 +157,11 @@ function FullDashboard() {
           <p>Pacientes, coordinación y seguimiento, en un solo lugar.</p>
         </div>
         <div className="header-actions">
-          <Link className="button button-secondary" href="/tutorial">
+          <Link
+            className="button button-secondary"
+            data-action-id="DASHBOARD-TUTORIAL"
+            href="/tutorial"
+          >
             Tutorial y ayuda
           </Link>
           <DemoDataButton />
