@@ -18,3 +18,16 @@ test('the Vercel app declares every imported workspace package', () => {
     },
   );
 });
+
+test('the Vercel app declares browser-test packages included by TypeScript', () => {
+  assert.deepEqual(
+    {
+      axe: webPackage.devDependencies['@axe-core/playwright'],
+      playwright: webPackage.devDependencies['@playwright/test'],
+    },
+    {
+      axe: '^4.11.0',
+      playwright: '^1.62.1',
+    },
+  );
+});
