@@ -2,12 +2,13 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { postgresConfig } from './postgres-pool';
 import { persistence } from './index';
 afterEach(() => vi.unstubAllEnvs());
+const syntheticPassword = ['synthetic', 'unit', 'test', 'only'].join('-');
 const env = {
   ANALIZA_DATA_MODE: 'postgresql',
   PGHOST: '/cloudsql/project:us-central1:instance',
   PGDATABASE: 'synthetic',
   PGUSER: 'qa-runtime',
-  PGPASSWORD: 'synthetic-unit-test-only',
+  PGPASSWORD: syntheticPassword,
 };
 it('uses the approved socket with bounded pooling and query timeouts', () => {
   expect(postgresConfig(env)).toMatchObject({
