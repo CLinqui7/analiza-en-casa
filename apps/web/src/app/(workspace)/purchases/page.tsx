@@ -3,15 +3,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Purchase } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
 import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
+  supplierCatalogItemId: z.string().min(1, 'Seleccione un proveedor.'),
   reference: z.string().trim().min(1, 'Ingrese una referencia de compra.'),
   note: z.string().trim(),
   quantity: z.number().positive('La cantidad debe ser mayor que cero.'),
   unitCost: z.number().nonnegative('El costo no puede ser negativo.'),
+  expirationDate: z.string(),
+  lotNumber: z.string().trim(),
+  serialNumber: z.string().trim(),
 });
 type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
@@ -25,17 +29,30 @@ export default function PurchasesPage() {
   const [selected, setSelected] = useState<Purchase | null>(null);
   const purchasableItems = useMemo(
     () =>
-      catalogItems.filter((item) => item.category !== 'INSURERS' && item.category !== 'PROVIDERS'),
+      catalogItems.filter(
+        (item) =>
+          item.status === 'ACTIVE' &&
+          ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
+      ),
+    [catalogItems],
+  );
+  const suppliers = useMemo(
+    () =>
+      catalogItems.filter((item) => item.status === 'ACTIVE' && item.category === 'PROVIDERS'),
     [catalogItems],
   );
   const form = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
       catalogItemId: purchasableItems[0]?.id ?? '',
+      supplierCatalogItemId: suppliers[0]?.id ?? '',
       reference: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
+      expirationDate: '',
+      lotNumber: '',
+      serialNumber: '',
     },
   });
   useEffect(() => {
@@ -44,11 +61,17 @@ export default function PurchasesPage() {
       form.setValue('catalogItemId', purchasableItems[0].id, { shouldValidate: true });
       form.setValue('unitCost', purchasableItems[0].costPrice ?? 0, { shouldValidate: true });
     }
-  }, [form, purchasableItems]);
+    const currentSupplier = form.getValues('supplierCatalogItemId');
+    if (!suppliers.some((item) => item.id === currentSupplier) && suppliers[0]) {
+      form.setValue('supplierCatalogItemId', suppliers[0].id, { shouldValidate: true });
+    }
+  }, [form, purchasableItems, suppliers]);
   const itemNames = useMemo(
     () => new Map(catalogItems.map((item) => [item.id, item.name])),
     [catalogItems],
   );
+  const selectedCatalogItemId = useWatch({ control: form.control, name: 'catalogItemId' });
+  const selectedItem = purchasableItems.find((item) => item.id === selectedCatalogItemId);
   const visible = useMemo(
     () =>
       purchases.filter((purchase) =>
@@ -65,26 +88,53 @@ export default function PurchasesPage() {
     setOpen(false);
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
+      supplierCatalogItemId: suppliers[0]?.id ?? '',
       reference: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
+      expirationDate: '',
+      lotNumber: '',
+      serialNumber: '',
     });
   }
   async function submit(values: Form) {
-    if (!purchasableItems.some((item) => item.id === values.catalogItemId)) return;
+    const catalogItem = purchasableItems.find((item) => item.id === values.catalogItemId);
+    if (!catalogItem) return;
+    if (!suppliers.some((item) => item.id === values.supplierCatalogItemId)) {
+      form.setError('supplierCatalogItemId', { message: 'Seleccione un proveedor activo.' });
+      return;
+    }
+    if (['MEDICATIONS', 'SUPPLIES'].includes(catalogItem.category ?? '')) {
+      if (!values.expirationDate) {
+        form.setError('expirationDate', { message: 'Indique la fecha de vencimiento.' });
+        return;
+      }
+      if (!values.lotNumber) {
+        form.setError('lotNumber', { message: 'Indique el lote.' });
+        return;
+      }
+    }
+    if (catalogItem.category === 'EQUIPMENT' && !values.serialNumber) {
+      form.setError('serialNumber', { message: 'Indique el número de serie.' });
+      return;
+    }
     const saved = await addPurchase({
       id: crypto.randomUUID(),
       catalogItemId: values.catalogItemId,
+      supplierCatalogItemId: values.supplierCatalogItemId,
       reference: values.reference,
       note: values.note || undefined,
       quantity: values.quantity,
       unitCost: values.unitCost,
+      expirationDate: values.expirationDate || undefined,
+      lotNumber: values.lotNumber || undefined,
+      serialNumber: values.serialNumber || undefined,
       status: 'DRAFT',
       createdAt: new Date().toISOString(),
     } satisfies Purchase);
     if (!saved) return;
-    setMessage('Compra sintética guardada como borrador con evidencia de auditoría.');
+    setMessage('Compra guardada como borrador con proveedor y trazabilidad de inventario.');
     close();
   }
   return (
@@ -94,14 +144,14 @@ export default function PurchasesPage() {
           <p className="eyebrow">Inventario</p>
           <h1>Compras</h1>
           <p>
-            Listado factual de borradores sintéticos. No crea recepción, stock, proveedor, factura,
-            costo, impuestos ni estados financieros sin reglas aprobadas.
+            Registra borradores de compra con proveedor, productos inventariados y trazabilidad de
+            lote, vencimiento o serie.
           </p>
         </div>
         {can('purchases:write') ? (
           <Button
             data-action-id="PURCHASE-CREATE"
-            disabled={!purchasableItems.length}
+            disabled={!purchasableItems.length || !suppliers.length}
             onClick={() => {
               setMessage(null);
               setOpen(true);
@@ -205,17 +255,17 @@ export default function PurchasesPage() {
                       Abrir
                     </Button>
                   </td>
-                  <td>Borrador sintético</td>
+                  <td>Compra</td>
                   <td>
                     <code>{purchase.reference}</code>
                     <p className="field-help">{purchase.note ?? 'Sin nota documentada'}</p>
                   </td>
+                  <td>{itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado'}</td>
                   <td>
                     {purchase.unitCost === undefined
                       ? 'No documentado'
                       : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
                   </td>
-                  <td>No documentado</td>
                   <td>No documentado</td>
                   <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
                   <td>Borrador</td>
@@ -265,7 +315,7 @@ export default function PurchasesPage() {
         </nav>
       </Panel>
       <Dialog
-        description="Este registro no ejecuta una recepción ni cambia inventario."
+        description="Registra el borrador y la trazabilidad de la compra; no descuenta ni recibe inventario automáticamente."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
@@ -278,7 +328,7 @@ export default function PurchasesPage() {
         }
         onClose={close}
         open={open}
-        title="Nueva compra sintética"
+        title="Nueva compra"
       >
         <form
           className="form-grid"
@@ -307,6 +357,22 @@ export default function PurchasesPage() {
             </select>
             {form.formState.errors.catalogItemId ? (
               <span className="field-error">{form.formState.errors.catalogItemId.message}</span>
+            ) : null}
+          </label>
+          <label>
+            Proveedor
+            <select {...form.register('supplierCatalogItemId')}>
+              <option value="">Seleccione un proveedor</option>
+              {suppliers.map((supplier) => (
+                <option key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </option>
+              ))}
+            </select>
+            {form.formState.errors.supplierCatalogItemId ? (
+              <span className="field-error">
+                {form.formState.errors.supplierCatalogItemId.message}
+              </span>
             ) : null}
           </label>
           <label>
@@ -341,6 +407,33 @@ export default function PurchasesPage() {
               <span className="field-error">{form.formState.errors.reference.message}</span>
             ) : null}
           </label>
+          {selectedItem?.category === 'MEDICATIONS' || selectedItem?.category === 'SUPPLIES' ? (
+            <>
+              <label>
+                Fecha de vencimiento
+                <input type="date" {...form.register('expirationDate')} />
+                {form.formState.errors.expirationDate ? (
+                  <span className="field-error">{form.formState.errors.expirationDate.message}</span>
+                ) : null}
+              </label>
+              <label>
+                Lote
+                <input {...form.register('lotNumber')} />
+                {form.formState.errors.lotNumber ? (
+                  <span className="field-error">{form.formState.errors.lotNumber.message}</span>
+                ) : null}
+              </label>
+            </>
+          ) : null}
+          {selectedItem?.category === 'EQUIPMENT' ? (
+            <label>
+              Número de serie
+              <input {...form.register('serialNumber')} />
+              {form.formState.errors.serialNumber ? (
+                <span className="field-error">{form.formState.errors.serialNumber.message}</span>
+              ) : null}
+            </label>
+          ) : null}
           <label>
             Nota (opcional)
             <textarea {...form.register('note')} rows={3} />
@@ -348,7 +441,7 @@ export default function PurchasesPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Sólo se muestran los campos persistidos. No se infieren proveedor, factura, impuestos, recepción ni total."
+        description="Detalle persistido del borrador de compra."
         footer={
           <Button
             className="button-secondary"
@@ -374,6 +467,12 @@ export default function PurchasesPage() {
               <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
             </div>
             <div>
+              <dt>Proveedor</dt>
+              <dd>
+                {itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}
+              </dd>
+            </div>
+            <div>
               <dt>Estado</dt>
               <dd>Borrador</dd>
             </div>
@@ -391,6 +490,16 @@ export default function PurchasesPage() {
             <div>
               <dt>Nota</dt>
               <dd>{selected.note || 'Sin nota documentada'}</dd>
+            </div>
+            <div>
+              <dt>Lote / vencimiento</dt>
+              <dd>
+                {selected.lotNumber || 'Sin lote'} · {selected.expirationDate || 'Sin vencimiento'}
+              </dd>
+            </div>
+            <div>
+              <dt>Número de serie</dt>
+              <dd>{selected.serialNumber || 'No aplica'}</dd>
             </div>
           </dl>
         ) : null}

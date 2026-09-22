@@ -9,6 +9,7 @@ import {
   shiftSchema,
   configurationEntrySchema,
   catalogItemSchema,
+  purchaseSchema,
   emptyOperations,
   type Patient,
   type Doctor,
@@ -91,14 +92,14 @@ function entityRepository<T extends Entity, K extends string>(
     );
     if (!patient.rowCount) throw new MongoInputError('El paciente asociado no está disponible.');
     const ids = [...new Set(h.assignedNursingResourceIds ?? [])];
-    if (!ids.length)
-      throw new MongoInputError('Asigne al menos una enfermera con cuenta de usuario.');
-    const nurses = await client.query(
-      `SELECT r.id,r.user_id FROM analiza.nursing_resources r JOIN analiza.memberships m ON m.user_id=r.user_id AND m.organization_id=r.organization_id
-      WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER')`,
-      [actor.organizationId, ids],
-    );
-    if (nurses.rowCount !== ids.length)
+    const nurses = ids.length
+      ? await client.query(
+          `SELECT r.id,r.user_id FROM analiza.nursing_resources r JOIN analiza.memberships m ON m.user_id=r.user_id AND m.organization_id=r.organization_id
+          WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER')`,
+          [actor.organizationId, ids],
+        )
+      : { rows: [], rowCount: 0 };
+    if (ids.length && nurses.rowCount !== ids.length)
       throw new MongoInputError('Una enfermera no tiene una cuenta activa en esta organización.');
     return {
       ...h,
@@ -422,6 +423,40 @@ export function postgresPersistence(): Persistence {
           return item;
         });
       }
+      if (command.command === 'purchase.create') {
+        authorize(actor, 'purchases:write');
+        const { purchase } = z
+          .object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const item = await c.query<{ category: string | null }>(
+            "SELECT body->>'category' AS category FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",
+            [actor.organizationId, purchase.catalogItemId],
+          );
+          const category = item.rows[0]?.category;
+          if (!item.rowCount || !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(category ?? ''))
+            throw new MongoInputError('Seleccione un medicamento, insumo o equipo activo.');
+          const supplier = await c.query(
+            "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE' AND body->>'category'='PROVIDERS'",
+            [actor.organizationId, purchase.supplierCatalogItemId],
+          );
+          if (!supplier.rowCount) throw new MongoInputError('Seleccione un proveedor activo.');
+          if (
+            ['MEDICATIONS', 'SUPPLIES'].includes(category ?? '') &&
+            (!purchase.expirationDate || !purchase.lotNumber)
+          )
+            throw new MongoInputError('Indique fecha de vencimiento y lote.');
+          if (category === 'EQUIPMENT' && !purchase.serialNumber)
+            throw new MongoInputError('Indique el número de serie del equipo.');
+          await c.query(
+            'INSERT INTO analiza.purchases(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
+            [actor.organizationId, purchase.id, JSON.stringify(purchase)],
+          );
+          await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', purchase.id);
+          return purchase;
+        });
+      }
       if (command.command === 'nurse.create') {
         authorize(actor, 'nurses:manage');
         const data = z
@@ -670,20 +705,20 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 12 ||
+        row.migrations !== 13 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
     },
     async workspace(actor) {
-      const [p, d, h, s, r, q, catalogs, audits] = await Promise.all([
+      const [p, d, h, s, r, q, catalogs, purchases, audits] = await Promise.all([
         can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
         can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
         can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
@@ -698,6 +733,16 @@ export function postgresPersistence(): Persistence {
                   [actor.organizationId],
                 )
               ).rows.map((r) => catalogItemSchema.parse(r.body)),
+            )
+          : [],
+        can(actor.role, 'purchases:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  'SELECT body FROM analiza.purchases WHERE organization_id=$1 ORDER BY created_at DESC,id',
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => purchaseSchema.parse(row.body)),
             )
           : [],
         can(actor.role, 'audit:read')
@@ -725,6 +770,7 @@ export function postgresPersistence(): Persistence {
         nursingResources: r,
         quotes: q.map((row) => row.quote),
         catalogItems: catalogs,
+        purchases,
         auditEntries: audits,
         patientVersions: Object.fromEntries(p.map((r) => [r.patient.id, r.version])),
         doctorVersions: Object.fromEntries(d.map((r) => [r.doctor.id, r.version])),

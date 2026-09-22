@@ -43,6 +43,27 @@ export const feedbackCategoryHelp: Record<(typeof feedbackCategories)[number][0]
 const moduleSchema = z.enum(feedbackModules.map(([value]) => value));
 const categorySchema = z.enum(feedbackCategories.map(([value]) => value));
 export const feedbackStatusSchema = z.enum(['NEW', 'REVIEWING', 'RESOLVED']);
+export const feedbackResolutionSchema = z
+  .object({
+    status: feedbackStatusSchema,
+    resolutionComment: z.string().trim().max(4000).optional(),
+    resolutionPath: z
+      .string()
+      .trim()
+      .max(500)
+      .refine((value) => !value || value.startsWith('/'), 'La ruta debe iniciar con /.')
+      .optional(),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.status === 'RESOLVED' && !value.resolutionComment?.trim()) {
+      context.addIssue({
+        code: 'custom',
+        path: ['resolutionComment'],
+        message: 'Describe cómo se resolvió el reporte.',
+      });
+    }
+  });
 
 export const feedbackInputSchema = z
   .object({
@@ -59,6 +80,9 @@ export const feedbackReportSchema = feedbackInputSchema.extend({
   imageMime: z.string().trim().min(1).max(100).optional(),
   createdAt: z.string().datetime(),
   status: feedbackStatusSchema,
+  resolutionComment: z.string().trim().max(4000).optional(),
+  resolutionPath: z.string().trim().max(500).optional(),
+  resolvedAt: z.string().datetime().optional(),
 });
 
 export const MAX_FEEDBACK_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -67,6 +91,7 @@ export const feedbackImageTypes = ['image/jpeg', 'image/png', 'image/webp'] as c
 export type FeedbackInput = z.infer<typeof feedbackInputSchema>;
 export type FeedbackReport = z.infer<typeof feedbackReportSchema>;
 export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>;
+export type FeedbackResolution = z.infer<typeof feedbackResolutionSchema>;
 export type FeedbackImage = Readonly<{
   name: string;
   mimeType: string;

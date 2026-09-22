@@ -13,7 +13,7 @@ import type { FileMetadata, FileOwnerType, PrivateFileUpload } from '../validati
 import type { WorkspaceSnapshot } from '@/lib/data-provider';
 import type { WorkspaceSetup } from '@/lib/workspace-setup';
 import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
-import type { FeedbackImage, FeedbackReport, FeedbackStatus } from '@/lib/feedback';
+import type { FeedbackImage, FeedbackReport, FeedbackResolution } from '@/lib/feedback';
 import type { ImportOverview, ImportPreview } from '@/lib/information-import';
 
 export interface EntityRepository<T, Key extends string> {
@@ -46,7 +46,7 @@ export interface Persistence {
     updateStatus(
       actor: ServerActor,
       id: string,
-      status: FeedbackStatus,
+      resolution: FeedbackResolution,
     ): Promise<FeedbackReport | null>;
     remove(actor: ServerActor, id: string): Promise<boolean>;
   };

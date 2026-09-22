@@ -45,8 +45,6 @@ const formSchema = z.object({
   primaryDoctorId: z.string().trim(),
   secondaryDoctorId: z.string().trim(),
   nextAction: z.string().trim(),
-  devices: z.string().trim(),
-  assignedNursingResourceIds: z.array(z.string()),
   admissionPeriods: z.array(
     z.object({ admissionDate: z.string(), dischargeDate: z.string().optional() }),
   ),
@@ -73,8 +71,6 @@ function blankForm(): HospitalizationForm {
     primaryDoctorId: '',
     secondaryDoctorId: '',
     nextAction: '',
-    devices: '',
-    assignedNursingResourceIds: [],
     admissionPeriods: [],
   };
 }
@@ -92,8 +88,6 @@ function formFor(item: Hospitalization): HospitalizationForm {
     primaryDoctorId: item.primaryDoctorId ?? '',
     secondaryDoctorId: item.secondaryDoctorId ?? '',
     nextAction: item.nextAction ?? '',
-    devices: item.devices?.join(', ') ?? '',
-    assignedNursingResourceIds: item.assignedNursingResourceIds ?? [],
     admissionPeriods: admissionPeriodsFor(item).slice(1),
   };
 }
@@ -106,7 +100,6 @@ export default function HospitalizationsPage() {
     catalogItems,
     hospitalizations,
     loading,
-    nursingResources,
     patients,
     providerMode,
     updateHospitalization,
@@ -234,15 +227,6 @@ export default function HospitalizationsPage() {
       primaryDoctorId: values.primaryDoctorId || undefined,
       secondaryDoctorId: values.secondaryDoctorId || undefined,
       nextAction: values.nextAction || undefined,
-      devices: values.devices
-        ? values.devices
-            .split(',')
-            .map((value) => value.trim())
-            .filter(Boolean)
-        : undefined,
-      assignedNursingResourceIds: values.assignedNursingResourceIds.length
-        ? values.assignedNursingResourceIds
-        : undefined,
     };
     const record = activeEdit
       ? { ...activeEdit, ...data }
@@ -660,7 +644,7 @@ export default function HospitalizationsPage() {
         </Panel>
       ) : null}
       <Dialog
-        description="Registre la información operativa del caso y asigne el personal de enfermería responsable."
+        description="Registre la información administrativa del caso. Los accesos y el personal de atención se gestionan en Hospitalización Clínica."
         footer={
           <>
             <Button
@@ -905,49 +889,10 @@ export default function HospitalizationsPage() {
             Próxima acción
             <textarea {...form.register('nextAction')} rows={2} />
           </label>
-          <label className="full">
-            Dispositivos / accesos
-            <input {...form.register('devices')} placeholder="Separados por coma" />
-          </label>
-          <fieldset className="full assignment-fieldset">
-            <legend>Enfermeras asignadas para la atención</legend>
-            {nursingResources.length ? (
-              <div className="assignment-option-grid">
-                {nursingResources.map((resource) => (
-                  <label key={resource.id}>
-                    <input
-                      data-action-id="HOSPITALIZATION-NURSE-ASSIGNMENT"
-                      disabled={isServerDataMode(providerMode) && !resource.userId}
-                      type="checkbox"
-                      value={resource.id}
-                      {...form.register('assignedNursingResourceIds')}
-                    />
-                    <span>
-                      <strong>{resource.displayName}</strong>
-                      <small>
-                        {resource.shift === 'MORNING'
-                          ? 'Mañana'
-                          : resource.shift === 'AFTERNOON'
-                            ? 'Tarde'
-                            : 'Noche'}{' '}
-                        · {resource.territory}
-                        {isServerDataMode(providerMode) && !resource.userId
-                          ? ' · Sin cuenta vinculada'
-                          : ''}
-                      </small>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <p className="field-help">Primero registre recursos de enfermería en Agenda.</p>
-            )}
-            <p className="field-help">
-              Todo el equipo puede consultar el balance; sólo las enfermeras asignadas pueden
-              registrar o corregir entradas. Seleccione las cuentas que atenderán cada turno.{' '}
-              <Link href="/nursing-team">Administrar cuentas de enfermería</Link>
-            </p>
-          </fieldset>
+          <p className="notice full" role="status">
+            Los dispositivos, accesos y enfermeras asignadas se completan después en{' '}
+            <Link href="/clinical/hospitalizations">Hospitalización Clínica</Link>.
+          </p>
         </form>
       </Dialog>
     </div>

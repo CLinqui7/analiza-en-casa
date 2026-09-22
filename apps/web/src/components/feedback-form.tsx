@@ -13,7 +13,7 @@ import {
   feedbackLabel,
   feedbackModules,
   feedbackReportSchema,
-  feedbackStatusSchema,
+  feedbackResolutionSchema,
   MAX_FEEDBACK_IMAGE_BYTES,
   type FeedbackInput,
   type FeedbackReport,
@@ -53,6 +53,9 @@ export function FeedbackForm() {
   const [saving, setSaving] = useState(false);
   const [workingReportId, setWorkingReportId] = useState<string>();
   const [previewReport, setPreviewReport] = useState<FeedbackReport>();
+  const [resolutionDrafts, setResolutionDrafts] = useState<
+    Record<string, { status: FeedbackStatus; resolutionComment: string; resolutionPath: string }>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -79,7 +82,21 @@ export function FeedbackForm() {
               return feedbackReportSchema.array().parse(payload);
             })
           : await listLocalFeedback(session.userId);
-        if (active) setReports(next);
+        if (active) {
+          setReports(next);
+          setResolutionDrafts(
+            Object.fromEntries(
+              next.map((report) => [
+                report.id,
+                {
+                  status: report.status,
+                  resolutionComment: report.resolutionComment ?? '',
+                  resolutionPath: report.resolutionPath ?? '',
+                },
+              ]),
+            ),
+          );
+        }
       } catch (cause) {
         if (active && !(cause instanceof DOMException && cause.name === 'AbortError')) {
           setError('No pudimos cargar tus reportes. Recarga la página para volver a intentarlo.');
@@ -164,20 +181,34 @@ export function FeedbackForm() {
     }
   }
 
-  async function changeStatus(id: string, status: FeedbackStatus) {
+  async function saveResolution(report: FeedbackReport) {
     if (!serverBacked || session?.role !== 'ADMIN') return;
+    const draft = resolutionDrafts[report.id] ?? {
+      status: report.status,
+      resolutionComment: report.resolutionComment ?? '',
+      resolutionPath: report.resolutionPath ?? '',
+    };
+    const parsedResolution = feedbackResolutionSchema.safeParse({
+      status: draft.status,
+      resolutionComment: draft.resolutionComment || undefined,
+      resolutionPath: draft.resolutionPath || undefined,
+    });
+    if (!parsedResolution.success) {
+      setError('Para resolver, escribe cómo se solucionó y una ruta válida que inicie con /.');
+      return;
+    }
     setError(null);
     setNotice(null);
-    setWorkingReportId(id);
+    setWorkingReportId(report.id);
     try {
-      const response = await fetch(`/api/feedback/${encodeURIComponent(id)}`, {
+      const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
         method: 'PATCH',
         headers: {
           ...mongoMutationHeaders(),
           'content-type': 'application/json',
           'x-analiza-feedback-schema': '2',
         },
-        body: JSON.stringify({ status: feedbackStatusSchema.parse(status) }),
+        body: JSON.stringify(parsedResolution.data),
       });
       const payload: unknown = await response.json();
       if (!response.ok) {
@@ -191,7 +222,15 @@ export function FeedbackForm() {
       setReports((current) =>
         current.map((report) => (report.id === updated.id ? updated : report)),
       );
-      setNotice('El estado del comentario fue actualizado.');
+      setResolutionDrafts((current) => ({
+        ...current,
+        [updated.id]: {
+          status: updated.status,
+          resolutionComment: updated.resolutionComment ?? '',
+          resolutionPath: updated.resolutionPath ?? '',
+        },
+      }));
+      setNotice('El estado, la respuesta y el enlace del reporte fueron actualizados.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos cambiar el estado.');
     } finally {
@@ -416,9 +455,20 @@ export function FeedbackForm() {
                           aria-label="Estado del comentario"
                           disabled={workingReportId === report.id}
                           onChange={(event) =>
-                            void changeStatus(report.id, event.target.value as FeedbackStatus)
+                            setResolutionDrafts((current) => ({
+                              ...current,
+                              [report.id]: {
+                                status: event.target.value as FeedbackStatus,
+                                resolutionComment:
+                                  current[report.id]?.resolutionComment ??
+                                  report.resolutionComment ??
+                                  '',
+                                resolutionPath:
+                                  current[report.id]?.resolutionPath ?? report.resolutionPath ?? '',
+                              },
+                            }))
                           }
-                          value={report.status}
+                          value={resolutionDrafts[report.id]?.status ?? report.status}
                         >
                           {feedbackStatuses.map(([value, label]) => (
                             <option key={value} value={value}>
@@ -427,6 +477,14 @@ export function FeedbackForm() {
                           ))}
                         </select>
                       </label>
+                      <button
+                        className="button secondary"
+                        disabled={workingReportId === report.id}
+                        onClick={() => void saveResolution(report)}
+                        type="button"
+                      >
+                        {workingReportId === report.id ? 'Guardando…' : 'Guardar respuesta'}
+                      </button>
                       <button
                         className="button secondary danger feedback-delete"
                         disabled={workingReportId === report.id}
@@ -440,6 +498,70 @@ export function FeedbackForm() {
                 </div>
               </div>
               <p>{report.description}</p>
+              {serverBacked && session?.role === 'ADMIN' ? (
+                <div className="feedback-resolution-editor">
+                  <label>
+                    Respuesta para la persona que reportó
+                    <textarea
+                      disabled={workingReportId === report.id}
+                      maxLength={4000}
+                      onChange={(event) =>
+                        setResolutionDrafts((current) => ({
+                          ...current,
+                          [report.id]: {
+                            status: current[report.id]?.status ?? report.status,
+                            resolutionComment: event.target.value,
+                            resolutionPath:
+                              current[report.id]?.resolutionPath ?? report.resolutionPath ?? '',
+                          },
+                        }))
+                      }
+                      placeholder="Se resolvió… Explica qué cambió."
+                      rows={3}
+                      value={
+                        resolutionDrafts[report.id]?.resolutionComment ??
+                        report.resolutionComment ??
+                        ''
+                      }
+                    />
+                  </label>
+                  <label>
+                    Pantalla corregida
+                    <input
+                      disabled={workingReportId === report.id}
+                      onChange={(event) =>
+                        setResolutionDrafts((current) => ({
+                          ...current,
+                          [report.id]: {
+                            status: current[report.id]?.status ?? report.status,
+                            resolutionComment:
+                              current[report.id]?.resolutionComment ??
+                              report.resolutionComment ??
+                              '',
+                            resolutionPath: event.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="/quotes?create=1"
+                      value={
+                        resolutionDrafts[report.id]?.resolutionPath ??
+                        report.resolutionPath ??
+                        ''
+                      }
+                    />
+                  </label>
+                </div>
+              ) : report.resolutionComment ? (
+                <div className="feedback-resolution">
+                  <strong>Respuesta del equipo</strong>
+                  <p>{report.resolutionComment}</p>
+                </div>
+              ) : null}
+              {report.resolutionPath ? (
+                <a className="button secondary feedback-change-link" href={report.resolutionPath}>
+                  Ver cambio realizado
+                </a>
+              ) : null}
               {report.imageName ? (
                 <div className="feedback-image-actions">
                   <span>

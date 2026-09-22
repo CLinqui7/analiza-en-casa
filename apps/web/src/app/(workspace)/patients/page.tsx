@@ -24,7 +24,6 @@ import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
-import { useOperations } from '@/lib/use-operations';
 import {
   companyOptions,
   insuranceProviderOptions,
@@ -286,10 +285,10 @@ function previewPatientImport(
 }
 
 export default function PatientsPage() {
-  const operations = useOperations();
   const {
     addPatient,
     addPatients,
+    catalogItems,
     doctors,
     patients,
     providerMode,
@@ -1384,25 +1383,29 @@ export default function PatientsPage() {
             {insuranceStatus === 'INSURED' ? (
               <div className="form-grid">
                 <label>
-                  Aseguradora demo
+                  Aseguradora
                   <Controller
                     control={form.control}
                     name="insurance.insurer"
                     render={({ field }) => (
                       <SearchableSelect
                         actionId="PATIENT-INSURER-SEARCH"
-                        ariaLabel="Aseguradora demo"
+                        ariaLabel="Aseguradora"
                         onChange={(value) => {
                           field.onChange(value);
                           if (value) setHolderDialogOpen(true);
                         }}
                         options={
                           isServerDataMode(providerMode)
-                            ? operations.configuration
-                                .filter((entry) => entry.category === 'INSURER' && entry.active)
-                                .map((entry) => ({ value: entry.label, label: entry.label }))
+                            ? catalogItems
+                                .filter(
+                                  (entry) =>
+                                    entry.category === 'INSURERS' && entry.status === 'ACTIVE',
+                                )
+                                .map((entry) => ({ value: entry.name, label: entry.name }))
                             : insuranceProviderOptions
                         }
+                        placeholder="Buscar aseguradora por nombre"
                         value={field.value}
                       />
                     )}

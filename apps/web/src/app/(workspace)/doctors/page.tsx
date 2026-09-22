@@ -340,16 +340,21 @@ export default function DoctorsPage() {
             name="specialty"
             render={({ field }) => (
               <SearchableSelect
+                allowCustom
                 actionId="DOCTOR-SPECIALTY-SELECT"
                 ariaLabel="Especialidad o profesión"
                 onChange={field.onChange}
-                options={
-                  isServerDataMode(providerMode)
+                options={[
+                  ...doctorSpecialtyOptions,
+                  ...(isServerDataMode(providerMode)
                     ? operations.configuration
                         .filter((entry) => entry.category === 'SPECIALTY' && entry.active)
                         .map((entry) => ({ value: entry.label, label: entry.label }))
-                    : doctorSpecialtyOptions
-                }
+                    : []),
+                ].filter(
+                  (option, index, all) =>
+                    all.findIndex((candidate) => candidate.value === option.value) === index,
+                )}
                 placeholder="Buscar especialidad o profesión"
                 value={field.value}
               />

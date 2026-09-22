@@ -3,6 +3,7 @@ import {
   feedbackImageTypes,
   feedbackInputSchema,
   feedbackReportSchema,
+  feedbackResolutionSchema,
   feedbackStatusSchema,
   MAX_FEEDBACK_IMAGE_BYTES,
 } from '@/lib/feedback';
@@ -57,5 +58,23 @@ describe('nurse feedback', () => {
   it('allows only the three administrative follow-up states', () => {
     expect(feedbackStatusSchema.options).toEqual(['NEW', 'REVIEWING', 'RESOLVED']);
     expect(feedbackStatusSchema.safeParse('DELETED').success).toBe(false);
+  });
+
+  it('requires a visible resolution comment and accepts an internal destination link', () => {
+    expect(
+      feedbackResolutionSchema.safeParse({
+        status: 'RESOLVED',
+        resolutionComment: 'Se resolvió el guardado y se agregó validación visible.',
+        resolutionPath: '/quotes?create=1',
+      }).success,
+    ).toBe(true);
+    expect(feedbackResolutionSchema.safeParse({ status: 'RESOLVED' }).success).toBe(false);
+    expect(
+      feedbackResolutionSchema.safeParse({
+        status: 'RESOLVED',
+        resolutionComment: 'Se resolvió.',
+        resolutionPath: 'https://example.com',
+      }).success,
+    ).toBe(false);
   });
 });

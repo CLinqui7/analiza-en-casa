@@ -5,6 +5,7 @@ import { searchOptions, type SearchableOption } from '@/lib/patient-form';
 
 type Props = {
   actionId?: string;
+  allowCustom?: boolean;
   ariaLabel: string;
   disabled?: boolean;
   onChange: (value: string) => void;
@@ -15,6 +16,7 @@ type Props = {
 
 export function SearchableSelect({
   actionId,
+  allowCustom = false,
   ariaLabel,
   disabled,
   onChange,
@@ -29,6 +31,11 @@ export function SearchableSelect({
   const listId = useId();
   const visible = useMemo(() => searchOptions(options, query), [options, query]);
   const selected = options.find((option) => option.value === value);
+  const customValue = query.trim();
+  const showCustom =
+    allowCustom &&
+    customValue.length > 1 &&
+    !options.some((option) => option.label.toLocaleLowerCase('es') === customValue.toLocaleLowerCase('es'));
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -116,11 +123,23 @@ export function SearchableSelect({
                 {option.label}
               </li>
             ))
-          ) : (
+          ) : !showCustom ? (
             <li aria-disabled="true" aria-selected="false" className="empty" role="option">
               Sin resultados
             </li>
-          )}
+          ) : null}
+          {showCustom ? (
+            <li
+              aria-selected="false"
+              onMouseDown={(event) => {
+                event.preventDefault();
+                choose(customValue);
+              }}
+              role="option"
+            >
+              Usar “{customValue}” como nueva opción
+            </li>
+          ) : null}
         </ul>
       ) : null}
       {value ? <span className="field-help">Seleccionado: {selected?.label ?? value}</span> : null}

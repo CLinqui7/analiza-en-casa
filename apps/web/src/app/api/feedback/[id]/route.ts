@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { feedbackStatusSchema } from '@/lib/feedback';
+import { feedbackResolutionSchema } from '@/lib/feedback';
 import { privateHeaders } from '@/server/auth-http';
 import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 import { authorizationStatus } from '@/server/http-auth';
@@ -85,12 +85,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       );
     }
     const body: unknown = await request.json();
-    const parsed = feedbackStatusSchema.safeParse(
-      body && typeof body === 'object' && !Array.isArray(body) && 'status' in body
-        ? body.status
-        : undefined,
-    );
-    if (!parsed.success) throw new MongoInputError('El estado seleccionado no es válido.');
+    const parsed = feedbackResolutionSchema.safeParse(body);
+    if (!parsed.success) throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
     const { id } = await params;
     const report = await backend.feedback.updateStatus(actor, id, parsed.data);
     if (!report) {

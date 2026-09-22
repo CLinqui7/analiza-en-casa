@@ -409,8 +409,57 @@
 
 .feedback-admin-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.feedback-resolution-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  gap: 12px;
+  margin: 16px 0 10px;
+  padding: 14px;
+  border: 1px solid #d7e7e8;
+  border-radius: 12px;
+  background: #f7fbfb;
+}
+
+.feedback-resolution-editor label {
+  display: grid;
+  gap: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.feedback-resolution-editor input,
+.feedback-resolution-editor textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 10px 11px;
+  background: white;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+}
+
+.feedback-resolution {
+  margin: 16px 0 10px;
+  padding: 14px 16px;
+  border-left: 3px solid #11876b;
+  border-radius: 10px;
+  background: #effaf6;
+}
+
+.feedback-resolution p {
+  margin: 5px 0 0 !important;
+}
+
+.feedback-change-link {
+  width: fit-content;
+  margin-top: 4px;
 }
 
 .feedback-admin-actions label {
@@ -494,5 +543,9 @@
 
   .feedback-submit {
     width: 100%;
+  }
+
+  .feedback-resolution-editor {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -5,16 +5,22 @@ import { doctorSpecialtyOptions, toDoctorAttachmentMetadata } from './doctor-cat
 // test-id: vitest:cr006-doctor-attachment-metadata
 describe('doctor catalog', () => {
   it('keeps every requested professional specialty available in the selector', () => {
-    expect(doctorSpecialtyOptions.map((option) => option.label)).toEqual([
-      'Técnico(a) en enfermería',
-      'Tecnólogo(a) en enfermería',
-      'Licenciado(a) en enfermería',
-      'Supervisor(a)',
-      'Licenciado en Terapia respiratoria',
-      'Licenciado en Terapia física',
-      'Nutricionista',
-      'Psicólogo(a)',
-    ]);
+    expect(doctorSpecialtyOptions.map((option) => option.label)).toEqual(
+      expect.arrayContaining([
+        'Cardiología',
+        'Medicina General',
+        'Pediatría',
+        'Urología',
+        'Técnico(a) en enfermería',
+        'Tecnólogo(a) en enfermería',
+        'Licenciado(a) en enfermería',
+        'Supervisor(a)',
+        'Licenciado en Terapia respiratoria',
+        'Licenciado en Terapia física',
+        'Nutricionista',
+        'Psicólogo(a)',
+      ]),
+    );
   });
 
   it('retains attachment metadata without retaining file content in browser storage', () => {

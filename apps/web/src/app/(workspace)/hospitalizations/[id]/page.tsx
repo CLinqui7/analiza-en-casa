@@ -20,6 +20,7 @@ export default function HospitalizationDetailPage() {
   const router = useRouter();
   const {
     clinicalDocuments,
+    catalogItems,
     doctors,
     hospitalizations,
     loading,
@@ -73,6 +74,9 @@ export default function HospitalizationDetailPage() {
         ? 'warning'
         : 'neutral';
   const profile = hospitalization.administrativeProfile;
+  const insurerOptions = catalogItems.filter(
+    (item) => item.category === 'INSURERS' && item.status === 'ACTIVE',
+  );
   const profileEditingEnabled = providerMode === 'mock' || isServerDataMode(providerMode);
   const closeProfile = () => setProfileOpen(false);
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
@@ -86,15 +90,11 @@ export default function HospitalizationDetailPage() {
       administrativeProfile: {
         healthManager: value('healthManager'),
         referredBy: value('referredBy'),
-        revenueType: value('revenueType'),
         type: value('type'),
         startDate: value('startDate'),
         durationDays: value('durationDays'),
         paymentMethod: value('paymentMethod'),
         insurer: value('insurer'),
-        requestType: value('requestType'),
-        majorCategory: value('majorCategory'),
-        subcategory: value('subcategory'),
         originatingHospital: value('originatingHospital'),
         patientClass: value('patientClass'),
       },
@@ -312,11 +312,14 @@ export default function HospitalizationDetailPage() {
             </label>
             <label>
               Referido por
-              <input defaultValue={profile?.referredBy ?? ''} name="referredBy" />
-            </label>
-            <label>
-              Tipo Revenue
-              <input defaultValue={profile?.revenueType ?? ''} name="revenueType" />
+              <select defaultValue={profile?.referredBy ?? ''} name="referredBy">
+                <option value="">Sin médico referido</option>
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.fullName}>
+                    {doctor.fullName}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               Tipo
@@ -346,22 +349,17 @@ export default function HospitalizationDetailPage() {
             </label>
             <label>
               Aseguradora
-              <input
+              <select
                 defaultValue={profile?.insurer ?? hospitalization.insurer ?? ''}
                 name="insurer"
-              />
-            </label>
-            <label>
-              Tipo de solicitud
-              <input defaultValue={profile?.requestType ?? ''} name="requestType" />
-            </label>
-            <label>
-              Categoría mayor
-              <input defaultValue={profile?.majorCategory ?? ''} name="majorCategory" />
-            </label>
-            <label>
-              Subcategoría
-              <input defaultValue={profile?.subcategory ?? ''} name="subcategory" />
+              >
+                <option value="">Particular / sin aseguradora</option>
+                {insurerOptions.map((insurer) => (
+                  <option key={insurer.id} value={insurer.name}>
+                    {insurer.name}
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
               Hospital de origen

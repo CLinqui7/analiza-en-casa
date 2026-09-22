@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { EmptyState, Panel, StatusTag } from '@analiza/ui';
+import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
 import { searchPatients } from '@analiza/domain';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -72,12 +72,46 @@ function textMatches(value: string, query: string) {
 }
 
 export default function ClinicalHospitalizationsPage() {
-  const { hospitalizations, patients, quotes } = useWorkspace();
+  const { hospitalizations, nursingResources, patients, quotes, updateHospitalization } =
+    useWorkspace();
   const { can } = useAuth();
   const [query, setQuery] = useState('');
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] =
     useState<Record<ClinicalColumn, string>>(emptyColumnFilters);
+  const [careCaseId, setCareCaseId] = useState<string | null>(null);
+  const [careDevices, setCareDevices] = useState('');
+  const [careNurseIds, setCareNurseIds] = useState<string[]>([]);
+  const [careMessage, setCareMessage] = useState<string | null>(null);
+  const [careSaving, setCareSaving] = useState(false);
+  const careCase = hospitalizations.find((item) => item.id === careCaseId);
+
+  function openCare(caseId: string) {
+    const hospitalization = hospitalizations.find((item) => item.id === caseId);
+    if (!hospitalization) return;
+    setCareCaseId(caseId);
+    setCareDevices(hospitalization.devices?.join(', ') ?? '');
+    setCareNurseIds(hospitalization.assignedNursingResourceIds ?? []);
+    setCareMessage(null);
+  }
+
+  async function saveCare() {
+    if (!careCase) return;
+    setCareSaving(true);
+    const saved = await updateHospitalization({
+      ...careCase,
+      devices: careDevices
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+      assignedNursingResourceIds: careNurseIds,
+    });
+    setCareSaving(false);
+    if (saved) {
+      setCareMessage('Atención clínica actualizada correctamente.');
+      setCareCaseId(null);
+    }
+  }
   const patientIds = new Set(searchPatients(patients, query).map((patient) => patient.id));
   const columnValue = (
     hospitalization: (typeof hospitalizations)[number],
@@ -295,6 +329,16 @@ export default function ClinicalHospitalizationsPage() {
                                   Ver cotizaciones
                                 </Link>
                               ) : null}
+                              {can('cases:write') ? (
+                                <button
+                                  data-action-id="CLINICAL-HOSPITALIZATION-CARE-EDIT"
+                                  onClick={() => openCare(hospitalization.id)}
+                                  role="menuitem"
+                                  type="button"
+                                >
+                                  Gestionar atención clínica
+                                </button>
+                              ) : null}
                               <button
                                 data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"
                                 disabled
@@ -387,6 +431,67 @@ export default function ClinicalHospitalizationsPage() {
           />
         )}
       </Panel>
+      {careMessage ? (
+        <p className="notice success" role="status">
+          {careMessage}
+        </p>
+      ) : null}
+      <Dialog
+        description="Registra los accesos del paciente y asigna las cuentas de enfermería responsables de la atención."
+        footer={
+          <>
+            <Button className="button-secondary" onClick={() => setCareCaseId(null)} type="button">
+              Cancelar
+            </Button>
+            <Button disabled={careSaving} onClick={() => void saveCare()} type="button">
+              {careSaving ? 'Guardando…' : 'Guardar atención'}
+            </Button>
+          </>
+        }
+        onClose={() => setCareCaseId(null)}
+        open={Boolean(careCase)}
+        title={`Atención clínica${careCase ? ` · ${careCase.id}` : ''}`}
+      >
+        <div className="form-grid" id="clinical-attention">
+          <label className="full">
+            Dispositivos / accesos
+            <input
+              onChange={(event) => setCareDevices(event.target.value)}
+              placeholder="Ej.: catéter, sonda, acceso venoso"
+              value={careDevices}
+            />
+            <span className="field-help">Separe varios elementos con comas.</span>
+          </label>
+          <fieldset className="full assignment-fieldset">
+            <legend>Enfermeras asignadas para la atención</legend>
+            <div className="assignment-option-grid">
+              {nursingResources.map((resource) => (
+                <label key={resource.id}>
+                  <input
+                    checked={careNurseIds.includes(resource.id)}
+                    disabled={!resource.userId}
+                    onChange={(event) =>
+                      setCareNurseIds((current) =>
+                        event.target.checked
+                          ? [...new Set([...current, resource.id])]
+                          : current.filter((id) => id !== resource.id),
+                      )
+                    }
+                    type="checkbox"
+                  />
+                  <span>
+                    <strong>{resource.displayName}</strong>
+                    <small>{resource.userId ? resource.territory : 'Sin cuenta vinculada'}</small>
+                  </span>
+                </label>
+              ))}
+            </div>
+            {!nursingResources.length ? (
+              <p className="field-help">Primero registre recursos en Equipo de enfermería.</p>
+            ) : null}
+          </fieldset>
+        </div>
+      </Dialog>
     </div>
   );
 }

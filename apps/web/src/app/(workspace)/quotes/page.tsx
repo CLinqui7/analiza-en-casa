@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { SearchableSelect } from '@/components/common/searchable-select';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -42,9 +43,6 @@ const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
   quantity: 0,
   unitPrice: 0,
   discountAmount: 0,
-  ...(category === 'MEDICATIONS'
-    ? { presentation: 'TABLET' as const, unitsPerPresentation: 1 }
-    : {}),
 });
 const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   caseId,
@@ -143,6 +141,7 @@ function QuoteEditor({
     addQuote,
     catalogItems,
     doctors,
+    error: workspaceError,
     hospitalizations,
     inventoryMovements,
     patients,
@@ -162,7 +161,6 @@ function QuoteEditor({
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<QuoteItemCategory>('SERVICES');
-  const [catalogQuery, setCatalogQuery] = useState('');
   const [processingItem, setProcessingItem] = useState(false);
   const [referralCatalogOpen, setReferralCatalogOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -199,7 +197,6 @@ function QuoteEditor({
   const linkedInventoryBalance = linkedInventoryItem
     ? currentInventoryBalance(inventoryMovements, linkedInventoryItem.id)
     : undefined;
-  const itemUnits = item.quantity * (item.unitsPerPresentation ?? 1);
   const catalogCategory = {
     SERVICES: 'SERVICES',
     STUDIES: 'LABORATORY',
@@ -228,9 +225,6 @@ function QuoteEditor({
               salePriceExcludingTax: candidate.salePriceExcludingTax,
             }))
         : [];
-  const catalogResults = activeCatalog.filter((entry) =>
-    entry.label.toLocaleLowerCase().includes(catalogQuery.toLocaleLowerCase()),
-  );
 
   function setNumber(key: 'quantity' | 'unitPrice' | 'discountAmount', value: string) {
     setItem((current) => ({ ...current, [key]: Number(value) }));
@@ -263,7 +257,6 @@ function QuoteEditor({
         : [...current.items, persisted],
     }));
     setItem(emptyItem(activeCategory));
-    setCatalogQuery('');
     setEditingItemId(null);
     setErrors((current) => ({ ...current, item: '' }));
     setProcessingItem(true);
@@ -271,7 +264,6 @@ function QuoteEditor({
   }
   function editItem(candidate: QuoteItem) {
     setItem({ ...candidate });
-    setCatalogQuery(candidate.name);
     setEditingItemId(candidate.id);
     setActiveCategory(candidate.category);
     setErrors((current) => ({ ...current, item: '' }));
@@ -719,7 +711,6 @@ function QuoteEditor({
                 onClick={() => {
                   setActiveCategory(category.value);
                   setItem(emptyItem(category.value));
-                  setCatalogQuery('');
                   setErrors((current) => ({ ...current, item: '' }));
                 }}
                 role="tab"
@@ -750,10 +741,19 @@ function QuoteEditor({
                           : activeCategory === 'SUPPLIES'
                             ? 'Insumo'
                             : 'Equipo'}
-                <select
-                  data-action-id="QUOTE-CATALOG-ITEM-SELECT"
-                  onChange={(event) => {
-                    const selected = activeCatalog.find((entry) => entry.id === event.target.value);
+                <SearchableSelect
+                  actionId="QUOTE-CATALOG-ITEM-SELECT"
+                  ariaLabel={`Buscar ${
+                    activeCategory === 'MEDICATIONS'
+                      ? 'medicamento'
+                      : activeCategory === 'SUPPLIES'
+                        ? 'insumo'
+                        : activeCategory === 'EQUIPMENT'
+                          ? 'equipo'
+                          : 'ítem de catálogo'
+                  } por código o nombre`}
+                  onChange={(value) => {
+                    const selected = activeCatalog.find((entry) => entry.id === value);
                     setItem((current) => ({
                       ...current,
                       name: selected?.label ?? '',
@@ -761,15 +761,13 @@ function QuoteEditor({
                       unitPrice: selected?.salePriceExcludingTax ?? 0,
                     }));
                   }}
-                  value={activeCatalog.find((entry) => entry.label === item.name)?.id ?? ''}
-                >
-                  <option value="">Seleccione del catálogo</option>
-                  {catalogResults.map((entry) => (
-                    <option key={entry.id} value={entry.id}>
-                      {entry.label}
-                    </option>
-                  ))}
-                </select>
+                  options={activeCatalog.map((entry) => ({
+                    value: entry.id,
+                    label: entry.label,
+                  }))}
+                  placeholder="Escribe las iniciales, código o nombre"
+                  value={item.inventoryItemId ?? ''}
+                />
                 {!activeCatalog.length ? (
                   <span className="field-help">Primero cree servicios activos en Catálogos.</span>
                 ) : null}
@@ -829,48 +827,13 @@ function QuoteEditor({
               </>
             ) : null}
             {activeCategory === 'MEDICATIONS' ? (
-              <>
-                <label>
-                  Presentación
-                  <select
-                    data-action-id="QUOTE-MEDICATION-PRESENTATION"
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        presentation: event.target.value as NonNullable<QuoteItem['presentation']>,
-                      }))
-                    }
-                    value={item.presentation ?? 'TABLET'}
-                  >
-                    <option value="TABLET">Tableta</option>
-                    <option value="BLISTER">Blíster</option>
-                    <option value="UNIT">Unidad</option>
-                  </select>
-                </label>
-                <label>
-                  Unidades por presentación
-                  <input
-                    data-action-id="QUOTE-MEDICATION-UNITS-PER-PRESENTATION"
-                    min="1"
-                    onChange={(event) =>
-                      setItem((current) => ({
-                        ...current,
-                        unitsPerPresentation: Math.max(1, Math.trunc(Number(event.target.value))),
-                      }))
-                    }
-                    step="1"
-                    type="number"
-                    value={item.unitsPerPresentation ?? 1}
-                  />
-                </label>
-                <div className="full-field">
-                  <span className="field-help">
-                    {linkedInventoryItem
-                      ? `${itemUnits} unidades indicadas · existencia actual ${linkedInventoryBalance ?? 0}. La cotización no reserva ni descuenta stock.`
-                      : `${itemUnits} unidades indicadas. Seleccione un ítem para ver su existencia.`}
-                  </span>
-                </div>
-              </>
+              <div className="full-field">
+                <span className="field-help">
+                  {linkedInventoryItem
+                    ? `${item.quantity} unidades indicadas · existencia actual ${linkedInventoryBalance ?? 0}. La presentación ya forma parte del nombre del catálogo.`
+                    : 'Seleccione un medicamento para ver su existencia. La presentación se toma del catálogo.'}
+                </span>
+              </div>
             ) : null}
             <label>
               Cantidad <span aria-hidden="true">*</span>
@@ -975,19 +938,14 @@ function QuoteEditor({
                           <small>Médico: {candidate.doctorName}</small>
                         </>
                       ) : null}
-                      {candidate.presentation ? (
+                      {candidate.inventoryItemId ? (
                         <>
                           <br />
                           <small>
-                            {candidate.presentation === 'BLISTER'
-                              ? 'Blíster'
-                              : candidate.presentation === 'TABLET'
-                                ? 'Tableta'
-                                : 'Unidad'}{' '}
-                            · {candidate.quantity * (candidate.unitsPerPresentation ?? 1)} unidades
-                            {candidate.inventoryItemId
-                              ? ` · Inventario ${catalogItems.find((catalogItem) => catalogItem.id === candidate.inventoryItemId)?.sku ?? candidate.inventoryItemId}`
-                              : ''}
+                            Catálogo:{' '}
+                            {catalogItems.find(
+                              (catalogItem) => catalogItem.id === candidate.inventoryItemId,
+                            )?.sku ?? candidate.inventoryItemId}
                           </small>
                         </>
                       ) : null}
@@ -1127,6 +1085,11 @@ function QuoteEditor({
         {errors.totals ? (
           <p className="field-error full-field" role="alert">
             {errors.totals}
+          </p>
+        ) : null}
+        {workspaceError ? (
+          <p className="notice danger full-field" role="alert">
+            No pudimos guardar: {workspaceError}
           </p>
         ) : null}
       </form>

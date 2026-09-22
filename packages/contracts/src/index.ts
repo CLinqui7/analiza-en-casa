@@ -332,10 +332,14 @@ export const catalogItemSchema = z.object({
 export const purchaseSchema = z.object({
   id: z.string(),
   catalogItemId: z.string(),
+  supplierCatalogItemId: z.string().trim().min(1).optional(),
   reference: z.string().trim().min(1),
   note: z.string().trim().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
+  expirationDate: z.string().trim().optional(),
+  lotNumber: z.string().trim().optional(),
+  serialNumber: z.string().trim().optional(),
   status: z.literal('DRAFT'),
   createdAt: z.string(),
 });
