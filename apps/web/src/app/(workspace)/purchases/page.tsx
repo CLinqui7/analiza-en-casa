@@ -2,6 +2,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Purchase } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -171,6 +172,17 @@ export default function PurchasesPage() {
         <p className="notice danger" role="alert">
           {error}
         </p>
+      ) : null}
+      {can('purchases:write') && (!suppliers.length || !purchasableItems.length) ? (
+        <div className="notice" role="status">
+          <strong>Antes de registrar una compra:</strong>{' '}
+          {!suppliers.length ? 'agrega al menos un proveedor activo' : ''}
+          {!suppliers.length && !purchasableItems.length ? ' y ' : ''}
+          {!purchasableItems.length
+            ? 'agrega un medicamento, insumo o equipo activo'
+            : ''}{' '}
+          en <Link href="/catalogs/operational">Catálogos operativos</Link>.
+        </div>
       ) : null}
       <Panel>
         <div className="table-heading">
