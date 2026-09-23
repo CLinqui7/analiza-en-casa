@@ -994,3 +994,23 @@ test('clinical hospitalizations keeps search, care actions and accessibility int
     .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
     .toBe(true);
 });
+
+test('clinical record hub presents every care tool accessibly on desktop and mobile', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/clinical');
+  const main = page.locator('main');
+  await expect(main.getByRole('heading', { name: 'Expediente clínico' })).toBeVisible();
+  await expect(main.getByRole('link', { name: /Hospitalizaciones clínicas/ })).toBeVisible();
+  await expect(main.getByRole('link', { name: /Reporte de salud/ })).toBeVisible();
+  await expect(main.getByRole('link', { name: /Órdenes y acciones/ })).toBeVisible();
+  await expect(main.getByRole('link', { name: /Administración de medicamentos/ })).toBeVisible();
+  await expect(main.getByRole('progressbar', { name: /documentos firmados/ })).toBeVisible();
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(results.violations).toEqual([]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+    .toBe(true);
+});
