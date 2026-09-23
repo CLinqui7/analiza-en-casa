@@ -79,8 +79,8 @@ export default function BalancePage() {
     nursingResources.find((resource) => resource.userId === userId)?.displayName ??
     (userId === session?.userId ? 'Mi usuario' : 'Profesional autorizado');
   return (
-    <div className="page-stack">
-      <header className="page-header">
+    <div className="page-stack clinical-suite-page">
+      <header className="page-header clinical-module-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
           <h1>Balance hídrico</h1>

@@ -1014,3 +1014,33 @@ test('clinical record hub presents every care tool accessibly on desktop and mob
     .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
     .toBe(true);
 });
+
+test('clinical orders and medication cards share the polished accessible visual system', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/clinical/orders');
+  await expect(page.getByRole('heading', { name: 'Orden Médica' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /Activos/ })).toHaveAttribute('aria-selected', 'true');
+  await page.getByLabel('Buscar orden médica').fill('Paciente Demo Aurora');
+  await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
+  await page.getByLabel('Buscar orden médica').fill('');
+  const orderResults = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(orderResults.violations).toEqual([]);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+    .toBe(true);
+
+  await page.goto('/clinical/medication-cards');
+  await expect(page.getByRole('heading', { name: 'Tarjetas de medicamentos' })).toBeVisible();
+  await expect(page.getByText('La captura permanece protegida')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Hospitalizaciones' })).toBeVisible();
+  const medicationResults = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa'])
+    .analyze();
+  expect(medicationResults.violations).toEqual([]);
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+    .toBe(true);
+});

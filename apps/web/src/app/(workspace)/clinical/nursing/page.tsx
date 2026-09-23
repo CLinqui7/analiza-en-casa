@@ -66,8 +66,8 @@ export default function NursingBoardPage() {
   }
 
   return (
-    <div className="page-stack">
-      <header className="page-header page-header-actions">
+    <div className="page-stack clinical-suite-page">
+      <header className="page-header page-header-actions clinical-module-header">
         <div>
           <p className="eyebrow">Clínico · operaciones</p>
           <h1>Tablero de enfermería</h1>

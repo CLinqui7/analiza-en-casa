@@ -62,8 +62,8 @@ export default function AdministrationsPage() {
     }
   }
   return (
-    <div className="page-stack">
-      <header className="page-header">
+    <div className="page-stack clinical-suite-page">
+      <header className="page-header clinical-module-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
           <h1>Administración de medicamentos</h1>

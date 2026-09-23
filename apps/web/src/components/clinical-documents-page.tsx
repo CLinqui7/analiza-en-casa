@@ -128,8 +128,8 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
     closeCorrection();
   };
   return (
-    <div className="page-stack">
-      <header className="page-header page-header-actions">
+    <div className="page-stack clinical-suite-page">
+      <header className="page-header page-header-actions clinical-module-header">
         <div>
           <p className="eyebrow">Clínico</p>
           <h1>{copy.heading}</h1>

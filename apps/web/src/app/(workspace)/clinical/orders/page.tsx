@@ -1,7 +1,7 @@
 'use client';
 
-import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { searchPatients } from '@analiza/domain';
+import { Button, Dialog, EmptyState, StatusTag } from '@analiza/ui';
 import { useMemo, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 
@@ -11,6 +11,15 @@ const pageSize = 5;
 
 function patientBirthDate(value: string | undefined) {
   return value ?? 'No documentada';
+}
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 }
 
 export default function MedicalOrdersPage() {
@@ -26,6 +35,9 @@ export default function MedicalOrdersPage() {
     () => searchPatients(patients, query).filter((patient) => patient.status === tab),
     [patients, query, tab],
   );
+  const activePatients = patients.filter((patient) => patient.status === 'ACTIVE').length;
+  const inactivePatients = patients.length - activePatients;
+  const hospitalizedPatients = new Set(hospitalizations.map((item) => item.patientId)).size;
   const pageCount = Math.max(1, Math.ceil(matchingPatients.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const visiblePatients = matchingPatients.slice(
@@ -40,68 +52,95 @@ export default function MedicalOrdersPage() {
   }
 
   return (
-    <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Clínico · listado factual</p>
-          <h1>Orden Médica</h1>
-          <p>
-            Pacientes y hospitalizaciones ya registradas, sin inferir órdenes, tratamientos ni
-            estados clínicos.
-          </p>
+    <div className="page-stack medical-orders-page">
+      <header className="medical-orders-hero">
+        <div className="medical-orders-hero-copy">
+          <span className="medical-orders-hero-icon" aria-hidden="true">
+            Rx
+          </span>
+          <div>
+            <p className="eyebrow">Gestión clínica</p>
+            <h1>Orden Médica</h1>
+            <p>
+              Consulta pacientes y hospitalizaciones registradas para organizar la documentación
+              médica desde un solo listado.
+            </p>
+          </div>
+        </div>
+        <div className="medical-orders-summary" aria-label="Resumen de pacientes">
+          <div>
+            <span>Activos</span>
+            <strong>{activePatients}</strong>
+          </div>
+          <div>
+            <span>Inactivos</span>
+            <strong>{inactivePatients}</strong>
+          </div>
+          <div>
+            <span>Hospitalizados</span>
+            <strong>{hospitalizedPatients}</strong>
+          </div>
         </div>
       </header>
 
-      <Panel>
-        <div aria-label="Listado de Orden Médica" className="tab-row" role="tablist">
-          <button
-            aria-selected={tab === 'ACTIVE'}
-            data-action-id="MEDICAL-ORDER-TAB-ACTIVE"
-            onClick={() => selectTab('ACTIVE')}
-            role="tab"
-            type="button"
-          >
-            Activos
-          </button>
-          <button
-            aria-selected={tab === 'INACTIVE'}
-            data-action-id="MEDICAL-ORDER-TAB-INACTIVE"
-            onClick={() => selectTab('INACTIVE')}
-            role="tab"
-            type="button"
-          >
-            Inactivos
-          </button>
-          <button
-            aria-describedby="medical-order-undefined-tabs"
-            data-action-id="MEDICAL-ORDER-TAB-CHANGES"
-            disabled
-            role="tab"
-            type="button"
-          >
-            Tratamientos con cambios
-          </button>
-          <button
-            aria-describedby="medical-order-undefined-tabs"
-            data-action-id="MEDICAL-ORDER-TAB-UPDATES"
-            disabled
-            role="tab"
-            type="button"
-          >
-            Actualizaciones
-          </button>
-        </div>
-        <p id="medical-order-undefined-tabs" role="status">
-          Tratamientos con cambios y Actualizaciones permanecen deshabilitados: CH10-Q011 no define
-          su unidad de versionado ni sus estados.
-        </p>
-        <div className="toolbar-row">
+      <section className="medical-orders-controls" aria-labelledby="medical-orders-filters">
+        <div className="medical-orders-controls-topline">
           <div>
-            <span className="field-label">Registros</span>
-            <span aria-label="Registros por página">{pageSize}</span>
+            <p className="eyebrow">Directorio clínico</p>
+            <h2 id="medical-orders-filters">Filtra los pacientes</h2>
           </div>
-          <label className="search-label" htmlFor="medical-order-search">
-            Buscar orden médica
+          <span className="medical-orders-results-count">
+            {matchingPatients.length} {matchingPatients.length === 1 ? 'resultado' : 'resultados'}
+          </span>
+        </div>
+
+        <div className="medical-orders-filter-row">
+          <div
+            aria-label="Listado de Orden Médica"
+            className="tab-row medical-orders-tabs"
+            role="tablist"
+          >
+            <button
+              aria-selected={tab === 'ACTIVE'}
+              data-action-id="MEDICAL-ORDER-TAB-ACTIVE"
+              onClick={() => selectTab('ACTIVE')}
+              role="tab"
+              type="button"
+            >
+              Activos <span aria-hidden="true">{activePatients}</span>
+            </button>
+            <button
+              aria-selected={tab === 'INACTIVE'}
+              data-action-id="MEDICAL-ORDER-TAB-INACTIVE"
+              onClick={() => selectTab('INACTIVE')}
+              role="tab"
+              type="button"
+            >
+              Inactivos <span aria-hidden="true">{inactivePatients}</span>
+            </button>
+            <button
+              aria-describedby="medical-order-undefined-tabs"
+              data-action-id="MEDICAL-ORDER-TAB-CHANGES"
+              disabled
+              role="tab"
+              type="button"
+            >
+              Tratamientos con cambios
+            </button>
+            <button
+              aria-describedby="medical-order-undefined-tabs"
+              data-action-id="MEDICAL-ORDER-TAB-UPDATES"
+              disabled
+              role="tab"
+              type="button"
+            >
+              Actualizaciones
+            </button>
+          </div>
+
+          <label className="medical-orders-search" htmlFor="medical-order-search">
+            <span aria-hidden="true">⌕</span>
+            <span className="sr-only">Buscar orden médica</span>
             <input
               data-action-id="MEDICAL-ORDER-SEARCH"
               id="medical-order-search"
@@ -109,20 +148,68 @@ export default function MedicalOrdersPage() {
                 setQuery(event.target.value);
                 setPage(1);
               }}
-              placeholder="Nombre o cédula"
+              placeholder="Buscar por nombre o DUI"
               type="search"
               value={query}
             />
           </label>
         </div>
-      </Panel>
 
-      <Panel>
+        <details className="medical-orders-upcoming">
+          <summary>
+            <span>Funciones en preparación</span>
+            <span aria-hidden="true">⌄</span>
+          </summary>
+          <div>
+            <p id="medical-order-undefined-tabs" role="status">
+              Tratamientos con cambios y Actualizaciones se habilitarán cuando esté aprobado su
+              modelo de versiones y estados.
+            </p>
+            <div className="medical-orders-upcoming-actions">
+              <Button
+                aria-describedby="medical-order-view-block"
+                data-action-id="MEDICAL-ORDER-VIEW"
+                disabled
+                type="button"
+              >
+                Ver órdenes
+              </Button>
+              <Button
+                aria-describedby="medical-order-xpo-block"
+                data-action-id="MEDICAL-ORDER-XPO"
+                disabled
+                type="button"
+              >
+                Registro XPO
+              </Button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section
+        className="medical-orders-directory"
+        aria-labelledby="medical-orders-directory-title"
+      >
+        <div className="medical-orders-directory-heading">
+          <div>
+            <p className="eyebrow">Pacientes registrados</p>
+            <h2 id="medical-orders-directory-title">
+              {tab === 'ACTIVE' ? 'Pacientes activos' : 'Pacientes inactivos'}
+            </h2>
+            <p>Selecciona las acciones disponibles para preparar la documentación del paciente.</p>
+          </div>
+          <span>{pageSize} por página</span>
+        </div>
+
         {loading ? (
-          <p role="status">Cargando…</p>
+          <div className="medical-orders-loading" role="status">
+            <span />
+            Cargando pacientes…
+          </div>
         ) : visiblePatients.length ? (
-          <div className="table-wrap">
-            <table>
+          <div className="table-wrap medical-orders-table-wrap" tabIndex={0}>
+            <table className="medical-orders-table">
               <thead>
                 <tr>
                   <th scope="col">Acciones</th>
@@ -141,59 +228,84 @@ export default function MedicalOrdersPage() {
                   );
                   const menuOpen = menuPatientId === patient.id;
                   return (
-                    <tr key={patient.id}>
+                    <tr className={menuOpen ? 'has-open-menu' : undefined} key={patient.id}>
                       <td>
-                        <button
-                          aria-expanded={menuOpen}
-                          aria-label={`Acciones para ${patient.fullName}`}
-                          className="icon-button"
-                          data-action-id="MEDICAL-ORDER-MENU-OPEN"
-                          onClick={() => setMenuPatientId(menuOpen ? null : patient.id)}
-                          type="button"
-                        >
-                          ⋯
-                        </button>
-                        {menuOpen ? (
-                          <div
-                            aria-label={`Menú de ${patient.fullName}`}
-                            className="row-action-menu"
-                            role="menu"
+                        <div className="medical-order-row-actions">
+                          <button
+                            aria-expanded={menuOpen}
+                            aria-label={`Acciones para ${patient.fullName}`}
+                            className="medical-order-menu-button"
+                            data-action-id="MEDICAL-ORDER-MENU-OPEN"
+                            onClick={() => setMenuPatientId(menuOpen ? null : patient.id)}
+                            type="button"
                           >
-                            {can('medical-orders:write') ? (
+                            <span aria-hidden="true">•••</span>
+                          </button>
+                          {menuOpen ? (
+                            <div
+                              aria-label={`Menú de ${patient.fullName}`}
+                              className="row-action-menu medical-order-action-menu"
+                              role="menu"
+                            >
+                              <div className="medical-order-action-menu-heading">
+                                <span>{initials(patient.fullName)}</span>
+                                <div>
+                                  <strong>{patient.fullName}</strong>
+                                  <small>{patient.documentId}</small>
+                                </div>
+                              </div>
+                              {can('medical-orders:write') ? (
+                                <Button
+                                  data-action-id="MEDICAL-ORDER-CREATE"
+                                  onClick={() => setDocumentChoiceOpen(true)}
+                                  type="button"
+                                >
+                                  Nuevo
+                                </Button>
+                              ) : null}
                               <Button
-                                data-action-id="MEDICAL-ORDER-CREATE"
-                                onClick={() => setDocumentChoiceOpen(true)}
+                                aria-describedby="medical-order-view-block"
+                                data-action-id="MEDICAL-ORDER-VIEW"
+                                disabled
                                 type="button"
                               >
-                                Nuevo
+                                Ver Órdenes
                               </Button>
-                            ) : null}
-                            <Button
-                              aria-describedby="medical-order-view-block"
-                              data-action-id="MEDICAL-ORDER-VIEW"
-                              disabled
-                              type="button"
-                            >
-                              Ver Órdenes
-                            </Button>
-                            <Button
-                              aria-describedby="medical-order-xpo-block"
-                              data-action-id="MEDICAL-ORDER-XPO"
-                              disabled
-                              type="button"
-                            >
-                              Registro XPO
-                            </Button>
-                          </div>
-                        ) : null}
+                              <Button
+                                aria-describedby="medical-order-xpo-block"
+                                data-action-id="MEDICAL-ORDER-XPO"
+                                disabled
+                                type="button"
+                              >
+                                Registro XPO
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
                       </td>
-                      <td>{patient.fullName}</td>
-                      <td>{patient.documentId}</td>
+                      <td>
+                        <div className="medical-order-patient">
+                          <span aria-hidden="true">{initials(patient.fullName)}</span>
+                          <div>
+                            <strong>{patient.fullName}</strong>
+                            <small>{patient.phone ?? 'Sin teléfono registrado'}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="medical-order-document">{patient.documentId}</span>
+                      </td>
                       <td>{patientBirthDate(patient.birthDate)}</td>
                       <td>
                         <StatusTag>No documentado</StatusTag>
                       </td>
-                      <td>{hospitalization?.id ?? 'Sin hospitalización'}</td>
+                      <td>
+                        {hospitalization ? (
+                          <code className="medical-order-case">{hospitalization.id}</code>
+                        ) : (
+                          <span className="medical-order-muted">Sin hospitalización</span>
+                        )}
+                      </td>
                       <td>
                         <StatusTag tone={patient.status === 'ACTIVE' ? 'success' : 'neutral'}>
                           {patient.status === 'ACTIVE' ? 'Activa' : 'Inactiva'}
@@ -207,18 +319,23 @@ export default function MedicalOrdersPage() {
           </div>
         ) : (
           <EmptyState
-            detail="Ajuste la búsqueda o seleccione otra pestaña factual."
+            detail="Prueba con otro nombre, documento o estado del paciente."
             title="No hay registros disponibles"
           />
         )}
-        <p className="visually-hidden" id="medical-order-view-block">
+
+        <p className="sr-only" id="medical-order-view-block">
           Ver Órdenes permanece bloqueado hasta definir el modelo y versionado de órdenes.
         </p>
-        <p className="visually-hidden" id="medical-order-xpo-block">
+        <p className="sr-only" id="medical-order-xpo-block">
           Registro XPO permanece bloqueado por CH10-Q012.
         </p>
-        <div aria-label="Paginación" className="pagination">
+        <div
+          aria-label="Paginación de Orden Médica"
+          className="pagination medical-orders-pagination"
+        >
           <Button
+            className="button-secondary"
             data-action-id="MEDICAL-ORDER-PAGE-PREV"
             disabled={currentPage === 1}
             onClick={() => setPage((value) => Math.max(1, value - 1))}
@@ -226,8 +343,11 @@ export default function MedicalOrdersPage() {
           >
             Anterior
           </Button>
-          <span aria-current="page">{currentPage}</span>
+          <span aria-current="page">
+            Página <strong>{currentPage}</strong> de {pageCount}
+          </span>
           <Button
+            className="button-secondary"
             data-action-id="MEDICAL-ORDER-PAGE-NEXT"
             disabled={currentPage === pageCount}
             onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
@@ -236,10 +356,10 @@ export default function MedicalOrdersPage() {
             Siguiente
           </Button>
         </div>
-      </Panel>
+      </section>
 
       <Dialog
-        description="Elegir un tipo es visible en la evidencia; iniciar un documento clínico sigue bloqueado hasta definir datos, autorización y auditoría."
+        description="Selecciona el tipo de documento que necesitas preparar para este paciente."
         footer={
           <Button
             className="button-secondary"
@@ -253,12 +373,20 @@ export default function MedicalOrdersPage() {
         open={isDocumentChoiceOpen}
         title="¿Qué quieres crear?"
       >
-        <div className="page-stack">
+        <div className="medical-order-document-options">
           <Button disabled type="button">
-            Orden Médica
+            <span aria-hidden="true">Rx</span>
+            <span>
+              <strong>Orden Médica</strong>
+              <small>Disponible al aprobar el contrato clínico.</small>
+            </span>
           </Button>
           <Button disabled type="button">
-            Tarjeta de medicamentos
+            <span aria-hidden="true">▤</span>
+            <span>
+              <strong>Tarjeta de medicamentos</strong>
+              <small>Requiere reglas aprobadas de autorización y dosis.</small>
+            </span>
           </Button>
           <p role="status">
             La creación clínica permanece bloqueada hasta contar con definiciones aprobadas.
