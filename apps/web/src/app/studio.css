@@ -844,6 +844,13 @@ table th .button:hover {
   align-self: center;
   font-size: 12px;
 }
+.dialog-validation-summary {
+  max-width: min(560px, 100%);
+  line-height: 1.45;
+}
+.dialog-validation-summary strong {
+  display: inline;
+}
 .studio-verification-stages {
   margin: 0;
 }

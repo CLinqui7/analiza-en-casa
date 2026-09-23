@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch02-form-required-document-demographics
 // test-id: playwright:ch02-botmaker-insurance-insurer-holder-coverage
 // test-id: playwright:ch02-contacts-address-map-back-save
+// test-id: playwright:ch02-required-field-summary
 // test-id: playwright:ch02-mobile-form-modal-map
 // test-id: playwright:cr002-resident-card
 // test-id: playwright:cr004-contact-document-pair
@@ -61,6 +62,35 @@ test('CH02-F001-F005 route, list, sections, required markers, and primary docume
   await expect(dialog.getByLabel('Fecha de nacimiento')).toHaveAttribute('type', 'date');
 });
 
+test('CH02-F016 lists missing fields beside Guardar and focuses the first invalid field', async ({
+  page,
+}) => {
+  await login(page);
+  const dialog = await openForm(page);
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
+
+  const summary = dialog.getByTestId('patient-validation-summary');
+  await expect(summary).toBeVisible();
+  await expect(summary).toContainText('Falta completar o corregir:');
+  for (const label of [
+    'Número de documento',
+    'Nombre completo',
+    'Fecha de nacimiento',
+    'Sexo',
+    'Teléfono celular',
+    'Empresa',
+    'Dirección',
+    'Comentarios relevantes de la dirección',
+  ]) {
+    await expect(summary).toContainText(label);
+  }
+  await expect(dialog.getByLabel('Número de documento')).toBeFocused();
+
+  await dialog.getByLabel('Número de documento').fill('CH02-VALIDATION-SUMMARY');
+  await expect(summary).not.toContainText('Número de documento');
+  await expect(dialog).toBeVisible();
+});
+
 test('CH02-F006-F012 searchable demographics, consent, insurer holder modal and coverage work', async ({
   page,
 }) => {
@@ -73,7 +103,7 @@ test('CH02-F006-F012 searchable demographics, consent, insurer holder modal and 
   await expect(consent).toBeChecked();
   await consent.uncheck();
   await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await dialog.getByLabel('Aseguradora demo').fill('cobertura');
+  await dialog.getByLabel('Aseguradora').fill('cobertura');
   await dialog.getByRole('option', { name: 'Cobertura sintética QA' }).click();
   const holder = page.getByRole('dialog', { name: '¿El paciente es el titular del seguro?' });
   await expect(holder).toBeVisible();
@@ -220,7 +250,7 @@ test('CH02 mobile form, holder modal and map have no viewport overflow', async (
   await login(page);
   const dialog = await openForm(page);
   await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await dialog.getByLabel('Aseguradora demo').fill('cobertura');
+  await dialog.getByLabel('Aseguradora').fill('cobertura');
   await dialog.getByRole('option', { name: 'Cobertura sintética QA' }).click();
   await expect(
     page.getByRole('dialog', { name: '¿El paciente es el titular del seguro?' }),
