@@ -968,3 +968,29 @@ test('dashboard has no automatically detectable serious accessibility violations
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations).toEqual([]);
 });
+
+test('clinical hospitalizations keeps search, care actions and accessibility intact', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/clinical/hospitalizations');
+  await expect(page.getByRole('heading', { name: 'Hospitalizaciones clínicas' })).toBeVisible();
+  const search = page.getByRole('searchbox', { name: 'Buscar hospitalización o paciente' });
+  await search.fill('Paciente Demo Aurora');
+  await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
+  await search.fill('sin coincidencia clínica');
+  await expect(page.getByText('No encontramos hospitalizaciones')).toBeVisible();
+  await search.fill('');
+  await page.getByText('Filtros avanzados', { exact: true }).click();
+  await expect(page.getByRole('searchbox', { name: 'Filtrar Paciente' })).toBeVisible();
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  expect(results.violations).toEqual([]);
+  await page.getByRole('button', { name: 'Atención' }).click();
+  await expect(page.getByRole('dialog', { name: /Atención clínica/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Guardar atención' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Cancelar' }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1))
+    .toBe(true);
+});

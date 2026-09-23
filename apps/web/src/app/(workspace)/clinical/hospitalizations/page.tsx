@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
 import { searchPatients } from '@analiza/domain';
+import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
+import Link from 'next/link';
+import { useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 
 function durationLabel(startDate: string, endDate?: string) {
@@ -11,7 +11,18 @@ function durationLabel(startDate: string, endDate?: string) {
   const start = Date.parse(`${startDate}T00:00:00Z`);
   const end = Date.parse(`${endDate}T00:00:00Z`);
   if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return 'No documentada';
-  return `${Math.floor((end - start) / 86_400_000) + 1} día(s)`;
+  const days = Math.floor((end - start) / 86_400_000) + 1;
+  return `${days} ${days === 1 ? 'día' : 'días'}`;
+}
+
+function initials(name?: string) {
+  if (!name) return '—';
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 }
 
 type ClinicalColumn =
@@ -34,21 +45,21 @@ const clinicalColumns: Array<{ key: ClinicalColumn; label: string; actionId: str
   },
   {
     key: 'hospitalization',
-    label: 'Hospitalizaci\u00f3n',
+    label: 'Hospitalización',
     actionId: 'CLINICAL-HOSPITALIZATION-CASE-COLUMN-FILTER',
   },
   { key: 'triage', label: 'Triage', actionId: 'CLINICAL-HOSPITALIZATION-TRIAGE-COLUMN-FILTER' },
   { key: 'company', label: 'Empresa', actionId: 'CLINICAL-HOSPITALIZATION-COMPANY-COLUMN-FILTER' },
   {
     key: 'clinician',
-    label: 'Cl\u00ednico',
+    label: 'Clínico',
     actionId: 'CLINICAL-HOSPITALIZATION-CLINICIAN-COLUMN-FILTER',
   },
   { key: 'start', label: 'Inicio', actionId: 'CLINICAL-HOSPITALIZATION-START-COLUMN-FILTER' },
   { key: 'end', label: 'Fin', actionId: 'CLINICAL-HOSPITALIZATION-END-COLUMN-FILTER' },
   {
     key: 'duration',
-    label: 'Duraci\u00f3n',
+    label: 'Duración',
     actionId: 'CLINICAL-HOSPITALIZATION-DURATION-COLUMN-FILTER',
   },
 ];
@@ -76,7 +87,6 @@ export default function ClinicalHospitalizationsPage() {
     useWorkspace();
   const { can } = useAuth();
   const [query, setQuery] = useState('');
-  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] =
     useState<Record<ClinicalColumn, string>>(emptyColumnFilters);
   const [careCaseId, setCareCaseId] = useState<string | null>(null);
@@ -112,6 +122,7 @@ export default function ClinicalHospitalizationsPage() {
       setCareCaseId(null);
     }
   }
+
   const patientIds = new Set(searchPatients(patients, query).map((patient) => patient.id));
   const columnValue = (
     hospitalization: (typeof hospitalizations)[number],
@@ -139,6 +150,7 @@ export default function ClinicalHospitalizationsPage() {
         return durationLabel(hospitalization.startDate, hospitalization.endDate);
     }
   };
+
   const entries = hospitalizations.filter(
     (hospitalization) =>
       (!query.trim() ||
@@ -150,111 +162,149 @@ export default function ClinicalHospitalizationsPage() {
         textMatches(columnValue(hospitalization, key), columnFilters[key]),
       ),
   );
+  const activeCount = hospitalizations.filter((item) => !item.endDate).length;
+  const completedCount = hospitalizations.length - activeCount;
+  const filtersActive =
+    Boolean(query.trim()) || Object.values(columnFilters).some((value) => Boolean(value.trim()));
 
   return (
-    <div className="page-stack">
-      <header className="page-header">
-        <div>
-          <p className="eyebrow">Clínico</p>
-          <h1>Hospitalización Clínica</h1>
-          <p>
-            Consulta de datos sintéticos disponibles. No asigna estado clínico, triage, activación
-            ni transiciones asistenciales.
-          </p>
+    <div className="page-stack clinical-hospitalizations-page">
+      <header className="clinical-page-hero">
+        <div className="clinical-page-title">
+          <div className="clinical-page-icon" aria-hidden="true">
+            ✚
+          </div>
+          <div>
+            <p className="eyebrow">Atención clínica</p>
+            <h1>Hospitalizaciones clínicas</h1>
+            <p>
+              Consulta cada caso, abre el expediente y administra la atención del equipo desde una
+              sola vista.
+            </p>
+          </div>
         </div>
-        <StatusTag>{entries.length} registros</StatusTag>
+        <div className="clinical-page-summary" aria-label="Resumen de hospitalizaciones">
+          <div>
+            <span>Total</span>
+            <strong>{hospitalizations.length}</strong>
+          </div>
+          <div>
+            <span>En curso</span>
+            <strong>{activeCount}</strong>
+          </div>
+          <div>
+            <span>Finalizadas</span>
+            <strong>{completedCount}</strong>
+          </div>
+        </div>
       </header>
-      <Panel>
-        <div className="form-grid form-grid-compact" aria-describedby="clinical-filter-boundary">
-          <label>
-            Estado clínico
-            <select
-              aria-label="Estado clínico"
-              data-action-id="CLINICAL-HOSPITALIZATION-STATUS-FILTER"
-              disabled
-              value=""
-            >
-              <option value="">Sin configuración aprobada</option>
-            </select>
+
+      <Panel className="clinical-search-panel">
+        <div className="clinical-search-row">
+          <label className="clinical-primary-search" htmlFor="clinical-case-search">
+            <span aria-hidden="true">⌕</span>
+            <span className="sr-only">Buscar hospitalización o paciente</span>
+            <input
+              data-action-id="CLINICAL-HOSPITALIZATION-SEARCH"
+              id="clinical-case-search"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Buscar por paciente, DUI, teléfono o número de hospitalización"
+              type="search"
+              value={query}
+            />
           </label>
-          <label>
-            Activado por
-            <select
-              aria-label="Activado por"
-              data-action-id="CLINICAL-HOSPITALIZATION-ACTIVATOR-FILTER"
-              disabled
-              value=""
+          {filtersActive ? (
+            <Button
+              className="button-secondary clinical-clear-filters"
+              onClick={() => {
+                setQuery('');
+                setColumnFilters(emptyColumnFilters);
+              }}
+              type="button"
             >
-              <option value="">Sin configuración aprobada</option>
-            </select>
-          </label>
-          <label>
-            Tipo de servicio
-            <select
-              aria-label="Tipo de servicio"
-              data-action-id="CLINICAL-HOSPITALIZATION-SERVICE-FILTER"
-              disabled
-              value=""
-            >
-              <option value="">Sin catálogo aprobado</option>
-            </select>
-          </label>
-          <label>
-            Tipo de atención
-            <select
-              aria-label="Tipo de atención"
-              data-action-id="CLINICAL-HOSPITALIZATION-CARE-FILTER"
-              disabled
-              value=""
-            >
-              <option value="">Sin catálogo aprobado</option>
-            </select>
-          </label>
+              Limpiar filtros
+            </Button>
+          ) : null}
+          <StatusTag>{entries.length} visibles</StatusTag>
         </div>
-        <div className="form-grid form-grid-compact" aria-describedby="clinical-filter-boundary">
-          <label>
-            Activos
-            <select
-              aria-label="Activos"
-              data-action-id="CLINICAL-HOSPITALIZATION-ACTIVES-FILTER"
-              disabled
-              value=""
-            >
-              <option value="">Sin estado activo aprobado</option>
-            </select>
-          </label>
-          <button
-            aria-describedby="clinical-filter-boundary"
-            data-action-id="CLINICAL-HOSPITALIZATION-FILTER-APPLY"
-            disabled
-            type="button"
-          >
-            Aplicar
-          </button>
-        </div>
-        <p className="notice" id="clinical-filter-boundary" role="status">
-          Los filtros clínicos observados requieren catálogos, roles y máquina de estados aprobados
-          (CH09-Q002/Q004); por eso no se aplican como reglas locales.
-        </p>
-        <label className="search-label" htmlFor="clinical-case-search">
-          Buscar hospitalización o paciente
-        </label>
-        <input
-          data-action-id="CLINICAL-HOSPITALIZATION-SEARCH"
-          id="clinical-case-search"
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Nombre, documento, teléfono u hospitalización"
-          type="search"
-          value={query}
-        />
+
+        <details className="clinical-filter-disclosure">
+          <summary>
+            <span>
+              <strong>Filtros avanzados</strong>
+              <small>Afina la lista por paciente, documento, fechas o estado.</small>
+            </span>
+            <span className="clinical-filter-chevron" aria-hidden="true">
+              ⌄
+            </span>
+          </summary>
+          <div className="clinical-column-filter-grid">
+            {clinicalColumns.map(({ key, label, actionId }) => (
+              <label key={key}>
+                {label}
+                <input
+                  aria-label={`Filtrar ${label}`}
+                  data-action-id={actionId}
+                  onChange={(event) =>
+                    setColumnFilters((current) => ({ ...current, [key]: event.target.value }))
+                  }
+                  placeholder={`Filtrar ${label.toLocaleLowerCase('es')}`}
+                  type="search"
+                  value={columnFilters[key]}
+                />
+              </label>
+            ))}
+          </div>
+          <div className="clinical-upcoming-filters" id="clinical-filter-boundary">
+            <div>
+              <strong>Filtros clínicos en preparación</strong>
+              <span>Se habilitarán cuando existan catálogos y estados clínicos configurados.</span>
+            </div>
+            <div className="clinical-disabled-filter-grid">
+              {[
+                ['Estado clínico', 'CLINICAL-HOSPITALIZATION-STATUS-FILTER'],
+                ['Activado por', 'CLINICAL-HOSPITALIZATION-ACTIVATOR-FILTER'],
+                ['Tipo de servicio', 'CLINICAL-HOSPITALIZATION-SERVICE-FILTER'],
+                ['Tipo de atención', 'CLINICAL-HOSPITALIZATION-CARE-FILTER'],
+                ['Activos', 'CLINICAL-HOSPITALIZATION-ACTIVES-FILTER'],
+              ].map(([label, actionId]) => (
+                <label key={actionId}>
+                  {label}
+                  <select aria-label={label} data-action-id={actionId} disabled value="">
+                    <option value="">Pendiente de configuración</option>
+                  </select>
+                </label>
+              ))}
+              <button
+                aria-describedby="clinical-filter-boundary"
+                data-action-id="CLINICAL-HOSPITALIZATION-FILTER-APPLY"
+                disabled
+                type="button"
+              >
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </details>
       </Panel>
-      <Panel>
-        <>
-          <div className="table-wrap">
-            <table>
+
+      <Panel className="clinical-directory-panel">
+        <div className="clinical-directory-heading">
+          <div>
+            <p className="eyebrow">Directorio clínico</p>
+            <h2>Casos hospitalizados</h2>
+            <p>Selecciona un caso para consultar su expediente o actualizar la atención.</p>
+          </div>
+          <StatusTag tone={activeCount ? 'warning' : 'neutral'}>
+            {activeCount ? `${activeCount} en curso` : 'Sin casos activos'}
+          </StatusTag>
+        </div>
+
+        {entries.length ? (
+          <div className="table-wrap clinical-directory-table-wrap" tabIndex={0}>
+            <table className="clinical-directory-table">
               <thead>
                 <tr>
-                  <th>Acciones</th>
                   <th>Paciente</th>
                   <th>DUI/NIT</th>
                   <th>Hospitalización</th>
@@ -264,23 +314,7 @@ export default function ClinicalHospitalizationsPage() {
                   <th>Inicio</th>
                   <th>Fin</th>
                   <th>Duración</th>
-                </tr>
-                <tr className="table-filter-row">
-                  <th scope="col" />
-                  {clinicalColumns.map(({ key, label, actionId }) => (
-                    <th key={key} scope="col">
-                      <input
-                        aria-label={`Filtrar ${label}`}
-                        data-action-id={actionId}
-                        onChange={(event) =>
-                          setColumnFilters((current) => ({ ...current, [key]: event.target.value }))
-                        }
-                        placeholder={label}
-                        type="search"
-                        value={columnFilters[key]}
-                      />
-                    </th>
-                  ))}
+                  <th className="clinical-actions-heading">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -293,149 +327,94 @@ export default function ClinicalHospitalizationsPage() {
                       candidate.caseId === hospitalization.id &&
                       candidate.patientId === hospitalization.patientId,
                   );
-                  const menuOpen = openActionMenuId === hospitalization.id;
+                  const isActive = !hospitalization.endDate;
                   return (
                     <tr key={hospitalization.id}>
                       <td>
-                        <div className="clinical-row-actions">
-                          <button
-                            aria-controls={`clinical-hospitalization-actions-${hospitalization.id}`}
-                            aria-expanded={menuOpen}
-                            aria-label="Acciones de hospitalización"
-                            className="clinical-row-menu-toggle"
-                            data-action-id="CLINICAL-HOSPITALIZATION-ACTIONS-MENU"
-                            onClick={() =>
-                              setOpenActionMenuId((current) =>
-                                current === hospitalization.id ? null : hospitalization.id,
-                              )
-                            }
-                            type="button"
-                          >
-                            <span aria-hidden="true">⋯</span>
-                          </button>
-                          {menuOpen ? (
-                            <div
-                              aria-describedby={`clinical-hospitalization-boundary-${hospitalization.id}`}
-                              className="clinical-row-menu"
-                              id={`clinical-hospitalization-actions-${hospitalization.id}`}
-                              role="menu"
-                            >
-                              {quote && can('quotes:read') ? (
-                                <Link
-                                  data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"
-                                  href={`/quotes/${quote.id}`}
-                                  role="menuitem"
-                                >
-                                  Ver cotizaciones
-                                </Link>
-                              ) : null}
-                              {can('cases:write') ? (
-                                <button
-                                  data-action-id="CLINICAL-HOSPITALIZATION-CARE-EDIT"
-                                  onClick={() => openCare(hospitalization.id)}
-                                  role="menuitem"
-                                  type="button"
-                                >
-                                  Gestionar atención clínica
-                                </button>
-                              ) : null}
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Perfil clínico
-                              </button>
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-RELIEF-DOCUMENT-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Doc de Relevos
-                              </button>
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-READMISSION-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Reingresos
-                              </button>
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-REINFECTION-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Reinfecciones
-                              </button>
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-ULCERATION-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Ulceraciones
-                              </button>
-                              <button
-                                data-action-id="CLINICAL-HOSPITALIZATION-NEAR-MISS-OPEN"
-                                disabled
-                                role="menuitem"
-                                type="button"
-                              >
-                                Near miss
-                              </button>
-                              <p
-                                className="field-help"
-                                id={`clinical-hospitalization-boundary-${hospitalization.id}`}
-                              >
-                                Perfil, documento y eventos clínicos requieren modelo, autorización,
-                                auditoría y definiciones aprobadas (CH09-Q006); no se inician desde
-                                este listado.
-                              </p>
-                            </div>
-                          ) : null}
+                        <div className="clinical-patient-cell">
+                          <span className="clinical-patient-avatar" aria-hidden="true">
+                            {initials(patient?.fullName)}
+                          </span>
+                          <div>
+                            <strong>{patient?.fullName ?? 'Paciente sin nombre'}</strong>
+                            <small>{patient?.phone ?? 'Sin teléfono documentado'}</small>
+                          </div>
                         </div>
-                        <Link
-                          className="text-link"
-                          data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"
-                          href={`/hospitalizations/${hospitalization.id}`}
-                        >
-                          Ver hospitalización
-                        </Link>
                       </td>
-                      <td>{patient?.fullName ?? 'No disponible'}</td>
                       <td>{patient?.documentId ?? 'No documentado'}</td>
                       <td>
-                        <code>{hospitalization.id}</code>
+                        <code className="clinical-case-code">{hospitalization.id}</code>
                       </td>
-                      <td>{patient?.triageStatus ?? 'No documentado'}</td>
-                      <td>{patient?.company ?? 'No documentada'}</td>
-                      <td>No documentado</td>
+                      <td>
+                        <StatusTag tone={patient?.triageStatus ? 'warning' : 'neutral'}>
+                          {patient?.triageStatus ?? 'Sin triage'}
+                        </StatusTag>
+                      </td>
+                      <td>
+                        {patient?.company ?? <span className="clinical-muted">Sin empresa</span>}
+                      </td>
+                      <td>
+                        <span className="clinical-muted">No asignado</span>
+                      </td>
                       <td>{hospitalization.startDate}</td>
-                      <td>{hospitalization.endDate ?? 'En curso'}</td>
+                      <td>
+                        <span className={`clinical-case-state ${isActive ? 'is-active' : ''}`}>
+                          {hospitalization.endDate ?? 'En curso'}
+                        </span>
+                      </td>
                       <td>{durationLabel(hospitalization.startDate, hospitalization.endDate)}</td>
+                      <td>
+                        <div className="clinical-table-actions">
+                          <Link
+                            className="clinical-table-action clinical-table-action-primary"
+                            data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"
+                            href={`/hospitalizations/${hospitalization.id}`}
+                          >
+                            Abrir
+                          </Link>
+                          {can('cases:write') ? (
+                            <button
+                              className="clinical-table-action"
+                              data-action-id="CLINICAL-HOSPITALIZATION-CARE-EDIT"
+                              onClick={() => openCare(hospitalization.id)}
+                              type="button"
+                            >
+                              Atención
+                            </button>
+                          ) : null}
+                          {quote && can('quotes:read') ? (
+                            <Link
+                              className="clinical-table-action clinical-table-action-icon"
+                              data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"
+                              href={`/quotes/${quote.id}`}
+                              title="Ver cotización"
+                              aria-label="Ver cotización"
+                            >
+                              <span aria-hidden="true">$</span>
+                            </Link>
+                          ) : null}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-        </>
-        {!entries.length && (
+        ) : (
           <EmptyState
-            detail="Ajuste la búsqueda. Los filtros clínicos permanecen bloqueados hasta contar con reglas aprobadas."
-            title="Sin hospitalizaciones coincidentes"
+            detail="Prueba con otro nombre, documento o número de hospitalización."
+            title="No encontramos hospitalizaciones"
           />
         )}
       </Panel>
+
       {careMessage ? (
         <p className="notice success" role="status">
           {careMessage}
         </p>
       ) : null}
+
       <Dialog
         description="Registra los accesos del paciente y asigna las cuentas de enfermería responsables de la atención."
         footer={
