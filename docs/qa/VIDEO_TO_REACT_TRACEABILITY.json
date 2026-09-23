@@ -12,7 +12,7 @@
   "generated_at": "2026-09-03T05:56:26-06:00",
   "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "098621753f2b79e416921d89abfcd83900425056",
+  "implementation_sha": "a483f37b613ef44c208b8f547ebb3cd4767ce8b7",
   "core_release_regression": {
     "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
     "scope": "Full mock edition regression only. Individual historical statuses and source evidence retained. Core visibility exclusions are authorized by the client; not full video parity or cloud certification."
@@ -1270,7 +1270,7 @@
         "CH02-Q008"
       ],
       "blocker_reason": "El video no muestra el resultado posterior de Guardar; React sí tiene una prueba local separada.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
+      "last_verified_sha": "a483f37b613ef44c208b8f547ebb3cd4767ce8b7",
       "notes": "Atrás descarta y Guardar persiste. Si hay campos inválidos, el pie junto a Guardar los enumera y enfoca el primero; el resultado original no observado permanece CH02-Q008. Reauditoría independiente 2026-09-10: El video no muestra el resultado posterior de Guardar; React sí tiene una prueba local separada."
     },
     {
