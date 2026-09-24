@@ -886,6 +886,7 @@ test('purchase drafts persist without changing inventory', async ({ page }) => {
   await page.goto('/purchases');
   await page.getByRole('button', { name: 'Nueva compra' }).click();
   await page.getByLabel('Referencia de compra').fill('PURCHASE-QA-001');
+  await page.getByLabel('Número de serie').fill('SERIE-QA-001');
   await page.getByLabel('Nota (opcional)').fill('Borrador sintético de QA.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByRole('status')).toContainText('guardada como borrador');

@@ -171,7 +171,7 @@ try {
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries,analiza.quotes,analiza.purchases,analiza.clinical_documents TO ${role}`,
     );
     await client.query(
-      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events TO ${role}`,
+      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements TO ${role}`,
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);

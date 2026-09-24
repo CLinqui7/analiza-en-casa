@@ -59,7 +59,13 @@ export default function KardexPage() {
     () => ({
       ...(providerMode === 'mock' ? demoItemCatalog : {}),
       ...Object.fromEntries(
-        catalogItems.map((item) => [item.id, { name: item.name, sku: item.sku }]),
+        catalogItems
+          .filter(
+            (item) =>
+              item.status === 'ACTIVE' &&
+              ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category ?? ''),
+          )
+          .map((item) => [item.id, { name: item.name, sku: item.sku }]),
       ),
     }),
     [catalogItems, providerMode],

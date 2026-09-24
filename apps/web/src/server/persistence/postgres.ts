@@ -11,6 +11,7 @@ import {
   catalogItemSchema,
   purchaseSchema,
   clinicalDocumentSchema,
+  inventoryMovementSchema,
   emptyOperations,
   type Patient,
   type Doctor,
@@ -459,6 +460,96 @@ export function postgresPersistence(): Persistence {
           return purchase;
         });
       }
+      if (command.command === 'inventory.record') {
+        authorize(actor, 'inventory:write');
+        const parsed = z
+          .object({
+            command: z.literal('inventory.record'),
+            movement: inventoryMovementSchema.strict(),
+            idempotencyKey: z.string().trim().min(1).max(120),
+          })
+          .strict()
+          .parse(input);
+        if (parsed.movement.kind === 'TRANSFER')
+          throw new MongoInputError(
+            'Un traslado necesita bodega de origen y destino. Regístrelo cuando estén definidas ambas.',
+          );
+        if (parsed.movement.kind === 'ADJUSTMENT' && !parsed.movement.adjustmentDirection)
+          throw new MongoInputError('Indique la dirección del ajuste.');
+        const warehouseId = parsed.movement.warehouseId ?? 'central';
+        const movement = inventoryMovementSchema.parse({
+          ...parsed.movement,
+          warehouseId,
+          user: actor.userId,
+        });
+        const delta =
+          (movement.kind === 'EXIT' ||
+          (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
+            ? -1
+            : 1) * movement.quantity;
+        return transaction(pool, actor, async (c) => {
+          await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+            `${actor.organizationId}:${movement.itemId}:${warehouseId}`,
+          ]);
+          const previous = (
+            await c.query<{ id: string; same: boolean }>(
+              `SELECT id,body=$3::jsonb AS same
+               FROM analiza.inventory_movements
+               WHERE organization_id=$1 AND idempotency_key=$2`,
+              [actor.organizationId, parsed.idempotencyKey, JSON.stringify(movement)],
+            )
+          ).rows[0];
+          if (previous) {
+            if (!previous.same) throw new MongoConflictError();
+            return { id: previous.id };
+          }
+          const item = await c.query(
+            `SELECT id FROM analiza.catalog_items
+             WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'
+               AND body->>'category'=ANY($3::text[])`,
+            [actor.organizationId, movement.itemId, ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT']],
+          );
+          if (!item.rowCount)
+            throw new MongoInputError('Seleccione un artículo activo del inventario.');
+          const balance = Number(
+            (
+              await c.query<{ balance: number }>(
+                `SELECT coalesce(sum(delta),0) AS balance
+                 FROM analiza.inventory_movements
+                 WHERE organization_id=$1 AND item_id=$2 AND warehouse_id=$3`,
+                [actor.organizationId, movement.itemId, warehouseId],
+              )
+            ).rows[0]?.balance ?? 0,
+          );
+          if (balance + delta < 0)
+            throw new MongoInputError(
+              'El movimiento dejaría un saldo negativo. Registre primero una entrada auditada.',
+            );
+          try {
+            await c.query(
+              `INSERT INTO analiza.inventory_movements(
+                 organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,created_at
+               ) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
+              [
+                actor.organizationId,
+                movement.id,
+                movement.itemId,
+                warehouseId,
+                parsed.idempotencyKey,
+                delta,
+                JSON.stringify(movement),
+                movement.createdAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          await audit(c, actor, 'INVENTORY_MOVEMENT_RECORDED', 'inventory_movements', movement.id);
+          return { id: movement.id };
+        });
+      }
       if (command.command === 'clinical.create') {
         authorize(actor, 'clinical:write');
         const { document } = z
@@ -864,84 +955,96 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 14 ||
+        row.migrations !== 15 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
     },
     async workspace(actor) {
-      const [p, d, h, s, r, q, clinicalDocuments, catalogs, purchases, audits] = await Promise.all([
-        can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
-        can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
-        can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
-        can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
-        can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
-        can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
-        can(actor.role, 'clinical:read')
-          ? transaction(pool, actor, async (c) =>
-              (
-                await c.query<{
-                  body: Record<string, unknown>;
-                  status: ClinicalDocument['status'];
-                  signed_at: Date | null;
-                }>(
-                  `SELECT body,status,signed_at
+      const [p, d, h, s, r, q, clinicalDocuments, inventoryMovements, catalogs, purchases, audits] =
+        await Promise.all([
+          can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
+          can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
+          can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
+          can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
+          can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
+          can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
+          can(actor.role, 'clinical:read')
+            ? transaction(pool, actor, async (c) =>
+                (
+                  await c.query<{
+                    body: Record<string, unknown>;
+                    status: ClinicalDocument['status'];
+                    signed_at: Date | null;
+                  }>(
+                    `SELECT body,status,signed_at
                    FROM analiza.clinical_documents
                    WHERE organization_id=$1
                    ORDER BY created_at DESC,id`,
-                  [actor.organizationId],
-                )
-              ).rows.map((row) => {
-                const body: Record<string, unknown> = { ...row.body, status: row.status };
-                if (row.signed_at) body.signedAt = row.signed_at.toISOString();
-                else delete body.signedAt;
-                return clinicalDocumentSchema.parse(body);
-              }),
-            )
-          : [],
-        can(actor.role, 'catalogs:read')
-          ? transaction(pool, actor, async (c) =>
-              (
-                await c.query(
-                  'SELECT body FROM analiza.catalog_items WHERE organization_id=$1 ORDER BY id',
-                  [actor.organizationId],
-                )
-              ).rows.map((r) => catalogItemSchema.parse(r.body)),
-            )
-          : [],
-        can(actor.role, 'purchases:read')
-          ? transaction(pool, actor, async (c) =>
-              (
-                await c.query(
-                  'SELECT body FROM analiza.purchases WHERE organization_id=$1 ORDER BY created_at DESC,id',
-                  [actor.organizationId],
-                )
-              ).rows.map((row) => purchaseSchema.parse(row.body)),
-            )
-          : [],
-        can(actor.role, 'audit:read')
-          ? transaction(pool, actor, async (c) =>
-              (
-                await c.query(
-                  'SELECT id,action,resource_id AS subject,occurred_at FROM analiza.audit_events WHERE organization_id=$1 ORDER BY occurred_at DESC LIMIT 100',
-                  [actor.organizationId],
-                )
-              ).rows.map((r) => ({
-                id: r.id,
-                action: r.action,
-                subject: r.subject,
-                at: r.occurred_at.toISOString(),
-              })),
-            )
-          : [],
-      ]);
+                    [actor.organizationId],
+                  )
+                ).rows.map((row) => {
+                  const body: Record<string, unknown> = { ...row.body, status: row.status };
+                  if (row.signed_at) body.signedAt = row.signed_at.toISOString();
+                  else delete body.signedAt;
+                  return clinicalDocumentSchema.parse(body);
+                }),
+              )
+            : [],
+          can(actor.role, 'inventory:read')
+            ? transaction(pool, actor, async (c) =>
+                (
+                  await c.query(
+                    `SELECT body FROM analiza.inventory_movements
+                   WHERE organization_id=$1 ORDER BY created_at,id`,
+                    [actor.organizationId],
+                  )
+                ).rows.map((row) => inventoryMovementSchema.parse(row.body)),
+              )
+            : [],
+          can(actor.role, 'catalogs:read')
+            ? transaction(pool, actor, async (c) =>
+                (
+                  await c.query(
+                    'SELECT body FROM analiza.catalog_items WHERE organization_id=$1 ORDER BY id',
+                    [actor.organizationId],
+                  )
+                ).rows.map((r) => catalogItemSchema.parse(r.body)),
+              )
+            : [],
+          can(actor.role, 'purchases:read')
+            ? transaction(pool, actor, async (c) =>
+                (
+                  await c.query(
+                    'SELECT body FROM analiza.purchases WHERE organization_id=$1 ORDER BY created_at DESC,id',
+                    [actor.organizationId],
+                  )
+                ).rows.map((row) => purchaseSchema.parse(row.body)),
+              )
+            : [],
+          can(actor.role, 'audit:read')
+            ? transaction(pool, actor, async (c) =>
+                (
+                  await c.query(
+                    'SELECT id,action,resource_id AS subject,occurred_at FROM analiza.audit_events WHERE organization_id=$1 ORDER BY occurred_at DESC LIMIT 100',
+                    [actor.organizationId],
+                  )
+                ).rows.map((r) => ({
+                  id: r.id,
+                  action: r.action,
+                  subject: r.subject,
+                  at: r.occurred_at.toISOString(),
+                })),
+              )
+            : [],
+        ]);
       return {
         ...emptyServerWorkspace(),
         patients: p.map((r) => r.patient),
@@ -951,6 +1054,7 @@ export function postgresPersistence(): Persistence {
         nursingResources: r,
         quotes: q.map((row) => row.quote),
         clinicalDocuments,
+        inventoryMovements,
         catalogItems: catalogs,
         purchases,
         auditEntries: audits,

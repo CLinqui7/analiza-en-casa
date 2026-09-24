@@ -63,3 +63,4 @@ $$;
 CREATE TRIGGER clinical_documents_immutable
 BEFORE UPDATE ON analiza.clinical_documents
 FOR EACH ROW EXECUTE FUNCTION analiza.enforce_clinical_document_immutability();
+
