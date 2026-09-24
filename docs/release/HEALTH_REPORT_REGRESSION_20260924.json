@@ -24,6 +24,7 @@
     "production_build": "PASS",
     "repository_preflight": "PASS",
     "authenticated_production": "PASS: real hospitalization route, vital-sign empty state, nursing-note section, preselected evolution case, clean console",
+    "production_patient_search": "PASS: 0 active and 0 inactive patient results for linqui",
     "feedback_status": "RESOLVED and persisted; totals 0 new, 3 reviewing, 35 resolved"
   },
   "deployment": {
