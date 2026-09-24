@@ -21,8 +21,8 @@
     "video_audit": "17/17 PASS",
     "focused_browser": "2/2 PASS",
     "production_build": "PASS",
-    "implementation_sha": "PENDING_COMMIT",
-    "production_promotion": "PENDING"
+    "implementation_sha": "992a50e",
+    "production_promotion": "PASS"
   },
   "limitations": [
     "The patient source workbook has not yet been supplied, so complete-field mapping remains open under CR-032.",
