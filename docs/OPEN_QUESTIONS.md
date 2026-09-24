@@ -332,6 +332,11 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - Navegadores y dispositivos utilizados.
 - Definición de respaldo y recuperación requerida.
 
+## Feedback en revisión · 2026-09-24
+
+- Definir en qué formularios debe operar el autoguardado, por cuánto tiempo se conserva cada borrador, cómo se recupera o descarta y qué controles adicionales protegen información clínica y evitan cruces entre organizaciones.
+- Definir estados, prioridades, permisos, responsables, reglas de entrega e idempotencia para solicitudes internas de medicamentos, insumos y equipos realizadas por enfermería. Cualquier aviso externo requiere proveedor y consentimiento aprobados, y no puede incluir información clínica sensible.
+
 ## Deployment
 
 - Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.

@@ -6,11 +6,14 @@
     "PostgreSQL persistence for clinical care-plan drafts, signatures and corrections",
     "PostgreSQL persistence for idempotent append-only inventory movements",
     "usable synthetic purchase prerequisites without inferred prices",
+    "exact patient search now selects the patient and first compatible hospitalization in quote creation",
+    "authenticated production verification of care plans, quotes, inventory, Kardex, purchases and feedback management",
     "client response for patient Excel or CSV intake"
   ],
   "candidate": {
-    "deployment_id": "dpl_9SX1s8kgUPftgyYufp2yRBArUJ4j",
-    "url": "https://analiza-en-casa-demo-63iwq1626-clinqui7s-projects.vercel.app",
+    "deployment_id": "dpl_BbZjqwcrYGejsGsMPVJYYs7QUE8P",
+    "url": "https://analiza-en-casa-demo-qyps48xpg-clinqui7s-projects.vercel.app",
+    "public_url": "https://analiza-en-casa-demo.vercel.app",
     "health": "ready",
     "database_migrations": ["014_clinical_documents.sql", "015_inventory_movements.sql"]
   },
@@ -21,13 +24,18 @@
     "baseline_tests": "111/111 PASS",
     "qa_checks": "76/76 PASS",
     "video_audit": "17/17 PASS",
-    "focused_browser": "4/4 PASS",
+    "focused_browser": "5/5 PASS",
+    "authenticated_production_flows": "care plan, quote, inventory movement, Kardex balance, purchase draft and feedback responses PASS",
+    "feedback_status_after_review": "0 new, 3 reviewing, 34 resolved",
+    "browser_console": "PASS: no errors after final feedback review",
     "production_build": "PASS",
-    "implementation_sha": "778a8f3",
+    "implementation_sha": "f86bf48",
     "production_promotion": "PASS"
   },
   "limitations": [
     "The patient source workbook has not yet been supplied, so complete-field mapping remains open under CR-032.",
+    "Cross-screen autosave remains under review until form scope, retention and clinical-data safeguards are approved.",
+    "The nurse supply-request workflow remains under review until roles, states, authorization and safe external-notification rules are approved.",
     "No clinical rule, treatment, dosage or frequency was inferred."
   ]
 }
