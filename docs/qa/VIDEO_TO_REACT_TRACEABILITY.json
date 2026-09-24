@@ -8644,14 +8644,19 @@
         "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
+      "action_ids": [
+        "HEALTH-REPORT-SECTION-CLINICAL",
+        "HOSPITALIZATION-VITALS-OPEN"
+      ],
+      "parity_status": "PARTIAL",
+      "functional_status": "DEMO_LOCAL_VERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:health-report-regression"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -8660,8 +8665,8 @@
         "CH17-Q009"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
-      "last_verified_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
-      "notes": "Precheck factual verified at dae09855e9f10dbebf231a98e449d1dc62970839: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "9f76fdef03e4821abdab4b5d5865b25174f92cff",
+      "notes": "La regresión 2026-09-24 corrigió el enlace 404 hacia /hospitalizations/:id, añadió acceso directo desde el caso y muestra métricas e historial de lecturas ya disponibles, con fecha, origen, profesional, presión, saturación, temperatura y nota. La prueba enfocada pasó 12/12 sobre compilación de producción en modo QA sintético. Permanece PARTIAL: no se habilita captura ni se declaran rangos, interpretación, corrección o persistencia hasta resolver CH16-Q008 y CH17-Q009; tampoco replica aún gráficas ni agrupación completa del video."
     },
     {
       "requirement_id": "CH17-F12",
@@ -8685,14 +8690,20 @@
         "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
+      "action_ids": [
+        "HEALTH-REPORT-SECTION-NURSING",
+        "HEALTH-REPORT-NURSING-NOTE-OPEN-EVOLUTIONS",
+        "HOSPITALIZATION-NURSING-NOTES-OPEN"
+      ],
+      "parity_status": "PARTIAL",
+      "functional_status": "DEMO_LOCAL_VERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:health-report-regression"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -8702,8 +8713,8 @@
         "CH17-Q010"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
-      "last_verified_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
-      "notes": "Precheck factual verified at 740b6bde8177d078fda24602a7c1e9e2d980b638: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
+      "last_verified_sha": "9f76fdef03e4821abdab4b5d5865b25174f92cff",
+      "notes": "La regresión 2026-09-24 añadió una sección visible de Notas de enfermería, acceso directo desde la hospitalización y lectura de documentos de evolución identificados como nota, mostrando fecha, autor, estado, resumen y versión. El alta remite al flujo existente de Evoluciones, que conserva borrador, firma inmutable, corrección versionada y auditoría. La prueba enfocada pasó 12/12 sobre compilación de producción en modo QA sintético. Permanece PARTIAL y sin captura específica, turno, recurso, búsqueda, paginación, impresión o acciones por fila hasta resolver CH16-Q008, CH17-Q001 y CH17-Q010."
     },
     {
       "requirement_id": "CH17-F13",
