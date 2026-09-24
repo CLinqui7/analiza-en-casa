@@ -690,13 +690,13 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await page.goto('/quotes');
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await page.getByLabel('Referido por').fill('Amigos');
+  await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
   await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page
     .getByLabel('Resumen operativo')
     .fill('Coordinación sintética para prueba de inmutabilidad.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
+  await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
   await expect(page.getByRole('status')).toContainText('enviada e inmutable');
@@ -710,7 +710,7 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.goto('/quotes');
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await page.getByLabel('Referido por').fill('Amigos');
+  await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
   await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
