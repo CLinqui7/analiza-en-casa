@@ -55,7 +55,7 @@ for (const file of files) {
       `File over 95 MiB: ${path.relative(root, file)} (${(st.size / 1024 / 1024).toFixed(1)} MiB)`,
     );
   const rel = path.relative(root, file);
-  if (/\.env($|\.)/.test(rel) && rel !== '.env.example')
+  if (/\.env($|\.)/.test(rel) && path.basename(rel) !== '.env.example')
     errors.push(`Environment file must not be committed: ${rel}`);
   if (
     st.size < 2 * 1024 * 1024 &&

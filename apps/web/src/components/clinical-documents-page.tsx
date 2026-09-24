@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ClinicalDocument } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -76,6 +76,11 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
     resolver: zodResolver(correctionSchema),
     defaultValues: { reason: '', summary: '', author: '' },
   });
+  useEffect(() => {
+    const requestedCase = new URLSearchParams(window.location.search).get('case');
+    if (requestedCase && hospitalizations.some((item) => item.id === requestedCase))
+      form.setValue('caseId', requestedCase);
+  }, [form, hospitalizations]);
   const closeCreate = () => {
     setCreateOpen(false);
     setCreateSaveFailed(false);

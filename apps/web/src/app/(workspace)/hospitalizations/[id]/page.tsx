@@ -266,11 +266,31 @@ export default function HospitalizationDetailPage() {
             )}
           </Panel>
           <Panel>
-            <h2>Resumen clínico</h2>
-            <p>
-              {linkedDocuments.length} documentos clínicos · {linkedVitals.length} registros de
-              signos vitales
-            </p>
+            <div className="table-heading">
+              <div>
+                <h2>Resumen clínico</h2>
+                <p>
+                  {linkedDocuments.length} documentos clínicos · {linkedVitals.length} registros de
+                  signos vitales
+                </p>
+              </div>
+              <div className="action-row">
+                <Link
+                  className="button button-secondary"
+                  data-action-id="HOSPITALIZATION-VITALS-OPEN"
+                  href={`/clinical/reports?case=${encodeURIComponent(hospitalization.id)}&section=clinical`}
+                >
+                  Ver signos vitales
+                </Link>
+                <Link
+                  className="button button-secondary"
+                  data-action-id="HOSPITALIZATION-NURSING-NOTES-OPEN"
+                  href={`/clinical/reports?case=${encodeURIComponent(hospitalization.id)}&section=nursing`}
+                >
+                  Ver notas de enfermería
+                </Link>
+              </div>
+            </div>
           </Panel>
         </div>
       )}

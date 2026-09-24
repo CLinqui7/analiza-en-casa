@@ -111,7 +111,7 @@ test('dashboard presents unclassified measurements and opens authorized operatio
   await expect(page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]')).toBeVisible();
 });
 
-test('patient duplicate validation and health-report data boundary are enforced', async ({
+test('patient duplicate validation and read-only health-report data are enforced', async ({
   page,
 }) => {
   await login(page);
@@ -127,7 +127,8 @@ test('patient duplicate validation and health-report data boundary are enforced'
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
   await page.goto('/clinical/reports');
-  await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /Signos vitales/ })).toBeVisible();
   await expect(page.locator('[data-action-id^="CLINICAL-VITAL"]')).toHaveCount(0);
 });
 
@@ -952,14 +953,15 @@ test('insurance search is normalized and unavailable to nurse role', async ({ pa
   );
 });
 
-test('health report does not expose vital records without the approved report-data contract', async ({
+test('health report exposes stored vital records read-only without inventing capture rules', async ({
   page,
 }) => {
   await login(page);
   await page.goto('/clinical/reports');
-  await expect(page.getByText('Sin registros autorizados para mostrar')).toBeVisible();
-  await expect(page.locator('[data-action-id="HEALTH-REPORT-SEARCH"]')).toBeDisabled();
-  await expect(page.locator('#health-report-data-boundary')).toContainText('CH16-Q008');
+  await page.getByRole('tab', { name: /Signos vitales/ }).click();
+  await expect(page.getByRole('tabpanel')).toContainText('Evaluación clínica');
+  await expect(page.getByRole('cell', { name: '118/76' })).toBeVisible();
+  await expect(page.locator('[data-action-id^="CLINICAL-VITAL"]')).toHaveCount(0);
 });
 
 test('dashboard has no automatically detectable serious accessibility violations', async ({

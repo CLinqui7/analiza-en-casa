@@ -681,6 +681,7 @@ export default function HospitalizationsPage() {
           <label>
             Buscar paciente por nombre o DUI
             <input
+              aria-label="Buscar por nombre o DUI"
               onChange={(event) => setPatientQuery(event.target.value)}
               type="search"
               value={patientQuery}

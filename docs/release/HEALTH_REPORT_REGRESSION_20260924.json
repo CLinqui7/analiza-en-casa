@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-24",
+  "source_feedback": "No puedo visualizar la parte de nota de enfermería y de signos vitales; esa parte ya nos la habían mostrado pero en este último enlace no he podido visualizarla para hacer la prueba.",
+  "root_cause": "El enlace Abrir caso del Reporte de salud dirigía a /clinical/hospitalizations/:id, una ruta que no existe. La ruta válida es /hospitalizations/:id. El reporte mostraba sólo la lectura más reciente de signos vitales y no tenía una sección explícita para notas de enfermería.",
+  "resolution": [
+    "Se corrigieron los enlaces del reporte para abrir la ruta real de la hospitalización.",
+    "Se añadió historial de signos vitales ya almacenados con fecha, origen, profesional y valores disponibles.",
+    "Se añadió la sección Notas de enfermería, alimentada por evoluciones clínicas identificadas como nota, conservando estado, autor y versión.",
+    "El detalle de hospitalización ofrece accesos directos a signos vitales y notas de enfermería.",
+    "El flujo de Evoluciones preselecciona la hospitalización recibida por enlace.",
+    "Se corrigió el nombre accesible ambiguo del selector de paciente y contrastes WCAG detectados durante la regresión."
+  ],
+  "safety_boundary": "No se inventaron reglas clínicas, rangos, interpretación ni un nuevo esquema de captura. Las notas usan el flujo clínico versionado existente y la consulta del reporte no genera mutaciones ni auditoría falsa.",
+  "verification": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "react_tests": "166/166 PASS",
+    "baseline_tests": "111/111 PASS",
+    "qa_checks": "76/76 PASS",
+    "video_audit": "17/17 PASS",
+    "ch17_traceability_gate": "17/17 PASS",
+    "focused_browser_production_build": "12/12 PASS",
+    "production_build": "PASS",
+    "repository_preflight": "PASS"
+  },
+  "feedback_response": "Corregimos el enlace que abría una ruta inexistente. Ahora el Reporte de salud permite abrir la hospitalización real y el detalle incluye accesos directos a Signos vitales y Notas de enfermería. Signos vitales muestra el historial disponible; cuando el caso no tiene registros se indica claramente. Notas de enfermería consulta el flujo versionado de Evoluciones. La captura clínica nueva permanece protegida hasta definir permisos y reglas aprobadas."
+}
