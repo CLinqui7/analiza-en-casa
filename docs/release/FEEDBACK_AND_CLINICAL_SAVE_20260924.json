@@ -4,13 +4,15 @@
     "feedback admin response persistence and local status feedback",
     "feedback page vertical overflow and responsive redesign",
     "PostgreSQL persistence for clinical care-plan drafts, signatures and corrections",
+    "PostgreSQL persistence for idempotent append-only inventory movements",
+    "usable synthetic purchase prerequisites without inferred prices",
     "client response for patient Excel or CSV intake"
   ],
   "candidate": {
-    "deployment_id": "dpl_FxeuGjirZS8icf6igM2Rma2BPXN6",
-    "url": "https://analiza-en-casa-demo-pntygccrk-clinqui7s-projects.vercel.app",
+    "deployment_id": "dpl_9SX1s8kgUPftgyYufp2yRBArUJ4j",
+    "url": "https://analiza-en-casa-demo-63iwq1626-clinqui7s-projects.vercel.app",
     "health": "ready",
-    "database_migration": "014_clinical_documents.sql"
+    "database_migrations": ["014_clinical_documents.sql", "015_inventory_movements.sql"]
   },
   "verification": {
     "typecheck": "PASS",
@@ -19,9 +21,9 @@
     "baseline_tests": "111/111 PASS",
     "qa_checks": "76/76 PASS",
     "video_audit": "17/17 PASS",
-    "focused_browser": "2/2 PASS",
+    "focused_browser": "4/4 PASS",
     "production_build": "PASS",
-    "implementation_sha": "992a50e",
+    "implementation_sha": "778a8f3",
     "production_promotion": "PASS"
   },
   "limitations": [
