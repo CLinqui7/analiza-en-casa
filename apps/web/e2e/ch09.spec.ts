@@ -20,6 +20,7 @@ async function loginToClinicalHospitalizations(
 test('CH09 presents factual clinical-hospitalization columns while blocking undefined clinical filters', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
   await loginToClinicalHospitalizations(page);
 
   await expect(page.getByRole('columnheader', { name: 'Paciente', exact: true })).toBeVisible();
@@ -35,19 +36,21 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await expect(page.getByRole('columnheader', { name: 'Fin', exact: true })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Duración', exact: true })).toBeVisible();
 
+  await page.getByText('Filtros avanzados', { exact: true }).click();
   await expect(page.getByLabel('Estado clínico')).toBeDisabled();
   await expect(page.getByLabel('Activado por')).toBeDisabled();
   await expect(page.getByLabel('Tipo de servicio')).toBeDisabled();
   await expect(page.getByLabel('Activos')).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Aplicar' })).toBeDisabled();
-  await expect(page.locator('thead tr')).toHaveCount(2);
-  await expect(page.locator('thead tr').nth(1).locator('th').first()).toBeEmpty();
+  await expect(page.locator('thead tr')).toHaveCount(1);
   await expect(page.getByLabel('Tipo de atención')).toBeDisabled();
-  await expect(page.getByRole('status')).toContainText('no se aplican como reglas locales');
+  await expect(
+    page.getByText('Se habilitarán cuando existan catálogos y estados clínicos configurados.'),
+  ).toBeVisible();
 
   const search = page.getByLabel('Buscar hospitalización o paciente');
   await search.fill('sin-coincidencia-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await search.fill('');
   const patientColumnFilter = page.locator(
     '[data-action-id="CLINICAL-HOSPITALIZATION-PATIENT-COLUMN-FILTER"]',
@@ -58,7 +61,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
     '/hospitalizations/case-demo-001',
   );
   await patientColumnFilter.fill('sin-coincidencia-columna-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await patientColumnFilter.fill('');
 
   const documentColumnFilter = page.locator(
@@ -67,7 +70,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await documentColumnFilter.fill('12345678-9');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await documentColumnFilter.fill('sin-documento-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await documentColumnFilter.fill('');
 
   const caseColumnFilter = page.locator(
@@ -76,7 +79,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await caseColumnFilter.fill('CASE-DEMO-001');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await caseColumnFilter.fill('sin-caso-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await caseColumnFilter.fill('');
 
   const triageColumnFilter = page.locator(
@@ -85,7 +88,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await triageColumnFilter.fill('No documentado');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await triageColumnFilter.fill('sin-triage-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await triageColumnFilter.fill('');
 
   const companyColumnFilter = page.locator(
@@ -94,7 +97,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await companyColumnFilter.fill('No documentada');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await companyColumnFilter.fill('sin-empresa-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await companyColumnFilter.fill('');
 
   const clinicianColumnFilter = page.locator(
@@ -103,7 +106,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await clinicianColumnFilter.fill('No documentado');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await clinicianColumnFilter.fill('sin-clinico-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await clinicianColumnFilter.fill('');
 
   const startColumnFilter = page.locator(
@@ -112,7 +115,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await startColumnFilter.fill('2026-08-28');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await startColumnFilter.fill('sin-inicio-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await startColumnFilter.fill('');
 
   const endColumnFilter = page.locator(
@@ -121,7 +124,7 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await endColumnFilter.fill('En curso');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await endColumnFilter.fill('sin-fin-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await endColumnFilter.fill('');
 
   const durationColumnFilter = page.locator(
@@ -130,12 +133,13 @@ test('CH09 presents factual clinical-hospitalization columns while blocking unde
   await durationColumnFilter.fill('En curso');
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveCount(1);
   await durationColumnFilter.fill('sin-duracion-ch09');
-  await expect(page.getByText('Sin hospitalizaciones coincidentes', { exact: true })).toBeVisible();
+  await expect(page.getByText('No encontramos hospitalizaciones', { exact: true })).toBeVisible();
   await durationColumnFilter.fill('');
   await search.fill('case-demo-001');
-  await expect(
-    page.getByRole('link', { name: 'Ver hospitalización', exact: true }),
-  ).toHaveAttribute('href', '/hospitalizations/case-demo-001');
+  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toHaveAttribute(
+    'href',
+    '/hospitalizations/case-demo-001',
+  );
 });
 
 test('CH09 DOCTOR can open the factual clinical list and its authorized hospitalization detail', async ({
@@ -149,35 +153,32 @@ test('CH09 DOCTOR can open the factual clinical list and its authorized hospital
   await expect(page.getByRole('heading', { name: 'case-demo-001' })).toBeVisible();
 });
 
-test('CH09 row menu opens the scoped quote and blocks undefined clinical workflows', async ({
+test('CH09 row actions open the scoped quote and omit undefined clinical workflows', async ({
   page,
 }) => {
   await loginToClinicalHospitalizations(page);
 
-  const menuToggle = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-ACTIONS-MENU"]');
-  await menuToggle.click();
-  await expect(menuToggle).toHaveAttribute('aria-expanded', 'true');
   const quoteLink = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]');
   await expect(quoteLink).toHaveAttribute('href', '/quotes/quote-demo-001');
+  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-CARE-EDIT"]')).toBeVisible();
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-RELIEF-DOCUMENT-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-READMISSION-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-REINFECTION-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-ULCERATION-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-NEAR-MISS-OPEN"]'),
-  ).toBeDisabled();
-  await expect(page.getByText(/CH09-Q006/)).toBeVisible();
+  ).toHaveCount(0);
 
   await quoteLink.click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
@@ -189,15 +190,13 @@ test('CH09 NURSE can read the factual list but cannot expose a quote navigation'
 }) => {
   await loginToClinicalHospitalizations(page, 'nurse@demo.local', 'demo-nurse');
 
-  const menuToggle = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-ACTIONS-MENU"]');
-  await menuToggle.click();
-  await expect(menuToggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]')).toBeVisible();
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]')).toHaveCount(
     0,
   );
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"]'),
-  ).toBeDisabled();
+  ).toHaveCount(0);
 });
 
 test('CH09 INVENTORY is denied the clinical hospitalizations direct route', async ({ page }) => {

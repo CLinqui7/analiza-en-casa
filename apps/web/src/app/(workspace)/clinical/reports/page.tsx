@@ -9,20 +9,28 @@ import type {
 } from '@analiza/contracts';
 import { EmptyState, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useMemo, useState } from 'react';
 import { useWorkspace } from '@/components/providers';
 import './health-report.css';
 
 const reportSections = [
   ['information', 'Resumen', '01'],
-  ['clinical', 'Evaluación clínica', '02'],
+  ['clinical', 'Signos vitales', '02'],
   ['medical', 'Equipo médico', '03'],
   ['treatments', 'Planes y evoluciones', '04'],
-  ['events', 'Línea de tiempo', '05'],
-  ['evidence', 'Documentos', '06'],
+  ['nursing', 'Notas de enfermería', '05'],
+  ['events', 'Línea de tiempo', '06'],
+  ['evidence', 'Documentos', '07'],
 ] as const;
 
 type ReportSectionId = (typeof reportSections)[number][0];
+
+function requestedReportSection(value: string | null): ReportSectionId {
+  return reportSections.some(([section]) => section === value)
+    ? (value as ReportSectionId)
+    : 'information';
+}
 
 function shortId(value: string) {
   return value.length > 14 ? `${value.slice(0, 8)}…${value.slice(-4)}` : value;
@@ -66,10 +74,21 @@ function ReportEmpty({ title, detail }: { title: string; detail: string }) {
 }
 
 export default function HealthReportPage() {
+  return (
+    <Suspense fallback={<p role="status">Cargando reporte de salud…</p>}>
+      <HealthReportContent />
+    </Suspense>
+  );
+}
+
+function HealthReportContent() {
+  const searchParameters = useSearchParams();
   const { clinicalDocuments, doctors, hospitalizations, patients, vitalReadings } = useWorkspace();
   const [query, setQuery] = useState('');
-  const [selectedCaseId, setSelectedCaseId] = useState('');
-  const [selectedSection, setSelectedSection] = useState<ReportSectionId>('information');
+  const [selectedCaseId, setSelectedCaseId] = useState(() => searchParameters.get('case') ?? '');
+  const [selectedSection, setSelectedSection] = useState<ReportSectionId>(() =>
+    requestedReportSection(searchParameters.get('section')),
+  );
 
   const reports = useMemo(
     () =>
@@ -121,6 +140,15 @@ export default function HealthReportPage() {
             .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         : [],
     [clinicalDocuments, selectedHospitalization],
+  );
+  const nursingNotes = useMemo(
+    () =>
+      caseDocuments.filter(
+        (document) =>
+          document.type === 'CLINICAL_EVOLUTION' &&
+          /(?:nota|enfermer)/iu.test(`${document.title} ${document.summary}`),
+      ),
+    [caseDocuments],
   );
   const latestReading = caseReadings[0];
   const primaryDoctor = doctors.find(
@@ -298,13 +326,11 @@ export default function HealthReportPage() {
                   </div>
                 </div>
                 <div className="health-case-actions no-print">
-                  <Link href={`/clinical/hospitalizations/${selectedHospitalization.id}`}>
-                    Abrir caso
-                  </Link>
+                  <Link href={`/hospitalizations/${selectedHospitalization.id}`}>Abrir caso</Link>
                   <details>
                     <summary aria-label="Más acciones">•••</summary>
                     <div>
-                      <Link href={`/clinical/hospitalizations/${selectedHospitalization.id}`}>
+                      <Link href={`/hospitalizations/${selectedHospitalization.id}`}>
                         Historia clínica
                       </Link>
                       <Link href="/clinical/visits">Visitas</Link>
@@ -321,8 +347,11 @@ export default function HealthReportPage() {
               >
                 {reportSections.map(([id, label, number]) => (
                   <button
+                    aria-controls="health-report-active-section"
                     aria-selected={selectedSection === id}
+                    data-action-id={`HEALTH-REPORT-SECTION-${id.toLocaleUpperCase('en')}`}
                     className={selectedSection === id ? 'active' : undefined}
+                    id={`health-report-tab-${id}`}
                     key={id}
                     onClick={() => setSelectedSection(id)}
                     role="tab"
@@ -334,7 +363,12 @@ export default function HealthReportPage() {
                 ))}
               </nav>
 
-              <div className="health-report-section" role="tabpanel">
+              <div
+                aria-labelledby={`health-report-tab-${selectedSection}`}
+                className="health-report-section"
+                id="health-report-active-section"
+                role="tabpanel"
+              >
                 {selectedSection === 'information' ? (
                   <OverviewSection
                     hospitalization={selectedHospitalization}
@@ -351,6 +385,12 @@ export default function HealthReportPage() {
                 ) : null}
                 {selectedSection === 'treatments' ? (
                   <DocumentSection documents={caseDocuments} />
+                ) : null}
+                {selectedSection === 'nursing' ? (
+                  <NursingNotesSection
+                    caseId={selectedHospitalization.id}
+                    documents={nursingNotes}
+                  />
                 ) : null}
                 {selectedSection === 'events' ? (
                   <TimelineSection
@@ -533,6 +573,106 @@ function ClinicalSection({
           <p>{latest.note}</p>
         </div>
       ) : null}
+      {readings.length ? (
+        <div className="table-wrap health-reading-history">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Origen</th>
+                <th>Profesional</th>
+                <th>FC / Pulso</th>
+                <th>Presión</th>
+                <th>Sat. O₂</th>
+                <th>Temperatura</th>
+                <th>Nota</th>
+              </tr>
+            </thead>
+            <tbody>
+              {readings.map((reading) => (
+                <tr key={reading.id}>
+                  <td>{formatDate(reading.measuredAt)}</td>
+                  <td>{reading.source === 'clinical' ? 'Registro clínico' : 'Paciente'}</td>
+                  <td>{reading.professional || 'Sin profesional indicado'}</td>
+                  <td>{reading.heartRate ?? reading.pulse ?? '—'}</td>
+                  <td>
+                    {reading.systolic !== undefined && reading.diastolic !== undefined
+                      ? `${reading.systolic}/${reading.diastolic}`
+                      : '—'}
+                  </td>
+                  <td>{reading.oxygenSaturation ?? '—'}</td>
+                  <td>{reading.temperature ?? '—'}</td>
+                  <td>{reading.note || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <ReportEmpty
+          title="Sin signos vitales registrados"
+          detail="La sección está disponible, pero esta hospitalización todavía no tiene lecturas guardadas."
+        />
+      )}
+    </div>
+  );
+}
+
+function NursingNotesSection({
+  caseId,
+  documents,
+}: {
+  caseId: string;
+  documents: ClinicalDocument[];
+}) {
+  return (
+    <div className="health-section-stack">
+      <div className="health-section-heading">
+        <div>
+          <h3>Notas de enfermería</h3>
+          <p>Consulta de notas vinculadas a esta hospitalización.</p>
+        </div>
+        <div className="health-section-actions no-print">
+          <StatusTag tone={documents.length ? 'success' : 'neutral'}>
+            {documents.length} notas
+          </StatusTag>
+          <Link
+            className="health-action-button secondary"
+            data-action-id="HEALTH-REPORT-NURSING-NOTE-OPEN-EVOLUTIONS"
+            href={`/clinical/evolutions?case=${encodeURIComponent(caseId)}`}
+          >
+            Abrir evoluciones
+          </Link>
+        </div>
+      </div>
+      {documents.length ? (
+        <div className="health-document-list health-nursing-note-list">
+          {documents.map((document) => (
+            <article key={document.id}>
+              <span className="health-card-icon violet" aria-hidden="true">
+                N
+              </span>
+              <div>
+                <div>
+                  <h3>{document.title}</h3>
+                  <StatusTag tone={document.status === 'SIGNED' ? 'success' : 'warning'}>
+                    {document.status === 'SIGNED' ? 'Firmada' : 'Borrador'}
+                  </StatusTag>
+                </div>
+                <p>{document.summary}</p>
+                <small>
+                  {formatDate(document.createdAt)} · {document.author} · v{document.version}
+                </small>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <ReportEmpty
+          title="Sin notas de enfermería"
+          detail="No hay notas identificadas como nota de enfermería para esta hospitalización. La captura utiliza el flujo versionado de Evoluciones y conserva firma, correcciones y auditoría."
+        />
+      )}
     </div>
   );
 }

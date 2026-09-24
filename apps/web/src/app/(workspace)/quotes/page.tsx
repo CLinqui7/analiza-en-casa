@@ -400,9 +400,26 @@ function QuoteEditor({
                 disabled={mode !== 'create'}
                 id="quote-patient-search"
                 list="quote-patient-options"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, patientQuery: event.target.value }))
-                }
+                onChange={(event) => {
+                  const patientQuery = event.target.value;
+                  const normalizedQuery = patientQuery.trim().toLocaleLowerCase('es-SV');
+                  const exactPatient = patients.find(
+                    (candidate) =>
+                      candidate.fullName.trim().toLocaleLowerCase('es-SV') === normalizedQuery ||
+                      candidate.documentId.trim().toLocaleLowerCase('es-SV') === normalizedQuery,
+                  );
+                  const exactCase = exactPatient
+                    ? hospitalizations.find((candidate) => candidate.patientId === exactPatient.id)
+                    : undefined;
+                  setDraft((current) => ({
+                    ...current,
+                    patientQuery,
+                    ...(exactPatient
+                      ? { patientId: exactPatient.id, caseId: exactCase?.id ?? '' }
+                      : {}),
+                  }));
+                  if (exactPatient) setErrors((current) => ({ ...current, caseId: '' }));
+                }}
                 placeholder="Nombre o documento"
                 value={draft.patientQuery}
               />

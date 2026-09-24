@@ -30,7 +30,7 @@ test('a manual doctor fee keeps its selected doctor after save and reload', asyn
   await page.getByRole('button', { name: '+ Nuevo' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await dialog.getByLabel('Referido por').fill('Amigos');
+  await dialog.getByLabel('Origen del contacto (opcional)').fill('Amigos');
   await dialog.getByRole('option', { name: 'Amigos & Familia' }).click();
   await dialog.getByLabel('Resumen operativo').fill('Honorario médico B4');
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();

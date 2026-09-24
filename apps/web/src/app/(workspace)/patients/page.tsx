@@ -20,7 +20,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { Controller, type FieldErrors, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -141,6 +141,60 @@ const patientFormSchema = z
   });
 
 type PatientForm = z.infer<typeof patientFormSchema>;
+
+type PatientValidationEntry = { label: string; selector: string };
+
+function patientValidationEntries(errors: FieldErrors<PatientForm>): PatientValidationEntry[] {
+  const entries: PatientValidationEntry[] = [];
+  const add = (error: unknown, label: string, selector: string) => {
+    if (error) entries.push({ label, selector });
+  };
+
+  add(errors.documentId, 'Número de documento', '[name="documentId"]');
+  add(errors.fullName, 'Nombre completo', '[name="fullName"]');
+  add(errors.birthDate, 'Fecha de nacimiento', '[name="birthDate"]');
+  add(errors.sex, 'Sexo', '[name="sex"]');
+  add(errors.phone, 'Teléfono celular', '[name="phone"]');
+  add(errors.company, 'Empresa', '[data-action-id="PATIENT-COMPANY-SEARCH"]');
+  add(errors.email, 'Correo', '[name="email"]');
+  add(errors.insurance?.insurer, 'Aseguradora', '[data-action-id="PATIENT-INSURER-SEARCH"]');
+  add(errors.insurance?.policyNumber, 'Número de póliza', '[name="insurance.policyNumber"]');
+  add(
+    errors.insurance?.holderDocumentId,
+    'DUI / NIT del titular',
+    '[name="insurance.holderDocumentId"]',
+  );
+  add(errors.insurance?.holderFullName, 'Nombre del titular', '[name="insurance.holderFullName"]');
+  add(
+    errors.insurance?.holderBirthDate,
+    'Fecha de nacimiento del titular',
+    '[name="insurance.holderBirthDate"]',
+  );
+  if (Array.isArray(errors.contacts)) {
+    errors.contacts.forEach((contact, index) => {
+      if (!contact) return;
+      add(contact.email, `Correo del contacto ${index + 1}`, `[name="contacts.${index}.email"]`);
+      add(
+        contact.documentType,
+        `Tipo de documento del contacto ${index + 1}`,
+        `[name="contacts.${index}.documentType"]`,
+      );
+      add(
+        contact.documentId,
+        `Número de documento del contacto ${index + 1}`,
+        `[name="contacts.${index}.documentId"]`,
+      );
+    });
+  }
+  add(errors.address?.line, 'Dirección', '[name="address.line"]');
+  add(
+    errors.address?.comments,
+    'Comentarios relevantes de la dirección',
+    '[name="address.comments"]',
+  );
+
+  return entries;
+}
 
 const emptyAddress = { line: '', comments: '', coordinates: '', locationUrl: '' };
 const emptyInsurance = {
@@ -315,6 +369,7 @@ export default function PatientsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
   const [pendingIdentityFiles, setPendingIdentityFiles] = useState<File[]>([]);
   const [pendingResponsibleFiles, setPendingResponsibleFiles] = useState<File[]>([]);
@@ -356,6 +411,9 @@ export default function PatientsPage() {
   const insurer = useWatch({ control: form.control, name: 'insurance.insurer' });
   const contacts = (useWatch({ control: form.control, name: 'contacts' }) ??
     []) as PatientForm['contacts'];
+  const validationEntries = showValidationSummary
+    ? patientValidationEntries(form.formState.errors)
+    : [];
   const visiblePatients = useMemo(
     () =>
       searchPatients(
@@ -435,8 +493,23 @@ export default function PatientsPage() {
     setPendingResponsibleFiles([]);
     setIdentityFiles([]);
     setMapVisible(false);
+    setShowValidationSummary(false);
     form.reset();
     if (searchParams.has('create') || searchParams.has('edit')) router.replace('/patients');
+  }
+  function focusFirstInvalidField(entries: PatientValidationEntry[]) {
+    const first = entries[0];
+    if (!first) return;
+    window.requestAnimationFrame(() => {
+      const element = document.querySelector<HTMLElement>(first.selector);
+      element?.focus();
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+  function onInvalid(errors: FieldErrors<PatientForm>) {
+    const entries = patientValidationEntries(errors);
+    setShowValidationSummary(true);
+    focusFirstInvalidField(entries);
   }
   function changeDocumentType(nextType: PatientForm['documentType']) {
     form.setValue('documentType', nextType);
@@ -590,9 +663,12 @@ export default function PatientsPage() {
   }
   async function onSubmit(values: PatientForm) {
     setActionError(null);
+    setShowValidationSummary(false);
     const documentError = validateDocument(values.documentType, values.documentId);
     if (documentError) {
       form.setError('documentId', { type: 'validate', message: documentError });
+      setShowValidationSummary(true);
+      focusFirstInvalidField([{ label: 'Número de documento', selector: '[name="documentId"]' }]);
       return;
     }
     const duplicate = findDuplicatePatient(
@@ -604,6 +680,8 @@ export default function PatientsPage() {
         type: 'duplicate',
         message: `Ya existe un registro con este documento (${duplicate.fullName}).`,
       });
+      setShowValidationSummary(true);
+      focusFirstInvalidField([{ label: 'Número de documento', selector: '[name="documentId"]' }]);
       return;
     }
     const insurance =
@@ -726,6 +804,7 @@ export default function PatientsPage() {
               onClick={() => {
                 setResult(null);
                 setActionError(null);
+                setShowValidationSummary(false);
                 setPendingIdentityFiles([]);
                 setPendingResponsibleFiles([]);
                 setDismissedLinkedDialog(false);
@@ -1038,6 +1117,16 @@ export default function PatientsPage() {
         description="Los datos administrativos se validan y guardan en la base de datos del espacio de trabajo."
         footer={
           <>
+            {validationEntries.length ? (
+              <p
+                className="field-error dialog-save-error dialog-validation-summary"
+                data-testid="patient-validation-summary"
+                role="alert"
+              >
+                <strong>Falta completar o corregir:</strong>{' '}
+                {[...new Set(validationEntries.map((entry) => entry.label))].join(', ')}.
+              </p>
+            ) : null}
             {persistenceError ? (
               <p className="field-error dialog-save-error" role="alert">
                 {persistenceError}
@@ -1069,7 +1158,7 @@ export default function PatientsPage() {
           className="form-grid"
           id="patient-form"
           noValidate
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
         >
           <fieldset>
             <legend>Datos generales</legend>

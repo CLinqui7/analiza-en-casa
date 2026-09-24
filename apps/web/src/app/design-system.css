@@ -1064,9 +1064,9 @@ body {
 .button.referral-catalog-toggle:hover,
 .button.referral-catalog-toggle:focus-visible {
   min-height: 42px;
-  border-color: #d94755;
+  border-color: #cf3445;
   border-radius: 10px;
-  background: #d94755;
+  background: #cf3445;
   color: #fff;
   box-shadow: 0 8px 20px rgb(217 71 85 / 18%);
   font-weight: 750;
@@ -2936,8 +2936,12 @@ button:disabled {
 
 .medical-order-patient small,
 .medical-order-muted {
-  color: #5b6c81;
+  color: #43566e;
   font-size: 0.62rem;
+}
+
+.medical-orders-directory .status-tag {
+  color: #2f4358;
 }
 
 .medical-order-document {
@@ -3044,11 +3048,9 @@ button:disabled {
 
 @keyframes medical-orders-row-enter {
   from {
-    opacity: 0;
     transform: translateY(5px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }

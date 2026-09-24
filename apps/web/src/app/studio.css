@@ -482,6 +482,9 @@ table th .button:hover {
   padding: 22px;
   overscroll-behavior: contain;
 }
+.clinical-save-error {
+  grid-column: 1 / -1;
+}
 .dialog-footer {
   display: flex;
   flex: 0 0 auto;
@@ -843,6 +846,13 @@ table th .button:hover {
   flex: 1;
   align-self: center;
   font-size: 12px;
+}
+.dialog-validation-summary {
+  max-width: min(560px, 100%);
+  line-height: 1.45;
+}
+.dialog-validation-summary strong {
+  display: inline;
 }
 .studio-verification-stages {
   margin: 0;

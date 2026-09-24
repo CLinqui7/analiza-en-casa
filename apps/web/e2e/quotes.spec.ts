@@ -17,7 +17,7 @@ async function openNewQuote(page: Page) {
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
   await dialog.getByLabel('Resumen operativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(page.getByRole('status')).toContainText('Borrador de cotización persistido');
+  await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
   return page.evaluate((expectedSummary) => {
     const quotes = JSON.parse(
@@ -27,7 +27,9 @@ async function saveDraft(page: Page, dialog: Locator, summary: string) {
   }, summary);
 }
 
-test('quotes list searches normalized id, patient, case and status, then clears', async ({ page }) => {
+test('quotes list searches normalized id, patient, case and status, then clears', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/quotes');
   const search = page.getByLabel('Buscar cotización');
@@ -41,7 +43,9 @@ test('quotes list searches normalized id, patient, case and status, then clears'
   await expect(search).toHaveValue('');
 });
 
-test('modern quote builder keeps the requested categories and optional origin', async ({ page }) => {
+test('modern quote builder keeps the requested categories and optional origin', async ({
+  page,
+}) => {
   await login(page);
   const dialog = await openNewQuote(page);
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
@@ -63,6 +67,58 @@ test('modern quote builder keeps the requested categories and optional origin', 
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(dialog.getByText('El resumen operativo es obligatorio.')).toBeVisible();
   const id = await saveDraft(page, dialog, 'Cotización moderna sin referido');
+  expect(id).toBeTruthy();
+});
+
+test('exact patient search selects its compatible hospitalization before saving', async ({
+  page,
+}) => {
+  await login(page);
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      'analiza.en.casa.workspace.v3.patients',
+      JSON.stringify([
+        {
+          id: 'patient-quote-first',
+          fullName: 'Paciente QA Inicial',
+          documentType: 'OTHER',
+          documentId: 'QUOTE-FIRST',
+          status: 'ACTIVE',
+        },
+        {
+          id: 'patient-quote-exact',
+          fullName: 'Paciente QA Exacto',
+          documentType: 'OTHER',
+          documentId: 'QUOTE-EXACT',
+          status: 'ACTIVE',
+        },
+      ]),
+    );
+    window.localStorage.setItem(
+      'analiza.en.casa.workspace.v3.hospitalizations',
+      JSON.stringify([
+        {
+          id: 'case-quote-first',
+          patientId: 'patient-quote-first',
+          startDate: '2026-09-24',
+          status: 'ACTIVE',
+        },
+        {
+          id: 'case-quote-exact',
+          patientId: 'patient-quote-exact',
+          startDate: '2026-09-24',
+          status: 'ACTIVE',
+        },
+      ]),
+    );
+  });
+  const dialog = await openNewQuote(page);
+  await dialog.getByLabel('Buscar paciente', { exact: true }).fill('Paciente QA Exacto');
+  await expect(dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]')).toHaveValue(
+    'patient-quote-exact',
+  );
+  await expect(dialog.getByLabel('Caso compatible')).toHaveValue('case-quote-exact');
+  const id = await saveDraft(page, dialog, 'Cotización con paciente encontrado');
   expect(id).toBeTruthy();
 });
 
@@ -104,7 +160,9 @@ test('catalog search matches code initials, closes on selection and reuses the c
   expect(id).toBeTruthy();
 });
 
-test('draft can be edited, sent and revised without changing the sent version', async ({ page }) => {
+test('draft can be edited, sent and revised without changing the sent version', async ({
+  page,
+}) => {
   await login(page);
   let dialog = await openNewQuote(page);
   const quoteId = await saveDraft(page, dialog, 'Flujo de estados E2E');
@@ -128,7 +186,9 @@ test('draft can be edited, sent and revised without changing the sent version', 
   await expect(page.getByRole('status')).toContainText('Nueva versión');
 });
 
-test('auditor remains read-only and mobile layout has no horizontal overflow', async ({ browser }) => {
+test('auditor remains read-only and mobile layout has no horizontal overflow', async ({
+  browser,
+}) => {
   const auditorContext = await browser.newContext();
   const auditor = await auditorContext.newPage();
   await login(auditor, 'auditor@demo.local', 'demo-auditor');

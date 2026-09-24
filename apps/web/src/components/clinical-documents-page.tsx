@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ClinicalDocument } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -52,6 +52,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
     addClinicalDocument,
     clinicalDocuments,
     correctClinicalDocument,
+    error: workspaceError,
     hospitalizations,
     patients,
     signClinicalDocument,
@@ -64,6 +65,8 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [correcting, setCorrecting] = useState<ClinicalDocument | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [createSaveFailed, setCreateSaveFailed] = useState(false);
+  const [correctionSaveFailed, setCorrectionSaveFailed] = useState(false);
   const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
   const form = useForm<DocumentForm>({
     resolver: zodResolver(documentSchema),
@@ -73,15 +76,23 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
     resolver: zodResolver(correctionSchema),
     defaultValues: { reason: '', summary: '', author: '' },
   });
+  useEffect(() => {
+    const requestedCase = new URLSearchParams(window.location.search).get('case');
+    if (requestedCase && hospitalizations.some((item) => item.id === requestedCase))
+      form.setValue('caseId', requestedCase);
+  }, [form, hospitalizations]);
   const closeCreate = () => {
     setCreateOpen(false);
+    setCreateSaveFailed(false);
     form.reset({ caseId: hospitalizations[0]?.id ?? '', title: '', summary: '', author: '' });
   };
   const closeCorrection = () => {
     setCorrecting(null);
+    setCorrectionSaveFailed(false);
     correctionForm.reset();
   };
   const submit = async (values: DocumentForm) => {
+    setCreateSaveFailed(false);
     const hospitalization = hospitalizations.find((candidate) => candidate.id === values.caseId);
     if (!hospitalization) {
       form.setError('caseId', {
@@ -102,7 +113,10 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
       version: 1,
       createdAt: new Date().toISOString(),
     });
-    if (!saved) return;
+    if (!saved) {
+      setCreateSaveFailed(true);
+      return;
+    }
     setMessage('Documento clínico sintético persistido como borrador con evidencia de auditoría.');
     closeCreate();
   };
@@ -117,13 +131,17 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
   };
   const submitCorrection = async (values: CorrectionForm) => {
     if (!correcting) return;
+    setCorrectionSaveFailed(false);
     const saved = await correctClinicalDocument(
       correcting.id,
       values.reason,
       values.summary,
       values.author,
     );
-    if (!saved) return;
+    if (!saved) {
+      setCorrectionSaveFailed(true);
+      return;
+    }
     setMessage('Corrección creada como nuevo borrador; la versión firmada original se conserva.');
     closeCorrection();
   };
@@ -140,6 +158,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
             data-action-id={copy.actionId}
             onClick={() => {
               setMessage(null);
+              setCreateSaveFailed(false);
               setCreateOpen(true);
             }}
             type="button"
@@ -244,7 +263,11 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
             <Button className="button-secondary" onClick={closeCreate} type="button">
               Cancelar
             </Button>
-            <Button form="clinical-document-form" type="submit">
+            <Button
+              disabled={form.formState.isSubmitting}
+              form="clinical-document-form"
+              type="submit"
+            >
               {form.formState.isSubmitting ? 'Guardando…' : 'Guardar borrador'}
             </Button>
           </>
@@ -259,6 +282,12 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
           noValidate
           onSubmit={form.handleSubmit(submit)}
         >
+          {createSaveFailed ? (
+            <p className="notice danger clinical-save-error" role="alert">
+              {workspaceError ??
+                'No se pudo guardar el borrador. Revisa los datos e intenta nuevamente.'}
+            </p>
+          ) : null}
           <label>
             Hospitalización
             <select {...form.register('caseId')}>
@@ -304,7 +333,11 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
             <Button className="button-secondary" onClick={closeCorrection} type="button">
               Cancelar
             </Button>
-            <Button form="clinical-correction-form" type="submit">
+            <Button
+              disabled={correctionForm.formState.isSubmitting}
+              form="clinical-correction-form"
+              type="submit"
+            >
               {correctionForm.formState.isSubmitting ? 'Guardando…' : 'Crear corrección'}
             </Button>
           </>
@@ -319,6 +352,12 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
           noValidate
           onSubmit={correctionForm.handleSubmit(submitCorrection)}
         >
+          {correctionSaveFailed ? (
+            <p className="notice danger clinical-save-error" role="alert">
+              {workspaceError ??
+                'No se pudo crear la corrección. Revisa los datos e intenta nuevamente.'}
+            </p>
+          ) : null}
           <label>
             Motivo de corrección
             <textarea {...correctionForm.register('reason')} rows={2} />

@@ -552,6 +552,17 @@
   justify-content: space-between;
   gap: 12px;
 }
+.health-section-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.health-section-actions .health-action-button {
+  min-height: 34px;
+  padding: 7px 11px;
+}
 .health-reading-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -595,6 +606,21 @@
   margin: 5px 0 0;
   color: #58737d;
   font-size: 0.64rem;
+}
+.health-reading-history table {
+  min-width: 760px;
+}
+.health-reading-history th,
+.health-reading-history td {
+  vertical-align: top;
+  white-space: nowrap;
+}
+.health-reading-history td:last-child {
+  max-width: 260px;
+  white-space: normal;
+}
+.health-nursing-note-list article {
+  display: flex;
 }
 .health-team-grid {
   display: grid;
@@ -823,6 +849,14 @@
   .health-patient-summary {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .health-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .health-section-actions,
+  .health-section-actions .health-action-button {
+    width: 100%;
   }
   .health-overview-grid,
   .health-reading-grid,
