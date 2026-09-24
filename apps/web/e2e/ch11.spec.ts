@@ -72,7 +72,7 @@ test('CH11 lets DOCTOR inspect an existing synthetic shift without changing visi
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   ]);
   await page.locator('[data-action-id="AGENDA-SHIFT-DETAIL-OPEN"]').first().click();
-  const dialog = page.getByRole('dialog', { name: 'Detalle del turno sintético' });
+  const dialog = page.getByRole('dialog', { name: 'Detalle del turno' });
   await expect(dialog.getByText('Agenda', { exact: true })).toBeVisible();
   await expect(dialog.locator('[data-action-id="AGENDA-SHIFT-DETAIL-UPDATES"]')).toBeDisabled();
   await expect(dialog.getByText('Inicio', { exact: true })).toBeVisible();

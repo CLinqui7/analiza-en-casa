@@ -20,6 +20,7 @@
     "video_audit": "17/17 PASS",
     "ch17_traceability_gate": "17/17 PASS",
     "focused_browser_production_build": "12/12 PASS",
+    "full_browser_production_build": "184/184 PASS",
     "production_build": "PASS",
     "repository_preflight": "PASS",
     "authenticated_production": "PASS: real hospitalization route, vital-sign empty state, nursing-note section, preselected evolution case, clean console",

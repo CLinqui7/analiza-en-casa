@@ -76,47 +76,41 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
   expect(caseId).toBeTruthy();
   await page.goto(`/hospitalizations/${caseId}`);
   await expect(
-    page.getByRole('heading', { name: 'Perfil administrativo de ejecución · PIC' }),
+    page.getByRole('heading', { name: 'Perfil administrativo · Ejecución de cotización' }),
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   const profile = page.getByRole('dialog', {
-    name: `Perfil administrativo de ejecución: ${caseId}`,
+    name: `Ejecución de cotización: ${caseId}`,
   });
-  await expect(profile.getByLabel('Health manager')).toBeVisible();
+  await expect(profile.getByLabel('Visitador médico')).toBeVisible();
   await expect(profile.getByLabel('Referido por')).toBeVisible();
-  await expect(profile.getByLabel('Tipo Revenue')).toBeVisible();
-  await profile.getByLabel('Health manager').fill('Coordinación CH08');
+  await expect(profile.getByLabel('Tipo', { exact: true })).toBeVisible();
+  await profile.getByLabel('Visitador médico').fill('Coordinación CH08');
   await profile.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByText('Coordinación CH08', { exact: true })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
-  const saved = page.getByRole('dialog', { name: `Perfil administrativo de ejecución: ${caseId}` });
-  await saved.getByLabel('Health manager').fill('Coordinación CH08');
-  await saved.getByLabel('Referido por').fill('Referencia CH08');
-  await saved.getByLabel('Tipo Revenue').fill('Recurrente');
+  const saved = page.getByRole('dialog', { name: `Ejecución de cotización: ${caseId}` });
+  await saved.getByLabel('Visitador médico').fill('Coordinación CH08');
+  await expect(saved.getByLabel('Referido por')).toHaveValue('');
   await saved.getByLabel('Tipo', { exact: true }).fill('Normal');
   await saved.getByLabel('Fecha de inicio').fill('2026-10-08');
   await saved.getByLabel('Días de duración').fill('5');
   await saved.getByLabel('Forma de pago').fill('Aseguradora');
-  await saved.getByLabel('Aseguradora').fill('Aseguradora sintética CH08');
-  await saved.getByLabel('Tipo de solicitud').fill('Reclamo');
-  await saved.getByLabel('Categoría mayor').fill('Hospitalización');
-  await saved.getByLabel('Subcategoría').fill('Aplicación');
   await saved.getByLabel('Hospital de origen').fill('Origen sintético');
   await saved.getByLabel('Clase de paciente').fill('Regular');
   await saved.getByRole('button', { name: 'Guardar' }).click();
   await expect(
-    page.getByText('Perfil administrativo de ejecución guardado.', { exact: true }),
+    page.getByText('Perfil de ejecución de cotización guardado.', { exact: true }),
   ).toBeVisible();
   await expect(page.getByText('Coordinación CH08', { exact: true })).toBeVisible();
   await page.reload();
-  await expect(page.getByText('Aseguradora sintética CH08', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   const reopened = page.getByRole('dialog', {
-    name: `Perfil administrativo de ejecución: ${caseId}`,
+    name: `Ejecución de cotización: ${caseId}`,
   });
-  await expect(reopened.getByLabel('Health manager')).toHaveValue('Coordinación CH08');
+  await expect(reopened.getByLabel('Visitador médico')).toHaveValue('Coordinación CH08');
   await expect(reopened.getByLabel('Días de duración')).toHaveValue('5');
   await expect(reopened.getByLabel('Hospital de origen')).toHaveValue('Origen sintético');
 });
@@ -127,7 +121,7 @@ test('CH08 ADMIN can open the administrative profile on a direct hospitalization
   await loginToDetail(page, 'admin@demo.local', 'demo-admin');
   await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Perfil administrativo de ejecución: case-demo-001' }),
+    page.getByRole('dialog', { name: 'Ejecución de cotización: case-demo-001' }),
   ).toBeVisible();
   await expect(page.locator('[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')).toBeVisible();
 });
@@ -138,7 +132,7 @@ test('CH08 DOCTOR can open the administrative profile on a direct hospitalizatio
   await loginToDetail(page, 'doctor@demo.local', 'demo-doctor');
   await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Perfil administrativo de ejecución: case-demo-001' }),
+    page.getByRole('dialog', { name: 'Ejecución de cotización: case-demo-001' }),
   ).toBeVisible();
   await expect(page.locator('[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')).toBeVisible();
 });

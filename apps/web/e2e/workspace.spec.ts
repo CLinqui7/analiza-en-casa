@@ -152,7 +152,7 @@ test('patient registration persists complete administrative, insurance, contacts
   await dialog.getByLabel('Nacionalidad').fill('Nacionalidad sintética');
   await dialog.getByLabel('Ocupación').fill('Ocupación sintética');
   await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await dialog.getByRole('combobox', { name: 'Aseguradora demo' }).fill('Aseguradora demo A');
+  await dialog.getByRole('combobox', { name: 'Aseguradora' }).fill('Aseguradora demo A');
   await dialog.getByRole('option', { name: 'Aseguradora demo A' }).click();
   await page
     .getByRole('dialog', { name: '¿El paciente es el titular del seguro?' })
@@ -217,9 +217,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await editDialog.getByLabel('Nombre completo').fill('Paciente QA Editado');
   await editDialog.getByLabel('Teléfono celular').fill('7000-4999');
   await editDialog.getByLabel('Tipo de paciente').selectOption('INSURED');
-  await editDialog
-    .getByRole('combobox', { name: 'Aseguradora demo' })
-    .fill('Cobertura sintética QA');
+  await editDialog.getByRole('combobox', { name: 'Aseguradora' }).fill('Cobertura sintética QA');
   await editDialog.getByRole('option', { name: 'Cobertura sintética QA' }).click();
   await page
     .getByRole('dialog', { name: '¿El paciente es el titular del seguro?' })
@@ -507,7 +505,9 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
   await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
-  await expect(page.getByRole('status')).toContainText('persistida');
+  await expect(page.getByRole('status')).toContainText(
+    'Hospitalización guardada con evidencia de auditoría.',
+  );
   await page.reload();
   const createdDetailLink = page.locator(
     'a[data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"][href^="/hospitalizations/HOS-"]',
@@ -863,23 +863,22 @@ test('all six demo roles enforce their route matrix', async ({ browser }) => {
   }
 });
 
-test('catalog items require a unique SKU and persist after refresh', async ({ page }) => {
+test('catalog items receive unique automatic codes and persist after refresh', async ({ page }) => {
   await login(page);
   await page.goto('/catalogs');
   await page.getByRole('button', { name: 'Nuevo ítem' }).click();
-  await page.getByLabel('SKU').fill('KIT-DEMO-001');
-  await page.getByLabel('Nombre').fill('Duplicado de QA');
-  await page.getByRole('button', { name: 'Guardar ítem' }).click();
-  await expect(page.getByText('Ya existe un ítem con este SKU.')).toBeVisible();
-  await page.getByRole('button', { name: 'Cancelar' }).click();
+  const firstCode = await page.getByLabel('Código automático').inputValue();
+  await expect(page.getByLabel('Código automático')).toHaveAttribute('readonly', '');
+  await page.getByLabel('Nombre').fill('Ítem sintético de QA');
+  await page.getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByRole('status')).toContainText('creado correctamente');
+  await page.reload();
+  await expect(page.getByText(firstCode, { exact: true })).toBeVisible();
+  await expect(page.getByText('Ítem sintético de QA', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Nuevo ítem' }).click();
-  await page.getByLabel('SKU').fill('QA-CATALOG-001');
-  await page.getByLabel('Nombre').fill('Ítem sintético de QA');
-  await page.getByRole('button', { name: 'Guardar ítem' }).click();
-  await expect(page.getByRole('status')).toContainText('Ítem de catálogo persistido');
-  await page.reload();
-  await expect(page.getByText('QA-CATALOG-001')).toBeVisible();
+  const secondCode = await page.getByLabel('Código automático').inputValue();
+  expect(secondCode).not.toBe(firstCode);
 });
 
 test('purchase drafts persist without changing inventory', async ({ page }) => {

@@ -85,26 +85,21 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toBeVisible();
+  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención', 'Caso compatible'])
+    await expect(dialog.getByRole('combobox', { name: label, exact: true })).toBeVisible();
   for (const label of [
-    'Buscar paciente',
-    'Paciente',
     'Documento',
     'Teléfono',
     'Correo',
+    'Resumen operativo',
     'Fecha',
-    'Grupo de descuento',
-    'Referido por',
-    'Giftcard',
+    'Origen del contacto (opcional)',
     'Comentarios',
   ])
-    await expect(
-      dialog.getByRole(
-        label === 'Paciente' || label === 'Grupo de descuento' || label === 'Buscar paciente'
-          ? 'combobox'
-          : 'textbox',
-        { name: label, exact: true },
-      ),
-    ).toBeVisible();
+    await expect(dialog.getByRole('textbox', { name: label, exact: true })).toBeVisible();
+  await expect(dialog.locator('[data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"]')).toBeVisible();
+  await expect(dialog.locator('[data-action-id="QUOTE-DISCOUNT-GROUP"]')).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Mostrar opciones de referido' })).toBeVisible();
   await expect(dialog.getByRole('textbox', { name: 'Documento', exact: true })).toBeDisabled();
   await expect(dialog.getByRole('textbox', { name: 'Fecha', exact: true })).not.toHaveValue('');
   await dialog.getByRole('combobox', { name: 'Buscar paciente', exact: true }).fill('Aurora');
