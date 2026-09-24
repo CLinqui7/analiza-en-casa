@@ -482,6 +482,9 @@ table th .button:hover {
   padding: 22px;
   overscroll-behavior: contain;
 }
+.clinical-save-error {
+  grid-column: 1 / -1;
+}
 .dialog-footer {
   display: flex;
   flex: 0 0 auto;

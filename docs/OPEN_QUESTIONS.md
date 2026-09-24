@@ -41,7 +41,7 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 - `CR-020`–`CR-030`: entregar formularios institucionales versionados y aprobados, reglas de corrección y permisos antes de construir Balance hídrico o escalas clínicas.
 - `CR-022`: confirmar que “Gasglow” corresponde a Glasgow; `CR-024`: que “Ecof” corresponde a ECOG; `CR-026`: que “karnofky” corresponde a Karnofsky.
 - `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.
-- `CR-032`: aportar export/dump autorizado y diccionario de datos de médicos y expedientes para preparar un dry-run idempotente, conciliable y reversible.
+- `CR-032`: subir el archivo autorizado de pacientes en Excel o CSV para revisar sus columnas y preparar el mapeo hacia todas las ventanas del módulo Pacientes. Respuesta acordada: “Gracias por la solicitud. Por favor suba el archivo de Excel o CSV; nosotros revisaremos su estructura y lo adaptaremos a los campos del módulo Pacientes. Antes de importar, le mostraremos el mapeo, las observaciones y posibles duplicados para que pueda validarlos.” Hasta recibir el archivo no se afirma compatibilidad completa ni se incorporan registros.
 
 ## CH01 · decisiones pendientes trazadas
 

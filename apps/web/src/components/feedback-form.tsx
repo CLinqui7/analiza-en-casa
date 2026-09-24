@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Panel, StatusTag } from '@analiza/ui';
 import Image from 'next/image';
 import { useAuth } from '@/components/providers';
@@ -19,7 +19,13 @@ import {
   type FeedbackReport,
   type FeedbackStatus,
 } from '@/lib/feedback';
-import { listLocalFeedback, saveLocalFeedback } from '@/lib/local-feedback';
+import {
+  getLocalFeedbackImage,
+  listLocalFeedback,
+  removeLocalFeedback,
+  saveLocalFeedback,
+  updateLocalFeedback,
+} from '@/lib/local-feedback';
 import './feedback-form.css';
 
 const initialInput: FeedbackInput = {
@@ -42,6 +48,26 @@ const feedbackStatuses: ReadonlyArray<readonly [FeedbackStatus, string]> = [
   ['RESOLVED', 'Resuelto'],
 ];
 
+const feedbackCategoryIcons: Record<FeedbackInput['category'], string> = {
+  ERROR: '!',
+  QUESTION: '?',
+  NEW_FEATURE: '+',
+  CHANGE: '↻',
+  IMPROVEMENT: '✦',
+};
+
+type FeedbackFilter = 'ALL' | FeedbackStatus;
+
+function formatReportDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Fecha no disponible';
+  return new Intl.DateTimeFormat('es-SV', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/El_Salvador',
+  }).format(date);
+}
+
 export function FeedbackForm() {
   const { session } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -52,12 +78,42 @@ export function FeedbackForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [workingReportId, setWorkingReportId] = useState<string>();
+  const [editingReportId, setEditingReportId] = useState<string>();
   const [previewReport, setPreviewReport] = useState<FeedbackReport>();
+  const [previewImageUrl, setPreviewImageUrl] = useState<string>();
+  const [reportFilter, setReportFilter] = useState<FeedbackFilter>('ALL');
+  const [reportQuery, setReportQuery] = useState('');
   const [resolutionDrafts, setResolutionDrafts] = useState<
     Record<string, { status: FeedbackStatus; resolutionComment: string; resolutionPath: string }>
   >({});
+  const [reportMessages, setReportMessages] = useState<
+    Record<string, { tone: 'danger' | 'success'; message: string }>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const canManageReports = session?.role === 'ADMIN';
+  const reportCounts = useMemo(
+    () => ({
+      ALL: reports.length,
+      NEW: reports.filter((report) => report.status === 'NEW').length,
+      REVIEWING: reports.filter((report) => report.status === 'REVIEWING').length,
+      RESOLVED: reports.filter((report) => report.status === 'RESOLVED').length,
+    }),
+    [reports],
+  );
+  const visibleReports = useMemo(() => {
+    const query = reportQuery.trim().toLocaleLowerCase('es');
+    return reports.filter((report) => {
+      if (reportFilter !== 'ALL' && report.status !== reportFilter) return false;
+      if (!query) return true;
+      return [
+        report.description,
+        report.submittedBy ?? '',
+        feedbackLabel(feedbackCategories, report.category),
+        feedbackLabel(feedbackModules, report.module),
+      ].some((value) => value.toLocaleLowerCase('es').includes(query));
+    });
+  }, [reportFilter, reportQuery, reports]);
 
   useEffect(() => {
     if (!session?.userId) return;
@@ -110,6 +166,13 @@ export function FeedbackForm() {
       controller.abort();
     };
   }, [serverBacked, session?.userId]);
+
+  useEffect(
+    () => () => {
+      if (previewImageUrl?.startsWith('blob:')) URL.revokeObjectURL(previewImageUrl);
+    },
+    [previewImageUrl],
+  );
 
   function chooseImage(file: File | undefined) {
     setError(null);
@@ -182,7 +245,7 @@ export function FeedbackForm() {
   }
 
   async function saveResolution(report: FeedbackReport) {
-    if (!serverBacked || session?.role !== 'ADMIN') return;
+    if (!canManageReports || !session?.userId) return;
     const draft = resolutionDrafts[report.id] ?? {
       status: report.status,
       resolutionComment: report.resolutionComment ?? '',
@@ -194,31 +257,55 @@ export function FeedbackForm() {
       resolutionPath: draft.resolutionPath || undefined,
     });
     if (!parsedResolution.success) {
-      setError('Para resolver, escribe cómo se solucionó y una ruta válida que inicie con /.');
+      setReportMessages((current) => ({
+        ...current,
+        [report.id]: {
+          tone: 'danger',
+          message:
+            parsedResolution.error.issues[0]?.message ??
+            'Revisa el estado, la respuesta y la ruta del cambio.',
+        },
+      }));
       return;
     }
     setError(null);
     setNotice(null);
+    setReportMessages((current) => {
+      const next = { ...current };
+      delete next[report.id];
+      return next;
+    });
     setWorkingReportId(report.id);
     try {
-      const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
-        method: 'PATCH',
-        headers: {
-          ...mongoMutationHeaders(),
-          'content-type': 'application/json',
-          'x-analiza-feedback-schema': '2',
-        },
-        body: JSON.stringify(parsedResolution.data),
-      });
-      const payload: unknown = await response.json();
-      if (!response.ok) {
-        const message =
-          payload && typeof payload === 'object' && 'error' in payload
-            ? String(payload.error)
-            : 'No pudimos cambiar el estado.';
-        throw new Error(message);
+      let updated: FeedbackReport;
+      if (serverBacked) {
+        const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
+          method: 'PATCH',
+          headers: {
+            ...mongoMutationHeaders(),
+            'content-type': 'application/json',
+            'x-analiza-feedback-schema': '2',
+          },
+          body: JSON.stringify(parsedResolution.data),
+        });
+        const payload: unknown = await response.json();
+        if (!response.ok) {
+          const message =
+            payload && typeof payload === 'object' && 'error' in payload
+              ? String(payload.error)
+              : 'No pudimos cambiar el estado.';
+          throw new Error(message);
+        }
+        updated = feedbackReportSchema.parse(payload);
+      } else {
+        const localUpdate = await updateLocalFeedback(
+          session.userId,
+          report.id,
+          parsedResolution.data,
+        );
+        if (!localUpdate) throw new Error('El comentario ya no existe.');
+        updated = localUpdate;
       }
-      const updated = feedbackReportSchema.parse(payload);
       setReports((current) =>
         current.map((report) => (report.id === updated.id ? updated : report)),
       );
@@ -230,52 +317,110 @@ export function FeedbackForm() {
           resolutionPath: updated.resolutionPath ?? '',
         },
       }));
-      setNotice('El estado, la respuesta y el enlace del reporte fueron actualizados.');
+      setReportMessages((current) => ({
+        ...current,
+        [updated.id]: {
+          tone: 'success',
+          message: 'La respuesta y el estado quedaron guardados.',
+        },
+      }));
+      setEditingReportId(undefined);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No pudimos cambiar el estado.');
+      setReportMessages((current) => ({
+        ...current,
+        [report.id]: {
+          tone: 'danger',
+          message: cause instanceof Error ? cause.message : 'No pudimos cambiar el estado.',
+        },
+      }));
     } finally {
       setWorkingReportId(undefined);
     }
   }
 
   async function removeReport(report: FeedbackReport) {
-    if (!serverBacked || session?.role !== 'ADMIN') return;
+    if (!canManageReports || !session?.userId) return;
     if (!window.confirm('¿Eliminar este comentario? Esta acción no se puede deshacer.')) return;
     setError(null);
     setNotice(null);
+    setReportMessages((current) => {
+      const next = { ...current };
+      delete next[report.id];
+      return next;
+    });
     setWorkingReportId(report.id);
     try {
-      const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
-        method: 'DELETE',
-        headers: mongoMutationHeaders(),
-      });
-      if (!response.ok) {
-        const payload: unknown = await response.json();
-        const message =
-          payload && typeof payload === 'object' && 'error' in payload
-            ? String(payload.error)
-            : 'No pudimos eliminar el comentario.';
-        throw new Error(message);
+      if (serverBacked) {
+        const response = await fetch(`/api/feedback/${encodeURIComponent(report.id)}`, {
+          method: 'DELETE',
+          headers: mongoMutationHeaders(),
+        });
+        if (!response.ok) {
+          const payload: unknown = await response.json();
+          const message =
+            payload && typeof payload === 'object' && 'error' in payload
+              ? String(payload.error)
+              : 'No pudimos eliminar el comentario.';
+          throw new Error(message);
+        }
+      } else if (!(await removeLocalFeedback(session.userId, report.id))) {
+        throw new Error('El comentario ya no existe.');
       }
       setReports((current) => current.filter((candidate) => candidate.id !== report.id));
-      setNotice('El comentario fue eliminado.');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No pudimos eliminar el comentario.');
+      setReportMessages((current) => ({
+        ...current,
+        [report.id]: {
+          tone: 'danger',
+          message: cause instanceof Error ? cause.message : 'No pudimos eliminar el comentario.',
+        },
+      }));
     } finally {
       setWorkingReportId(undefined);
     }
   }
 
+  async function openPreview(report: FeedbackReport) {
+    if (!session?.userId) return;
+    setError(null);
+    try {
+      const nextUrl = serverBacked
+        ? `/api/feedback/${encodeURIComponent(report.id)}`
+        : await getLocalFeedbackImage(session.userId, report.id).then((blob) =>
+            blob ? URL.createObjectURL(blob) : null,
+          );
+      if (!nextUrl) throw new Error('La imagen ya no está disponible.');
+      if (previewImageUrl?.startsWith('blob:')) URL.revokeObjectURL(previewImageUrl);
+      setPreviewImageUrl(nextUrl);
+      setPreviewReport(report);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No pudimos abrir la imagen.');
+    }
+  }
+
+  function closePreview() {
+    if (previewImageUrl?.startsWith('blob:')) URL.revokeObjectURL(previewImageUrl);
+    setPreviewImageUrl(undefined);
+    setPreviewReport(undefined);
+  }
+
   return (
     <div className="page-stack feedback-page">
-      <header className="page-header">
-        <div>
+      <header className="page-header feedback-hero">
+        <div className="feedback-hero-copy">
           <p className="eyebrow">Tu experiencia nos ayuda</p>
           <h1>Preguntas o errores encontrados</h1>
           <p>
-            Elige la función, cuéntanos qué necesitas y adjunta una foto si ayuda a explicar mejor
-            tu solicitud.
+            Cuéntanos qué necesitas. Cada solicitud queda registrada para que puedas consultar su
+            avance y la respuesta del equipo.
           </p>
+        </div>
+        <div className="feedback-hero-assurance" aria-label="Compromiso de seguimiento">
+          <span aria-hidden="true">✓</span>
+          <div>
+            <strong>Seguimiento visible</strong>
+            <small>Recibe estado, respuesta y enlace al cambio.</small>
+          </div>
         </div>
       </header>
 
@@ -304,6 +449,13 @@ export function FeedbackForm() {
       </ol>
 
       <Panel className="feedback-composer">
+        <div className="feedback-composer-heading">
+          <div>
+            <p className="eyebrow">Nueva solicitud</p>
+            <h2>¿Cómo podemos ayudarte?</h2>
+          </div>
+          <small>Los campos con * son obligatorios</small>
+        </div>
         <form className="feedback-form" onSubmit={submit}>
           <fieldset className="feedback-type-picker">
             <legend>¿Qué quieres enviar? *</legend>
@@ -321,6 +473,9 @@ export function FeedbackForm() {
                     type="radio"
                     value={value}
                   />
+                  <span className="feedback-type-icon" aria-hidden="true">
+                    {feedbackCategoryIcons[value]}
+                  </span>
                   <span>
                     <strong>{label}</strong>
                     <small>{feedbackCategoryHelp[value]}</small>
@@ -352,6 +507,8 @@ export function FeedbackForm() {
           <label>
             Describe lo que pasó o lo que quieres *
             <textarea
+              aria-describedby="feedback-description-help"
+              aria-invalid={input.description.length > 0 && input.description.trim().length < 10}
               disabled={saving}
               maxLength={4000}
               onChange={(event) =>
@@ -362,7 +519,10 @@ export function FeedbackForm() {
               rows={7}
               value={input.description}
             />
-            <small>{input.description.length}/4000 caracteres</small>
+            <small className="feedback-character-count" id="feedback-description-help">
+              <span>Mínimo 10 caracteres</span>
+              <span>{input.description.length}/4000</span>
+            </small>
           </label>
           <label className="feedback-file" data-has-file={image ? 'true' : 'false'}>
             <span className="feedback-file-icon" aria-hidden="true">
@@ -407,9 +567,16 @@ export function FeedbackForm() {
               {notice}
             </p>
           ) : null}
-          <button className="button feedback-submit" disabled={saving} type="submit">
-            {saving ? 'Enviando…' : 'Enviar reporte'}
-          </button>
+          <div className="feedback-submit-row">
+            <small>
+              {image
+                ? 'La captura se enviará de forma privada con este reporte.'
+                : 'Puedes enviarlo sin adjuntar una imagen.'}
+            </small>
+            <button className="button feedback-submit" disabled={saving} type="submit">
+              {saving ? 'Enviando…' : 'Enviar reporte'}
+            </button>
+          </div>
         </form>
       </Panel>
 
@@ -418,88 +585,188 @@ export function FeedbackForm() {
           <div>
             <p className="eyebrow">Seguimiento</p>
             <h2 id="feedback-history-title">
-              {session?.role === 'ADMIN'
+              {serverBacked && canManageReports
                 ? 'Reportes enviados por el equipo'
                 : 'Tus reportes enviados'}
             </h2>
+            <p>
+              {serverBacked && canManageReports
+                ? 'Prioriza solicitudes, documenta la solución y comparte la pantalla corregida.'
+                : 'Consulta el estado y la respuesta de cada solicitud que hayas enviado.'}
+            </p>
           </div>
-          <span>{reports.length}</span>
+          <span aria-label={`${reports.length} reportes`}>{reports.length}</span>
         </div>
-        {loading ? <p role="status">Cargando reportes…</p> : null}
+        {!loading && reports.length ? (
+          <>
+            <div className="feedback-overview" aria-label="Filtrar reportes por estado">
+              {(
+                [
+                  ['ALL', 'Todos'],
+                  ['NEW', 'Nuevos'],
+                  ['REVIEWING', 'En revisión'],
+                  ['RESOLVED', 'Resueltos'],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  aria-pressed={reportFilter === value}
+                  className="feedback-summary-card"
+                  data-active={reportFilter === value ? 'true' : 'false'}
+                  data-status={value}
+                  key={value}
+                  onClick={() => setReportFilter(value)}
+                  type="button"
+                >
+                  <span>{label}</span>
+                  <strong>{reportCounts[value]}</strong>
+                </button>
+              ))}
+            </div>
+            <div className="feedback-toolbar">
+              <label>
+                <span className="sr-only">Buscar reportes</span>
+                <span className="feedback-search-icon" aria-hidden="true">
+                  ⌕
+                </span>
+                <input
+                  onChange={(event) => setReportQuery(event.target.value)}
+                  placeholder="Buscar por texto, sección o persona…"
+                  type="search"
+                  value={reportQuery}
+                />
+              </label>
+              <span>
+                {visibleReports.length} {visibleReports.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </div>
+            {!serverBacked ? (
+              <p className="feedback-scope-note">
+                En este entorno de demostración, los reportes se guardan sólo en este navegador.
+              </p>
+            ) : null}
+          </>
+        ) : null}
+        {loading ? (
+          <div className="feedback-loading" role="status">
+            <span aria-hidden="true" />
+            Cargando reportes…
+          </div>
+        ) : null}
         {!loading && !reports.length ? (
-          <Panel>
-            <p>Aún no has enviado preguntas, errores o mejoras.</p>
+          <Panel className="feedback-empty-state">
+            <span aria-hidden="true">✦</span>
+            <div>
+              <strong>Aún no hay solicitudes</strong>
+              <p>Cuando envíes una pregunta, error o mejora podrás seguirla desde aquí.</p>
+            </div>
+          </Panel>
+        ) : null}
+        {!loading && reports.length > 0 && !visibleReports.length ? (
+          <Panel className="feedback-empty-state">
+            <span aria-hidden="true">⌕</span>
+            <div>
+              <strong>No encontramos coincidencias</strong>
+              <p>Prueba otro texto o selecciona un estado diferente.</p>
+              <button
+                className="text-link"
+                onClick={() => {
+                  setReportFilter('ALL');
+                  setReportQuery('');
+                }}
+                type="button"
+              >
+                Limpiar filtros
+              </button>
+            </div>
           </Panel>
         ) : null}
         <div className="feedback-history">
-          {reports.map((report) => (
-            <Panel key={report.id}>
+          {visibleReports.map((report) => (
+            <Panel
+              className={`feedback-report-card feedback-report-${report.status.toLocaleLowerCase()}`}
+              key={report.id}
+            >
               <div className="feedback-report-heading">
                 <div>
-                  <strong>
-                    {feedbackLabel(feedbackCategories, report.category)} ·{' '}
-                    {feedbackLabel(feedbackModules, report.module)}
-                  </strong>
-                  <small>{new Date(report.createdAt).toLocaleString('es-MX')}</small>
-                  {report.submittedBy ? <small>Enviado por: {report.submittedBy}</small> : null}
+                  <div className="feedback-report-title">
+                    <span aria-hidden="true">{feedbackCategoryIcons[report.category]}</span>
+                    <div>
+                      <strong>{feedbackLabel(feedbackCategories, report.category)}</strong>
+                      <small>{feedbackLabel(feedbackModules, report.module)}</small>
+                    </div>
+                  </div>
+                  <div className="feedback-report-meta">
+                    <time dateTime={report.createdAt}>{formatReportDate(report.createdAt)}</time>
+                    {report.submittedBy ? <span>Por {report.submittedBy}</span> : null}
+                  </div>
                 </div>
                 <div className="feedback-report-state">
-                  <StatusTag tone={report.status === 'RESOLVED' ? 'success' : 'warning'}>
+                  <StatusTag
+                    tone={
+                      report.status === 'RESOLVED'
+                        ? 'success'
+                        : report.status === 'NEW'
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                  >
                     {feedbackLabel(feedbackStatuses, report.status)}
                   </StatusTag>
-                  {serverBacked && session?.role === 'ADMIN' ? (
-                    <div className="feedback-admin-actions">
-                      <label>
-                        <span className="sr-only">Estado del comentario</span>
-                        <select
-                          aria-label="Estado del comentario"
-                          disabled={workingReportId === report.id}
-                          onChange={(event) =>
-                            setResolutionDrafts((current) => ({
-                              ...current,
-                              [report.id]: {
-                                status: event.target.value as FeedbackStatus,
-                                resolutionComment:
-                                  current[report.id]?.resolutionComment ??
-                                  report.resolutionComment ??
-                                  '',
-                                resolutionPath:
-                                  current[report.id]?.resolutionPath ?? report.resolutionPath ?? '',
-                              },
-                            }))
-                          }
-                          value={resolutionDrafts[report.id]?.status ?? report.status}
-                        >
-                          {feedbackStatuses.map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <button
-                        className="button secondary"
-                        disabled={workingReportId === report.id}
-                        onClick={() => void saveResolution(report)}
-                        type="button"
-                      >
-                        {workingReportId === report.id ? 'Guardando…' : 'Guardar respuesta'}
-                      </button>
-                      <button
-                        className="button secondary danger feedback-delete"
-                        disabled={workingReportId === report.id}
-                        onClick={() => void removeReport(report)}
-                        type="button"
-                      >
-                        {workingReportId === report.id ? 'Guardando…' : 'Eliminar'}
-                      </button>
-                    </div>
+                  {canManageReports ? (
+                    <button
+                      aria-expanded={editingReportId === report.id}
+                      className="button secondary feedback-manage"
+                      onClick={() =>
+                        setEditingReportId((current) =>
+                          current === report.id ? undefined : report.id,
+                        )
+                      }
+                      type="button"
+                    >
+                      {editingReportId === report.id ? 'Cerrar gestión' : 'Gestionar'}
+                    </button>
                   ) : null}
                 </div>
               </div>
-              <p>{report.description}</p>
-              {serverBacked && session?.role === 'ADMIN' ? (
+              <p className="feedback-report-description">{report.description}</p>
+              {reportMessages[report.id] ? (
+                <p
+                  className={`notice ${reportMessages[report.id].tone} feedback-report-message`}
+                  role={reportMessages[report.id].tone === 'danger' ? 'alert' : 'status'}
+                >
+                  {reportMessages[report.id].message}
+                </p>
+              ) : null}
+              {canManageReports && editingReportId === report.id ? (
                 <div className="feedback-resolution-editor">
+                  <label>
+                    Estado
+                    <select
+                      aria-label="Estado del comentario"
+                      disabled={workingReportId === report.id}
+                      onChange={(event) =>
+                        setResolutionDrafts((current) => ({
+                          ...current,
+                          [report.id]: {
+                            status: event.target.value as FeedbackStatus,
+                            resolutionComment:
+                              current[report.id]?.resolutionComment ??
+                              report.resolutionComment ??
+                              '',
+                            resolutionPath:
+                              current[report.id]?.resolutionPath ?? report.resolutionPath ?? '',
+                          },
+                        }))
+                      }
+                      value={resolutionDrafts[report.id]?.status ?? report.status}
+                    >
+                      {feedbackStatuses.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <label>
                     Respuesta para la persona que reportó
                     <textarea
@@ -544,12 +811,28 @@ export function FeedbackForm() {
                       }
                       placeholder="/quotes?create=1"
                       value={
-                        resolutionDrafts[report.id]?.resolutionPath ??
-                        report.resolutionPath ??
-                        ''
+                        resolutionDrafts[report.id]?.resolutionPath ?? report.resolutionPath ?? ''
                       }
                     />
                   </label>
+                  <div className="feedback-admin-actions">
+                    <button
+                      className="button"
+                      disabled={workingReportId === report.id}
+                      onClick={() => void saveResolution(report)}
+                      type="button"
+                    >
+                      {workingReportId === report.id ? 'Guardando…' : 'Guardar respuesta'}
+                    </button>
+                    <button
+                      className="button secondary danger feedback-delete"
+                      disabled={workingReportId === report.id}
+                      onClick={() => void removeReport(report)}
+                      type="button"
+                    >
+                      {workingReportId === report.id ? 'Guardando…' : 'Eliminar reporte'}
+                    </button>
+                  </div>
                 </div>
               ) : report.resolutionComment ? (
                 <div className="feedback-resolution">
@@ -568,27 +851,25 @@ export function FeedbackForm() {
                     <strong>Imagen adjunta</strong>
                     <small>{report.imageName}</small>
                   </span>
-                  {serverBacked ? (
-                    <button
-                      className="button secondary"
-                      onClick={() => setPreviewReport(report)}
-                      type="button"
-                    >
-                      Ver imagen
-                    </button>
-                  ) : null}
+                  <button
+                    className="button secondary"
+                    onClick={() => void openPreview(report)}
+                    type="button"
+                  >
+                    Ver imagen
+                  </button>
                 </div>
               ) : null}
             </Panel>
           ))}
         </div>
       </section>
-      {previewReport ? (
+      {previewReport && previewImageUrl ? (
         <div
           aria-label={`Imagen adjunta ${previewReport.imageName ?? ''}`}
           aria-modal="true"
           className="feedback-image-backdrop"
-          onClick={() => setPreviewReport(undefined)}
+          onClick={closePreview}
           role="dialog"
         >
           <div className="feedback-image-dialog" onClick={(event) => event.stopPropagation()}>
@@ -597,11 +878,7 @@ export function FeedbackForm() {
                 <strong>Imagen del reporte</strong>
                 <small>{previewReport.imageName}</small>
               </div>
-              <button
-                aria-label="Cerrar imagen"
-                onClick={() => setPreviewReport(undefined)}
-                type="button"
-              >
+              <button aria-label="Cerrar imagen" onClick={closePreview} type="button">
                 ×
               </button>
             </header>
@@ -609,7 +886,7 @@ export function FeedbackForm() {
               <Image
                 alt={`Captura adjunta al reporte: ${previewReport.imageName ?? 'imagen'}`}
                 height={900}
-                src={`/api/feedback/${encodeURIComponent(previewReport.id)}`}
+                src={previewImageUrl}
                 unoptimized
                 width={1400}
               />
@@ -617,13 +894,13 @@ export function FeedbackForm() {
             <footer>
               <a
                 className="button secondary"
-                href={`/api/feedback/${encodeURIComponent(previewReport.id)}`}
+                href={previewImageUrl}
                 rel="noreferrer"
                 target="_blank"
               >
                 Abrir en otra pestaña
               </a>
-              <button className="button" onClick={() => setPreviewReport(undefined)} type="button">
+              <button className="button" onClick={closePreview} type="button">
                 Cerrar
               </button>
             </footer>

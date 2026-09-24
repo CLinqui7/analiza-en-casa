@@ -10,6 +10,7 @@ import {
   configurationEntrySchema,
   catalogItemSchema,
   purchaseSchema,
+  clinicalDocumentSchema,
   emptyOperations,
   type Patient,
   type Doctor,
@@ -18,6 +19,7 @@ import {
   type OperationsSnapshot,
   type Quote,
   type Shift,
+  type ClinicalDocument,
 } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
@@ -457,6 +459,163 @@ export function postgresPersistence(): Persistence {
           return purchase;
         });
       }
+      if (command.command === 'clinical.create') {
+        authorize(actor, 'clinical:write');
+        const { document } = z
+          .object({
+            command: z.literal('clinical.create'),
+            document: clinicalDocumentSchema.strict(),
+          })
+          .strict()
+          .parse(input);
+        if (
+          document.status !== 'DRAFT' ||
+          document.version !== 1 ||
+          document.signedAt ||
+          document.correctionOf ||
+          document.correctionReason
+        )
+          throw new MongoInputError('Un documento nuevo debe iniciar como borrador versión 1.');
+        return transaction(pool, actor, async (c) => {
+          const hospitalization = await c.query(
+            `SELECT id FROM analiza.hospitalizations
+             WHERE organization_id=$1 AND id=$2 AND patient_id=$3
+               AND body->>'status'<>'CLOSED'`,
+            [actor.organizationId, document.caseId, document.patientId],
+          );
+          if (!hospitalization.rowCount)
+            throw new MongoInputError(
+              'Seleccione una hospitalización activa de esta organización.',
+            );
+          try {
+            await c.query(
+              `INSERT INTO analiza.clinical_documents(
+                 organization_id,id,case_id,patient_id,root_document_id,
+                 document_version,status,body,created_by,created_at
+               ) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10)`,
+              [
+                actor.organizationId,
+                document.id,
+                document.caseId,
+                document.patientId,
+                document.id,
+                document.version,
+                document.status,
+                JSON.stringify(document),
+                actor.userId,
+                document.createdAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          await audit(c, actor, 'CLINICAL_DOCUMENT_CREATED', 'clinical_documents', document.id);
+          return { id: document.id };
+        });
+      }
+      if (command.command === 'clinical.sign') {
+        authorize(actor, 'clinical:sign');
+        const { documentId } = z
+          .object({ command: z.literal('clinical.sign'), documentId: z.string().min(1) })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const current = await c.query<{ status: ClinicalDocument['status'] }>(
+            `SELECT status FROM analiza.clinical_documents
+             WHERE organization_id=$1 AND id=$2 FOR UPDATE`,
+            [actor.organizationId, documentId],
+          );
+          if (!current.rowCount) throw new MongoAccessError();
+          if (current.rows[0]?.status === 'SIGNED') return { id: documentId };
+          const signedAt = new Date().toISOString();
+          const updated = await c.query(
+            `UPDATE analiza.clinical_documents
+             SET status='SIGNED',signed_by=$3,signed_at=$4
+             WHERE organization_id=$1 AND id=$2 AND status='DRAFT'`,
+            [actor.organizationId, documentId, actor.userId, signedAt],
+          );
+          if (updated.rowCount !== 1) throw new MongoConflictError();
+          await audit(c, actor, 'CLINICAL_DOCUMENT_SIGNED', 'clinical_documents', documentId);
+          return { id: documentId };
+        });
+      }
+      if (command.command === 'clinical.correct') {
+        authorize(actor, 'clinical:sign');
+        const parsed = z
+          .object({
+            command: z.literal('clinical.correct'),
+            documentId: z.string().min(1),
+            correctionId: z.string().min(1),
+            reason: z.string().trim().min(1),
+            summary: z.string().trim().min(1),
+            author: z.string().trim().min(1),
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const original = (
+            await c.query<{
+              body: ClinicalDocument;
+              root_document_id: string;
+            }>(
+              `SELECT body,root_document_id FROM analiza.clinical_documents
+               WHERE organization_id=$1 AND id=$2 AND status='SIGNED' FOR UPDATE`,
+              [actor.organizationId, parsed.documentId],
+            )
+          ).rows[0];
+          if (!original) throw new MongoAccessError();
+          const nextVersion = Number(
+            (
+              await c.query<{ next_version: number }>(
+                `SELECT coalesce(max(document_version),0)+1 AS next_version
+                 FROM analiza.clinical_documents
+                 WHERE organization_id=$1 AND root_document_id=$2`,
+                [actor.organizationId, original.root_document_id],
+              )
+            ).rows[0]?.next_version ?? 2,
+          );
+          const createdAt = new Date().toISOString();
+          const correction = clinicalDocumentSchema.parse({
+            ...original.body,
+            id: parsed.correctionId,
+            summary: parsed.summary,
+            author: parsed.author,
+            status: 'DRAFT',
+            version: nextVersion,
+            createdAt,
+            signedAt: undefined,
+            correctionOf: parsed.documentId,
+            correctionReason: parsed.reason,
+          });
+          try {
+            await c.query(
+              `INSERT INTO analiza.clinical_documents(
+                 organization_id,id,case_id,patient_id,root_document_id,
+                 document_version,status,body,created_by,created_at
+               ) VALUES($1,$2,$3,$4,$5,$6,'DRAFT',$7::jsonb,$8,$9)`,
+              [
+                actor.organizationId,
+                correction.id,
+                correction.caseId,
+                correction.patientId,
+                original.root_document_id,
+                correction.version,
+                JSON.stringify(correction),
+                actor.userId,
+                correction.createdAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          await audit(c, actor, 'CLINICAL_DOCUMENT_CORRECTED', 'clinical_documents', correction.id);
+          return { id: correction.id };
+        });
+      }
       if (command.command === 'nurse.create') {
         authorize(actor, 'nurses:manage');
         const data = z
@@ -705,26 +864,48 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 13 ||
+        row.migrations !== 14 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
     },
     async workspace(actor) {
-      const [p, d, h, s, r, q, catalogs, purchases, audits] = await Promise.all([
+      const [p, d, h, s, r, q, clinicalDocuments, catalogs, purchases, audits] = await Promise.all([
         can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
         can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
         can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
         can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
+        can(actor.role, 'clinical:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query<{
+                  body: Record<string, unknown>;
+                  status: ClinicalDocument['status'];
+                  signed_at: Date | null;
+                }>(
+                  `SELECT body,status,signed_at
+                   FROM analiza.clinical_documents
+                   WHERE organization_id=$1
+                   ORDER BY created_at DESC,id`,
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => {
+                const body: Record<string, unknown> = { ...row.body, status: row.status };
+                if (row.signed_at) body.signedAt = row.signed_at.toISOString();
+                else delete body.signedAt;
+                return clinicalDocumentSchema.parse(body);
+              }),
+            )
+          : [],
         can(actor.role, 'catalogs:read')
           ? transaction(pool, actor, async (c) =>
               (
@@ -769,6 +950,7 @@ export function postgresPersistence(): Persistence {
         shifts: s,
         nursingResources: r,
         quotes: q.map((row) => row.quote),
+        clinicalDocuments,
         catalogItems: catalogs,
         purchases,
         auditEntries: audits,
