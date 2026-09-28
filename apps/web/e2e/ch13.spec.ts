@@ -36,6 +36,49 @@ test('CH13 renders a factual purchase list without financial operations', async 
     )
     .toBe(before);
 });
+// test-id: playwright:feedback-purchase-catalog-prefix-and-equipment-traceability
+test('purchase catalog supports word-prefix search and equipment keeps only its serial', async ({
+  page,
+}) => {
+  await login(page);
+  await page.getByRole('button', { name: 'Nueva compra' }).click();
+
+  const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
+  const catalog = dialog.getByRole('combobox', { name: 'Ítem de catálogo' });
+  await catalog.fill('unidad');
+  await dialog.getByRole('option', { name: /Unidad inerte QA/ }).click();
+  await expect(dialog.getByText(/Seleccionado:.*Unidad inerte QA/)).toBeVisible();
+  await expect(dialog.getByLabel('Fecha de vencimiento')).toBeVisible();
+  await expect(dialog.getByLabel('Lote')).toBeVisible();
+  await expect(dialog.getByLabel('Número de serie')).toHaveCount(0);
+
+  await dialog.getByLabel('Fecha de vencimiento').fill('2027-01-01');
+  await dialog.getByLabel('Lote').fill('LOT-SYNTHETIC-01');
+  await catalog.fill('kit');
+  await dialog.getByRole('option', { name: /Kit operativo demo/ }).click();
+  await expect(dialog.getByText(/Seleccionado:.*Kit operativo demo/)).toBeVisible();
+  await expect(dialog.getByLabel('Fecha de vencimiento')).toHaveCount(0);
+  await expect(dialog.getByLabel('Lote')).toHaveCount(0);
+  await expect(dialog.getByLabel('Número de serie')).toBeVisible();
+
+  await dialog.getByLabel('Referencia de compra').fill('PURCHASE-SEARCH-QA-001');
+  await dialog.getByLabel('Número de serie').fill('SERIAL-SYNTHETIC-01');
+  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
+  await expect(page.getByRole('status')).toContainText('guardada como borrador');
+
+  const saved = await page.evaluate(() => {
+    const purchases = JSON.parse(
+      localStorage.getItem('analiza.en.casa.workspace.v3.purchases') ?? '[]',
+    ) as Array<Record<string, unknown>>;
+    return purchases.find((purchase) => purchase.reference === 'PURCHASE-SEARCH-QA-001');
+  });
+  expect(saved).toMatchObject({
+    catalogItemId: 'catalog-demo-kit',
+    serialNumber: 'SERIAL-SYNTHETIC-01',
+  });
+  expect(saved).not.toHaveProperty('expirationDate');
+  expect(saved).not.toHaveProperty('lotNumber');
+});
 test('CH13 permits AUDITOR read-only list access and denies NURSE directly', async ({
   browser,
 }) => {

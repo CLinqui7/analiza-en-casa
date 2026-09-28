@@ -23,6 +23,7 @@ import {
   type ClinicalDocument,
 } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
+import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { AuthService, hashPassword } from '../auth-service';
 import {
@@ -452,12 +453,13 @@ export function postgresPersistence(): Persistence {
             throw new MongoInputError('Indique fecha de vencimiento y lote.');
           if (category === 'EQUIPMENT' && !purchase.serialNumber)
             throw new MongoInputError('Indique el número de serie del equipo.');
+          const normalizedPurchase = normalizePurchaseTraceability(purchase, category ?? undefined);
           await c.query(
             'INSERT INTO analiza.purchases(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
-            [actor.organizationId, purchase.id, JSON.stringify(purchase)],
+            [actor.organizationId, purchase.id, JSON.stringify(normalizedPurchase)],
           );
           await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', purchase.id);
-          return purchase;
+          return normalizedPurchase;
         });
       }
       if (command.command === 'inventory.record') {

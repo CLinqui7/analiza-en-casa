@@ -116,6 +116,9 @@ describe('assigned clinical operations', () => {
       catalogItemId: 'item-synthetic-01',
       reference: 'PURCHASE-SYNTHETIC-01',
       note: 'Datos sintéticos',
+      expirationDate: '2027-01-01',
+      lotNumber: 'LOT-SYNTHETIC-01',
+      serialNumber: 'SERIAL-SYNTHETIC-01',
       status: 'DRAFT',
       createdAt: '2026-09-10T07:00:00.000Z',
     };
@@ -128,6 +131,7 @@ describe('assigned clinical operations', () => {
       id: purchase.catalogItemId,
       organizationId: 'org-a',
       status: 'ACTIVE',
+      category: 'EQUIPMENT',
     });
     const purchaseInsert = vi.fn().mockResolvedValue({ acknowledged: true });
     const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
@@ -157,7 +161,12 @@ describe('assigned clinical operations', () => {
       { session },
     );
     expect(purchaseInsert).toHaveBeenCalledWith(
-      { ...purchase, organizationId: 'org-a' },
+      {
+        ...purchase,
+        expirationDate: undefined,
+        lotNumber: undefined,
+        organizationId: 'org-a',
+      },
       { session },
     );
     expect(auditInsert).toHaveBeenCalledWith(

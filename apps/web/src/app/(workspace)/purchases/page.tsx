@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
+import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
   supplierCatalogItemId: z.string().min(1, 'Seleccione un proveedor.'),
@@ -38,8 +40,7 @@ export default function PurchasesPage() {
     [catalogItems],
   );
   const suppliers = useMemo(
-    () =>
-      catalogItems.filter((item) => item.status === 'ACTIVE' && item.category === 'PROVIDERS'),
+    () => catalogItems.filter((item) => item.status === 'ACTIVE' && item.category === 'PROVIDERS'),
     [catalogItems],
   );
   const form = useForm<Form>({
@@ -73,6 +74,14 @@ export default function PurchasesPage() {
   );
   const selectedCatalogItemId = useWatch({ control: form.control, name: 'catalogItemId' });
   const selectedItem = purchasableItems.find((item) => item.id === selectedCatalogItemId);
+  const purchaseCatalogOptions = useMemo(
+    () =>
+      purchasableItems.map((item) => ({
+        value: item.id,
+        label: `${item.sku} · ${item.name}`,
+      })),
+    [purchasableItems],
+  );
   const visible = useMemo(
     () =>
       purchases.filter((purchase) =>
@@ -99,6 +108,19 @@ export default function PurchasesPage() {
       serialNumber: '',
     });
   }
+  function selectCatalogItem(itemId: string) {
+    const item = purchasableItems.find((candidate) => candidate.id === itemId);
+    form.setValue('catalogItemId', item?.id ?? '', { shouldValidate: true });
+    form.setValue('unitCost', item?.costPrice ?? 0, { shouldValidate: true });
+    if (item?.category === 'EQUIPMENT') {
+      form.setValue('expirationDate', '');
+      form.setValue('lotNumber', '');
+      form.clearErrors(['expirationDate', 'lotNumber']);
+    } else if (item?.category === 'MEDICATIONS' || item?.category === 'SUPPLIES') {
+      form.setValue('serialNumber', '');
+      form.clearErrors('serialNumber');
+    }
+  }
   async function submit(values: Form) {
     const catalogItem = purchasableItems.find((item) => item.id === values.catalogItemId);
     if (!catalogItem) return;
@@ -120,20 +142,24 @@ export default function PurchasesPage() {
       form.setError('serialNumber', { message: 'Indique el número de serie.' });
       return;
     }
-    const saved = await addPurchase({
-      id: crypto.randomUUID(),
-      catalogItemId: values.catalogItemId,
-      supplierCatalogItemId: values.supplierCatalogItemId,
-      reference: values.reference,
-      note: values.note || undefined,
-      quantity: values.quantity,
-      unitCost: values.unitCost,
-      expirationDate: values.expirationDate || undefined,
-      lotNumber: values.lotNumber || undefined,
-      serialNumber: values.serialNumber || undefined,
-      status: 'DRAFT',
-      createdAt: new Date().toISOString(),
-    } satisfies Purchase);
+    const purchase = normalizePurchaseTraceability(
+      {
+        id: crypto.randomUUID(),
+        catalogItemId: values.catalogItemId,
+        supplierCatalogItemId: values.supplierCatalogItemId,
+        reference: values.reference,
+        note: values.note || undefined,
+        quantity: values.quantity,
+        unitCost: values.unitCost,
+        expirationDate: values.expirationDate || undefined,
+        lotNumber: values.lotNumber || undefined,
+        serialNumber: values.serialNumber || undefined,
+        status: 'DRAFT',
+        createdAt: new Date().toISOString(),
+      } satisfies Purchase,
+      catalogItem.category,
+    );
+    const saved = await addPurchase(purchase);
     if (!saved) return;
     setMessage('Compra guardada como borrador con proveedor y trazabilidad de inventario.');
     close();
@@ -178,10 +204,8 @@ export default function PurchasesPage() {
           <strong>Antes de registrar una compra:</strong>{' '}
           {!suppliers.length ? 'agrega al menos un proveedor activo' : ''}
           {!suppliers.length && !purchasableItems.length ? ' y ' : ''}
-          {!purchasableItems.length
-            ? 'agrega un medicamento, insumo o equipo activo'
-            : ''}{' '}
-          en <Link href="/catalogs/operational">Catálogos operativos</Link>.
+          {!purchasableItems.length ? 'agrega un medicamento, insumo o equipo activo' : ''} en{' '}
+          <Link href="/catalogs/operational">Catálogos operativos</Link>.
         </div>
       ) : null}
       <Panel>
@@ -350,23 +374,14 @@ export default function PurchasesPage() {
         >
           <label>
             Ítem de catálogo
-            <select
-              {...form.register('catalogItemId')}
-              onChange={(event) => {
-                form.setValue('catalogItemId', event.target.value, { shouldValidate: true });
-                form.setValue(
-                  'unitCost',
-                  purchasableItems.find((item) => item.id === event.target.value)?.costPrice ?? 0,
-                  { shouldValidate: true },
-                );
-              }}
-            >
-              {purchasableItems.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.sku} · {item.name}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+              actionId="PURCHASE-CATALOG-SEARCH"
+              ariaLabel="Ítem de catálogo"
+              onChange={selectCatalogItem}
+              options={purchaseCatalogOptions}
+              placeholder="Escribe el inicio del código o de una palabra"
+              value={selectedCatalogItemId ?? ''}
+            />
             {form.formState.errors.catalogItemId ? (
               <span className="field-error">{form.formState.errors.catalogItemId.message}</span>
             ) : null}
@@ -425,7 +440,9 @@ export default function PurchasesPage() {
                 Fecha de vencimiento
                 <input type="date" {...form.register('expirationDate')} />
                 {form.formState.errors.expirationDate ? (
-                  <span className="field-error">{form.formState.errors.expirationDate.message}</span>
+                  <span className="field-error">
+                    {form.formState.errors.expirationDate.message}
+                  </span>
                 ) : null}
               </label>
               <label>
@@ -480,9 +497,7 @@ export default function PurchasesPage() {
             </div>
             <div>
               <dt>Proveedor</dt>
-              <dd>
-                {itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}
-              </dd>
+              <dd>{itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}</dd>
             </div>
             <div>
               <dt>Estado</dt>

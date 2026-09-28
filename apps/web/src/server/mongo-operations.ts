@@ -22,6 +22,7 @@ import {
   purchaseSchema,
 } from '@analiza/contracts';
 import { can } from '@/lib/permissions';
+import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { hashPassword } from './mongo-auth';
 import {
   MongoAccessError,
@@ -371,15 +372,15 @@ export class MongoOperationsRepository {
             assertSameRetry(previous, purchase);
             return { id: previous.id };
           }
-          if (
-            !(await this.database
-              .collection('catalogItems')
-              .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session }))
-          )
+          const catalogItem = await this.database
+            .collection('catalogItems')
+            .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session });
+          if (!catalogItem)
             throw new MongoInputError('Seleccione un artículo activo de esta organización.');
+          const normalizedPurchase = normalizePurchaseTraceability(purchase, catalogItem.category);
           await this.database
             .collection('purchases')
-            .insertOne({ ...purchase, ...scoped }, { session });
+            .insertOne({ ...normalizedPurchase, ...scoped }, { session });
           await audit('PURCHASE_DRAFT_CREATED', purchase.id);
           return { id: purchase.id };
         }
