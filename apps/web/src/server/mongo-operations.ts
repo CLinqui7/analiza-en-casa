@@ -20,6 +20,9 @@ import {
   clinicalDocumentSchema,
   inventoryMovementSchema,
   purchaseSchema,
+  warehouseInputSchema,
+  warehouseSchema,
+  warehouseTransferSchema,
 } from '@analiza/contracts';
 import { can } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
@@ -36,6 +39,10 @@ const identifier = z.string().trim().min(1).max(120);
 const commands = z.discriminatedUnion('command', [
   z.object({ command: z.literal('catalog.create'), item: catalogItemSchema.strict() }).strict(),
   z.object({ command: z.literal('catalog.save'), item: catalogItemSchema.strict() }).strict(),
+  z.object({ command: z.literal('warehouse.save'), warehouse: warehouseInputSchema }).strict(),
+  z
+    .object({ command: z.literal('inventory.transfer'), transfer: warehouseTransferSchema })
+    .strict(),
   z
     .object({
       command: z.literal('inventory.record'),
@@ -200,6 +207,17 @@ export class MongoOperationsRepository {
             }),
           ])
         : undefined,
+      can(actor.role, 'inventory:read')
+        ? read('warehouses').then((rows) => {
+            result.warehouses = rows
+              .map((row) => warehouseSchema.strip().parse(row))
+              .sort(
+                (left, right) =>
+                  Number(left.status === 'INACTIVE') - Number(right.status === 'INACTIVE') ||
+                  left.name.localeCompare(right.name, 'es'),
+              );
+          })
+        : undefined,
     ]);
     return result;
   }
@@ -276,6 +294,158 @@ export class MongoOperationsRepository {
           await audit('CATALOG_ITEM_SAVED', input.item.id);
           return { id: input.item.id };
         }
+        if (input.command === 'warehouse.save') {
+          permission('inventory:write');
+          const submitted = input.warehouse;
+          const existing = await this.database
+            .collection('warehouses')
+            .findOne({ ...scoped, id: submitted.id }, { session });
+          if (!existing && submitted.status !== 'ACTIVE')
+            throw new MongoInputError('Una bodega nueva debe iniciar activa.');
+          const codeNormalized = submitted.code.toUpperCase();
+          if (
+            await this.database
+              .collection('warehouses')
+              .findOne({ ...scoped, codeNormalized, id: { $ne: submitted.id } }, { session })
+          )
+            throw new MongoConflictError();
+          if (existing && submitted.status === 'INACTIVE') {
+            const movements = await this.database
+              .collection('inventoryMovements')
+              .find({ ...scoped, warehouseId: submitted.id }, { session })
+              .toArray();
+            const balances = new Map<string, number>();
+            for (const movement of movements) {
+              const delta =
+                movement.kind === 'TRANSFER'
+                  ? movement.transferDirection === 'IN'
+                    ? movement.quantity
+                    : -movement.quantity
+                  : movement.kind === 'ENTRY' || movement.kind === 'RETURN'
+                    ? movement.quantity
+                    : movement.kind === 'EXIT' || movement.adjustmentDirection === 'OUT'
+                      ? -movement.quantity
+                      : movement.quantity;
+              balances.set(movement.itemId, (balances.get(movement.itemId) ?? 0) + delta);
+            }
+            if ([...balances.values()].some((balance) => balance !== 0))
+              throw new MongoInputError(
+                'Traslade o ajuste todas las existencias antes de desactivar la bodega.',
+              );
+          }
+          const now = new Date().toISOString();
+          const warehouse = warehouseSchema.parse({
+            ...submitted,
+            code: codeNormalized,
+            description: submitted.description || undefined,
+            createdAt: existing?.createdAt ?? now,
+            updatedAt: now,
+          });
+          await this.database
+            .collection('warehouses')
+            .updateOne(
+              { ...scoped, id: warehouse.id },
+              { $set: { ...warehouse, ...scoped, codeNormalized } },
+              { upsert: true, session },
+            );
+          await audit(
+            !existing
+              ? 'WAREHOUSE_CREATED'
+              : existing.status !== warehouse.status && warehouse.status === 'INACTIVE'
+                ? 'WAREHOUSE_DEACTIVATED'
+                : 'WAREHOUSE_UPDATED',
+            warehouse.id,
+          );
+          return warehouse;
+        }
+        if (input.command === 'inventory.transfer') {
+          permission('inventory:write');
+          const transfer = input.transfer;
+          const previous = await this.database
+            .collection('inventoryTransfers')
+            .findOne({ ...scoped, idempotencyKey: transfer.idempotencyKey }, { session });
+          if (previous) {
+            assertSameRetry(previous, transfer, Object.keys(transfer));
+            return transfer;
+          }
+          if (
+            !(await this.database.collection('catalogItems').findOne(
+              {
+                ...scoped,
+                id: transfer.itemId,
+                status: 'ACTIVE',
+                category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+              },
+              { session },
+            ))
+          )
+            throw new MongoInputError('Seleccione un artículo activo del inventario.');
+          const activeWarehouses = await this.database
+            .collection('warehouses')
+            .find(
+              {
+                ...scoped,
+                id: { $in: [transfer.sourceWarehouseId, transfer.destinationWarehouseId] },
+                status: 'ACTIVE',
+              },
+              { session },
+            )
+            .toArray();
+          if (activeWarehouses.length !== 2)
+            throw new MongoInputError('Seleccione dos bodegas activas y distintas.');
+          await applyStockDelta(
+            this.database,
+            session,
+            actor,
+            transfer.itemId,
+            transfer.sourceWarehouseId,
+            -transfer.quantity,
+          );
+          await applyStockDelta(
+            this.database,
+            session,
+            actor,
+            transfer.itemId,
+            transfer.destinationWarehouseId,
+            transfer.quantity,
+          );
+          const common = {
+            itemId: transfer.itemId,
+            createdAt: transfer.occurredAt,
+            kind: 'TRANSFER' as const,
+            quantity: transfer.quantity,
+            reason: transfer.reason,
+            reference: transfer.reference,
+            user: actor.userId,
+            transferId: transfer.id,
+          };
+          const outbound = inventoryMovementSchema.parse({
+            ...common,
+            id: `${transfer.id}:out`,
+            warehouseId: transfer.sourceWarehouseId,
+            transferDirection: 'OUT',
+            counterpartWarehouseId: transfer.destinationWarehouseId,
+          });
+          const inbound = inventoryMovementSchema.parse({
+            ...common,
+            id: `${transfer.id}:in`,
+            warehouseId: transfer.destinationWarehouseId,
+            transferDirection: 'IN',
+            counterpartWarehouseId: transfer.sourceWarehouseId,
+          });
+          await this.database
+            .collection('inventoryTransfers')
+            .insertOne({ ...transfer, ...scoped }, { session });
+          await this.database.collection('inventoryMovements').insertMany(
+            [
+              { ...outbound, ...scoped, idempotencyKey: `${transfer.idempotencyKey}:out` },
+              { ...inbound, ...scoped, idempotencyKey: `${transfer.idempotencyKey}:in` },
+            ],
+            { session },
+          );
+          await audit('INVENTORY_TRANSFER_RECORDED', transfer.id);
+          return transfer;
+        }
         if (input.command === 'inventory.record') {
           permission('inventory:write');
           const movement = input.movement;
@@ -291,9 +461,15 @@ export class MongoOperationsRepository {
             return { id: previous.id };
           }
           if (
-            !(await this.database
-              .collection('catalogItems')
-              .findOne({ ...scoped, id: movement.itemId, status: 'ACTIVE' }, { session }))
+            !(await this.database.collection('catalogItems').findOne(
+              {
+                ...scoped,
+                id: movement.itemId,
+                status: 'ACTIVE',
+                category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+              },
+              { session },
+            ))
           )
             throw new MongoInputError('El artículo no está disponible.');
           if (movement.kind === 'TRANSFER')
@@ -302,6 +478,17 @@ export class MongoOperationsRepository {
             );
           if (movement.kind === 'ADJUSTMENT' && !movement.adjustmentDirection)
             throw new MongoInputError('Indique la dirección del ajuste.');
+          if (
+            !(await this.database.collection('warehouses').findOne(
+              {
+                ...scoped,
+                id: movement.warehouseId ?? 'central',
+                status: 'ACTIVE',
+              },
+              { session },
+            ))
+          )
+            throw new MongoInputError('Seleccione una bodega activa.');
           const delta =
             (movement.kind === 'EXIT' ||
             (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
@@ -898,7 +1085,9 @@ export async function applyStockDelta(
         (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
           ? -movement.quantity
           : movement.kind === 'TRANSFER'
-            ? 0
+            ? movement.transferDirection === 'IN'
+              ? movement.quantity
+              : -movement.quantity
             : movement.quantity),
       0,
     );
@@ -933,6 +1122,8 @@ export const mongoOperationsIndexes: Array<{
     'catalogItems',
     'purchases',
     'clinicalDocuments',
+    'warehouses',
+    'inventoryTransfers',
   ].map((collection) => ({
     collection,
     key: { organizationId: 1, id: 1 },
@@ -951,6 +1142,19 @@ export const mongoOperationsIndexes: Array<{
     collection: 'inventoryBalances',
     key: { organizationId: 1, itemId: 1, warehouseId: 1 },
     name: 'stock_org_item_warehouse',
+    unique: true,
+  },
+  {
+    collection: 'warehouses',
+    key: { organizationId: 1, codeNormalized: 1 },
+    name: 'warehouse_org_code',
+    unique: true,
+    partialFilterExpression: { codeNormalized: { $type: 'string' } },
+  },
+  {
+    collection: 'inventoryTransfers',
+    key: { organizationId: 1, idempotencyKey: 1 },
+    name: 'inventory_transfer_idempotency',
     unique: true,
   },
   {

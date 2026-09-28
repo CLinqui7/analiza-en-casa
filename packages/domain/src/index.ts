@@ -483,7 +483,9 @@ export type KardexRow = InventoryMovement & { delta: number; balance: number };
 
 export function movementDelta(movement: InventoryMovement): number {
   if (movement.kind === 'ENTRY' || movement.kind === 'RETURN') return movement.quantity;
-  if (movement.kind === 'EXIT' || movement.kind === 'TRANSFER') return -movement.quantity;
+  if (movement.kind === 'TRANSFER')
+    return movement.transferDirection === 'IN' ? movement.quantity : -movement.quantity;
+  if (movement.kind === 'EXIT') return -movement.quantity;
   return movement.adjustmentDirection === 'OUT' ? -movement.quantity : movement.quantity;
 }
 

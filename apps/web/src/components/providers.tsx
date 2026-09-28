@@ -72,6 +72,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addPatients: (patients: Patient[]) => void;
   updatePatient: (patient: Patient) => Promise<boolean>;
   refreshPatients: () => Promise<boolean>;
+  refreshWorkspace: () => Promise<boolean>;
   addVitalReading: (reading: VitalReading) => void;
   addNursingResource: (resource: NursingResource) => void;
   addDoctor: (doctor: Doctor) => Promise<boolean>;
@@ -317,6 +318,16 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       return true;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No fue posible actualizar pacientes.');
+      return false;
+    }
+  }, [provider]);
+  const refreshWorkspace = useCallback(async (): Promise<boolean> => {
+    try {
+      setSnapshot(await provider.load());
+      setError(null);
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No fue posible actualizar los datos.');
       return false;
     }
   }, [provider]);
@@ -708,6 +719,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         })),
       updatePatient: (patient) => savePatient(patient, 'replace'),
       refreshPatients,
+      refreshWorkspace,
       addVitalReading: (reading) =>
         commit((current) => ({
           ...current,
@@ -962,6 +974,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       loading,
       provider.mode,
       refreshPatients,
+      refreshWorkspace,
       saveDoctor,
       saveCommand,
       saveHospitalization,

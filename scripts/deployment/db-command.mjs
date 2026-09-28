@@ -189,12 +189,13 @@ try {
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries,analiza.quotes,analiza.purchases,analiza.clinical_documents TO ${role}`,
     );
     await client.query(
-      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements TO ${role}`,
+      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements,analiza.inventory_transfers TO ${role}`,
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.payments TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_visits TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.visit_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.warehouses TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);
     if (provision) {

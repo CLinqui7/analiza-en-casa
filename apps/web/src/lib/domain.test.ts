@@ -188,6 +188,39 @@ describe('domain boundaries', () => {
     ).toBe(false);
   });
 
+  // test-id: vitest:inventory-transfer-ledger
+  it('records a transfer as equal and opposite warehouse movements', () => {
+    const transfer: InventoryMovement[] = [
+      {
+        id: 'transfer-1:out',
+        itemId: 'kit',
+        warehouseId: 'central',
+        counterpartWarehouseId: 'north',
+        transferId: 'transfer-1',
+        transferDirection: 'OUT',
+        kind: 'TRANSFER',
+        quantity: 3,
+        reason: 'Reposición sintética',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+      {
+        id: 'transfer-1:in',
+        itemId: 'kit',
+        warehouseId: 'north',
+        counterpartWarehouseId: 'central',
+        transferId: 'transfer-1',
+        transferDirection: 'IN',
+        kind: 'TRANSFER',
+        quantity: 3,
+        reason: 'Reposición sintética',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+    ];
+    expect(currentInventoryBalance(transfer, 'kit', 'central')).toBe(-3);
+    expect(currentInventoryBalance(transfer, 'kit', 'north')).toBe(3);
+    expect(currentInventoryBalance(transfer, 'kit')).toBe(0);
+  });
+
   it('escapes generated CSV values', () => {
     expect(toCsv([['valor', 'texto "entre comillas"']])).toBe('"valor","texto ""entre comillas"""');
   });

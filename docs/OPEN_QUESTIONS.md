@@ -46,9 +46,9 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 ## Feedback operativo · 25 septiembre 2026
 
 - `FEEDBACK-7BB83834`: se implementaron gráficos semanales de visitas realizadas, separación Médico/Enfermería, ingresos administrativos y cobros aplicados con persistencia PostgreSQL. Se mantienen separados de cotizaciones y facturación fiscal. `CR-014`/`CR-015` siguen abiertos únicamente para cualquier fórmula comercial/fiscal adicional no definida.
-- `FEEDBACK-11C6094E`: ya se muestran unidades calculadas por `itemId` y bodega registrada. Crear/editar bodegas y trasladar existencias continúa bloqueado por `CH14-Q009`/`CH14-Q011`; se retiró del formulario el traslado incompleto que podía registrar una sola salida sin destino.
+- `FEEDBACK-11C6094E`: resuelto para bodegas y unidades sin lote: alta/edición/desactivación auditable, saldo por `itemId` y bodega, y traslado transaccional de doble asiento sin saldo negativo. `CH14-Q011` permanece abierto únicamente para lotes y series.
 - `FEEDBACK-75AE2471`: se implementó PDF interno real, autenticado y sin caché para versiones enviadas/inmutables, y se retiró el envío directo inseguro. El adjunto por WhatsApp sigue bloqueado por `CH07-Q008`/`CH07-Q009`; sólo podrá usarse una notificación genérica con enlace seguro, consentimiento explícito y proveedor verificable.
-- `FEEDBACK-DF6A39DC`: Existencias muestra saldos por bodega, proveedores ya existentes del catálogo y bodegas derivadas de movimientos en modo de solo lectura. El CRUD y los traslados permanecen bloqueados hasta resolver `CH14-Q008`/`CH14-Q009`.
+- `FEEDBACK-DF6A39DC`: Existencias ya administra bodegas y traslados con permisos y auditoría; proveedores existentes continúan visibles. El ciclo de vida propio de proveedores permanece abierto en `CH14-Q008`.
 - `FEEDBACK-C7EF7D96`: pagos parciales idempotentes, prevención transaccional de sobrepago, reversión auditada, estado Pagado y comprobante PDF no fiscal ya están implementados para PostgreSQL/Mongo. La factura fiscal continúa pendiente de `MEETING-Q004` y `CH07-Q008`; no se inventa emisor, numeración, impuestos ni regla tributaria.
 
 ## CH01 · decisiones pendientes trazadas
@@ -231,7 +231,7 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 - `CH14-Q006`: determinar qué datos puede borrar Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0048.
 - `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
 - `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
-- `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.
+- `CH14-Q009` — resuelta el 2026-09-28 para el alcance seguro autorizado: código único por organización, alta/edición, desactivación sólo con saldo cero por ítem, sin borrado, `inventory:write`, RLS, auditoría e idempotencia. Cada traslado crea salida y entrada en la misma transacción y una corrección se registra como traslado compensatorio. Evidencia visual: CH14-E0068/CH14-E0071; contrato verificable: migración PostgreSQL 017 y repositorios PostgreSQL/MongoDB.
 - `CH14-Q010`: definir Fecha inválida, vencimiento, ausencia de fecha, cuarentena, agotamiento, FEFO y alertas. Evidencia: CH14-E0082.
 - `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
 - `CH14-Q012`: definir la composición versionada de kits, roles autorizados, auditoría, duplicación y eliminación preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0106–CH14-E0117.

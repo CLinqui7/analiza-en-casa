@@ -275,7 +275,7 @@ test('CH14 denies FINANCE direct inventory supplier access', async ({ page }) =>
   await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
 });
 
-test('CH14 renders registered warehouse identifiers read-only without audit mutation', async ({
+test('CH14 renders registered warehouses and keeps server writes disabled in mock mode', async ({
   page,
 }) => {
   await login(page);
@@ -285,13 +285,13 @@ test('CH14 renders registered warehouse identifiers read-only without audit muta
   await page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]').click();
   await expect(page.getByRole('heading', { name: 'Items / Bodegas' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Bodegas', exact: true })).toBeVisible();
-  await expect(page.getByLabel('Estado de bodegas')).toBeDisabled();
-  await expect(page.getByLabel('Registros de bodegas por página')).toBeDisabled();
-  await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-PAGE-PREV"]')).toBeDisabled();
-  await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-PAGE-NEXT"]')).toBeDisabled();
+  await expect(page.getByLabel('Estado de bodegas')).toBeEnabled();
+  await expect(page.getByLabel('Estado de bodegas')).toHaveValue('ALL');
+  await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSE-CREATE"]')).toBeDisabled();
   await expect(page.getByRole('columnheader', { name: 'Nombre' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Descripción' })).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Fecha de creación' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Actualización' })).toBeVisible();
   await expect(page.getByText('Bodega central demo')).toBeVisible();
   await expect(page.getByText('Bodega norte demo')).toBeVisible();
   await page.getByLabel('Buscar bodegas').fill('sin-bodega-ch14');

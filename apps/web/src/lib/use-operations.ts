@@ -43,7 +43,9 @@ export function useOperations() {
   }, [connected]);
   const execute = async (command: unknown): Promise<boolean> => {
     if (!connected) {
-      setError('Esta operación necesita la conexión MongoDB. No se guardó en este navegador.');
+      setError(
+        'Esta operación necesita conexión segura con el servidor. No se guardó en este navegador.',
+      );
       return false;
     }
     setBusy(true);

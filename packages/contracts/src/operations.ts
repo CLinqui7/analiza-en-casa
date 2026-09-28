@@ -4,6 +4,41 @@ const id = z.string().trim().min(1).max(120);
 const text = z.string().trim().min(1).max(500);
 const date = z.string().datetime({ offset: true });
 export const configurationCategories = ['SPECIALTY', 'DOSE', 'INSURER', 'MEDICATION'] as const;
+
+export const warehouseStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);
+export const warehouseInputSchema = z
+  .object({
+    id,
+    code: z.string().trim().min(2).max(40),
+    name: z.string().trim().min(1).max(120),
+    description: z.string().trim().max(500).optional(),
+    status: warehouseStatusSchema,
+  })
+  .strict();
+export const warehouseSchema = warehouseInputSchema.extend({
+  createdAt: date,
+  updatedAt: date,
+});
+export type Warehouse = z.infer<typeof warehouseSchema>;
+
+export const warehouseTransferSchema = z
+  .object({
+    id,
+    itemId: id,
+    sourceWarehouseId: id,
+    destinationWarehouseId: id,
+    quantity: z.number().int().positive().max(1000000),
+    reason: z.string().trim().min(1).max(500),
+    reference: z.string().trim().max(200).optional(),
+    occurredAt: date,
+    idempotencyKey: id,
+  })
+  .strict()
+  .refine((value) => value.sourceWarehouseId !== value.destinationWarehouseId, {
+    message: 'La bodega de destino debe ser distinta de la bodega de origen.',
+    path: ['destinationWarehouseId'],
+  });
+export type WarehouseTransfer = z.infer<typeof warehouseTransferSchema>;
 export const configurationEntrySchema = z
   .object({
     id,
@@ -108,6 +143,7 @@ export type OperationsSnapshot = {
   administrations: Administration[];
   visits: Visit[];
   goals: VisitGoal[];
+  warehouses: Warehouse[];
 };
 export const emptyOperations = (): OperationsSnapshot => ({
   professionals: [],
@@ -117,6 +153,7 @@ export const emptyOperations = (): OperationsSnapshot => ({
   administrations: [],
   visits: [],
   goals: [],
+  warehouses: [],
 });
 
 /** Corrections append a new observation; the original remains available for audit. */

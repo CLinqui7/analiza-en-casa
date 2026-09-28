@@ -133,18 +133,44 @@ export const nurseHourEntrySchema = z.object({
   service: z.string().trim().min(1),
 });
 
-export const inventoryMovementSchema = z.object({
-  id: z.string(),
-  itemId: z.string(),
-  createdAt: z.string(),
-  kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
-  quantity: z.number().int().positive(),
-  adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
-  reason: z.string().trim().min(1),
-  warehouseId: z.string().trim().optional(),
-  reference: z.string().trim().optional(),
-  user: z.string().trim().optional(),
-});
+export const inventoryMovementSchema = z
+  .object({
+    id: z.string(),
+    itemId: z.string(),
+    createdAt: z.string(),
+    kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
+    quantity: z.number().int().positive(),
+    adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
+    reason: z.string().trim().min(1),
+    warehouseId: z.string().trim().optional(),
+    reference: z.string().trim().optional(),
+    user: z.string().trim().optional(),
+    transferId: z.string().trim().min(1).optional(),
+    transferDirection: z.enum(['IN', 'OUT']).optional(),
+    counterpartWarehouseId: z.string().trim().min(1).optional(),
+  })
+  .superRefine((movement, context) => {
+    if (movement.kind === 'TRANSFER') {
+      for (const field of ['transferId', 'transferDirection', 'counterpartWarehouseId'] as const) {
+        if (!movement[field])
+          context.addIssue({
+            code: 'custom',
+            message: 'El traslado requiere origen, destino y dirección.',
+            path: [field],
+          });
+      }
+    } else if (
+      movement.transferId ||
+      movement.transferDirection ||
+      movement.counterpartWarehouseId
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Los datos de traslado sólo aplican a movimientos de tipo traslado.',
+        path: ['kind'],
+      });
+    }
+  });
 
 export const shiftSchema = z.object({
   id: z.string(),

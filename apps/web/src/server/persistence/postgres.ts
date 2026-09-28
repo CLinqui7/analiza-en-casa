@@ -18,6 +18,9 @@ import {
   goalInputSchema,
   goalSchema,
   emptyOperations,
+  warehouseInputSchema,
+  warehouseSchema,
+  warehouseTransferSchema,
   type Patient,
   type Doctor,
   type Hospitalization,
@@ -27,6 +30,7 @@ import {
   type Shift,
   type ClinicalDocument,
   type Payment,
+  type InventoryMovement,
 } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
@@ -373,6 +377,15 @@ export function postgresPersistence(): Persistence {
               [actor.organizationId],
             )
           ).rows.map((r) => configurationEntrySchema.parse(r.body));
+        if (can(actor.role, 'inventory:read'))
+          result.warehouses = (
+            await c.query(
+              `SELECT body FROM analiza.warehouses
+               WHERE organization_id=$1
+               ORDER BY CASE status WHEN 'ACTIVE' THEN 0 ELSE 1 END,lower(body->>'name'),id`,
+              [actor.organizationId],
+            )
+          ).rows.map((row) => warehouseSchema.parse(row.body));
         if (can(actor.role, 'reports:read')) {
           // A transaction owns one pg client. Keep its queries sequential: pg@9 will reject
           // overlapping client.query calls even when the current driver only warns about them.
@@ -402,6 +415,195 @@ export function postgresPersistence(): Persistence {
     async execute(actor, input) {
       rejectBrowserAuthority(input);
       const command = z.object({ command: z.string() }).passthrough().parse(input);
+      if (command.command === 'warehouse.save') {
+        authorize(actor, 'inventory:write');
+        const { warehouse: submitted } = z
+          .object({ command: z.literal('warehouse.save'), warehouse: warehouseInputSchema })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+            `${actor.organizationId}:warehouse:${submitted.id}`,
+          ]);
+          const existing = (
+            await c.query<{ body: unknown }>(
+              'SELECT body FROM analiza.warehouses WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+              [actor.organizationId, submitted.id],
+            )
+          ).rows[0];
+          if (!existing && submitted.status !== 'ACTIVE')
+            throw new MongoInputError('Una bodega nueva debe iniciar activa.');
+          if (existing && submitted.status === 'INACTIVE') {
+            const stockedItems = await c.query(
+              `SELECT item_id FROM analiza.inventory_movements
+               WHERE organization_id=$1 AND warehouse_id=$2
+               GROUP BY item_id HAVING sum(delta)<>0 LIMIT 1`,
+              [actor.organizationId, submitted.id],
+            );
+            if (stockedItems.rowCount)
+              throw new MongoInputError(
+                'Traslade o ajuste todas las existencias antes de desactivar la bodega.',
+              );
+          }
+          const now = new Date().toISOString();
+          const prior = existing ? warehouseSchema.parse(existing.body) : null;
+          const warehouse = warehouseSchema.parse({
+            ...submitted,
+            code: submitted.code.toUpperCase(),
+            description: submitted.description || undefined,
+            createdAt: prior?.createdAt ?? now,
+            updatedAt: now,
+          });
+          try {
+            await c.query(
+              `INSERT INTO analiza.warehouses(
+                 organization_id,id,code_normalized,status,body,created_at,updated_at
+               ) VALUES($1,$2,$3,$4,$5::jsonb,$6,$7)
+               ON CONFLICT(organization_id,id) DO UPDATE SET
+                 code_normalized=EXCLUDED.code_normalized,
+                 status=EXCLUDED.status,
+                 body=EXCLUDED.body,
+                 updated_at=EXCLUDED.updated_at`,
+              [
+                actor.organizationId,
+                warehouse.id,
+                warehouse.code.toUpperCase(),
+                warehouse.status,
+                JSON.stringify(warehouse),
+                warehouse.createdAt,
+                warehouse.updatedAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          const action = !prior
+            ? 'WAREHOUSE_CREATED'
+            : prior.status !== warehouse.status && warehouse.status === 'INACTIVE'
+              ? 'WAREHOUSE_DEACTIVATED'
+              : 'WAREHOUSE_UPDATED';
+          await audit(c, actor, action, 'warehouses', warehouse.id);
+          return warehouse;
+        });
+      }
+      if (command.command === 'inventory.transfer') {
+        authorize(actor, 'inventory:write');
+        const { transfer } = z
+          .object({ command: z.literal('inventory.transfer'), transfer: warehouseTransferSchema })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const lockKeys = [
+            `${actor.organizationId}:inventory-transfer:${transfer.idempotencyKey}`,
+            `${actor.organizationId}:${transfer.itemId}:${transfer.sourceWarehouseId}`,
+            `${actor.organizationId}:${transfer.itemId}:${transfer.destinationWarehouseId}`,
+          ].sort();
+          for (const key of lockKeys)
+            await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [key]);
+          const previous = (
+            await c.query<{ body: unknown }>(
+              `SELECT body FROM analiza.inventory_transfers
+               WHERE organization_id=$1 AND idempotency_key=$2`,
+              [actor.organizationId, transfer.idempotencyKey],
+            )
+          ).rows[0];
+          if (previous) {
+            if (canonical(previous.body) !== canonical(transfer)) throw new MongoConflictError();
+            return warehouseTransferSchema.parse(previous.body);
+          }
+          const item = await c.query(
+            `SELECT id FROM analiza.catalog_items
+             WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'
+               AND body->>'category'=ANY($3::text[])`,
+            [actor.organizationId, transfer.itemId, ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT']],
+          );
+          if (!item.rowCount)
+            throw new MongoInputError('Seleccione un artículo activo del inventario.');
+          const warehouseRows = await c.query<{ id: string }>(
+            `SELECT id FROM analiza.warehouses
+             WHERE organization_id=$1 AND id=ANY($2::text[]) AND status='ACTIVE'`,
+            [actor.organizationId, [transfer.sourceWarehouseId, transfer.destinationWarehouseId]],
+          );
+          if (warehouseRows.rowCount !== 2)
+            throw new MongoInputError('Seleccione dos bodegas activas y distintas.');
+          const sourceBalance = Number(
+            (
+              await c.query<{ balance: number }>(
+                `SELECT coalesce(sum(delta),0) AS balance
+                 FROM analiza.inventory_movements
+                 WHERE organization_id=$1 AND item_id=$2 AND warehouse_id=$3`,
+                [actor.organizationId, transfer.itemId, transfer.sourceWarehouseId],
+              )
+            ).rows[0]?.balance ?? 0,
+          );
+          if (sourceBalance < transfer.quantity)
+            throw new MongoInputError('La bodega de origen no tiene existencias suficientes.');
+          const common = {
+            itemId: transfer.itemId,
+            createdAt: transfer.occurredAt,
+            kind: 'TRANSFER' as const,
+            quantity: transfer.quantity,
+            reason: transfer.reason,
+            reference: transfer.reference,
+            user: actor.userId,
+            transferId: transfer.id,
+          };
+          const outbound: InventoryMovement = inventoryMovementSchema.parse({
+            ...common,
+            id: `${transfer.id}:out`,
+            warehouseId: transfer.sourceWarehouseId,
+            transferDirection: 'OUT',
+            counterpartWarehouseId: transfer.destinationWarehouseId,
+          });
+          const inbound: InventoryMovement = inventoryMovementSchema.parse({
+            ...common,
+            id: `${transfer.id}:in`,
+            warehouseId: transfer.destinationWarehouseId,
+            transferDirection: 'IN',
+            counterpartWarehouseId: transfer.sourceWarehouseId,
+          });
+          await c.query(
+            `INSERT INTO analiza.inventory_transfers(
+               organization_id,id,item_id,source_warehouse_id,destination_warehouse_id,
+               idempotency_key,quantity,body,created_at
+             ) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)`,
+            [
+              actor.organizationId,
+              transfer.id,
+              transfer.itemId,
+              transfer.sourceWarehouseId,
+              transfer.destinationWarehouseId,
+              transfer.idempotencyKey,
+              transfer.quantity,
+              JSON.stringify(transfer),
+              transfer.occurredAt,
+            ],
+          );
+          for (const [movement, delta, suffix] of [
+            [outbound, -transfer.quantity, 'out'],
+            [inbound, transfer.quantity, 'in'],
+          ] as const)
+            await c.query(
+              `INSERT INTO analiza.inventory_movements(
+                 organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,created_at
+               ) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
+              [
+                actor.organizationId,
+                movement.id,
+                movement.itemId,
+                movement.warehouseId,
+                `${transfer.idempotencyKey}:${suffix}`,
+                delta,
+                JSON.stringify(movement),
+                movement.createdAt,
+              ],
+            );
+          await audit(c, actor, 'INVENTORY_TRANSFER_RECORDED', 'inventory_transfers', transfer.id);
+          return transfer;
+        });
+      }
       if (command.command === 'configuration.save') {
         authorize(actor, 'catalogs:write');
         const { entry } = z
@@ -531,6 +733,12 @@ export function postgresPersistence(): Persistence {
           );
           if (!item.rowCount)
             throw new MongoInputError('Seleccione un artículo activo del inventario.');
+          const warehouse = await c.query(
+            `SELECT id FROM analiza.warehouses
+             WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'`,
+            [actor.organizationId, warehouseId],
+          );
+          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
           const balance = Number(
             (
               await c.query<{ balance: number }>(
@@ -1209,14 +1417,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 16 ||
+        row.migrations !== 17 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
