@@ -43,6 +43,14 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 - `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.
 - `CR-032`: subir el archivo autorizado de pacientes en Excel o CSV para revisar sus columnas y preparar el mapeo hacia todas las ventanas del módulo Pacientes. Respuesta acordada: “Gracias por la solicitud. Por favor suba el archivo de Excel o CSV; nosotros revisaremos su estructura y lo adaptaremos a los campos del módulo Pacientes. Antes de importar, le mostraremos el mapeo, las observaciones y posibles duplicados para que pueda validarlos.” Hasta recibir el archivo no se afirma compatibilidad completa ni se incorporan registros.
 
+## Feedback operativo · 25 septiembre 2026
+
+- `FEEDBACK-7BB83834`: la solicitud de gráficas semanales/mensuales para visitas médicas, pacientes ingresados y facturación continúa bajo `CR-014`/`CR-015`. Falta aprobar fuentes, períodos, permisos y fórmulas; la tabla actual de visitas y metas no se reutiliza como facturación ni como actividad médica sin esa definición.
+- `FEEDBACK-11C6094E`: crear bodegas, ver unidades por bodega y trasladar existencias continúa bloqueado por `CH14-Q009`, además de las reglas de lotes/series de `CH14-Q011`. No se habilita un traslado no transaccional o sin reversión auditada.
+- `FEEDBACK-75AE2471`: enviar una cotización como PDF adjunto por WhatsApp requiere aprobar el documento, destinatario, consentimiento, proveedor, entrega, reintentos y auditoría de `CH07-Q008`/`CH07-Q009`. La vista previa no incluirá contenido clínico ni sustituirá un proveedor real.
+- `FEEDBACK-DF6A39DC`: Existencias ya expone las pestañas factuales del video; Proveedores y Bodegas permanecen de solo lectura hasta resolver `CH14-Q008`/`CH14-Q009`. Habilitar botones sin fuente y ciclo de vida aprobados produciría estados no auditables.
+- `FEEDBACK-C7EF7D96`: la plataforma permite registrar varios pagos idempotentes contra una cotización enviada y muestra pagado/saldo. La factura final continúa pendiente de `MEETING-Q004`, `CH07-Q008` y de la definición del vínculo cotización–cuenta–factura; no se inventa numeración ni regla fiscal.
+
 ## CH01 · decisiones pendientes trazadas
 
 - `CH01-Q001`: confirmar si el enlace histórico `/pacientes.php` debe conservar una ruta de retorno después del login. El SPA aplica guardia de sesión; no se inventó una regla de redirección heredada.
@@ -200,7 +208,7 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 
 - `CH13-Q001`: aprobar estados y transiciones exactas para Orden de compra y Caja menuda, roles, precondiciones e irreversibilidad. La plataforma sólo crea `DRAFT`. Evidencia: CH13-E0004 y CH13-E0080.
 - `CH13-Q002`: definir el evento que genera inventario: aprobación, recepción total/parcial u otro hito. Ningún borrador mueve existencias. Evidencia verbal: CH13-E0092.
-- `CH13-Q003`: confirmar recepciones parciales, bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. Evidencia verbal: CH13-E0092.
+- `CH13-Q003`: confirmar recepciones parciales, bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. `FEEDBACK-7549EF34` aclara únicamente que una compra de equipo solicita serie y no vencimiento; no resuelve recepción, traslado, devolución ni movimiento de inventario. Evidencia verbal: CH13-E0092.
 - `CH13-Q004`: aprobar captura de impuesto por línea/global, moneda, precisión y redondeo. Se eliminó el IVA 13% inventado; sólo se aceptan montos manuales. Evidencia: CH13-E0057 y CH13-E0065.
 - `CH13-Q005`: definir significado, conceptos, límites, justificación, autorización y efecto contable/fiscal de Extra. Evidencia: CH13-E0070.
 - `CH13-Q006`: definir combinación, límites, autorización y efecto contable/fiscal de descuentos por línea/global. Evidencia: CH13-E0057 y CH13-E0060.

@@ -2408,6 +2408,29 @@
       "blocker": ""
     },
     {
+      "action_id": "PURCHASE-CATALOG-SEARCH",
+      "module": "Compras",
+      "route": "/purchases",
+      "control_type": "COMBOBOX",
+      "visible_label": "Ítem de catálogo",
+      "selector_or_testid": "[data-action-id=PURCHASE-CATALOG-SEARCH]",
+      "roles_allowed": ["ADMIN", "INVENTORY", "FINANCE"],
+      "roles_denied": ["DOCTOR", "NURSE", "AUDITOR"],
+      "preconditions": "Ítems activos de catálogo autorizados para compra",
+      "positive_scenario": "Filtra por inicio de código o palabra y selecciona un ítem tenant-scoped.",
+      "negative_scenario": "Sin coincidencias no fabrica ítems ni permite guardar una selección inválida.",
+      "persistence_required": false,
+      "refresh_required": false,
+      "selenium_required": false,
+      "selenium_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:feedback-purchase-catalog-prefix-and-equipment-traceability"
+      ],
+      "unit_test_ids": [],
+      "status": "IMPLEMENTED_VERIFIED",
+      "blocker": ""
+    },
+    {
       "action_id": "INVENTORY-MOVEMENT-CREATE",
       "module": "Inventario",
       "route": "/inventory/movements",

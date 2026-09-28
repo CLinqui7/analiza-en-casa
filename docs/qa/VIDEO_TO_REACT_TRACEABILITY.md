@@ -2,14 +2,9 @@
 
 > Generado de forma determinista. La validez de CH01 depende de su fingerprint funcional, no del commit que contiene esta metadata.
 
-Commit generador: `58030d1419e179a4bc51145106c7314cb6417c6c`
-SHA de regresión de implementación: `532048263a6e17de698b0fbed8594067a8c75714`
-Fingerprint funcional CH01: `f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc`
-
-Regresión de la edición completa mock: 178 pruebas aprobadas; no nuevas promociones EXACT.
-La edición Core oculta temporalmente módulos pendientes por autorización del cliente.
-La certificación conectada a Atlas del contenedor y el bloqueo cloud se distinguen en
-`docs/release/CORE_RELEASE_VERIFICATION.json`. Los estados individuales históricos se conservan.
+Commit generador: `099a75ba0b96bc4f40404c9a9f5b5e6d6892f8af`
+SHA de implementación: `a483f37b613ef44c208b8f547ebb3cd4767ce8b7`
+Fingerprint funcional CH01: `f649b292b3df5579272bdb7a0152ade38490e426a19693d5d65f2be381be8531`
 
 | Requisito | Ruta | Estado | Acciones |
 |---|---|---|---|
@@ -77,9 +72,9 @@ La certificación conectada a Atlas del contenedor y el bloqueo cloud se disting
 | CH05-F008 | /quotes | PARTIAL | QUOTE-ITEM-ADD, QUOTE-DISCOUNT-UPDATE |
 | CH05-F009 | /quotes | PARTIAL | — |
 | CH05-F010 | /quotes | PARTIAL | QUOTE-MEDICATION-CATEGORY |
-| CH05-F011 | /quotes | PARTIAL | — |
+| CH05-F011 | /quotes | MISSING | — |
 | CH05-F012 | /quotes | EXACT | QUOTE-MEDICATION-SEARCH, QUOTE-MEDICATION-SELECT |
-| CH05-F013 | /quotes | PARTIAL | — |
+| CH05-F013 | /quotes | BLOCKED_CLIENT | — |
 | CH05-F014 | /quotes | NOT_TESTABLE | — |
 | CH05-F015 | /quotes | PARTIAL | — |
 | CH06-F01 | /quotes | EXACT | QUOTE-SUPPLY-INVENTORY-ONLY, QUOTE-STUDY-INVENTORY-ONLY |
@@ -106,35 +101,35 @@ La certificación conectada a Atlas del contenedor y el bloqueo cloud se disting
 | CH08-F03 | /hospitalizations/:id | BLOCKED_INTEGRATION | HOSPITALIZATION-ADMIN-PROFILE-SAVE |
 | CH08-F04 | /receivables | PARTIAL | — |
 | CH08-F05 | /receivables | PARTIAL | — |
-| CH08-F06 | /receivables | PARTIAL | — |
+| CH08-F06 | /receivables | MISSING | — |
 | CH08-F07 | /receivables | PARTIAL | — |
-| CH08-F08 | /receivables | PARTIAL | — |
-| CH08-F09 | /receivables | PARTIAL | — |
+| CH08-F08 | /receivables | MISSING | — |
+| CH08-F09 | /receivables | MISSING | — |
 | CH08-F10 | /receivables | PARTIAL | — |
 | CH08-F11 | /receivables | NOT_TESTABLE | — |
 | CH08-F12 | /receivables | NOT_TESTABLE | — |
 | CH09-F01 | /clinical/hospitalizations | PARTIAL | CLINICAL-HOSPITALIZATION-STATUS-FILTER, CLINICAL-HOSPITALIZATION-ACTIVATOR-FILTER, CLINICAL-HOSPITALIZATION-SERVICE-FILTER, CLINICAL-HOSPITALIZATION-CARE-FILTER, CLINICAL-HOSPITALIZATION-ACTIVES-FILTER, CLINICAL-HOSPITALIZATION-FILTER-APPLY, CLINICAL-HOSPITALIZATION-SEARCH, CLINICAL-HOSPITALIZATION-PATIENT-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-DOCUMENT-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-CASE-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-TRIAGE-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-COMPANY-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-CLINICIAN-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-START-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-END-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-DURATION-COLUMN-FILTER, CLINICAL-HOSPITALIZATION-DETAIL |
 | CH09-F02 | /clinical/hospitalizations | PARTIAL | CLINICAL-HOSPITALIZATION-ACTIONS-MENU, CLINICAL-HOSPITALIZATION-QUOTE-VIEW, CLINICAL-HOSPITALIZATION-PROFILE-OPEN, CLINICAL-HOSPITALIZATION-RELIEF-DOCUMENT-OPEN, CLINICAL-HOSPITALIZATION-READMISSION-OPEN, CLINICAL-HOSPITALIZATION-REINFECTION-OPEN, CLINICAL-HOSPITALIZATION-ULCERATION-OPEN, CLINICAL-HOSPITALIZATION-NEAR-MISS-OPEN |
-| CH09-F03 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F04 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F05 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F06 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F07 | /clinical/hospitalizations | PARTIAL | — |
+| CH09-F03 | /clinical/hospitalizations | MISSING | — |
+| CH09-F04 | /clinical/hospitalizations | MISSING | — |
+| CH09-F05 | /clinical/hospitalizations | MISSING | — |
+| CH09-F06 | /clinical/hospitalizations | MISSING | — |
+| CH09-F07 | /clinical/hospitalizations | MISSING | — |
 | CH09-F08 | /clinical/hospitalizations | PARTIAL | — |
 | CH09-F09 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F10 | /clinical/hospitalizations | PARTIAL | — |
-| CH09-F11 | /clinical/hospitalizations | PARTIAL | — |
+| CH09-F10 | /clinical/hospitalizations | MISSING | — |
+| CH09-F11 | /clinical/hospitalizations | MISSING | — |
 | CH09-F12 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH09-F13 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH09-F14 | /clinical/hospitalizations | NOT_TESTABLE | — |
 | CH10-F01 | /clinical/orders | PARTIAL | MEDICAL-ORDER-TAB-ACTIVE, MEDICAL-ORDER-TAB-INACTIVE, MEDICAL-ORDER-TAB-CHANGES, MEDICAL-ORDER-TAB-UPDATES, MEDICAL-ORDER-SEARCH, MEDICAL-ORDER-MENU-OPEN, MEDICAL-ORDER-CREATE, MEDICAL-ORDER-VIEW, MEDICAL-ORDER-XPO, MEDICAL-ORDER-PAGE-PREV, MEDICAL-ORDER-PAGE-NEXT |
 | CH10-F02 | /clinical/orders | PARTIAL | MEDICAL-ORDER-CREATE |
-| CH10-F03 | /clinical/orders | PARTIAL | — |
-| CH10-F04 | /clinical/orders | PARTIAL | — |
-| CH10-F05 | /clinical/orders | NOT_TESTABLE | — |
+| CH10-F03 | /clinical/orders | MISSING | — |
+| CH10-F04 | /clinical/orders | MISSING | — |
+| CH10-F05 | /clinical/orders | MISSING | — |
 | CH10-F06 | /clinical/orders | NOT_TESTABLE | — |
-| CH10-F07 | /clinical/orders | PARTIAL | — |
-| CH10-F08 | /clinical/orders | PARTIAL | — |
+| CH10-F07 | /clinical/orders | MISSING | — |
+| CH10-F08 | /clinical/orders | MISSING | — |
 | CH10-F09 | /clinical/orders | NOT_TESTABLE | — |
 | CH10-F10 | /clinical/orders | NOT_TESTABLE | — |
 | CH11-F01 | /agenda | PARTIAL | AGENDA-PATIENT-SEARCH, AGENDA-PATIENT-FILTER |
@@ -148,20 +143,20 @@ La certificación conectada a Atlas del contenedor y el bloqueo cloud se disting
 | CH11-F09 | /agenda | NOT_TESTABLE | — |
 | CH12-F01 | /clinical/nursing | PARTIAL | PAYABLES-SUMMARY-TAB, PAYABLES-SERVICE-PAYMENTS-TAB, PAYABLES-STATEMENT-GENERATE, PAYABLES-RESTRICTIONS, PAYABLES-DOWNLOAD, PAYABLES-CLEAR-TABLE, PAYABLES-INVOICE-SEARCH |
 | CH12-F02 | /clinical/nursing | PARTIAL | — |
-| CH12-F03 | /clinical/nursing | NOT_TESTABLE | — |
+| CH12-F03 | /clinical/nursing | MISSING | — |
 | CH12-F04 | /clinical/nursing | BLOCKED_CLIENT | — |
-| CH12-F05 | /clinical/nursing | PARTIAL | — |
-| CH12-F06 | /clinical/nursing | PARTIAL | — |
+| CH12-F05 | /clinical/nursing | MISSING | — |
+| CH12-F06 | /clinical/nursing | MISSING | — |
 | CH12-F07 | /clinical/nursing | BLOCKED_CLIENT | — |
 | CH12-F08 | /clinical/nursing | NOT_TESTABLE | — |
 | CH13-F01 | /purchases | PARTIAL | PURCHASE-LIST-SEARCH, PURCHASE-LIST-EXPORT |
 | CH13-F02 | /purchases | NOT_TESTABLE | — |
 | CH13-F03 | /purchases | BLOCKED_CLIENT | — |
-| CH13-F04 | /purchases | PARTIAL | — |
+| CH13-F04 | /purchases | PARTIAL | PURCHASE-CREATE, PURCHASE-CATALOG-SEARCH |
 | CH13-F05 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F06 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F07 | /purchases | BLOCKED_CLIENT | — |
-| CH13-F08 | /purchases | PARTIAL | — |
+| CH13-F08 | /purchases | MISSING | — |
 | CH13-F09 | /purchases | BLOCKED_CLIENT | — |
 | CH13-F10 | /purchases | NOT_TESTABLE | — |
 | CH13-F11 | /purchases | NOT_TESTABLE | — |
@@ -181,18 +176,18 @@ La certificación conectada a Atlas del contenedor y el bloqueo cloud se disting
 | CH14-F14 | /inventory | MISSING | — |
 | CH14-F15 | /inventory | MISSING | — |
 | CH14-F16 | /inventory | NOT_TESTABLE | — |
-| CH15-F01 | /catalogs | PARTIAL | — |
-| CH15-F02 | /catalogs | PARTIAL | — |
-| CH15-F03 | /catalogs | PARTIAL | — |
-| CH15-F04 | /catalogs | PARTIAL | — |
+| CH15-F01 | /catalogs | MISSING | — |
+| CH15-F02 | /catalogs | MISSING | — |
+| CH15-F03 | /catalogs | MISSING | — |
+| CH15-F04 | /catalogs | MISSING | — |
 | CH15-F05 | /catalogs | NOT_TESTABLE | — |
 | CH15-F06 | /catalogs/medications | PARTIAL | CATALOG-MEDICATIONS-SEARCH, CATALOG-MEDICATIONS-EXPORT, CATALOG-MEDICATIONS-CREATE, CATALOG-MEDICATIONS-PAGE-SIZE, CATALOG-MEDICATIONS-PAGE-PREV, CATALOG-MEDICATIONS-PAGE-NEXT |
-| CH15-F07 | /catalogs | PARTIAL | — |
+| CH15-F07 | /catalogs | MISSING | — |
 | CH15-F08 | /catalogs/supplies | PARTIAL | CATALOG-SUPPLIES-SEARCH, CATALOG-SUPPLIES-EXPORT, CATALOG-SUPPLIES-CREATE, CATALOG-SUPPLIES-PAGE-SIZE, CATALOG-SUPPLIES-PAGE-PREV, CATALOG-SUPPLIES-PAGE-NEXT |
 | CH15-F09 | /catalogs/studies | PARTIAL | CATALOG-STUDIES-SEARCH, CATALOG-STUDIES-EXPORT, CATALOG-STUDIES-CREATE, CATALOG-STUDIES-PAGE-SIZE, CATALOG-STUDIES-PAGE-PREV, CATALOG-STUDIES-PAGE-NEXT |
 | CH15-F10 | /catalogs/fees | PARTIAL | CATALOG-FEES-SEARCH, CATALOG-FEES-EXPORT, CATALOG-FEES-CREATE, CATALOG-FEES-PAGE-SIZE, CATALOG-FEES-PAGE-PREV, CATALOG-FEES-PAGE-NEXT |
-| CH15-F11 | /catalogs | PARTIAL | — |
-| CH15-F12 | /catalogs | PARTIAL | — |
+| CH15-F11 | /catalogs | MISSING | — |
+| CH15-F12 | /catalogs | MISSING | — |
 | CH15-F13 | /catalogs/services | PARTIAL | CATALOG-SERVICES-SEARCH, CATALOG-SERVICES-EXPORT, CATALOG-SERVICES-CREATE, CATALOG-SERVICES-PAGE-SIZE, CATALOG-SERVICES-PAGE-PREV, CATALOG-SERVICES-PAGE-NEXT |
 | CH15-F14 | /catalogs/discounts | PARTIAL | CATALOG-DISCOUNTS-SEARCH, CATALOG-DISCOUNTS-EXPORT, CATALOG-DISCOUNTS-CREATE, CATALOG-DISCOUNTS-PAGE-SIZE, CATALOG-DISCOUNTS-PAGE-PREV, CATALOG-DISCOUNTS-PAGE-NEXT |
 | CH15-F15 | /catalogs | NOT_TESTABLE | — |
