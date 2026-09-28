@@ -34,6 +34,13 @@ test('PostgreSQL payment command locks the quote chain and rejects overpayment',
   assert.match(repository, /PAYMENT_VOIDED/);
 });
 
+test('PostgreSQL operations never overlap queries on one transactional client', () => {
+  const start = repository.indexOf("const operations: Persistence['operations']");
+  const end = repository.indexOf('async execute(actor, input)', start);
+  assert.ok(start >= 0 && end > start, 'operations.list source must remain identifiable');
+  assert.doesNotMatch(repository.slice(start, end), /Promise\.all/);
+});
+
 test('migration grants only the required new-table operations to the discovered runtime role', () => {
   assert.match(migrationRunner, /has_schema_privilege\(rolname,'analiza','USAGE'\)/);
   assert.match(migrationRunner, /SELECT,INSERT,UPDATE ON analiza\.payments/);

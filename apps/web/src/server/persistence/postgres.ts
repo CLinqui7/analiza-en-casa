@@ -373,37 +373,29 @@ export function postgresPersistence(): Persistence {
               [actor.organizationId],
             )
           ).rows.map((r) => configurationEntrySchema.parse(r.body));
-        if (can(actor.role, 'reports:read'))
-          await Promise.all([
-            c
-              .query(
-                `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
-                [actor.organizationId],
-              )
-              .then((rows) => {
-                result.professionals = rows.rows.map((r) => ({
-                  userId: r.id,
-                  name: r.display_name,
-                  profession: r.role === 'DOCTOR' ? 'DOCTOR' : 'NURSE',
-                }));
-              }),
-            c
-              .query(
-                'SELECT body FROM analiza.home_visits WHERE organization_id=$1 ORDER BY created_at DESC,id',
-                [actor.organizationId],
-              )
-              .then((rows) => {
-                result.visits = rows.rows.map((r) => visitSchema.parse(r.body));
-              }),
-            c
-              .query(
-                'SELECT body FROM analiza.visit_goals WHERE organization_id=$1 ORDER BY month DESC,id',
-                [actor.organizationId],
-              )
-              .then((rows) => {
-                result.goals = rows.rows.map((r) => goalSchema.parse(r.body));
-              }),
-          ]);
+        if (can(actor.role, 'reports:read')) {
+          // A transaction owns one pg client. Keep its queries sequential: pg@9 will reject
+          // overlapping client.query calls even when the current driver only warns about them.
+          const professionals = await c.query(
+            `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+            [actor.organizationId],
+          );
+          result.professionals = professionals.rows.map((r) => ({
+            userId: r.id,
+            name: r.display_name,
+            profession: r.role === 'DOCTOR' ? 'DOCTOR' : 'NURSE',
+          }));
+          const visits = await c.query(
+            'SELECT body FROM analiza.home_visits WHERE organization_id=$1 ORDER BY created_at DESC,id',
+            [actor.organizationId],
+          );
+          result.visits = visits.rows.map((r) => visitSchema.parse(r.body));
+          const goals = await c.query(
+            'SELECT body FROM analiza.visit_goals WHERE organization_id=$1 ORDER BY month DESC,id',
+            [actor.organizationId],
+          );
+          result.goals = goals.rows.map((r) => goalSchema.parse(r.body));
+        }
         return result;
       });
     },
