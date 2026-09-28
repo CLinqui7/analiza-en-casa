@@ -45,11 +45,11 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 
 ## Feedback operativo · 25 septiembre 2026
 
-- `FEEDBACK-7BB83834`: la solicitud de gráficas semanales/mensuales para visitas médicas, pacientes ingresados y facturación continúa bajo `CR-014`/`CR-015`. Falta aprobar fuentes, períodos, permisos y fórmulas; la tabla actual de visitas y metas no se reutiliza como facturación ni como actividad médica sin esa definición.
-- `FEEDBACK-11C6094E`: crear bodegas, ver unidades por bodega y trasladar existencias continúa bloqueado por `CH14-Q009`, además de las reglas de lotes/series de `CH14-Q011`. No se habilita un traslado no transaccional o sin reversión auditada.
-- `FEEDBACK-75AE2471`: enviar una cotización como PDF adjunto por WhatsApp requiere aprobar el documento, destinatario, consentimiento, proveedor, entrega, reintentos y auditoría de `CH07-Q008`/`CH07-Q009`. La vista previa no incluirá contenido clínico ni sustituirá un proveedor real.
-- `FEEDBACK-DF6A39DC`: Existencias ya expone las pestañas factuales del video; Proveedores y Bodegas permanecen de solo lectura hasta resolver `CH14-Q008`/`CH14-Q009`. Habilitar botones sin fuente y ciclo de vida aprobados produciría estados no auditables.
-- `FEEDBACK-C7EF7D96`: la plataforma permite registrar varios pagos idempotentes contra una cotización enviada y muestra pagado/saldo. La factura final continúa pendiente de `MEETING-Q004`, `CH07-Q008` y de la definición del vínculo cotización–cuenta–factura; no se inventa numeración ni regla fiscal.
+- `FEEDBACK-7BB83834`: se implementaron gráficos semanales de visitas realizadas, separación Médico/Enfermería, ingresos administrativos y cobros aplicados con persistencia PostgreSQL. Se mantienen separados de cotizaciones y facturación fiscal. `CR-014`/`CR-015` siguen abiertos únicamente para cualquier fórmula comercial/fiscal adicional no definida.
+- `FEEDBACK-11C6094E`: ya se muestran unidades calculadas por `itemId` y bodega registrada. Crear/editar bodegas y trasladar existencias continúa bloqueado por `CH14-Q009`/`CH14-Q011`; se retiró del formulario el traslado incompleto que podía registrar una sola salida sin destino.
+- `FEEDBACK-75AE2471`: se implementó PDF interno real, autenticado y sin caché para versiones enviadas/inmutables, y se retiró el envío directo inseguro. El adjunto por WhatsApp sigue bloqueado por `CH07-Q008`/`CH07-Q009`; sólo podrá usarse una notificación genérica con enlace seguro, consentimiento explícito y proveedor verificable.
+- `FEEDBACK-DF6A39DC`: Existencias muestra saldos por bodega, proveedores ya existentes del catálogo y bodegas derivadas de movimientos en modo de solo lectura. El CRUD y los traslados permanecen bloqueados hasta resolver `CH14-Q008`/`CH14-Q009`.
+- `FEEDBACK-C7EF7D96`: pagos parciales idempotentes, prevención transaccional de sobrepago, reversión auditada, estado Pagado y comprobante PDF no fiscal ya están implementados para PostgreSQL/Mongo. La factura fiscal continúa pendiente de `MEETING-Q004` y `CH07-Q008`; no se inventa emisor, numeración, impuestos ni regla tributaria.
 
 ## CH01 · decisiones pendientes trazadas
 

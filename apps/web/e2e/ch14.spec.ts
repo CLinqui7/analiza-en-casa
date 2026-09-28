@@ -208,7 +208,7 @@ test('CH14 exposes read-only Cierres tabs with factual empty sources and no audi
     .toBe(auditBefore);
 });
 
-test('CH14 exposes an empty read-only supplier list without supplier mutations', async ({
+test('CH14 exposes registered suppliers read-only without supplier mutations', async ({
   browser,
 }) => {
   const admin = await browser.newPage();
@@ -229,7 +229,7 @@ test('CH14 exposes an empty read-only supplier list without supplier mutations',
   await expect(admin.getByRole('columnheader', { name: 'Teléfono' })).toBeVisible();
   await expect(admin.getByRole('columnheader', { name: 'Correo' })).toBeVisible();
   await expect(admin.getByRole('columnheader', { name: 'Dirección' })).toBeVisible();
-  await expect(admin.getByText('Sin proveedores documentados')).toBeVisible();
+  await expect(admin.getByText('Proveedor sintético de QA')).toBeVisible();
   await admin.getByLabel('Buscar proveedores').fill('sin-proveedor-ch14');
   await expect(admin.locator('tbody .empty-state')).toContainText('sin-proveedor-ch14');
   await admin.reload();
@@ -242,7 +242,7 @@ test('CH14 exposes an empty read-only supplier list without supplier mutations',
   const inventory = await browser.newPage();
   await login(inventory, 'inventory@demo.local', 'demo-inventory');
   await inventory.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
-  await expect(inventory.getByText('Sin proveedores documentados')).toBeVisible();
+  await expect(inventory.getByText('Proveedor sintético de QA')).toBeVisible();
   await inventory.close();
 });
 
@@ -275,7 +275,7 @@ test('CH14 denies FINANCE direct inventory supplier access', async ({ page }) =>
   await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]')).toHaveCount(0);
 });
 
-test('CH14 renders the read-only empty Bodegas anatomy without audit mutation', async ({
+test('CH14 renders registered warehouse identifiers read-only without audit mutation', async ({
   page,
 }) => {
   await login(page);
@@ -292,7 +292,8 @@ test('CH14 renders the read-only empty Bodegas anatomy without audit mutation', 
   await expect(page.getByRole('columnheader', { name: 'Nombre' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Descripción' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Fecha de creación' })).toBeVisible();
-  await expect(page.getByText('Sin bodegas documentadas')).toBeVisible();
+  await expect(page.getByText('Bodega central demo')).toBeVisible();
+  await expect(page.getByText('Bodega norte demo')).toBeVisible();
   await page.getByLabel('Buscar bodegas').fill('sin-bodega-ch14');
   await expect(page.locator('tbody .empty-state')).toContainText('sin-bodega-ch14');
   await page.reload();
@@ -303,10 +304,10 @@ test('CH14 renders the read-only empty Bodegas anatomy without audit mutation', 
     .toBe(auditBefore);
 });
 
-test('CH14 lets INVENTORY open the empty Bodegas surface', async ({ page }) => {
+test('CH14 lets INVENTORY open the registered Bodegas surface', async ({ page }) => {
   await login(page, 'inventory@demo.local', 'demo-inventory');
   await page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]').click();
-  await expect(page.getByText('Sin bodegas documentadas')).toBeVisible();
+  await expect(page.getByText('Bodega central demo')).toBeVisible();
 });
 
 test('CH14 lets AUDITOR search the empty Bodegas surface', async ({ page }) => {
@@ -332,6 +333,21 @@ test('CH14 denies FINANCE direct inventory warehouse access', async ({ page }) =
   await login(page, 'finance@demo.local', 'demo-finance');
   await expect(page.locator('main[role="alert"]')).toContainText('FINANCE');
   await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]')).toHaveCount(0);
+});
+
+test('CH14 exposes factual lot and serial tabs without inventing received stock', async ({
+  page,
+}) => {
+  await login(page);
+  await page.locator('[data-action-id="INVENTORY-LOTS-OPEN"]').click();
+  await expect(
+    page.getByRole('heading', { name: 'Lotes y números de serie', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Sin lotes recibidos')).toBeVisible();
+  await page.locator('[data-action-id="INVENTORY-SERIALS-TAB"]').click();
+  await expect(page.getByText('Sin números de serie recibidos')).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Fecha V' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Nuevo' })).toBeDisabled();
 });
 
 test('CH14 renders the read-only empty Kit de insumos anatomy without audit mutation', async ({

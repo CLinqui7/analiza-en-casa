@@ -701,6 +701,8 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
   await expect(page.getByRole('status')).toContainText('enviada e inmutable');
+  await expect(page.locator('[data-action-id="QUOTE-PDF-DOWNLOAD"]')).toBeVisible();
+  await expect(page.locator('[data-action-id="QUOTE-WHATSAPP-DIRECT"]')).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('Enviada e inmutable', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Enviar enlace seguro' })).toHaveCount(0);
@@ -709,24 +711,47 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
 test('payment application is idempotent and reversal preserves its reason', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.catalogItems';
+    const items = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    items.push({
+      id: 'service-payment-e2e',
+      sku: 'PAY-E2E-001',
+      name: 'Servicio sintético de pago',
+      category: 'SERVICES',
+      status: 'ACTIVE',
+      salePriceExcludingTax: 125.5,
+      createdAt: new Date().toISOString(),
+    });
+    window.localStorage.setItem(key, JSON.stringify(items));
+  });
+  await page.reload();
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
   await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
   await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
+  const catalog = page.getByRole('combobox', {
+    name: 'Buscar ítem de catálogo por código o nombre',
+  });
+  await catalog.fill('PAY-E2E');
+  await page.getByRole('option', { name: /PAY-E2E-001/ }).click();
+  await page.getByLabel('Cantidad').fill('1');
+  await page.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
 
   await page.goto('/payments');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
-  await page.getByLabel('Monto ingresado').fill('125.50');
+  await page.getByLabel('Monto ingresado').fill('25.50');
   await page.getByLabel('Referencia').fill('REF-PAGO-E2E');
   await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
   await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
   await expect(page.getByRole('status')).toContainText('Pago aplicado una sola vez');
   await page.reload();
   await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  await expect(page.locator('[data-action-id="PAYMENT-RECEIPT-PDF"]')).toBeVisible();
 
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
   await page.getByLabel('Referencia').fill('REF-PAGO-E2E-DUPLICADO');

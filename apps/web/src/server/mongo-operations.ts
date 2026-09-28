@@ -356,6 +356,32 @@ export class MongoOperationsRepository {
           await this.database
             .collection('quotes')
             .updateOne({ _id: quote._id }, { $inc: { paymentSequence: 1 } }, { session });
+          const rootQuoteId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+          const quoteIds = (
+            await this.database
+              .collection('quotes')
+              .find(
+                {
+                  ...scoped,
+                  $or: [{ id: rootQuoteId }, { rootQuoteId }, { originalQuoteId: rootQuoteId }],
+                },
+                { session, projection: { id: 1 } },
+              )
+              .toArray()
+          ).map((item) => item.id);
+          const applied = await this.database
+            .collection('payments')
+            .find(
+              { ...scoped, quoteId: { $in: quoteIds }, status: 'APPLIED' },
+              { session, projection: { amount: 1 } },
+            )
+            .toArray();
+          const paidCents = applied.reduce(
+            (sum, item) => sum + Math.round(Number(item.amount) * 100),
+            0,
+          );
+          if (paidCents + Math.round(payment.amount * 100) > Math.round(quote.patientAmount * 100))
+            throw new MongoInputError('El pago supera el saldo pendiente de la cotización.');
           await this.database
             .collection('payments')
             .insertOne({ ...payment, ...scoped, createdAt: new Date().toISOString() }, { session });
@@ -501,7 +527,10 @@ export class MongoOperationsRepository {
             .collection('payments')
             .findOne({ ...scoped, id: input.paymentId }, { session });
           if (!payment) throw new MongoAccessError();
-          if (payment.status === 'VOIDED') return { id: payment.id };
+          if (payment.status === 'VOIDED') {
+            if (payment.voidReason !== input.reason) throw new MongoConflictError();
+            return { id: payment.id };
+          }
           await this.database.collection('payments').updateOne(
             { ...scoped, id: input.paymentId, status: 'APPLIED' },
             {

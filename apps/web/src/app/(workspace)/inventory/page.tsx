@@ -14,7 +14,8 @@ const warehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'KITS';
+type Surface =
+  'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'LOTS' | 'KITS';
 type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
 type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
 const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
@@ -87,26 +88,27 @@ export default function InventoryPage() {
   const [supplierQuery, setSupplierQuery] = useState('');
   const [warehouseQuery, setWarehouseQuery] = useState('');
   const [kitQuery, setKitQuery] = useState('');
+  const [lotTab, setLotTab] = useState<'LOTS' | 'SERIALS'>('LOTS');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
   const rows = useMemo(() => {
     const itemIds = [...new Set(inventoryMovements.map((movement) => movement.itemId))];
     return itemIds
-      .map((itemId) => {
+      .flatMap((itemId) => {
         const movements = inventoryMovements.filter((movement) => movement.itemId === itemId);
         const warehouseIds = [
           ...new Set(movements.map((movement) => movement.warehouseId).filter(Boolean)),
         ] as string[];
-        return {
+        return (warehouseIds.length ? warehouseIds : ['central']).map((warehouseId) => ({
+          rowId: `${itemId}:${warehouseId}`,
           itemId,
           type: 'Sintético',
           code: itemCatalog[itemId]?.sku ?? itemId,
           name: itemCatalog[itemId]?.name ?? itemId,
-          warehouse:
-            warehouseIds.map((id) => warehouses[id] ?? id).join(', ') || 'Sin bodega documentada',
-          available: currentInventoryBalance(inventoryMovements, itemId),
-        };
+          warehouse: warehouses[warehouseId] ?? warehouseId,
+          available: currentInventoryBalance(inventoryMovements, itemId, warehouseId),
+        }));
       })
       .filter((row) =>
         `${row.type} ${row.code} ${row.name} ${row.warehouse}`
@@ -114,6 +116,35 @@ export default function InventoryPage() {
           .includes(query.toLocaleLowerCase('es')),
       );
   }, [inventoryMovements, query, itemCatalog]);
+  const supplierRows = useMemo(
+    () =>
+      catalogItems
+        .filter((item) => item.category === 'PROVIDERS')
+        .filter((item) =>
+          `${item.sku} ${item.name} ${item.contactName ?? ''} ${item.landlinePhone ?? ''} ${item.mobilePhone ?? ''} ${item.email ?? ''}`
+            .toLocaleLowerCase('es')
+            .includes(supplierQuery.toLocaleLowerCase('es')),
+        ),
+    [catalogItems, supplierQuery],
+  );
+  const warehouseRows = useMemo(
+    () =>
+      [...new Set(inventoryMovements.map((movement) => movement.warehouseId).filter(Boolean))]
+        .map((id) => {
+          const movements = inventoryMovements.filter((movement) => movement.warehouseId === id);
+          return {
+            id: id!,
+            name: warehouses[id!] ?? id!,
+            createdAt: movements.map((movement) => movement.createdAt).sort()[0],
+          };
+        })
+        .filter((item) =>
+          `${item.name} ${item.id}`
+            .toLocaleLowerCase('es')
+            .includes(warehouseQuery.toLocaleLowerCase('es')),
+        ),
+    [inventoryMovements, warehouseQuery],
+  );
   const historyItem =
     rows.find((row) => row.itemId === historyItemId) ??
     (historyItemId
@@ -190,9 +221,11 @@ export default function InventoryPage() {
                   ? 'Inventario / Proveedores'
                   : surface === 'WAREHOUSES'
                     ? 'Items / Bodegas'
-                    : surface === 'KITS'
-                      ? 'Inventario / Kit de insumos'
-                      : 'Gestión de inventario'}
+                    : surface === 'LOTS'
+                      ? 'Inventario / Lotes y números de serie'
+                      : surface === 'KITS'
+                        ? 'Inventario / Kit de insumos'
+                        : 'Gestión de inventario'}
           </h1>
           <p>
             {surface === 'ACKNOWLEDGEMENTS'
@@ -203,9 +236,11 @@ export default function InventoryPage() {
                   ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
                   : surface === 'WAREHOUSES'
                     ? 'Superficie factual y de solo lectura. No consulta ni crea bodegas; la fuente, los permisos y los traslados requieren definición aprobada.'
-                    : surface === 'KITS'
-                      ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
-                      : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
+                    : surface === 'LOTS'
+                      ? 'Superficie factual observada. No crea lotes o series ni deriva vencimiento, disponibilidad o recepción desde borradores de compra.'
+                      : surface === 'KITS'
+                        ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
+                        : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -327,7 +362,13 @@ export default function InventoryPage() {
         >
           Comprometido
         </button>
-        <button aria-describedby="inventory-lots-help" className="tab" disabled type="button">
+        <button
+          aria-current={surface === 'LOTS' ? 'page' : undefined}
+          className={surface === 'LOTS' ? 'tab active' : 'tab'}
+          data-action-id="INVENTORY-LOTS-OPEN"
+          onClick={() => setSurface('LOTS')}
+          type="button"
+        >
           Lotes
         </button>
       </nav>
@@ -390,7 +431,7 @@ export default function InventoryPage() {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.itemId}>
+                  <tr key={row.rowId}>
                     <td>
                       <Button
                         className="button-secondary"
@@ -556,18 +597,32 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan={6}>
-                    <EmptyState
-                      detail={
-                        supplierQuery
-                          ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
-                          : 'No existe una fuente autorizada de proveedores en el modelo actual.'
-                      }
-                      title="Sin proveedores documentados"
-                    />
-                  </td>
-                </tr>
+                {supplierRows.map((supplier) => (
+                  <tr key={supplier.id}>
+                    <td>
+                      <code>{supplier.sku}</code>
+                    </td>
+                    <td>{supplier.name}</td>
+                    <td>{supplier.contactName || 'No documentado'}</td>
+                    <td>{supplier.mobilePhone || supplier.landlinePhone || 'No documentado'}</td>
+                    <td>{supplier.email || 'No documentado'}</td>
+                    <td>No documentada</td>
+                  </tr>
+                ))}
+                {!supplierRows.length ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <EmptyState
+                        detail={
+                          supplierQuery
+                            ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
+                            : 'No existe una fuente autorizada de proveedores en el modelo actual.'
+                        }
+                        title="Sin proveedores documentados"
+                      />
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
@@ -637,22 +692,99 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
+                {warehouseRows.map((warehouse) => (
+                  <tr key={warehouse.id}>
+                    <td>{warehouse.name}</td>
+                    <td>Identificador registrado: {warehouse.id}</td>
+                    <td>
+                      {warehouse.createdAt
+                        ? new Date(warehouse.createdAt).toLocaleDateString('es-SV')
+                        : 'No documentada'}
+                    </td>
+                  </tr>
+                ))}
+                {!warehouseRows.length ? (
+                  <tr>
+                    <td colSpan={3}>
+                      <EmptyState
+                        detail={
+                          warehouseQuery
+                            ? `No hay bodegas documentadas que coincidan con “${warehouseQuery}”.`
+                            : 'No existe una fuente autorizada de bodegas en el modelo actual.'
+                        }
+                        title="Sin bodegas documentadas"
+                      />
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
+        </Panel>
+      ) : surface === 'LOTS' ? (
+        <Panel>
+          <div className="table-heading">
+            <div>
+              <h2>Lotes y números de serie</h2>
+              <p className="field-help" id="inventory-lots-help">
+                La recepción, unicidad, vencimiento, FEFO, cuarentena y corrección siguen pendientes
+                de CH14-Q010/CH14-Q011. No se convierten borradores de compra en stock.
+              </p>
+            </div>
+            <Button aria-describedby="inventory-lots-help" disabled type="button">
+              Nuevo
+            </Button>
+          </div>
+          <div aria-label="Tipo de trazabilidad" className="tabs" role="tablist">
+            <Button
+              aria-selected={lotTab === 'LOTS'}
+              className={lotTab === 'LOTS' ? 'tab active' : 'tab'}
+              data-action-id="INVENTORY-LOTS-TAB"
+              onClick={() => setLotTab('LOTS')}
+              role="tab"
+              type="button"
+            >
+              Lotes
+            </Button>
+            <Button
+              aria-selected={lotTab === 'SERIALS'}
+              className={lotTab === 'SERIALS' ? 'tab active' : 'tab'}
+              data-action-id="INVENTORY-SERIALS-TAB"
+              onClick={() => setLotTab('SERIALS')}
+              role="tab"
+              type="button"
+            >
+              Nros de serie
+            </Button>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={3}>
+                  <th>Acciones</th>
+                  <th>Número</th>
+                  <th>Descripción</th>
+                  <th>Ítem</th>
+                  <th>Fecha E</th>
+                  <th>Fecha V</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={7}>
                     <EmptyState
-                      detail={
-                        warehouseQuery
-                          ? `No hay bodegas documentadas que coincidan con “${warehouseQuery}”.`
-                          : 'No existe una fuente autorizada de bodegas en el modelo actual.'
+                      title={
+                        lotTab === 'LOTS' ? 'Sin lotes recibidos' : 'Sin números de serie recibidos'
                       }
-                      title="Sin bodegas documentadas"
+                      detail="No existe una recepción de inventario autorizada que alimente esta tabla."
                     />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
         </Panel>
       ) : surface === 'KITS' ? (
         <Panel>

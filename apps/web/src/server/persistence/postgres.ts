@@ -12,6 +12,11 @@ import {
   purchaseSchema,
   clinicalDocumentSchema,
   inventoryMovementSchema,
+  paymentSchema,
+  visitInputSchema,
+  visitSchema,
+  goalInputSchema,
+  goalSchema,
   emptyOperations,
   type Patient,
   type Doctor,
@@ -21,6 +26,7 @@ import {
   type Quote,
   type Shift,
   type ClinicalDocument,
+  type Payment,
 } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
@@ -368,16 +374,36 @@ export function postgresPersistence(): Persistence {
             )
           ).rows.map((r) => configurationEntrySchema.parse(r.body));
         if (can(actor.role, 'reports:read'))
-          result.professionals = (
-            await c.query(
-              `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
-              [actor.organizationId],
-            )
-          ).rows.map((r) => ({
-            userId: r.id,
-            name: r.display_name,
-            profession: r.role === 'DOCTOR' ? 'DOCTOR' : 'NURSE',
-          }));
+          await Promise.all([
+            c
+              .query(
+                `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+                [actor.organizationId],
+              )
+              .then((rows) => {
+                result.professionals = rows.rows.map((r) => ({
+                  userId: r.id,
+                  name: r.display_name,
+                  profession: r.role === 'DOCTOR' ? 'DOCTOR' : 'NURSE',
+                }));
+              }),
+            c
+              .query(
+                'SELECT body FROM analiza.home_visits WHERE organization_id=$1 ORDER BY created_at DESC,id',
+                [actor.organizationId],
+              )
+              .then((rows) => {
+                result.visits = rows.rows.map((r) => visitSchema.parse(r.body));
+              }),
+            c
+              .query(
+                'SELECT body FROM analiza.visit_goals WHERE organization_id=$1 ORDER BY month DESC,id',
+                [actor.organizationId],
+              )
+              .then((rows) => {
+                result.goals = rows.rows.map((r) => goalSchema.parse(r.body));
+              }),
+          ]);
         return result;
       });
     },
@@ -550,6 +576,240 @@ export function postgresPersistence(): Persistence {
           }
           await audit(c, actor, 'INVENTORY_MOVEMENT_RECORDED', 'inventory_movements', movement.id);
           return { id: movement.id };
+        });
+      }
+      if (command.command === 'payment.apply') {
+        authorize(actor, 'payments:write');
+        const { payment } = z
+          .object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() })
+          .strict()
+          .parse(input);
+        if (payment.status !== 'APPLIED' || payment.voidReason)
+          throw new MongoInputError('El alta de pago debe iniciar aplicada.');
+        return transaction(pool, actor, async (c) => {
+          const quote = (
+            await c.query<{ body: Quote; root_quote_id: string }>(
+              `SELECT body,root_quote_id FROM analiza.quotes
+               WHERE organization_id=$1 AND id=$2 FOR UPDATE`,
+              [actor.organizationId, payment.quoteId],
+            )
+          ).rows[0];
+          if (!quote || quote.body.status !== 'SENT' || !quote.body.immutable)
+            throw new MongoInputError('Seleccione una cotización enviada e inmutable.');
+          await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+            `${actor.organizationId}:payment:${quote.root_quote_id}`,
+          ]);
+          const existing = (
+            await c.query<{ body: Payment }>(
+              'SELECT body FROM analiza.payments WHERE organization_id=$1 AND idempotency_key=$2',
+              [actor.organizationId, payment.idempotencyKey],
+            )
+          ).rows[0];
+          if (existing) {
+            if (canonical(existing.body) !== canonical(payment)) throw new MongoConflictError();
+            return paymentSchema.parse(existing.body);
+          }
+          const latestQuote = (
+            await c.query<{ body: Quote }>(
+              `SELECT body FROM analiza.quotes
+               WHERE organization_id=$1 AND root_quote_id=$2
+                 AND body->>'status'='SENT' AND body->>'immutable'='true'
+               ORDER BY quote_version DESC LIMIT 1 FOR UPDATE`,
+              [actor.organizationId, quote.root_quote_id],
+            )
+          ).rows[0];
+          if (!latestQuote || latestQuote.body.id !== payment.quoteId)
+            throw new MongoInputError('Aplique el pago sobre la última versión enviada.');
+          const paidCents = Number(
+            (
+              await c.query<{ paid: string }>(
+                `SELECT coalesce(sum(p.amount_cents),0)::text AS paid
+                 FROM analiza.payments p
+                 JOIN analiza.quotes q ON q.organization_id=p.organization_id AND q.id=p.quote_id
+                 WHERE p.organization_id=$1 AND q.root_quote_id=$2 AND p.status='APPLIED'`,
+                [actor.organizationId, quote.root_quote_id],
+              )
+            ).rows[0]?.paid ?? 0,
+          );
+          const amountCents = Math.round(payment.amount * 100);
+          const responsibilityCents = Math.round(latestQuote.body.patientAmount * 100);
+          if (paidCents + amountCents > responsibilityCents)
+            throw new MongoInputError('El pago supera el saldo pendiente de la cotización.');
+          try {
+            await c.query(
+              `INSERT INTO analiza.payments(
+                 organization_id,id,quote_id,idempotency_key,status,amount_cents,body,created_at
+               ) VALUES($1,$2,$3,$4,'APPLIED',$5,$6::jsonb,$7)`,
+              [
+                actor.organizationId,
+                payment.id,
+                payment.quoteId,
+                payment.idempotencyKey,
+                amountCents,
+                JSON.stringify(payment),
+                payment.createdAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          await audit(c, actor, 'PAYMENT_APPLIED', 'payments', payment.id);
+          return payment;
+        });
+      }
+      if (command.command === 'payment.void') {
+        authorize(actor, 'payments:write');
+        const parsed = z
+          .object({
+            command: z.literal('payment.void'),
+            paymentId: z.string().trim().min(1),
+            reason: z.string().trim().min(1).max(1000),
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const current = (
+            await c.query<{ body: Payment; status: Payment['status'] }>(
+              `SELECT body,status FROM analiza.payments
+               WHERE organization_id=$1 AND id=$2 FOR UPDATE`,
+              [actor.organizationId, parsed.paymentId],
+            )
+          ).rows[0];
+          if (!current) throw new MongoAccessError();
+          if (current.status === 'VOIDED') {
+            if (current.body.voidReason !== parsed.reason) throw new MongoConflictError();
+            return current.body;
+          }
+          const payment = paymentSchema.parse({
+            ...current.body,
+            status: 'VOIDED',
+            voidReason: parsed.reason,
+          });
+          await c.query(
+            `UPDATE analiza.payments
+             SET status='VOIDED',body=$3::jsonb,updated_at=now()
+             WHERE organization_id=$1 AND id=$2`,
+            [actor.organizationId, parsed.paymentId, JSON.stringify(payment)],
+          );
+          await audit(c, actor, 'PAYMENT_VOIDED', 'payments', parsed.paymentId);
+          return payment;
+        });
+      }
+      if (command.command === 'visit.create') {
+        authorize(actor, 'reports:read');
+        const { visit: inputVisit } = z
+          .object({ command: z.literal('visit.create'), visit: visitInputSchema })
+          .strict()
+          .parse(input);
+        if (
+          inputVisit.professionalUserId !== actor.userId &&
+          !can(actor.role, 'nurses:manage') &&
+          !can(actor.role, 'payments:write')
+        )
+          throw new MongoAccessError();
+        return transaction(pool, actor, async (c) => {
+          const previous = (
+            await c.query<{ body: Record<string, unknown> }>(
+              'SELECT body FROM analiza.home_visits WHERE organization_id=$1 AND idempotency_key=$2',
+              [actor.organizationId, inputVisit.idempotencyKey],
+            )
+          ).rows[0];
+          if (previous) {
+            const storedInput = { ...previous.body };
+            delete storedInput.id;
+            delete storedInput.createdBy;
+            if (canonical(storedInput) !== canonical(inputVisit)) throw new MongoConflictError();
+            return visitSchema.parse(previous.body);
+          }
+          const professional = (
+            await c.query<{ display_name: string; role: string }>(
+              `SELECT u.display_name,m.role FROM analiza.memberships m
+               JOIN analiza.users u ON u.id=m.user_id
+               WHERE m.organization_id=$1 AND m.user_id=$2 AND m.active
+                 AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+              [actor.organizationId, inputVisit.professionalUserId],
+            )
+          ).rows[0];
+          if (!professional) throw new MongoInputError('Seleccione un profesional activo.');
+          const patient = await c.query(
+            'SELECT id FROM analiza.patients WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, inputVisit.patientId],
+          );
+          if (!patient.rowCount) throw new MongoInputError('Seleccione un paciente disponible.');
+          const profession = professional.role === 'DOCTOR' ? 'DOCTOR' : 'NURSE';
+          if (inputVisit.profession !== profession)
+            throw new MongoInputError('La profesión no coincide con la cuenta seleccionada.');
+          const visit = visitSchema.parse({
+            ...inputVisit,
+            id: randomUUID(),
+            professionalName: professional.display_name,
+            createdBy: actor.userId,
+          });
+          await c.query(
+            `INSERT INTO analiza.home_visits(
+               organization_id,id,professional_user_id,patient_id,idempotency_key,body,created_at
+             ) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7)`,
+            [
+              actor.organizationId,
+              visit.id,
+              visit.professionalUserId,
+              visit.patientId,
+              visit.idempotencyKey,
+              JSON.stringify(visit),
+              visit.occurredAt,
+            ],
+          );
+          await audit(c, actor, 'HOME_VISIT_CREATED', 'home_visits', visit.id);
+          return visit;
+        });
+      }
+      if (command.command === 'goal.save') {
+        if (!can(actor.role, 'nurses:manage') && !can(actor.role, 'payments:write'))
+          throw new MongoAccessError();
+        const { goal: inputGoal } = z
+          .object({ command: z.literal('goal.save'), goal: goalInputSchema })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const professional = (
+            await c.query<{ display_name: string }>(
+              `SELECT u.display_name FROM analiza.memberships m
+               JOIN analiza.users u ON u.id=m.user_id
+               WHERE m.organization_id=$1 AND m.user_id=$2 AND m.active
+                 AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+              [actor.organizationId, inputGoal.professionalUserId],
+            )
+          ).rows[0];
+          if (!professional) throw new MongoInputError('Seleccione un profesional activo.');
+          const existing = (
+            await c.query<{ id: string }>(
+              'SELECT id FROM analiza.visit_goals WHERE organization_id=$1 AND professional_user_id=$2 AND month=$3',
+              [actor.organizationId, inputGoal.professionalUserId, inputGoal.month],
+            )
+          ).rows[0];
+          const goal = goalSchema.parse({
+            ...inputGoal,
+            professionalName: professional.display_name,
+            id: existing?.id ?? randomUUID(),
+          });
+          await c.query(
+            `INSERT INTO analiza.visit_goals(
+               organization_id,id,professional_user_id,month,body
+             ) VALUES($1,$2,$3,$4,$5::jsonb)
+             ON CONFLICT(organization_id,professional_user_id,month)
+             DO UPDATE SET body=EXCLUDED.body,updated_at=now()`,
+            [
+              actor.organizationId,
+              goal.id,
+              goal.professionalUserId,
+              goal.month,
+              JSON.stringify(goal),
+            ],
+          );
+          await audit(c, actor, 'VISIT_GOAL_SAVED', 'visit_goals', goal.id);
+          return goal;
         });
       }
       if (command.command === 'clinical.create') {
@@ -957,96 +1217,118 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 15 ||
+        row.migrations !== 16 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
     },
     async workspace(actor) {
-      const [p, d, h, s, r, q, clinicalDocuments, inventoryMovements, catalogs, purchases, audits] =
-        await Promise.all([
-          can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
-          can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
-          can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
-          can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
-          can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
-          can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
-          can(actor.role, 'clinical:read')
-            ? transaction(pool, actor, async (c) =>
-                (
-                  await c.query<{
-                    body: Record<string, unknown>;
-                    status: ClinicalDocument['status'];
-                    signed_at: Date | null;
-                  }>(
-                    `SELECT body,status,signed_at
+      const [
+        p,
+        d,
+        h,
+        s,
+        r,
+        q,
+        clinicalDocuments,
+        inventoryMovements,
+        catalogs,
+        purchases,
+        payments,
+        audits,
+      ] = await Promise.all([
+        can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
+        can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
+        can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
+        can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
+        can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],
+        can(actor.role, 'quotes:read') ? quotes.listWithVersions(actor) : [],
+        can(actor.role, 'clinical:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query<{
+                  body: Record<string, unknown>;
+                  status: ClinicalDocument['status'];
+                  signed_at: Date | null;
+                }>(
+                  `SELECT body,status,signed_at
                    FROM analiza.clinical_documents
                    WHERE organization_id=$1
                    ORDER BY created_at DESC,id`,
-                    [actor.organizationId],
-                  )
-                ).rows.map((row) => {
-                  const body: Record<string, unknown> = { ...row.body, status: row.status };
-                  if (row.signed_at) body.signedAt = row.signed_at.toISOString();
-                  else delete body.signedAt;
-                  return clinicalDocumentSchema.parse(body);
-                }),
-              )
-            : [],
-          can(actor.role, 'inventory:read')
-            ? transaction(pool, actor, async (c) =>
-                (
-                  await c.query(
-                    `SELECT body FROM analiza.inventory_movements
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => {
+                const body: Record<string, unknown> = { ...row.body, status: row.status };
+                if (row.signed_at) body.signedAt = row.signed_at.toISOString();
+                else delete body.signedAt;
+                return clinicalDocumentSchema.parse(body);
+              }),
+            )
+          : [],
+        can(actor.role, 'inventory:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  `SELECT body FROM analiza.inventory_movements
                    WHERE organization_id=$1 ORDER BY created_at,id`,
-                    [actor.organizationId],
-                  )
-                ).rows.map((row) => inventoryMovementSchema.parse(row.body)),
-              )
-            : [],
-          can(actor.role, 'catalogs:read')
-            ? transaction(pool, actor, async (c) =>
-                (
-                  await c.query(
-                    'SELECT body FROM analiza.catalog_items WHERE organization_id=$1 ORDER BY id',
-                    [actor.organizationId],
-                  )
-                ).rows.map((r) => catalogItemSchema.parse(r.body)),
-              )
-            : [],
-          can(actor.role, 'purchases:read')
-            ? transaction(pool, actor, async (c) =>
-                (
-                  await c.query(
-                    'SELECT body FROM analiza.purchases WHERE organization_id=$1 ORDER BY created_at DESC,id',
-                    [actor.organizationId],
-                  )
-                ).rows.map((row) => purchaseSchema.parse(row.body)),
-              )
-            : [],
-          can(actor.role, 'audit:read')
-            ? transaction(pool, actor, async (c) =>
-                (
-                  await c.query(
-                    'SELECT id,action,resource_id AS subject,occurred_at FROM analiza.audit_events WHERE organization_id=$1 ORDER BY occurred_at DESC LIMIT 100',
-                    [actor.organizationId],
-                  )
-                ).rows.map((r) => ({
-                  id: r.id,
-                  action: r.action,
-                  subject: r.subject,
-                  at: r.occurred_at.toISOString(),
-                })),
-              )
-            : [],
-        ]);
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => inventoryMovementSchema.parse(row.body)),
+            )
+          : [],
+        can(actor.role, 'catalogs:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  'SELECT body FROM analiza.catalog_items WHERE organization_id=$1 ORDER BY id',
+                  [actor.organizationId],
+                )
+              ).rows.map((r) => catalogItemSchema.parse(r.body)),
+            )
+          : [],
+        can(actor.role, 'purchases:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  'SELECT body FROM analiza.purchases WHERE organization_id=$1 ORDER BY created_at DESC,id',
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => purchaseSchema.parse(row.body)),
+            )
+          : [],
+        can(actor.role, 'payments:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  'SELECT body FROM analiza.payments WHERE organization_id=$1 ORDER BY created_at DESC,id',
+                  [actor.organizationId],
+                )
+              ).rows.map((row) => paymentSchema.parse(row.body)),
+            )
+          : [],
+        can(actor.role, 'audit:read')
+          ? transaction(pool, actor, async (c) =>
+              (
+                await c.query(
+                  'SELECT id,action,resource_id AS subject,occurred_at FROM analiza.audit_events WHERE organization_id=$1 ORDER BY occurred_at DESC LIMIT 100',
+                  [actor.organizationId],
+                )
+              ).rows.map((r) => ({
+                id: r.id,
+                action: r.action,
+                subject: r.subject,
+                at: r.occurred_at.toISOString(),
+              })),
+            )
+          : [],
+      ]);
       return {
         ...emptyServerWorkspace(),
         patients: p.map((r) => r.patient),
@@ -1059,6 +1341,7 @@ export function postgresPersistence(): Persistence {
         inventoryMovements,
         catalogItems: catalogs,
         purchases,
+        payments,
         auditEntries: audits,
         patientVersions: Object.fromEntries(p.map((r) => [r.patient.id, r.version])),
         doctorVersions: Object.fromEntries(d.map((r) => [r.doctor.id, r.version])),

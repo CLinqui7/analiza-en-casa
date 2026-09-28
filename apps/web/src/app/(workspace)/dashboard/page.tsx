@@ -11,6 +11,7 @@ import { videoParitySummary } from '@/lib/video-parity-summary';
 import { isCoreRelease } from '@/lib/release-profile';
 import { CoreDashboard } from '@/components/core-dashboard';
 import { DemoDataButton } from '@/components/demo-data-button';
+import { useOperations } from '@/lib/use-operations';
 
 const currency = new Intl.NumberFormat('es-SV', {
   style: 'currency',
@@ -47,6 +48,7 @@ export default function DashboardPage() {
 }
 
 function FullDashboard() {
+  const operations = useOperations();
   const {
     auditEntries,
     catalogItems,
@@ -93,9 +95,30 @@ function FullDashboard() {
     .filter((shift) => shift.status === 'SCHEDULED')
     .slice()
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
-  const visitsThisMonth = shifts.filter(
-    (shift) => shift.status !== 'CANCELLED' && shift.startsAt.startsWith(dashboardMonth),
+  const visitsForMonth = operations.visits.filter((visit) =>
+    visit.occurredAt.startsWith(dashboardMonth),
+  );
+  const visitsThisMonth = visitsForMonth.length;
+  const doctorVisitsThisMonth = visitsForMonth.filter(
+    (visit) => visit.profession === 'DOCTOR',
   ).length;
+  const nurseVisitsThisMonth = visitsForMonth.filter(
+    (visit) => visit.profession === 'NURSE',
+  ).length;
+  const admissionsThisMonth = hospitalizations.filter((hospitalization) =>
+    (hospitalization.admissionPeriods?.length
+      ? hospitalization.admissionPeriods
+      : [{ admissionDate: hospitalization.startDate }]
+    ).some((period) => period.admissionDate.startsWith(dashboardMonth)),
+  ).length;
+  const weeklyVisits = [1, 2, 3, 4, 5].map((week) => ({
+    label: `Semana ${week}`,
+    value: visitsForMonth.filter((visit) => {
+      const day = new Date(visit.occurredAt).getDate();
+      return Math.min(5, Math.ceil(day / 7)) === week;
+    }).length,
+  }));
+  const maximumWeeklyVisits = Math.max(...weeklyVisits.map((item) => item.value), 1);
   const sentQuoteValueThisMonth = latestQuotes
     .filter(
       (quote) =>
@@ -478,21 +501,22 @@ function FullDashboard() {
             <Panel className="dashboard-card dashboard-goals-card">
               <div className="dashboard-card-heading">
                 <div>
-                  <h2>Agenda y cotizaciones del mes</h2>
-                  <p>Los turnos programados no equivalen a visitas realizadas ni a ventas.</p>
+                  <h2>Actividad registrada del mes</h2>
+                  <p>Visitas realizadas, ingresos administrativos y cobros aplicados.</p>
                 </div>
                 {can('agenda:read') ? <Link href="/agenda">Abrir agenda</Link> : null}
               </div>
               <div className="dashboard-split-metrics">
                 <div>
                   <strong data-testid="dashboard-monthly-visits">{visitsThisMonth}</strong>
-                  <span>Turnos del mes</span>
+                  <span>
+                    Visitas realizadas · {doctorVisitsThisMonth} médicas · {nurseVisitsThisMonth}{' '}
+                    enfermería
+                  </span>
                 </div>
                 <div>
-                  <strong data-testid="dashboard-monthly-sent-quotes">
-                    {currency.format(sentQuoteValueThisMonth)}
-                  </strong>
-                  <span>Valor cotizado enviado</span>
+                  <strong>{admissionsThisMonth}</strong>
+                  <span>Pacientes con ingreso en el mes</span>
                 </div>
                 <div className="dashboard-goal-pending">
                   <Link href="/reports/visits-goals">
@@ -501,6 +525,16 @@ function FullDashboard() {
                   <span>Resultados y objetivos por profesional</span>
                 </div>
               </div>
+              <ul className="dashboard-bar-list" aria-label="Visitas realizadas por semana">
+                {weeklyVisits.map((item) => (
+                  <BarRow key={item.label} {...item} maximum={maximumWeeklyVisits} />
+                ))}
+              </ul>
+              <p className="field-help">
+                Cobros aplicados: {currency.format(appliedPaymentsThisMonth)} · Valor cotizado
+                enviado: {currency.format(sentQuoteValueThisMonth)}. Ninguno se presenta como
+                facturación fiscal.
+              </p>
             </Panel>
             <Panel className="dashboard-card">
               <div className="dashboard-card-heading">

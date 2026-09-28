@@ -16,25 +16,29 @@
     {
       "feedback_id": "7bb83834-1c0a-40ce-8f59-06496d65246b",
       "summary": "Dashboard semanal/mensual de visitas médicas, pacientes ingresados y facturación.",
-      "disposition": "BLOCKED_CLIENT",
-      "dependencies": ["CR-014", "CR-015"]
+      "disposition": "IMPLEMENTED_LOCAL_SAFE_SCOPE_PENDING_DEPLOYMENT",
+      "implemented_scope": "Visitas reales por semana/mes y profesión, ingresos administrativos y cobros aplicados; cotizaciones separadas de facturación fiscal.",
+      "dependencies": ["CR-014", "CR-015: only for additional fiscal/commercial formulas"]
     },
     {
       "feedback_id": "11c6094e-e252-45e1-8bfe-48c0b9a679bb",
       "summary": "Crear bodegas, consultar unidades por bodega y trasladar existencias.",
-      "disposition": "BLOCKED_CLIENT",
+      "disposition": "PARTIAL_SAFE_LOCAL_PENDING_DEPLOYMENT",
+      "implemented_scope": "Unidades por bodega registrada y bloqueo del traslado incompleto de una sola salida.",
       "dependencies": ["CH14-Q009", "CH14-Q011"]
     },
     {
       "feedback_id": "75ae2471-2006-4057-ab42-7db59c9eb6ad",
       "summary": "Entregar cotización como PDF adjunto por WhatsApp.",
-      "disposition": "BLOCKED_CLIENT_AND_INTEGRATION",
+      "disposition": "PARTIAL_SAFE_LOCAL_PENDING_DEPLOYMENT_AND_INTEGRATION",
+      "implemented_scope": "PDF interno autenticado para versión enviada/inmutable y retiro del WhatsApp directo inseguro.",
       "dependencies": ["CH07-Q008", "CH07-Q009"]
     },
     {
       "feedback_id": "df6a39dc-927e-4879-8565-26934f3652f1",
       "summary": "Habilitar funciones de Existencias actualmente expuestas como superficies seguras de solo lectura.",
-      "disposition": "BLOCKED_CLIENT",
+      "disposition": "PARTIAL_SAFE_LOCAL_PENDING_DEPLOYMENT",
+      "implemented_scope": "Proveedores existentes y bodegas derivadas de movimientos visibles en solo lectura.",
       "dependencies": ["CH14-Q008", "CH14-Q009"]
     },
     {
@@ -51,8 +55,8 @@
     {
       "feedback_id": "c7ef7d96-d879-4ef5-83c9-6d55a87ea255",
       "summary": "Abonos sobre cotización y factura al completar el pago.",
-      "disposition": "PARTIAL_EXISTING_AND_BLOCKED_CLIENT",
-      "existing_behavior": "Pagos parciales idempotentes, pagado y saldo ya existen para cotizaciones enviadas.",
+      "disposition": "IMPLEMENTED_LOCAL_NON_FISCAL_SCOPE_PENDING_DEPLOYMENT",
+      "existing_behavior": "Pagos parciales PostgreSQL/Mongo idempotentes, sin sobrepago, reversión auditada, estado Pagado y comprobante PDF no fiscal.",
       "dependencies": ["MEETING-Q004", "CH07-Q008"]
     }
   ],
@@ -61,16 +65,20 @@
     "production_feedback_api": "PASS: authenticated GET 200",
     "production_feedback_triage": "PASS: all six new reports moved to REVIEWING with an explanatory response and internal route; none marked RESOLVED before deployment",
     "production_console": "PASS: no page errors or console errors during triage",
-    "unit_focused": "11/11 PASS",
+    "unit_focused": "27/27 PDF/domain/receivables focused PASS",
+    "unit_full": "171/171 React/Vitest and 113/113 domain/Node PASS",
     "playwright_ch13": "3/3 PASS against isolated production build in mock mode",
-    "playwright_full": "185/185 PASS against an isolated production build in mock mode",
+    "playwright_full": "186/186 PASS against an isolated build in mock mode",
     "mobile": "PASS at 390px; document width equals viewport width",
     "accessibility": "PASS: 0 axe violations in purchase dialog; one contrast check incomplete due overlay",
-    "implementation_sha": "5eca8f2c656430d282b38f9b2f513321804c8cb9"
+    "postgres_migration_plan": "PASS: 16 ordered migrations; 016 adds tenant-scoped payments, home visits and goals",
+    "postgres_runtime": "PENDING: no operator PostgreSQL credentials and Docker daemon unavailable on this workstation",
+    "implementation_sha": "PENDING_CURRENT_COMMIT"
   },
   "limitations": [
     "No production deployment is claimed by this artifact; the only production database mutations were the authorized REVIEWING status, response and internal route updates for the six new feedback reports.",
-    "No warehouse, fiscal, billing, provider, delivery, pricing or inventory-transition rule was invented.",
+    "No warehouse lifecycle, fiscal, provider-delivery, pricing or inventory-transfer rule was invented.",
+    "WhatsApp PDF attachment remains intentionally blocked; direct sending was removed because quotes can contain medication or clinical-adjacent concepts.",
     "Connected PostgreSQL purchase persistence must be repeated after deployment before the feedback can be marked resolved."
   ]
 }

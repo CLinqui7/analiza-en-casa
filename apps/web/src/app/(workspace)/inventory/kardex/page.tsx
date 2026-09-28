@@ -21,7 +21,7 @@ const demoWarehouses: Record<string, string> = {
 const movementFormSchema = z.object({
   itemId: z.string().min(1, 'Seleccione un ítem.'),
   warehouseId: z.string().min(1, 'Seleccione una bodega.'),
-  kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
+  kind: z.enum(['ENTRY', 'EXIT', 'RETURN', 'ADJUSTMENT']),
   adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
   quantity: z.coerce.number().int().positive('La cantidad debe ser un entero positivo.'),
   reference: z.string().trim(),
@@ -201,7 +201,7 @@ export default function KardexPage() {
           <h1>{isMovementView ? 'Movimientos de inventario' : 'Kárdex de inventario'}</h1>
           <p>
             {isMovementView
-              ? 'Entradas, salidas, transferencias, devoluciones y ajustes con responsable y referencia.'
+              ? 'Entradas, salidas, devoluciones y ajustes con responsable y referencia. Los traslados permanecen bloqueados hasta definir su recepción y reversión.'
               : 'Saldo cronológico reproducible por ítem y bodega, sin edición directa de existencias.'}
           </p>
         </div>
@@ -547,7 +547,6 @@ export default function KardexPage() {
             <select {...form.register('kind')}>
               <option value="ENTRY">Entrada</option>
               <option value="EXIT">Salida</option>
-              <option value="TRANSFER">Transferencia</option>
               <option value="RETURN">Devolución</option>
               <option value="ADJUSTMENT">Ajuste</option>
             </select>

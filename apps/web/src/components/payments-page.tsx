@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Payment } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { receivableAccounts } from '@/lib/receivables';
@@ -26,6 +26,9 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const accounts = receivableAccounts(quotes, payments);
+  const openAccounts = accounts.filter((account) => account.balance > 0);
+  const sentQuotes = openAccounts.map((account) => account.quote);
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -36,6 +39,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     },
   });
   const voidForm = useForm<{ reason: string }>({ defaultValues: { reason: '' } });
+  const selectedQuoteId = useWatch({ control: form.control, name: 'quoteId' });
   function close() {
     setOpen(false);
     form.reset({
@@ -46,6 +50,17 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     });
   }
   async function submit(values: PaymentForm) {
+    const account = accounts.find((candidate) => candidate.quote.id === values.quoteId);
+    if (!account || account.balance <= 0) {
+      form.setError('quoteId', { message: 'La cuenta seleccionada ya está pagada.' });
+      return;
+    }
+    if (Math.round(values.amount * 100) > Math.round(account.balance * 100)) {
+      form.setError('amount', {
+        message: `El monto no puede superar el saldo de ${money(account.balance)}.`,
+      });
+      return;
+    }
     if (payments.some((payment) => payment.idempotencyKey === values.idempotencyKey)) {
       form.setError('idempotencyKey', {
         type: 'duplicate',
@@ -84,8 +99,18 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     setVoiding(null);
     voidForm.reset();
   }
-  const sentQuotes = quotes.filter((quote) => quote.status === 'SENT');
-  const accounts = receivableAccounts(quotes, payments);
+  async function downloadReceipt(payment: Payment) {
+    const { buildPaymentReceiptPdf, downloadPdf } = await import('@/lib/financial-pdf');
+    const quote = quotes.find((candidate) => candidate.id === payment.quoteId);
+    if (!quote) {
+      setMessage('No se encontró la cotización asociada al comprobante.');
+      return;
+    }
+    const patient = patients.find((candidate) => candidate.id === quote.patientId);
+    const bytes = await buildPaymentReceiptPdf(payment, quote, patient);
+    downloadPdf(bytes, `comprobante-pago-${payment.id}.pdf`);
+    setMessage('Comprobante interno no fiscal generado.');
+  }
   const totals = accounts.reduce(
     (sum, item) => ({
       responsibility: sum.responsibility + item.responsibility,
@@ -107,7 +132,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           {can('payments:write') ? (
             <Button
               data-action-id="PAYMENT-APPLY"
-              disabled={!sentQuotes.length}
+              disabled={!openAccounts.length}
               onClick={() => {
                 form.setValue('quoteId', sentQuotes[0]?.id ?? '');
                 setMessage(null);
@@ -181,26 +206,24 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     <td>{money(account.balance)}</td>
                     <td>
                       <StatusTag tone={account.balance > 0 ? 'neutral' : 'success'}>
-                        {account.balance > 0
-                          ? 'Pendiente'
-                          : account.balance < 0
-                            ? 'Saldo a favor'
-                            : 'Pagado'}
+                        {account.balance > 0 ? 'Pendiente' : 'Pagado'}
                       </StatusTag>
                     </td>
                     <td>
-                      {can('payments:write') ? (
+                      {can('payments:write') && account.balance > 0 ? (
                         <Button
                           className="button-secondary"
                           data-action-id="PAYMENT-APPLY"
                           onClick={() => {
                             form.setValue('quoteId', account.quote.id);
-                            form.setValue('amount', Math.max(account.balance, 0.01));
+                            form.setValue('amount', account.balance);
                             setOpen(true);
                           }}
                         >
                           Registrar pago
                         </Button>
+                      ) : account.balance <= 0 ? (
+                        <StatusTag tone="success">Pago completado</StatusTag>
                       ) : (
                         'Lectura'
                       )}
@@ -243,7 +266,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                   <th>Referencia</th>
                   <th>Clave idempotente</th>
                   <th>Estado</th>
-                  <th />
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,18 +284,28 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     </td>
                     <td>{paymentStatus[payment.status]}</td>
                     <td>
-                      {payment.status === 'APPLIED' && can('payments:write') ? (
+                      <div className="action-row">
                         <Button
                           className="button-secondary"
-                          data-action-id="PAYMENT-VOID"
-                          onClick={() => setVoiding(payment.id)}
+                          data-action-id="PAYMENT-RECEIPT-PDF"
+                          onClick={() => void downloadReceipt(payment)}
                           type="button"
                         >
-                          Reversar
+                          Comprobante PDF
                         </Button>
-                      ) : (
-                        (payment.voidReason ?? '—')
-                      )}
+                        {payment.status === 'APPLIED' && can('payments:write') ? (
+                          <Button
+                            className="button-secondary"
+                            data-action-id="PAYMENT-VOID"
+                            onClick={() => setVoiding(payment.id)}
+                            type="button"
+                          >
+                            Reversar
+                          </Button>
+                        ) : (
+                          (payment.voidReason ?? '—')
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -284,7 +317,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
         )}
       </Panel>
       <Dialog
-        description="No se aplican reglas de saldo o cobertura sin configuración. La clave idempotente evita duplicar la operación."
+        description="El monto no puede superar el saldo pendiente. La clave idempotente evita duplicar la operación."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
@@ -327,6 +360,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             Monto ingresado
             <input
               {...form.register('amount', { valueAsNumber: true })}
+              max={accounts.find((account) => account.quote.id === selectedQuoteId)?.balance}
               min="0.01"
               step="0.01"
               type="number"

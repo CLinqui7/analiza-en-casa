@@ -488,14 +488,16 @@ export function movementDelta(movement: InventoryMovement): number {
 }
 
 export function deriveKardex(movements: readonly InventoryMovement[], itemId: string): KardexRow[] {
-  let balance = 0;
+  const balances = new Map<string, number>();
   return movements
     .filter((movement) => movement.itemId === itemId)
     .slice()
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
     .map((movement) => {
       const delta = movementDelta(movement);
-      balance += delta;
+      const warehouseId = movement.warehouseId ?? 'central';
+      const balance = (balances.get(warehouseId) ?? 0) + delta;
+      balances.set(warehouseId, balance);
       return { ...movement, delta, balance };
     });
 }
@@ -503,15 +505,26 @@ export function deriveKardex(movements: readonly InventoryMovement[], itemId: st
 export function currentInventoryBalance(
   movements: readonly InventoryMovement[],
   itemId: string,
+  warehouseId?: string,
 ): number {
-  return deriveKardex(movements, itemId).at(-1)?.balance ?? 0;
+  return movements
+    .filter(
+      (movement) =>
+        movement.itemId === itemId &&
+        (!warehouseId || (movement.warehouseId ?? 'central') === warehouseId),
+    )
+    .reduce((balance, movement) => balance + movementDelta(movement), 0);
 }
 
 export function canRecordMovement(
   movements: readonly InventoryMovement[],
   candidate: InventoryMovement,
 ): boolean {
-  const current = currentInventoryBalance(movements, candidate.itemId);
+  const current = currentInventoryBalance(
+    movements,
+    candidate.itemId,
+    candidate.warehouseId ?? 'central',
+  );
   return current + movementDelta(candidate) >= 0;
 }
 

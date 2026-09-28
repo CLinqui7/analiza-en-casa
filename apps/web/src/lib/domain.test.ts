@@ -150,6 +150,7 @@ describe('domain boundaries', () => {
     ];
     expect(deriveKardex(movements, 'kit').map((row) => row.balance)).toEqual([5, 3]);
     expect(currentInventoryBalance(movements, 'kit')).toBe(3);
+    expect(currentInventoryBalance(movements, 'kit', 'central')).toBe(3);
     expect(
       canRecordMovement(movements, {
         id: 'c',
@@ -158,6 +159,31 @@ describe('domain boundaries', () => {
         kind: 'EXIT',
         quantity: 4,
         reason: 'Exceso demo',
+      }),
+    ).toBe(false);
+  });
+
+  it('rejects an outgoing movement when another warehouse has stock but the selected one does not', () => {
+    const movements: InventoryMovement[] = [
+      {
+        id: 'north-entry',
+        itemId: 'kit',
+        warehouseId: 'north',
+        kind: 'ENTRY',
+        quantity: 10,
+        reason: 'Prueba',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+    ];
+    expect(
+      canRecordMovement(movements, {
+        id: 'central-exit',
+        itemId: 'kit',
+        warehouseId: 'central',
+        kind: 'EXIT',
+        quantity: 1,
+        reason: 'Prueba',
+        createdAt: '2026-09-28T11:00:00.000Z',
       }),
     ).toBe(false);
   });
