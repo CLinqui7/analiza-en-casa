@@ -73,7 +73,7 @@
     "accessibility": "PASS: 0 axe violations in purchase dialog; one contrast check incomplete due overlay",
     "postgres_migration_plan": "PASS: 16 ordered migrations; 016 adds tenant-scoped payments, home visits and goals",
     "postgres_runtime": "PENDING: no operator PostgreSQL credentials and Docker daemon unavailable on this workstation",
-    "implementation_sha": "PENDING_CURRENT_COMMIT"
+    "implementation_sha": "aab60742affdda3fae466c9844d093858f258966"
   },
   "limitations": [
     "No production deployment is claimed by this artifact; the only production database mutations were the authorized REVIEWING status, response and internal route updates for the six new feedback reports.",

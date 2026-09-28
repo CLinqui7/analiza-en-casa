@@ -3578,7 +3578,7 @@
         "CH07-Q009"
       ],
       "blocker_reason": "El PDF interno autenticado está implementado; el adjunto directo por WhatsApp permanece bloqueado por consentimiento, proveedor, entrega y el contrato de seguridad.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "La versión enviada e inmutable produce un PDF real con no-store y rótulo no fiscal. Se retiró QUOTE-WHATSAPP-DIRECT; sólo puede enviarse una notificación genérica con enlace seguro y consentimiento explícito."
     },
     {
@@ -3891,7 +3891,7 @@
         "CH08-Q009"
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q009.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado."
     },
     {
@@ -3940,7 +3940,7 @@
         "CH08-Q005"
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q004, CH08-Q005.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "Registrar pago se desactiva al llegar a saldo cero; el pago original permanece y la reversión exige motivo. El comprobante descargable se identifica como no fiscal."
     },
     {
@@ -6851,7 +6851,7 @@
         "CH14-Q008"
       ],
       "blocker_reason": "La evidencia no define una fuente autorizada, identificación, unicidad, campos obligatorios, estados, creación, edición, desactivación, eliminación ni auditoría de proveedores por organización.",
-      "last_verified_sha": "b90334b52751179d3104abe0cbf06bde3fb3fdcf",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "CH14-E0061 respalda la superficie y CH14-E0068 las filas. React muestra proveedores tenant-scoped ya existentes del catálogo con búsqueda y conserva Nuevo/paginación deshabilitados hasta definir el ciclo de vida. Playwright verifica lectura ADMIN/INVENTORY/AUDITOR y denegación para NURSE/DOCTOR/FINANCE."
     },
     {
@@ -6951,7 +6951,7 @@
         "CH14-Q011"
       ],
       "blocker_reason": "La anatomía visible ya está implementada con evidencia corregida; escritura sigue bloqueada por vencimiento, FEFO, cuarentena, recepción, unicidad, ciclo de vida y correcciones auditadas.",
-      "last_verified_sha": "739e5b4b4263ec0a568de9f3021ac15924957ad8",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "Evidencia corregida a CH14-E0084/E0089. React expone pestañas Lotes/Nros de serie, columnas observadas y estados vacíos; Nuevo permanece deshabilitado y no deriva stock desde borradores de compra."
     },
     {
