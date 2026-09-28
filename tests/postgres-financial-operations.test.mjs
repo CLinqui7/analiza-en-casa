@@ -10,6 +10,10 @@ const repository = await readFile(
   new URL('../apps/web/src/server/persistence/postgres.ts', import.meta.url),
   'utf8',
 );
+const migrationRunner = await readFile(
+  new URL('../scripts/deployment/db-command.mjs', import.meta.url),
+  'utf8',
+);
 
 test('PostgreSQL payments, visits and goals remain tenant scoped and idempotent', () => {
   for (const table of ['payments', 'home_visits', 'visit_goals']) {
@@ -28,4 +32,12 @@ test('PostgreSQL payment command locks the quote chain and rejects overpayment',
   assert.match(repository, /pago supera el saldo pendiente/);
   assert.match(repository, /PAYMENT_APPLIED/);
   assert.match(repository, /PAYMENT_VOIDED/);
+});
+
+test('migration grants only the required new-table operations to the discovered runtime role', () => {
+  assert.match(migrationRunner, /has_schema_privilege\(rolname,'analiza','USAGE'\)/);
+  assert.match(migrationRunner, /SELECT,INSERT,UPDATE ON analiza\.payments/);
+  assert.match(migrationRunner, /SELECT,INSERT ON analiza\.home_visits/);
+  assert.match(migrationRunner, /SELECT,INSERT,UPDATE ON analiza\.visit_goals/);
+  assert.doesNotMatch(migrationRunner, /GRANT ALL[^\n]+analiza\.(payments|home_visits|visit_goals)/);
 });

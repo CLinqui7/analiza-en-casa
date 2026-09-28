@@ -66,13 +66,13 @@
     "production_feedback_triage": "PASS: all six new reports moved to REVIEWING with an explanatory response and internal route; none marked RESOLVED before deployment",
     "production_console": "PASS: no page errors or console errors during triage",
     "unit_focused": "27/27 PDF/domain/receivables focused PASS",
-    "unit_full": "171/171 React/Vitest and 113/113 domain/Node PASS",
+    "unit_full": "171/171 React/Vitest and 114/114 domain/Node PASS",
     "playwright_ch13": "3/3 PASS against isolated production build in mock mode",
     "playwright_full": "186/186 PASS against an isolated build in mock mode",
     "mobile": "PASS at 390px; document width equals viewport width",
     "accessibility": "PASS: 0 axe violations in purchase dialog; one contrast check incomplete due overlay",
     "postgres_migration_plan": "PASS: 16 ordered migrations; 016 adds tenant-scoped payments, home visits and goals",
-    "postgres_runtime": "PENDING: no operator PostgreSQL credentials and Docker daemon unavailable on this workstation",
+    "postgres_runtime": "PASS: migration 016 applied to production Neon and least-privilege grants applied to analiza_runtime",
     "implementation_sha": "aab60742affdda3fae466c9844d093858f258966"
   },
   "limitations": [

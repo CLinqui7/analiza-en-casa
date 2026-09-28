@@ -139,9 +139,27 @@ try {
       }
     }
     // Existing role only. This tool never creates a corporate user/password or grants DDL.
-    const runtimeRole =
+    let runtimeRole =
       process.env.ANALIZA_PG_RUNTIME_ROLE ||
       (managedNeon ? process.env.PGUSER || neonUsername : undefined);
+    if (managedNeon && (!runtimeRole || runtimeRole === process.env.PGUSER)) {
+      const candidates = (
+        await client.query(
+          `SELECT rolname FROM pg_roles
+           WHERE rolcanlogin AND NOT rolsuper AND NOT rolbypassrls
+             AND rolname<>current_user
+             AND rolname !~ '^(pg_|neon_)'
+             AND has_schema_privilege(rolname,'analiza','USAGE')
+           ORDER BY rolname`,
+        )
+      ).rows;
+      assert.equal(
+        candidates.length,
+        1,
+        'Specify ANALIZA_PG_RUNTIME_ROLE when the existing restricted role is ambiguous',
+      );
+      runtimeRole = candidates[0].rolname;
+    }
     assert.ok(
       runtimeRole && /^[a-z][a-z0-9_]{0,62}$/.test(runtimeRole),
       'Specify the existing restricted runtime SQL role',
@@ -173,6 +191,9 @@ try {
     await client.query(
       `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements TO ${role}`,
     );
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.payments TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.home_visits TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.visit_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);

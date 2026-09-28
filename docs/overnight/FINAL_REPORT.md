@@ -128,8 +128,8 @@ La recomendación de producción es **no aprobar aún**: primero complete la val
 - El dashboard usa visitas registradas —separadas entre Médico y Enfermería—, ingresos administrativos y cobros aplicados; no presenta cotizaciones como facturación fiscal.
 - Cotizaciones enviadas/inmutables generan un PDF interno autenticado y `no-store`; pagos generan un comprobante interno no fiscal. Se eliminó el WhatsApp directo que admitía consentimiento ausente y exponía importes.
 - Inventario calcula saldo por ítem y bodega, muestra proveedores existentes y bodegas derivadas de movimientos, retira la transferencia incompleta y añade la anatomía segura de Lotes/Nros de serie sin inventar recepción o vencimiento.
-- Verificación local: 113/113 Node, 171/171 Vitest, 186/186 Playwright, 76/76 QA, 210/210 trazabilidad de video y 17/17 capítulos. Build, tipos, lint, seguridad y preflight pasaron.
-- La migración runtime no se aplicó: faltan credenciales privadas del operador PostgreSQL y Docker Desktop no tiene daemon activo. El plan de 16 migraciones sí pasó; el despliegue debe aplicar `016` antes de promover la aplicación porque readiness exige el esquema completo.
+- Verificación local: 114/114 Node, 171/171 Vitest, 186/186 Playwright, 76/76 QA, 210/210 trazabilidad de video y 17/17 capítulos. Build, tipos, lint, seguridad y preflight pasaron.
+- La migración `016` se aplicó a producción Neon con hashes verificados. El migrador descubrió de forma inequívoca el rol restringido `analiza_runtime` y concedió únicamente SELECT/INSERT/UPDATE según cada tabla nueva; no creó roles ni otorgó `ALL`.
 - Permanecen bloqueados por definición/integración real: factura fiscal, adjunto por WhatsApp, CRUD/ciclo de vida de bodegas y proveedores, traslado/reversión de existencias y recepción de lotes/series.
 
 ---
