@@ -10,7 +10,7 @@ export default function Page() {
         status: row.status,
         detail: row.blocker_reason || row.notes || '',
         conflict: row.source_conflict.detected,
-        stages: row.verification_stages,
+        stages: 'verification_stages' in row ? row.verification_stages : [],
       }))}
     />
   );
