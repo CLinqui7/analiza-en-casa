@@ -75,7 +75,6 @@ export default function KardexPage() {
   );
   const warehouses: Record<string, string> = {
     ...(providerMode === 'mock' ? demoWarehouses : {}),
-    ...Object.fromEntries(operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name])),
     ...Object.fromEntries(
       inventoryMovements
         .filter((item) => item.warehouseId)
@@ -84,6 +83,9 @@ export default function KardexPage() {
           item.warehouseId === 'central' ? 'Bodega central' : item.warehouseId!,
         ]),
     ),
+    // Keep the configured label authoritative, including for inactive warehouses that
+    // still appear in the immutable movement history.
+    ...Object.fromEntries(operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name])),
   };
   const activeWarehouses = operations.warehouses.filter(
     (warehouse) => warehouse.status === 'ACTIVE',
