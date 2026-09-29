@@ -18,6 +18,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import {
+  formatQuoteSavedDate,
+  formatQuoteSavedTime,
+  newestSavedQuotesFirst,
+  quoteLastSavedAt,
+} from '@/lib/quote-timestamps';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -1261,7 +1267,9 @@ export default function QuotesPage() {
         : reviseId && source
           ? 'revise'
           : null;
-  const visibleQuotes = filterQuotes(searchQuotes(quotes, patients, query), appliedFilters);
+  const visibleQuotes = newestSavedQuotesFirst(
+    filterQuotes(searchQuotes(quotes, patients, query), appliedFilters),
+  );
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(visibleQuotes.length / pageSize));
   const currentPage = Math.min(page, totalPages);
@@ -1304,6 +1312,7 @@ export default function QuotesPage() {
           <div>
             <h2>Listado de cotizaciones</h2>
             <p>{quotes.length} registros persistidos</p>
+            <p>Últimos guardados primero · hora de El Salvador</p>
           </div>
           <StatusTag>{visibleQuotes.length} visibles</StatusTag>
         </div>
@@ -1398,7 +1407,7 @@ export default function QuotesPage() {
                   <tr>
                     <th>Cotización</th>
                     <th>Paciente / caso</th>
-                    <th>Creación</th>
+                    <th>Último guardado</th>
                     <th>Total</th>
                     <th>Seguro</th>
                     <th>Paciente</th>
@@ -1410,6 +1419,7 @@ export default function QuotesPage() {
                 <tbody>
                   {pagedQuotes.map((quote) => {
                     const balance = calculateQuoteBalance(quote, payments);
+                    const savedAt = quoteLastSavedAt(quote);
                     return (
                       <tr key={quote.id}>
                         <td>
@@ -1423,7 +1433,12 @@ export default function QuotesPage() {
                           <br />
                           <small>{quote.caseId}</small>
                         </td>
-                        <td>{new Date(quote.createdAt).toLocaleString('es-SV')}</td>
+                        <td>
+                          <time className="quote-saved-stamp" dateTime={savedAt}>
+                            <strong>{formatQuoteSavedDate(savedAt)}</strong>
+                            <span>{formatQuoteSavedTime(savedAt)}</span>
+                          </time>
+                        </td>
                         <td>{money(quote.total)}</td>
                         <td>{money(quote.insurerAmount)}</td>
                         <td>{money(quote.patientAmount)}</td>

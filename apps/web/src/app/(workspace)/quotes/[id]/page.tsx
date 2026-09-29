@@ -9,6 +9,11 @@ import { useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import {
+  formatQuoteSavedDate,
+  formatQuoteSavedTime,
+  quoteLastSavedAt,
+} from '@/lib/quote-timestamps';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 type PortalShare = {
@@ -40,6 +45,7 @@ export default function QuoteDetailPage() {
       </main>
     );
   const currentQuote = quote;
+  const lastSavedAt = quoteLastSavedAt(currentQuote);
   const patient = patients.find((candidate) => candidate.id === currentQuote.patientId);
   const balance = calculateQuoteBalance(currentQuote, payments);
   const whatsappPhone = patient?.phone?.replace(/\D/g, '') ?? '';
@@ -206,7 +212,18 @@ export default function QuoteDetailPage() {
             </div>
             <div>
               <dt>Creación</dt>
-              <dd>{new Date(quote.createdAt).toLocaleString('es-SV')}</dd>
+              <dd>
+                {formatQuoteSavedDate(quote.createdAt)} · {formatQuoteSavedTime(quote.createdAt)}
+              </dd>
+            </div>
+            <div>
+              <dt>Último guardado</dt>
+              <dd>
+                <time dateTime={lastSavedAt}>
+                  {formatQuoteSavedDate(lastSavedAt)} · {formatQuoteSavedTime(lastSavedAt)}
+                </time>
+                <small> Hora de El Salvador</small>
+              </dd>
             </div>
             <div>
               <dt>Comprobante</dt>

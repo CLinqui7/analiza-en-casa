@@ -47,6 +47,52 @@ test('quotes list searches normalized id, patient, case and status, then clears'
   await expect(search).toHaveValue('');
 });
 
+test('quotes show the saved day and time with the most recently saved first', async ({ page }) => {
+  await login(page);
+  await page.evaluate(() => {
+    const base = {
+      caseId: 'case-demo-001',
+      patientId: 'patient-demo-001',
+      version: 1,
+      status: 'DRAFT',
+      summary: 'Seguimiento',
+      items: [],
+      subtotal: 0,
+      discountAmount: 0,
+      total: 0,
+      insurerAmount: 0,
+      patientAmount: 0,
+      immutable: false,
+    };
+    window.localStorage.setItem(
+      'analiza.en.casa.workspace.v3.quotes',
+      JSON.stringify([
+        { ...base, id: 'quote-old', createdAt: '2026-09-20T10:00:00.000Z' },
+        { ...base, id: 'quote-new', createdAt: '2026-09-28T10:00:00.000Z' },
+        {
+          ...base,
+          id: 'quote-edited',
+          createdAt: '2026-09-19T10:00:00.000Z',
+          updatedAt: '2026-09-29T19:00:00.000Z',
+        },
+      ]),
+    );
+  });
+  await page.goto('/quotes');
+  await expect(page.getByText('Últimos guardados primero · hora de El Salvador')).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Último guardado' })).toBeVisible();
+  const rows = page.locator('tbody tr');
+  await expect(rows).toHaveCount(3);
+  await expect(rows.nth(0)).toContainText('quote-edited');
+  await expect(rows.nth(1)).toContainText('quote-new');
+  await expect(rows.nth(2)).toContainText('quote-old');
+  await expect(rows.nth(0).locator('time')).toHaveAttribute('datetime', '2026-09-29T19:00:00.000Z');
+  await expect(rows.nth(0).locator('time')).toContainText('2026');
+  await rows.nth(0).getByRole('link', { name: 'Consultar' }).click();
+  await expect(page.getByText('Último guardado')).toBeVisible();
+  await expect(page.locator('time[datetime="2026-09-29T19:00:00.000Z"]')).toBeVisible();
+});
+
 test('modern quote builder keeps the requested categories and optional origin', async ({
   page,
 }) => {

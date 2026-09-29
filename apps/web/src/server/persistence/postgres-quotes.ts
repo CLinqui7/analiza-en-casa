@@ -13,6 +13,10 @@ function authorize(actor: ServerActor, permission: 'quotes:read' | 'quotes:write
   if (!can(actor.role, permission)) throw new MongoAccessError();
 }
 
+function quoteWithSavedAt(row: { body: Quote; updated_at: Date | string }): Quote {
+  return quoteSchema.parse({ ...row.body, updatedAt: new Date(row.updated_at).toISOString() });
+}
+
 export function postgresQuotes(pool: Pool): Persistence['quotes'] {
   return {
     async listWithVersions(actor) {
@@ -20,11 +24,11 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
       return transaction(pool, actor, async (client) =>
         (
           await client.query(
-            'SELECT body,record_version FROM analiza.quotes WHERE organization_id=$1 ORDER BY created_at DESC,id',
+            'SELECT body,record_version,updated_at FROM analiza.quotes WHERE organization_id=$1 ORDER BY updated_at DESC,id',
             [actor.organizationId],
           )
         ).rows.map((row) => ({
-          quote: quoteSchema.parse(row.body),
+          quote: quoteWithSavedAt(row),
           version: Number(row.record_version),
         })),
       );
@@ -34,12 +38,12 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
       authorize(actor, 'quotes:read');
       return transaction(pool, actor, async (client) => {
         const row = (
-          await client.query('SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2', [
-            actor.organizationId,
-            id,
-          ])
+          await client.query(
+            'SELECT body,updated_at FROM analiza.quotes WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, id],
+          )
         ).rows[0];
-        return row ? quoteSchema.parse(row.body) : null;
+        return row ? quoteWithSavedAt(row) : null;
       });
     },
 
@@ -81,8 +85,8 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
             rootQuoteId: rootId,
             originalQuoteId: rootId,
           };
-          await client.query(
-            'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          const inserted = await client.query(
+            'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb) RETURNING updated_at',
             [
               actor.organizationId,
               stored.id,
@@ -100,7 +104,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
             'quote',
             stored.id,
           );
-          return quoteSchema.parse(stored);
+          return quoteWithSavedAt({ body: stored, updated_at: inserted.rows[0].updated_at });
         });
       } catch (error) {
         if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
@@ -123,12 +127,12 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
         if (!current || !canEditQuote(quoteSchema.parse(current.body)))
           throw new MongoConflictError();
         const updated = await client.query(
-          "UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 AND body->>'status'='DRAFT' AND (body->>'immutable')::boolean=false RETURNING body",
+          "UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 AND body->>'status'='DRAFT' AND (body->>'immutable')::boolean=false RETURNING body,updated_at",
           [actor.organizationId, id, expectedVersion, JSON.stringify(quote)],
         );
         if (updated.rowCount !== 1) throw new MongoConflictError();
         await audit(client, actor, 'QUOTE_DRAFT_UPDATED', 'quote', id);
-        return quoteSchema.parse(updated.rows[0].body);
+        return quoteWithSavedAt(updated.rows[0]);
       });
     },
 
@@ -152,12 +156,12 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
           sentAt: new Date().toISOString(),
         };
         const updated = await client.query(
-          'UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 RETURNING body',
+          'UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 RETURNING body,updated_at',
           [actor.organizationId, id, expectedVersion, JSON.stringify(sent)],
         );
         if (updated.rowCount !== 1) throw new MongoConflictError();
         await audit(client, actor, 'QUOTE_SENT_IMMUTABLE', 'quote', id);
-        return quoteSchema.parse(updated.rows[0].body);
+        return quoteWithSavedAt(updated.rows[0]);
       });
     },
   };

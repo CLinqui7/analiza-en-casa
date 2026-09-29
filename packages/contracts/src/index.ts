@@ -302,6 +302,8 @@ export const quoteSchema = z.object({
   patientAmount: z.number().nonnegative().default(0),
   immutable: z.boolean().default(false),
   createdAt: z.string(),
+  /** Server-confirmed time of the latest persisted change; legacy records use createdAt. */
+  updatedAt: z.string().optional(),
   sentAt: z.string().optional(),
   originalQuoteId: z.string().optional(),
   rootQuoteId: z.string().optional(),

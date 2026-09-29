@@ -510,6 +510,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           immutable: false,
           status: 'DRAFT',
           sentAt: undefined,
+          updatedAt: new Date().toISOString(),
         };
         return persistMockChange((current) => ({
           ...current,
@@ -562,11 +563,18 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
+      const sentAt = new Date().toISOString();
       return persistMockChange((current) => ({
         ...current,
         quotes: current.quotes.map((candidate) =>
           candidate.id === quoteId
-            ? { ...candidate, status: 'SENT', immutable: true, sentAt: new Date().toISOString() }
+            ? {
+                ...candidate,
+                status: 'SENT',
+                immutable: true,
+                sentAt,
+                updatedAt: sentAt,
+              }
             : candidate,
         ),
         auditEntries: [
