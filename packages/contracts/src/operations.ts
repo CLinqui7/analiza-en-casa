@@ -39,6 +39,103 @@ export const warehouseTransferSchema = z
     path: ['destinationWarehouseId'],
   });
 export type WarehouseTransfer = z.infer<typeof warehouseTransferSchema>;
+
+export const inventoryTraceKindSchema = z.enum(['LOT', 'SERIAL']);
+export const inventoryTraceQualityStatusSchema = z.enum([
+  'QUARANTINED',
+  'AVAILABLE',
+  'BLOCKED',
+  'REJECTED',
+]);
+export const inventoryTraceBalanceSchema = z
+  .object({ warehouseId: id, quantity: z.number().int().nonnegative().max(1000000) })
+  .strict();
+export const inventoryTraceRecordSchema = z
+  .object({
+    id,
+    kind: inventoryTraceKindSchema,
+    itemId: id,
+    supplierCatalogItemId: id,
+    number: z.string().trim().min(1).max(120),
+    receivedQuantity: z.number().int().positive().max(1000000),
+    manufacturedOn: z.iso.date().optional(),
+    expiresOn: z.iso.date().optional(),
+    receiptReference: z.string().trim().min(1).max(200),
+    qualityStatus: inventoryTraceQualityStatusSchema,
+    receivedAt: date,
+    createdAt: date,
+    updatedAt: date,
+    balances: z.array(inventoryTraceBalanceSchema),
+  })
+  .strict();
+export type InventoryTraceRecord = z.infer<typeof inventoryTraceRecordSchema>;
+
+export const inventoryTraceReceiptSchema = z
+  .object({
+    id,
+    kind: inventoryTraceKindSchema,
+    itemId: id,
+    warehouseId: id,
+    supplierCatalogItemId: id,
+    number: z.string().trim().min(1).max(120),
+    quantity: z.number().int().positive().max(1000000),
+    manufacturedOn: z.iso.date().optional(),
+    expiresOn: z.iso.date().optional(),
+    receiptReference: z.string().trim().min(1).max(200),
+    reason: z.string().trim().min(1).max(500),
+    receivedAt: date,
+    idempotencyKey: id,
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (value.kind === 'LOT' && !value.expiresOn)
+      context.addIssue({ code: 'custom', message: 'Indique el vencimiento.', path: ['expiresOn'] });
+    if (value.kind === 'SERIAL' && value.quantity !== 1)
+      context.addIssue({
+        code: 'custom',
+        message: 'Cada número de serie representa una unidad.',
+        path: ['quantity'],
+      });
+    if (value.kind === 'SERIAL' && value.expiresOn)
+      context.addIssue({
+        code: 'custom',
+        message: 'El vencimiento se registra por lote, no por número de serie.',
+        path: ['expiresOn'],
+      });
+    if (value.manufacturedOn && value.expiresOn && value.manufacturedOn > value.expiresOn)
+      context.addIssue({
+        code: 'custom',
+        message: 'El vencimiento debe ser posterior a la fabricación.',
+        path: ['expiresOn'],
+      });
+  });
+export type InventoryTraceReceipt = z.infer<typeof inventoryTraceReceiptSchema>;
+
+export const inventoryTraceStatusChangeSchema = z
+  .object({
+    id,
+    recordId: id,
+    status: z.enum(['AVAILABLE', 'BLOCKED', 'REJECTED']),
+    reason: z.string().trim().min(1).max(500),
+    occurredAt: date,
+    idempotencyKey: id,
+  })
+  .strict();
+export type InventoryTraceStatusChange = z.infer<typeof inventoryTraceStatusChangeSchema>;
+
+export const inventoryFefoIssueSchema = z
+  .object({
+    id,
+    itemId: id,
+    warehouseId: id,
+    quantity: z.number().int().positive().max(1000000),
+    reference: z.string().trim().min(1).max(200),
+    reason: z.string().trim().min(1).max(500),
+    occurredAt: date,
+    idempotencyKey: id,
+  })
+  .strict();
+export type InventoryFefoIssue = z.infer<typeof inventoryFefoIssueSchema>;
 export const configurationEntrySchema = z
   .object({
     id,
@@ -144,6 +241,7 @@ export type OperationsSnapshot = {
   visits: Visit[];
   goals: VisitGoal[];
   warehouses: Warehouse[];
+  traceRecords: InventoryTraceRecord[];
 };
 export const emptyOperations = (): OperationsSnapshot => ({
   professionals: [],
@@ -154,6 +252,7 @@ export const emptyOperations = (): OperationsSnapshot => ({
   visits: [],
   goals: [],
   warehouses: [],
+  traceRecords: [],
 });
 
 /** Corrections append a new observation; the original remains available for audit. */

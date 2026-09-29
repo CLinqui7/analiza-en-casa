@@ -35,10 +35,10 @@ test('warehouse transfers lock both balances and create equal opposite movements
   assert.ok(start >= 0 && end > start, 'transfer command must remain identifiable');
   const source = repository.slice(start, end);
   assert.match(source, /lockKeys[\s\S]+\.sort\(\)/);
-  assert.match(source, /sourceBalance < transfer\.quantity/);
+  assert.match(source, /sourceBalance - unavailableTraceBalance < transfer\.quantity/);
   assert.match(source, /transferDirection: 'OUT'/);
   assert.match(source, /transferDirection: 'IN'/);
-  assert.match(source, /-transfer\.quantity/);
+  assert.match(source, /-quantity/);
   assert.match(source, /INVENTORY_TRANSFER_RECORDED/);
 });
 

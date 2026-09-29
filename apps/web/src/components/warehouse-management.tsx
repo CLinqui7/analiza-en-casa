@@ -3,12 +3,14 @@
 import type {
   CatalogItem,
   InventoryMovement,
+  InventoryTraceRecord,
   Warehouse,
   WarehouseTransfer,
 } from '@analiza/contracts';
 import { currentInventoryBalance } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useMemo, useState } from 'react';
+import { expiredTraceQuantity } from '@/lib/inventory-traceability';
 
 type Execute = (command: unknown) => Promise<boolean>;
 
@@ -248,6 +250,7 @@ export function InventoryTransferDialog({
   warehouses,
   items,
   movements,
+  traceRecords,
   busy,
   error,
   execute,
@@ -258,6 +261,7 @@ export function InventoryTransferDialog({
   warehouses: Warehouse[];
   items: CatalogItem[];
   movements: InventoryMovement[];
+  traceRecords: InventoryTraceRecord[];
   busy: boolean;
   error: string | null;
   execute: Execute;
@@ -275,9 +279,10 @@ export function InventoryTransferDialog({
   const available = useMemo(
     () =>
       itemId && sourceWarehouseId
-        ? currentInventoryBalance(movements, itemId, sourceWarehouseId)
+        ? currentInventoryBalance(movements, itemId, sourceWarehouseId) -
+          expiredTraceQuantity(traceRecords, itemId, sourceWarehouseId)
         : 0,
-    [itemId, movements, sourceWarehouseId],
+    [itemId, movements, sourceWarehouseId, traceRecords],
   );
 
   async function transfer(formData: FormData) {

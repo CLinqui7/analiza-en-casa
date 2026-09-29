@@ -5,7 +5,9 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { InventoryTransferDialog, WarehouseManagement } from '@/components/warehouse-management';
+import { InventoryTraceability } from '@/components/inventory-traceability';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { expiredTraceQuantity } from '@/lib/inventory-traceability';
 import { useOperations } from '@/lib/use-operations';
 
 const demoItemCatalog: Record<string, { name: string; sku: string }> = {
@@ -114,7 +116,6 @@ export default function InventoryPage() {
   const [supplierQuery, setSupplierQuery] = useState('');
   const [warehouseQuery, setWarehouseQuery] = useState('');
   const [kitQuery, setKitQuery] = useState('');
-  const [lotTab, setLotTab] = useState<'LOTS' | 'SERIALS'>('LOTS');
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
@@ -134,7 +135,9 @@ export default function InventoryPage() {
           code: itemCatalog[itemId]?.sku ?? itemId,
           name: itemCatalog[itemId]?.name ?? itemId,
           warehouse: warehouseNames[warehouseId] ?? warehouseId,
-          available: currentInventoryBalance(inventoryMovements, itemId, warehouseId),
+          available:
+            currentInventoryBalance(inventoryMovements, itemId, warehouseId) -
+            expiredTraceQuantity(operations.traceRecords, itemId, warehouseId),
         }));
       })
       .filter((row) =>
@@ -142,7 +145,7 @@ export default function InventoryPage() {
           .toLocaleLowerCase('es')
           .includes(query.toLocaleLowerCase('es')),
       );
-  }, [inventoryMovements, query, itemCatalog, warehouseNames]);
+  }, [inventoryMovements, operations.traceRecords, query, itemCatalog, warehouseNames]);
   const supplierRows = useMemo(
     () =>
       catalogItems
@@ -247,10 +250,10 @@ export default function InventoryPage() {
                   : surface === 'WAREHOUSES'
                     ? 'Administre bodegas activas e inactivas con códigos únicos, permisos y trazabilidad. La desactivación exige saldo total cero.'
                     : surface === 'LOTS'
-                      ? 'Superficie factual observada. No crea lotes o series ni deriva vencimiento, disponibilidad o recepción desde borradores de compra.'
+                      ? 'Recepción trazable por lote o serie, cuarentena, liberación, bloqueo, rechazo y salida FEFO/FIFO por bodega.'
                       : surface === 'KITS'
                         ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
-                        : 'Existencias cronológicas por ítem y bodega. Los traslados son atómicos; compromisos y lotes siguen separados hasta contar con reglas verificables.'}
+                        : 'Existencias cronológicas por ítem y bodega. Los traslados son atómicos y preservan lote o serie cuando existe trazabilidad.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -412,7 +415,8 @@ export default function InventoryPage() {
             La regla de inventario comprometido requiere definición aprobada (CH14-Q001).
           </p>
           <p className="field-help" id="inventory-lots-help">
-            Lotes y series requieren reglas de trazabilidad aprobadas (CH14-Q001).
+            Las existencias vencidas se excluyen del disponible. Recepciones y salidas trazadas se
+            administran en Lotes.
           </p>
           <div className="filter-grid">
             <label>
@@ -657,69 +661,17 @@ export default function InventoryPage() {
           warehouses={visibleWarehouses}
         />
       ) : surface === 'LOTS' ? (
-        <Panel>
-          <div className="table-heading">
-            <div>
-              <h2>Lotes y números de serie</h2>
-              <p className="field-help" id="inventory-lots-help">
-                La recepción, unicidad, vencimiento, FEFO, cuarentena y corrección siguen pendientes
-                de CH14-Q010/CH14-Q011. No se convierten borradores de compra en stock.
-              </p>
-            </div>
-            <Button aria-describedby="inventory-lots-help" disabled type="button">
-              Nuevo
-            </Button>
-          </div>
-          <div aria-label="Tipo de trazabilidad" className="tabs" role="tablist">
-            <Button
-              aria-selected={lotTab === 'LOTS'}
-              className={lotTab === 'LOTS' ? 'tab active' : 'tab'}
-              data-action-id="INVENTORY-LOTS-TAB"
-              onClick={() => setLotTab('LOTS')}
-              role="tab"
-              type="button"
-            >
-              Lotes
-            </Button>
-            <Button
-              aria-selected={lotTab === 'SERIALS'}
-              className={lotTab === 'SERIALS' ? 'tab active' : 'tab'}
-              data-action-id="INVENTORY-SERIALS-TAB"
-              onClick={() => setLotTab('SERIALS')}
-              role="tab"
-              type="button"
-            >
-              Nros de serie
-            </Button>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Acciones</th>
-                  <th>Número</th>
-                  <th>Descripción</th>
-                  <th>Ítem</th>
-                  <th>Fecha E</th>
-                  <th>Fecha V</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={7}>
-                    <EmptyState
-                      title={
-                        lotTab === 'LOTS' ? 'Sin lotes recibidos' : 'Sin números de serie recibidos'
-                      }
-                      detail="No existe una recepción de inventario autorizada que alimente esta tabla."
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Panel>
+        <InventoryTraceability
+          busy={operations.busy}
+          canWrite={can('inventory:write')}
+          connected={operations.connected}
+          error={operations.error}
+          execute={operations.execute}
+          items={catalogItems}
+          records={operations.traceRecords}
+          refreshWorkspace={refreshWorkspace}
+          warehouses={visibleWarehouses}
+        />
       ) : surface === 'KITS' ? (
         <Panel>
           <div className="table-heading">
@@ -900,8 +852,8 @@ export default function InventoryPage() {
               </label>
             </div>
             <p className="field-help">
-              Rango de fechas sobre movimientos locales. Lote/serie, origen, destino y estado no
-              están documentados por el modelo actual (CH14-Q001).
+              Rango de fechas sobre movimientos locales. Las recepciones, cambios de estado y
+              asignaciones FEFO conservan lote o serie y bodega.
             </p>
             <div className="table-wrap">
               <table>
@@ -922,6 +874,7 @@ export default function InventoryPage() {
                     <tr key={movement.id}>
                       <td>{movement.kind}</td>
                       <td>{new Date(movement.createdAt).toLocaleString('es-SV')}</td>
+                      <td>{movement.traceNumber ?? 'No trazado'}</td>
                       <td>
                         {movement.kind === 'TRANSFER' && movement.transferDirection === 'OUT'
                           ? (warehouseNames[movement.warehouseId ?? ''] ?? movement.warehouseId)
@@ -938,10 +891,9 @@ export default function InventoryPage() {
                               movement.counterpartWarehouseId)
                             : 'No aplica'}
                       </td>
-                      <td>No documentado</td>
                       <td>{movement.quantity}</td>
                       <td>{movementLabel(movement)}</td>
-                      <td>No documentado</td>
+                      <td>{movement.traceRecordId ? 'Trazado' : 'Movimiento histórico'}</td>
                     </tr>
                   ))}
                   {!historyRows.length ? (
@@ -966,6 +918,7 @@ export default function InventoryPage() {
         execute={operations.execute}
         items={catalogItems}
         movements={inventoryMovements}
+        traceRecords={operations.traceRecords}
         onClose={() => setTransferOpen(false)}
         open={transferOpen}
         refreshWorkspace={refreshWorkspace}

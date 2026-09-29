@@ -19,6 +19,10 @@ import {
   catalogItemSchema,
   clinicalDocumentSchema,
   inventoryMovementSchema,
+  inventoryFefoIssueSchema,
+  inventoryTraceReceiptSchema,
+  inventoryTraceRecordSchema,
+  inventoryTraceStatusChangeSchema,
   purchaseSchema,
   warehouseInputSchema,
   warehouseSchema,
@@ -42,6 +46,18 @@ const commands = z.discriminatedUnion('command', [
   z.object({ command: z.literal('warehouse.save'), warehouse: warehouseInputSchema }).strict(),
   z
     .object({ command: z.literal('inventory.transfer'), transfer: warehouseTransferSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('inventory.trace.receive'), receipt: inventoryTraceReceiptSchema })
+    .strict(),
+  z
+    .object({
+      command: z.literal('inventory.trace.status'),
+      change: inventoryTraceStatusChangeSchema,
+    })
+    .strict(),
+  z
+    .object({ command: z.literal('inventory.trace.issue'), issue: inventoryFefoIssueSchema })
     .strict(),
   z
     .object({
@@ -218,6 +234,41 @@ export class MongoOperationsRepository {
               );
           })
         : undefined,
+      can(actor.role, 'inventory:read')
+        ? Promise.all([read('inventoryTraceRecords'), read('inventoryTraceBalances')]).then(
+            ([records, balances]) => {
+              result.traceRecords = records
+                .map((record) =>
+                  inventoryTraceRecordSchema.parse({
+                    id: record.id,
+                    kind: record.kind,
+                    itemId: record.itemId,
+                    supplierCatalogItemId: record.supplierCatalogItemId,
+                    number: record.number,
+                    receivedQuantity: record.receivedQuantity,
+                    manufacturedOn: record.manufacturedOn,
+                    expiresOn: record.expiresOn,
+                    receiptReference: record.receiptReference,
+                    qualityStatus: record.qualityStatus,
+                    receivedAt: record.receivedAt,
+                    createdAt: record.createdAt,
+                    updatedAt: record.updatedAt,
+                    balances: balances
+                      .filter((balance) => balance.traceRecordId === record.id)
+                      .map((balance) => ({
+                        warehouseId: String(balance.warehouseId),
+                        quantity: Number(balance.quantity),
+                      })),
+                  }),
+                )
+                .sort(
+                  (left, right) =>
+                    right.receivedAt.localeCompare(left.receivedAt) ||
+                    left.id.localeCompare(right.id),
+                );
+            },
+          )
+        : undefined,
     ]);
     return result;
   }
@@ -328,7 +379,10 @@ export class MongoOperationsRepository {
                       : movement.quantity;
               balances.set(movement.itemId, (balances.get(movement.itemId) ?? 0) + delta);
             }
-            if ([...balances.values()].some((balance) => balance !== 0))
+            const tracedBalance = await this.database
+              .collection('inventoryTraceBalances')
+              .findOne({ ...scoped, warehouseId: submitted.id, quantity: { $gt: 0 } }, { session });
+            if ([...balances.values()].some((balance) => balance !== 0) || tracedBalance)
               throw new MongoInputError(
                 'Traslade o ajuste todas las existencias antes de desactivar la bodega.',
               );
@@ -357,6 +411,315 @@ export class MongoOperationsRepository {
             warehouse.id,
           );
           return warehouse;
+        }
+        if (input.command === 'inventory.trace.receive') {
+          permission('inventory:write');
+          const receipt = input.receipt;
+          const previous = await this.database
+            .collection('inventoryTraceEvents')
+            .findOne({ ...scoped, idempotencyKey: receipt.idempotencyKey }, { session });
+          if (previous) {
+            assertSameRetry(previous.body as Record<string, unknown>, receipt);
+            const existing = await this.database
+              .collection('inventoryTraceRecords')
+              .findOne({ ...scoped, id: receipt.id }, { session });
+            if (!existing) throw new MongoConflictError();
+            return existing;
+          }
+          const item = await this.database.collection('catalogItems').findOne(
+            {
+              ...scoped,
+              id: receipt.itemId,
+              status: 'ACTIVE',
+              category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+            },
+            { session },
+          );
+          const expectedKind = item?.category === 'EQUIPMENT' ? 'SERIAL' : 'LOT';
+          if (!item || receipt.kind !== expectedKind)
+            throw new MongoInputError(
+              'Medicamentos e insumos usan lote; los equipos usan un número de serie por unidad.',
+            );
+          const [supplier, warehouse] = await Promise.all([
+            this.database.collection('catalogItems').findOne(
+              {
+                ...scoped,
+                id: receipt.supplierCatalogItemId,
+                status: 'ACTIVE',
+                category: 'PROVIDERS',
+              },
+              { session },
+            ),
+            this.database
+              .collection('warehouses')
+              .findOne({ ...scoped, id: receipt.warehouseId, status: 'ACTIVE' }, { session }),
+          ]);
+          if (!supplier) throw new MongoInputError('Seleccione un proveedor activo.');
+          if (!warehouse) throw new MongoInputError('Seleccione una bodega activa.');
+          const now = new Date().toISOString();
+          const record = inventoryTraceRecordSchema.parse({
+            id: receipt.id,
+            kind: receipt.kind,
+            itemId: receipt.itemId,
+            supplierCatalogItemId: receipt.supplierCatalogItemId,
+            number: receipt.number.toUpperCase(),
+            receivedQuantity: receipt.quantity,
+            manufacturedOn: receipt.manufacturedOn,
+            expiresOn: receipt.kind === 'LOT' ? receipt.expiresOn : undefined,
+            receiptReference: receipt.receiptReference,
+            qualityStatus: 'QUARANTINED',
+            receivedAt: receipt.receivedAt,
+            createdAt: now,
+            updatedAt: now,
+            balances: [{ warehouseId: receipt.warehouseId, quantity: receipt.quantity }],
+          });
+          await this.database.collection('inventoryTraceRecords').insertOne(
+            {
+              ...record,
+              balances: undefined,
+              numberNormalized: record.number.toUpperCase(),
+              ...scoped,
+            },
+            { session },
+          );
+          await this.database.collection('inventoryTraceBalances').insertOne(
+            {
+              ...scoped,
+              traceRecordId: record.id,
+              warehouseId: receipt.warehouseId,
+              quantity: receipt.quantity,
+              updatedAt: now,
+            },
+            { session },
+          );
+          await this.database.collection('inventoryTraceEvents').insertOne(
+            {
+              ...scoped,
+              id: receipt.id,
+              traceRecordId: record.id,
+              eventType: 'RECEIVED',
+              idempotencyKey: receipt.idempotencyKey,
+              body: receipt,
+              occurredAt: receipt.receivedAt,
+            },
+            { session },
+          );
+          await audit('INVENTORY_TRACE_RECEIVED', record.id);
+          return record;
+        }
+        if (input.command === 'inventory.trace.status') {
+          permission('inventory:write');
+          const change = input.change;
+          const previous = await this.database
+            .collection('inventoryTraceEvents')
+            .findOne({ ...scoped, idempotencyKey: change.idempotencyKey }, { session });
+          if (previous) {
+            assertSameRetry(previous.body as Record<string, unknown>, change);
+            return { id: change.recordId };
+          }
+          const record = await this.database
+            .collection('inventoryTraceRecords')
+            .findOne({ ...scoped, id: change.recordId }, { session });
+          if (!record) throw new MongoInputError('El lote o serie no está disponible.');
+          const allowed: Record<string, string[]> = {
+            QUARANTINED: ['AVAILABLE', 'BLOCKED', 'REJECTED'],
+            AVAILABLE: ['BLOCKED', 'REJECTED'],
+            BLOCKED: ['AVAILABLE', 'REJECTED'],
+            REJECTED: [],
+          };
+          if (!allowed[String(record.qualityStatus)]?.includes(change.status))
+            throw new MongoInputError('La transición de estado no está permitida.');
+          if (
+            change.status === 'AVAILABLE' &&
+            record.expiresOn &&
+            String(record.expiresOn) < change.occurredAt.slice(0, 10)
+          )
+            throw new MongoInputError('Un lote vencido no puede liberarse ni distribuirse.');
+          const direction =
+            record.qualityStatus === 'AVAILABLE' ? -1 : change.status === 'AVAILABLE' ? 1 : 0;
+          const balances = await this.database
+            .collection('inventoryTraceBalances')
+            .find({ ...scoped, traceRecordId: record.id }, { session })
+            .sort({ warehouseId: 1 })
+            .toArray();
+          for (const [index, balance] of balances.entries()) {
+            const quantity = Number(balance.quantity);
+            if (!direction || !quantity) continue;
+            await applyStockDelta(
+              this.database,
+              session,
+              actor,
+              String(record.itemId),
+              String(balance.warehouseId),
+              direction * quantity,
+            );
+            const movement = inventoryMovementSchema.parse({
+              id: `${change.id}:movement:${index}`,
+              itemId: record.itemId,
+              warehouseId: balance.warehouseId,
+              quantity,
+              createdAt: change.occurredAt,
+              reason: change.reason,
+              reference: record.receiptReference,
+              user: actor.userId,
+              kind: direction > 0 ? 'ENTRY' : 'EXIT',
+              traceRecordId: record.id,
+              traceNumber: record.number,
+            });
+            await this.database.collection('inventoryMovements').insertOne(
+              {
+                ...movement,
+                ...scoped,
+                idempotencyKey: `${change.idempotencyKey}:movement:${index}`,
+              },
+              { session },
+            );
+          }
+          await this.database
+            .collection('inventoryTraceRecords')
+            .updateOne(
+              { ...scoped, id: record.id, qualityStatus: record.qualityStatus },
+              { $set: { qualityStatus: change.status, updatedAt: change.occurredAt } },
+              { session },
+            );
+          await this.database.collection('inventoryTraceEvents').insertOne(
+            {
+              ...scoped,
+              id: change.id,
+              traceRecordId: record.id,
+              eventType: change.status === 'AVAILABLE' ? 'RELEASED' : change.status,
+              idempotencyKey: change.idempotencyKey,
+              body: change,
+              occurredAt: change.occurredAt,
+            },
+            { session },
+          );
+          await audit(`INVENTORY_TRACE_${change.status}`, String(record.id));
+          return { id: record.id };
+        }
+        if (input.command === 'inventory.trace.issue') {
+          permission('inventory:write');
+          const issue = input.issue;
+          const previous = await this.database
+            .collection('inventoryTraceEvents')
+            .findOne({ ...scoped, idempotencyKey: issue.idempotencyKey }, { session });
+          if (previous) {
+            assertSameRetry(previous.body as Record<string, unknown>, issue);
+            return { id: issue.id };
+          }
+          const warehouse = await this.database
+            .collection('warehouses')
+            .findOne({ ...scoped, id: issue.warehouseId, status: 'ACTIVE' }, { session });
+          if (!warehouse) throw new MongoInputError('Seleccione una bodega activa.');
+          const date = issue.occurredAt.slice(0, 10);
+          const records = await this.database
+            .collection('inventoryTraceRecords')
+            .find(
+              {
+                ...scoped,
+                itemId: issue.itemId,
+                qualityStatus: 'AVAILABLE',
+                $or: [{ expiresOn: { $exists: false } }, { expiresOn: { $gte: date } }],
+              },
+              { session },
+            )
+            .sort({ expiresOn: 1, receivedAt: 1, id: 1 })
+            .toArray();
+          const candidates: Array<Record<string, unknown> & { quantity: number }> = [];
+          for (const record of records) {
+            const balance = await this.database.collection('inventoryTraceBalances').findOne(
+              {
+                ...scoped,
+                traceRecordId: record.id,
+                warehouseId: issue.warehouseId,
+                quantity: { $gt: 0 },
+              },
+              { session },
+            );
+            if (balance) candidates.push({ ...record, quantity: Number(balance.quantity) });
+          }
+          if (candidates.reduce((sum, row) => sum + row.quantity, 0) < issue.quantity)
+            throw new MongoInputError(
+              'No hay existencias liberadas y vigentes suficientes para esta salida FEFO.',
+            );
+          let remaining = issue.quantity;
+          const allocations: Array<{ traceRecordId: string; number: string; quantity: number }> =
+            [];
+          for (const [index, candidate] of candidates.entries()) {
+            if (!remaining) break;
+            const quantity = Math.min(remaining, candidate.quantity);
+            remaining -= quantity;
+            const changed = await this.database.collection('inventoryTraceBalances').updateOne(
+              {
+                ...scoped,
+                traceRecordId: candidate.id,
+                warehouseId: issue.warehouseId,
+                quantity: { $gte: quantity },
+              },
+              { $inc: { quantity: -quantity }, $set: { updatedAt: issue.occurredAt } },
+              { session },
+            );
+            if (changed.modifiedCount !== 1) throw new MongoConflictError();
+            await applyStockDelta(
+              this.database,
+              session,
+              actor,
+              issue.itemId,
+              issue.warehouseId,
+              -quantity,
+            );
+            const movement = inventoryMovementSchema.parse({
+              id: `${issue.id}:movement:${index}`,
+              itemId: issue.itemId,
+              warehouseId: issue.warehouseId,
+              quantity,
+              createdAt: issue.occurredAt,
+              reason: issue.reason,
+              reference: issue.reference,
+              user: actor.userId,
+              kind: 'EXIT',
+              traceRecordId: candidate.id,
+              traceNumber: candidate.number,
+            });
+            await this.database.collection('inventoryMovements').insertOne(
+              {
+                ...movement,
+                ...scoped,
+                idempotencyKey: `${issue.idempotencyKey}:movement:${index}`,
+              },
+              { session },
+            );
+            await this.database.collection('inventoryTraceEvents').insertOne(
+              {
+                ...scoped,
+                id: `${issue.id}:allocation:${index}`,
+                traceRecordId: candidate.id,
+                eventType: 'ISSUED',
+                idempotencyKey: `${issue.idempotencyKey}:allocation:${index}`,
+                body: { ...issue, allocatedQuantity: quantity },
+                occurredAt: issue.occurredAt,
+              },
+              { session },
+            );
+            allocations.push({
+              traceRecordId: String(candidate.id),
+              number: String(candidate.number),
+              quantity,
+            });
+          }
+          await this.database.collection('inventoryTraceEvents').insertOne(
+            {
+              ...scoped,
+              id: issue.id,
+              eventType: 'ISSUED',
+              idempotencyKey: issue.idempotencyKey,
+              body: issue,
+              occurredAt: issue.occurredAt,
+            },
+            { session },
+          );
+          await audit('INVENTORY_FEFO_ISSUED', issue.id);
+          return { id: issue.id, allocations };
         }
         if (input.command === 'inventory.transfer') {
           permission('inventory:write');
@@ -393,6 +756,66 @@ export class MongoOperationsRepository {
             .toArray();
           if (activeWarehouses.length !== 2)
             throw new MongoInputError('Seleccione dos bodegas activas y distintas.');
+          const transferDate = transfer.occurredAt.slice(0, 10);
+          const traceRecords = await this.database
+            .collection('inventoryTraceRecords')
+            .find({ ...scoped, itemId: transfer.itemId, qualityStatus: 'AVAILABLE' }, { session })
+            .sort({ expiresOn: 1, receivedAt: 1, id: 1 })
+            .toArray();
+          const traceCandidates: Array<Record<string, unknown> & { quantity: number }> = [];
+          let expiredQuantity = 0;
+          for (const record of traceRecords) {
+            const balance = await this.database.collection('inventoryTraceBalances').findOne(
+              {
+                ...scoped,
+                traceRecordId: record.id,
+                warehouseId: transfer.sourceWarehouseId,
+                quantity: { $gt: 0 },
+              },
+              { session },
+            );
+            if (!balance) continue;
+            const quantity = Number(balance.quantity);
+            if (record.expiresOn && String(record.expiresOn) < transferDate)
+              expiredQuantity += quantity;
+            else traceCandidates.push({ ...record, quantity });
+          }
+          const storedBalance = await this.database.collection('inventoryBalances').findOne(
+            {
+              ...scoped,
+              itemId: transfer.itemId,
+              warehouseId: transfer.sourceWarehouseId,
+            },
+            { session },
+          );
+          let sourceQuantity = Number(storedBalance?.quantity ?? 0);
+          if (!storedBalance) {
+            const historical = await this.database
+              .collection('inventoryMovements')
+              .find(
+                {
+                  ...scoped,
+                  itemId: transfer.itemId,
+                  warehouseId: transfer.sourceWarehouseId,
+                },
+                { session },
+              )
+              .toArray();
+            sourceQuantity = historical.reduce(
+              (sum, movement) =>
+                sum +
+                (movement.kind === 'EXIT' ||
+                (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT') ||
+                (movement.kind === 'TRANSFER' && movement.transferDirection === 'OUT')
+                  ? -Number(movement.quantity)
+                  : Number(movement.quantity)),
+              0,
+            );
+          }
+          if (sourceQuantity - expiredQuantity < transfer.quantity)
+            throw new MongoInputError(
+              'La bodega de origen no tiene existencias vigentes suficientes.',
+            );
           await applyStockDelta(
             this.database,
             session,
@@ -409,40 +832,120 @@ export class MongoOperationsRepository {
             transfer.destinationWarehouseId,
             transfer.quantity,
           );
-          const common = {
-            itemId: transfer.itemId,
-            createdAt: transfer.occurredAt,
-            kind: 'TRANSFER' as const,
-            quantity: transfer.quantity,
-            reason: transfer.reason,
-            reference: transfer.reference,
-            user: actor.userId,
-            transferId: transfer.id,
-          };
-          const outbound = inventoryMovementSchema.parse({
-            ...common,
-            id: `${transfer.id}:out`,
-            warehouseId: transfer.sourceWarehouseId,
-            transferDirection: 'OUT',
-            counterpartWarehouseId: transfer.destinationWarehouseId,
-          });
-          const inbound = inventoryMovementSchema.parse({
-            ...common,
-            id: `${transfer.id}:in`,
-            warehouseId: transfer.destinationWarehouseId,
-            transferDirection: 'IN',
-            counterpartWarehouseId: transfer.sourceWarehouseId,
-          });
           await this.database
             .collection('inventoryTransfers')
             .insertOne({ ...transfer, ...scoped }, { session });
-          await this.database.collection('inventoryMovements').insertMany(
-            [
-              { ...outbound, ...scoped, idempotencyKey: `${transfer.idempotencyKey}:out` },
-              { ...inbound, ...scoped, idempotencyKey: `${transfer.idempotencyKey}:in` },
-            ],
-            { session },
-          );
+          const movements: Array<Record<string, unknown>> = [];
+          let remaining = transfer.quantity;
+          for (const [index, candidate] of traceCandidates.entries()) {
+            if (!remaining) break;
+            const quantity = Math.min(remaining, candidate.quantity);
+            remaining -= quantity;
+            const moved = await this.database.collection('inventoryTraceBalances').updateOne(
+              {
+                ...scoped,
+                traceRecordId: candidate.id,
+                warehouseId: transfer.sourceWarehouseId,
+                quantity: { $gte: quantity },
+              },
+              { $inc: { quantity: -quantity }, $set: { updatedAt: transfer.occurredAt } },
+              { session },
+            );
+            if (moved.modifiedCount !== 1) throw new MongoConflictError();
+            await this.database.collection('inventoryTraceBalances').updateOne(
+              {
+                ...scoped,
+                traceRecordId: candidate.id,
+                warehouseId: transfer.destinationWarehouseId,
+              },
+              {
+                $inc: { quantity },
+                $set: { updatedAt: transfer.occurredAt },
+                $setOnInsert: {
+                  ...scoped,
+                  traceRecordId: candidate.id,
+                  warehouseId: transfer.destinationWarehouseId,
+                },
+              },
+              { upsert: true, session },
+            );
+            for (const [warehouseId, direction, counterpart] of [
+              [transfer.sourceWarehouseId, 'OUT', transfer.destinationWarehouseId],
+              [transfer.destinationWarehouseId, 'IN', transfer.sourceWarehouseId],
+            ] as const) {
+              const movement = inventoryMovementSchema.parse({
+                id: `${transfer.id}:trace:${index}:${direction.toLowerCase()}`,
+                itemId: transfer.itemId,
+                createdAt: transfer.occurredAt,
+                kind: 'TRANSFER',
+                quantity,
+                reason: transfer.reason,
+                reference: transfer.reference,
+                user: actor.userId,
+                transferId: transfer.id,
+                warehouseId,
+                transferDirection: direction,
+                counterpartWarehouseId: counterpart,
+                traceRecordId: candidate.id,
+                traceNumber: candidate.number,
+              });
+              movements.push({
+                ...movement,
+                ...scoped,
+                idempotencyKey: `${transfer.idempotencyKey}:trace:${index}:${direction.toLowerCase()}`,
+              });
+            }
+            await this.database.collection('inventoryTraceEvents').insertOne(
+              {
+                ...scoped,
+                id: `${transfer.id}:trace:${index}`,
+                traceRecordId: candidate.id,
+                eventType: 'TRANSFERRED',
+                idempotencyKey: `${transfer.idempotencyKey}:trace:${index}`,
+                body: { ...transfer, traceRecordId: candidate.id, quantity },
+                occurredAt: transfer.occurredAt,
+              },
+              { session },
+            );
+          }
+          if (remaining) {
+            const common = {
+              itemId: transfer.itemId,
+              createdAt: transfer.occurredAt,
+              kind: 'TRANSFER' as const,
+              quantity: remaining,
+              reason: transfer.reason,
+              reference: transfer.reference,
+              user: actor.userId,
+              transferId: transfer.id,
+            };
+            movements.push(
+              {
+                ...inventoryMovementSchema.parse({
+                  ...common,
+                  id: `${transfer.id}:out`,
+                  warehouseId: transfer.sourceWarehouseId,
+                  transferDirection: 'OUT',
+                  counterpartWarehouseId: transfer.destinationWarehouseId,
+                }),
+                ...scoped,
+                idempotencyKey: `${transfer.idempotencyKey}:out`,
+              },
+              {
+                ...inventoryMovementSchema.parse({
+                  ...common,
+                  id: `${transfer.id}:in`,
+                  warehouseId: transfer.destinationWarehouseId,
+                  transferDirection: 'IN',
+                  counterpartWarehouseId: transfer.sourceWarehouseId,
+                }),
+                ...scoped,
+                idempotencyKey: `${transfer.idempotencyKey}:in`,
+              },
+            );
+          }
+          if (movements.length)
+            await this.database.collection('inventoryMovements').insertMany(movements, { session });
           await audit('INVENTORY_TRANSFER_RECORDED', transfer.id);
           return transfer;
         }
@@ -489,6 +992,14 @@ export class MongoOperationsRepository {
             ))
           )
             throw new MongoInputError('Seleccione una bodega activa.');
+          if (
+            await this.database
+              .collection('inventoryTraceRecords')
+              .findOne({ ...scoped, itemId: movement.itemId }, { session })
+          )
+            throw new MongoInputError(
+              'Este artículo usa trazabilidad. Registre recepciones o salidas desde Lotes y series.',
+            );
           const delta =
             (movement.kind === 'EXIT' ||
             (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection === 'OUT')
@@ -1124,6 +1635,7 @@ export const mongoOperationsIndexes: Array<{
     'clinicalDocuments',
     'warehouses',
     'inventoryTransfers',
+    'inventoryTraceRecords',
   ].map((collection) => ({
     collection,
     key: { organizationId: 1, id: 1 },
@@ -1156,6 +1668,31 @@ export const mongoOperationsIndexes: Array<{
     key: { organizationId: 1, idempotencyKey: 1 },
     name: 'inventory_transfer_idempotency',
     unique: true,
+  },
+  {
+    collection: 'inventoryTraceRecords',
+    key: { organizationId: 1, numberNormalized: 1 },
+    name: 'inventory_trace_serial_unique',
+    unique: true,
+    partialFilterExpression: { kind: 'SERIAL' },
+  },
+  {
+    collection: 'inventoryTraceBalances',
+    key: { organizationId: 1, traceRecordId: 1, warehouseId: 1 },
+    name: 'inventory_trace_balance_location',
+    unique: true,
+  },
+  {
+    collection: 'inventoryTraceEvents',
+    key: { organizationId: 1, idempotencyKey: 1 },
+    name: 'inventory_trace_event_idempotency',
+    unique: true,
+  },
+  {
+    collection: 'inventoryTraceRecords',
+    key: { organizationId: 1, itemId: 1, qualityStatus: 1, expiresOn: 1, receivedAt: 1 },
+    name: 'inventory_trace_fefo',
+    unique: false,
   },
   {
     collection: 'catalogItems',

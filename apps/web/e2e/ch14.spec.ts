@@ -9,6 +9,7 @@ import { expect, test } from '@playwright/test';
 // test-id: playwright:ch14-inventory-supplier-permissions
 // test-id: playwright:ch14-inventory-warehouses
 // test-id: playwright:ch14-inventory-warehouse-permissions
+// test-id: playwright:ch14-inventory-traceability
 // test-id: playwright:ch14-inventory-kits
 // test-id: playwright:ch14-inventory-kit-permissions
 
@@ -335,7 +336,7 @@ test('CH14 denies FINANCE direct inventory warehouse access', async ({ page }) =
   await expect(page.locator('[data-action-id="INVENTORY-WAREHOUSES-OPEN"]')).toHaveCount(0);
 });
 
-test('CH14 exposes factual lot and serial tabs without inventing received stock', async ({
+test('CH14 exposes traceability controls without inventing received stock in mock mode', async ({
   page,
 }) => {
   await login(page);
@@ -343,11 +344,13 @@ test('CH14 exposes factual lot and serial tabs without inventing received stock'
   await expect(
     page.getByRole('heading', { name: 'Lotes y números de serie', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText('Sin lotes recibidos')).toBeVisible();
+  await expect(page.getByText('Sin lotes', { exact: true })).toBeVisible();
+  await expect(page.getByText(/Toda recepción inicia en cuarentena/)).toBeVisible();
   await page.locator('[data-action-id="INVENTORY-SERIALS-TAB"]').click();
-  await expect(page.getByText('Sin números de serie recibidos')).toBeVisible();
-  await expect(page.getByRole('columnheader', { name: 'Fecha V' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Nuevo' })).toBeDisabled();
+  await expect(page.getByText('Sin números de serie', { exact: true })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Vencimiento' })).toBeVisible();
+  await expect(page.locator('[data-action-id="INVENTORY-TRACE-RECEIVE"]')).toBeDisabled();
+  await expect(page.locator('[data-action-id="INVENTORY-TRACE-ISSUE"]')).toBeDisabled();
 });
 
 test('CH14 renders the read-only empty Kit de insumos anatomy without audit mutation', async ({

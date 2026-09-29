@@ -196,6 +196,10 @@ try {
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.visit_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.warehouses TO ${role}`);
+    await client.query(
+      `GRANT SELECT,INSERT,UPDATE ON analiza.inventory_trace_records,analiza.inventory_trace_balances TO ${role}`,
+    );
+    await client.query(`GRANT SELECT,INSERT ON analiza.inventory_trace_events TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);
     if (provision) {

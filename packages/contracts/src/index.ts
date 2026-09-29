@@ -148,6 +148,8 @@ export const inventoryMovementSchema = z
     transferId: z.string().trim().min(1).optional(),
     transferDirection: z.enum(['IN', 'OUT']).optional(),
     counterpartWarehouseId: z.string().trim().min(1).optional(),
+    traceRecordId: z.string().trim().min(1).optional(),
+    traceNumber: z.string().trim().min(1).max(120).optional(),
   })
   .superRefine((movement, context) => {
     if (movement.kind === 'TRANSFER') {
@@ -170,6 +172,12 @@ export const inventoryMovementSchema = z
         path: ['kind'],
       });
     }
+    if (Boolean(movement.traceRecordId) !== Boolean(movement.traceNumber))
+      context.addIssue({
+        code: 'custom',
+        message: 'La trazabilidad requiere identificador y número.',
+        path: ['traceRecordId'],
+      });
   });
 
 export const shiftSchema = z.object({

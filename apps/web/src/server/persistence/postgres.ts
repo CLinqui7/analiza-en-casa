@@ -21,6 +21,10 @@ import {
   warehouseInputSchema,
   warehouseSchema,
   warehouseTransferSchema,
+  inventoryTraceReceiptSchema,
+  inventoryTraceRecordSchema,
+  inventoryTraceStatusChangeSchema,
+  inventoryFefoIssueSchema,
   type Patient,
   type Doctor,
   type Hospitalization,
@@ -226,6 +230,62 @@ function canonical(value: unknown): string {
   return JSON.stringify(value);
 }
 
+async function insertTraceMovement(
+  client: PoolClient,
+  actor: ServerActor,
+  input: {
+    id: string;
+    idempotencyKey: string;
+    itemId: string;
+    warehouseId: string;
+    quantity: number;
+    delta: number;
+    createdAt: string;
+    reason: string;
+    reference?: string;
+    traceRecordId: string;
+    traceNumber: string;
+    kind?: 'ENTRY' | 'EXIT' | 'TRANSFER';
+    transferId?: string;
+    transferDirection?: 'IN' | 'OUT';
+    counterpartWarehouseId?: string;
+  },
+) {
+  const movement = inventoryMovementSchema.parse({
+    id: input.id,
+    itemId: input.itemId,
+    warehouseId: input.warehouseId,
+    quantity: input.quantity,
+    createdAt: input.createdAt,
+    reason: input.reason,
+    reference: input.reference,
+    user: actor.userId,
+    kind: input.kind ?? (input.delta > 0 ? 'ENTRY' : 'EXIT'),
+    traceRecordId: input.traceRecordId,
+    traceNumber: input.traceNumber,
+    transferId: input.transferId,
+    transferDirection: input.transferDirection,
+    counterpartWarehouseId: input.counterpartWarehouseId,
+  });
+  await client.query(
+    `INSERT INTO analiza.inventory_movements(
+       organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,created_at,trace_record_id
+     ) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9)`,
+    [
+      actor.organizationId,
+      movement.id,
+      movement.itemId,
+      movement.warehouseId,
+      input.idempotencyKey,
+      input.delta,
+      JSON.stringify(movement),
+      movement.createdAt,
+      input.traceRecordId,
+    ],
+  );
+  return movement;
+}
+
 export function postgresPersistence(): Persistence {
   const pool = postgresPool();
   const patients = entityRepository(
@@ -386,6 +446,37 @@ export function postgresPersistence(): Persistence {
               [actor.organizationId],
             )
           ).rows.map((row) => warehouseSchema.parse(row.body));
+        if (can(actor.role, 'inventory:read')) {
+          const traceRows = await c.query<{ body: Record<string, unknown> }>(
+            `SELECT body FROM analiza.inventory_trace_records
+             WHERE organization_id=$1
+             ORDER BY received_at DESC,id`,
+            [actor.organizationId],
+          );
+          const balanceRows = await c.query<{
+            trace_record_id: string;
+            warehouse_id: string;
+            quantity: number;
+          }>(
+            `SELECT trace_record_id,warehouse_id,quantity
+             FROM analiza.inventory_trace_balances
+             WHERE organization_id=$1
+             ORDER BY trace_record_id,warehouse_id`,
+            [actor.organizationId],
+          );
+          result.traceRecords = traceRows.rows.map((row) => {
+            const recordId = String(row.body.id);
+            return inventoryTraceRecordSchema.parse({
+              ...row.body,
+              balances: balanceRows.rows
+                .filter((balance) => balance.trace_record_id === recordId)
+                .map((balance) => ({
+                  warehouseId: balance.warehouse_id,
+                  quantity: Number(balance.quantity),
+                })),
+            });
+          });
+        }
         if (can(actor.role, 'reports:read')) {
           // A transaction owns one pg client. Keep its queries sequential: pg@9 will reject
           // overlapping client.query calls even when the current driver only warns about them.
@@ -435,9 +526,14 @@ export function postgresPersistence(): Persistence {
             throw new MongoInputError('Una bodega nueva debe iniciar activa.');
           if (existing && submitted.status === 'INACTIVE') {
             const stockedItems = await c.query(
-              `SELECT item_id FROM analiza.inventory_movements
-               WHERE organization_id=$1 AND warehouse_id=$2
-               GROUP BY item_id HAVING sum(delta)<>0 LIMIT 1`,
+              `SELECT 1 FROM (
+                 SELECT item_id FROM analiza.inventory_movements
+                 WHERE organization_id=$1 AND warehouse_id=$2
+                 GROUP BY item_id HAVING sum(delta)<>0
+                 UNION ALL
+                 SELECT trace_record_id FROM analiza.inventory_trace_balances
+                 WHERE organization_id=$1 AND warehouse_id=$2 AND quantity>0
+               ) stocked LIMIT 1`,
               [actor.organizationId, submitted.id],
             );
             if (stockedItems.rowCount)
@@ -486,6 +582,364 @@ export function postgresPersistence(): Persistence {
               : 'WAREHOUSE_UPDATED';
           await audit(c, actor, action, 'warehouses', warehouse.id);
           return warehouse;
+        });
+      }
+      if (command.command === 'inventory.trace.receive') {
+        authorize(actor, 'inventory:write');
+        const { receipt } = z
+          .object({
+            command: z.literal('inventory.trace.receive'),
+            receipt: inventoryTraceReceiptSchema,
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const previous = (
+            await c.query<{ body: unknown }>(
+              `SELECT body FROM analiza.inventory_trace_events
+               WHERE organization_id=$1 AND idempotency_key=$2`,
+              [actor.organizationId, receipt.idempotencyKey],
+            )
+          ).rows[0];
+          if (previous) {
+            if (canonical(previous.body) !== canonical(receipt)) throw new MongoConflictError();
+            const existing = (
+              await c.query<{ body: Record<string, unknown> }>(
+                `SELECT body FROM analiza.inventory_trace_records
+                 WHERE organization_id=$1 AND id=$2`,
+                [actor.organizationId, receipt.id],
+              )
+            ).rows[0];
+            if (!existing) throw new MongoConflictError();
+            const balances = await c.query<{ warehouse_id: string; quantity: number }>(
+              `SELECT warehouse_id,quantity FROM analiza.inventory_trace_balances
+               WHERE organization_id=$1 AND trace_record_id=$2 ORDER BY warehouse_id`,
+              [actor.organizationId, receipt.id],
+            );
+            return inventoryTraceRecordSchema.parse({
+              ...existing.body,
+              balances: balances.rows.map((row) => ({
+                warehouseId: row.warehouse_id,
+                quantity: Number(row.quantity),
+              })),
+            });
+          }
+          const item = (
+            await c.query<{ category: string }>(
+              `SELECT body->>'category' AS category FROM analiza.catalog_items
+               WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'`,
+              [actor.organizationId, receipt.itemId],
+            )
+          ).rows[0];
+          const expectedKind = item?.category === 'EQUIPMENT' ? 'SERIAL' : 'LOT';
+          if (
+            !item ||
+            !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(item.category) ||
+            receipt.kind !== expectedKind
+          )
+            throw new MongoInputError(
+              'Medicamentos e insumos usan lote; los equipos usan un número de serie por unidad.',
+            );
+          const supplier = await c.query(
+            `SELECT id FROM analiza.catalog_items
+             WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'
+               AND body->>'category'='PROVIDERS'`,
+            [actor.organizationId, receipt.supplierCatalogItemId],
+          );
+          if (!supplier.rowCount) throw new MongoInputError('Seleccione un proveedor activo.');
+          const warehouse = await c.query(
+            `SELECT id FROM analiza.warehouses
+             WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'`,
+            [actor.organizationId, receipt.warehouseId],
+          );
+          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
+          const now = new Date().toISOString();
+          const record = inventoryTraceRecordSchema.parse({
+            id: receipt.id,
+            kind: receipt.kind,
+            itemId: receipt.itemId,
+            supplierCatalogItemId: receipt.supplierCatalogItemId,
+            number: receipt.number.toUpperCase(),
+            receivedQuantity: receipt.quantity,
+            manufacturedOn: receipt.manufacturedOn,
+            expiresOn: receipt.kind === 'LOT' ? receipt.expiresOn : undefined,
+            receiptReference: receipt.receiptReference,
+            qualityStatus: 'QUARANTINED',
+            receivedAt: receipt.receivedAt,
+            createdAt: now,
+            updatedAt: now,
+            balances: [{ warehouseId: receipt.warehouseId, quantity: receipt.quantity }],
+          });
+          try {
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_records(
+                 organization_id,id,kind,item_id,supplier_catalog_item_id,number_normalized,
+                 quality_status,expires_on,received_at,body,created_at,updated_at
+               ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12)`,
+              [
+                actor.organizationId,
+                record.id,
+                record.kind,
+                record.itemId,
+                record.supplierCatalogItemId,
+                record.number.toUpperCase(),
+                record.qualityStatus,
+                record.expiresOn ?? null,
+                record.receivedAt,
+                JSON.stringify({ ...record, balances: [] }),
+                record.createdAt,
+                record.updatedAt,
+              ],
+            );
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_balances(
+                 organization_id,trace_record_id,warehouse_id,quantity
+               ) VALUES($1,$2,$3,$4)`,
+              [actor.organizationId, record.id, receipt.warehouseId, receipt.quantity],
+            );
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_events(
+                 organization_id,id,trace_record_id,event_type,idempotency_key,body,occurred_at
+               ) VALUES($1,$2,$3,'RECEIVED',$4,$5::jsonb,$6)`,
+              [
+                actor.organizationId,
+                receipt.id,
+                record.id,
+                receipt.idempotencyKey,
+                JSON.stringify(receipt),
+                receipt.receivedAt,
+              ],
+            );
+          } catch (error) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
+              throw new MongoConflictError();
+            throw error;
+          }
+          await audit(c, actor, 'INVENTORY_TRACE_RECEIVED', 'inventory_trace_records', record.id);
+          return record;
+        });
+      }
+      if (command.command === 'inventory.trace.status') {
+        authorize(actor, 'inventory:write');
+        const { change } = z
+          .object({
+            command: z.literal('inventory.trace.status'),
+            change: inventoryTraceStatusChangeSchema,
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const previous = (
+            await c.query<{ body: unknown }>(
+              `SELECT body FROM analiza.inventory_trace_events
+               WHERE organization_id=$1 AND idempotency_key=$2`,
+              [actor.organizationId, change.idempotencyKey],
+            )
+          ).rows[0];
+          if (previous) {
+            if (canonical(previous.body) !== canonical(change)) throw new MongoConflictError();
+            return { id: change.recordId };
+          }
+          const row = (
+            await c.query<{ body: Record<string, unknown> }>(
+              `SELECT body FROM analiza.inventory_trace_records
+               WHERE organization_id=$1 AND id=$2 FOR UPDATE`,
+              [actor.organizationId, change.recordId],
+            )
+          ).rows[0];
+          if (!row) throw new MongoInputError('El lote o serie no está disponible.');
+          const balances = await c.query<{ warehouse_id: string; quantity: number }>(
+            `SELECT warehouse_id,quantity FROM analiza.inventory_trace_balances
+             WHERE organization_id=$1 AND trace_record_id=$2 ORDER BY warehouse_id FOR UPDATE`,
+            [actor.organizationId, change.recordId],
+          );
+          const current = inventoryTraceRecordSchema.parse({
+            ...row.body,
+            balances: balances.rows.map((balance) => ({
+              warehouseId: balance.warehouse_id,
+              quantity: Number(balance.quantity),
+            })),
+          });
+          const allowed: Record<string, string[]> = {
+            QUARANTINED: ['AVAILABLE', 'BLOCKED', 'REJECTED'],
+            AVAILABLE: ['BLOCKED', 'REJECTED'],
+            BLOCKED: ['AVAILABLE', 'REJECTED'],
+            REJECTED: [],
+          };
+          if (!allowed[current.qualityStatus].includes(change.status))
+            throw new MongoInputError('La transición de estado no está permitida.');
+          const eventDate = change.occurredAt.slice(0, 10);
+          if (change.status === 'AVAILABLE' && current.expiresOn && current.expiresOn < eventDate)
+            throw new MongoInputError('Un lote vencido no puede liberarse ni distribuirse.');
+          const direction =
+            current.qualityStatus === 'AVAILABLE' ? -1 : change.status === 'AVAILABLE' ? 1 : 0;
+          if (direction)
+            for (const [index, balance] of current.balances.entries()) {
+              if (!balance.quantity) continue;
+              await insertTraceMovement(c, actor, {
+                id: `${change.id}:movement:${index}`,
+                idempotencyKey: `${change.idempotencyKey}:movement:${index}`,
+                itemId: current.itemId,
+                warehouseId: balance.warehouseId,
+                quantity: balance.quantity,
+                delta: direction * balance.quantity,
+                createdAt: change.occurredAt,
+                reason: change.reason,
+                reference: current.receiptReference,
+                traceRecordId: current.id,
+                traceNumber: current.number,
+              });
+            }
+          const updated = inventoryTraceRecordSchema.parse({
+            ...current,
+            qualityStatus: change.status,
+            updatedAt: change.occurredAt,
+          });
+          await c.query(
+            `UPDATE analiza.inventory_trace_records
+             SET quality_status=$3,body=$4::jsonb,updated_at=$5
+             WHERE organization_id=$1 AND id=$2`,
+            [
+              actor.organizationId,
+              updated.id,
+              updated.qualityStatus,
+              JSON.stringify({ ...updated, balances: [] }),
+              updated.updatedAt,
+            ],
+          );
+          await c.query(
+            `INSERT INTO analiza.inventory_trace_events(
+               organization_id,id,trace_record_id,event_type,idempotency_key,body,occurred_at
+             ) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7)`,
+            [
+              actor.organizationId,
+              change.id,
+              current.id,
+              change.status === 'AVAILABLE' ? 'RELEASED' : change.status,
+              change.idempotencyKey,
+              JSON.stringify(change),
+              change.occurredAt,
+            ],
+          );
+          await audit(
+            c,
+            actor,
+            `INVENTORY_TRACE_${change.status}`,
+            'inventory_trace_records',
+            current.id,
+          );
+          return updated;
+        });
+      }
+      if (command.command === 'inventory.trace.issue') {
+        authorize(actor, 'inventory:write');
+        const { issue } = z
+          .object({ command: z.literal('inventory.trace.issue'), issue: inventoryFefoIssueSchema })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const previous = (
+            await c.query<{ body: unknown }>(
+              `SELECT body FROM analiza.inventory_trace_events
+               WHERE organization_id=$1 AND idempotency_key=$2`,
+              [actor.organizationId, issue.idempotencyKey],
+            )
+          ).rows[0];
+          if (previous) {
+            if (canonical(previous.body) !== canonical(issue)) throw new MongoConflictError();
+            return { id: issue.id };
+          }
+          const warehouse = await c.query(
+            `SELECT id FROM analiza.warehouses
+             WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'`,
+            [actor.organizationId, issue.warehouseId],
+          );
+          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
+          const candidates = await c.query<{
+            id: string;
+            number_normalized: string;
+            quantity: number;
+          }>(
+            `SELECT record.id,record.number_normalized,balance.quantity
+             FROM analiza.inventory_trace_records record
+             JOIN analiza.inventory_trace_balances balance
+               ON balance.organization_id=record.organization_id
+              AND balance.trace_record_id=record.id
+             WHERE record.organization_id=$1 AND record.item_id=$2
+               AND balance.warehouse_id=$3 AND balance.quantity>0
+               AND record.quality_status='AVAILABLE'
+               AND (record.expires_on IS NULL OR record.expires_on >= $4::date)
+             ORDER BY record.expires_on ASC NULLS LAST,record.received_at,record.id
+             FOR UPDATE OF record,balance`,
+            [actor.organizationId, issue.itemId, issue.warehouseId, issue.occurredAt.slice(0, 10)],
+          );
+          const available = candidates.rows.reduce(
+            (sum, candidate) => sum + Number(candidate.quantity),
+            0,
+          );
+          if (available < issue.quantity)
+            throw new MongoInputError(
+              'No hay existencias liberadas y vigentes suficientes para esta salida FEFO.',
+            );
+          let remaining = issue.quantity;
+          const allocations: Array<{ traceRecordId: string; number: string; quantity: number }> =
+            [];
+          for (const [index, candidate] of candidates.rows.entries()) {
+            if (!remaining) break;
+            const quantity = Math.min(remaining, Number(candidate.quantity));
+            remaining -= quantity;
+            await c.query(
+              `UPDATE analiza.inventory_trace_balances
+               SET quantity=quantity-$4,updated_at=$5
+               WHERE organization_id=$1 AND trace_record_id=$2 AND warehouse_id=$3`,
+              [actor.organizationId, candidate.id, issue.warehouseId, quantity, issue.occurredAt],
+            );
+            await insertTraceMovement(c, actor, {
+              id: `${issue.id}:movement:${index}`,
+              idempotencyKey: `${issue.idempotencyKey}:movement:${index}`,
+              itemId: issue.itemId,
+              warehouseId: issue.warehouseId,
+              quantity,
+              delta: -quantity,
+              createdAt: issue.occurredAt,
+              reason: issue.reason,
+              reference: issue.reference,
+              traceRecordId: candidate.id,
+              traceNumber: candidate.number_normalized,
+            });
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_events(
+                 organization_id,id,trace_record_id,event_type,idempotency_key,body,occurred_at
+               ) VALUES($1,$2,$3,'ISSUED',$4,$5::jsonb,$6)`,
+              [
+                actor.organizationId,
+                `${issue.id}:allocation:${index}`,
+                candidate.id,
+                `${issue.idempotencyKey}:allocation:${index}`,
+                JSON.stringify({ ...issue, allocatedQuantity: quantity }),
+                issue.occurredAt,
+              ],
+            );
+            allocations.push({
+              traceRecordId: candidate.id,
+              number: candidate.number_normalized,
+              quantity,
+            });
+          }
+          await c.query(
+            `INSERT INTO analiza.inventory_trace_events(
+               organization_id,id,trace_record_id,event_type,idempotency_key,body,occurred_at
+             ) VALUES($1,$2,NULL,'ISSUED',$3,$4::jsonb,$5)`,
+            [
+              actor.organizationId,
+              issue.id,
+              issue.idempotencyKey,
+              JSON.stringify(issue),
+              issue.occurredAt,
+            ],
+          );
+          await audit(c, actor, 'INVENTORY_FEFO_ISSUED', 'inventory_trace_events', issue.id);
+          return { id: issue.id, allocations };
         });
       }
       if (command.command === 'inventory.transfer') {
@@ -538,32 +992,52 @@ export function postgresPersistence(): Persistence {
               )
             ).rows[0]?.balance ?? 0,
           );
-          if (sourceBalance < transfer.quantity)
+          const traceCandidates = await c.query<{
+            id: string;
+            number_normalized: string;
+            quantity: number;
+          }>(
+            `SELECT record.id,record.number_normalized,balance.quantity
+             FROM analiza.inventory_trace_records record
+             JOIN analiza.inventory_trace_balances balance
+               ON balance.organization_id=record.organization_id
+              AND balance.trace_record_id=record.id
+             WHERE record.organization_id=$1 AND record.item_id=$2
+               AND balance.warehouse_id=$3 AND balance.quantity>0
+               AND record.quality_status='AVAILABLE'
+               AND (record.expires_on IS NULL OR record.expires_on >= $4::date)
+             ORDER BY record.expires_on ASC NULLS LAST,record.received_at,record.id
+             FOR UPDATE OF record,balance`,
+            [
+              actor.organizationId,
+              transfer.itemId,
+              transfer.sourceWarehouseId,
+              transfer.occurredAt.slice(0, 10),
+            ],
+          );
+          const unavailableTraceBalance = Number(
+            (
+              await c.query<{ quantity: number }>(
+                `SELECT coalesce(sum(balance.quantity),0) AS quantity
+                 FROM analiza.inventory_trace_records record
+                 JOIN analiza.inventory_trace_balances balance
+                   ON balance.organization_id=record.organization_id
+                  AND balance.trace_record_id=record.id
+                 WHERE record.organization_id=$1 AND record.item_id=$2
+                   AND balance.warehouse_id=$3 AND balance.quantity>0
+                   AND record.quality_status='AVAILABLE'
+                   AND record.expires_on < $4::date`,
+                [
+                  actor.organizationId,
+                  transfer.itemId,
+                  transfer.sourceWarehouseId,
+                  transfer.occurredAt.slice(0, 10),
+                ],
+              )
+            ).rows[0]?.quantity ?? 0,
+          );
+          if (sourceBalance - unavailableTraceBalance < transfer.quantity)
             throw new MongoInputError('La bodega de origen no tiene existencias suficientes.');
-          const common = {
-            itemId: transfer.itemId,
-            createdAt: transfer.occurredAt,
-            kind: 'TRANSFER' as const,
-            quantity: transfer.quantity,
-            reason: transfer.reason,
-            reference: transfer.reference,
-            user: actor.userId,
-            transferId: transfer.id,
-          };
-          const outbound: InventoryMovement = inventoryMovementSchema.parse({
-            ...common,
-            id: `${transfer.id}:out`,
-            warehouseId: transfer.sourceWarehouseId,
-            transferDirection: 'OUT',
-            counterpartWarehouseId: transfer.destinationWarehouseId,
-          });
-          const inbound: InventoryMovement = inventoryMovementSchema.parse({
-            ...common,
-            id: `${transfer.id}:in`,
-            warehouseId: transfer.destinationWarehouseId,
-            transferDirection: 'IN',
-            counterpartWarehouseId: transfer.sourceWarehouseId,
-          });
           await c.query(
             `INSERT INTO analiza.inventory_transfers(
                organization_id,id,item_id,source_warehouse_id,destination_warehouse_id,
@@ -581,25 +1055,118 @@ export function postgresPersistence(): Persistence {
               transfer.occurredAt,
             ],
           );
-          for (const [movement, delta, suffix] of [
-            [outbound, -transfer.quantity, 'out'],
-            [inbound, transfer.quantity, 'in'],
-          ] as const)
+          let remaining = transfer.quantity;
+          for (const [index, candidate] of traceCandidates.rows.entries()) {
+            if (!remaining) break;
+            const quantity = Math.min(remaining, Number(candidate.quantity));
+            remaining -= quantity;
             await c.query(
-              `INSERT INTO analiza.inventory_movements(
-                 organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,created_at
-               ) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
+              `UPDATE analiza.inventory_trace_balances
+               SET quantity=quantity-$4,updated_at=$5
+               WHERE organization_id=$1 AND trace_record_id=$2 AND warehouse_id=$3`,
               [
                 actor.organizationId,
-                movement.id,
-                movement.itemId,
-                movement.warehouseId,
-                `${transfer.idempotencyKey}:${suffix}`,
-                delta,
-                JSON.stringify(movement),
-                movement.createdAt,
+                candidate.id,
+                transfer.sourceWarehouseId,
+                quantity,
+                transfer.occurredAt,
               ],
             );
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_balances(
+                 organization_id,trace_record_id,warehouse_id,quantity,updated_at
+               ) VALUES($1,$2,$3,$4,$5)
+               ON CONFLICT(organization_id,trace_record_id,warehouse_id)
+               DO UPDATE SET quantity=analiza.inventory_trace_balances.quantity+EXCLUDED.quantity,
+                             updated_at=EXCLUDED.updated_at`,
+              [
+                actor.organizationId,
+                candidate.id,
+                transfer.destinationWarehouseId,
+                quantity,
+                transfer.occurredAt,
+              ],
+            );
+            for (const [warehouseId, direction, delta, counterpart] of [
+              [transfer.sourceWarehouseId, 'OUT', -quantity, transfer.destinationWarehouseId],
+              [transfer.destinationWarehouseId, 'IN', quantity, transfer.sourceWarehouseId],
+            ] as const)
+              await insertTraceMovement(c, actor, {
+                id: `${transfer.id}:trace:${index}:${direction.toLowerCase()}`,
+                idempotencyKey: `${transfer.idempotencyKey}:trace:${index}:${direction.toLowerCase()}`,
+                itemId: transfer.itemId,
+                warehouseId,
+                quantity,
+                delta,
+                createdAt: transfer.occurredAt,
+                reason: transfer.reason,
+                reference: transfer.reference,
+                traceRecordId: candidate.id,
+                traceNumber: candidate.number_normalized,
+                kind: 'TRANSFER',
+                transferId: transfer.id,
+                transferDirection: direction,
+                counterpartWarehouseId: counterpart,
+              });
+            await c.query(
+              `INSERT INTO analiza.inventory_trace_events(
+                 organization_id,id,trace_record_id,event_type,idempotency_key,body,occurred_at
+               ) VALUES($1,$2,$3,'TRANSFERRED',$4,$5::jsonb,$6)`,
+              [
+                actor.organizationId,
+                `${transfer.id}:trace:${index}`,
+                candidate.id,
+                `${transfer.idempotencyKey}:trace:${index}`,
+                JSON.stringify({ ...transfer, traceRecordId: candidate.id, quantity }),
+                transfer.occurredAt,
+              ],
+            );
+          }
+          if (remaining) {
+            const common = {
+              itemId: transfer.itemId,
+              createdAt: transfer.occurredAt,
+              kind: 'TRANSFER' as const,
+              quantity: remaining,
+              reason: transfer.reason,
+              reference: transfer.reference,
+              user: actor.userId,
+              transferId: transfer.id,
+            };
+            const outbound: InventoryMovement = inventoryMovementSchema.parse({
+              ...common,
+              id: `${transfer.id}:out`,
+              warehouseId: transfer.sourceWarehouseId,
+              transferDirection: 'OUT',
+              counterpartWarehouseId: transfer.destinationWarehouseId,
+            });
+            const inbound: InventoryMovement = inventoryMovementSchema.parse({
+              ...common,
+              id: `${transfer.id}:in`,
+              warehouseId: transfer.destinationWarehouseId,
+              transferDirection: 'IN',
+              counterpartWarehouseId: transfer.sourceWarehouseId,
+            });
+            for (const [movement, delta, suffix] of [
+              [outbound, -remaining, 'out'],
+              [inbound, remaining, 'in'],
+            ] as const)
+              await c.query(
+                `INSERT INTO analiza.inventory_movements(
+                   organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,created_at
+                 ) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8)`,
+                [
+                  actor.organizationId,
+                  movement.id,
+                  movement.itemId,
+                  movement.warehouseId,
+                  `${transfer.idempotencyKey}:${suffix}`,
+                  delta,
+                  JSON.stringify(movement),
+                  movement.createdAt,
+                ],
+              );
+          }
           await audit(c, actor, 'INVENTORY_TRANSFER_RECORDED', 'inventory_transfers', transfer.id);
           return transfer;
         });
@@ -739,6 +1306,15 @@ export function postgresPersistence(): Persistence {
             [actor.organizationId, warehouseId],
           );
           if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
+          const traced = await c.query(
+            `SELECT 1 FROM analiza.inventory_trace_records
+             WHERE organization_id=$1 AND item_id=$2 LIMIT 1`,
+            [actor.organizationId, movement.itemId],
+          );
+          if (traced.rowCount)
+            throw new MongoInputError(
+              'Este artículo usa trazabilidad. Registre recepciones o salidas desde Lotes y series.',
+            );
           const balance = Number(
             (
               await c.query<{ balance: number }>(
@@ -1417,14 +1993,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 17 ||
+        row.migrations !== 18 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
