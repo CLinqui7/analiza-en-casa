@@ -12,7 +12,12 @@ export function inventoryTraceEffectiveStatus(
   today = new Date().toISOString().slice(0, 10),
 ): InventoryTraceEffectiveStatus {
   if (inventoryTraceQuantity(record) === 0) return 'DEPLETED';
-  if (record.expiresOn && record.expiresOn < today) return 'EXPIRED';
+  if (
+    ['QUARANTINED', 'AVAILABLE'].includes(record.qualityStatus) &&
+    record.expiresOn &&
+    record.expiresOn < today
+  )
+    return 'EXPIRED';
   return record.qualityStatus;
 }
 

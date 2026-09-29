@@ -29,6 +29,9 @@ describe('inventory traceability projections', () => {
   it('sums balances and derives expired/depleted without mutating quality history', () => {
     expect(inventoryTraceQuantity(record)).toBe(5);
     expect(inventoryTraceEffectiveStatus(record, '2027-02-01')).toBe('EXPIRED');
+    expect(
+      inventoryTraceEffectiveStatus({ ...record, qualityStatus: 'REJECTED' }, '2027-02-01'),
+    ).toBe('REJECTED');
     expect(inventoryTraceEffectiveStatus({ ...record, balances: [] }, '2026-09-28')).toBe(
       'DEPLETED',
     );
