@@ -23,7 +23,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Controller, type FieldErrors, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import { PhoneField } from '@/components/common/phone-field';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isNormalizedPhone, normalizeKnownPhone } from '@/lib/phone-number';
 import {
   companyOptions,
   insuranceProviderOptions,
@@ -55,7 +57,10 @@ const optionalEmailSchema = z
 const contactFormSchema = z.object({
   id: z.string(),
   fullName: z.string().trim(),
-  phone: z.string().trim(),
+  phone: z
+    .string()
+    .trim()
+    .refine(isNormalizedPhone, 'Seleccione el país e ingrese un teléfono válido.'),
   email: optionalEmailSchema,
   relationship: z.string().trim(),
   role: z.string().trim(),
@@ -72,9 +77,16 @@ const patientFormSchema = z
     documentId: z.string().trim().min(1, 'El número de documento es obligatorio.'),
     birthDate: z.string().min(1, 'Ingrese la fecha de nacimiento.'),
     sex: z.enum(['M', 'F'], { error: 'Seleccione el sexo.' }),
-    phone: z.string().trim().min(1, 'Ingrese el teléfono celular.'),
+    phone: z
+      .string()
+      .trim()
+      .min(1, 'Ingrese el teléfono celular.')
+      .refine(isNormalizedPhone, 'Seleccione el país e ingrese un teléfono válido.'),
     company: z.string().trim().min(1, 'Ingrese la empresa.'),
-    homePhone: z.string().trim(),
+    homePhone: z
+      .string()
+      .trim()
+      .refine(isNormalizedPhone, 'Seleccione el país e ingrese un teléfono válido.'),
     email: optionalEmailSchema,
     retired: z.boolean(),
     bloodType: z.enum(['', 'O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']),
@@ -439,9 +451,9 @@ export default function PatientsPage() {
       documentId: editingPatient.documentId,
       birthDate: editingPatient.birthDate ?? '',
       sex: editingPatient.sex,
-      phone: editingPatient.phone ?? '',
+      phone: normalizeKnownPhone(editingPatient.phone ?? ''),
       company: editingPatient.company ?? '',
-      homePhone: editingPatient.homePhone ?? '',
+      homePhone: normalizeKnownPhone(editingPatient.homePhone ?? ''),
       email: editingPatient.email ?? '',
       retired: editingPatient.retired ?? false,
       bloodType: editingPatient.bloodType ?? '',
@@ -459,6 +471,7 @@ export default function PatientsPage() {
       contacts: (editingPatient.contacts ?? []).map((contact) => ({
         ...createContact(false),
         ...contact,
+        phone: normalizeKnownPhone(contact.phone ?? ''),
       })),
       address: { ...emptyAddress, ...editingPatient.address },
       botmakerConsent: editingPatient.notifications?.botmakerConsent ?? true,
@@ -1026,6 +1039,9 @@ export default function PatientsPage() {
                     </td>
                     <td>
                       {patient.phone || 'Sin teléfono'}
+                      {patient.phone && !isNormalizedPhone(patient.phone) ? (
+                        <small className="phone-review-hint">País por confirmar al editar</small>
+                      ) : null}
                       <small>{patient.email || ''}</small>
                     </td>
                     <td>
@@ -1276,18 +1292,21 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </fieldset>
-            <label>
-              Teléfono celular{' '}
-              <span className="required-marker" aria-label="obligatorio">
-                *
-              </span>
-              <input {...form.register('phone')} autoComplete="tel" />
-              {form.formState.errors.phone ? (
-                <span className="field-error" role="alert">
-                  {form.formState.errors.phone.message}
-                </span>
-              ) : null}
-            </label>
+            <Controller
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <PhoneField
+                  error={form.formState.errors.phone?.message}
+                  label="Teléfono celular"
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
+                  required
+                  value={field.value}
+                />
+              )}
+            />
             <label>
               Empresa{' '}
               <span className="required-marker" aria-label="obligatorio">
@@ -1312,10 +1331,20 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </label>
-            <label>
-              Teléfono de casa
-              <input {...form.register('homePhone')} />
-            </label>
+            <Controller
+              control={form.control}
+              name="homePhone"
+              render={({ field }) => (
+                <PhoneField
+                  error={form.formState.errors.homePhone?.message}
+                  label="Teléfono de casa"
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              )}
+            />
             <label>
               Correo
               <input {...form.register('email')} type="email" autoComplete="email" />
@@ -1600,10 +1629,20 @@ export default function PatientsPage() {
                   Nombre
                   <input {...form.register(`contacts.${index}.fullName`)} />
                 </label>
-                <label>
-                  Teléfono
-                  <input {...form.register(`contacts.${index}.phone`)} />
-                </label>
+                <Controller
+                  control={form.control}
+                  name={`contacts.${index}.phone`}
+                  render={({ field: phoneField }) => (
+                    <PhoneField
+                      error={form.formState.errors.contacts?.[index]?.phone?.message}
+                      label="Teléfono del contacto"
+                      name={phoneField.name}
+                      onBlur={phoneField.onBlur}
+                      onChange={phoneField.onChange}
+                      value={phoneField.value}
+                    />
+                  )}
+                />
                 <label>
                   Correo
                   <input {...form.register(`contacts.${index}.email`)} type="email" />

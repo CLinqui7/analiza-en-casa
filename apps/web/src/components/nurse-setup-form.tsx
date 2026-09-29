@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { PhoneField } from '@/components/common/phone-field';
 import { mongoMutationHeaders } from '@/lib/auth';
 import { isServerDataMode } from '@/lib/data-mode';
+import { isNormalizedPhone, normalizeKnownPhone } from '@/lib/phone-number';
 import {
   emptyNurseProfile,
   loadLocalNurseProfile,
@@ -131,7 +133,10 @@ export function NurseSetupForm() {
           router.replace('/dashboard');
           return;
         }
-        setData(profile);
+        setData({
+          ...profile,
+          profile: { ...profile.profile, phone: normalizeKnownPhone(profile.profile.phone) },
+        });
         setLoaded(true);
       } catch (cause) {
         if (active && !(cause instanceof DOMException && cause.name === 'AbortError'))
@@ -187,6 +192,11 @@ export function NurseSetupForm() {
   async function save(nextStep?: number, complete = false) {
     setError(null);
     setNotice(null);
+    if (data.profile.phone && !isNormalizedPhone(data.profile.phone)) {
+      setStep(0);
+      setError('Selecciona el país y completa el teléfono antes de guardar el perfil.');
+      return;
+    }
     const parsed = nurseProfileSchema.safeParse(
       complete && !data.completedAt ? { ...data, completedAt: new Date().toISOString() } : data,
     );
@@ -382,9 +392,9 @@ export function NurseSetupForm() {
                   change((current) => ({ ...current, profile: { ...current.profile, email } }))
                 }
               />
-              <TextField
+              <PhoneField
                 label="Teléfono"
-                type="tel"
+                name="nurse-phone"
                 value={data.profile.phone}
                 onChange={(phone) =>
                   change((current) => ({ ...current, profile: { ...current.profile, phone } }))

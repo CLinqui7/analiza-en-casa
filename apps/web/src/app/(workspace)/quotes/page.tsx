@@ -196,7 +196,7 @@ function QuoteEditor({
   );
   const validationTargets = [
     { key: 'patientId', label: 'Datos del paciente · Paciente', id: 'quote-patient' },
-    { key: 'caseId', label: 'Atención y caso · Caso compatible', id: 'quote-case' },
+    { key: 'caseId', label: 'Atención y caso · Hospitalización del paciente', id: 'quote-case' },
     { key: 'summary', label: 'Atención y caso · Resumen operativo', id: 'quote-summary' },
     { key: 'revisionReason', label: 'Revisión · Motivo de revisión', id: 'quote-revision-reason' },
     { key: 'totals', label: 'Importes · Totales', id: 'quote-totals' },
@@ -312,7 +312,7 @@ function QuoteEditor({
         ? 'Primero selecciona un paciente y después su hospitalización.'
         : compatibleCases.length === 0
           ? 'Este paciente aún no tiene una hospitalización. Créala en Hospitalizaciones y luego actualiza los casos aquí.'
-          : 'Selecciona una hospitalización de este paciente en Caso compatible.';
+          : 'Selecciona la hospitalización de este paciente que deseas cotizar.';
     }
     if (!draft.summary.trim())
       nextErrors.summary = 'Escribe el resumen operativo en Atención y caso.';
@@ -589,7 +589,7 @@ function QuoteEditor({
           </select>
         </label>
         <label htmlFor="quote-case">
-          Caso compatible
+          Hospitalización del paciente *
           <select
             aria-describedby={errors.caseId ? 'quote-case-error' : 'quote-case-help'}
             aria-invalid={Boolean(errors.caseId)}
@@ -604,7 +604,8 @@ function QuoteEditor({
             <option value="">Seleccione una hospitalización</option>
             {compatibleCases.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.id}
+                {candidate.id} · ingreso {candidate.startDate} ·{' '}
+                {candidate.status === 'CLOSED' ? 'cerrada' : 'en seguimiento'}
               </option>
             ))}
           </select>
@@ -616,9 +617,10 @@ function QuoteEditor({
         </label>
         <div className="quote-case-guidance full-field" id="quote-case-help">
           <p>
-            Cada cotización debe vincularse a una hospitalización registrada del paciente, incluso
-            si la modalidad de atención es ambulatoria. Crear un paciente no crea ese caso
-            automáticamente.
+            Elige el registro de atención al que corresponde esta cotización. Es obligatorio para
+            guardar y consultar después los importes junto al expediente correcto. En este sistema
+            ese registro se crea en Hospitalización, incluso para atención ambulatoria. Registrar al
+            paciente por sí solo no crea una hospitalización.
           </p>
           {mode === 'create' && selectedPatient && compatibleCases.length === 0 ? (
             <div className="quote-case-actions">

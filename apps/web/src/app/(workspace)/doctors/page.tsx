@@ -11,7 +11,9 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import { PhoneField } from '@/components/common/phone-field';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isNormalizedPhone, normalizeKnownPhone } from '@/lib/phone-number';
 import { doctorSpecialtyOptions, toDoctorAttachmentMetadata } from '@/lib/doctor-catalog';
 import { useOperations } from '@/lib/use-operations';
 import {
@@ -38,7 +40,10 @@ const doctorFormSchema = z.object({
     .refine((value) => !value || Number(value) >= 0, 'Ingrese un honorario válido.'),
   documentId: z.string().trim().min(1, 'Ingrese el DUI.'),
   specialty: z.string().trim().min(1, 'Seleccione una especialidad o profesión.'),
-  phone: z.string().trim(),
+  phone: z
+    .string()
+    .trim()
+    .refine(isNormalizedPhone, 'Seleccione el país e ingrese un teléfono válido.'),
   email: optionalEmailSchema,
   address: z.string().trim().min(1, 'Ingrese la dirección.'),
 });
@@ -104,7 +109,7 @@ export default function DoctorsPage() {
       medicalFee: doctor.medicalFee?.toString() ?? '',
       documentId: doctor.documentId,
       specialty: doctor.specialty,
-      phone: doctor.phone ?? '',
+      phone: normalizeKnownPhone(doctor.phone ?? ''),
       email: doctor.email ?? '',
       address: doctor.address,
     });
@@ -365,10 +370,20 @@ export default function DoctorsPage() {
               {form.formState.errors.specialty.message}
             </span>
           ) : null}
-          <label>
-            Teléfono
-            <input {...form.register('phone')} type="tel" />
-          </label>
+          <Controller
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <PhoneField
+                error={form.formState.errors.phone?.message}
+                label="Teléfono"
+                name={field.name}
+                onBlur={field.onBlur}
+                onChange={field.onChange}
+                value={field.value}
+              />
+            )}
+          />
           <label>
             Correo
             <input {...form.register('email')} type="email" />

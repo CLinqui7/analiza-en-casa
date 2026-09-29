@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
 export type ChangeSummary = {
   id: string;
@@ -8,6 +9,7 @@ export type ChangeSummary = {
   status: string;
   detail: string;
   conflict: boolean;
+  referenceHref?: string;
   stages: Record<'implemented' | 'local' | 'preview' | 'integration' | 'definition', string>;
 };
 const label = (status: string) =>
@@ -28,6 +30,9 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
   const rows = changes.filter((row) =>
     `${row.id} ${row.source} ${row.module}`.toLowerCase().includes(query.toLowerCase()),
   );
+  const unresolvedCount = changes.filter(
+    (row) => row.conflict || row.status !== 'IMPLEMENTED',
+  ).length;
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -50,8 +55,9 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
         <span>{rows.length} resultados</span>
       </Panel>
       <p className="notice">
-        La existencia de una pantalla no acredita una función completa. Los conflictos de escalas se
-        conservan sin inventar puntuaciones.
+        {unresolvedCount} solicitudes aún requieren implementación o validación. Las imágenes de las
+        escalas ya se pueden consultar, pero no se marcan resueltas hasta aprobar sus formularios y
+        comprobar su uso real. Los conflictos de fuente permanecen visibles.
       </p>
       <Panel>
         <div className="table-heading">
@@ -89,6 +95,11 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                     >
                       Ver detalle
                     </Button>
+                    {row.referenceHref ? (
+                      <Link className="change-reference-link" href={row.referenceHref}>
+                        Ver imagen original
+                      </Link>
+                    ) : null}
                   </td>
                 </tr>
               ))}
@@ -113,6 +124,11 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
             <p className="studio-source">{selected.source}</p>
             <h3>Estado y evidencia pendiente</h3>
             <p>{selected.detail || 'Requiere verificación funcional y de integración.'}</p>
+            {selected.referenceHref ? (
+              <Link className="button button-secondary" href={selected.referenceHref}>
+                Consultar imagen de esta escala
+              </Link>
+            ) : null}
             <dl className="studio-verification-stages">
               {(
                 [

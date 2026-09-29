@@ -682,7 +682,7 @@ export default function AgendaPage() {
               </div>
             ))}
           </div>
-          <label>
+          <label className="agenda-time-field">
             Inicio
             <input
               {...form.register('startTime', { onChange: () => setEndDayOffset(0) })}
@@ -694,7 +694,7 @@ export default function AgendaPage() {
               </span>
             ) : null}
           </label>
-          <label>
+          <label className="agenda-time-field">
             Fin
             <input
               {...form.register('endTime', { onChange: () => setEndDayOffset(0) })}
@@ -702,7 +702,7 @@ export default function AgendaPage() {
             />
             {endDayOffset ? <span className="field-help">Finaliza el día siguiente.</span> : null}
           </label>
-          <div className="full action-row">
+          <div className="full agenda-preset-buttons" aria-label="Duración rápida del turno">
             <Button
               className="button-secondary"
               data-action-id="AGENDA-SHIFT-PRESET-6H"
@@ -737,12 +737,13 @@ export default function AgendaPage() {
             </Button>
             {!isCoreRelease && (
               <Button
+                className="button-secondary agenda-pending-preset"
                 data-action-id="AGENDA-SHIFT-PRESET-PUNTUAL"
                 disabled
                 title="Requiere definición del cliente"
                 type="button"
               >
-                Puntual (pendiente de definición)
+                Puntual · por definir
               </Button>
             )}
           </div>

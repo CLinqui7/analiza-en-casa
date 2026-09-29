@@ -179,6 +179,9 @@ function HealthReportContent() {
           </div>
         </div>
         <div className="health-report-hero-actions no-print">
+          <Link className="health-action-button secondary" href="/clinical/scales">
+            Consultar escalas <span aria-hidden="true">→</span>
+          </Link>
           <button
             className="health-action-button secondary"
             onClick={() => window.print()}

@@ -15,9 +15,9 @@ async function openNewQuote(page: Page) {
 }
 
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
-  if (!(await dialog.getByLabel('Caso compatible').inputValue())) {
+  if (!(await dialog.getByLabel('Hospitalización del paciente').inputValue())) {
     await dialog.getByLabel('Buscar paciente', { exact: true }).fill('Paciente Demo Aurora');
-    await expect(dialog.getByLabel('Caso compatible')).not.toHaveValue('');
+    await expect(dialog.getByLabel('Hospitalización del paciente')).not.toHaveValue('');
   }
   await dialog.getByLabel('Resumen operativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
@@ -149,8 +149,8 @@ test('missing hospitalization explains the exact blocker and links to the field 
   const summary = dialog.locator('.quote-validation-summary');
   await expect(summary).toBeVisible();
   await expect(summary).toContainText('Este paciente aún no tiene una hospitalización');
-  await summary.getByRole('button', { name: /Caso compatible/ }).click();
-  await expect(dialog.getByLabel('Caso compatible')).toBeFocused();
+  await summary.getByRole('button', { name: /Hospitalización del paciente/ }).click();
+  await expect(dialog.getByLabel('Hospitalización del paciente')).toBeFocused();
   await expect(dialog.getByRole('link', { name: /Crear hospitalización/ })).toHaveAttribute(
     'href',
     '/hospitalizations',
@@ -172,8 +172,10 @@ test('missing hospitalization explains the exact blocker and links to the field 
     );
   });
   await dialog.getByRole('button', { name: 'Actualizar casos' }).click();
-  await expect(dialog.getByLabel('Caso compatible')).toContainText('case-created-after-quote');
-  await dialog.getByLabel('Caso compatible').selectOption('case-created-after-quote');
+  await expect(dialog.getByLabel('Hospitalización del paciente')).toContainText(
+    'case-created-after-quote',
+  );
+  await dialog.getByLabel('Hospitalización del paciente').selectOption('case-created-after-quote');
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
 });
@@ -225,7 +227,7 @@ test('exact patient search selects its compatible hospitalization before saving'
   await expect(dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]')).toHaveValue(
     'patient-quote-exact',
   );
-  await expect(dialog.getByLabel('Caso compatible')).toHaveValue('case-quote-exact');
+  await expect(dialog.getByLabel('Hospitalización del paciente')).toHaveValue('case-quote-exact');
   const id = await saveDraft(page, dialog, 'Cotización con paciente encontrado');
   expect(id).toBeTruthy();
 });

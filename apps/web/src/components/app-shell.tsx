@@ -116,6 +116,12 @@ const navigation: NavigationGroup[] = [
         actionId: 'HEALTH-REPORT-NAVIGATE',
       },
       {
+        label: 'Escalas clínicas',
+        href: '/clinical/scales',
+        permission: 'clinical:read',
+        actionId: 'CLINICAL-SCALES-NAVIGATE',
+      },
+      {
         label: 'Órdenes y acciones',
         href: '/clinical/orders',
         permission: 'clinical:read',
