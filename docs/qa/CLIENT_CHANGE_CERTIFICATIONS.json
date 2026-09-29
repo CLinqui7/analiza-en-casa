@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+  "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "b952386eac84f0cd270b962f9b0b7bbbf5d6766619df5554dfbdd9067175b4a1",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -87,7 +87,7 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "d3264302ceb058607fe2cb022152716cc29e254114c4a8a5e9edd8d716f13e97",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -96,7 +96,7 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "88b0b0c7eeee113ef12075ae258d25ae1ec6243332b59cf19dad58ab22ad4834",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -133,7 +133,7 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -144,7 +144,7 @@
       "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
     },
     "CR-018": {
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "production_status": "PARTIAL",
@@ -181,70 +181,70 @@
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      "notes": "Captura e historial por paciente disponibles; pendiente versión clínica aprobada e interpretación."
     },
     "CR-022": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      "notes": "Captura literal por paciente disponible; la imagen omite verbal 1 y no se calcula suma."
     },
     "CR-023": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "No existe motor ni formulario aprobado."
+      "notes": "Captura e historial por paciente disponibles; pendiente formulario clínico aprobado."
     },
     "CR-024": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      "notes": "Captura e historial por paciente disponibles; confirmar ECOF/ECOG y versión."
     },
     "CR-025": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      "notes": "Captura de once dominios e historial por paciente disponibles; pendiente versión clínica aprobada."
     },
     "CR-026": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      "notes": "Captura e historial por paciente disponibles; pendiente denominación y versión aprobadas."
     },
     "CR-027": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "No existe motor ni versión aprobada."
+      "notes": "Primera captura e historial por paciente disponibles; no se calcula riesgo sin versión aprobada."
     },
     "CR-028": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      "notes": "Segunda captura disponible por paciente; el texto dice Dowton y la imagen parece Norton, sin interpretación."
     },
     "CR-029": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      "notes": "Captura disponible por paciente; la fila no tiene nombre y la imagen dice Barthel."
     },
     "CR-030": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "El texto dice Branden y la imagen parece Braden."
+      "notes": "Captura e historial por paciente disponibles; confirmar Branden/Braden antes de interpretar."
     },
     "CR-031": {
       "implementation_sha": null,

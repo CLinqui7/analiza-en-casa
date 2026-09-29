@@ -3,7 +3,7 @@
   "canonical_source": {
     "path": "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx",
     "sha256": "d3a3f872b296aa9f722085f44f8ea11e364669ace3c26707d346a10b022aa6b3",
-    "source_head": "386a5506618438d4b0685ed838b018c2538e47f3",
+    "source_head": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
     "worksheet": "Hoja1"
   },
   "changes": [
@@ -57,7 +57,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "b952386eac84f0cd270b962f9b0b7bbbf5d6766619df5554dfbdd9067175b4a1",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -608,7 +608,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "d3264302ceb058607fe2cb022152716cc29e254114c4a8a5e9edd8d716f13e97",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -667,7 +667,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "88b0b0c7eeee113ef12075ae258d25ae1ec6243332b59cf19dad58ab22ad4834",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -940,7 +940,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -1001,7 +1001,7 @@
       "blocker_reason": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
       "client_question": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
       "acceptance_criteria": "Presets 6h/8h y Puntual sujeto a regla aprobada",
-      "implementation_sha": "386a5506618438d4b0685ed838b018c2538e47f3",
+      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": true,
@@ -1134,14 +1134,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-22"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1162,7 +1164,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      "notes": "Captura e historial por paciente disponibles; pendiente versión clínica aprobada e interpretación."
     },
     {
       "change_id": "CR-022",
@@ -1184,14 +1186,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-23"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1212,7 +1216,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      "notes": "Captura literal por paciente disponible; la imagen omite verbal 1 y no se calcula suma."
     },
     {
       "change_id": "CR-023",
@@ -1234,14 +1238,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-24"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1262,7 +1268,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni formulario aprobado."
+      "notes": "Captura e historial por paciente disponibles; pendiente formulario clínico aprobado."
     },
     {
       "change_id": "CR-024",
@@ -1284,14 +1290,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-25"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1312,7 +1320,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      "notes": "Captura e historial por paciente disponibles; confirmar ECOF/ECOG y versión."
     },
     {
       "change_id": "CR-025",
@@ -1334,14 +1342,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-26"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1362,7 +1372,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      "notes": "Captura de once dominios e historial por paciente disponibles; pendiente versión clínica aprobada."
     },
     {
       "change_id": "CR-026",
@@ -1384,14 +1394,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-27"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1412,7 +1424,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      "notes": "Captura e historial por paciente disponibles; pendiente denominación y versión aprobadas."
     },
     {
       "change_id": "CR-027",
@@ -1434,14 +1446,16 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-28"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1462,7 +1476,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni versión aprobada."
+      "notes": "Primera captura e historial por paciente disponibles; no se calcula riesgo sin versión aprobada."
     },
     {
       "change_id": "CR-028",
@@ -1477,7 +1491,7 @@
       "normalized_request": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
       "source_conflict": {
         "detected": true,
-        "detail": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+        "detail": "Segunda captura disponible por paciente; el texto dice Dowton y la imagen parece Norton, sin interpretación."
       },
       "confirmation_required": true,
       "priority": "Baja",
@@ -1491,7 +1505,9 @@
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1512,7 +1528,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      "notes": "Segunda captura disponible por paciente; el texto dice Dowton y la imagen parece Norton, sin interpretación."
     },
     {
       "change_id": "CR-029",
@@ -1527,7 +1543,7 @@
       "normalized_request": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
       "source_conflict": {
         "detected": true,
-        "detail": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+        "detail": "Captura disponible por paciente; la fila no tiene nombre y la imagen dice Barthel."
       },
       "confirmation_required": true,
       "priority": "Baja",
@@ -1541,7 +1557,9 @@
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1562,7 +1580,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      "notes": "Captura disponible por paciente; la fila no tiene nombre y la imagen dice Barthel."
     },
     {
       "change_id": "CR-030",
@@ -1577,21 +1595,23 @@
       "normalized_request": "Escala Braden confirmada y versionada",
       "source_conflict": {
         "detected": true,
-        "detail": "El texto dice Branden y la imagen parece Braden."
+        "detail": "Captura e historial por paciente disponibles; confirmar Branden/Braden antes de interpretar."
       },
       "confirmation_required": true,
       "priority": "Baja",
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-31"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "apps/web/src/app/(workspace)/patients/[id]/scales/page.tsx",
+        "apps/web/src/components/patient-scale-workspace.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-scales.ts"
       ],
       "db_objects": [],
       "action_ids": [],
@@ -1612,7 +1632,7 @@
       "multiuser_required": false,
       "clinical_change": true,
       "technical_status": "UNASSESSED",
-      "notes": "El texto dice Branden y la imagen parece Braden."
+      "notes": "Captura e historial por paciente disponibles; confirmar Branden/Braden antes de interpretar."
     },
     {
       "change_id": "CR-031",
