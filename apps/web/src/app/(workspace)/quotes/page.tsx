@@ -15,7 +15,7 @@ import {
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 
@@ -146,17 +146,11 @@ function QuoteEditor({
     inventoryMovements,
     patients,
     refreshPatients,
+    refreshWorkspace,
     updateQuote,
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
-    source
-      ? cloneDraft(source)
-      : emptyDraft(
-          hospitalizations[0]?.id,
-          hospitalizations[0]
-            ? patients.find((patient) => patient.id === hospitalizations[0].patientId)?.id
-            : '',
-        ),
+    source ? cloneDraft(source) : emptyDraft(),
   );
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -165,7 +159,12 @@ function QuoteEditor({
   const [referralCatalogOpen, setReferralCatalogOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshingPatients, setRefreshingPatients] = useState(false);
+  const [refreshingCases, setRefreshingCases] = useState(false);
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
+  const [caseRefreshNotice, setCaseRefreshNotice] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const validationSummaryRef = useRef<HTMLDivElement>(null);
+  const saveErrorRef = useRef<HTMLParagraphElement>(null);
 
   const totals = useMemo(() => {
     try {
@@ -187,8 +186,15 @@ function QuoteEditor({
   );
   const selectedPatient = patients.find((candidate) => candidate.id === draft.patientId);
   const compatibleCases = hospitalizations.filter(
-    (candidate) => !draft.patientId || candidate.patientId === draft.patientId,
+    (candidate) => draft.patientId && candidate.patientId === draft.patientId,
   );
+  const validationTargets = [
+    { key: 'patientId', label: 'Datos del paciente · Paciente', id: 'quote-patient' },
+    { key: 'caseId', label: 'Atención y caso · Caso compatible', id: 'quote-case' },
+    { key: 'summary', label: 'Atención y caso · Resumen operativo', id: 'quote-summary' },
+    { key: 'revisionReason', label: 'Revisión · Motivo de revisión', id: 'quote-revision-reason' },
+    { key: 'totals', label: 'Importes · Totales', id: 'quote-totals' },
+  ].filter(({ key }) => errors[key]);
   const patientOptions = searchPatients(patients, draft.patientQuery).slice(0, 10);
   const itemError = validateQuoteItem(item);
   const linkedInventoryItem = catalogItems.find(
@@ -239,6 +245,16 @@ function QuoteEditor({
         : 'No fue posible actualizar la lista. Su selección no se modificó.',
     );
   }
+  async function refreshCaseOptions() {
+    setRefreshingCases(true);
+    const refreshed = await refreshWorkspace();
+    setRefreshingCases(false);
+    setCaseRefreshNotice(
+      refreshed
+        ? 'Casos actualizados. Selecciona la hospitalización de este paciente para continuar.'
+        : 'No fue posible actualizar los casos. Puedes intentarlo de nuevo; tu borrador no cambió.',
+    );
+  }
   function selectFeeDoctor(doctorId: string) {
     const doctor = doctors.find((candidate) => candidate.id === doctorId);
     setItem((current) => ({ ...current, doctorId: doctor?.id, doctorName: doctor?.fullName }));
@@ -282,9 +298,18 @@ function QuoteEditor({
   }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSaveFailed(false);
     const nextErrors: Record<string, string> = {};
-    if (!selectedCase) nextErrors.caseId = 'Seleccione una hospitalización válida.';
-    if (!draft.summary.trim()) nextErrors.summary = 'El resumen operativo es obligatorio.';
+    if (!selectedPatient) nextErrors.patientId = 'Selecciona un paciente en Datos del paciente.';
+    if (!selectedCase) {
+      nextErrors.caseId = !selectedPatient
+        ? 'Primero selecciona un paciente y después su hospitalización.'
+        : compatibleCases.length === 0
+          ? 'Este paciente aún no tiene una hospitalización. Créala en Hospitalizaciones y luego actualiza los casos aquí.'
+          : 'Selecciona una hospitalización de este paciente en Caso compatible.';
+    }
+    if (!draft.summary.trim())
+      nextErrors.summary = 'Escribe el resumen operativo en Atención y caso.';
     if (mode === 'revise' && !draft.revisionReason.trim())
       nextErrors.revisionReason = 'El motivo de revisión es obligatorio.';
     try {
@@ -295,8 +320,10 @@ function QuoteEditor({
     }
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
+      window.requestAnimationFrame(() => validationSummaryRef.current?.focus());
       return;
     }
+    setErrors({});
     const now = new Date().toISOString();
     const common = {
       caseId: selectedCase!.id,
@@ -313,9 +340,10 @@ function QuoteEditor({
       discount: draft.discount,
       insurerAmount: draft.insurerAmount,
     };
+    let saved = false;
     if (mode === 'create') {
       const id = crypto.randomUUID();
-      const saved = await addQuote({
+      saved = await addQuote({
         id,
         ...common,
         version: 1,
@@ -331,12 +359,16 @@ function QuoteEditor({
       });
       if (saved) onSaved('Borrador de cotización persistido.');
     } else if (mode === 'edit' && source) {
-      const saved = await updateQuote({ ...source, ...common });
+      saved = await updateQuote({ ...source, ...common });
       if (saved) onSaved('Borrador de cotización actualizado y persistido.');
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
-      const saved = await addQuote({ ...revision, ...common });
+      saved = await addQuote({ ...revision, ...common });
       if (saved) onSaved('Nueva versión de cotización creada como borrador.');
+    }
+    if (!saved) {
+      setSaveFailed(true);
+      window.requestAnimationFrame(() => saveErrorRef.current?.focus());
     }
   }
   const title =
@@ -389,6 +421,38 @@ function QuoteEditor({
         noValidate
         onSubmit={(event) => void submit(event)}
       >
+        {validationTargets.length ? (
+          <div
+            className="quote-validation-summary full-field"
+            ref={validationSummaryRef}
+            role="alert"
+            tabIndex={-1}
+          >
+            <strong>Faltan datos para guardar la cotización</strong>
+            <p>Corrige los siguientes campos; selecciona uno para ir directamente a él.</p>
+            <ul>
+              {validationTargets.map(({ key, label, id }) => (
+                <li key={key}>
+                  <button
+                    className="quote-validation-link"
+                    onClick={() => document.getElementById(id)?.focus()}
+                    type="button"
+                  >
+                    {label}
+                  </button>
+                  <span>{errors[key]}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {saveFailed ? (
+          <p className="notice danger full-field" ref={saveErrorRef} role="alert" tabIndex={-1}>
+            No se guardó la cotización:{' '}
+            {workspaceError ??
+              'el servidor no confirmó el guardado. Actualiza los casos y vuelve a intentarlo.'}
+          </p>
+        ) : null}
         <fieldset className="quote-fieldset full-field">
           <legend>Datos del paciente</legend>
           <div className="form-grid form-grid-compact">
@@ -414,11 +478,10 @@ function QuoteEditor({
                   setDraft((current) => ({
                     ...current,
                     patientQuery,
-                    ...(exactPatient
-                      ? { patientId: exactPatient.id, caseId: exactCase?.id ?? '' }
-                      : {}),
+                    patientId: exactPatient?.id ?? '',
+                    caseId: exactCase?.id ?? '',
                   }));
-                  if (exactPatient) setErrors((current) => ({ ...current, caseId: '' }));
+                  setErrors((current) => ({ ...current, patientId: '', caseId: '' }));
                 }}
                 placeholder="Nombre o documento"
                 value={draft.patientQuery}
@@ -444,21 +507,27 @@ function QuoteEditor({
                 </option>
               ))}
             </datalist>
-            <label>
+            <label htmlFor="quote-patient">
               Paciente
               <select
+                aria-describedby={errors.patientId ? 'quote-patient-error' : undefined}
+                aria-invalid={Boolean(errors.patientId)}
                 data-action-id="QUOTE-PATIENT-SELECT"
                 disabled={mode !== 'create'}
-                onChange={(event) =>
+                id="quote-patient"
+                onChange={(event) => {
+                  const patientId = event.target.value;
                   setDraft((current) => ({
                     ...current,
-                    patientId: event.target.value,
+                    patientId,
+                    patientQuery:
+                      patients.find((candidate) => candidate.id === patientId)?.fullName ?? '',
                     caseId:
-                      hospitalizations.find(
-                        (candidate) => candidate.patientId === event.target.value,
-                      )?.id ?? '',
-                  }))
-                }
+                      hospitalizations.find((candidate) => candidate.patientId === patientId)?.id ??
+                      '',
+                  }));
+                  setErrors((current) => ({ ...current, patientId: '', caseId: '' }));
+                }}
                 value={draft.patientId}
               >
                 <option value="">Seleccione un paciente</option>
@@ -468,6 +537,11 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              {errors.patientId ? (
+                <span className="field-error" id="quote-patient-error">
+                  {errors.patientId}
+                </span>
+              ) : null}
             </label>
             <label>
               Documento
@@ -508,13 +582,17 @@ function QuoteEditor({
             <option value="CLINIC_OUTPATIENT">Ambulatorio en Analiza en Casa</option>
           </select>
         </label>
-        <label>
+        <label htmlFor="quote-case">
           Caso compatible
           <select
+            aria-describedby={errors.caseId ? 'quote-case-error' : 'quote-case-help'}
+            aria-invalid={Boolean(errors.caseId)}
             disabled={mode !== 'create'}
-            onChange={(event) =>
-              setDraft((current) => ({ ...current, caseId: event.target.value }))
-            }
+            id="quote-case"
+            onChange={(event) => {
+              setDraft((current) => ({ ...current, caseId: event.target.value }));
+              setErrors((current) => ({ ...current, caseId: '' }));
+            }}
             value={draft.caseId}
           >
             <option value="">Seleccione una hospitalización</option>
@@ -524,18 +602,58 @@ function QuoteEditor({
               </option>
             ))}
           </select>
-          {errors.caseId ? <span className="field-error">{errors.caseId}</span> : null}
+          {errors.caseId ? (
+            <span className="field-error" id="quote-case-error">
+              {errors.caseId}
+            </span>
+          ) : null}
         </label>
-        <label>
+        <div className="quote-case-guidance full-field" id="quote-case-help">
+          <p>
+            Cada cotización debe vincularse a una hospitalización registrada del paciente, incluso
+            si la modalidad de atención es ambulatoria. Crear un paciente no crea ese caso
+            automáticamente.
+          </p>
+          {mode === 'create' && selectedPatient && compatibleCases.length === 0 ? (
+            <div className="quote-case-actions">
+              <Link
+                className="button button-secondary"
+                href="/hospitalizations"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Crear hospitalización ↗
+              </Link>
+              <Button
+                className="button-secondary"
+                disabled={refreshingCases}
+                onClick={() => void refreshCaseOptions()}
+                type="button"
+              >
+                {refreshingCases ? 'Actualizando…' : 'Actualizar casos'}
+              </Button>
+            </div>
+          ) : null}
+          {caseRefreshNotice ? <p role="status">{caseRefreshNotice}</p> : null}
+        </div>
+        <label htmlFor="quote-summary">
           Resumen operativo
           <textarea
-            onChange={(event) =>
-              setDraft((current) => ({ ...current, summary: event.target.value }))
-            }
+            aria-describedby={errors.summary ? 'quote-summary-error' : undefined}
+            aria-invalid={Boolean(errors.summary)}
+            id="quote-summary"
+            onChange={(event) => {
+              setDraft((current) => ({ ...current, summary: event.target.value }));
+              setErrors((current) => ({ ...current, summary: '' }));
+            }}
             rows={3}
             value={draft.summary}
           />
-          {errors.summary ? <span className="field-error">{errors.summary}</span> : null}
+          {errors.summary ? (
+            <span className="field-error" id="quote-summary-error">
+              {errors.summary}
+            </span>
+          ) : null}
         </label>
         <fieldset className="quote-fieldset full-field">
           <legend>Datos iniciales de factura</legend>
@@ -703,6 +821,8 @@ function QuoteEditor({
           <label className="full-field">
             Motivo de revisión
             <textarea
+              aria-invalid={Boolean(errors.revisionReason)}
+              id="quote-revision-reason"
               onChange={(event) =>
                 setDraft((current) => ({ ...current, revisionReason: event.target.value }))
               }
@@ -1077,7 +1197,12 @@ function QuoteEditor({
             </label>
           </div>
         </fieldset>
-        <section className="quote-totals full-field" aria-label="Totales de cotización">
+        <section
+          className="quote-totals full-field"
+          aria-label="Totales de cotización"
+          id="quote-totals"
+          tabIndex={-1}
+        >
           <div>
             <span>Subtotal</span>
             <strong>{money(totals.subtotal)}</strong>
@@ -1102,11 +1227,6 @@ function QuoteEditor({
         {errors.totals ? (
           <p className="field-error full-field" role="alert">
             {errors.totals}
-          </p>
-        ) : null}
-        {workspaceError ? (
-          <p className="notice danger full-field" role="alert">
-            No pudimos guardar: {workspaceError}
           </p>
         ) : null}
       </form>

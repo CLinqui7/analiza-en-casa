@@ -15,6 +15,10 @@ async function openNewQuote(page: Page) {
 }
 
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
+  if (!(await dialog.getByLabel('Caso compatible').inputValue())) {
+    await dialog.getByLabel('Buscar paciente', { exact: true }).fill('Paciente Demo Aurora');
+    await expect(dialog.getByLabel('Caso compatible')).not.toHaveValue('');
+  }
   await dialog.getByLabel('Resumen operativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
@@ -65,9 +69,67 @@ test('modern quote builder keeps the requested categories and optional origin', 
   await expect(dialog.getByText('Presentación', { exact: true })).toHaveCount(0);
   await expect(dialog.getByText('Unidades por presentación', { exact: true })).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(dialog.getByText('El resumen operativo es obligatorio.')).toBeVisible();
+  await expect(dialog.locator('#quote-summary-error')).toHaveText(
+    'Escribe el resumen operativo en Atención y caso.',
+  );
+  await expect(dialog.getByRole('alert').first()).toContainText('Faltan datos para guardar');
   const id = await saveDraft(page, dialog, 'Cotización moderna sin referido');
   expect(id).toBeTruthy();
+});
+
+test('missing hospitalization explains the exact blocker and links to the field and case screen', async ({
+  page,
+}) => {
+  await login(page);
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      'analiza.en.casa.workspace.v3.patients',
+      JSON.stringify([
+        {
+          id: 'patient-without-case',
+          fullName: 'Paciente sin hospitalización',
+          documentType: 'OTHER',
+          documentId: 'NO-CASE-001',
+          status: 'ACTIVE',
+        },
+      ]),
+    );
+    window.localStorage.setItem('analiza.en.casa.workspace.v3.hospitalizations', '[]');
+  });
+  const dialog = await openNewQuote(page);
+  await dialog.getByLabel('Buscar paciente', { exact: true }).fill('Paciente sin hospitalización');
+  await dialog.getByLabel('Resumen operativo').fill('Seguimiento sin caso');
+  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
+  const summary = dialog.locator('.quote-validation-summary');
+  await expect(summary).toBeVisible();
+  await expect(summary).toContainText('Este paciente aún no tiene una hospitalización');
+  await summary.getByRole('button', { name: /Caso compatible/ }).click();
+  await expect(dialog.getByLabel('Caso compatible')).toBeFocused();
+  await expect(dialog.getByRole('link', { name: /Crear hospitalización/ })).toHaveAttribute(
+    'href',
+    '/hospitalizations',
+  );
+  await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toHaveCount(
+    0,
+  );
+  await page.evaluate(() => {
+    window.localStorage.setItem(
+      'analiza.en.casa.workspace.v3.hospitalizations',
+      JSON.stringify([
+        {
+          id: 'case-created-after-quote',
+          patientId: 'patient-without-case',
+          startDate: '2026-09-29',
+          status: 'ACTIVE',
+        },
+      ]),
+    );
+  });
+  await dialog.getByRole('button', { name: 'Actualizar casos' }).click();
+  await expect(dialog.getByLabel('Caso compatible')).toContainText('case-created-after-quote');
+  await dialog.getByLabel('Caso compatible').selectOption('case-created-after-quote');
+  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
+  await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
 });
 
 test('exact patient search selects its compatible hospitalization before saving', async ({
@@ -180,7 +242,9 @@ test('draft can be edited, sent and revised without changing the sent version', 
   await page.getByRole('button', { name: 'Revisar / nueva versión' }).click();
   dialog = page.getByRole('dialog', { name: /Revisar/ });
   await dialog.getByRole('button', { name: 'Crear revisión' }).click();
-  await expect(dialog.getByText('El motivo de revisión es obligatorio.')).toBeVisible();
+  await expect(
+    dialog.locator('.field-error').filter({ hasText: 'El motivo de revisión es obligatorio.' }),
+  ).toBeVisible();
   await dialog.getByLabel('Motivo de revisión').fill('Ajuste E2E documentado');
   await dialog.getByRole('button', { name: 'Crear revisión' }).click();
   await expect(page.getByRole('status')).toContainText('Nueva versión');
