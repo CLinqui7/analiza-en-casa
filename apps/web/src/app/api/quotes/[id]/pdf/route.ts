@@ -12,12 +12,13 @@ const noStore = { 'Cache-Control': 'private, no-store' };
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const backend = await persistence();
-    const actor = await backend.auth.requireSession(
-      request.cookies.get(sessionCookieName)?.value,
-    );
+    const actor = await backend.auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     const quote = await backend.quotes.get(actor, (await context.params).id);
     if (!quote)
-      return NextResponse.json({ error: 'Cotización no encontrada.' }, { status: 404, headers: noStore });
+      return NextResponse.json(
+        { error: 'Cotización no encontrada.' },
+        { status: 404, headers: noStore },
+      );
     if (quote.status !== 'SENT' || !quote.immutable)
       return NextResponse.json(
         { error: 'Sólo se exportan versiones enviadas e inmutables.' },

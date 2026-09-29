@@ -164,7 +164,8 @@ export class PostgresFeedbackRepository {
   ): Promise<FeedbackReport | null> {
     requireAdministrator(actor);
     const parsed = feedbackResolutionSchema.safeParse(resolution);
-    if (!parsed.success) throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
+    if (!parsed.success)
+      throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
     return transaction(this.pool, actor, async (client) => {
       const row = (
         await client.query<FeedbackRow>(
