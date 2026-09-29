@@ -41,6 +41,23 @@ export default function PatientDetailPage() {
           </Link>
         ) : null}
       </header>
+      {can('clinical:read') ? (
+        <section className="patient-clinical-shortcut">
+          <div>
+            <span className="eyebrow">Seguimiento clínico</span>
+            <h2>Escalas de {patient.fullName}</h2>
+            <p>
+              Registra valores de las capturas originales y revisa su historial en este expediente.
+            </p>
+          </div>
+          <Link
+            className="button button-primary"
+            href={`/patients/${encodeURIComponent(patient.id)}/scales`}
+          >
+            Abrir escalas
+          </Link>
+        </section>
+      ) : null}
       <section className="two-column">
         <Panel>
           <h2>Identificación</h2>

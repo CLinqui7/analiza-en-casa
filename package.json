@@ -20,6 +20,7 @@
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,css}\" \"packages/**/*.{ts,tsx}\"",
     "test:react": "npm run test --workspace=@analiza/web",
     "test:core:mongo": "tsx --tsconfig apps/web/tsconfig.json apps/web/src/server/core-live-verification.ts",
+    "test:clinical-scales:postgres": "tsx --tsconfig apps/web/tsconfig.json tests/clinical-scales-postgres.integration.ts",
     "test:core:selenium": "node scripts/verify-core-selenium.mjs",
     "docker:build": "docker build --progress=plain -t analiza-web:cloudrun .",
     "docker:bootstrap:build": "docker build --target operator -t analiza-operator:postgresql .",

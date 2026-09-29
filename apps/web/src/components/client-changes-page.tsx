@@ -55,9 +55,9 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
         <span>{rows.length} resultados</span>
       </Panel>
       <p className="notice">
-        {unresolvedCount} solicitudes aún requieren implementación o validación. Las imágenes de las
-        escalas ya se pueden consultar, pero no se marcan resueltas hasta aprobar sus formularios y
-        comprobar su uso real. Los conflictos de fuente permanecen visibles.
+        {unresolvedCount} solicitudes aún requieren implementación o validación. Las escalas ya
+        permiten capturar valores por paciente y consultar el historial, pero no se marcan resueltas
+        hasta aprobar sus versiones clínicas. Los conflictos de fuente permanecen visibles.
       </p>
       <Panel>
         <div className="table-heading">

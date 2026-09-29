@@ -12,13 +12,12 @@ export default function ClinicalScalesPage() {
           <p className="eyebrow">Clínico · material original</p>
           <h1>Escalas clínicas</h1>
           <p>
-            Consulta las diez capturas incluidas en el HTML inicial, con su fila y denominación
-            original. Este catálogo permite revisar la fuente, pero todavía no registra puntuaciones
-            ni sustituye los formularios clínicos aprobados.
+            Consulta las diez capturas incluidas en el HTML inicial. Para registrar sus valores y
+            revisar el historial, abre el expediente del paciente y entra en «Escalas».
           </p>
         </div>
-        <Link className="button button-secondary" href="/clinical/reports">
-          Volver a reportes
+        <Link className="button button-primary" href="/patients">
+          Elegir paciente
         </Link>
       </header>
 
@@ -38,9 +37,9 @@ export default function ClinicalScalesPage() {
       </section>
 
       <p className="notice" role="note">
-        Antes de habilitar captura, cálculos o uso con pacientes reales, el equipo responsable debe
-        confirmar la versión y los criterios de cada escala. Las imágenes se muestran tal como se
-        recibieron, incluidos sus errores o nombres distintos.
+        Los formularios por paciente guardan los valores seleccionados y su autor, pero no calculan
+        riesgo, diagnóstico ni clasificación. El equipo responsable aún debe confirmar la versión
+        clínica de cada escala; las imágenes conservan sus errores y nombres originales.
       </p>
 
       <section className="clinical-scales-grid" aria-label="Escalas del archivo original">

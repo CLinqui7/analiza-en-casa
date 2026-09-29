@@ -372,7 +372,7 @@ try {
   await dialog.getByLabel('Nombre completo').fill('Paciente ficticio SQL');
   await dialog.getByLabel('Fecha de nacimiento').fill('1990-01-01');
   await dialog.getByLabel('Femenino').check();
-  await dialog.getByLabel('Teléfono celular').fill('7000-0000');
+  await dialog.getByRole('textbox', { name: 'Teléfono celular *' }).fill('7000-0000');
   await dialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
   await dialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
   await dialog
@@ -443,6 +443,30 @@ try {
   passed.push(
     'React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected',
   );
+  const scalePath = `/api/patients/${patient.id}/scales`;
+  const scaleInput = {
+    scaleId: 'eva',
+    observedAt: new Date().toISOString(),
+    values: { score: 5 },
+    notes: 'Captura sintética QA',
+  };
+  assert.equal((await fetch(base + scalePath)).status, 401);
+  assert.equal((await nurse.context.post(scalePath, { data: scaleInput })).status(), 403);
+  await mutate(finance, scalePath, scaleInput, 403);
+  await mutate(nurse, scalePath, { ...scaleInput, values: { score: 11 } }, 400);
+  const scaleCapture = await mutate(nurse, scalePath, scaleInput, 201);
+  assert.equal(scaleCapture.patientId, patient.id);
+  assert.equal(scaleCapture.clinicalValidated, false);
+  assert.equal((await (await b.context.get(scalePath)).json())[0].id, scaleCapture.id);
+  assert.equal((await c.context.get(scalePath)).status(), 404);
+  await page.goto(base + `/patients/${patient.id}/scales?scale=eva`);
+  await page.getByRole('heading', { name: 'Escalas del paciente' }).waitFor();
+  assert.equal(await page.locator('.patient-scale-choice').count(), 10);
+  await page.getByRole('group', { name: 'Puntuación visible *' }).getByLabel('6').check();
+  await page.getByRole('button', { name: 'Guardar en el expediente' }).click();
+  await page.getByText(/Captura de EVA · dolor guardada/).waitFor();
+  assert.equal(await page.locator('.patient-scale-history-entry').count(), 2);
+  passed.push('Patient scales: nurse capture through PostgreSQL, browser save/history, CSRF, ACL and tenant isolation');
   await mutate(a, '/api/operations', {
     command: 'configuration.save',
     entry: {
@@ -600,7 +624,7 @@ try {
   await failDialog.getByLabel('Nombre completo').fill('Paciente ficticio rechazado');
   await failDialog.getByLabel('Fecha de nacimiento').fill('1990-01-01');
   await failDialog.getByLabel('Femenino').check();
-  await failDialog.getByLabel('Teléfono celular').fill('7000-0000');
+  await failDialog.getByRole('textbox', { name: 'Teléfono celular *' }).fill('7000-0000');
   await failDialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
   await failDialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
   await failDialog

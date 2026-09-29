@@ -4633,6 +4633,265 @@ body {
   }
 }
 
+.patient-clinical-shortcut,
+.patient-scale-capture-panel,
+.patient-scale-history,
+.patient-scale-history-entry {
+  border: 1px solid #dce5ef;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgb(27 53 82 / 5%);
+}
+
+.patient-clinical-shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 26px;
+}
+
+.patient-clinical-shortcut h2,
+.patient-clinical-shortcut p {
+  margin: 5px 0 0;
+}
+
+.patient-clinical-shortcut .button {
+  flex: none;
+}
+
+.patient-scale-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+  gap: 10px;
+}
+
+.patient-scale-choice {
+  display: grid;
+  gap: 5px;
+  align-content: center;
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px solid #d9e3ef;
+  border-radius: 13px;
+  color: var(--brand-navy);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.patient-scale-choice:hover,
+.patient-scale-choice.active {
+  border-color: #d34353;
+  background: #fff7f8;
+}
+
+.patient-scale-choice:hover {
+  transform: translateY(-1px);
+}
+
+.patient-scale-choice span {
+  color: var(--muted);
+  font-size: 0.77rem;
+}
+
+.patient-scale-capture-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 28px;
+  padding: 25px;
+}
+
+.patient-scale-source,
+.patient-scale-form {
+  display: grid;
+  align-content: start;
+  gap: 15px;
+  min-width: 0;
+}
+
+.patient-scale-source h2,
+.patient-scale-source p,
+.patient-scale-form h2,
+.patient-scale-form p {
+  margin: 0;
+}
+
+.patient-scale-source > img {
+  width: 100%;
+  height: auto;
+  border: 1px solid #dce5ef;
+  border-radius: 10px;
+}
+
+.patient-scale-form > label {
+  display: grid;
+  gap: 7px;
+  color: #253d5d;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.patient-scale-now {
+  justify-self: start;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.patient-scale-field {
+  min-width: 0;
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.patient-scale-field legend {
+  padding: 0 5px;
+  color: var(--brand-navy);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.patient-scale-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.patient-scale-options label {
+  position: relative;
+  cursor: pointer;
+}
+
+.patient-scale-options input {
+  position: absolute;
+  width: 1px;
+  min-height: 1px;
+  opacity: 0;
+}
+
+.patient-scale-options span {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 38px;
+  padding: 6px 10px;
+  border: 1px solid #cfdae8;
+  border-radius: 9px;
+  color: var(--brand-navy);
+  background: #fff;
+  font-weight: 700;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.patient-scale-options input:checked + span {
+  border-color: #d34353;
+  color: #b62c40;
+  background: #fff0f2;
+}
+
+.patient-scale-options input:focus-visible + span {
+  outline: 3px solid #8ca8da;
+  outline-offset: 2px;
+}
+
+.patient-scale-form > .button {
+  justify-self: start;
+  width: auto;
+}
+
+.patient-scale-history {
+  display: grid;
+  gap: 13px;
+  padding: 22px;
+}
+
+.patient-scale-history > .table-heading h2,
+.patient-scale-history > .table-heading p {
+  margin: 0 0 4px;
+}
+
+.patient-scale-history-entry {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+  gap: 18px;
+  padding: 17px;
+  box-shadow: none;
+}
+
+.patient-scale-history-entry > div:first-child,
+.patient-scale-history-values {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+}
+
+.patient-scale-history-entry small {
+  color: var(--muted);
+}
+
+.patient-scale-history-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.patient-scale-history-values > span {
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: var(--brand-navy);
+  background: #f1f5fa;
+  font-size: 0.78rem;
+}
+
+.patient-scale-history-values > p,
+.patient-scale-history-values > small {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+}
+
+@media (max-width: 900px) {
+  .patient-scale-capture-panel,
+  .patient-scale-history-entry {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 740px) {
+  .patient-clinical-shortcut {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patient-scale-capture-panel,
+  .patient-scale-history {
+    padding: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patient-scale-choice,
+  .patient-scale-options span {
+    transition: none;
+  }
+
+  .patient-scale-choice:hover {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .clinical-scale-card,
   .clinical-scale-source summary {

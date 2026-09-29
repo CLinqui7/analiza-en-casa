@@ -15,6 +15,7 @@ import type { WorkspaceSetup } from '@/lib/workspace-setup';
 import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
 import type { FeedbackImage, FeedbackReport, FeedbackResolution } from '@/lib/feedback';
 import type { ImportOverview, ImportPreview } from '@/lib/information-import';
+import type { ClinicalScaleCapture } from '@/lib/clinical-scale-capture';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -31,6 +32,14 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  clinicalScales?: {
+    listForPatient(actor: ServerActor, patientId: string): Promise<ClinicalScaleCapture[] | null>;
+    create(
+      actor: ServerActor,
+      patientId: string,
+      input: unknown,
+    ): Promise<ClinicalScaleCapture | null>;
+  };
   informationImports?: {
     overview(actor: ServerActor): Promise<ImportOverview>;
     preview(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportPreview>;

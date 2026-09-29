@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collection": "clinicalScaleCaptures",
+      "key": { "organizationId": 1, "id": 1 },
+      "name": "clinical_scale_captures_org_id_unique",
+      "unique": true
+    },
+    {
+      "collection": "clinicalScaleCaptures",
+      "key": { "organizationId": 1, "patientId": 1, "observedAt": -1, "createdAt": -1 },
+      "name": "clinical_scale_captures_patient_time"
+    }
+  ]
+}
