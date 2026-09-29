@@ -24,7 +24,9 @@ test('UI00 mobile navigation keeps account controls in an accessible drawer', as
     readFile(shellSource, 'utf8'),
     readFile(stylesheet, 'utf8'),
   ]);
-  const mobileCss = css.slice(css.lastIndexOf('@media (max-width: 740px)'));
+  const navigationRule = css.lastIndexOf('.sidebar.mobile-navigation-open');
+  assert.notEqual(navigationRule, -1, 'Expected mobile navigation CSS');
+  const mobileCss = css.slice(css.lastIndexOf('@media (max-width: 740px)', navigationRule));
 
   assert.match(shell, /aria-controls="main-navigation"/);
   assert.match(shell, /className="mobile-nav-toggle"/);

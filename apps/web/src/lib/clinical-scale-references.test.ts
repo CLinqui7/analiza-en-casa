@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { clinicalScaleReferences } from './clinical-scale-references';
 
@@ -10,8 +11,9 @@ describe('clinical scale source catalog', () => {
       22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     ]);
     expect(new Set(clinicalScaleReferences.map((entry) => entry.image)).size).toBe(10);
+    const publicDirectory = fileURLToPath(new URL('../../public/', import.meta.url));
     for (const reference of clinicalScaleReferences) {
-      expect(existsSync(path.resolve('apps/web/public', reference.image.slice(1)))).toBe(true);
+      expect(existsSync(path.join(publicDirectory, reference.image.slice(1)))).toBe(true);
     }
   });
 
