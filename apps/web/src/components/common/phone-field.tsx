@@ -33,7 +33,8 @@ export function PhoneField({
     sourceValue: string;
     country: PhoneCountry | '';
   } | null>(null);
-  const country = countrySelection?.sourceValue === value ? countrySelection.country : parsed.country;
+  const country =
+    countrySelection?.sourceValue === value ? countrySelection.country : parsed.country;
   // An unrecognized international prefix cannot safely be treated as national digits.
   const unknownInternationalPrefix = value.trim().startsWith('+') && !parsed.country;
   const national = unknownInternationalPrefix ? '' : parsed.national;
