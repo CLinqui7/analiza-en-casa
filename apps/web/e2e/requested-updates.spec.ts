@@ -40,6 +40,23 @@ test('clinical scales show ten source images without claiming clinical approval'
   await expect(page.getByRole('link', { name: 'Ver imagen original' })).toHaveCount(10);
 });
 
+test('all Excel requests show completed tracking without changing nurse reports', async ({
+  page,
+}) => {
+  await page.goto('/changes');
+  await expect(page.getByRole('heading', { name: 'Cambios solicitados' })).toBeVisible();
+  await expect(page.getByText('Completado', { exact: true })).toHaveCount(32);
+  await expect(
+    page.getByText(/Esto no certifica que todas las funciones estén implementadas/),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Ver detalle' }).first().click();
+  await expect(page.getByRole('dialog')).toContainText('Verificación técnica');
+  await page.goto('/feedback');
+  await expect(
+    page.getByRole('heading', { name: 'Preguntas o errores encontrados' }),
+  ).toBeVisible();
+});
+
 test('agenda duration shortcuts are compact and keep the existing shift flow', async ({ page }) => {
   await page.goto('/agenda');
   await page.getByRole('button', { name: 'Crear turno', exact: true }).click();

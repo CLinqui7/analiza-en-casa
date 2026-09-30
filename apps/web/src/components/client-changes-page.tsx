@@ -6,6 +6,7 @@ export type ChangeSummary = {
   id: string;
   source: string;
   module: string;
+  trackingStatus: string;
   status: string;
   detail: string;
   conflict: boolean;
@@ -30,20 +31,16 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
   const rows = changes.filter((row) =>
     `${row.id} ${row.source} ${row.module}`.toLowerCase().includes(query.toLowerCase()),
   );
-  const unresolvedCount = changes.filter(
-    (row) => row.conflict || row.status !== 'IMPLEMENTED',
-  ).length;
+  const completedCount = changes.filter((row) => row.trackingStatus === 'COMPLETED').length;
   return (
     <div className="page-stack">
       <header className="page-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
           <h1>Cambios solicitados</h1>
-          <p>
-            Las 32 solicitudes del Excel, su texto original y el estado documentado de verificación.
-          </p>
+          <p>Las {changes.length} solicitudes del Excel y su seguimiento administrativo.</p>
         </div>
-        <StatusTag>{changes.length} solicitudes</StatusTag>
+        <StatusTag>{completedCount} completadas</StatusTag>
       </header>
       <Panel className="studio-toolbar">
         <input
@@ -55,9 +52,10 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
         <span>{rows.length} resultados</span>
       </Panel>
       <p className="notice">
-        {unresolvedCount} solicitudes aún requieren implementación o validación. Las escalas ya
-        permiten capturar valores por paciente y consultar el historial, pero no se marcan resueltas
-        hasta aprobar sus versiones clínicas. Los conflictos de fuente permanecen visibles.
+        El seguimiento de estas {completedCount} solicitudes se marcó como completado por indicación
+        del administrador. Esto no certifica que todas las funciones estén implementadas o aprobadas
+        clínicamente. La verificación técnica y los conflictos de fuente permanecen en «Ver
+        detalle». Los reportes enviados por las enfermeras se gestionan por separado.
       </p>
       <Panel>
         <div className="table-heading">
@@ -70,7 +68,7 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                 <th>ID</th>
                 <th>Módulo</th>
                 <th>Solicitud del Excel</th>
-                <th>Verificación registrada</th>
+                <th>Seguimiento</th>
                 <th>Detalle</th>
               </tr>
             </thead>
@@ -83,8 +81,8 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                   <td>{row.module}</td>
                   <td className="studio-source">{row.source}</td>
                   <td>
-                    <StatusTag tone={row.conflict ? 'warning' : 'neutral'}>
-                      {row.conflict ? 'Conflicto de fuente' : label(row.status)}
+                    <StatusTag tone="neutral">
+                      {row.trackingStatus === 'COMPLETED' ? 'Completado' : 'Pendiente'}
                     </StatusTag>
                   </td>
                   <td>
@@ -122,7 +120,15 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
           <div className="page-stack">
             <h3>Texto original</h3>
             <p className="studio-source">{selected.source}</p>
-            <h3>Estado y evidencia pendiente</h3>
+            <h3>Verificación técnica</h3>
+            <p>
+              Seguimiento:{' '}
+              <strong>
+                {selected.trackingStatus === 'COMPLETED' ? 'Completado' : 'Pendiente'}
+              </strong>{' '}
+              · Implementación: {label(selected.status)}
+              {selected.conflict ? ' · Conflicto de fuente' : ''}
+            </p>
             <p>{selected.detail || 'Requiere verificación funcional y de integración.'}</p>
             {selected.referenceHref ? (
               <Link className="button button-secondary" href={selected.referenceHref}>

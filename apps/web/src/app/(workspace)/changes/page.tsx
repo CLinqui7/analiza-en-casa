@@ -35,6 +35,7 @@ export default function Page() {
         id: row.change_id,
         source: row.source_text,
         module: row.module,
+        trackingStatus: row.tracking_status,
         status: row.status,
         detail: row.blocker_reason || row.notes || '',
         conflict: row.source_conflict.detected,

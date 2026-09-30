@@ -19,6 +19,7 @@ const selected = batch ? registry.changes.filter((change) => change.dependency_i
 if (registry.changes.length !== 32) errors.push(`Registry has ${registry.changes.length} changes, expected 32.`);
 for (const id of expected) if (!registry.changes.some((change) => change.change_id === id)) errors.push(`Missing ${id}.`);
 for (const change of selected) {
+  if (change.tracking_status !== 'COMPLETED') errors.push(`${change.change_id}: request tracking must be completed.`);
   if (!statuses.has(change.status)) errors.push(`${change.change_id}: invalid status.`);
   if (!change.source_text || !change.normalized_interpretation || !change.source_rows?.length) errors.push(`${change.change_id}: source traceability is incomplete.`);
   if (change.source_conflict?.detected && !change.confirmation_required) errors.push(`${change.change_id}: source conflict closed without confirmation.`);
