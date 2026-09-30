@@ -306,6 +306,9 @@ describe('quote domain', () => {
     expect(validateQuoteItem({ ...items[0], quantity: 0 })).toBe(
       'La cantidad debe ser mayor que cero.',
     );
+    expect(validateQuoteItem({ ...items[0], unitPrice: Number.NaN })).toBe(
+      'Indique un precio de venta sin IVA para este ítem.',
+    );
     expect(() => calculateQuoteTotals([{ ...items[0], discountAmount: 99 }], undefined, 0)).toThrow(
       'descuento manual',
     );

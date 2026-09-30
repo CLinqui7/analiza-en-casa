@@ -290,8 +290,8 @@ export function validateQuoteItem(item: QuoteItem): string | undefined {
   if (!item.name.trim()) return 'El concepto es obligatorio.';
   if (!Number.isFinite(item.quantity) || item.quantity <= 0)
     return 'La cantidad debe ser mayor que cero.';
-  if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0)
-    return 'El precio manual no puede ser negativo.';
+  if (!Number.isFinite(item.unitPrice)) return 'Indique un precio de venta sin IVA para este ítem.';
+  if (item.unitPrice < 0) return 'El precio manual no puede ser negativo.';
   if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0)
     return 'El descuento manual no puede ser negativo.';
   if (item.discountAmount > quoteItemGross(item))

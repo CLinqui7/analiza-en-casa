@@ -230,7 +230,7 @@ function QuoteEditor({
             )
             .map((candidate) => ({
               id: candidate.id,
-              label: `${candidate.sku} | ${candidate.name}`,
+              label: `${candidate.sku} | ${candidate.name}${candidate.salePriceExcludingTax === undefined ? ' · Pendiente de precio' : ''}`,
               inventoryAvailable:
                 !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(activeCategory) ||
                 currentInventoryBalance(inventoryMovements, candidate.id) > 0,
@@ -239,7 +239,10 @@ function QuoteEditor({
         : [];
 
   function setNumber(key: 'quantity' | 'unitPrice' | 'discountAmount', value: string) {
-    setItem((current) => ({ ...current, [key]: Number(value) }));
+    setItem((current) => ({
+      ...current,
+      [key]: key === 'unitPrice' && value === '' ? Number.NaN : Number(value),
+    }));
   }
   async function refreshPatientOptions() {
     setRefreshingPatients(true);
@@ -903,7 +906,7 @@ function QuoteEditor({
                       ...current,
                       name: selected?.label ?? '',
                       inventoryItemId: selected?.id,
-                      unitPrice: selected?.salePriceExcludingTax ?? 0,
+                      unitPrice: selected?.salePriceExcludingTax ?? Number.NaN,
                     }));
                   }}
                   options={activeCatalog.map((entry) => ({
@@ -997,10 +1000,15 @@ function QuoteEditor({
                 data-action-id={activeCategory === 'FEES' ? 'QUOTE-FEE-AMOUNT' : undefined}
                 min="0"
                 onChange={(event) => setNumber('unitPrice', event.target.value)}
-                step="0.01"
+                step="any"
                 type="number"
                 value={Number.isFinite(item.unitPrice) ? item.unitPrice : ''}
               />
+              {linkedInventoryItem && linkedInventoryItem.salePriceExcludingTax === undefined ? (
+                <span className="field-help">
+                  Pendiente de precio. Ingrese manualmente el precio sin IVA antes de agregarlo.
+                </span>
+              ) : null}
             </label>
             <label>
               Descuento manual

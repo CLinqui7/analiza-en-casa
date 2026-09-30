@@ -34,13 +34,21 @@ const itemSchema = z.object({
     'PROVIDERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
-  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.'),
+  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.').optional(),
   salePriceExcludingTax: z
     .number()
     .finite()
-    .nonnegative('El precio de venta no puede ser negativo.'),
+    .nonnegative('El precio de venta no puede ser negativo.')
+    .optional(),
 });
 type ItemForm = z.infer<typeof itemSchema>;
+const priceFormatter = new Intl.NumberFormat('es-SV', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 5,
+});
+const catalogPrice = (value: number) => `USD ${priceFormatter.format(value)}`;
+const optionalPrice = (value: unknown) =>
+  value === '' || value === null || value === undefined ? undefined : Number(value);
 
 export default function CatalogsPage() {
   const { addCatalogItem, catalogItems } = useWorkspace();
@@ -51,7 +59,7 @@ export default function CatalogsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
-    defaultValues: { category: 'SERVICES', name: '', costPrice: 0, salePriceExcludingTax: 0 },
+    defaultValues: { category: 'SERVICES', name: '' },
   });
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
   const visibleItems = useMemo(
@@ -72,14 +80,14 @@ export default function CatalogsPage() {
     form.reset({
       category: activeCategory,
       name: '',
-      costPrice: 0,
-      salePriceExcludingTax: 0,
+      costPrice: undefined,
+      salePriceExcludingTax: undefined,
     });
   }
   function create(category: Category = activeCategory) {
     setMessage(null);
     setEditing(null);
-    form.reset({ category, name: '', costPrice: 0, salePriceExcludingTax: 0 });
+    form.reset({ category, name: '', costPrice: undefined, salePriceExcludingTax: undefined });
     setOpen(true);
   }
   function edit(item: CatalogItem) {
@@ -88,13 +96,14 @@ export default function CatalogsPage() {
     form.reset({
       category: isCategory(item.category) ? item.category : 'SUPPLIES',
       name: item.name,
-      costPrice: item.costPrice ?? 0,
-      salePriceExcludingTax: item.salePriceExcludingTax ?? 0,
+      costPrice: item.costPrice,
+      salePriceExcludingTax: item.salePriceExcludingTax,
     });
     setOpen(true);
   }
   async function save(values: ItemForm) {
     const item: CatalogItem = {
+      ...(editing ?? {}),
       id: editing?.id ?? crypto.randomUUID(),
       sku: editing?.sku ?? nextSku(values.category),
       name: values.name.trim(),
@@ -184,8 +193,20 @@ export default function CatalogsPage() {
                       <code>{item.sku}</code>
                     </td>
                     <td>{item.name}</td>
-                    <td>USD {(item.costPrice ?? 0).toFixed(2)}</td>
-                    <td>USD {(item.salePriceExcludingTax ?? 0).toFixed(2)}</td>
+                    <td>
+                      {item.category === 'PROVIDERS'
+                        ? 'No aplica'
+                        : item.costPrice === undefined
+                          ? 'Pendiente de costo'
+                          : catalogPrice(item.costPrice)}
+                    </td>
+                    <td>
+                      {item.category === 'PROVIDERS'
+                        ? 'No aplica'
+                        : item.salePriceExcludingTax === undefined
+                          ? 'Pendiente de precio'
+                          : catalogPrice(item.salePriceExcludingTax)}
+                    </td>
                     <td>
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -258,24 +279,26 @@ export default function CatalogsPage() {
             ) : null}
           </label>
           <label>
-            Precio de costo
+            Precio de costo (opcional)
             <input
               min="0"
-              step="0.01"
+              placeholder="Pendiente de costo"
+              step="any"
               type="number"
-              {...form.register('costPrice', { valueAsNumber: true })}
+              {...form.register('costPrice', { setValueAs: optionalPrice })}
             />
             {form.formState.errors.costPrice ? (
               <span className="field-error">{form.formState.errors.costPrice.message}</span>
             ) : null}
           </label>
           <label>
-            Precio de venta sin IVA
+            Precio de venta sin IVA (opcional)
             <input
               min="0"
-              step="0.01"
+              placeholder="Pendiente de precio"
+              step="any"
               type="number"
-              {...form.register('salePriceExcludingTax', { valueAsNumber: true })}
+              {...form.register('salePriceExcludingTax', { setValueAs: optionalPrice })}
             />
             {form.formState.errors.salePriceExcludingTax ? (
               <span className="field-error">
