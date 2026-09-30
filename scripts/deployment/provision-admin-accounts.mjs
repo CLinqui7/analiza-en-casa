@@ -16,6 +16,7 @@ if (!process.argv.includes('--apply')) {
       accounts: accounts.map(([login, name]) => ({ login, name, role: 'ADMIN' })),
       existingUsers: 'preserved',
       temporaryPassword: 'read from ANALIZA_TEMP_ADMIN_PASSWORD at apply time',
+      ownerBootstrap: 'if absent, bootstrap linquicarloss@gmail.com from the active pruebaadmin organization using ANALIZA_OWNER_ADMIN_PASSWORD',
     }),
   );
   process.exit(0);
@@ -51,14 +52,39 @@ try {
   await client.query("SELECT pg_advisory_xact_lock(hashtextextended('analiza:admin-provision',0))");
   const schema = await client.query("SELECT 1 FROM analiza.schema_migrations WHERE version='020_account_profile.sql'");
   assert.equal(schema.rowCount, 1, 'Apply migration 020_account_profile.sql before provisioning.');
-  const owner = await client.query(
+  let owner = await client.query(
     "SELECT m.organization_id FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE u.email_normalized='linquicarloss@gmail.com' AND m.role='ADMIN' AND m.active AND u.disabled_at IS NULL",
   );
-  assert.equal(
-    owner.rowCount,
-    1,
-    'Expected exactly one active ADMIN organization for linquicarloss@gmail.com.',
-  );
+  assert.ok(owner.rowCount <= 1, 'Owner ADMIN belongs to multiple organizations.');
+  let ownerCreated = false;
+  if (owner.rowCount === 0) {
+    const ownerPassword = process.env.ANALIZA_OWNER_ADMIN_PASSWORD;
+    assert.ok(
+      ownerPassword && ownerPassword.length >= 12 && ownerPassword.length <= 1024,
+      'Owner bootstrap requires ANALIZA_OWNER_ADMIN_PASSWORD of at least 12 characters.',
+    );
+    const existingOwner = await client.query(
+      "SELECT id FROM analiza.users WHERE email_normalized='linquicarloss@gmail.com'",
+    );
+    assert.equal(existingOwner.rowCount, 0, 'Owner login already exists without an active ADMIN membership.');
+    const bootstrap = await client.query(
+      "SELECT m.organization_id FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE u.email_normalized='pruebaadmin@analiza.com' AND m.role='ADMIN' AND m.active AND u.disabled_at IS NULL",
+    );
+    assert.equal(bootstrap.rowCount, 1, 'Expected exactly one active pruebaadmin ADMIN organization for owner bootstrap.');
+    const id = randomUUID();
+    const salt = randomBytes(16).toString('base64url');
+    const hash = `scrypt$${salt}$${scryptSync(ownerPassword, salt, 64).toString('base64url')}`;
+    await client.query(
+      'INSERT INTO analiza.users(id,email_normalized,password_hash,display_name,must_change_password) VALUES($1,$2,$3,$4,true)',
+      [id, 'linquicarloss@gmail.com', hash, 'Carlos Linqui'],
+    );
+    await client.query(
+      "INSERT INTO analiza.memberships(user_id,organization_id,role,active) VALUES($1,$2,'ADMIN',true)",
+      [id, bootstrap.rows[0].organization_id],
+    );
+    owner = { rowCount: 1, rows: [{ organization_id: bootstrap.rows[0].organization_id }] };
+    ownerCreated = true;
+  }
   const organizationId = owner.rows[0].organization_id;
   await client.query("SELECT set_config('analiza.organization_id',$1,true)", [organizationId]);
   const created = [];
@@ -102,6 +128,7 @@ try {
     JSON.stringify({
       created,
       retained,
+      ownerCreated,
       organization: 'owner ADMIN organization',
       mustChangePassword: true,
     }),

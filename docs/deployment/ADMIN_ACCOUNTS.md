@@ -13,9 +13,9 @@ Todas pertenecen a la misma organización ADMIN activa que `linquicarloss@gmail.
 
 ## Despliegue, en este orden
 
-1. Confirmar que la conexión privada del operador corresponde a la base de producción deseada y que `linquicarloss@gmail.com` tiene exactamente una membresía ADMIN activa. No usar una cuenta SQL de runtime con privilegios limitados para migrar.
+1. Confirmar que la conexión privada del operador corresponde a la base de producción deseada. `linquicarloss@gmail.com` debe tener una membresía ADMIN activa; si todavía no existe, debe existir exactamente una membresía ADMIN activa de `pruebaadmin@analiza.com` en la organización compartida. No usar una cuenta SQL de runtime con privilegios limitados para migrar.
 2. Aplicar la migración `020_account_profile.sql` con el procedimiento de migraciones del proyecto (`npm run db:migrate`). El servidor nuevo exige las 20 migraciones antes de iniciar.
-3. Ejecutar `npm run admin:provision:plan` para revisar nombres/usuarios. Configurar `ANALIZA_TEMP_ADMIN_PASSWORD` en la sesión privada del operador y ejecutar `npm run admin:provision`. Para Neon, también configurar `ANALIZA_MANAGED_POSTGRES=neon` y `DATABASE_URL_UNPOOLED` o `DATABASE_URL`; para PostgreSQL propio, usar `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` y opcionalmente `PGPORT`.
+3. Ejecutar `npm run admin:provision:plan` para revisar nombres/usuarios. Configurar `ANALIZA_TEMP_ADMIN_PASSWORD` en la sesión privada del operador y, si falta el dueño, `ANALIZA_OWNER_ADMIN_PASSWORD`; ejecutar `npm run admin:provision`. El dueño se crea con cambio obligatorio de clave. Para Neon, también configurar `ANALIZA_MANAGED_POSTGRES=neon` y `DATABASE_URL_UNPOOLED` o `DATABASE_URL`; para PostgreSQL propio, usar `PGHOST`, `PGDATABASE`, `PGUSER`, `PGPASSWORD` y opcionalmente `PGPORT`.
 4. Desplegar la aplicación actualizada y comprobar que cada usuario entra, es dirigido a `/account`, cambia la clave y puede abrir los módulos ADMIN. Comprobar que una clave temporal anterior ya no permite entrar después del cambio.
 
 El comando es idempotente: una segunda ejecución conserva las cuentas existentes y **no** restablece sus claves. Si un usuario ya existe en otra organización, inactivo o sin rol ADMIN, se detiene sin cambios. Nunca pegar la conexión privada ni la clave en una incidencia o chat público.
