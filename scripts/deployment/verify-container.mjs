@@ -386,7 +386,7 @@ try {
   const accountCsrf = await (await accountContext.get('/api/auth/csrf')).json();
   const accountLogin = await accountContext.post('/api/auth/login', {
     headers: { 'x-analiza-csrf': accountCsrf.csrfToken },
-    data: { email: 'sophia.gonzalez@analizaencasa', password: temporaryPassword },
+    data: { email: 'sophia.gonzalez@analizaencasa.com', password: temporaryPassword },
   });
   assert.equal(accountLogin.status(), 200);
   const accountLoginBody = await accountLogin.json();
@@ -406,14 +406,14 @@ try {
   assert.equal(accountChange.status(), 200, await accountChange.text());
   assert.equal((await accountContext.get('/api/patients')).status(), 200);
   const accountRow = await admin.query(
-    "SELECT display_name,must_change_password FROM analiza.users WHERE email_normalized='sophia.gonzalez@analizaencasa'",
+    "SELECT display_name,must_change_password FROM analiza.users WHERE email_normalized='sophia.gonzalez@analizaencasa.com'",
   );
   assert.equal(accountRow.rows[0].display_name, 'Sophia Gonzalez QA');
   assert.equal(accountRow.rows[0].must_change_password, false);
   const temporaryBrowser = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const temporaryPage = await temporaryBrowser.newPage();
   await temporaryPage.goto(base + '/login');
-  await temporaryPage.getByLabel('Usuario o correo').fill('wendy.estrada@analizaencasa');
+  await temporaryPage.getByLabel('Usuario o correo').fill('wendy.estrada@analizaencasa.com');
   await temporaryPage.getByLabel('Clave').fill(temporaryPassword);
   await temporaryPage.getByRole('button', { name: 'Iniciar sesión' }).click();
   await temporaryPage.waitForURL('**/account');

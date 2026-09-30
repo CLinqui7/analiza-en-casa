@@ -4,10 +4,10 @@ Esta entrega añade cuatro identificadores internos (no son buzones de correo):
 
 | Persona | Usuario |
 | --- | --- |
-| Sophia Gonzalez | `sophia.gonzalez@analizaencasa` |
-| Wendy Estrada | `wendy.estrada@analizaencasa` |
-| Luis Aguilar | `luis.aguilar@analizaencasa` |
-| Gabriela Cabrera | `gabriela.cabrera@analizaencasa` |
+| Sophia Gonzalez | `sophia.gonzalez@analizaencasa.com` |
+| Wendy Estrada | `wendy.estrada@analizaencasa.com` |
+| Luis Aguilar | `luis.aguilar@analizaencasa.com` |
+| Gabriela Cabrera | `gabriela.cabrera@analizaencasa.com` |
 
 Todas pertenecen a la misma organización ADMIN activa que `linquicarloss@gmail.com` y reciben el rol `ADMIN`. El registro público no puede elegir este rol. La contraseña temporal solicitada se entrega al operador por un canal seguro y se pasa únicamente mediante `ANALIZA_TEMP_ADMIN_PASSWORD`; no se guarda en el repositorio ni se imprime. Cada persona debe cambiarla por una clave personal de al menos 12 caracteres en `/account` antes de abrir datos operativos. Las otras sesiones se revocan al cambiarla.
 

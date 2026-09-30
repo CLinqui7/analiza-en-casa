@@ -19,7 +19,7 @@ const temporaryPassword = 'Testpass12';
 function fixture() {
   let user: UserRecord = {
     id: 'user-a',
-    emailNormalized: 'sophia.gonzalez@analizaencasa',
+    emailNormalized: 'sophia.gonzalez@analizaencasa.com',
     displayName: 'Sophia Gonzalez',
     passwordHash: temporaryHash(temporaryPassword),
     mustChangePassword: true,
@@ -65,7 +65,7 @@ describe('operator-provisioned temporary ADMIN account', () => {
   it('requires a personal password before accessing application data', async () => {
     const { auth, getUser } = fixture();
     const login = await auth.login({
-      email: 'sophia.gonzalez@analizaencasa',
+      email: 'sophia.gonzalez@analizaencasa.com',
       password: temporaryPassword,
     });
     expect(login.session.role).toBe('ADMIN');
@@ -115,11 +115,11 @@ describe('operator-provisioned temporary ADMIN account', () => {
   it('revokes other sessions after changing the password and permits name edits', async () => {
     const { auth, sessions } = fixture();
     const first = await auth.login({
-      email: 'sophia.gonzalez@analizaencasa',
+      email: 'sophia.gonzalez@analizaencasa.com',
       password: temporaryPassword,
     });
     const second = await auth.login({
-      email: 'sophia.gonzalez@analizaencasa',
+      email: 'sophia.gonzalez@analizaencasa.com',
       password: temporaryPassword,
     });
     await auth.updateAccount(second.sessionToken, {

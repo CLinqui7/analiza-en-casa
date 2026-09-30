@@ -3,10 +3,10 @@ import { randomBytes, randomUUID, scryptSync } from 'node:crypto';
 import { Client } from 'pg';
 
 const accounts = [
-  ['sophia.gonzalez@analizaencasa', 'Sophia Gonzalez'],
-  ['wendy.estrada@analizaencasa', 'Wendy Estrada'],
-  ['luis.aguilar@analizaencasa', 'Luis Aguilar'],
-  ['gabriela.cabrera@analizaencasa', 'Gabriela Cabrera'],
+  ['sophia.gonzalez@analizaencasa.com', 'Sophia Gonzalez'],
+  ['wendy.estrada@analizaencasa.com', 'Wendy Estrada'],
+  ['luis.aguilar@analizaencasa.com', 'Luis Aguilar'],
+  ['gabriela.cabrera@analizaencasa.com', 'Gabriela Cabrera'],
 ];
 
 if (!process.argv.includes('--apply')) {
