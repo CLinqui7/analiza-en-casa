@@ -29,7 +29,8 @@ export function LoginForm() {
   const loginFlowRef = useRef(false);
 
   useEffect(() => {
-    if (session && !loginFlowRef.current) router.replace(destination);
+    if (session && !loginFlowRef.current)
+      router.replace(session.mustChangePassword ? '/account' : destination);
   }, [destination, router, session]);
 
   useEffect(() => {
@@ -48,8 +49,8 @@ export function LoginForm() {
     setSubmitting(true);
     loginFlowRef.current = true;
     try {
-      await login(email, password);
-      router.replace(destination);
+      const next = await login(email, password);
+      router.replace(next.mustChangePassword ? '/account' : destination);
     } catch (cause) {
       loginFlowRef.current = false;
       setError(

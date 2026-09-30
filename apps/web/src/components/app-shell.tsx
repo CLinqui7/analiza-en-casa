@@ -248,6 +248,7 @@ const navigation: NavigationGroup[] = [
     actionId: 'TUTORIAL-NAVIGATE',
   },
   { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
+  { label: 'Cuenta', href: '/account', permission: 'dashboard:read', actionId: 'ACCOUNT-NAVIGATE' },
   {
     label: 'Preguntas o errores encontrados',
     href: '/feedback',
@@ -361,6 +362,10 @@ export function AppShell({ children }: PropsWithChildren) {
     Administración: true,
   });
   const required = permissionForPath(pathname);
+
+  useEffect(() => {
+    if (session?.mustChangePassword && pathname !== '/account') router.replace('/account');
+  }, [pathname, router, session?.mustChangePassword]);
 
   useEffect(() => {
     const restoreTimer = window.setTimeout(
@@ -522,6 +527,13 @@ export function AppShell({ children }: PropsWithChildren) {
     );
   }
   if (!session) return <DeniedRoute pathname={pathname} />;
+  if (session.mustChangePassword && pathname !== '/account') {
+    return (
+      <main className="access-denied" role="status">
+        Prepara tu contraseña personal para continuar…
+      </main>
+    );
+  }
   if (required && !can(required)) {
     return (
       <main className="access-denied" role="alert">
@@ -729,6 +741,9 @@ export function AppShell({ children }: PropsWithChildren) {
                 >
                   Ver mi usuario
                 </button>
+                <Link href="/account" role="menuitem" onClick={() => setUserMenuOpen(false)}>
+                  Editar nombre y contraseña
+                </Link>
                 <button
                   data-action-id="AUTH-LOGOUT"
                   onClick={() => void logout().then(() => router.replace('/login'))}
@@ -863,6 +878,13 @@ export function AppShell({ children }: PropsWithChildren) {
                   </dl>
                 </div>
                 <div className="dialog-footer">
+                  <Link
+                    className="button button-primary"
+                    href="/account"
+                    onClick={closeUserProfile}
+                  >
+                    Editar cuenta
+                  </Link>
                   <button
                     className="button button-secondary"
                     data-action-id="USER-PROFILE-CLOSE"

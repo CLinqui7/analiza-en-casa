@@ -42,6 +42,8 @@ function asUser(row: Record<string, unknown> | null): UserRecord | null {
     id: row.id,
     emailNormalized: row.emailNormalized,
     passwordHash: row.passwordHash,
+    displayName: typeof row.displayName === 'string' ? row.displayName : '',
+    mustChangePassword: row.mustChangePassword === true,
     disabledAt: asDate(row.disabledAt),
   };
 }
@@ -94,6 +96,35 @@ export function mongoAuthStore(database: Db): MongoAuthStore {
     },
     async findUserByEmail(emailNormalized) {
       return asUser(await users.findOne({ emailNormalized }));
+    },
+    async findUserById(id) {
+      return asUser(await users.findOne({ id }));
+    },
+    async updateAccount(
+      id,
+      expectedPasswordHash,
+      displayName,
+      newPasswordHash,
+      currentSessionHash,
+      now,
+    ) {
+      const update = newPasswordHash
+        ? { $set: { displayName, passwordHash: newPasswordHash, mustChangePassword: false } }
+        : { $set: { displayName } };
+      const updated = await users.findOneAndUpdate(
+        { id, passwordHash: expectedPasswordHash, disabledAt: { $exists: false } },
+        update,
+        { returnDocument: 'after' },
+      );
+      if (!updated) return false;
+      if (newPasswordHash)
+        await database
+          .collection('sessions')
+          .updateMany(
+            { userId: id, sessionHash: { $ne: currentSessionHash }, revokedAt: { $exists: false } },
+            { $set: { revokedAt: now } },
+          );
+      return true;
     },
     async createUser(user) {
       await users.insertOne({ ...user, createdAt: new Date() });

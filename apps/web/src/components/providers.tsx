@@ -61,6 +61,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<AuthSession>;
   register: (input: RegistrationInput) => Promise<void>;
   logout: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   can: (permission: Permission) => boolean;
 };
 
@@ -173,6 +174,9 @@ function AuthProvider({ children }: PropsWithChildren) {
     setError(null);
     setSession(await registerAccount(input));
   }, []);
+  const refreshSession = useCallback(async () => {
+    setSession(await loadSession());
+  }, []);
   const value = useMemo<AuthContextValue>(
     () => ({
       session,
@@ -181,9 +185,10 @@ function AuthProvider({ children }: PropsWithChildren) {
       login,
       register,
       logout,
+      refreshSession,
       can: (permission) => can(session?.role, permission),
     }),
-    [error, loading, login, register, logout, session],
+    [error, loading, login, register, logout, refreshSession, session],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -198,7 +203,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isServerDataMode(provider.mode) && !session) return;
+    if (isServerDataMode(provider.mode) && (!session || session.mustChangePassword)) return;
     let cancelled = false;
     void provider
       .load()

@@ -17,11 +17,54 @@ export function postgresAuthStore(pool: Pool): AuthStore {
       return (
         (
           await pool.query(
-            'SELECT id,email_normalized AS "emailNormalized",password_hash AS "passwordHash",disabled_at AS "disabledAt" FROM analiza.users WHERE email_normalized=$1',
+            'SELECT id,email_normalized AS "emailNormalized",password_hash AS "passwordHash",display_name AS "displayName",must_change_password AS "mustChangePassword",disabled_at AS "disabledAt" FROM analiza.users WHERE email_normalized=$1',
             [email],
           )
         ).rows[0] ?? null
       );
+    },
+    async findUserById(id) {
+      return (
+        (
+          await pool.query(
+            'SELECT id,email_normalized AS "emailNormalized",password_hash AS "passwordHash",display_name AS "displayName",must_change_password AS "mustChangePassword",disabled_at AS "disabledAt" FROM analiza.users WHERE id=$1',
+            [id],
+          )
+        ).rows[0] ?? null
+      );
+    },
+    async updateAccount(
+      id,
+      expectedPasswordHash,
+      displayName,
+      newPasswordHash,
+      currentSessionHash,
+      now,
+    ) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const result = await client.query(
+          'UPDATE analiza.users SET display_name=$3,password_hash=COALESCE($4,password_hash),must_change_password=CASE WHEN $4::text IS NULL THEN must_change_password ELSE false END WHERE id=$1 AND password_hash=$2 AND disabled_at IS NULL',
+          [id, expectedPasswordHash, displayName, newPasswordHash],
+        );
+        if (result.rowCount !== 1) {
+          await client.query('ROLLBACK');
+          return false;
+        }
+        if (newPasswordHash)
+          await client.query(
+            'UPDATE analiza.sessions SET revoked_at=$3 WHERE user_id=$1 AND session_hash<>$2 AND revoked_at IS NULL',
+            [id, currentSessionHash, now],
+          );
+        await client.query('COMMIT');
+        return true;
+      } catch (error) {
+        await client.query('ROLLBACK').catch(() => {});
+        throw error;
+      } finally {
+        client.release();
+      }
     },
     async createUser(u) {
       await pool.query(

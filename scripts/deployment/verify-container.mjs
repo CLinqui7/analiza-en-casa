@@ -342,6 +342,9 @@ const mutate = async (c, path, data, status = 200, method = 'POST') => {
 };
 try {
   assert.equal((await fetch(base + '/api/health/live')).status, 200);
+  const referenceImage = await fetch(base + '/reference-scales/hoja1-fila-22.png');
+  assert.equal(referenceImage.status, 200);
+  assert.match(referenceImage.headers.get('content-type') ?? '', /^image\/png/);
   const a = await login('qa-admin@example.test'),
     b = await login('qa-admin-b@example.test'),
     c = await login('qa-foreign@example.test'),
@@ -354,6 +357,70 @@ try {
   const registration = await verifyPostgresRegistration({ base, admin, limited, clients, finance });
   passed.push(
     'PostgreSQL registration and onboarding: atomic rollback, concurrent versions, tenant RLS, CSRF, permissions and no DELETE',
+  );
+  await admin.query(
+    "INSERT INTO analiza.users(id,email_normalized,password_hash,display_name) SELECT 'qa-owner','linquicarloss@gmail.com',password_hash,'QA owner' FROM analiza.users WHERE id='qa-admin'",
+  );
+  await admin.query(
+    "INSERT INTO analiza.memberships(user_id,organization_id,role,active) VALUES('qa-owner','qa-org-a','ADMIN',true)",
+  );
+  const temporaryPassword = randomBytes(16).toString('base64url');
+  const provision = () =>
+    spawnSync(process.execPath, ['scripts/deployment/provision-admin-accounts.mjs', '--apply'], {
+      env: { ...operatorEnv, ANALIZA_TEMP_ADMIN_PASSWORD: temporaryPassword },
+      encoding: 'utf8',
+      timeout: 30000,
+    });
+  const firstProvision = provision();
+  assert.equal(firstProvision.status, 0, `Admin provisioning: ${firstProvision.stderr}`);
+  assert.equal(JSON.parse(firstProvision.stdout).created.length, 4);
+  const repeatedProvision = provision();
+  assert.equal(
+    repeatedProvision.status,
+    0,
+    `Repeated admin provisioning: ${repeatedProvision.stderr}`,
+  );
+  assert.equal(JSON.parse(repeatedProvision.stdout).retained.length, 4);
+  const accountContext = await request.newContext({ baseURL: base });
+  clients.push(accountContext);
+  const accountCsrf = await (await accountContext.get('/api/auth/csrf')).json();
+  const accountLogin = await accountContext.post('/api/auth/login', {
+    headers: { 'x-analiza-csrf': accountCsrf.csrfToken },
+    data: { email: 'sophia.gonzalez@analizaencasa', password: temporaryPassword },
+  });
+  assert.equal(accountLogin.status(), 200);
+  const accountLoginBody = await accountLogin.json();
+  assert.equal(accountLoginBody.role, 'ADMIN');
+  assert.equal(accountLoginBody.mustChangePassword, true);
+  assert.equal((await accountContext.get('/api/patients')).status(), 403);
+  assert.equal((await accountContext.get('/api/auth/account')).status(), 200);
+  const personalPassword = randomBytes(24).toString('base64url');
+  const accountChange = await accountContext.patch('/api/auth/account', {
+    headers: { 'x-analiza-csrf': accountLoginBody.csrfToken },
+    data: {
+      displayName: 'Sophia Gonzalez QA',
+      currentPassword: temporaryPassword,
+      newPassword: personalPassword,
+    },
+  });
+  assert.equal(accountChange.status(), 200, await accountChange.text());
+  assert.equal((await accountContext.get('/api/patients')).status(), 200);
+  const accountRow = await admin.query(
+    "SELECT display_name,must_change_password FROM analiza.users WHERE email_normalized='sophia.gonzalez@analizaencasa'",
+  );
+  assert.equal(accountRow.rows[0].display_name, 'Sophia Gonzalez QA');
+  assert.equal(accountRow.rows[0].must_change_password, false);
+  const temporaryBrowser = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const temporaryPage = await temporaryBrowser.newPage();
+  await temporaryPage.goto(base + '/login');
+  await temporaryPage.getByLabel('Usuario o correo').fill('wendy.estrada@analizaencasa');
+  await temporaryPage.getByLabel('Clave').fill(temporaryPassword);
+  await temporaryPage.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await temporaryPage.waitForURL('**/account');
+  await temporaryPage.getByText('Tu contraseña inicial es temporal.').waitFor();
+  await temporaryBrowser.close();
+  passed.push(
+    'Four idempotent ADMIN accounts: temporary password forced change, account update and clinical access gate',
   );
   const pageContext = await browser.newContext({ viewport: { width: 1440, height: 1000 } }),
     page = await pageContext.newPage();
@@ -466,7 +533,28 @@ try {
   await page.getByRole('button', { name: 'Guardar en el expediente' }).click();
   await page.getByText(/Captura de EVA · dolor guardada/).waitFor();
   assert.equal(await page.locator('.patient-scale-history-entry').count(), 2);
-  passed.push('Patient scales: nurse capture through PostgreSQL, browser save/history, CSRF, ACL and tenant isolation');
+  for (const scaleId of [
+    'glasgow', 'ramsay', 'ecog', 'esas', 'karnofsky', 'dowton-a', 'dowton-b', 'barthel', 'braden',
+  ]) {
+    await page.goto(base + `/patients/${patient.id}/scales?scale=${scaleId}`);
+    await page.getByRole('heading', { name: 'Escalas del paciente' }).waitFor();
+    const fields = page.locator('.patient-scale-field');
+    const count = await fields.count();
+    assert.ok(count > 0, `${scaleId} has capture fields`);
+    for (let index = 0; index < count; index++) {
+      await fields.nth(index).locator('input[type="radio"]').first().check();
+    }
+    await page.getByRole('button', { name: 'Guardar en el expediente' }).click();
+    try {
+      await page.locator('.patient-scale-form .notice[role="status"]').waitFor({ timeout: 5000 });
+    } catch {
+      throw new Error(
+        `${scaleId} did not save: ${JSON.stringify(await page.locator('.patient-scale-form .field-error').allTextContents())}`,
+      );
+    }
+  }
+  assert.equal((await (await b.context.get(scalePath)).json()).length, 11);
+  passed.push('All ten patient scales: PostgreSQL browser save/history, CSRF, ACL and tenant isolation');
   await mutate(a, '/api/operations', {
     command: 'configuration.save',
     entry: {

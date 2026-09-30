@@ -14,6 +14,7 @@ export const corePages = [
   '/onboarding',
   '/feedback',
   '/tutorial',
+  '/account',
 ] as const;
 const coreApi = [
   '/api/auth',

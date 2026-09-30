@@ -1,10 +1,15 @@
-import { CsrfError, SessionError } from '@/server/auth-service';
+import { CsrfError, PasswordChangeRequiredError, SessionError } from '@/server/auth-service';
 import { MongoAccessError } from '@/server/validation/patients';
 
 /** Maps only expected authorization failures. All other server errors stay fail-closed as 503. */
 export function authorizationStatus(error: unknown): 401 | 403 | 503 {
   if (error instanceof SessionError) return 401;
-  if (error instanceof CsrfError || error instanceof MongoAccessError) return 403;
+  if (
+    error instanceof CsrfError ||
+    error instanceof PasswordChangeRequiredError ||
+    error instanceof MongoAccessError
+  )
+    return 403;
   return 503;
 }
 

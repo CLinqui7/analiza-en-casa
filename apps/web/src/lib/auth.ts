@@ -12,6 +12,7 @@ export type AuthSession = {
   userId: string;
   role: Role;
   mode: 'mock' | 'supabase' | 'mongodb' | 'postgresql';
+  mustChangePassword?: boolean;
 };
 
 const mockUsers = [
@@ -72,7 +73,7 @@ export async function loadSession(): Promise<AuthSession | null> {
     if (!response.ok) throw new Error('No fue posible validar la sesión segura.');
     const payload: unknown = await response.json();
     if (!payload || typeof payload !== 'object') throw new Error('La sesión segura no es válida.');
-    const { userId, role } = payload as Record<string, unknown>;
+    const { userId, role, mustChangePassword } = payload as Record<string, unknown>;
     if (typeof userId !== 'string' || !isRole(role))
       throw new Error('La sesión segura no es válida.');
     const csrfResponse = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
@@ -85,7 +86,12 @@ export async function loadSession(): Promise<AuthSession | null> {
         : null;
     if (!csrfToken) throw new Error('No fue posible preparar la sesión segura.');
     mongoCsrfToken = csrfToken;
-    return { userId, role, mode: configuredServerDataMode() };
+    return {
+      userId,
+      role,
+      mode: configuredServerDataMode(),
+      mustChangePassword: mustChangePassword === true,
+    };
   }
   const client = getSupabaseBrowserClient();
   if (!client) return readMockSession();
@@ -130,12 +136,22 @@ async function serverAuthenticate(
   }
   const payload: unknown = await response.json();
   if (!payload || typeof payload !== 'object') throw new Error('No fue posible iniciar sesión.');
-  const { userId, role, csrfToken: returnedCsrf } = payload as Record<string, unknown>;
+  const {
+    userId,
+    role,
+    csrfToken: returnedCsrf,
+    mustChangePassword,
+  } = payload as Record<string, unknown>;
   if (typeof userId !== 'string' || !isRole(role) || typeof returnedCsrf !== 'string') {
     throw new Error('No fue posible iniciar sesión.');
   }
   mongoCsrfToken = returnedCsrf;
-  return { userId, role, mode: configuredServerDataMode() };
+  return {
+    userId,
+    role,
+    mode: configuredServerDataMode(),
+    mustChangePassword: mustChangePassword === true,
+  };
 }
 
 export async function register(input: RegistrationInput): Promise<AuthSession> {

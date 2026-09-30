@@ -9,9 +9,13 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const auth = (await persistence()).auth;
-    const session = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
+    const session = await auth.requireSession(request.cookies.get(sessionCookieName)?.value, true);
     return NextResponse.json(
-      { userId: session.userId, role: session.role },
+      {
+        userId: session.userId,
+        role: session.role,
+        mustChangePassword: Boolean(session.mustChangePassword),
+      },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

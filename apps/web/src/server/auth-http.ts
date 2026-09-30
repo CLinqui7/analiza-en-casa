@@ -67,6 +67,7 @@ export function sessionResponse(
     {
       userId: result.session.userId,
       role: result.session.role,
+      mustChangePassword: Boolean(result.session.mustChangePassword),
       csrfToken: result.csrfToken,
     },
     { status, headers: privateHeaders },

@@ -1,0 +1,123 @@
+.account-page {
+  display: grid;
+  gap: 24px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 12px 56px;
+}
+.account-header {
+  padding: 6px 2px 2px;
+}
+.account-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.22fr);
+  gap: 22px;
+  align-items: start;
+}
+.account-layout .panel {
+  border: 1px solid #d7e1ec;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgb(19 48 80 / 5%);
+  padding: 28px;
+  background: white;
+}
+.account-layout h2 {
+  margin: 4px 0 18px;
+  color: #143657;
+  font-size: 1.4rem;
+  letter-spacing: -0.025em;
+}
+.account-identity-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  background: #fbe9eb;
+  color: #c73a4c;
+  font-weight: 800;
+  font-size: 1.45rem;
+  margin-bottom: 20px;
+}
+.account-identity dl {
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid #e8eef4;
+}
+.account-identity dt {
+  color: #64768a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.account-identity dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+.account-identity-note {
+  color: #64768a;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.account-edit form {
+  display: grid;
+  gap: 17px;
+}
+.account-edit label {
+  display: grid;
+  gap: 7px;
+  color: #1b3e60;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.account-edit label small {
+  color: #687b8f;
+  font-weight: 400;
+}
+.account-edit input {
+  border-radius: 11px;
+  min-height: 47px;
+  padding: 10px 13px;
+}
+.account-divider {
+  height: 1px;
+  background: #e8eef4;
+  margin: 2px 0;
+}
+.account-required,
+.account-error,
+.account-success {
+  border-radius: 12px;
+  padding: 12px 15px;
+  line-height: 1.45;
+}
+.account-required {
+  color: #704906;
+  background: #fff7e7;
+  border: 1px solid #f1d9a4;
+}
+.account-error {
+  color: #a12938;
+  background: #fff0f1;
+  border: 1px solid #eec7cd;
+}
+.account-success {
+  color: #236349;
+  background: #eff9f3;
+  border: 1px solid #bfe4cf;
+}
+.account-edit .button {
+  justify-self: start;
+  margin-top: 5px;
+}
+@media (max-width: 760px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+  }
+  .account-page {
+    padding: 18px 4px 42px;
+  }
+}

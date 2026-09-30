@@ -24,12 +24,15 @@ export type ServerSession = Readonly<{
   organizationId: string;
   role: Role;
   expiresAt: Date;
+  mustChangePassword?: boolean;
 }>;
 
 export type UserRecord = Readonly<{
   id: string;
   emailNormalized: string;
   passwordHash: string;
+  displayName?: string;
+  mustChangePassword?: boolean;
   disabledAt?: Date;
 }>;
 export type MembershipRecord = Readonly<{
@@ -89,6 +92,20 @@ export class CsrfError extends Error {
   }
 }
 
+export class PasswordChangeRequiredError extends Error {
+  constructor() {
+    super('Debes cambiar tu contraseña temporal antes de continuar.');
+    this.name = 'PasswordChangeRequiredError';
+  }
+}
+
+export class AccountError extends Error {
+  constructor(message = 'No fue posible actualizar la cuenta.') {
+    super(message);
+    this.name = 'AccountError';
+  }
+}
+
 export class BootstrapError extends Error {
   constructor() {
     super('El bootstrap inicial no está autorizado.');
@@ -103,6 +120,15 @@ export class BootstrapError extends Error {
 export interface AuthStore {
   hasAnyUser(): Promise<boolean>;
   findUserByEmail(emailNormalized: string): Promise<UserRecord | null>;
+  findUserById?(id: string): Promise<UserRecord | null>;
+  updateAccount?(
+    id: string,
+    expectedPasswordHash: string,
+    displayName: string,
+    newPasswordHash: string | null,
+    currentSessionHash: string,
+    now: Date,
+  ): Promise<boolean>;
   createUser(user: UserRecord): Promise<void>;
   findActiveMemberships(userId: string): Promise<MembershipRecord[]>;
   createMembership(membership: MembershipRecord): Promise<void>;
@@ -153,13 +179,18 @@ function unknownAccountHash() {
   return (dummyPasswordHash ??= hashPassword(randomSecret()));
 }
 
-function sessionFrom(stored: StoredSession, membership: MembershipRecord): ServerSession {
+function sessionFrom(
+  stored: StoredSession,
+  membership: MembershipRecord,
+  mustChangePassword = false,
+): ServerSession {
   return {
     id: stored.sessionHash,
     userId: stored.userId,
     organizationId: membership.organizationId,
     role: membership.role,
     expiresAt: stored.expiresAt,
+    mustChangePassword,
   };
 }
 
@@ -212,7 +243,11 @@ export class AuthService {
       expiresAt: new Date(issuedAt.getTime() + SESSION_TTL_MS),
     };
     await this.store.createSession(stored);
-    return { sessionToken, csrfToken, session: sessionFrom(stored, memberships[0]) };
+    return {
+      sessionToken,
+      csrfToken,
+      session: sessionFrom(stored, memberships[0], user.mustChangePassword),
+    };
   }
 
   async register(input: unknown) {
@@ -310,7 +345,10 @@ export class AuthService {
   }
 
   /** Resolves membership and role on every request, rather than trusting session/UI metadata. */
-  async requireSession(sessionToken: string | undefined): Promise<ServerSession> {
+  async requireSession(
+    sessionToken: string | undefined,
+    allowPasswordChange = false,
+  ): Promise<ServerSession> {
     if (!sessionToken) throw new SessionError();
     const stored = await this.store.findSession(hashSecret(sessionToken));
     const now = this.now();
@@ -323,7 +361,81 @@ export class AuthService {
         isRole(candidate.role),
     );
     if (!membership) throw new SessionError();
-    return sessionFrom(stored, membership);
+    const user = this.store.findUserById ? await this.store.findUserById(stored.userId) : null;
+    if (this.store.findUserById && (!user || user.disabledAt)) throw new SessionError();
+    if (user?.mustChangePassword && !allowPasswordChange) throw new PasswordChangeRequiredError();
+    return sessionFrom(stored, membership, user?.mustChangePassword);
+  }
+
+  async account(sessionToken: string | undefined) {
+    const session = await this.requireSession(sessionToken, true);
+    if (!this.store.findUserById) throw new AccountError();
+    const user = await this.store.findUserById(session.userId);
+    if (!user || user.disabledAt) throw new SessionError();
+    return {
+      userId: user.id,
+      email: user.emailNormalized,
+      displayName: user.displayName ?? '',
+      role: session.role,
+      mustChangePassword: Boolean(user.mustChangePassword),
+    };
+  }
+
+  async updateAccount(sessionToken: string | undefined, input: unknown) {
+    const session = await this.requireSession(sessionToken, true);
+    if (
+      !this.store.findUserById ||
+      !this.store.updateAccount ||
+      !input ||
+      typeof input !== 'object' ||
+      Array.isArray(input)
+    )
+      throw new AccountError();
+    const body = input as Record<string, unknown>;
+    if (
+      Object.keys(body).some(
+        (key) => !['displayName', 'currentPassword', 'newPassword'].includes(key),
+      )
+    )
+      throw new AccountError();
+    const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : '';
+    const currentPassword = body.currentPassword;
+    const newPassword = body.newPassword;
+    if (
+      displayName.length < 2 ||
+      displayName.length > 100 ||
+      typeof currentPassword !== 'string' ||
+      currentPassword.length > 1024 ||
+      (newPassword !== undefined &&
+        (typeof newPassword !== 'string' || newPassword.length < 12 || newPassword.length > 1024))
+    )
+      throw new AccountError(
+        'Revisa el nombre, la contraseña actual y la nueva contraseña (mínimo 12 caracteres).',
+      );
+    const user = await this.store.findUserById(session.userId);
+    if (!user || user.disabledAt || !(await passwordMatches(currentPassword, user.passwordHash)))
+      throw new AccountError('La contraseña actual no coincide.');
+    if (user.mustChangePassword && !newPassword) throw new PasswordChangeRequiredError();
+    if (newPassword && (await passwordMatches(newPassword, user.passwordHash)))
+      throw new AccountError('Elige una contraseña diferente de la actual.');
+    const newHash = newPassword ? await hashPassword(newPassword) : null;
+    const saved = await this.store.updateAccount(
+      user.id,
+      user.passwordHash,
+      displayName,
+      newHash,
+      session.id,
+      this.now(),
+    );
+    if (!saved)
+      throw new AccountError('La cuenta cambió durante esta solicitud. Vuelve a intentarlo.');
+    return {
+      userId: user.id,
+      email: user.emailNormalized,
+      displayName,
+      role: session.role,
+      mustChangePassword: false,
+    };
   }
 
   async requireCsrf(
@@ -341,7 +453,7 @@ export class AuthService {
   }
 
   async rotateCsrf(sessionToken: string | undefined): Promise<string> {
-    const session = await this.requireSession(sessionToken);
+    const session = await this.requireSession(sessionToken, true);
     const csrfToken = randomSecret();
     await this.store.updateSessionCsrf(session.id, hashSecret(csrfToken));
     return csrfToken;
