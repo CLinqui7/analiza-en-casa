@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+  "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "b952386eac84f0cd270b962f9b0b7bbbf5d6766619df5554dfbdd9067175b4a1",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -87,7 +87,7 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "d3264302ceb058607fe2cb022152716cc29e254114c4a8a5e9edd8d716f13e97",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -96,7 +96,7 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "88b0b0c7eeee113ef12075ae258d25ae1ec6243332b59cf19dad58ab22ad4834",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -133,7 +133,7 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -144,7 +144,7 @@
       "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
     },
     "CR-018": {
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "production_status": "PARTIAL",

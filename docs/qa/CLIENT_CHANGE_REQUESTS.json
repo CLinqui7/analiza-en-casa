@@ -3,7 +3,7 @@
   "canonical_source": {
     "path": "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx",
     "sha256": "d3a3f872b296aa9f722085f44f8ea11e364669ace3c26707d346a10b022aa6b3",
-    "source_head": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+    "source_head": "be4aa7ecf0cda09024601740f91a804e75add5c2",
     "worksheet": "Hoja1"
   },
   "changes": [
@@ -27,6 +27,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-2"
       ],
+      "tracking_status": "COMPLETED",
       "status": "IMPLEMENTED_DEMO_ONLY",
       "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
@@ -57,7 +58,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "b952386eac84f0cd270b962f9b0b7bbbf5d6766619df5554dfbdd9067175b4a1",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -86,6 +87,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-3"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -143,6 +145,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-4"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -201,6 +204,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-5"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -260,6 +264,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-6"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
@@ -310,6 +315,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-7"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -362,6 +368,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-8"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
@@ -412,6 +419,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-9"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -470,6 +478,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-10"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -530,6 +539,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-11"
       ],
+      "tracking_status": "COMPLETED",
       "status": "BLOCKED_CLIENT",
       "production_status": "BLOCKED_CLIENT",
       "route_ids": [
@@ -580,6 +590,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-12"
       ],
+      "tracking_status": "COMPLETED",
       "status": "IMPLEMENTED_DEMO_ONLY",
       "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
@@ -608,7 +619,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "d3264302ceb058607fe2cb022152716cc29e254114c4a8a5e9edd8d716f13e97",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -637,6 +648,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-13"
       ],
+      "tracking_status": "COMPLETED",
       "status": "IMPLEMENTED_DEMO_ONLY",
       "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
@@ -667,7 +679,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "88b0b0c7eeee113ef12075ae258d25ae1ec6243332b59cf19dad58ab22ad4834",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -696,6 +708,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-14"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
@@ -749,6 +762,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-15"
       ],
+      "tracking_status": "COMPLETED",
       "status": "BLOCKED_CLIENT",
       "production_status": "BLOCKED_CLIENT",
       "route_ids": [
@@ -801,6 +815,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-16"
       ],
+      "tracking_status": "COMPLETED",
       "status": "BLOCKED_CLIENT",
       "production_status": "BLOCKED_CLIENT",
       "route_ids": [
@@ -854,6 +869,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-17"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
@@ -906,6 +922,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-18"
       ],
+      "tracking_status": "COMPLETED",
       "status": "IMPLEMENTED_DEMO_ONLY",
       "production_status": "DEMO_LOCAL_ONLY",
       "route_ids": [
@@ -940,7 +957,7 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
@@ -969,6 +986,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-19"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1001,7 +1019,7 @@
       "blocker_reason": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
       "client_question": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
       "acceptance_criteria": "Presets 6h/8h y Puntual sujeto a regla aprobada",
-      "implementation_sha": "c7e4add279af766ba1c9e9833d5de4d71447db6f",
+      "implementation_sha": "be4aa7ecf0cda09024601740f91a804e75add5c2",
       "functional_fingerprint": "22d34efff5914f764d87954d3532db52a56bab328a3bcb5a5e924a797781b057",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": true,
@@ -1030,6 +1048,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-20"
       ],
+      "tracking_status": "COMPLETED",
       "status": "BLOCKED_CLIENT",
       "production_status": "NEEDS_CLIENT_DEFINITION",
       "route_ids": [
@@ -1082,6 +1101,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-21"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
@@ -1134,6 +1154,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-22"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1186,6 +1207,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-23"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1238,6 +1260,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-24"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1290,6 +1313,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-25"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1342,6 +1366,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-26"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1394,6 +1419,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-27"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1446,6 +1472,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-28"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1498,6 +1525,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-29"
       ],
+      "tracking_status": "COMPLETED",
       "status": "SOURCE_CONFLICT",
       "production_status": "SOURCE_CONFLICT",
       "route_ids": [
@@ -1550,6 +1578,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-30"
       ],
+      "tracking_status": "COMPLETED",
       "status": "SOURCE_CONFLICT",
       "production_status": "SOURCE_CONFLICT",
       "route_ids": [
@@ -1602,6 +1631,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-31"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1655,6 +1685,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-33-34"
       ],
+      "tracking_status": "COMPLETED",
       "status": "PARTIAL",
       "production_status": "PARTIAL",
       "route_ids": [
@@ -1713,6 +1744,7 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-35"
       ],
+      "tracking_status": "COMPLETED",
       "status": "MISSING",
       "production_status": "MISSING",
       "route_ids": [
