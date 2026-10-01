@@ -50,12 +50,29 @@ una representación visual y no sustituye la llave persistente.
 
 - `npm test`: 128/128.
 - `npm run test:react`: 177/177.
-- Playwright focalizado: cotizaciones, pagos, compras/bodegas y bitácora.
+- Playwright focalizado: 35/35 en cotizaciones, compras/bodegas y bitácora; pagos se validó
+  en su prueba focalizada del lote.
 - `npm run typecheck`: aprobado.
 - `npm run lint`: aprobado.
 - `npm run build`: 49 páginas generadas; rutas de bitácora y API incluidas.
 - `npm run security:scan`: aprobado.
+- `npm audit`: 0 vulnerabilidades de producción o desarrollo después de actualizar Next.js y
+  su configuración ESLint a 16.3.8.
 - `npm run audit:verify`: 17/17 capítulos, 0 pendientes.
 - `npm run repo:preflight`: aprobado.
 
-La verificación productiva, SHA y URL de despliegue se registran al finalizar la promoción.
+## Verificación productiva
+
+- Commit de aplicación verificado: `d0b71a6`.
+- Despliegue Vercel: `dpl_EejfdHbV993acPLb1v2rrsSvvfd7`, estado `READY`.
+- URL productiva: <https://analiza-en-casa-demo.vercel.app>.
+- Salud: `ready`, modo `postgresql`, base de datos `ready`.
+- La cuenta dedicada de analítica abre `/analytics/logins`; una sesión `ADMIN` recibe acceso
+  restringido en esa misma ruta.
+- Los cuatro usuarios solicitados aparecen activos en la tabla. Un inicio de sesión productivo
+  posterior a la activación quedó registrado con sus conteos de 7/30 días y días activos.
+- Compras muestra proveedor y bodega de destino activa en el formulario nuevo; no se creó una
+  compra de prueba en producción.
+- Feedback productivo: 49 reportes, 0 nuevos, 4 en revisión y 45 resueltos. Los cuatro errores
+  nuevos del lote quedaron respondidos y enlazados a sus pantallas corregidas; los cuatro en
+  revisión ya existían y conservan su estado por depender de definición o integración externa.
