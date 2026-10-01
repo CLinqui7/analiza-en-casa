@@ -1,6 +1,11 @@
 'use client';
 
-import { calculateQuoteBalance, canEditQuote, quoteCategories } from '@analiza/domain';
+import {
+  calculateQuoteBalance,
+  canEditQuote,
+  quoteCategories,
+  quoteDisplayCode,
+} from '@analiza/domain';
 import { Button, EmptyState, Panel } from '@analiza/ui';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -133,7 +138,7 @@ export default function QuoteDetailPage() {
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Facturación</p>
-          <h1>{quote.id}</h1>
+          <h1 title={quote.id}>{quoteDisplayCode(quote.id)}</h1>
           <p>
             Versión v{quote.version} ·{' '}
             {quote.immutable ? 'Enviada e inmutable' : 'Borrador editable'}
@@ -198,7 +203,7 @@ export default function QuoteDetailPage() {
             </div>
             <div>
               <dt>Hospitalización</dt>
-              <dd>{quote.caseId}</dd>
+              <dd>{quote.caseId ?? 'Atención nueva sin hospitalización'}</dd>
             </div>
             <div>
               <dt>Estado</dt>

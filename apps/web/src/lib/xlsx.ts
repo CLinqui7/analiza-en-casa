@@ -38,7 +38,12 @@ function inlineStringCell(reference: string, value: XlsxCell) {
  * Creates a minimal OOXML workbook using only text cells. Text is deliberately
  * emitted as inline strings, so values beginning with '=' are not formulas.
  */
-export function createXlsxWorkbook(columns: XlsxColumn[], rows: XlsxRow[]) {
+export function createXlsxWorkbook(
+  columns: XlsxColumn[],
+  rows: XlsxRow[],
+  sheetName = 'Pacientes',
+) {
+  const safeSheetName = sheetName.replace(/[\[\]:*?/\\]/g, '').slice(0, 31) || 'Hoja1';
   const allRows: XlsxCell[][] = [
     columns.map((column) => column.label),
     ...rows.map((row) => columns.map((column) => row[column.key])),
@@ -71,7 +76,7 @@ export function createXlsxWorkbook(columns: XlsxColumn[], rows: XlsxRow[]) {
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
       ),
       'xl/workbook.xml': strToU8(
-        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Pacientes" sheetId="1" r:id="rId1"/></sheets></workbook>',
+        `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${escapeXml(safeSheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>`,
       ),
       'xl/_rels/workbook.xml.rels': strToU8(
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',

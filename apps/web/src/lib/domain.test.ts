@@ -41,6 +41,7 @@ import {
   searchQuotes,
   filterQuotes,
   normalizeQuoteInvoiceMetadata,
+  quoteDisplayCode,
   validateQuoteItem,
 } from '@analiza/domain';
 
@@ -397,6 +398,12 @@ describe('quote domain', () => {
     expect(searchQuotes([quote], patients, 'case 001')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'áurea')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'draft')).toHaveLength(1);
+    expect(searchQuotes([quote], patients, quoteDisplayCode(quote.id))).toHaveLength(1);
+  });
+
+  it('shows a compact quote code without replacing the immutable identifier', () => {
+    expect(quoteDisplayCode('2b43ef22-b68c-44a9-a463-04652588f3c1')).toBe('COT-2588F3C1');
+    expect(quote.id).toBe('Q-001');
   });
 
   it('filters quote list status and creation date without changing totals', () => {

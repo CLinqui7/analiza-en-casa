@@ -61,6 +61,7 @@ import { postgresPool, transaction } from './postgres-pool';
 import { postgresAuthStore } from './postgres-auth';
 import { postgresFiles } from './postgres-files';
 import { PostgresWorkspaceSetupRepository } from './postgres-workspace-setup';
+import { PostgresLoginAnalyticsRepository } from '../login-analytics';
 import { PostgresNurseProfileRepository } from './postgres-nurse-profile';
 import { PostgresFeedbackRepository } from './postgres-feedback';
 import { PostgresInformationImportRepository } from './postgres-information-import';
@@ -593,6 +594,7 @@ export function postgresPersistence(): Persistence {
           })
           .strict()
           .parse(input);
+        if (receipt.purchaseId) authorize(actor, 'purchases:write');
         return transaction(pool, actor, async (c) => {
           const previous = (
             await c.query<{ body: unknown }>(
@@ -624,6 +626,30 @@ export function postgresPersistence(): Persistence {
               })),
             });
           }
+          const linkedPurchase = receipt.purchaseId
+            ? (
+                await c.query<{ body: unknown }>(
+                  `SELECT body FROM analiza.purchases
+                   WHERE organization_id=$1 AND id=$2 FOR UPDATE`,
+                  [actor.organizationId, receipt.purchaseId],
+                )
+              ).rows[0]
+            : null;
+          const purchase = linkedPurchase ? purchaseSchema.parse(linkedPurchase.body) : null;
+          if (receipt.purchaseId && (!purchase || purchase.status !== 'DRAFT'))
+            throw new MongoInputError('La compra no está pendiente de recepción.');
+          if (
+            purchase &&
+            (purchase.catalogItemId !== receipt.itemId ||
+              purchase.supplierCatalogItemId !== receipt.supplierCatalogItemId ||
+              purchase.warehouseId !== receipt.warehouseId ||
+              purchase.reference !== receipt.receiptReference ||
+              purchase.quantity !== receipt.quantity ||
+              (purchase.serialNumber ?? purchase.lotNumber)?.toUpperCase() !==
+                receipt.number.toUpperCase() ||
+              (purchase.expirationDate ?? undefined) !== (receipt.expiresOn ?? undefined))
+          )
+            throw new MongoInputError('La recepción no coincide con el borrador de compra.');
           const item = (
             await c.query<{ category: string }>(
               `SELECT body->>'category' AS category FROM analiza.catalog_items
@@ -714,6 +740,23 @@ export function postgresPersistence(): Persistence {
             if (error && typeof error === 'object' && 'code' in error && error.code === '23505')
               throw new MongoConflictError();
             throw error;
+          }
+          if (purchase) {
+            await c.query(
+              `UPDATE analiza.purchases SET body=$3::jsonb
+               WHERE organization_id=$1 AND id=$2`,
+              [
+                actor.organizationId,
+                purchase.id,
+                JSON.stringify({
+                  ...purchase,
+                  status: 'RECEIVED',
+                  receivedAt: receipt.receivedAt,
+                  traceRecordId: record.id,
+                }),
+              ],
+            );
+            await audit(c, actor, 'PURCHASE_RECEIVED', 'purchase', purchase.id);
           }
           await audit(c, actor, 'INVENTORY_TRACE_RECEIVED', 'inventory_trace_records', record.id);
           return record;
@@ -1233,6 +1276,13 @@ export function postgresPersistence(): Persistence {
             [actor.organizationId, purchase.supplierCatalogItemId],
           );
           if (!supplier.rowCount) throw new MongoInputError('Seleccione un proveedor activo.');
+          if (!purchase.warehouseId) throw new MongoInputError('Seleccione una bodega de destino.');
+          const warehouse = await c.query(
+            `SELECT id FROM analiza.warehouses
+             WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'`,
+            [actor.organizationId, purchase.warehouseId],
+          );
+          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
           if (
             ['MEDICATIONS', 'SUPPLIES'].includes(category ?? '') &&
             (!purchase.expirationDate || !purchase.lotNumber)
@@ -1242,8 +1292,14 @@ export function postgresPersistence(): Persistence {
             throw new MongoInputError('Indique el número de serie del equipo.');
           const normalizedPurchase = normalizePurchaseTraceability(purchase, category ?? undefined);
           await c.query(
-            'INSERT INTO analiza.purchases(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
-            [actor.organizationId, purchase.id, JSON.stringify(normalizedPurchase)],
+            `INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body)
+             VALUES($1,$2,$3,$4::jsonb)`,
+            [
+              actor.organizationId,
+              purchase.id,
+              purchase.warehouseId,
+              JSON.stringify(normalizedPurchase),
+            ],
           );
           await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', purchase.id);
           return normalizedPurchase;
@@ -1979,6 +2035,7 @@ export function postgresPersistence(): Persistence {
     },
   };
   return {
+    loginAnalytics: new PostgresLoginAnalyticsRepository(pool),
     auth: new AuthService(postgresAuthStore(pool)),
     informationImports: new PostgresInformationImportRepository(pool),
     onboarding: new PostgresWorkspaceSetupRepository(pool),
@@ -1993,14 +2050,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql','019_purchase_destination_warehouse.sql','020_login_analytics.sql','021_quotes_without_hospitalization.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 18 ||
+        row.migrations !== 21 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');

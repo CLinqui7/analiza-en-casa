@@ -374,6 +374,12 @@ export function calculateQuoteBalance(
   return { paid, balance: roundMoney(quote.patientAmount - paid) };
 }
 
+/** A concise display reference. The full immutable identifier remains the database/API key. */
+export function quoteDisplayCode(id: string) {
+  const compact = id.replace(/[^a-z0-9]/gi, '').toUpperCase();
+  return `COT-${compact.slice(-8).padStart(8, '0')}`;
+}
+
 export function searchQuotes(
   quotes: readonly Quote[],
   patients: readonly Patient[],
@@ -385,11 +391,15 @@ export function searchQuotes(
   return quotes.filter((quote) => {
     const patient = patients.find((candidate) => candidate.id === quote.patientId);
     return (
-      [quote.id, quote.caseId, quote.status, patient?.fullName ?? ''].some((value) =>
-        normalizeText(value).includes(needle),
-      ) ||
+      [
+        quote.id,
+        quoteDisplayCode(quote.id),
+        quote.caseId ?? '',
+        quote.status,
+        patient?.fullName ?? '',
+      ].some((value) => normalizeText(value).includes(needle)) ||
       normalizeDocument(quote.id).includes(normalizedNeedle) ||
-      normalizeDocument(quote.caseId).includes(normalizedNeedle)
+      normalizeDocument(quote.caseId ?? '').includes(normalizedNeedle)
     );
   });
 }

@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+import { strFromU8, unzipSync } from 'fflate';
 // test-id: playwright:ch13-factual-purchase-list
 async function login(page: import('@playwright/test').Page) {
   await page.goto('/login?next=%2Fpurchases');
@@ -44,6 +46,7 @@ test('purchase catalog supports word-prefix search and equipment keeps only its 
   await page.getByRole('button', { name: 'Nueva compra' }).click();
 
   const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
+  await expect(dialog.getByLabel('Bodega de destino')).toHaveValue('central');
   const catalog = dialog.getByRole('combobox', { name: 'Ítem de catálogo' });
   await catalog.fill('unidad');
   await dialog.getByRole('option', { name: /Unidad inerte QA/ }).click();
@@ -74,10 +77,20 @@ test('purchase catalog supports word-prefix search and equipment keeps only its 
   });
   expect(saved).toMatchObject({
     catalogItemId: 'catalog-demo-kit',
+    warehouseId: 'central',
     serialNumber: 'SERIAL-SYNTHETIC-01',
   });
   expect(saved).not.toHaveProperty('expirationDate');
   expect(saved).not.toHaveProperty('lotNumber');
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Excel' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('compras-filtradas.xlsx');
+  const archive = unzipSync(new Uint8Array(await readFile(await download.path())));
+  expect(strFromU8(archive['xl/workbook.xml'])).toContain('sheet name="Compras"');
+  expect(strFromU8(archive['xl/worksheets/sheet1.xml'])).toContain('PURCHASE-SEARCH-QA-001');
+  expect(strFromU8(archive['xl/worksheets/sheet1.xml'])).toContain('central');
 });
 test('CH13 permits AUDITOR read-only list access and denies NURSE directly', async ({
   browser,

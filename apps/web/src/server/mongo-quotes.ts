@@ -110,15 +110,21 @@ export class MongoQuoteRepository {
     const session = this.database.client.startSession();
     try {
       const result = await session.withTransaction(async () => {
-        const hospitalization = await this.database.collection('hospitalizations').findOne(
-          {
-            organizationId: actor.organizationId,
-            id: quote.caseId,
-            patientId: quote.patientId,
-          },
-          { session },
-        );
-        if (!hospitalization) throw new MongoInputError('La hospitalización no está disponible.');
+        const patient = await this.database
+          .collection('patients')
+          .findOne({ organizationId: actor.organizationId, id: quote.patientId }, { session });
+        if (!patient) throw new MongoInputError('El paciente no está disponible.');
+        if (quote.caseId) {
+          const hospitalization = await this.database.collection('hospitalizations').findOne(
+            {
+              organizationId: actor.organizationId,
+              id: quote.caseId,
+              patientId: quote.patientId,
+            },
+            { session },
+          );
+          if (!hospitalization) throw new MongoInputError('La hospitalización no está disponible.');
+        }
 
         const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
         if (quote.version === 1) {
@@ -139,6 +145,10 @@ export class MongoQuoteRepository {
           ) {
             throw new MongoInputError('La revisión no continúa una versión enviada válida.');
           }
+          if (previous.patientId !== quote.patientId || previous.caseId !== quote.caseId)
+            throw new MongoInputError(
+              'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
+            );
         }
         const stored: StoredQuote = {
           ...quote,
@@ -189,6 +199,10 @@ export class MongoQuoteRepository {
           { session },
         );
         if (!current || !canEditQuote(publicQuote(current))) throw new MongoConflictError();
+        if (current.patientId !== quote.patientId || current.caseId !== quote.caseId)
+          throw new MongoInputError(
+            'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
+          );
         const updated = await this.database.collection<StoredQuote>('quotes').findOneAndUpdate(
           {
             organizationId: actor.organizationId,

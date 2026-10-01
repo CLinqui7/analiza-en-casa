@@ -6,6 +6,8 @@ import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
+import { quoteDisplayCode } from '@analiza/domain';
+import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { receivableAccounts } from '@/lib/receivables';
 const money = (value: number) =>
@@ -29,6 +31,15 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
   const sentQuotes = openAccounts.map((account) => account.quote);
+  const quoteOptions = openAccounts.map((account) => ({
+    value: account.quote.id,
+    label:
+      (patients.find((patient) => patient.id === account.quote.patientId)?.fullName ?? 'Paciente') +
+      ' · ' +
+      quoteDisplayCode(account.quote.id) +
+      ' · saldo ' +
+      money(account.balance),
+  }));
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -194,7 +205,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                 {accounts.map((account) => (
                   <tr key={account.quote.id}>
                     <td>
-                      <strong>{account.quote.id}</strong>
+                      <strong title={account.quote.id}>{quoteDisplayCode(account.quote.id)}</strong>
                       <small style={{ display: 'block' }}>v{account.quote.version}</small>
                     </td>
                     <td>
@@ -273,7 +284,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                 {payments.map((payment) => (
                   <tr key={payment.id}>
                     <td>{new Date(payment.createdAt).toLocaleString('es-SV')}</td>
-                    <td>{payment.quoteId}</td>
+                    <td title={payment.quoteId}>{quoteDisplayCode(payment.quoteId)}</td>
                     <td>{money(payment.amount)}</td>
                     <td>{payment.reference}</td>
                     <td>
@@ -345,13 +356,16 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           ) : null}
           <label>
             Cotización enviada
-            <select {...form.register('quoteId')}>
-              {sentQuotes.map((quote) => (
-                <option key={quote.id} value={quote.id}>
-                  {quote.id}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+              actionId="PAYMENT-QUOTE-SEARCH"
+              ariaLabel="Buscar paciente o cotización"
+              onChange={(value) =>
+                form.setValue('quoteId', value, { shouldDirty: true, shouldValidate: true })
+              }
+              options={quoteOptions}
+              placeholder="Buscar por paciente o código de cotización"
+              value={selectedQuoteId}
+            />
             {form.formState.errors.quoteId ? (
               <span className="field-error">{form.formState.errors.quoteId.message}</span>
             ) : null}

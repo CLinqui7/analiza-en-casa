@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { Patient, Payment, Quote } from '@analiza/contracts';
+import { quoteDisplayCode } from '@analiza/domain';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 const safe = (value: string) => value.replace(/[\u2013\u2014]/g, '-').replace(/\u2022/g, '*');
@@ -50,7 +51,7 @@ export async function buildQuotePdf(quote: Quote, patient?: Patient): Promise<Ui
     throw new Error('Sólo se exportan versiones enviadas e inmutables.');
   const { document, write } = await documentWithWriter('Cotización informativa');
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
-  write(`Referencia: ${quote.id} · versión ${quote.version}`);
+  write(`Referencia: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
   write(`Fecha de envío: ${new Date(quote.sentAt ?? quote.createdAt).toLocaleString('es-SV')}`);
   write(`Resumen: ${quote.summary}`, { gap: 22 });
@@ -81,7 +82,7 @@ export async function buildPaymentReceiptPdf(
   const { document, write } = await documentWithWriter('Comprobante interno de pago');
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
   write(`Pago: ${payment.id}`);
-  write(`Cotización: ${quote.id} · versión ${quote.version}`);
+  write(`Cotización: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
   write(`Fecha: ${new Date(payment.createdAt).toLocaleString('es-SV')}`);
   write(`Monto: ${money(payment.amount)}`, { bold: true });

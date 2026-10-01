@@ -22,6 +22,7 @@ class MemoryAuthStore implements MongoAuthStore {
   private readonly attempts = new Map<string, number>();
   user: { id: string; emailNormalized: string; passwordHash: string } | null = null;
   memberships: Array<{ userId: string; organizationId: string; role: Role; active: boolean }> = [];
+  successfulLogins: Array<{ userId: string; occurredAt: Date }> = [];
 
   async findUserByEmail(emailNormalized: string) {
     return this.user?.emailNormalized === emailNormalized ? this.user : null;
@@ -47,6 +48,10 @@ class MemoryAuthStore implements MongoAuthStore {
   }
   async createSession(session: MemorySession) {
     this.sessions.set(session.sessionHash, session);
+  }
+  async createLoginSession(session: MemorySession, occurredAt: Date) {
+    this.sessions.set(session.sessionHash, session);
+    this.successfulLogins.push({ userId: session.userId, occurredAt });
   }
   async findSession(sessionHash: string) {
     return this.sessions.get(sessionHash) ?? null;
@@ -82,13 +87,16 @@ async function fixture() {
 describe('Mongo authentication and authorization', () => {
   // test-id: vitest:m01-server-role-tenant
   it('derives organization and role from the membership, rejecting browser authority fields', async () => {
-    const { auth, password } = await fixture();
+    const { auth, password, store } = await fixture();
     const result = await auth.login({ email: 'USER-A@example.test', password });
     expect(result.session).toMatchObject({
       userId: 'user-synthetic-a',
       organizationId: 'org-a',
       role: 'DOCTOR',
     });
+    expect(store.successfulLogins).toEqual([
+      expect.objectContaining({ userId: 'user-synthetic-a' }),
+    ]);
     await expect(
       auth.login({ email: 'user-a@example.test', password, organizationId: 'org-other' }),
     ).rejects.toBeInstanceOf(AuthenticationError);

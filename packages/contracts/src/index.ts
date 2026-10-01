@@ -278,7 +278,7 @@ export const quoteDiscountSchema = z.object({
 
 export const quoteSchema = z.object({
   id: z.string(),
-  caseId: z.string(),
+  caseId: z.string().trim().min(1).optional(),
   patientId: z.string(),
   version: z.number().int().positive(),
   status: z.enum(['DRAFT', 'SENT']),
@@ -367,6 +367,7 @@ export const purchaseSchema = z.object({
   id: z.string(),
   catalogItemId: z.string(),
   supplierCatalogItemId: z.string().trim().min(1).optional(),
+  warehouseId: z.string().trim().min(1).optional(),
   reference: z.string().trim().min(1),
   note: z.string().trim().optional(),
   quantity: z.number().positive().optional(),
@@ -374,7 +375,9 @@ export const purchaseSchema = z.object({
   expirationDate: z.string().trim().optional(),
   lotNumber: z.string().trim().optional(),
   serialNumber: z.string().trim().optional(),
-  status: z.literal('DRAFT'),
+  status: z.enum(['DRAFT', 'RECEIVED']),
+  receivedAt: z.string().optional(),
+  traceRecordId: z.string().optional(),
   createdAt: z.string(),
 });
 

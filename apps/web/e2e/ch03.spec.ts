@@ -85,8 +85,9 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toBeVisible();
-  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención', 'Caso compatible'])
+  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención'])
     await expect(dialog.getByRole('combobox', { name: label, exact: true })).toBeVisible();
+  await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toBeVisible();
   for (const label of [
     'Documento',
     'Teléfono',

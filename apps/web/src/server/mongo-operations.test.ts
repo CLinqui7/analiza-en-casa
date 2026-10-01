@@ -114,6 +114,8 @@ describe('assigned clinical operations', () => {
     const purchase: Purchase = {
       id: 'purchase-synthetic-01',
       catalogItemId: 'item-synthetic-01',
+      supplierCatalogItemId: 'supplier-synthetic-01',
+      warehouseId: 'warehouse-synthetic-01',
       reference: 'PURCHASE-SYNTHETIC-01',
       note: 'Datos sintéticos',
       expirationDate: '2027-01-01',
@@ -127,12 +129,16 @@ describe('assigned clinical operations', () => {
       endSession: vi.fn(),
     };
     const purchaseFind = vi.fn().mockResolvedValue(null);
-    const catalogFind = vi.fn().mockResolvedValue({
-      id: purchase.catalogItemId,
-      organizationId: 'org-a',
-      status: 'ACTIVE',
-      category: 'EQUIPMENT',
-    });
+    const catalogFind = vi.fn(async (filter: { id: string }) =>
+      filter.id === purchase.catalogItemId
+        ? { id: filter.id, organizationId: 'org-a', status: 'ACTIVE', category: 'EQUIPMENT' }
+        : { id: filter.id, organizationId: 'org-a', status: 'ACTIVE', category: 'PROVIDERS' },
+    );
+    const warehouseFind = vi.fn(async (filter: { id: string }) =>
+      filter.id === purchase.warehouseId
+        ? { id: filter.id, organizationId: 'org-a', status: 'ACTIVE' }
+        : null,
+    );
     const purchaseInsert = vi.fn().mockResolvedValue({ acknowledged: true });
     const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
     const database = {
@@ -140,6 +146,7 @@ describe('assigned clinical operations', () => {
       collection: vi.fn((name: string) => {
         if (name === 'purchases') return { findOne: purchaseFind, insertOne: purchaseInsert };
         if (name === 'catalogItems') return { findOne: catalogFind };
+        if (name === 'warehouses') return { findOne: warehouseFind };
         if (name === 'auditEvents') return { insertOne: auditInsert };
         throw new Error(`Unexpected collection ${name}`);
       }),
@@ -160,6 +167,10 @@ describe('assigned clinical operations', () => {
       { organizationId: 'org-a', id: purchase.catalogItemId, status: 'ACTIVE' },
       { session },
     );
+    expect(warehouseFind).toHaveBeenCalledWith(
+      { organizationId: 'org-a', id: purchase.warehouseId, status: 'ACTIVE' },
+      { session },
+    );
     expect(purchaseInsert).toHaveBeenCalledWith(
       {
         ...purchase,
@@ -178,6 +189,16 @@ describe('assigned clinical operations', () => {
       }),
       { session },
     );
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.create',
+        purchase: {
+          ...purchase,
+          id: 'purchase-foreign-warehouse',
+          warehouseId: 'foreign-warehouse',
+        },
+      }),
+    ).rejects.toThrow('Seleccione una bodega activa.');
   });
 
   // test-id: vitest:operations-clinical-create-tenant-audit

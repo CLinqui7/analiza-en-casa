@@ -4,6 +4,16 @@ import { can, permissionForPath, roles } from './permissions';
 // test-id: vitest:b2-doctors-admin-only
 
 describe('doctor administration authorization', () => {
+  it('isolates login analytics in its dedicated role', () => {
+    expect(permissionForPath('/analytics/logins')).toBe('login-analytics:read');
+    expect(can('ANALYTICS', 'login-analytics:read')).toBe(true);
+    for (const role of roles.filter((role) => role !== 'ANALYTICS')) {
+      expect(can(role, 'login-analytics:read')).toBe(false);
+    }
+    expect(can('ANALYTICS', 'patients:read')).toBe(false);
+    expect(can('ANALYTICS', 'audit:read')).toBe(false);
+  });
+
   it('requires settings write permission for the doctors route', () => {
     expect(permissionForPath('/doctors')).toBe('settings:write');
     expect(permissionForPath('/doctors/doctor-1')).toBe('settings:write');

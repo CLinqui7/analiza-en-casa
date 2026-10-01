@@ -82,6 +82,7 @@ export const inventoryTraceReceiptSchema = z
     manufacturedOn: z.iso.date().optional(),
     expiresOn: z.iso.date().optional(),
     receiptReference: z.string().trim().min(1).max(200),
+    purchaseId: id.optional(),
     reason: z.string().trim().min(1).max(500),
     receivedAt: date,
     idempotencyKey: id,

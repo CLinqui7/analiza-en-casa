@@ -744,6 +744,12 @@ test('payment application is idempotent and reversal preserves its reason', asyn
 
   await page.goto('/payments');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
+  const quoteSearch = page.getByRole('combobox', { name: 'Buscar paciente o cotización' });
+  await quoteSearch.fill('Paciente Demo Aurora');
+  await page
+    .getByRole('option', { name: /Paciente Demo Aurora.*COT-/ })
+    .last()
+    .click();
   await page.getByLabel('Monto ingresado').fill('25.50');
   await page.getByLabel('Referencia').fill('REF-PAGO-E2E');
   await page.getByLabel('Clave idempotente').fill('payment-e2e-key');

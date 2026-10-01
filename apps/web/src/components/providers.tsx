@@ -491,17 +491,27 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      const hospitalization = snapshot.hospitalizations.find(
-        (candidate) => candidate.id === quote.caseId,
-      );
-      if (!hospitalization || hospitalization.patientId !== quote.patientId) return false;
+      const patient = snapshot.patients.find((candidate) => candidate.id === quote.patientId);
+      if (!patient) return false;
+      const hospitalization = quote.caseId
+        ? snapshot.hospitalizations.find((candidate) => candidate.id === quote.caseId)
+        : undefined;
+      if (quote.caseId && (!hospitalization || hospitalization.patientId !== quote.patientId))
+        return false;
       if (operation === 'create' && snapshot.quotes.some((candidate) => candidate.id === quote.id))
         return false;
       const original =
         operation === 'replace'
           ? snapshot.quotes.find((candidate) => candidate.id === quote.id)
           : undefined;
-      if (operation === 'replace' && (!original || !canEditQuote(original))) return false;
+      if (
+        operation === 'replace' &&
+        (!original ||
+          !canEditQuote(original) ||
+          original.patientId !== quote.patientId ||
+          original.caseId !== quote.caseId)
+      )
+        return false;
       try {
         const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
         const normalized: Quote = {
@@ -535,7 +545,14 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         return false;
       }
     },
-    [can, persistMockChange, provider, snapshot.hospitalizations, snapshot.quotes],
+    [
+      can,
+      persistMockChange,
+      provider,
+      snapshot.hospitalizations,
+      snapshot.patients,
+      snapshot.quotes,
+    ],
   );
   const sendStoredQuote = useCallback(
     async (quoteId: string): Promise<boolean> => {

@@ -29,7 +29,8 @@ export function LoginForm() {
   const loginFlowRef = useRef(false);
 
   useEffect(() => {
-    if (session && !loginFlowRef.current) router.replace(destination);
+    if (session && !loginFlowRef.current)
+      router.replace(session.role === 'ANALYTICS' ? '/analytics/logins' : destination);
   }, [destination, router, session]);
 
   useEffect(() => {
@@ -48,8 +49,8 @@ export function LoginForm() {
     setSubmitting(true);
     loginFlowRef.current = true;
     try {
-      await login(email, password);
-      router.replace(destination);
+      const authenticated = await login(email, password);
+      router.replace(authenticated.role === 'ANALYTICS' ? '/analytics/logins' : destination);
     } catch (cause) {
       loginFlowRef.current = false;
       setError(

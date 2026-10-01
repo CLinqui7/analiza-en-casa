@@ -415,6 +415,7 @@ export class MongoOperationsRepository {
         if (input.command === 'inventory.trace.receive') {
           permission('inventory:write');
           const receipt = input.receipt;
+          if (receipt.purchaseId) permission('purchases:write');
           const previous = await this.database
             .collection('inventoryTraceEvents')
             .findOne({ ...scoped, idempotencyKey: receipt.idempotencyKey }, { session });
@@ -426,6 +427,26 @@ export class MongoOperationsRepository {
             if (!existing) throw new MongoConflictError();
             return existing;
           }
+          const linkedPurchase = receipt.purchaseId
+            ? await this.database
+                .collection('purchases')
+                .findOne({ ...scoped, id: receipt.purchaseId }, { session })
+            : null;
+          const purchase = linkedPurchase ? purchaseSchema.parse(linkedPurchase) : null;
+          if (receipt.purchaseId && (!purchase || purchase.status !== 'DRAFT'))
+            throw new MongoInputError('La compra no está pendiente de recepción.');
+          if (
+            purchase &&
+            (purchase.catalogItemId !== receipt.itemId ||
+              purchase.supplierCatalogItemId !== receipt.supplierCatalogItemId ||
+              purchase.warehouseId !== receipt.warehouseId ||
+              purchase.reference !== receipt.receiptReference ||
+              purchase.quantity !== receipt.quantity ||
+              (purchase.serialNumber ?? purchase.lotNumber)?.toUpperCase() !==
+                receipt.number.toUpperCase() ||
+              (purchase.expirationDate ?? undefined) !== (receipt.expiresOn ?? undefined))
+          )
+            throw new MongoInputError('La recepción no coincide con el borrador de compra.');
           const item = await this.database.collection('catalogItems').findOne(
             {
               ...scoped,
@@ -504,6 +525,21 @@ export class MongoOperationsRepository {
             },
             { session },
           );
+          if (purchase) {
+            const updated = await this.database.collection('purchases').updateOne(
+              { ...scoped, id: purchase.id, status: 'DRAFT' },
+              {
+                $set: {
+                  status: 'RECEIVED',
+                  receivedAt: receipt.receivedAt,
+                  traceRecordId: record.id,
+                },
+              },
+              { session },
+            );
+            if (updated.modifiedCount !== 1) throw new MongoConflictError();
+            await audit('PURCHASE_RECEIVED', purchase.id);
+          }
           await audit('INVENTORY_TRACE_RECEIVED', record.id);
           return record;
         }
@@ -1101,6 +1137,21 @@ export class MongoOperationsRepository {
             .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session });
           if (!catalogItem)
             throw new MongoInputError('Seleccione un artículo activo de esta organización.');
+          const supplier = await this.database.collection('catalogItems').findOne(
+            {
+              ...scoped,
+              id: purchase.supplierCatalogItemId,
+              status: 'ACTIVE',
+              category: 'PROVIDERS',
+            },
+            { session },
+          );
+          if (!supplier) throw new MongoInputError('Seleccione un proveedor activo.');
+          if (!purchase.warehouseId) throw new MongoInputError('Seleccione una bodega de destino.');
+          const warehouse = await this.database
+            .collection('warehouses')
+            .findOne({ ...scoped, id: purchase.warehouseId, status: 'ACTIVE' }, { session });
+          if (!warehouse) throw new MongoInputError('Seleccione una bodega activa.');
           const normalizedPurchase = normalizePurchaseTraceability(purchase, catalogItem.category);
           await this.database
             .collection('purchases')
