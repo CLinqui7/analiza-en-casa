@@ -15,6 +15,8 @@ async function openNewQuote(page: Page) {
 }
 
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
+  const patient = dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]');
+  if (!(await patient.inputValue())) await patient.selectOption({ index: 1 });
   await dialog.getByLabel('Resumen operativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();

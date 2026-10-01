@@ -155,14 +155,7 @@ function QuoteEditor({
     updateQuote,
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
-    source
-      ? cloneDraft(source)
-      : emptyDraft(
-          hospitalizations[0]?.id,
-          hospitalizations[0]
-            ? patients.find((patient) => patient.id === hospitalizations[0].patientId)?.id
-            : '',
-        ),
+    source ? cloneDraft(source) : emptyDraft(),
   );
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
