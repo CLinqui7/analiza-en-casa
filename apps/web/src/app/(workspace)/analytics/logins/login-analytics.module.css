@@ -2,8 +2,8 @@
   --analytics-ink: #17243b;
   --analytics-muted: #667085;
   --analytics-navy: #12324c;
-  --analytics-teal: #178b83;
-  --analytics-coral: #e86f61;
+  --analytics-teal: #237c83;
+  --analytics-coral: #d94454;
   display: grid;
   gap: 24px;
   min-width: 0;
@@ -12,15 +12,15 @@
 .hero {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  min-height: 292px;
-  padding: clamp(30px, 5vw, 56px);
+  overflow: clip;
+  min-height: 232px;
+  padding: clamp(29px, 3.6vw, 44px);
   color: #fff;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 30px;
   background:
-    radial-gradient(circle at 78% 18%, rgb(51 202 185 / 30%), transparent 28%),
-    linear-gradient(125deg, #102c45 0%, #174765 55%, #126e72 120%);
+    radial-gradient(circle at 82% 12%, rgb(236 104 117 / 27%), transparent 30%),
+    linear-gradient(125deg, #102c45 0%, #174765 72%, #31526d 120%);
   box-shadow: 0 24px 60px rgb(26 62 82 / 18%);
   animation: analyticsRise 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -64,14 +64,14 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 40px;
-  min-height: 180px;
+  min-height: 150px;
 }
 
 .privateBadge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 26px;
+  margin-bottom: 17px;
   padding: 8px 13px;
   color: #d7fffa;
   font-size: 0.78rem;
@@ -254,8 +254,8 @@
 }
 
 .metricViolet {
-  --metric-accent: #8468b1;
-  --metric-wash: #f7f1fb;
+  --metric-accent: #6b718f;
+  --metric-wash: #f4f5fa;
 }
 
 .metricIcon {
@@ -299,6 +299,139 @@
   font-size: 0.7rem;
   line-height: 1.35;
   text-overflow: ellipsis;
+}
+
+.trendPanel {
+  min-width: 0;
+  padding: 27px 30px 19px;
+  border: 1px solid #e3e9ef;
+  border-radius: 24px;
+  background: radial-gradient(circle at 100% 0%, rgb(217 68 84 / 5%), transparent 32%), #fff;
+  box-shadow: 0 12px 34px rgb(39 67 82 / 7%);
+  animation: analyticsRise 560ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.trendHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.trendHeading h2 {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+}
+
+.trendHeading p,
+.trendFootnote {
+  margin: 7px 0 0;
+  color: var(--analytics-muted);
+  font-size: 0.77rem;
+  line-height: 1.45;
+}
+
+.mobileChartHint,
+.tableSwipeHint {
+  display: none;
+}
+
+.trendSummary {
+  display: grid;
+  justify-items: end;
+  flex: 0 0 auto;
+  color: #647183;
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.trendSummary strong {
+  color: var(--analytics-navy);
+  font-size: 1.9rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.trendSummary small {
+  margin-top: 5px;
+  color: #838d99;
+}
+
+.trendChart {
+  display: flex;
+  gap: clamp(7px, 1.25vw, 15px);
+  min-width: 0;
+  margin: 18px 0 0;
+  padding: 0 0 10px;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-color: #cdd8e2 transparent;
+}
+
+.trendChart li {
+  display: grid;
+  grid-template-rows: 18px 148px auto;
+  justify-items: center;
+  flex: 1 0 34px;
+  gap: 6px;
+  min-width: 34px;
+  color: #667385;
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.trendChart strong {
+  color: #41516a;
+  font-size: 0.7rem;
+}
+
+.trendTrack {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  border-bottom: 1px solid #dfe5eb;
+  background: linear-gradient(180deg, transparent 49%, #edf1f5 50%, transparent 51%);
+}
+
+.trendBar {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, #eb7b83, #d94454);
+  box-shadow: 0 5px 14px rgb(217 68 84 / 16%);
+  transform-origin: bottom;
+  animation: trendReveal 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.trendChart li:last-child .trendBar {
+  background: linear-gradient(180deg, #4c7899, #174765);
+  box-shadow: 0 5px 14px rgb(23 71 101 / 16%);
+}
+
+.trendChart time {
+  white-space: nowrap;
+}
+
+.trendFootnote {
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid #edf1f4;
+}
+
+.trendPlaceholder {
+  margin: 25px 0 6px;
+  padding: 28px;
+  color: #647183;
+  font-size: 0.8rem;
+  text-align: center;
+  border: 1px dashed #d7e0e8;
+  border-radius: 14px;
+  background: #f9fbfd;
 }
 
 .contentGrid {
@@ -418,6 +551,78 @@
   color: var(--analytics-ink);
   outline: none;
   background: #e9eef2;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-bottom: 1px solid #edf0f3;
+  background: #fcfdfe;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 35px;
+  padding: 6px 11px;
+  color: #506176;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid #dce4eb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.filterChip span {
+  min-width: 19px;
+  padding: 2px 5px;
+  color: #65768a;
+  font-size: 0.65rem;
+  text-align: center;
+  border-radius: 6px;
+  background: #edf1f5;
+}
+
+.filterChip:hover {
+  border-color: #aab9c8;
+  background: #f7f9fb;
+}
+
+.filterChip:focus-visible {
+  outline: 3px solid rgb(217 68 84 / 25%);
+  outline-offset: 2px;
+}
+
+.filterChipActive {
+  color: #fff;
+  border-color: #b83749;
+  background: #c73d50;
+}
+
+.filterChipActive span {
+  color: #fff;
+  background: rgb(255 255 255 / 20%);
+}
+
+.filterChipActive:hover {
+  border-color: #aa3042;
+  background: #b83749;
+}
+
+.resultCount {
+  margin-left: auto;
+  color: #718094;
+  font-size: 0.69rem;
+  white-space: nowrap;
 }
 
 .tableWrap {
@@ -824,6 +1029,15 @@
   }
 }
 
+@keyframes trendReveal {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
 @media (max-width: 1180px) {
   .metricsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -874,6 +1088,13 @@
     display: grid;
   }
 
+  .mobileChartHint {
+    display: block;
+    margin-top: 5px !important;
+    color: #647183;
+    font-size: 0.68rem !important;
+  }
+
   .refreshButton {
     width: 100%;
   }
@@ -881,6 +1102,46 @@
   .metricsGrid,
   .timeline {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .trendPanel {
+    padding: 22px 20px 16px;
+    border-radius: 20px;
+  }
+
+  .trendHeading {
+    align-items: flex-start;
+  }
+
+  .trendSummary {
+    max-width: 105px;
+  }
+
+  .trendChart li {
+    flex-basis: 0;
+    min-width: 0;
+  }
+
+  .trendChart li:nth-child(-n + 7) {
+    display: none;
+  }
+
+  .trendChart li {
+    grid-template-rows: 18px 112px auto;
+  }
+
+  .tableSwipeHint {
+    display: block;
+    margin: 0;
+    padding: 8px 20px;
+    color: #6d7d8d;
+    font-size: 0.68rem;
+    text-align: right;
+    background: #fcfdfe;
+  }
+
+  .filterRow {
+    padding: 13px 20px;
   }
 
   .metricCard {
@@ -932,6 +1193,11 @@
   .liveDot,
   .loadingDot,
   .spinning {
+    animation: none;
+  }
+
+  .trendPanel,
+  .trendBar {
     animation: none;
   }
 

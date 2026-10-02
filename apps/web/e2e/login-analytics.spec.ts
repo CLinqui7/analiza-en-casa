@@ -40,11 +40,16 @@ const snapshot = {
       occurredAt: '2026-10-01T14:30:00.000Z',
     },
   ],
+  dailyLogins: Array.from({ length: 14 }, (_, index) => ({
+    day: new Date(Date.UTC(2026, 8, 18 + index)).toISOString().slice(0, 10),
+    count: index === 13 ? 2 : index === 6 ? 1 : 0,
+  })),
 };
 
 test('dedicated analytics account sees live login frequency without workspace access', async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   let requests = 0;
   await page.route('**/api/login-analytics', async (route) => {
     requests += 1;
@@ -56,15 +61,45 @@ test('dedicated analytics account sees live login frequency without workspace ac
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/analytics\/logins$/);
   await expect(page.getByRole('heading', { name: 'Bitácora de accesos' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Accesos en los últimos 14 días' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Accesos diarios' }).locator('li')).toHaveCount(14);
+  if (process.env.ANALIZA_ANALYTICS_SCREENSHOT) {
+    await expect
+      .poll(() =>
+        page.locator('[class$="__privateBadge"]').evaluate((badge) => {
+          const hero = badge.closest('header');
+          return hero ? badge.getBoundingClientRect().top - hero.getBoundingClientRect().top : 0;
+        }),
+      )
+      .toBeGreaterThan(20);
+    await page.screenshot({ path: process.env.ANALIZA_ANALYTICS_SCREENSHOT, fullPage: true });
+  }
   await expect(page.getByText('user.one@example.test')).toHaveCount(2);
   await expect(page.getByRole('cell', { name: '9', exact: true })).toHaveCount(2);
   await expect(page.getByText('Sin accesos registrados')).toBeVisible();
+  await page.getByRole('button', { name: 'Con acceso en 30 días' }).click();
+  await expect(page.getByText('user.two@example.test')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Todos' }).click();
   await expect(page.getByRole('link', { name: 'Pacientes' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Auditoría' })).toHaveCount(0);
   const requestsBeforeRefresh = requests;
   await page.getByRole('button', { name: 'Actualizar ahora' }).click();
   await expect.poll(() => requests).toBeGreaterThan(requestsBeforeRefresh);
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      page.locator('[class$="__privateBadge"]').evaluate((badge) => {
+        const hero = badge.closest('header');
+        return hero ? badge.getBoundingClientRect().top - hero.getBoundingClientRect().top : 0;
+      }),
+    )
+    .toBeGreaterThan(20);
+  if (process.env.ANALIZA_ANALYTICS_MOBILE_SCREENSHOT) {
+    await page.screenshot({
+      path: process.env.ANALIZA_ANALYTICS_MOBILE_SCREENSHOT,
+      fullPage: true,
+    });
+  }
   await expect
     .poll(() =>
       page.evaluate(

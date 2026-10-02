@@ -28,11 +28,17 @@ const recentLoginSchema = z.object({
   occurredAt: z.string(),
 });
 
+const dailyLoginSchema = z.object({
+  day: z.iso.date(),
+  count: z.number().int().nonnegative(),
+});
+
 export const loginAnalyticsSnapshotSchema = z.object({
   generatedAt: z.string(),
   trackingSince: z.string().nullable(),
   users: z.array(loginAnalyticsUserSchema),
   recentLogins: z.array(recentLoginSchema),
+  dailyLogins: z.array(dailyLoginSchema).length(14),
 });
 export type LoginAnalyticsSnapshot = z.infer<typeof loginAnalyticsSnapshotSchema>;
 
@@ -44,12 +50,32 @@ function iso(value: Date | string | null | undefined) {
   return value ? new Date(value).toISOString() : null;
 }
 
+function lastFourteenDays(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/El_Salvador',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((entry) => entry.type === type)?.value);
+  const today = Date.UTC(part('year'), part('month') - 1, part('day'));
+  return Array.from({ length: 14 }, (_, index) =>
+    new Date(today - (13 - index) * 86_400_000).toISOString().slice(0, 10),
+  );
+}
+
+function dailySeries(rows: Array<{ day: string; count: number }>, days: string[]) {
+  const counts = new Map(rows.map(({ day, count }) => [day, count]));
+  return days.map((day) => ({ day, count: counts.get(day) ?? 0 }));
+}
+
 export class PostgresLoginAnalyticsRepository {
   constructor(private readonly pool: Pool) {}
 
   async snapshot(actor: ServerActor): Promise<LoginAnalyticsSnapshot> {
     authorize(actor);
     return transaction(this.pool, actor, async (client) => {
+      const days = lastFourteenDays();
       const users = await client.query<{
         userId: string;
         email: string;
@@ -105,6 +131,17 @@ export class PostgresLoginAnalyticsRepository {
             WHERE e.organization_id=$1 AND m.role<>'ANALYTICS'`,
         [actor.organizationId],
       );
+      const daily = await client.query<{ day: string; count: number }>(
+        `SELECT to_char((e.occurred_at AT TIME ZONE 'America/El_Salvador')::date,'YYYY-MM-DD') AS day,
+                count(*)::int AS count
+           FROM analiza.login_events e
+           JOIN analiza.memberships m
+             ON m.organization_id=e.organization_id AND m.user_id=e.user_id
+          WHERE e.organization_id=$1 AND m.role<>'ANALYTICS'
+            AND e.occurred_at >= now()-interval '15 days'
+          GROUP BY 1 ORDER BY 1`,
+        [actor.organizationId],
+      );
       return loginAnalyticsSnapshotSchema.parse({
         generatedAt: new Date().toISOString(),
         trackingSince: iso(tracking.rows[0]?.trackingSince),
@@ -119,6 +156,7 @@ export class PostgresLoginAnalyticsRepository {
           displayName: row.displayName || row.email,
           occurredAt: row.occurredAt.toISOString(),
         })),
+        dailyLogins: dailySeries(daily.rows, days),
       });
     });
   }
@@ -129,6 +167,7 @@ export class MongoLoginAnalyticsRepository {
 
   async snapshot(actor: ServerActor): Promise<LoginAnalyticsSnapshot> {
     authorize(actor);
+    const days = lastFourteenDays();
     const memberships = await this.database
       .collection('memberships')
       .find({ organizationId: actor.organizationId, role: { $ne: 'ANALYTICS' } })
@@ -138,7 +177,7 @@ export class MongoLoginAnalyticsRepository {
     const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
     const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
     const eventMatch = { organizationId: actor.organizationId, userId: { $in: userIds } };
-    const [users, aggregates, recentEvents, firstEvent] = await Promise.all([
+    const [users, aggregates, recentEvents, firstEvent, dailyRows] = await Promise.all([
       this.database
         .collection('users')
         .find(
@@ -193,6 +232,24 @@ export class MongoLoginAnalyticsRepository {
         .sort({ occurredAt: 1 })
         .limit(1)
         .next(),
+      this.database
+        .collection('loginEvents')
+        .aggregate<{ _id: string; count: number }>([
+          { $match: { ...eventMatch, occurredAt: { $gte: new Date(now - 15 * 86_400_000) } } },
+          {
+            $group: {
+              _id: {
+                $dateToString: {
+                  date: '$occurredAt',
+                  format: '%Y-%m-%d',
+                  timezone: 'America/El_Salvador',
+                },
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ])
+        .toArray(),
     ]);
     const userRows = memberships.map((membership) => {
       const user = users.find((candidate) => candidate.id === membership.userId);
@@ -231,6 +288,10 @@ export class MongoLoginAnalyticsRepository {
           occurredAt: new Date(event.occurredAt).toISOString(),
         };
       }),
+      dailyLogins: dailySeries(
+        dailyRows.map((row) => ({ day: row._id, count: row.count })),
+        days,
+      ),
     });
   }
 }

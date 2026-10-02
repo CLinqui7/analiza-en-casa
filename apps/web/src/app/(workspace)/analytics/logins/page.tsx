@@ -32,7 +32,10 @@ type LoginAnalytics = {
   trackingSince: string | null;
   users: AnalyticsUser[];
   recentLogins: RecentLogin[];
+  dailyLogins: { day: string; count: number }[];
 };
+
+type UserFilter = 'all' | 'recent' | 'never' | 'inactive';
 
 type IconName = 'activity' | 'calendar' | 'check' | 'clock' | 'search' | 'shield' | 'users';
 
@@ -40,6 +43,11 @@ const dateTime = new Intl.DateTimeFormat('es-SV', {
   dateStyle: 'medium',
   timeStyle: 'short',
   timeZone: 'America/El_Salvador',
+});
+const chartDate = new Intl.DateTimeFormat('es-SV', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
 });
 
 const roleLabels: Record<string, string> = {
@@ -104,6 +112,10 @@ function formatDate(value: string | null) {
   return value ? dateTime.format(new Date(value)) : 'Sin accesos registrados';
 }
 
+function formatChartDay(day: string) {
+  return chartDate.format(new Date(`${day}T00:00:00.000Z`));
+}
+
 function initials(name: string) {
   const characters = name
     .split(/\s+/)
@@ -129,6 +141,7 @@ async function loadLoginAnalytics(signal: AbortSignal): Promise<LoginAnalytics> 
 
 export default function LoginAnalyticsPage() {
   const [query, setQuery] = useState('');
+  const [userFilter, setUserFilter] = useState<UserFilter>('all');
   const {
     data: snapshot,
     error,
@@ -146,13 +159,18 @@ export default function LoginAnalyticsPage() {
 
   const visibleUsers = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('es-SV');
-    if (!normalized) return snapshot?.users ?? [];
-    return (snapshot?.users ?? []).filter((user) =>
-      `${user.displayName} ${user.email} ${user.role}`
-        .toLocaleLowerCase('es-SV')
-        .includes(normalized),
-    );
-  }, [query, snapshot?.users]);
+    return (snapshot?.users ?? []).filter((user) => {
+      if (userFilter === 'recent' && user.loginsLast30Days === 0) return false;
+      if (userFilter === 'never' && user.totalLogins !== 0) return false;
+      if (userFilter === 'inactive' && user.active) return false;
+      return (
+        !normalized ||
+        `${user.displayName} ${user.email} ${user.role}`
+          .toLocaleLowerCase('es-SV')
+          .includes(normalized)
+      );
+    });
+  }, [query, snapshot?.users, userFilter]);
 
   const totals = useMemo(
     () => ({
@@ -165,7 +183,29 @@ export default function LoginAnalyticsPage() {
   );
 
   const activeRate = totals.users ? Math.round((totals.activeLast30 / totals.users) * 100) : 0;
+  const dailyLogins = snapshot?.dailyLogins ?? [];
+  const maximumDaily = Math.max(1, ...dailyLogins.map(({ count }) => count));
+  const previousWeek = dailyLogins.slice(0, 7).reduce((sum, day) => sum + day.count, 0);
+  const currentWeek = dailyLogins.slice(7).reduce((sum, day) => sum + day.count, 0);
+  const busiestDay = dailyLogins.reduce<(typeof dailyLogins)[number] | null>(
+    (best, day) => (day.count > (best?.count ?? 0) ? day : best),
+    null,
+  );
   const maximumLogins = Math.max(1, ...visibleUsers.map((user) => user.totalLogins));
+  const filters: { id: UserFilter; label: string; count: number }[] = [
+    { id: 'all', label: 'Todos', count: totals.users },
+    { id: 'recent', label: 'Con acceso en 30 días', count: totals.activeLast30 },
+    {
+      id: 'never',
+      label: 'Sin accesos',
+      count: snapshot?.users.filter((user) => user.totalLogins === 0).length ?? 0,
+    },
+    {
+      id: 'inactive',
+      label: 'Desactivados',
+      count: snapshot?.users.filter((user) => !user.active).length ?? 0,
+    },
+  ];
   const metrics = [
     {
       icon: 'users' as const,
@@ -176,7 +216,7 @@ export default function LoginAnalyticsPage() {
     },
     {
       icon: 'calendar' as const,
-      label: 'Activos en 30 días',
+      label: 'Con acceso en 30 días',
       value: totals.activeLast30,
       detail: `${activeRate}% de los usuarios observados`,
       tone: styles.metricTeal,
@@ -206,13 +246,13 @@ export default function LoginAnalyticsPage() {
           <div>
             <span className={styles.privateBadge}>
               <span className={styles.liveDot} />
-              Panel privado · actualización en vivo
+              Panel privado · actualización automática
             </span>
-            <p className={styles.eyebrow}>Analiza en Casa Analytics</p>
+            <p className={styles.eyebrow}>Analiza en Casa · Analíticas</p>
             <h1>Bitácora de accesos</h1>
             <p className={styles.heroDescription}>
-              Conoce quién entra a la plataforma y con qué frecuencia desde un espacio seguro, claro
-              y siempre actualizado.
+              Una vista clara de los accesos de tu equipo: actividad diaria, frecuencia por usuario
+              y últimos ingresos registrados.
             </p>
             <div className={styles.heroMeta}>
               <span>
@@ -261,11 +301,56 @@ export default function LoginAnalyticsPage() {
             </span>
             <div>
               <span className={styles.metricLabel}>{metric.label}</span>
-              <strong>{metric.value.toLocaleString('es-SV')}</strong>
+              <strong>{snapshot ? metric.value.toLocaleString('es-SV') : '—'}</strong>
               <span className={styles.metricDetail}>{metric.detail}</span>
             </div>
           </article>
         ))}
+      </section>
+
+      <section aria-labelledby="access-trend-title" className={styles.trendPanel}>
+        <div className={styles.trendHeading}>
+          <div>
+            <span className={styles.sectionKicker}>Actividad diaria</span>
+            <h2 id="access-trend-title">Accesos en los últimos 14 días</h2>
+            <p>Ingresos exitosos por día calendario, hora de El Salvador.</p>
+            <p className={styles.mobileChartHint}>En móvil se muestran los 7 días más recientes.</p>
+          </div>
+          <div className={styles.trendSummary}>
+            <strong>{snapshot ? currentWeek : '—'}</strong>
+            <span>últimos 7 días calendario</span>
+            {snapshot ? <small>7 anteriores: {previousWeek}</small> : null}
+          </div>
+        </div>
+        {snapshot ? (
+          <>
+            <ol aria-label="Accesos diarios" className={styles.trendChart}>
+              {dailyLogins.map(({ day, count }) => (
+                <li aria-label={`${formatChartDay(day)}: ${count} accesos`} key={day}>
+                  <strong>{count || ''}</strong>
+                  <span className={styles.trendTrack}>
+                    <span
+                      className={styles.trendBar}
+                      style={{
+                        height: count ? `${Math.max(9, (count / maximumDaily) * 100)}%` : '0%',
+                      }}
+                    />
+                  </span>
+                  <time dateTime={day}>{formatChartDay(day)}</time>
+                </li>
+              ))}
+            </ol>
+            <p className={styles.trendFootnote}>
+              {busiestDay
+                ? `Día con más actividad: ${formatChartDay(busiestDay.day)} · ${busiestDay.count} accesos.`
+                : 'Todavía no hay accesos registrados en este período.'}
+            </p>
+          </>
+        ) : (
+          <p className={styles.trendPlaceholder} role="status">
+            {loading ? 'Preparando la tendencia de accesos…' : 'No se pudo mostrar la tendencia.'}
+          </p>
+        )}
       </section>
 
       <div className={styles.contentGrid}>
@@ -295,6 +380,24 @@ export default function LoginAnalyticsPage() {
               ) : null}
             </label>
           </div>
+
+          <div aria-label="Filtrar usuarios" className={styles.filterRow} role="group">
+            {filters.map((filter) => (
+              <button
+                aria-pressed={userFilter === filter.id}
+                className={`${styles.filterChip} ${userFilter === filter.id ? styles.filterChipActive : ''}`}
+                key={filter.id}
+                onClick={() => setUserFilter(filter.id)}
+                type="button"
+              >
+                {filter.label} <span>{filter.count}</span>
+              </button>
+            ))}
+            {snapshot ? (
+              <span className={styles.resultCount}>{visibleUsers.length} visibles</span>
+            ) : null}
+          </div>
+          <p className={styles.tableSwipeHint}>Desliza la tabla para ver todas las métricas →</p>
 
           <div
             aria-label="Tabla desplazable de frecuencia por usuario"
@@ -361,18 +464,20 @@ export default function LoginAnalyticsPage() {
                     </td>
                   </tr>
                 ))}
-                {!visibleUsers.length ? (
+                {!visibleUsers.length && snapshot ? (
                   <tr>
                     <td className={styles.emptyState} colSpan={7}>
                       <span className={styles.emptyIcon}>
                         <AnalyticsIcon name="search" />
                       </span>
                       <strong>
-                        {query ? 'No encontramos coincidencias' : 'Aún no hay usuarios'}
+                        {query || userFilter !== 'all'
+                          ? 'No encontramos coincidencias'
+                          : 'Aún no hay usuarios'}
                       </strong>
                       <span>
-                        {query
-                          ? 'Prueba con otro nombre, correo o rol.'
+                        {query || userFilter !== 'all'
+                          ? 'Prueba con otro filtro, nombre, correo o rol.'
                           : 'Los usuarios aparecerán cuando se registren.'}
                       </span>
                     </td>
@@ -408,7 +513,7 @@ export default function LoginAnalyticsPage() {
             ))}
           </ol>
 
-          {!snapshot?.recentLogins.length ? (
+          {snapshot && !snapshot.recentLogins.length ? (
             <div className={styles.emptyActivity}>
               <AnalyticsIcon name="clock" />
               <strong>Sin actividad reciente</strong>
