@@ -425,7 +425,7 @@ export default function LoginAnalyticsPage() {
       </div>
 
       {snapshot ? (
-        <footer className={styles.statusFooter} role="status">
+        <footer className={styles.statusFooter} aria-live="polite">
           <span>
             <AnalyticsIcon name="shield" />
             No se almacenan contraseñas, direcciones IP ni información clínica.
