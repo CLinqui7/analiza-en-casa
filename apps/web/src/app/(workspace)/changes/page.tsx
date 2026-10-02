@@ -1,7 +1,9 @@
 import registry from '../../../../../../docs/qa/CLIENT_CHANGE_REQUESTS.json';
+import workflow from '../../../../../../docs/qa/CLIENT_CHANGE_WORKFLOW.json';
 import { ClientChangesPage, type ChangeSummary } from '@/components/client-changes-page';
 
 type RegistryChange = (typeof registry.changes)[number];
+const doneIds = new Set<string>(workflow.done_ids);
 
 function verificationStages(row: RegistryChange): ChangeSummary['stages'] {
   const blocker = row.blocker_reason || 'Sin bloqueo registrado';
@@ -24,6 +26,7 @@ export default function Page() {
         source: row.source_text,
         module: row.module,
         status: row.status,
+        workflowStatus: doneIds.has(row.change_id) ? 'DONE' : 'OPEN',
         detail: row.blocker_reason || row.notes || '',
         conflict: row.source_conflict.detected,
         stages: verificationStages(row),

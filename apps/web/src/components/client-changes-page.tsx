@@ -6,6 +6,7 @@ export type ChangeSummary = {
   source: string;
   module: string;
   status: string;
+  workflowStatus: 'DONE' | 'OPEN';
   detail: string;
   conflict: boolean;
   stages: Record<'implemented' | 'local' | 'preview' | 'integration' | 'definition', string>;
@@ -28,17 +29,18 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
   const rows = changes.filter((row) =>
     `${row.id} ${row.source} ${row.module}`.toLowerCase().includes(query.toLowerCase()),
   );
+  const doneCount = changes.filter((row) => row.workflowStatus === 'DONE').length;
   return (
     <div className="page-stack">
       <header className="page-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
           <h1>Cambios solicitados</h1>
-          <p>
-            Las 32 solicitudes del Excel, su texto original y el estado documentado de verificación.
-          </p>
+          <p>Las solicitudes del Excel, su seguimiento y el detalle de verificación técnica.</p>
         </div>
-        <StatusTag>{changes.length} solicitudes</StatusTag>
+        <StatusTag tone="success">
+          {doneCount} de {changes.length} Done
+        </StatusTag>
       </header>
       <Panel className="studio-toolbar">
         <input
@@ -50,8 +52,9 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
         <span>{rows.length} resultados</span>
       </Panel>
       <p className="notice">
-        La existencia de una pantalla no acredita una función completa. Los conflictos de escalas se
-        conservan sin inventar puntuaciones.
+        Por solicitud del propietario, estas solicitudes figuran como Done en el seguimiento. Es un
+        cierre administrativo, no una certificación funcional o clínica. Abre «Ver detalle» para
+        consultar el estado técnico y los bloqueos que siguen documentados.
       </p>
       <Panel>
         <div className="table-heading">
@@ -64,7 +67,7 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                 <th>ID</th>
                 <th>Módulo</th>
                 <th>Solicitud del Excel</th>
-                <th>Verificación registrada</th>
+                <th>Seguimiento</th>
                 <th>Detalle</th>
               </tr>
             </thead>
@@ -77,8 +80,8 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                   <td>{row.module}</td>
                   <td className="studio-source">{row.source}</td>
                   <td>
-                    <StatusTag tone={row.conflict ? 'warning' : 'neutral'}>
-                      {row.conflict ? 'Conflicto de fuente' : label(row.status)}
+                    <StatusTag tone={row.workflowStatus === 'DONE' ? 'success' : 'neutral'}>
+                      {row.workflowStatus === 'DONE' ? 'Done' : 'Abierto'}
                     </StatusTag>
                   </td>
                   <td>
@@ -111,7 +114,12 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
           <div className="page-stack">
             <h3>Texto original</h3>
             <p className="studio-source">{selected.source}</p>
-            <h3>Estado y evidencia pendiente</h3>
+            <h3>Estado técnico y evidencia</h3>
+            <p>
+              <StatusTag tone={selected.conflict ? 'warning' : 'neutral'}>
+                {selected.conflict ? 'Conflicto de fuente' : label(selected.status)}
+              </StatusTag>
+            </p>
             <p>{selected.detail || 'Requiere verificación funcional y de integración.'}</p>
             <dl className="studio-verification-stages">
               {(
