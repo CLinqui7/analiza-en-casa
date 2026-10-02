@@ -2,7 +2,7 @@
 
 - Passed: **true**
 - Files: 7214
-- Size: 533.48 MiB
+- Size: 533.49 MiB
 - Chapters: 17
 - Events: 1359
 - Detail crops: 730

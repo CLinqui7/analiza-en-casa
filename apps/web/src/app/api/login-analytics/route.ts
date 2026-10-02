@@ -13,7 +13,7 @@ function errorResponse(status: 401 | 403 | 503) {
         status === 401
           ? 'No autorizado.'
           : status === 403
-            ? 'Esta bitácora es privada para la cuenta de analítica.'
+            ? 'Esta bitácora es privada para las cuentas autorizadas de analítica.'
             : 'La bitácora de accesos no está disponible.',
     },
     { status, headers: { 'Cache-Control': 'no-store' } },

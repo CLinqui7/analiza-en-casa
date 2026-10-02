@@ -22,6 +22,7 @@ const mockUsers = [
   ['finance@demo.local', 'demo-finance', 'FINANCE'],
   ['auditor@demo.local', 'demo-auditor', 'AUDITOR'],
   ['analytics@demo.local', 'demo-analytics', 'ANALYTICS'],
+  ['webmaster@demo.local', 'demo-webmaster', 'WEBMASTER'],
 ] as const satisfies ReadonlyArray<readonly [string, string, Role]>;
 
 export function isSupabaseMode() {

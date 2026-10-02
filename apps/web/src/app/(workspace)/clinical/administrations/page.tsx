@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isAdministrator } from '@/lib/permissions';
 import { useOperations } from '@/lib/use-operations';
 
 export default function AdministrationsPage() {
@@ -30,7 +31,7 @@ export default function AdministrationsPage() {
   const cases = hospitalizations.filter(
     (item) =>
       item.status !== 'CLOSED' &&
-      (session?.role === 'ADMIN' ||
+      (isAdministrator(session?.role) ||
         (session && item.assignedNurseUserIds?.includes(session.userId))),
   );
   const warehouses = [

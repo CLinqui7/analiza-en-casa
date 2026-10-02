@@ -48,3 +48,24 @@ export async function POST(request: NextRequest) {
     return secureError(authorizationStatus(error));
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const backend = await persistence();
+    const auth = backend.auth;
+    const sessionToken = request.cookies.get(sessionCookieName)?.value;
+    const actor = await auth.requireSession(sessionToken);
+    await auth.requireCsrf(sessionToken, request.headers.get(csrfHeaderName) ?? undefined);
+    return NextResponse.json(await backend.shifts.update(actor, await request.json()), {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  } catch (error) {
+    if (error instanceof MongoInputError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
+    return secureError(authorizationStatus(error));
+  }
+}

@@ -253,6 +253,13 @@ export const mongoAuthIndexes = [
     unique: true,
     partialFilterExpression: { active: true, role: 'ANALYTICS' },
   },
+  {
+    collection: 'memberships',
+    key: { organizationId: 1, role: 1 },
+    name: 'memberships_single_active_webmaster',
+    unique: true,
+    partialFilterExpression: { active: true, role: 'WEBMASTER' },
+  },
   { collection: 'sessions', key: { sessionHash: 1 }, name: 'sessions_hash_unique', unique: true },
   {
     collection: 'sessions',

@@ -5,6 +5,7 @@ import { Panel, StatusTag } from '@analiza/ui';
 import Image from 'next/image';
 import { useAuth } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { isAdministrator } from '@/lib/permissions';
 import {
   feedbackCategories,
   feedbackCategoryHelp,
@@ -91,7 +92,7 @@ export function FeedbackForm() {
   >({});
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const canManageReports = session?.role === 'ADMIN';
+  const canManageReports = isAdministrator(session?.role);
   const reportCounts = useMemo(
     () => ({
       ALL: reports.length,

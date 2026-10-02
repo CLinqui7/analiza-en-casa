@@ -308,16 +308,30 @@ export const quoteSchema = z.object({
   revisionReason: z.string().trim().optional(),
 });
 
-export const paymentSchema = z.object({
-  id: z.string(),
-  quoteId: z.string(),
-  amount: z.number().positive(),
-  reference: z.string().trim().min(1),
-  idempotencyKey: z.string().trim().min(1),
-  status: z.enum(['APPLIED', 'VOIDED']),
-  createdAt: z.string(),
-  voidReason: z.string().trim().optional(),
-});
+export const paymentSchema = z
+  .object({
+    id: z.string(),
+    quoteId: z.string(),
+    amount: z.number().positive(),
+    paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']).optional(),
+    reference: z.string().trim().max(120).optional(),
+    idempotencyKey: z.string().trim().min(1),
+    status: z.enum(['APPLIED', 'VOIDED']),
+    createdAt: z.string(),
+    voidReason: z.string().trim().optional(),
+  })
+  .superRefine((payment, context) => {
+    if (
+      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      !payment.reference
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Ingrese el número de referencia.',
+        path: ['reference'],
+      });
+    }
+  });
 
 export const clinicalDocumentSchema = z.object({
   id: z.string(),

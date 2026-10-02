@@ -86,7 +86,16 @@ export async function buildPaymentReceiptPdf(
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
   write(`Fecha: ${new Date(payment.createdAt).toLocaleString('es-SV')}`);
   write(`Monto: ${money(payment.amount)}`, { bold: true });
-  write(`Referencia: ${payment.reference}`);
+  write(
+    `Medio de pago: ${
+      payment.paymentMethod
+        ? { CASH: 'Efectivo', CHECK: 'Cheque', TRANSFER: 'Transferencia', CARD: 'Tarjeta' }[
+            payment.paymentMethod
+          ]
+        : 'No registrado'
+    }`,
+  );
+  if (payment.reference) write(`Número de referencia: ${payment.reference}`);
   write(`Estado: ${payment.status === 'APPLIED' ? 'Aplicado' : 'Reversado'}`);
   if (payment.voidReason) write(`Motivo de reversión: ${payment.voidReason}`);
   write('', { gap: 14 });

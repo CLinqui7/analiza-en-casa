@@ -8,6 +8,7 @@ export const roles = [
   'FINANCE',
   'AUDITOR',
   'ANALYTICS',
+  'WEBMASTER',
 ] as const;
 export type Role = (typeof roles)[number];
 
@@ -153,6 +154,7 @@ const permissions: Record<Role, readonly Permission[]> = {
   ],
   AUDITOR: allRead,
   ANALYTICS: ['login-analytics:read'],
+  WEBMASTER: [...allRead, ...allWrite, 'login-analytics:read'],
 };
 
 export function isRole(value: unknown): value is Role {
@@ -161,6 +163,10 @@ export function isRole(value: unknown): value is Role {
 
 export function can(role: Role | undefined, permission: Permission): boolean {
   return Boolean(role && permissions[role].includes(permission));
+}
+
+export function isAdministrator(role: Role | undefined): boolean {
+  return role === 'ADMIN' || role === 'WEBMASTER';
 }
 
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [

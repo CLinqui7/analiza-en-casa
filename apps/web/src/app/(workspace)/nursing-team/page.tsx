@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isAdministrator } from '@/lib/permissions';
 import { useOperations } from '@/lib/use-operations';
 import type { NurseProfileSubmission } from '@/lib/nurse-profile';
 import {
@@ -248,8 +249,8 @@ export default function NursingTeamPage() {
           <label>
             Rol
             <select name="role" defaultValue="NURSE">
-              {session?.role === 'ADMIN' ? <option value="ADMIN">Administrador</option> : null}
-              {session?.role === 'ADMIN' ? <option value="MANAGER">Gerente</option> : null}
+              {isAdministrator(session?.role) ? <option value="ADMIN">Administrador</option> : null}
+              {isAdministrator(session?.role) ? <option value="MANAGER">Gerente</option> : null}
               <option value="NURSE_MANAGER">Supervisora / jefe de enfermería</option>
               <option value="NURSE">Enfermería</option>
             </select>

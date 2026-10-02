@@ -27,6 +27,13 @@ type CalendarView = 'MONTH' | 'WEEK' | 'LIST_WEEK' | 'LIST_DAY';
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
+function localDate(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+function localTime(date: Date) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
 function dateFromIso(date: string) {
   return new Date(`${date}T00:00:00.000Z`);
 }
@@ -91,7 +98,8 @@ function agendaDateLabel(date: string) {
 }
 
 export default function AgendaPage() {
-  const { addShiftSeries, nursingResources, patients, providerMode, shifts } = useWorkspace();
+  const { addShiftSeries, nursingResources, patients, providerMode, shifts, updateShift } =
+    useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -102,6 +110,7 @@ export default function AgendaPage() {
   const [calendarAnchor, setCalendarAnchor] = useState(initialDate);
   const [calendarView, setCalendarView] = useState<CalendarView>('MONTH');
   const [detailShift, setDetailShift] = useState<(typeof shifts)[number] | null>(null);
+  const [editingShift, setEditingShift] = useState<(typeof shifts)[number] | null>(null);
   const [saving, setSaving] = useState(false);
   const form = useForm<ShiftForm>({
     resolver: zodResolver(shiftSchema),
@@ -123,9 +132,29 @@ export default function AgendaPage() {
   const selectedShiftPatient = patients.find((patient) => patient.id === selectedShiftPatientId);
   function close() {
     setOpen(false);
+    setEditingShift(null);
     setDates([initialDate]);
     setEndDayOffset(0);
     form.reset();
+  }
+  function edit(shift: (typeof shifts)[number]) {
+    const start = new Date(shift.startsAt);
+    const end = new Date(shift.endsAt);
+    const date = localDate(start);
+    setEditingShift(shift);
+    setDates([date]);
+    setEndDayOffset(localDate(end) === date ? 0 : 1);
+    form.reset({
+      resourceId: shift.resourceId,
+      patientId: shift.patientId,
+      startTime: localTime(start),
+      endTime: localTime(end),
+      status: shift.status,
+      note: shift.note ?? '',
+    });
+    setDetailShift(null);
+    setMessage(null);
+    setOpen(true);
   }
   function choosePreset(preset: ShiftPreset) {
     const date = dates.find(Boolean) ?? initialDate;
@@ -139,16 +168,23 @@ export default function AgendaPage() {
         ...values,
         dates,
         endDayOffset,
-        existing: shifts,
-        idFor: () => crypto.randomUUID(),
+        existing: editingShift
+          ? shifts.filter((candidate) => candidate.id !== editingShift.id)
+          : shifts,
+        idFor: () => editingShift?.id ?? crypto.randomUUID(),
       });
       setSaving(true);
-      if (!(await addShiftSeries(series, crypto.randomUUID()))) {
+      const saved = editingShift
+        ? await updateShift(series[0], crypto.randomUUID())
+        : await addShiftSeries(series, crypto.randomUUID());
+      if (!saved) {
         form.setError('startTime', { message: 'El servidor no confirmó la serie de turnos.' });
         return;
       }
       setMessage(
-        `${series.length} turno${series.length === 1 ? '' : 's'} persistido${series.length === 1 ? '' : 's'} para las fechas seleccionadas.`,
+        editingShift
+          ? 'Turno actualizado con validación de disponibilidad y registro de auditoría.'
+          : `${series.length} turno${series.length === 1 ? '' : 's'} persistido${series.length === 1 ? '' : 's'} para las fechas seleccionadas.`,
       );
       close();
     } catch (error) {
@@ -256,6 +292,7 @@ export default function AgendaPage() {
           <Button
             data-action-id="AGENDA-SHIFT-CREATE"
             onClick={() => {
+              setEditingShift(null);
               setMessage(null);
               setOpen(true);
             }}
@@ -491,14 +528,25 @@ export default function AgendaPage() {
         <Dialog
           description="Vista del turno registrado. La finalización de la visita y los datos clínicos se documentan en sus módulos correspondientes."
           footer={
-            <Button
-              className="button-secondary"
-              data-action-id="AGENDA-SHIFT-DETAIL-CLOSE"
-              onClick={() => setDetailShift(null)}
-              type="button"
-            >
-              Cerrar detalle
-            </Button>
+            <>
+              {can('agenda:write') && detailShift.status === 'SCHEDULED' ? (
+                <Button
+                  data-action-id="AGENDA-SHIFT-EDIT"
+                  onClick={() => edit(detailShift)}
+                  type="button"
+                >
+                  Editar turno
+                </Button>
+              ) : null}
+              <Button
+                className="button-secondary"
+                data-action-id="AGENDA-SHIFT-DETAIL-CLOSE"
+                onClick={() => setDetailShift(null)}
+                type="button"
+              >
+                Cerrar detalle
+              </Button>
+            </>
           }
           onClose={() => setDetailShift(null)}
           open
@@ -559,9 +607,11 @@ export default function AgendaPage() {
       ) : null}
       <Dialog
         description={
-          isCoreRelease
-            ? 'Programa los días y horarios; se comprueba la disponibilidad del recurso antes de guardar.'
-            : 'Puede crear una serie de días sin duplicados ni colisiones del mismo recurso. Puntual sigue pendiente de definición del cliente.'
+          editingShift
+            ? 'Corrige la enfermera o el horario. Antes de guardar se vuelve a comprobar la disponibilidad.'
+            : isCoreRelease
+              ? 'Programa los días y horarios; se comprueba la disponibilidad del recurso antes de guardar.'
+              : 'Puede crear una serie de días sin duplicados ni colisiones del mismo recurso. Puntual sigue pendiente de definición del cliente.'
         }
         footer={
           <>
@@ -574,18 +624,18 @@ export default function AgendaPage() {
               Cerrar
             </Button>
             <Button
-              data-action-id="AGENDA-SHIFT-SAVE"
+              data-action-id={editingShift ? 'AGENDA-SHIFT-EDIT-SAVE' : 'AGENDA-SHIFT-SAVE'}
               disabled={saving}
               form="shift-form"
               type="submit"
             >
-              {saving ? 'Guardando…' : 'Guardar'}
+              {saving ? 'Guardando…' : editingShift ? 'Guardar cambios' : 'Guardar'}
             </Button>
           </>
         }
         onClose={close}
         open={open}
-        title="Crear turno a paciente"
+        title={editingShift ? 'Editar turno programado' : 'Crear turno a paciente'}
       >
         <form className="form-grid" id="shift-form" noValidate onSubmit={form.handleSubmit(submit)}>
           <label>
@@ -640,19 +690,21 @@ export default function AgendaPage() {
                   Cada fecha crea un turno independiente con el mismo intervalo.
                 </p>
               </div>
-              <Button
-                className="button-secondary"
-                data-action-id="AGENDA-SHIFT-DATE-ADD"
-                onClick={() => setDates((current) => [...current, ''])}
-                type="button"
-              >
-                Agregar fecha
-              </Button>
+              {!editingShift ? (
+                <Button
+                  className="button-secondary"
+                  data-action-id="AGENDA-SHIFT-DATE-ADD"
+                  onClick={() => setDates((current) => [...current, ''])}
+                  type="button"
+                >
+                  Agregar fecha
+                </Button>
+              ) : null}
             </div>
             {dates.map((date, index) => (
               <div className="action-row" key={`${index}-${date}`}>
                 <label>
-                  Fecha {index + 1}
+                  {editingShift ? 'Fecha' : `Fecha ${index + 1}`}
                   <input
                     data-action-id="AGENDA-SHIFT-DATE"
                     onChange={(event) =>
@@ -666,7 +718,7 @@ export default function AgendaPage() {
                     value={date}
                   />
                 </label>
-                {dates.length > 1 ? (
+                {!editingShift && dates.length > 1 ? (
                   <Button
                     aria-label={`Quitar fecha ${index + 1}`}
                     className="button-secondary"

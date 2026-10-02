@@ -83,3 +83,16 @@ test('ordinary admin role cannot open the private analytics route', async ({ pag
     'Acceso restringido para el rol ADMIN',
   );
 });
+
+test('webmaster keeps the admin workspace and receives analytics as an extra', async ({ page }) => {
+  await page.route('**/api/login-analytics', (route) => route.fulfill({ json: snapshot }));
+  await page.goto('/login?next=%2Fanalytics%2Flogins');
+  await page.getByLabel('Usuario o correo').fill('webmaster@demo.local');
+  await page.getByLabel('Clave').fill('demo-webmaster');
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page).toHaveURL(/\/analytics\/logins$/);
+  await expect(page.getByRole('heading', { name: 'Bitácora de accesos' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Pacientes' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Auditoría' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Analítica de accesos' })).toBeVisible();
+});

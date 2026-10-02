@@ -81,6 +81,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addInventoryMovement: (movement: InventoryMovement) => Promise<boolean>;
   addShift: (shift: Shift) => void;
   addShiftSeries: (shifts: Shift[], idempotencyKey: string) => Promise<boolean>;
+  updateShift: (shift: Shift, idempotencyKey: string) => Promise<boolean>;
   addHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   updateHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   addQuote: (quote: Quote) => Promise<boolean>;
@@ -462,6 +463,37 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [can, persistMockChange, provider],
   );
+  const replaceShift = useCallback(
+    async (shift: Shift, idempotencyKey: string): Promise<boolean> => {
+      if (!can('agenda:write')) return false;
+      if (isServerDataMode(provider.mode)) {
+        if (!provider.updateShift) {
+          setError('El comando seguro para editar Agenda no está disponible; no se guardó nada.');
+          return false;
+        }
+        try {
+          const saved = await provider.updateShift(shift, idempotencyKey);
+          setSnapshot((current) => ({
+            ...current,
+            shifts: current.shifts.map((candidate) =>
+              candidate.id === saved.id ? saved : candidate,
+            ),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible actualizar el turno.');
+          return false;
+        }
+      }
+      return persistMockChange((current) => ({
+        ...current,
+        shifts: current.shifts.map((candidate) => (candidate.id === shift.id ? shift : candidate)),
+        auditEntries: [audit('Turno actualizado', shift.id), ...current.auditEntries],
+      }));
+    },
+    [can, persistMockChange, provider],
+  );
   const saveQuote = useCallback(
     async (quote: Quote, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('quotes:write')) return false;
@@ -781,6 +813,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         }));
       },
       addShiftSeries: saveShiftSeries,
+      updateShift: replaceShift,
       addHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'create'),
       updateHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'replace'),
       addQuote: (quote) => saveQuote(quote, 'create'),
@@ -999,6 +1032,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       savePatient,
       saveQuote,
       saveShiftSeries,
+      replaceShift,
       sendStoredQuote,
       snapshot,
     ],

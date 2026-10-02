@@ -602,6 +602,27 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
   await expect(page.getByRole('status')).toContainText('turno persistido');
   await page.reload();
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
+
+  const shiftRow = page.getByRole('row').filter({ hasText: 'Turno programado de QA.' });
+  await shiftRow.getByRole('button', { name: 'Ver detalle' }).click();
+  await page.getByRole('button', { name: 'Editar turno' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar turno programado' });
+  const nurseSelect = editDialog.getByLabel('Enfermera');
+  const nurseOptions = await nurseSelect.locator('option').evaluateAll((options) =>
+    options.map((option) => ({
+      label: (option as HTMLOptionElement).textContent ?? '',
+      value: (option as HTMLOptionElement).value,
+    })),
+  );
+  if (nurseOptions.length > 1) await nurseSelect.selectOption(nurseOptions[1].value);
+  await editDialog.getByLabel('Inicio').fill('09:00');
+  await editDialog.getByLabel('Fin').fill('13:00');
+  await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(page.getByRole('status')).toContainText('Turno actualizado');
+  await page.reload();
+  const updatedRow = page.getByRole('row').filter({ hasText: 'Turno programado de QA.' });
+  await expect(updatedRow).toContainText('9:00');
+  if (nurseOptions.length > 1) await expect(updatedRow).toContainText(nurseOptions[1].label);
 });
 
 test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({
@@ -751,21 +772,19 @@ test('payment application is idempotent and reversal preserves its reason', asyn
     .last()
     .click();
   await page.getByLabel('Monto ingresado').fill('25.50');
-  await page.getByLabel('Referencia').fill('REF-PAGO-E2E');
-  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
+  await page.getByLabel('Medio de pago').selectOption('TRANSFER');
+  await page.getByLabel('Número de referencia').fill('REF-PAGO-E2E');
+  await expect(page.getByLabel('Clave idempotente')).toHaveCount(0);
   await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
-  await expect(page.getByRole('status')).toContainText('Pago aplicado una sola vez');
+  await expect(page.getByRole('status')).toContainText('Pago aplicado correctamente');
   await page.reload();
   await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  await expect(page.getByText('Transferencia')).toBeVisible();
   await expect(page.locator('[data-action-id="PAYMENT-RECEIPT-PDF"]')).toBeVisible();
 
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
-  await page.getByLabel('Referencia').fill('REF-PAGO-E2E-DUPLICADO');
-  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
-  await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
-  await expect(
-    page.getByText('La clave ya fue aplicada; la operación no se duplicó.'),
-  ).toBeVisible();
+  await page.getByLabel('Medio de pago').selectOption('CARD');
+  await expect(page.getByLabel('Número de referencia')).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).first().click();
 
   await page.getByRole('button', { name: 'Reversar' }).click();

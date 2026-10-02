@@ -6,6 +6,7 @@ import {
   type NurseProfile,
   type NurseProfileSubmission,
 } from '@/lib/nurse-profile';
+import { isAdministrator } from '@/lib/permissions';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -32,7 +33,7 @@ export class PostgresNurseProfileRepository {
   }
 
   async listForAdmin(actor: ServerActor): Promise<NurseProfileSubmission[]> {
-    if (actor.role !== 'ADMIN') throw new MongoAccessError();
+    if (!isAdministrator(actor.role)) throw new MongoAccessError();
     return transaction(this.pool, actor, async (client) =>
       (
         await client.query(

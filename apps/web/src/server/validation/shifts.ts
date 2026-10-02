@@ -6,7 +6,7 @@ function object(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function parseShift(value: unknown): Shift {
+export function parseShift(value: unknown): Shift {
   try {
     const shift = shiftSchema.strict().parse(value);
     const startsAt = new Date(shift.startsAt);
@@ -19,6 +19,21 @@ function parseShift(value: unknown): Shift {
     if (error instanceof MongoInputError) throw error;
     throw new MongoInputError('El turno contiene datos no válidos.');
   }
+}
+
+export function parseShiftUpdateCommand(input: unknown): {
+  shift: Shift;
+  idempotencyKey: string;
+} {
+  rejectBrowserAuthority(input);
+  const body = object(input);
+  if (Object.keys(body).some((key) => key !== 'shift' && key !== 'idempotencyKey')) {
+    throw new MongoInputError();
+  }
+  if (typeof body.idempotencyKey !== 'string' || !body.idempotencyKey.trim()) {
+    throw new MongoInputError('La actualización requiere una clave de idempotencia.');
+  }
+  return { shift: parseShift(body.shift), idempotencyKey: body.idempotencyKey };
 }
 
 export function parseShiftSeriesCommand(input: unknown): {

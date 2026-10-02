@@ -36,7 +36,7 @@ import {
   type Payment,
   type InventoryMovement,
 } from '@analiza/contracts';
-import { can, type Permission } from '@/lib/permissions';
+import { can, isAdministrator, type Permission } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { AuthService, hashPassword } from '../auth-service';
@@ -55,7 +55,11 @@ import {
   parseHospitalizationCreate,
   parseHospitalizationReplace,
 } from '../validation/hospitalizations';
-import { parseShiftSeriesCommand, assertNoSeriesCollisions } from '../validation/shifts';
+import {
+  parseShiftSeriesCommand,
+  parseShiftUpdateCommand,
+  assertNoSeriesCollisions,
+} from '../validation/shifts';
 import type { EntityRepository, Persistence } from './contracts';
 import { postgresPool, transaction } from './postgres-pool';
 import { postgresAuthStore } from './postgres-auth';
@@ -114,7 +118,7 @@ function entityRepository<T extends Entity, K extends string>(
     const nurses = ids.length
       ? await client.query(
           `SELECT r.id,r.user_id FROM analiza.nursing_resources r JOIN analiza.memberships m ON m.user_id=r.user_id AND m.organization_id=r.organization_id
-          WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER')`,
+          WHERE r.organization_id=$1 AND r.id=ANY($2::text[]) AND m.active AND m.role IN ('ADMIN','WEBMASTER','NURSE','NURSE_MANAGER')`,
           [actor.organizationId, ids],
         )
       : { rows: [], rowCount: 0 };
@@ -426,6 +430,88 @@ export function postgresPersistence(): Persistence {
         return parsed.shifts;
       });
     },
+    async update(actor, input) {
+      authorize(actor, 'agenda:write');
+      const parsed = parseShiftUpdateCommand(input);
+      return transaction(pool, actor, async (c) => {
+        const hash = createHash('sha256').update(canonical(parsed.shift)).digest('hex');
+        await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+          actor.organizationId + ':shift-update:' + parsed.idempotencyKey,
+        ]);
+        const old = (
+          await c.query(
+            'SELECT payload_hash,result FROM analiza.commands WHERE organization_id=$1 AND idempotency_key=$2',
+            [actor.organizationId, parsed.idempotencyKey],
+          )
+        ).rows[0];
+        if (old) {
+          if (old.payload_hash !== hash) throw new MongoConflictError();
+          return shiftSchema.parse(old.result);
+        }
+        const current = (
+          await c.query(
+            'SELECT body,status FROM analiza.shifts WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+            [actor.organizationId, parsed.shift.id],
+          )
+        ).rows[0];
+        if (!current) throw new MongoInputError('El turno ya no está disponible.');
+        if (current.status !== 'SCHEDULED' || parsed.shift.status !== 'SCHEDULED')
+          throw new MongoInputError('Sólo se pueden editar turnos programados.');
+        if (
+          !(
+            await c.query(
+              'SELECT id FROM analiza.nursing_resources WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+              [actor.organizationId, parsed.shift.resourceId],
+            )
+          ).rowCount
+        )
+          throw new MongoInputError('El recurso asignado no está disponible.');
+        if (
+          parsed.shift.patientId &&
+          !(
+            await c.query('SELECT id FROM analiza.patients WHERE organization_id=$1 AND id=$2', [
+              actor.organizationId,
+              parsed.shift.patientId,
+            ])
+          ).rowCount
+        )
+          throw new MongoInputError('El paciente asignado no está disponible.');
+        if (
+          (
+            await c.query(
+              "SELECT id FROM analiza.shifts WHERE organization_id=$1 AND id<>$2 AND resource_id=$3 AND status<>'CANCELLED' AND starts_at<$5 AND ends_at>$4 LIMIT 1",
+              [
+                actor.organizationId,
+                parsed.shift.id,
+                parsed.shift.resourceId,
+                parsed.shift.startsAt,
+                parsed.shift.endsAt,
+              ],
+            )
+          ).rowCount
+        )
+          throw new MongoInputError('El recurso ya tiene un turno que colisiona.');
+        await c.query(
+          'UPDATE analiza.shifts SET resource_id=$3,patient_id=$4,starts_at=$5,ends_at=$6,status=$7,body=$8 WHERE organization_id=$1 AND id=$2',
+          [
+            actor.organizationId,
+            parsed.shift.id,
+            parsed.shift.resourceId,
+            parsed.shift.patientId ?? null,
+            parsed.shift.startsAt,
+            parsed.shift.endsAt,
+            parsed.shift.status,
+            JSON.stringify(parsed.shift),
+          ],
+        );
+        await c.query(
+          'INSERT INTO analiza.commands(organization_id,idempotency_key,payload_hash,result) VALUES($1,$2,$3,$4)',
+          [actor.organizationId, parsed.idempotencyKey, hash, JSON.stringify(parsed.shift)],
+        );
+        await audit(c, actor, 'SHIFT_UPDATED', 'shifts', parsed.shift.id);
+        return parsed.shift;
+      });
+    },
   };
   const operations: Persistence['operations'] = {
     async list(actor) {
@@ -482,7 +568,7 @@ export function postgresPersistence(): Persistence {
           // A transaction owns one pg client. Keep its queries sequential: pg@9 will reject
           // overlapping client.query calls even when the current driver only warns about them.
           const professionals = await c.query(
-            `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+            `SELECT u.id,u.display_name,m.role FROM analiza.users u JOIN analiza.memberships m ON m.user_id=u.id WHERE m.organization_id=$1 AND m.active AND m.role IN ('ADMIN','WEBMASTER','NURSE','NURSE_MANAGER','DOCTOR')`,
             [actor.organizationId],
           );
           result.professionals = professionals.rows.map((r) => ({
@@ -1560,7 +1646,7 @@ export function postgresPersistence(): Persistence {
               `SELECT u.display_name,m.role FROM analiza.memberships m
                JOIN analiza.users u ON u.id=m.user_id
                WHERE m.organization_id=$1 AND m.user_id=$2 AND m.active
-                 AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+                 AND m.role IN ('ADMIN','WEBMASTER','NURSE','NURSE_MANAGER','DOCTOR')`,
               [actor.organizationId, inputVisit.professionalUserId],
             )
           ).rows[0];
@@ -1610,7 +1696,7 @@ export function postgresPersistence(): Persistence {
               `SELECT u.display_name FROM analiza.memberships m
                JOIN analiza.users u ON u.id=m.user_id
                WHERE m.organization_id=$1 AND m.user_id=$2 AND m.active
-                 AND m.role IN ('ADMIN','NURSE','NURSE_MANAGER','DOCTOR')`,
+                 AND m.role IN ('ADMIN','WEBMASTER','NURSE','NURSE_MANAGER','DOCTOR')`,
               [actor.organizationId, inputGoal.professionalUserId],
             )
           ).rows[0];
@@ -1813,7 +1899,7 @@ export function postgresPersistence(): Persistence {
           })
           .strict()
           .parse(input);
-        if (['ADMIN', 'MANAGER'].includes(data.role) && actor.role !== 'ADMIN')
+        if (['ADMIN', 'MANAGER'].includes(data.role) && !isAdministrator(actor.role))
           throw new MongoAccessError();
         const id = randomUUID(),
           hash = await hashPassword(data.password);
@@ -1853,7 +1939,7 @@ export function postgresPersistence(): Persistence {
               [actor.userId, actor.organizationId],
             )
           ).rows[0];
-          if (!account || !['ADMIN', 'NURSE', 'NURSE_MANAGER'].includes(account.role))
+          if (!account || !['ADMIN', 'WEBMASTER', 'NURSE', 'NURSE_MANAGER'].includes(account.role))
             throw new MongoAccessError();
 
           const resource: NursingResource = nursingResourceSchema.parse({

@@ -13,14 +13,33 @@ import { receivableAccounts } from '@/lib/receivables';
 const money = (value: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(value);
 
-const paymentSchema = z.object({
-  quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
-  amount: z.number().positive('Ingrese un monto positivo.'),
-  reference: z.string().trim().min(1, 'Ingrese una referencia.'),
-  idempotencyKey: z.string().trim().min(1, 'Ingrese una clave idempotente.'),
-});
+const paymentSchema = z
+  .object({
+    quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
+    amount: z.number().positive('Ingrese un monto positivo.'),
+    paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']),
+    reference: z.string().trim().max(120, 'Use un máximo de 120 caracteres.').optional(),
+  })
+  .superRefine((payment, context) => {
+    if (
+      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      !payment.reference
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Ingrese el número de referencia.',
+        path: ['reference'],
+      });
+    }
+  });
 type PaymentForm = z.infer<typeof paymentSchema>;
 const paymentStatus = { APPLIED: 'Aplicado', VOIDED: 'Reversado' };
+const paymentMethods = {
+  CASH: 'Efectivo',
+  CHECK: 'Cheque',
+  TRANSFER: 'Transferencia',
+  CARD: 'Tarjeta',
+} as const;
 
 export function PaymentsPage({ receivables = false }: { receivables?: boolean }) {
   const { addPayment, payments, quotes, patients, voidPayment, error } = useWorkspace();
@@ -28,6 +47,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [paymentCommandKey, setPaymentCommandKey] = useState(() => crypto.randomUUID());
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
   const sentQuotes = openAccounts.map((account) => account.quote);
@@ -45,19 +65,20 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     defaultValues: {
       quoteId: quotes.find((quote) => quote.status === 'SENT')?.id ?? '',
       amount: 1,
+      paymentMethod: 'CASH',
       reference: '',
-      idempotencyKey: crypto.randomUUID(),
     },
   });
   const voidForm = useForm<{ reason: string }>({ defaultValues: { reason: '' } });
   const selectedQuoteId = useWatch({ control: form.control, name: 'quoteId' });
+  const selectedPaymentMethod = useWatch({ control: form.control, name: 'paymentMethod' });
   function close() {
     setOpen(false);
     form.reset({
       quoteId: quotes.find((quote) => quote.status === 'SENT')?.id ?? '',
       amount: 1,
+      paymentMethod: 'CASH',
       reference: '',
-      idempotencyKey: crypto.randomUUID(),
     });
   }
   async function submit(values: PaymentForm) {
@@ -72,16 +93,11 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       });
       return;
     }
-    if (payments.some((payment) => payment.idempotencyKey === values.idempotencyKey)) {
-      form.setError('idempotencyKey', {
-        type: 'duplicate',
-        message: 'La clave ya fue aplicada; la operación no se duplicó.',
-      });
-      return;
-    }
     const payment: Payment = {
       id: crypto.randomUUID(),
       ...values,
+      reference: values.reference || undefined,
+      idempotencyKey: paymentCommandKey,
       status: 'APPLIED',
       createdAt: new Date().toISOString(),
     };
@@ -91,7 +107,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       });
       return;
     }
-    setMessage('Pago aplicado una sola vez con clave idempotente y evidencia de auditoría.');
+    setMessage('Pago aplicado correctamente y registrado en auditoría.');
     close();
   }
   async function voidSubmit(values: { reason: string }) {
@@ -146,6 +162,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
               disabled={!openAccounts.length}
               onClick={() => {
                 form.setValue('quoteId', sentQuotes[0]?.id ?? '');
+                setPaymentCommandKey(crypto.randomUUID());
                 setMessage(null);
                 setOpen(true);
               }}
@@ -228,6 +245,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                           onClick={() => {
                             form.setValue('quoteId', account.quote.id);
                             form.setValue('amount', account.balance);
+                            setPaymentCommandKey(crypto.randomUUID());
                             setOpen(true);
                           }}
                         >
@@ -274,8 +292,8 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                   <th>Fecha</th>
                   <th>Cotización</th>
                   <th>Monto ingresado</th>
-                  <th>Referencia</th>
-                  <th>Clave idempotente</th>
+                  <th>Medio de pago</th>
+                  <th>N.º de referencia</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -286,13 +304,12 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     <td>{new Date(payment.createdAt).toLocaleString('es-SV')}</td>
                     <td title={payment.quoteId}>{quoteDisplayCode(payment.quoteId)}</td>
                     <td>{money(payment.amount)}</td>
-                    <td>{payment.reference}</td>
                     <td>
-                      <details>
-                        <summary>Ver clave</summary>
-                        <small>{payment.idempotencyKey}</small>
-                      </details>
+                      {payment.paymentMethod
+                        ? paymentMethods[payment.paymentMethod]
+                        : 'No registrado'}
                     </td>
+                    <td>{payment.reference || 'No aplica'}</td>
                     <td>{paymentStatus[payment.status]}</td>
                     <td>
                       <div className="action-row">
@@ -328,7 +345,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
         )}
       </Panel>
       <Dialog
-        description="El monto no puede superar el saldo pendiente. La clave idempotente evita duplicar la operación."
+        description="Selecciona cómo se recibió el pago. La plataforma evita duplicados automáticamente."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
@@ -384,19 +401,35 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             ) : null}
           </label>
           <label>
-            Referencia
-            <input {...form.register('reference')} />
-            {form.formState.errors.reference ? (
-              <span className="field-error">{form.formState.errors.reference.message}</span>
-            ) : null}
+            Medio de pago
+            <select
+              {...form.register('paymentMethod', {
+                onChange: (event) => {
+                  if (event.target.value !== 'TRANSFER' && event.target.value !== 'CARD') {
+                    form.setValue('reference', '');
+                  }
+                },
+              })}
+            >
+              {Object.entries(paymentMethods).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </label>
-          <label>
-            Clave idempotente
-            <input {...form.register('idempotencyKey')} />
-            {form.formState.errors.idempotencyKey ? (
-              <span className="field-error">{form.formState.errors.idempotencyKey.message}</span>
-            ) : null}
-          </label>
+          {selectedPaymentMethod === 'TRANSFER' || selectedPaymentMethod === 'CARD' ? (
+            <label>
+              Número de referencia
+              <input {...form.register('reference')} autoComplete="off" maxLength={120} />
+              <span className="field-help">
+                Obligatorio para identificar transferencias y pagos con tarjeta.
+              </span>
+              {form.formState.errors.reference ? (
+                <span className="field-error">{form.formState.errors.reference.message}</span>
+              ) : null}
+            </label>
+          ) : null}
         </form>
       </Dialog>
       <Dialog

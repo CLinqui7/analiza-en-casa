@@ -77,6 +77,7 @@ export interface Persistence {
     list(actor: ServerActor): Promise<Shift[]>;
     listResources(actor: ServerActor): Promise<NursingResource[]>;
     createSeries(actor: ServerActor, input: unknown): Promise<Shift[]>;
+    update(actor: ServerActor, input: unknown): Promise<Shift>;
   };
   operations: {
     list(actor: ServerActor): Promise<OperationsSnapshot>;

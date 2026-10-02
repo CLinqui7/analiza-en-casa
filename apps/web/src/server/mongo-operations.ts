@@ -28,7 +28,7 @@ import {
   warehouseSchema,
   warehouseTransferSchema,
 } from '@analiza/contracts';
-import { can } from '@/lib/permissions';
+import { can, isAdministrator } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { hashPassword } from './mongo-auth';
 import {
@@ -128,7 +128,7 @@ const commands = z.discriminatedUnion('command', [
 
 export function canEditAssignedBalance(actor: ServerActor, assignedUsers: readonly string[]) {
   return (
-    actor.role === 'ADMIN' ||
+    isAdministrator(actor.role) ||
     (can(actor.role, 'nursing:write') && assignedUsers.includes(actor.userId))
   );
 }
@@ -162,7 +162,7 @@ export class MongoOperationsRepository {
             .find({
               ...query,
               active: true,
-              role: { $in: ['ADMIN', 'NURSE', 'NURSE_MANAGER', 'DOCTOR'] },
+              role: { $in: ['ADMIN', 'WEBMASTER', 'NURSE', 'NURSE_MANAGER', 'DOCTOR'] },
             })
             .toArray()
             .then(async (memberships) => {
@@ -1320,7 +1320,7 @@ export class MongoOperationsRepository {
         }
         if (input.command === 'nurse.create') {
           permission('nurses:manage');
-          if (['ADMIN', 'MANAGER'].includes(input.role) && actor.role !== 'ADMIN')
+          if (['ADMIN', 'MANAGER'].includes(input.role) && !isAdministrator(actor.role))
             throw new MongoAccessError();
           const emailNormalized = input.email.toLowerCase();
           if (await this.database.collection('users').findOne({ emailNormalized }, { session }))
@@ -1557,8 +1557,8 @@ export class MongoOperationsRepository {
               role: {
                 $in:
                   visit.profession === 'NURSE'
-                    ? ['ADMIN', 'NURSE', 'NURSE_MANAGER']
-                    : ['ADMIN', 'DOCTOR'],
+                    ? ['ADMIN', 'WEBMASTER', 'NURSE', 'NURSE_MANAGER']
+                    : ['ADMIN', 'WEBMASTER', 'DOCTOR'],
               },
             },
             { session },

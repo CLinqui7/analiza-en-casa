@@ -6,6 +6,10 @@ const migration = await readFile(
   new URL('../database/postgresql/migrations/020_login_analytics.sql', import.meta.url),
   'utf8',
 );
+const webmasterMigration = await readFile(
+  new URL('../database/postgresql/migrations/022_webmaster_role.sql', import.meta.url),
+  'utf8',
+);
 const runner = await readFile(
   new URL('../scripts/deployment/db-command.mjs', import.meta.url),
   'utf8',
@@ -36,9 +40,19 @@ test('ANALYTICS is a single-purpose, single-active account per organization', ()
   assert.doesNotMatch(permissions, /ANALYTICS:[^\n]+patients:read/);
 });
 
+test('WEBMASTER is single-active and receives ADMIN capabilities plus analytics', () => {
+  assert.match(webmasterMigration, /'WEBMASTER'/);
+  assert.match(webmasterMigration, /memberships_single_active_webmaster/);
+  assert.match(webmasterMigration, /WHERE active AND role='WEBMASTER'/);
+  assert.match(permissions, /WEBMASTER: \[\.\.\.allRead, \.\.\.allWrite, 'login-analytics:read'\]/);
+});
+
 test('session issuance and login event commit together and runtime has least privilege', () => {
   assert.match(authStore, /async createLoginSession/);
-  assert.match(authStore, /BEGIN[\s\S]+INSERT INTO analiza\.sessions[\s\S]+INSERT INTO analiza\.login_events[\s\S]+COMMIT/);
+  assert.match(
+    authStore,
+    /BEGIN[\s\S]+INSERT INTO analiza\.sessions[\s\S]+INSERT INTO analiza\.login_events[\s\S]+COMMIT/,
+  );
   assert.match(runner, /GRANT SELECT,INSERT ON analiza\.login_events/);
   assert.doesNotMatch(runner, /GRANT (?:ALL|DELETE|UPDATE) ON analiza\.login_events/);
 });
