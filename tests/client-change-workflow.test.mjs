@@ -16,3 +16,8 @@ test('the owner-requested Done state covers all current changes without altering
   assert.deepEqual([...workflow.done_ids].sort(), [...registeredIds].sort());
   assert.ok(registry.changes.some((change) => change.status !== 'IMPLEMENTED'));
 });
+
+test('the closure overlay is included in the Vercel deployment bundle', async () => {
+  const ignore = await readFile(new URL('../.vercelignore', import.meta.url), 'utf8');
+  assert.match(ignore, /^!docs\/qa\/CLIENT_CHANGE_WORKFLOW\.json$/m);
+});

@@ -22,6 +22,7 @@ docs/*
 !docs/qa
 docs/qa/*
 !docs/qa/CLIENT_CHANGE_REQUESTS.json
+!docs/qa/CLIENT_CHANGE_WORKFLOW.json
 .local
 .env*
 **/.env*
