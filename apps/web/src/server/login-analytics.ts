@@ -42,6 +42,23 @@ export const loginAnalyticsSnapshotSchema = z.object({
 });
 export type LoginAnalyticsSnapshot = z.infer<typeof loginAnalyticsSnapshotSchema>;
 
+export const loginHistorySchema = z.object({
+  userId: z.string(),
+  month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+  days: z.array(dailyLoginSchema),
+  events: z.array(z.object({ id: z.string(), occurredAt: z.string() })),
+});
+export type LoginHistory = z.infer<typeof loginHistorySchema>;
+
+function monthBounds(month: string) {
+  const [year, number] = month.split('-').map(Number);
+  // El Salvador observes UTC−6 for the dates covered by this login ledger.
+  return {
+    start: new Date(Date.UTC(year, number - 1, 1, 6)),
+    end: new Date(Date.UTC(year, number, 1, 6)),
+  };
+}
+
 function authorize(actor: ServerActor) {
   if (!can(actor.role, 'login-analytics:read')) throw new MongoAccessError();
 }
@@ -71,6 +88,36 @@ function dailySeries(rows: Array<{ day: string; count: number }>, days: string[]
 
 export class PostgresLoginAnalyticsRepository {
   constructor(private readonly pool: Pool) {}
+
+  async history(actor: ServerActor, userId: string, month: string): Promise<LoginHistory | null> {
+    authorize(actor);
+    return transaction(this.pool, actor, async (client) => {
+      const member = await client.query(
+        `SELECT 1 FROM analiza.memberships
+          WHERE organization_id=$1 AND user_id=$2 AND role<>'ANALYTICS'`,
+        [actor.organizationId, userId],
+      );
+      if (!member.rowCount) return null;
+      const events = await client.query<{ id: string; occurredAt: Date; day: string }>(
+        `SELECT e.id::text AS id, e.occurred_at AS "occurredAt",
+                to_char((e.occurred_at AT TIME ZONE 'America/El_Salvador')::date,'YYYY-MM-DD') AS day
+           FROM analiza.login_events e
+          WHERE e.organization_id=$1 AND e.user_id=$2
+            AND e.occurred_at >= (($3 || '-01')::timestamp AT TIME ZONE 'America/El_Salvador')
+            AND e.occurred_at < ((($3 || '-01')::date + interval '1 month')::timestamp AT TIME ZONE 'America/El_Salvador')
+          ORDER BY e.occurred_at DESC,e.id DESC`,
+        [actor.organizationId, userId, month],
+      );
+      const counts = new Map<string, number>();
+      for (const event of events.rows) counts.set(event.day, (counts.get(event.day) ?? 0) + 1);
+      return loginHistorySchema.parse({
+        userId,
+        month,
+        days: [...counts].map(([day, count]) => ({ day, count })).sort((a, b) => a.day.localeCompare(b.day)),
+        events: events.rows.map((event) => ({ id: event.id, occurredAt: event.occurredAt.toISOString() })),
+      });
+    });
+  }
 
   async snapshot(actor: ServerActor): Promise<LoginAnalyticsSnapshot> {
     authorize(actor);
@@ -164,6 +211,37 @@ export class PostgresLoginAnalyticsRepository {
 
 export class MongoLoginAnalyticsRepository {
   constructor(private readonly database: Db) {}
+
+  async history(actor: ServerActor, userId: string, month: string): Promise<LoginHistory | null> {
+    authorize(actor);
+    const member = await this.database.collection('memberships').findOne({
+      organizationId: actor.organizationId,
+      userId,
+      role: { $ne: 'ANALYTICS' },
+    });
+    if (!member) return null;
+    const { start, end } = monthBounds(month);
+    const events = await this.database.collection('loginEvents')
+      .find({ organizationId: actor.organizationId, userId, occurredAt: { $gte: start, $lt: end } })
+      .sort({ occurredAt: -1, id: -1 })
+      .toArray();
+    const dayFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/El_Salvador', year: 'numeric', month: '2-digit', day: '2-digit',
+    });
+    const counts = new Map<string, number>();
+    for (const event of events) {
+      const parts = dayFormatter.formatToParts(new Date(event.occurredAt));
+      const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? '';
+      const day = `${part('year')}-${part('month')}-${part('day')}`;
+      counts.set(day, (counts.get(day) ?? 0) + 1);
+    }
+    return loginHistorySchema.parse({
+      userId,
+      month,
+      days: [...counts].map(([day, count]) => ({ day, count })).sort((a, b) => a.day.localeCompare(b.day)),
+      events: events.map((event) => ({ id: String(event.id), occurredAt: new Date(event.occurredAt).toISOString() })),
+    });
+  }
 
   async snapshot(actor: ServerActor): Promise<LoginAnalyticsSnapshot> {
     authorize(actor);

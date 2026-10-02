@@ -35,6 +35,13 @@ type LoginAnalytics = {
   dailyLogins: { day: string; count: number }[];
 };
 
+type LoginHistory = {
+  userId: string;
+  month: string;
+  days: { day: string; count: number }[];
+  events: { id: string; occurredAt: string }[];
+};
+
 type UserFilter = 'all' | 'recent' | 'never' | 'inactive';
 
 type IconName = 'activity' | 'calendar' | 'check' | 'clock' | 'search' | 'shield' | 'users';
@@ -49,6 +56,34 @@ const chartDate = new Intl.DateTimeFormat('es-SV', {
   month: 'short',
   timeZone: 'UTC',
 });
+const monthTitle = new Intl.DateTimeFormat('es-SV', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const fullDay = new Intl.DateTimeFormat('es-SV', { dateStyle: 'full', timeZone: 'UTC' });
+const accessTime = new Intl.DateTimeFormat('es-SV', { timeStyle: 'short', timeZone: 'America/El_Salvador' });
+const salvadorDay = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/El_Salvador',
+});
+
+function localDay(value: Date | string) {
+  const parts = salvadorDay.formatToParts(new Date(value));
+  const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? '';
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
+function shiftMonth(month: string, delta: number) {
+  const [year, number] = month.split('-').map(Number);
+  return new Date(Date.UTC(year, number - 1 + delta, 1)).toISOString().slice(0, 7);
+}
+
+function calendarCells(month: string) {
+  const [year, number] = month.split('-').map(Number);
+  const first = new Date(Date.UTC(year, number - 1, 1));
+  const leading = (first.getUTCDay() + 6) % 7;
+  const length = new Date(Date.UTC(year, number, 0)).getUTCDate();
+  return [
+    ...Array.from({ length: leading }, () => null),
+    ...Array.from({ length }, (_, index) => `${month}-${String(index + 1).padStart(2, '0')}`),
+  ];
+}
 
 const roleLabels: Record<string, string> = {
   ADMIN: 'Administración',
@@ -139,9 +174,101 @@ async function loadLoginAnalytics(signal: AbortSignal): Promise<LoginAnalytics> 
   return payload as LoginAnalytics;
 }
 
+async function loadLoginHistory(userId: string, month: string, signal: AbortSignal): Promise<LoginHistory> {
+  const params = new URLSearchParams({ userId, month });
+  const response = await fetch(`/api/login-analytics/history?${params}`, {
+    cache: 'no-store', credentials: 'same-origin', signal,
+  });
+  const payload = (await response.json()) as LoginHistory | { error?: string };
+  if (!response.ok) throw new Error('error' in payload ? payload.error : 'No se pudo cargar el calendario.');
+  return payload as LoginHistory;
+}
+
+function LoginCalendar({ user, onClose }: { user: AnalyticsUser; onClose: () => void }) {
+  const [month, setMonth] = useState(() => localDay(user.lastLoginAt ?? new Date()).slice(0, 7));
+  const [selectedDay, setSelectedDay] = useState<string | null>(() => user.lastLoginAt ? localDay(user.lastLoginAt) : null);
+  const { data, error, isLoading } = useQuery<LoginHistory, Error>({
+    queryKey: ['login-history', user.userId, month],
+    queryFn: ({ signal }) => loadLoginHistory(user.userId, month, signal),
+    staleTime: 30_000,
+  });
+  const counts = new Map(data?.days.map(({ day, count }) => [day, count]) ?? []);
+  const dayEvents = selectedDay
+    ? (data?.events ?? []).filter((event) => localDay(event.occurredAt) === selectedDay)
+    : [];
+  const firstMonth = user.firstLoginAt ? localDay(user.firstLoginAt).slice(0, 7) : localDay(new Date()).slice(0, 7);
+  const currentMonth = localDay(new Date()).slice(0, 7);
+  const changeMonth = (delta: number) => {
+    setMonth((value) => shiftMonth(value, delta));
+    setSelectedDay(null);
+  };
+
+  return (
+    <section aria-label={`Calendario de accesos de ${user.displayName}`} className={styles.calendarPanel}>
+      <div className={styles.calendarHeading}>
+        <div>
+          <span className={styles.sectionKicker}>Historial completo por mes</span>
+          <h3>Accesos de {user.displayName}</h3>
+          <p>Selecciona un día para ver cada hora de entrada. Horario de El Salvador.</p>
+        </div>
+        <button aria-label="Cerrar calendario" className={styles.calendarClose} onClick={onClose} type="button">×</button>
+      </div>
+      <div className={styles.calendarBody}>
+        <div>
+          <div className={styles.monthNavigation}>
+            <button aria-label="Mes anterior" disabled={month <= firstMonth} onClick={() => changeMonth(-1)} type="button">‹</button>
+            <strong>{monthTitle.format(new Date(`${month}-01T00:00:00.000Z`))}</strong>
+            <button aria-label="Mes siguiente" disabled={month >= currentMonth} onClick={() => changeMonth(1)} type="button">›</button>
+          </div>
+          <div aria-label="Calendario mensual de accesos" className={styles.calendarGrid} role="group">
+            {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => <span className={styles.weekday} key={day}>{day}</span>)}
+            {calendarCells(month).map((day, index) => day ? (
+              <button
+                aria-label={`${fullDay.format(new Date(`${day}T00:00:00.000Z`))}: ${counts.get(day) ?? 0} accesos`}
+                aria-pressed={selectedDay === day}
+                className={`${styles.calendarDay} ${counts.has(day) ? styles.calendarDayActive : ''} ${selectedDay === day ? styles.calendarDaySelected : ''}`}
+                key={day}
+                onClick={() => setSelectedDay(day)}
+                type="button"
+              >
+                <span>{Number(day.slice(-2))}</span>
+                {counts.has(day) ? <small>{counts.get(day)}</small> : null}
+              </button>
+            ) : <span aria-hidden="true" key={`empty-${index}`} />)}
+          </div>
+          <p className={styles.calendarFootnote}>
+            {isLoading ? 'Cargando accesos…' : `${data?.events.length ?? 0} accesos en este mes · ${data?.days.length ?? 0} días con actividad`}
+          </p>
+        </div>
+        <div className={styles.dayDetail}>
+          <span className={styles.sectionKicker}>Detalle del día</span>
+          <h4>{selectedDay ? fullDay.format(new Date(`${selectedDay}T00:00:00.000Z`)) : 'Elige una fecha'}</h4>
+          {error ? <p className={styles.calendarError} role="alert">{error.message}</p> : null}
+          {selectedDay && !isLoading && !error ? (
+            dayEvents.length ? (
+              <ol className={styles.dayEvents}>
+                {dayEvents.map((event, index) => (
+                  <li key={event.id}>
+                    <span className={styles.eventSequence}>{String(index + 1).padStart(2, '0')}</span>
+                    <span>Inicio de sesión exitoso</span>
+                    <time dateTime={event.occurredAt}>{accessTime.format(new Date(event.occurredAt))}</time>
+                  </li>
+                ))}
+              </ol>
+            ) : <p className={styles.dayEmpty}>No hay accesos registrados en esta fecha.</p>
+          ) : null}
+          {!selectedDay ? <p className={styles.dayEmpty}>Los días resaltados indican actividad. Haz clic para ver las horas de entrada.</p> : null}
+        </div>
+      </div>
+      <p className={styles.calendarCaveat}>Solo se muestran ingresos exitosos desde que se activó la bitácora; los anteriores no se pueden reconstruir.</p>
+    </section>
+  );
+}
+
 export default function LoginAnalyticsPage() {
   const [query, setQuery] = useState('');
   const [userFilter, setUserFilter] = useState<UserFilter>('all');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const {
     data: snapshot,
     error,
@@ -171,6 +298,7 @@ export default function LoginAnalyticsPage() {
       );
     });
   }, [query, snapshot?.users, userFilter]);
+  const selectedUser = snapshot?.users.find((user) => user.userId === selectedUserId);
 
   const totals = useMemo(
     () => ({
@@ -434,6 +562,14 @@ export default function LoginAnalyticsPage() {
                           <span className={styles.roleLabel}>
                             {roleLabels[user.role] ?? user.role}
                           </span>
+                          <button
+                            aria-expanded={selectedUserId === user.userId}
+                            className={styles.historyButton}
+                            onClick={() => setSelectedUserId((current) => current === user.userId ? null : user.userId)}
+                            type="button"
+                          >
+                            <AnalyticsIcon name="calendar" /> Ver calendario
+                          </button>
                         </span>
                       </div>
                     </td>
@@ -486,6 +622,9 @@ export default function LoginAnalyticsPage() {
               </tbody>
             </table>
           </div>
+          {selectedUser ? (
+            <LoginCalendar key={selectedUser.userId} onClose={() => setSelectedUserId(null)} user={selectedUser} />
+          ) : null}
         </section>
 
         <aside aria-labelledby="recent-logins-title" className={styles.activityPanel}>

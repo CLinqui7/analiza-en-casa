@@ -55,6 +55,21 @@ test('dedicated analytics account sees live login frequency without workspace ac
     requests += 1;
     await route.fulfill({ json: snapshot });
   });
+  await page.route('**/api/login-analytics/history?*', async (route) => {
+    const month = new URL(route.request().url()).searchParams.get('month');
+    await route.fulfill({ json: month === '2026-09' ? {
+      userId: 'synthetic-user-one', month,
+      days: [{ day: '2026-09-28', count: 1 }],
+      events: [{ id: 'synthetic-september-login', occurredAt: '2026-09-28T15:00:00.000Z' }],
+    } : {
+      userId: 'synthetic-user-one', month: '2026-10',
+      days: [{ day: '2026-10-01', count: 2 }],
+      events: [
+        { id: 'synthetic-login-one', occurredAt: '2026-10-01T14:30:00.000Z' },
+        { id: 'synthetic-login-two', occurredAt: '2026-10-01T13:00:00.000Z' },
+      ],
+    } });
+  });
   await page.goto('/login');
   await page.getByLabel('Usuario o correo').fill('analytics@demo.local');
   await page.getByLabel('Clave').fill('demo-analytics');
@@ -77,6 +92,14 @@ test('dedicated analytics account sees live login frequency without workspace ac
   await expect(page.getByText('user.one@example.test')).toHaveCount(2);
   await expect(page.getByRole('cell', { name: '9', exact: true })).toHaveCount(2);
   await expect(page.getByText('Sin accesos registrados')).toBeVisible();
+  await page.getByRole('row').filter({ hasText: 'Usuario sintético uno' }).getByRole('button', { name: 'Ver calendario' }).click();
+  await expect(page.getByRole('heading', { name: 'Accesos de Usuario sintético uno' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /1 de octubre de 2026: 2 accesos/ })).toBeVisible();
+  await page.getByRole('button', { name: /1 de octubre de 2026: 2 accesos/ }).click();
+  await expect(page.getByText('Inicio de sesión exitoso')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Mes anterior' }).click();
+  await expect(page.getByRole('button', { name: /28 de septiembre de 2026: 1 accesos/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar calendario' }).click();
   await page.getByRole('button', { name: 'Con acceso en 30 días' }).click();
   await expect(page.getByText('user.two@example.test')).toHaveCount(0);
   await page.getByRole('button', { name: 'Todos' }).click();
