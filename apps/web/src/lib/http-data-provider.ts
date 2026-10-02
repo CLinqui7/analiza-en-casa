@@ -266,6 +266,21 @@ export class HttpDataProvider implements DataProvider {
     return (payload as { shifts: unknown[] }).shifts.map((shift) => shiftSchema.parse(shift));
   }
 
+  async updateShift(shift: Shift, idempotencyKey: string): Promise<Shift> {
+    const response = await this.fetchImpl('/api/shifts', {
+      method: 'PATCH',
+      credentials: 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...this.mutationHeaders(),
+      },
+      body: JSON.stringify({ shift, idempotencyKey }),
+    });
+    if (!response.ok) throw await responseError(response, 'No fue posible actualizar el turno.');
+    return shiftSchema.parse(await response.json());
+  }
+
   async createQuote(quote: Quote): Promise<Quote> {
     const response = await this.fetchImpl('/api/quotes', {
       method: 'POST',

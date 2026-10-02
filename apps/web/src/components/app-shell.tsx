@@ -28,6 +28,12 @@ type NavigationGroup = {
 
 const navigation: NavigationGroup[] = [
   {
+    label: 'Analítica de accesos',
+    href: '/analytics/logins',
+    permission: 'login-analytics:read',
+    actionId: 'LOGIN-ANALYTICS-NAVIGATE',
+  },
+  {
     label: 'Dashboard',
     href: '/dashboard',
     permission: 'dashboard:read',
@@ -785,22 +791,24 @@ export function AppShell({ children }: PropsWithChildren) {
             >
               Menú
             </button>
-            <form className="global-search" onSubmit={submitGlobalSearch} role="search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                aria-label="Buscar en Analiza en Casa"
-                onChange={(event) => setGlobalSearch(event.target.value)}
-                placeholder={
-                  isCoreRelease
-                    ? 'Buscar paciente, hospitalización o turno…'
-                    : 'Buscar paciente, caso, cotización o comando…'
-                }
-                ref={globalSearchRef}
-                type="search"
-                value={globalSearch}
-              />
-              <kbd>Ctrl K</kbd>
-            </form>
+            {can('dashboard:read') ? (
+              <form className="global-search" onSubmit={submitGlobalSearch} role="search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  aria-label="Buscar en Analiza en Casa"
+                  onChange={(event) => setGlobalSearch(event.target.value)}
+                  placeholder={
+                    isCoreRelease
+                      ? 'Buscar paciente, hospitalización o turno…'
+                      : 'Buscar paciente, caso, cotización o comando…'
+                  }
+                  ref={globalSearchRef}
+                  type="search"
+                  value={globalSearch}
+                />
+                <kbd>Ctrl K</kbd>
+              </form>
+            ) : null}
           </div>
           <div className="topbar-actions">
             <span className="topbar-page-name">{currentPageLabel(pathname)}</span>

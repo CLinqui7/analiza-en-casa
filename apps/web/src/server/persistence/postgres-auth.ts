@@ -49,6 +49,35 @@ export function postgresAuthStore(pool: Pool): AuthStore {
         [s.sessionHash, s.csrfHash, s.userId, s.organizationId, s.expiresAt],
       );
     },
+    async createLoginSession(session, occurredAt) {
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query("SELECT set_config('analiza.organization_id',$1,true)", [
+          session.organizationId,
+        ]);
+        await client.query(
+          'INSERT INTO analiza.sessions(session_hash,csrf_hash,user_id,organization_id,expires_at) VALUES($1,$2,$3,$4,$5)',
+          [
+            session.sessionHash,
+            session.csrfHash,
+            session.userId,
+            session.organizationId,
+            session.expiresAt,
+          ],
+        );
+        await client.query(
+          'INSERT INTO analiza.login_events(organization_id,id,user_id,occurred_at) VALUES($1,$2,$3,$4)',
+          [session.organizationId, randomUUID(), session.userId, occurredAt],
+        );
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK').catch(() => undefined);
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
     async findSession(hash) {
       return (
         (

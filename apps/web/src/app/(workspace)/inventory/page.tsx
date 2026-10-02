@@ -4,17 +4,22 @@ import { currentInventoryBalance } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { useWorkspace } from '@/components/providers';
+import { InventoryTransferDialog, WarehouseManagement } from '@/components/warehouse-management';
+import { InventoryTraceability } from '@/components/inventory-traceability';
+import { useAuth, useWorkspace } from '@/components/providers';
+import { expiredTraceQuantity } from '@/lib/inventory-traceability';
+import { useOperations } from '@/lib/use-operations';
 
 const demoItemCatalog: Record<string, { name: string; sku: string }> = {
   'inventory-demo-kit': { name: 'Kit operativo demo', sku: 'KIT-DEMO-001' },
   'inventory-demo-supplies': { name: 'Insumos demo', sku: 'INS-DEMO-001' },
 };
-const warehouses: Record<string, string> = {
+const demoWarehouses: Record<string, string> = {
   'warehouse-demo-central': 'Bodega central demo',
   'warehouse-demo-north': 'Bodega norte demo',
 };
-type Surface = 'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'KITS';
+type Surface =
+  'ITEMS' | 'ACKNOWLEDGEMENTS' | 'CLOSURES' | 'SUPPLIERS' | 'WAREHOUSES' | 'LOTS' | 'KITS';
 type AcknowledgementTab = 'PATIENTS' | 'RESOURCES' | 'UNAVAILABLE' | 'REQUESTS' | 'TASKS';
 type ClosureTab = 'PENDING' | 'TOTALS' | 'CLOSED' | 'RESOURCES';
 const acknowledgementTabs: Array<{ id: AcknowledgementTab; label: string; actionId: string }> = [
@@ -70,7 +75,31 @@ const emptyClosureCopy: Record<
 };
 
 export default function InventoryPage() {
-  const { inventoryMovements, catalogItems, providerMode } = useWorkspace();
+  const { inventoryMovements, catalogItems, providerMode, refreshWorkspace } = useWorkspace();
+  const { can } = useAuth();
+  const operations = useOperations();
+  const visibleWarehouses = useMemo(
+    () =>
+      providerMode === 'mock'
+        ? Object.entries(demoWarehouses).map(([id, name]) => ({
+            id,
+            code: id,
+            name,
+            description: 'Bodega de datos sintéticos para demostración.',
+            status: 'ACTIVE' as const,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          }))
+        : operations.warehouses,
+    [operations.warehouses, providerMode],
+  );
+  const warehouseNames = useMemo(
+    () => ({
+      ...(providerMode === 'mock' ? demoWarehouses : {}),
+      ...Object.fromEntries(visibleWarehouses.map((warehouse) => [warehouse.id, warehouse.name])),
+    }),
+    [providerMode, visibleWarehouses],
+  );
   const itemCatalog = useMemo(
     () => ({
       ...(providerMode === 'mock' ? demoItemCatalog : {}),
@@ -90,30 +119,44 @@ export default function InventoryPage() {
   const [historyItemId, setHistoryItemId] = useState<string | null>(null);
   const [historyFrom, setHistoryFrom] = useState('');
   const [historyTo, setHistoryTo] = useState('');
+  const [transferOpen, setTransferOpen] = useState(false);
   const rows = useMemo(() => {
     const itemIds = [...new Set(inventoryMovements.map((movement) => movement.itemId))];
     return itemIds
-      .map((itemId) => {
+      .flatMap((itemId) => {
         const movements = inventoryMovements.filter((movement) => movement.itemId === itemId);
         const warehouseIds = [
           ...new Set(movements.map((movement) => movement.warehouseId).filter(Boolean)),
         ] as string[];
-        return {
+        return (warehouseIds.length ? warehouseIds : ['central']).map((warehouseId) => ({
+          rowId: `${itemId}:${warehouseId}`,
           itemId,
           type: 'Sintético',
           code: itemCatalog[itemId]?.sku ?? itemId,
           name: itemCatalog[itemId]?.name ?? itemId,
-          warehouse:
-            warehouseIds.map((id) => warehouses[id] ?? id).join(', ') || 'Sin bodega documentada',
-          available: currentInventoryBalance(inventoryMovements, itemId),
-        };
+          warehouse: warehouseNames[warehouseId] ?? warehouseId,
+          available:
+            currentInventoryBalance(inventoryMovements, itemId, warehouseId) -
+            expiredTraceQuantity(operations.traceRecords, itemId, warehouseId),
+        }));
       })
       .filter((row) =>
         `${row.type} ${row.code} ${row.name} ${row.warehouse}`
           .toLocaleLowerCase('es')
           .includes(query.toLocaleLowerCase('es')),
       );
-  }, [inventoryMovements, query, itemCatalog]);
+  }, [inventoryMovements, operations.traceRecords, query, itemCatalog, warehouseNames]);
+  const supplierRows = useMemo(
+    () =>
+      catalogItems
+        .filter((item) => item.category === 'PROVIDERS')
+        .filter((item) =>
+          `${item.sku} ${item.name} ${item.contactName ?? ''} ${item.landlinePhone ?? ''} ${item.mobilePhone ?? ''} ${item.email ?? ''}`
+            .toLocaleLowerCase('es')
+            .includes(supplierQuery.toLocaleLowerCase('es')),
+        ),
+    [catalogItems, supplierQuery],
+  );
   const historyItem =
     rows.find((row) => row.itemId === historyItemId) ??
     (historyItemId
@@ -152,6 +195,7 @@ export default function InventoryPage() {
   const movementLabel = (movement: (typeof inventoryMovements)[number]) =>
     movement.kind === 'ENTRY' ||
     movement.kind === 'RETURN' ||
+    (movement.kind === 'TRANSFER' && movement.transferDirection === 'IN') ||
     (movement.kind === 'ADJUSTMENT' && movement.adjustmentDirection !== 'OUT')
       ? 'Entrada'
       : 'Salida';
@@ -190,9 +234,11 @@ export default function InventoryPage() {
                   ? 'Inventario / Proveedores'
                   : surface === 'WAREHOUSES'
                     ? 'Items / Bodegas'
-                    : surface === 'KITS'
-                      ? 'Inventario / Kit de insumos'
-                      : 'Gestión de inventario'}
+                    : surface === 'LOTS'
+                      ? 'Inventario / Lotes y números de serie'
+                      : surface === 'KITS'
+                        ? 'Inventario / Kit de insumos'
+                        : 'Gestión de inventario'}
           </h1>
           <p>
             {surface === 'ACKNOWLEDGEMENTS'
@@ -202,10 +248,12 @@ export default function InventoryPage() {
                 : surface === 'SUPPLIERS'
                   ? 'Superficie factual y de solo lectura. No consulta ni crea proveedores; los datos, identidades y ciclo de vida requieren definición aprobada.'
                   : surface === 'WAREHOUSES'
-                    ? 'Superficie factual y de solo lectura. No consulta ni crea bodegas; la fuente, los permisos y los traslados requieren definición aprobada.'
-                    : surface === 'KITS'
-                      ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
-                      : 'Listado factual derivado de movimientos sintéticos. No calcula compromisos, reservas, lotes, traslados ni reglas de bodega sin una definición aprobada.'}
+                    ? 'Administre bodegas activas e inactivas con códigos únicos, permisos y trazabilidad. La desactivación exige saldo total cero.'
+                    : surface === 'LOTS'
+                      ? 'Recepción trazable por lote o serie, cuarentena, liberación, bloqueo, rechazo y salida FEFO/FIFO por bodega.'
+                      : surface === 'KITS'
+                        ? 'Superficie factual y de solo lectura. No consulta ni crea kits; la composición, consumo, permisos y auditoría requieren definición aprobada.'
+                        : 'Existencias cronológicas por ítem y bodega. Los traslados son atómicos y preservan lote o serie cuando existe trazabilidad.'}
           </p>
         </div>
         {surface === 'ITEMS' ? (
@@ -222,7 +270,14 @@ export default function InventoryPage() {
             <Button
               aria-describedby="inventory-transfer-help"
               data-action-id="INVENTORY-TRANSFERS"
-              disabled
+              disabled={
+                !can('inventory:write') ||
+                !operations.connected ||
+                operations.busy ||
+                operations.warehouses.filter((warehouse) => warehouse.status === 'ACTIVE').length <
+                  2
+              }
+              onClick={() => setTransferOpen(true)}
               type="button"
             >
               Traslados
@@ -327,7 +382,13 @@ export default function InventoryPage() {
         >
           Comprometido
         </button>
-        <button aria-describedby="inventory-lots-help" className="tab" disabled type="button">
+        <button
+          aria-current={surface === 'LOTS' ? 'page' : undefined}
+          className={surface === 'LOTS' ? 'tab active' : 'tab'}
+          data-action-id="INVENTORY-LOTS-OPEN"
+          onClick={() => setSurface('LOTS')}
+          type="button"
+        >
           Lotes
         </button>
       </nav>
@@ -347,14 +408,15 @@ export default function InventoryPage() {
             La exportación requiere columnas, minimización y autorización aprobadas (CH14-Q015).
           </p>
           <p className="field-help" id="inventory-transfer-help">
-            Los traslados requieren bodega de origen/destino, autorización y auditoría aprobadas
-            (CH14-Q001).
+            Un traslado autorizado registra salida y entrada en una sola transacción, sin permitir
+            saldo negativo.
           </p>
           <p className="field-help" id="inventory-commitments-help">
             La regla de inventario comprometido requiere definición aprobada (CH14-Q001).
           </p>
           <p className="field-help" id="inventory-lots-help">
-            Lotes y series requieren reglas de trazabilidad aprobadas (CH14-Q001).
+            Las existencias vencidas se excluyen del disponible. Recepciones y salidas trazadas se
+            administran en Lotes.
           </p>
           <div className="filter-grid">
             <label>
@@ -390,7 +452,7 @@ export default function InventoryPage() {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.itemId}>
+                  <tr key={row.rowId}>
                     <td>
                       <Button
                         className="button-secondary"
@@ -556,104 +618,60 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan={6}>
-                    <EmptyState
-                      detail={
-                        supplierQuery
-                          ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
-                          : 'No existe una fuente autorizada de proveedores en el modelo actual.'
-                      }
-                      title="Sin proveedores documentados"
-                    />
-                  </td>
-                </tr>
+                {supplierRows.map((supplier) => (
+                  <tr key={supplier.id}>
+                    <td>
+                      <code>{supplier.sku}</code>
+                    </td>
+                    <td>{supplier.name}</td>
+                    <td>{supplier.contactName || 'No documentado'}</td>
+                    <td>{supplier.mobilePhone || supplier.landlinePhone || 'No documentado'}</td>
+                    <td>{supplier.email || 'No documentado'}</td>
+                    <td>No documentada</td>
+                  </tr>
+                ))}
+                {!supplierRows.length ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <EmptyState
+                        detail={
+                          supplierQuery
+                            ? `No hay proveedores documentados que coincidan con “${supplierQuery}”.`
+                            : 'No existe una fuente autorizada de proveedores en el modelo actual.'
+                        }
+                        title="Sin proveedores documentados"
+                      />
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
           <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
         </Panel>
       ) : surface === 'WAREHOUSES' ? (
-        <Panel>
-          <div className="table-heading">
-            <div>
-              <h2>Bodegas</h2>
-              <p className="field-help" id="inventory-warehouses-active-help">
-                Activo se muestra como control observado, pero no filtra ni deriva estados sin una
-                definición aprobada (CH14-Q009).
-              </p>
-            </div>
-          </div>
-          <div className="filter-grid">
-            <label>
-              Activo
-              <select
-                aria-describedby="inventory-warehouses-active-help"
-                aria-label="Estado de bodegas"
-                data-action-id="INVENTORY-WAREHOUSES-ACTIVE-FILTER"
-                disabled
-                value="active"
-              >
-                <option value="active">Activo</option>
-              </select>
-            </label>
-            <label>
-              Registros
-              <select
-                aria-label="Registros de bodegas por página"
-                data-action-id="INVENTORY-WAREHOUSES-PAGE-SIZE"
-                disabled
-                value="50"
-              >
-                <option value="50">50</option>
-              </select>
-            </label>
-            <div aria-label="Paginación de bodegas" className="action-row">
-              <Button data-action-id="INVENTORY-WAREHOUSES-PAGE-PREV" disabled type="button">
-                Anterior
-              </Button>
-              <Button data-action-id="INVENTORY-WAREHOUSES-PAGE-NEXT" disabled type="button">
-                Siguiente
-              </Button>
-            </div>
-            <label>
-              Buscar bodegas
-              <input
-                data-action-id="INVENTORY-WAREHOUSES-SEARCH"
-                onChange={(event) => setWarehouseQuery(event.target.value)}
-                placeholder="Buscar nombre o descripción"
-                type="search"
-                value={warehouseQuery}
-              />
-            </label>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Descripción</th>
-                  <th>Fecha de creación</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={3}>
-                    <EmptyState
-                      detail={
-                        warehouseQuery
-                          ? `No hay bodegas documentadas que coincidan con “${warehouseQuery}”.`
-                          : 'No existe una fuente autorizada de bodegas en el modelo actual.'
-                      }
-                      title="Sin bodegas documentadas"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <p className="field-help">Mostrando página 1 de 1 · Anterior · Siguiente</p>
-        </Panel>
+        <WarehouseManagement
+          busy={operations.busy}
+          canWrite={can('inventory:write')}
+          connected={operations.connected}
+          error={operations.error}
+          execute={operations.execute}
+          query={warehouseQuery}
+          setQuery={setWarehouseQuery}
+          warehouses={visibleWarehouses}
+        />
+      ) : surface === 'LOTS' ? (
+        <InventoryTraceability
+          busy={operations.busy}
+          canWrite={can('inventory:write')}
+          connected={operations.connected}
+          error={operations.error}
+          execute={operations.execute}
+          items={catalogItems}
+          records={operations.traceRecords}
+          refreshWorkspace={refreshWorkspace}
+          warehouses={visibleWarehouses}
+        />
       ) : surface === 'KITS' ? (
         <Panel>
           <div className="table-heading">
@@ -834,8 +852,8 @@ export default function InventoryPage() {
               </label>
             </div>
             <p className="field-help">
-              Rango de fechas sobre movimientos locales. Lote/serie, origen, destino y estado no
-              están documentados por el modelo actual (CH14-Q001).
+              Rango de fechas sobre movimientos locales. Las recepciones, cambios de estado y
+              asignaciones FEFO conservan lote o serie y bodega.
             </p>
             <div className="table-wrap">
               <table>
@@ -856,12 +874,26 @@ export default function InventoryPage() {
                     <tr key={movement.id}>
                       <td>{movement.kind}</td>
                       <td>{new Date(movement.createdAt).toLocaleString('es-SV')}</td>
-                      <td>No documentado</td>
-                      <td>No documentado</td>
-                      <td>No documentado</td>
+                      <td>{movement.traceNumber ?? 'No trazado'}</td>
+                      <td>
+                        {movement.kind === 'TRANSFER' && movement.transferDirection === 'OUT'
+                          ? (warehouseNames[movement.warehouseId ?? ''] ?? movement.warehouseId)
+                          : movement.kind === 'TRANSFER'
+                            ? (warehouseNames[movement.counterpartWarehouseId ?? ''] ??
+                              movement.counterpartWarehouseId)
+                            : 'No aplica'}
+                      </td>
+                      <td>
+                        {movement.kind === 'TRANSFER' && movement.transferDirection === 'IN'
+                          ? (warehouseNames[movement.warehouseId ?? ''] ?? movement.warehouseId)
+                          : movement.kind === 'TRANSFER'
+                            ? (warehouseNames[movement.counterpartWarehouseId ?? ''] ??
+                              movement.counterpartWarehouseId)
+                            : 'No aplica'}
+                      </td>
                       <td>{movement.quantity}</td>
                       <td>{movementLabel(movement)}</td>
-                      <td>No documentado</td>
+                      <td>{movement.traceRecordId ? 'Trazado' : 'Movimiento histórico'}</td>
                     </tr>
                   ))}
                   {!historyRows.length ? (
@@ -880,6 +912,18 @@ export default function InventoryPage() {
           </div>
         ) : null}
       </Dialog>
+      <InventoryTransferDialog
+        busy={operations.busy}
+        error={operations.error}
+        execute={operations.execute}
+        items={catalogItems}
+        movements={inventoryMovements}
+        traceRecords={operations.traceRecords}
+        onClose={() => setTransferOpen(false)}
+        open={transferOpen}
+        refreshWorkspace={refreshWorkspace}
+        warehouses={visibleWarehouses}
+      />
     </div>
   );
 }

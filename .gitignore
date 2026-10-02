@@ -13,6 +13,8 @@ dist/
 coverage/
 playwright-report/
 test-results/
+tmp/
+output/
 .qa-results/
 *.tsbuildinfo
 *.log

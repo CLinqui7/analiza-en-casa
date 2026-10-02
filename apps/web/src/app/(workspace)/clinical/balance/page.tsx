@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { balanceTotals, type BalanceEntry } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isAdministrator } from '@/lib/permissions';
 import { useOperations } from '@/lib/use-operations';
 
 export default function BalancePage() {
@@ -28,7 +29,7 @@ export default function BalancePage() {
   const editable = Boolean(
     currentCase &&
     currentCase.status !== 'CLOSED' &&
-    (session?.role === 'ADMIN' ||
+    (isAdministrator(session?.role) ||
       (session &&
         ['NURSE', 'NURSE_MANAGER'].includes(session.role) &&
         currentCase.assignedNurseUserIds?.includes(session.userId))),

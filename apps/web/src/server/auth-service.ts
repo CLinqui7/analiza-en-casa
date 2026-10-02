@@ -107,6 +107,7 @@ export interface AuthStore {
   findActiveMemberships(userId: string): Promise<MembershipRecord[]>;
   createMembership(membership: MembershipRecord): Promise<void>;
   createSession(session: StoredSession): Promise<void>;
+  createLoginSession?(session: StoredSession, occurredAt: Date): Promise<void>;
   findSession(sessionHash: string): Promise<StoredSession | null>;
   updateSessionCsrf(sessionHash: string, csrfHash: string): Promise<void>;
   revokeSession(sessionHash: string, now: Date): Promise<void>;
@@ -211,7 +212,8 @@ export class AuthService {
       organizationId: memberships[0].organizationId,
       expiresAt: new Date(issuedAt.getTime() + SESSION_TTL_MS),
     };
-    await this.store.createSession(stored);
+    if (this.store.createLoginSession) await this.store.createLoginSession(stored, issuedAt);
+    else await this.store.createSession(stored);
     return { sessionToken, csrfToken, session: sessionFrom(stored, memberships[0]) };
   }
 

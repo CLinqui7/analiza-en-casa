@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { useOperations } from '@/lib/use-operations';
 
 const demoItemCatalog: Record<string, { name: string; sku: string }> = {
   'inventory-demo-kit': { name: 'Kit operativo demo', sku: 'KIT-DEMO-001' },
@@ -21,7 +22,7 @@ const demoWarehouses: Record<string, string> = {
 const movementFormSchema = z.object({
   itemId: z.string().min(1, 'Seleccione un ítem.'),
   warehouseId: z.string().min(1, 'Seleccione una bodega.'),
-  kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
+  kind: z.enum(['ENTRY', 'EXIT', 'RETURN', 'ADJUSTMENT']),
   adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
   quantity: z.coerce.number().int().positive('La cantidad debe ser un entero positivo.'),
   reference: z.string().trim(),
@@ -48,13 +49,15 @@ const kindLabel: Record<InventoryMovement['kind'], string> = {
 
 function direction(movement: InventoryMovement) {
   if (movement.kind === 'ENTRY' || movement.kind === 'RETURN') return 'in';
-  if (movement.kind === 'EXIT' || movement.kind === 'TRANSFER') return 'out';
+  if (movement.kind === 'TRANSFER') return movement.transferDirection === 'IN' ? 'in' : 'out';
+  if (movement.kind === 'EXIT') return 'out';
   return movement.adjustmentDirection === 'OUT' ? 'out' : 'in';
 }
 
 export default function KardexPage() {
   const pathname = usePathname();
   const { addInventoryMovement, inventoryMovements, catalogItems, providerMode } = useWorkspace();
+  const operations = useOperations();
   const itemCatalog = useMemo(
     () => ({
       ...(providerMode === 'mock' ? demoItemCatalog : {}),
@@ -71,7 +74,7 @@ export default function KardexPage() {
     [catalogItems, providerMode],
   );
   const warehouses: Record<string, string> = {
-    ...(providerMode === 'mock' ? demoWarehouses : { central: 'Bodega central' }),
+    ...(providerMode === 'mock' ? demoWarehouses : {}),
     ...Object.fromEntries(
       inventoryMovements
         .filter((item) => item.warehouseId)
@@ -80,7 +83,13 @@ export default function KardexPage() {
           item.warehouseId === 'central' ? 'Bodega central' : item.warehouseId!,
         ]),
     ),
+    // Keep the configured label authoritative, including for inactive warehouses that
+    // still appear in the immutable movement history.
+    ...Object.fromEntries(operations.warehouses.map((warehouse) => [warehouse.id, warehouse.name])),
   };
+  const activeWarehouses = operations.warehouses.filter(
+    (warehouse) => warehouse.status === 'ACTIVE',
+  );
   const { can, session } = useAuth();
   const isMovementView = pathname.endsWith('/movements');
   const [isOpen, setOpen] = useState(false);
@@ -142,7 +151,8 @@ export default function KardexPage() {
     resolver: zodResolver(movementFormSchema),
     defaultValues: {
       itemId: itemIds[0] ?? '',
-      warehouseId: Object.keys(warehouses)[0],
+      warehouseId:
+        providerMode === 'mock' ? Object.keys(demoWarehouses)[0] : (activeWarehouses[0]?.id ?? ''),
       kind: 'ENTRY',
       quantity: 1,
       reference: '',
@@ -201,15 +211,26 @@ export default function KardexPage() {
           <h1>{isMovementView ? 'Movimientos de inventario' : 'Kárdex de inventario'}</h1>
           <p>
             {isMovementView
-              ? 'Entradas, salidas, transferencias, devoluciones y ajustes con responsable y referencia.'
+              ? 'Entradas, salidas, devoluciones, ajustes y traslados con responsable, referencia y doble asiento auditable.'
               : 'Saldo cronológico reproducible por ítem y bodega, sin edición directa de existencias.'}
           </p>
         </div>
         {can('inventory:write') ? (
           <Button
             data-action-id="INVENTORY-MOVEMENT-CREATE"
+            disabled={
+              !itemIds.length ||
+              (providerMode !== 'mock' && (!operations.connected || !activeWarehouses.length))
+            }
             onClick={() => {
               setResult(null);
+              form.setValue('itemId', itemIds[0] ?? '');
+              form.setValue(
+                'warehouseId',
+                providerMode === 'mock'
+                  ? Object.keys(demoWarehouses)[0]
+                  : (activeWarehouses[0]?.id ?? ''),
+              );
               setOpen(true);
             }}
             type="button"
@@ -535,7 +556,10 @@ export default function KardexPage() {
           <label>
             Bodega
             <select {...form.register('warehouseId')}>
-              {Object.entries(warehouses).map(([id, name]) => (
+              {(providerMode === 'mock'
+                ? Object.entries(demoWarehouses)
+                : activeWarehouses.map((warehouse) => [warehouse.id, warehouse.name] as const)
+              ).map(([id, name]) => (
                 <option key={id} value={id}>
                   {name}
                 </option>
@@ -547,7 +571,6 @@ export default function KardexPage() {
             <select {...form.register('kind')}>
               <option value="ENTRY">Entrada</option>
               <option value="EXIT">Salida</option>
-              <option value="TRANSFER">Transferencia</option>
               <option value="RETURN">Devolución</option>
               <option value="ADJUSTMENT">Ajuste</option>
             </select>

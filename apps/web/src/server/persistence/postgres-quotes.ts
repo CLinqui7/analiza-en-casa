@@ -48,12 +48,19 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
       const quote = parseQuoteCreate(input);
       try {
         return await transaction(pool, actor, async (client) => {
-          const hospitalization = await client.query(
-            'SELECT id FROM analiza.hospitalizations WHERE organization_id=$1 AND id=$2 AND patient_id=$3',
-            [actor.organizationId, quote.caseId, quote.patientId],
+          const patient = await client.query(
+            'SELECT id FROM analiza.patients WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, quote.patientId],
           );
-          if (!hospitalization.rowCount)
-            throw new MongoInputError('La hospitalización no está disponible.');
+          if (!patient.rowCount) throw new MongoInputError('El paciente no está disponible.');
+          if (quote.caseId) {
+            const hospitalization = await client.query(
+              'SELECT id FROM analiza.hospitalizations WHERE organization_id=$1 AND id=$2 AND patient_id=$3',
+              [actor.organizationId, quote.caseId, quote.patientId],
+            );
+            if (!hospitalization.rowCount)
+              throw new MongoInputError('La hospitalización no está disponible.');
+          }
 
           const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
           if (quote.version === 1) {
@@ -74,6 +81,13 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
               !quote.revisionReason?.trim()
             )
               throw new MongoInputError('La revisión no continúa una versión enviada válida.');
+            if (
+              previousQuote.patientId !== quote.patientId ||
+              previousQuote.caseId !== quote.caseId
+            )
+              throw new MongoInputError(
+                'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
+              );
           }
 
           const stored: Quote = {
@@ -86,7 +100,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
             [
               actor.organizationId,
               stored.id,
-              stored.caseId,
+              stored.caseId ?? null,
               stored.patientId,
               rootId,
               stored.version,
@@ -120,8 +134,12 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
             [actor.organizationId, id, expectedVersion],
           )
         ).rows[0];
-        if (!current || !canEditQuote(quoteSchema.parse(current.body)))
-          throw new MongoConflictError();
+        const currentQuote = current ? quoteSchema.parse(current.body) : null;
+        if (!currentQuote || !canEditQuote(currentQuote)) throw new MongoConflictError();
+        if (currentQuote.patientId !== quote.patientId || currentQuote.caseId !== quote.caseId)
+          throw new MongoInputError(
+            'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
+          );
         const updated = await client.query(
           "UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 AND body->>'status'='DRAFT' AND (body->>'immutable')::boolean=false RETURNING body",
           [actor.organizationId, id, expectedVersion, JSON.stringify(quote)],

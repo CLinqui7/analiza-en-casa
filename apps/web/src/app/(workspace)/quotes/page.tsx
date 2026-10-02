@@ -7,6 +7,7 @@ import {
   createQuoteRevision,
   currentInventoryBalance,
   filterQuotes,
+  quoteDisplayCode,
   quoteCategories,
   searchPatients,
   searchQuotes,
@@ -22,7 +23,6 @@ import { SearchableSelect } from '@/components/common/searchable-select';
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
   Quote,
-  | 'caseId'
   | 'summary'
   | 'careSetting'
   | 'comments'
@@ -34,7 +34,13 @@ type QuoteDraft = Pick<
   | 'discountGroup'
   | 'referralLabel'
   | 'referralSelections'
-> & { revisionReason: string; patientId: string; patientQuery: string; referralQuery: string };
+> & {
+  caseId: string;
+  revisionReason: string;
+  patientId: string;
+  patientQuery: string;
+  referralQuery: string;
+};
 
 const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
   id: '',
@@ -100,7 +106,7 @@ function updatedCategoryPercentages(
 
 function cloneDraft(quote: Quote): QuoteDraft {
   return {
-    caseId: quote.caseId,
+    caseId: quote.caseId ?? '',
     patientId: quote.patientId,
     patientQuery: '',
     referralQuery: quote.referralLabel ?? '',
@@ -149,14 +155,7 @@ function QuoteEditor({
     updateQuote,
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
-    source
-      ? cloneDraft(source)
-      : emptyDraft(
-          hospitalizations[0]?.id,
-          hospitalizations[0]
-            ? patients.find((patient) => patient.id === hospitalizations[0].patientId)?.id
-            : '',
-        ),
+    source ? cloneDraft(source) : emptyDraft(),
   );
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -283,7 +282,9 @@ function QuoteEditor({
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
-    if (!selectedCase) nextErrors.caseId = 'Seleccione una hospitalización válida.';
+    if (!selectedPatient) nextErrors.patientId = 'Seleccione un paciente válido.';
+    if (draft.caseId && !selectedCase)
+      nextErrors.caseId = 'La hospitalización seleccionada no corresponde al paciente.';
     if (!draft.summary.trim()) nextErrors.summary = 'El resumen operativo es obligatorio.';
     if (mode === 'revise' && !draft.revisionReason.trim())
       nextErrors.revisionReason = 'El motivo de revisión es obligatorio.';
@@ -299,8 +300,8 @@ function QuoteEditor({
     }
     const now = new Date().toISOString();
     const common = {
-      caseId: selectedCase!.id,
-      patientId: selectedCase!.patientId,
+      ...(selectedCase ? { caseId: selectedCase.id } : {}),
+      patientId: selectedPatient!.id,
       summary: draft.summary.trim(),
       careSetting: draft.careSetting,
       invoiceDate: draft.invoiceDate,
@@ -468,6 +469,7 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              {errors.patientId ? <span className="field-error">{errors.patientId}</span> : null}
             </label>
             <label>
               Documento
@@ -509,7 +511,7 @@ function QuoteEditor({
           </select>
         </label>
         <label>
-          Caso compatible
+          Hospitalización vinculada (opcional)
           <select
             disabled={mode !== 'create'}
             onChange={(event) =>
@@ -517,13 +519,17 @@ function QuoteEditor({
             }
             value={draft.caseId}
           >
-            <option value="">Seleccione una hospitalización</option>
+            <option value="">Sin hospitalización · atención nueva</option>
             {compatibleCases.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.id}
+                {candidate.id} · {candidate.status}
               </option>
             ))}
           </select>
+          <span className="field-help">
+            Para pacientes nuevos puede guardar la cotización sin crear una hospitalización. Vincule
+            una existente sólo cuando la cotización amplíe una atención ya registrada.
+          </span>
           {errors.caseId ? <span className="field-error">{errors.caseId}</span> : null}
         </label>
         <label>
@@ -1293,7 +1299,7 @@ export default function QuotesPage() {
                     return (
                       <tr key={quote.id}>
                         <td>
-                          {quote.id}
+                          <span title={quote.id}>{quoteDisplayCode(quote.id)}</span>
                           <br />
                           <small>v{quote.version}</small>
                         </td>
@@ -1301,7 +1307,7 @@ export default function QuotesPage() {
                           {patients.find((patient) => patient.id === quote.patientId)?.fullName ??
                             'No disponible'}
                           <br />
-                          <small>{quote.caseId}</small>
+                          <small>{quote.caseId ?? 'Atención nueva sin hospitalización'}</small>
                         </td>
                         <td>{new Date(quote.createdAt).toLocaleString('es-SV')}</td>
                         <td>{money(quote.total)}</td>

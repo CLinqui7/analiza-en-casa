@@ -10,6 +10,7 @@ import {
   type FeedbackReport,
   type FeedbackResolution,
 } from '@/lib/feedback';
+import { isAdministrator } from '@/lib/permissions';
 import { MongoAccessError, MongoInputError, type ServerActor } from '../validation/patients';
 import { transaction } from './postgres-pool';
 
@@ -58,7 +59,7 @@ function validateImage(image: FeedbackImage | undefined) {
 }
 
 function requireAdministrator(actor: ServerActor) {
-  if (actor.role !== 'ADMIN') throw new MongoAccessError();
+  if (!isAdministrator(actor.role)) throw new MongoAccessError();
 }
 
 export class PostgresFeedbackRepository {
@@ -66,7 +67,7 @@ export class PostgresFeedbackRepository {
 
   async list(actor: ServerActor): Promise<FeedbackReport[]> {
     return transaction(this.pool, actor, async (client) => {
-      const administrator = actor.role === 'ADMIN';
+      const administrator = isAdministrator(actor.role);
       return (
         await client.query<FeedbackRow>(
           `SELECT report.id,report.module,report.category,report.description,
@@ -133,7 +134,7 @@ export class PostgresFeedbackRepository {
     id: string,
   ): Promise<{ name: string; mimeType: string; bytes: Uint8Array } | null> {
     return transaction(this.pool, actor, async (client) => {
-      const administrator = actor.role === 'ADMIN';
+      const administrator = isAdministrator(actor.role);
       const row = (
         await client.query<{
           image_name: string;
@@ -164,7 +165,8 @@ export class PostgresFeedbackRepository {
   ): Promise<FeedbackReport | null> {
     requireAdministrator(actor);
     const parsed = feedbackResolutionSchema.safeParse(resolution);
-    if (!parsed.success) throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
+    if (!parsed.success)
+      throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
     return transaction(this.pool, actor, async (client) => {
       const row = (
         await client.query<FeedbackRow>(

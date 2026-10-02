@@ -1,0 +1,91 @@
+{
+  "date": "2026-09-28",
+  "source": {
+    "route": "/feedback",
+    "environment": "https://analiza-en-casa-demo.vercel.app",
+    "data_mode": "postgresql",
+    "organization_scope": "authenticated administrator organization",
+    "text_location": "Authoritative source text remains in the tenant-scoped feedback store; this artifact records sanitized summaries only."
+  },
+  "counts": {
+    "previous_2026_09_24": { "new": 0, "reviewing": 3, "resolved": 35 },
+    "observed_2026_09_28": { "new": 6, "reviewing": 3, "resolved": 35 },
+    "after_triage_2026_09_28": { "new": 0, "reviewing": 9, "resolved": 35 },
+    "after_production_verification_2026_09_28": { "new": 0, "reviewing": 5, "resolved": 39 }
+  },
+  "reports": [
+    {
+      "feedback_id": "7bb83834-1c0a-40ce-8f59-06496d65246b",
+      "summary": "Dashboard semanal/mensual de visitas médicas, pacientes ingresados y facturación.",
+      "disposition": "RESOLVED_PRODUCTION_SAFE_SCOPE",
+      "implemented_scope": "Visitas reales por semana/mes y profesión, ingresos administrativos y cobros aplicados; cotizaciones separadas de facturación fiscal.",
+      "dependencies": ["CR-014", "CR-015: only for additional fiscal/commercial formulas"]
+    },
+    {
+      "feedback_id": "11c6094e-e252-45e1-8bfe-48c0b9a679bb",
+      "summary": "Crear bodegas, consultar unidades por bodega y trasladar existencias.",
+      "disposition": "RESOLVED_PRODUCTION_SAFE_SCOPE",
+      "implemented_scope": "Alta, búsqueda, edición y desactivación segura de bodegas tenant-scoped; unidades por bodega y traslados idempotentes de doble asiento en una transacción, con permisos, RLS y auditoría. Validado en producción con traslado y reversa compensatoria sintéticos.",
+      "dependencies": []
+    },
+    {
+      "feedback_id": "75ae2471-2006-4057-ab42-7db59c9eb6ad",
+      "summary": "Entregar cotización como PDF adjunto por WhatsApp.",
+      "disposition": "PARTIAL_PRODUCTION_BLOCKED_INTEGRATION",
+      "implemented_scope": "PDF interno autenticado para versión enviada/inmutable y retiro del WhatsApp directo inseguro.",
+      "dependencies": ["CH07-Q008", "CH07-Q009"]
+    },
+    {
+      "feedback_id": "df6a39dc-927e-4879-8565-26934f3652f1",
+      "summary": "Habilitar funciones de Existencias actualmente expuestas como superficies seguras de solo lectura.",
+      "disposition": "PARTIAL_PRODUCTION_BLOCKED_DEFINITION",
+      "implemented_scope": "Movimientos y Kárdex persistentes; bodegas con ciclo de vida y traslados operativos; proveedores y lotes/series conservan consulta factual.",
+      "dependencies": ["CH14-Q008", "CH14-Q011"]
+    },
+    {
+      "feedback_id": "7549ef34-c87e-4772-b86e-49bb69061d98",
+      "summary": "Buscar ítems por inicio de palabra y pedir sólo serie cuando el ítem es un equipo.",
+      "disposition": "RESOLVED_PRODUCTION",
+      "requirement_id": "CH13-F04",
+      "tests": [
+        "vitest:purchase-equipment-traceability",
+        "vitest:operations-purchase-draft-tenant-audit",
+        "playwright:feedback-purchase-catalog-prefix-and-equipment-traceability"
+      ]
+    },
+    {
+      "feedback_id": "c7ef7d96-d879-4ef5-83c9-6d55a87ea255",
+      "summary": "Abonos sobre cotización y factura al completar el pago.",
+      "disposition": "RESOLVED_PRODUCTION_NON_FISCAL_SCOPE",
+      "existing_behavior": "Pagos parciales PostgreSQL/Mongo idempotentes, sin sobrepago, reversión auditada, estado Pagado y comprobante PDF no fiscal.",
+      "dependencies": ["MEETING-Q004", "CH07-Q008"]
+    }
+  ],
+  "verification": {
+    "production_health": "PASS: ready/postgresql/database ready",
+    "production_feedback_api": "PASS: authenticated GET 200",
+    "production_deployment": "PASS: dpl_697Am9B3vSFQLr2Bvuzu9XBt5m4o READY at analiza-en-casa-demo.vercel.app",
+    "production_feedback_triage": "PASS: warehouse request moved to RESOLVED after live create/edit/transfer/reverse/deactivate verification; five reports retain REVIEWING only for explicit source, policy or external-integration dependencies",
+    "production_browser": "PASS: authenticated HTTP 200 for dashboard, payments, inventory, purchases, quotes, visits/goals and feedback",
+    "production_pdf": "PASS: authenticated sent immutable quote returned application/pdf; rendered page visually inspected",
+    "production_console": "PASS: no page errors, console errors or failed responses after authentication",
+    "production_error_logs": "PASS: no error logs after serializing operations queries on the transactional PostgreSQL client",
+    "unit_focused": "27/27 PDF/domain/receivables focused PASS",
+    "unit_full": "172/172 React/Vitest and 118/118 domain/Node PASS",
+    "playwright_ch14": "23/23 inventory chapter tests and 16/16 video-parity gates PASS against an isolated production build in mock mode",
+    "playwright_ch13": "3/3 PASS against isolated production build in mock mode",
+    "playwright_full": "186/186 PASS against an isolated build in mock mode",
+    "mobile": "PASS at 390px; document width equals viewport width",
+    "accessibility": "PASS: 0 axe violations in purchase dialog; one contrast check incomplete due overlay",
+    "postgres_migration_plan": "PASS: 17 ordered migrations; 017 adds tenant-scoped warehouses and atomic transfers",
+    "postgres_runtime": "PASS: migration 017 applied to production Neon and least-privilege grants applied to analiza_runtime",
+    "production_warehouse_flow": "PASS: synthetic warehouse create/edit, atomic outbound and compensating inbound transfer, stock guard on deactivation, zero-stock deactivation, filters and historical Kárdex labels verified live",
+    "implementation_sha": "f292ba6"
+  },
+  "limitations": [
+    "The Vercel Preview build is READY but intentionally reports dataMode not-configured; it was not connected to the production database.",
+    "No fiscal, provider-delivery, pricing, lot/serial lifecycle or external-delivery rule was invented; the warehouse contract is the safe technical scope documented in CH14-Q009.",
+    "WhatsApp PDF attachment remains intentionally blocked; direct sending was removed because quotes can contain medication or clinical-adjacent concepts.",
+    "Patient import, clinical autosave and nursing supply-request workflow remain REVIEWING because their source schema, retention/security rules or external delivery contract are not approved."
+  ]
+}

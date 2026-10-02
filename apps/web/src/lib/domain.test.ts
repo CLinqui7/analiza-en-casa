@@ -41,6 +41,7 @@ import {
   searchQuotes,
   filterQuotes,
   normalizeQuoteInvoiceMetadata,
+  quoteDisplayCode,
   validateQuoteItem,
 } from '@analiza/domain';
 
@@ -150,6 +151,7 @@ describe('domain boundaries', () => {
     ];
     expect(deriveKardex(movements, 'kit').map((row) => row.balance)).toEqual([5, 3]);
     expect(currentInventoryBalance(movements, 'kit')).toBe(3);
+    expect(currentInventoryBalance(movements, 'kit', 'central')).toBe(3);
     expect(
       canRecordMovement(movements, {
         id: 'c',
@@ -160,6 +162,64 @@ describe('domain boundaries', () => {
         reason: 'Exceso demo',
       }),
     ).toBe(false);
+  });
+
+  it('rejects an outgoing movement when another warehouse has stock but the selected one does not', () => {
+    const movements: InventoryMovement[] = [
+      {
+        id: 'north-entry',
+        itemId: 'kit',
+        warehouseId: 'north',
+        kind: 'ENTRY',
+        quantity: 10,
+        reason: 'Prueba',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+    ];
+    expect(
+      canRecordMovement(movements, {
+        id: 'central-exit',
+        itemId: 'kit',
+        warehouseId: 'central',
+        kind: 'EXIT',
+        quantity: 1,
+        reason: 'Prueba',
+        createdAt: '2026-09-28T11:00:00.000Z',
+      }),
+    ).toBe(false);
+  });
+
+  // test-id: vitest:inventory-transfer-ledger
+  it('records a transfer as equal and opposite warehouse movements', () => {
+    const transfer: InventoryMovement[] = [
+      {
+        id: 'transfer-1:out',
+        itemId: 'kit',
+        warehouseId: 'central',
+        counterpartWarehouseId: 'north',
+        transferId: 'transfer-1',
+        transferDirection: 'OUT',
+        kind: 'TRANSFER',
+        quantity: 3,
+        reason: 'Reposición sintética',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+      {
+        id: 'transfer-1:in',
+        itemId: 'kit',
+        warehouseId: 'north',
+        counterpartWarehouseId: 'central',
+        transferId: 'transfer-1',
+        transferDirection: 'IN',
+        kind: 'TRANSFER',
+        quantity: 3,
+        reason: 'Reposición sintética',
+        createdAt: '2026-09-28T10:00:00.000Z',
+      },
+    ];
+    expect(currentInventoryBalance(transfer, 'kit', 'central')).toBe(-3);
+    expect(currentInventoryBalance(transfer, 'kit', 'north')).toBe(3);
+    expect(currentInventoryBalance(transfer, 'kit')).toBe(0);
   });
 
   it('escapes generated CSV values', () => {
@@ -338,6 +398,12 @@ describe('quote domain', () => {
     expect(searchQuotes([quote], patients, 'case 001')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'áurea')).toHaveLength(1);
     expect(searchQuotes([quote], patients, 'draft')).toHaveLength(1);
+    expect(searchQuotes([quote], patients, quoteDisplayCode(quote.id))).toHaveLength(1);
+  });
+
+  it('shows a compact quote code without replacing the immutable identifier', () => {
+    expect(quoteDisplayCode('2b43ef22-b68c-44a9-a463-04652588f3c1')).toBe('COT-2588F3C1');
+    expect(quote.id).toBe('Q-001');
   });
 
   it('filters quote list status and creation date without changing totals', () => {

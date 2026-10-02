@@ -15,6 +15,8 @@ async function openNewQuote(page: Page) {
 }
 
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
+  const patient = dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]');
+  if (!(await patient.inputValue())) await patient.selectOption({ index: 1 });
   await dialog.getByLabel('Resumen operativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
@@ -35,7 +37,7 @@ test('quotes list searches normalized id, patient, case and status, then clears'
   const search = page.getByLabel('Buscar cotización');
   for (const query of ['quote demo 001', 'Áurora', 'case demo 001', 'draft']) {
     await search.fill(query);
-    await expect(page.getByText('quote-demo-001')).toBeVisible();
+    await expect(page.getByTitle('quote-demo-001')).toBeVisible();
   }
   await search.fill('no existe QA');
   await expect(page.getByRole('status')).toContainText('Sin cotizaciones');
@@ -68,6 +70,35 @@ test('modern quote builder keeps the requested categories and optional origin', 
   await expect(dialog.getByText('El resumen operativo es obligatorio.')).toBeVisible();
   const id = await saveDraft(page, dialog, 'Cotización moderna sin referido');
   expect(id).toBeTruthy();
+});
+
+test('new patient quote saves without creating or requiring a hospitalization', async ({
+  page,
+}) => {
+  await login(page);
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.patients';
+    const patients = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    patients.push({
+      id: 'patient-new-care-e2e',
+      fullName: 'Paciente Nuevo Sin Hospitalización',
+      documentType: 'OTHER',
+      documentId: 'NEW-CARE-E2E',
+      status: 'ACTIVE',
+    });
+    window.localStorage.setItem(key, JSON.stringify(patients));
+  });
+  const dialog = await openNewQuote(page);
+  await dialog
+    .getByLabel('Buscar paciente', { exact: true })
+    .fill('Paciente Nuevo Sin Hospitalización');
+  await expect(dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]')).toHaveValue(
+    'patient-new-care-e2e',
+  );
+  await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toHaveValue('');
+  const id = await saveDraft(page, dialog, 'Atención nueva sin hospitalización E2E');
+  expect(id).toBeTruthy();
+  await expect(page.getByText('Atención nueva sin hospitalización')).toBeVisible();
 });
 
 test('exact patient search selects its compatible hospitalization before saving', async ({
@@ -117,7 +148,9 @@ test('exact patient search selects its compatible hospitalization before saving'
   await expect(dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]')).toHaveValue(
     'patient-quote-exact',
   );
-  await expect(dialog.getByLabel('Caso compatible')).toHaveValue('case-quote-exact');
+  await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toHaveValue(
+    'case-quote-exact',
+  );
   const id = await saveDraft(page, dialog, 'Cotización con paciente encontrado');
   expect(id).toBeTruthy();
 });

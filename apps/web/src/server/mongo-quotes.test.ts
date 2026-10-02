@@ -37,6 +37,14 @@ describe('Mongo quote commands', () => {
     expect(parsed.patientAmount).toBe(40);
   });
 
+  it('accepts a patient quote without inventing a hospitalization', () => {
+    const parsed = parseQuoteCreate({
+      quote: { ...quote, caseId: undefined },
+    });
+    expect(parsed.patientId).toBe('patient-safe-001');
+    expect(parsed.caseId).toBeUndefined();
+  });
+
   it('rejects browser-controlled tenant authority and sent mutations', () => {
     expect(() => parseQuoteCreate({ quote, organizationId: 'foreign' })).toThrow();
     expect(() =>

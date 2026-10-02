@@ -35,7 +35,9 @@ export function SearchableSelect({
   const showCustom =
     allowCustom &&
     customValue.length > 1 &&
-    !options.some((option) => option.label.toLocaleLowerCase('es') === customValue.toLocaleLowerCase('es'));
+    !options.some(
+      (option) => option.label.toLocaleLowerCase('es') === customValue.toLocaleLowerCase('es'),
+    );
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
