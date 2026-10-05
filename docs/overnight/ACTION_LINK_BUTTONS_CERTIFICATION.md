@@ -50,5 +50,18 @@ subrayadas o enlaces ambiguos, sino como botones visibles que funcionen al presi
 
 ## Producción
 
-Pendiente de completar después de desplegar el commit funcional y repetir el smoke autenticado en
-`https://analiza-en-casa-demo.vercel.app`.
+- Producción actualizada en `https://analiza-en-casa-demo.vercel.app` con el deployment
+  `dpl_5DdD33cxuWhbZ1sV4AnCR9xRFfut`, estado `READY`.
+- El endpoint de salud respondió `ready`; base de datos `ready`, modo de datos `postgresql` y modo
+  de notificaciones `mock`.
+- Smoke autenticado con el rol WEBMASTER en cotizaciones, dashboard, pacientes,
+  hospitalizaciones, reporte clínico y cambios.
+- El primer botón `Consultar` navegó desde `/quotes` al detalle dinámico de la cotización.
+- Las acciones verificadas en producción presentan borde de 1 px, radio de 9 px, alto de 32 px y
+  `text-decoration: none`.
+- La recarga limpia del dashboard no produjo errores de página, mensajes de consola ni respuestas
+  HTTP 3xx/4xx/5xx. Los logs de error del deployment no registraron incidencias durante el smoke.
+- Auditoría axe del contenido principal del dashboard: 0 violaciones WCAG 2 A/AA; queda 1
+  comprobación manual inconclusa de contraste sobre iconos decorativos y fondos con degradado.
+- Evidencia visual: `action-buttons-production.png` en el directorio de visualizaciones de la
+  sesión.
