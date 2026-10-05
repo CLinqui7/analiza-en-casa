@@ -23,7 +23,7 @@ subrayadas o enlaces ambiguos, sino como botones visibles que funcionen al presi
 - Cotizaciones: `Consultar` en el listado y el historial de versiones, y retorno al listado.
 - Dashboard: acciones de encabezados, casos, inventario, agenda, auditoría y mediciones.
 - Pacientes: nombre factual separado de la acción; `Consultar` es un control explícito. `Editar
-  paciente` dejó de anidar un botón dentro de un enlace.
+paciente` dejó de anidar un botón dentro de un enlace.
 - Hospitalizaciones: `Gestionar`, `Consultar`, accesos a cotizaciones, pacientes inactivos,
   clínica, seguros y descargas privadas.
 - Seguros: apertura y consulta de cotizaciones.
