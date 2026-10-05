@@ -39,7 +39,7 @@ export default function QuoteDetailPage() {
           detail="La cotización no existe o no está disponible en este espacio de trabajo."
           title="Cotización no encontrada"
         />
-        <Link data-action-id="QUOTE-BACK-TO-LIST" href="/quotes">
+        <Link className="action-link-button" data-action-id="QUOTE-BACK-TO-LIST" href="/quotes">
           Volver a cotizaciones
         </Link>
       </main>
@@ -433,7 +433,12 @@ export default function QuoteDetailPage() {
                   <td>{version.revisionReason || '—'}</td>
                   <td>{money(version.total)}</td>
                   <td>
-                    <Link href={`/quotes/${version.id}`}>Consultar</Link>
+                    <Link
+                      className="action-link-button action-link-button--compact"
+                      href={`/quotes/${version.id}`}
+                    >
+                      Consultar
+                    </Link>
                   </td>
                 </tr>
               ))}

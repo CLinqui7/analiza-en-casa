@@ -1330,7 +1330,11 @@ export default function QuotesPage() {
                           </StatusTag>
                         </td>
                         <td>
-                          <Link data-action-id="QUOTE-DETAIL-NAVIGATE" href={`/quotes/${quote.id}`}>
+                          <Link
+                            className="action-link-button action-link-button--compact"
+                            data-action-id="QUOTE-DETAIL-NAVIGATE"
+                            href={`/quotes/${quote.id}`}
+                          >
                             Consultar
                           </Link>
                         </td>

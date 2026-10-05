@@ -205,7 +205,11 @@ export default function InsurancePage() {
                       Registrar actualización
                     </Button>
                   ) : null}
-                  <Link data-action-id="INSURANCE-OPEN-QUOTE" href={`/quotes/${quote.id}`}>
+                  <Link
+                    className="action-link-button"
+                    data-action-id="INSURANCE-OPEN-QUOTE"
+                    href={`/quotes/${quote.id}`}
+                  >
                     Abrir cotización
                   </Link>
                 </div>
@@ -323,7 +327,12 @@ export default function InsurancePage() {
               return (
                 <article className="insurance-pending-card" key={candidate.id}>
                   <div>
-                    <Link href={`/quotes/${candidate.id}`}>{candidate.id}</Link>
+                    <Link
+                      className="action-link-button action-link-button--compact"
+                      href={`/quotes/${candidate.id}`}
+                    >
+                      Consultar {candidate.id}
+                    </Link>
                     <StatusTag>Sin solicitud</StatusTag>
                   </div>
                   <strong>{patient?.fullName ?? 'Paciente no disponible'}</strong>
@@ -517,8 +526,12 @@ function InsuranceCard({
     <article className="insurance-card">
       <div className="insurance-card-topline">
         {quote ? (
-          <Link data-action-id="INSURANCE-OPEN-QUOTE" href={`/quotes/${quote.id}`}>
-            {quote.id}
+          <Link
+            className="action-link-button action-link-button--compact"
+            data-action-id="INSURANCE-OPEN-QUOTE"
+            href={`/quotes/${quote.id}`}
+          >
+            Consultar {quote.id}
           </Link>
         ) : (
           <strong>{request?.quoteId}</strong>

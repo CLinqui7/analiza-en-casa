@@ -152,8 +152,13 @@ export default function NursingTeamPage() {
                     </small>
                     {attachments[resource.id]?.map((file) => (
                       <div key={file.id}>
-                        <a href={privateFileDownloadHref(file.id)} target="_blank" rel="noreferrer">
-                          Ver archivo · {file.name}
+                        <a
+                          className="action-link-button action-link-button--compact"
+                          href={privateFileDownloadHref(file.id)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Descargar {file.name}
                         </a>
                       </div>
                     ))}

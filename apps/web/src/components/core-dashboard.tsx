@@ -44,21 +44,30 @@ export function CoreDashboard() {
           <Panel>
             <p>Pacientes registrados</p>
             <h2>{patients.length}</h2>
-            <Link href="/patients">Abrir pacientes →</Link>
+            <Link className="action-link-button action-link-button--compact" href="/patients">
+              Abrir pacientes
+            </Link>
           </Panel>
         )}
         {can('cases:read') && (
           <Panel>
             <p>Hospitalizaciones activas</p>
             <h2>{active.length}</h2>
-            <Link href="/hospitalizations">Abrir hospitalizaciones →</Link>
+            <Link
+              className="action-link-button action-link-button--compact"
+              href="/hospitalizations"
+            >
+              Abrir hospitalizaciones
+            </Link>
           </Panel>
         )}
         {can('agenda:read') && (
           <Panel>
             <p>Turnos registrados</p>
             <h2>{shifts.length}</h2>
-            <Link href="/agenda">Abrir agenda →</Link>
+            <Link className="action-link-button action-link-button--compact" href="/agenda">
+              Abrir agenda
+            </Link>
           </Panel>
         )}
       </div>
@@ -88,8 +97,11 @@ export function CoreDashboard() {
                         <StatusTag tone="success">Activo</StatusTag>
                       </td>
                       <td>
-                        <Link href={`/hospitalizations/${encodeURIComponent(row.id)}`}>
-                          Abrir →
+                        <Link
+                          className="action-link-button action-link-button--compact"
+                          href={`/hospitalizations/${encodeURIComponent(row.id)}`}
+                        >
+                          Abrir caso
                         </Link>
                       </td>
                     </tr>

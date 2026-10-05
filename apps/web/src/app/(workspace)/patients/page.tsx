@@ -1016,7 +1016,7 @@ export default function PatientsPage() {
                           .toUpperCase()}
                       </span>
                       <div>
-                        <Link href={`/patients/${patient.id}`}>{patient.fullName}</Link>
+                        <strong>{patient.fullName}</strong>
                         <small>{patient.id}</small>
                       </div>
                     </td>
@@ -1041,11 +1041,11 @@ export default function PatientsPage() {
                       <div className="patient-row-actions">
                         <Link
                           aria-label={`Detalle de ${patient.fullName}`}
+                          className="action-link-button action-link-button--compact"
                           data-action-id="PATIENT-DETAIL-NAVIGATE"
                           href={`/patients/${patient.id}`}
-                          title="Abrir paciente"
                         >
-                          ↗
+                          Consultar
                         </Link>
                         {can('patients:write') ? (
                           <Button
@@ -1427,7 +1427,12 @@ export default function PatientsPage() {
                 <ul className="private-file-list">
                   {identityFiles.map((file) => (
                     <li key={file.id}>
-                      <a href={privateFileDownloadHref(file.id)}>{file.name}</a>
+                      <a
+                        className="action-link-button action-link-button--compact"
+                        href={privateFileDownloadHref(file.id)}
+                      >
+                        Descargar {file.name}
+                      </a>
                     </li>
                   ))}
                 </ul>

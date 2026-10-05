@@ -326,7 +326,12 @@ function HealthReportContent() {
                   </div>
                 </div>
                 <div className="health-case-actions no-print">
-                  <Link href={`/hospitalizations/${selectedHospitalization.id}`}>Abrir caso</Link>
+                  <Link
+                    className="action-link-button action-link-button--compact"
+                    href={`/hospitalizations/${selectedHospitalization.id}`}
+                  >
+                    Abrir caso
+                  </Link>
                   <details>
                     <summary aria-label="Más acciones">•••</summary>
                     <div>

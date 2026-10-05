@@ -635,7 +635,9 @@ export function NurseSetupForm() {
 
       {loaded && !dirty ? (
         <p>
-          <Link href="/dashboard">Ir al dashboard</Link>
+          <Link className="action-link-button" href="/dashboard">
+            Ir al dashboard
+          </Link>
         </p>
       ) : null}
     </section>

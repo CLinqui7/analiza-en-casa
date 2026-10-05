@@ -476,16 +476,6 @@ export function AppShell({ children }: PropsWithChildren) {
   const required = permissionForPath(pathname);
 
   useEffect(() => {
-    const activeGroup = navigation.find((group) =>
-      group.children?.some((child) => isActive(pathname, child.href)),
-    );
-    if (!activeGroup) return;
-    setExpanded((current) =>
-      current[activeGroup.label] ? current : { ...current, [activeGroup.label]: true },
-    );
-  }, [pathname]);
-
-  useEffect(() => {
     const restoreTimer = window.setTimeout(
       () =>
         setSidebarCollapsed(window.localStorage.getItem('analiza.sidebar.collapsed') === 'true'),
@@ -753,10 +743,10 @@ export function AppShell({ children }: PropsWithChildren) {
                   (child) => can(child.permission) && isReleasedPath(child.href),
                 ) ?? [];
               if (!childrenForRole.length) return null;
-              const open = expanded[group.label] ?? false;
               const hasCurrentChild = childrenForRole.some((child) =>
                 isActive(pathname, child.href),
               );
+              const open = expanded[group.label] ?? hasCurrentChild;
 
               return (
                 <li key={group.label} className="nav-group">

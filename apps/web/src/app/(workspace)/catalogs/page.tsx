@@ -152,7 +152,9 @@ export default function CatalogsPage() {
         ))}
       </div>
       <p>
-        <Link href="/catalogs/operational">Administrar especialidades, dosis y aseguradoras</Link>
+        <Link className="action-link-button" href="/catalogs/operational">
+          Administrar especialidades, dosis y aseguradoras
+        </Link>
       </p>
       {message ? (
         <p className="notice success" role="status">

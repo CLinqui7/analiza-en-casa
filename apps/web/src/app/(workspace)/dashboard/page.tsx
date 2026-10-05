@@ -276,7 +276,9 @@ function FullDashboard() {
                     Importes cotizados registrados; no equivalen a ventas ni facturación cobrada.
                   </p>
                 </div>
-                <Link href="/quotes">Ver cotizaciones →</Link>
+                <Link className="action-link-button action-link-button--compact" href="/quotes">
+                  Ver cotizaciones
+                </Link>
               </div>
               <div
                 className="studio-chart"
@@ -369,7 +371,11 @@ function FullDashboard() {
                   <h2>Embudo de cotizaciones</h2>
                   <p>Distribución del estado documentado.</p>
                 </div>
-                {can('quotes:read') ? <Link href="/quotes">Ver flujo</Link> : null}
+                {can('quotes:read') ? (
+                  <Link className="action-link-button action-link-button--compact" href="/quotes">
+                    Ver flujo
+                  </Link>
+                ) : null}
               </div>
               <ul className="dashboard-bar-list">
                 {quoteFunnel.map((item) => (
@@ -384,7 +390,11 @@ function FullDashboard() {
                   <h2>Turnos programados</h2>
                   <p>Agenda registrada, sin inferencias clínicas.</p>
                 </div>
-                {can('agenda:read') ? <Link href="/agenda">Abrir agenda</Link> : null}
+                {can('agenda:read') ? (
+                  <Link className="action-link-button action-link-button--compact" href="/agenda">
+                    Abrir agenda
+                  </Link>
+                ) : null}
               </div>
               {scheduledShifts.length ? (
                 <ul className="dashboard-turn-list">
@@ -422,7 +432,14 @@ function FullDashboard() {
                   <h2>Casos que requieren acción</h2>
                   <p>Hospitalizaciones abiertas con la siguiente acción registrada.</p>
                 </div>
-                {can('cases:read') ? <Link href="/hospitalizations">Ver casos</Link> : null}
+                {can('cases:read') ? (
+                  <Link
+                    className="action-link-button action-link-button--compact"
+                    href="/hospitalizations"
+                  >
+                    Ver casos
+                  </Link>
+                ) : null}
               </div>
               {openHospitalizations.length ? (
                 <div
@@ -454,7 +471,12 @@ function FullDashboard() {
                           {hospitalization.nextAction ?? 'Sin próxima acción documentada'}
                         </span>
                         <span role="cell">
-                          <Link href={`/hospitalizations/${hospitalization.id}`}>Abrir →</Link>
+                          <Link
+                            className="action-link-button action-link-button--compact"
+                            href={`/hospitalizations/${hospitalization.id}`}
+                          >
+                            Abrir caso
+                          </Link>
                         </span>
                       </div>
                     );
@@ -474,7 +496,14 @@ function FullDashboard() {
                   <h2>Existencias registradas</h2>
                   <p>Balance derivado del kardex.</p>
                 </div>
-                {can('inventory:read') ? <Link href="/inventory">Gestionar</Link> : null}
+                {can('inventory:read') ? (
+                  <Link
+                    className="action-link-button action-link-button--compact"
+                    href="/inventory"
+                  >
+                    Gestionar inventario
+                  </Link>
+                ) : null}
               </div>
               {inventoryBalances.length ? (
                 <ul className="dashboard-stock-list">
@@ -504,7 +533,11 @@ function FullDashboard() {
                   <h2>Actividad registrada del mes</h2>
                   <p>Visitas realizadas, ingresos administrativos y cobros aplicados.</p>
                 </div>
-                {can('agenda:read') ? <Link href="/agenda">Abrir agenda</Link> : null}
+                {can('agenda:read') ? (
+                  <Link className="action-link-button action-link-button--compact" href="/agenda">
+                    Abrir agenda
+                  </Link>
+                ) : null}
               </div>
               <div className="dashboard-split-metrics">
                 <div>
@@ -519,8 +552,11 @@ function FullDashboard() {
                   <span>Pacientes con ingreso en el mes</span>
                 </div>
                 <div className="dashboard-goal-pending">
-                  <Link href="/reports/visits-goals">
-                    <strong>Visitas y metas →</strong>
+                  <Link
+                    className="action-link-button action-link-button--compact"
+                    href="/reports/visits-goals"
+                  >
+                    <strong>Ver visitas y metas</strong>
                   </Link>
                   <span>Resultados y objetivos por profesional</span>
                 </div>
@@ -542,7 +578,11 @@ function FullDashboard() {
                   <h2>Pacientes por modalidad</h2>
                   <p>Clasificación según la aseguradora registrada.</p>
                 </div>
-                {can('patients:read') ? <Link href="/patients">Ver pacientes</Link> : null}
+                {can('patients:read') ? (
+                  <Link className="action-link-button action-link-button--compact" href="/patients">
+                    Ver pacientes
+                  </Link>
+                ) : null}
               </div>
               <div className="dashboard-split-metrics">
                 <div>
@@ -571,7 +611,9 @@ function FullDashboard() {
                   <h2>Valor de cotizaciones por mes</h2>
                   <p>Totales registrados; no se presentan como facturación cobrada.</p>
                 </div>
-                <Link href="/quotes">Detalle</Link>
+                <Link className="action-link-button action-link-button--compact" href="/quotes">
+                  Ver detalle
+                </Link>
               </div>
               {quoteMonths.length ? (
                 <ul className="dashboard-month-bars">
@@ -604,7 +646,11 @@ function FullDashboard() {
                 <h2>Actividad reciente</h2>
                 <p>Últimos cambios auditados en esta sesión.</p>
               </div>
-              {can('audit:read') ? <Link href="/audit">Auditoría completa</Link> : null}
+              {can('audit:read') ? (
+                <Link className="action-link-button action-link-button--compact" href="/audit">
+                  Ver auditoría completa
+                </Link>
+              ) : null}
             </div>
             {auditEntries.length ? (
               <ul className="dashboard-audit-list">
@@ -711,7 +757,12 @@ function FullDashboard() {
                         <strong>{action.patientName}</strong>
                         <span>{action.detail}</span>
                         <span>{displayDate(action.occursAt)}</span>
-                        <Link href={action.href}>Abrir</Link>
+                        <Link
+                          className="action-link-button action-link-button--compact"
+                          href={action.href}
+                        >
+                          Abrir acción
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -761,10 +812,11 @@ function FullDashboard() {
                               <td>
                                 {patient && can('patients:read') ? (
                                   <Link
+                                    className="action-link-button action-link-button--compact"
                                     data-action-id="DASHBOARD-MEASUREMENT-OPEN"
                                     href={`/patients/${patient.id}`}
                                   >
-                                    Ver paciente →
+                                    Ver paciente
                                   </Link>
                                 ) : (
                                   '—'

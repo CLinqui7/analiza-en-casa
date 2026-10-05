@@ -49,7 +49,11 @@ export default function HospitalizationDetailPage() {
           detail="El registro no existe o ya no está disponible en este espacio de trabajo."
           title="Hospitalización no encontrada"
         />
-        <Link data-action-id="HOSPITALIZATION-BACK-TO-LIST" href="/hospitalizations">
+        <Link
+          className="action-link-button"
+          data-action-id="HOSPITALIZATION-BACK-TO-LIST"
+          href="/hospitalizations"
+        >
           Volver al listado
         </Link>
       </main>
@@ -251,8 +255,11 @@ export default function HospitalizationDetailPage() {
               <ul>
                 {linkedQuotes.map((quote) => (
                   <li key={quote.id}>
-                    <Link href={`/quotes/${quote.id}`}>
-                      {quote.id} · v{quote.version}
+                    <Link
+                      className="action-link-button action-link-button--compact"
+                      href={`/quotes/${quote.id}`}
+                    >
+                      Consultar {quote.id} · v{quote.version}
                     </Link>{' '}
                     · {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
                   </li>

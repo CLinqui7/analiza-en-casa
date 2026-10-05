@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Panel } from '@analiza/ui';
+import { Panel } from '@analiza/ui';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth, useWorkspace } from '@/components/providers';
@@ -36,8 +36,12 @@ export default function PatientDetailPage() {
           <p>Detalle administrativo del paciente.</p>
         </div>
         {can('patients:write') ? (
-          <Link data-action-id="PATIENT-EDIT" href={`/patients?edit=${patient.id}`}>
-            <Button type="button">Editar paciente</Button>
+          <Link
+            className="button"
+            data-action-id="PATIENT-EDIT"
+            href={`/patients?edit=${patient.id}`}
+          >
+            Editar paciente
           </Link>
         ) : null}
       </header>

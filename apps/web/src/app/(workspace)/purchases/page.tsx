@@ -350,7 +350,12 @@ export default function PurchasesPage() {
           {!suppliers.length ? 'agrega al menos un proveedor activo' : ''}
           {!suppliers.length && !purchasableItems.length ? ' y ' : ''}
           {!purchasableItems.length ? 'agrega un medicamento, insumo o equipo activo' : ''} en{' '}
-          <Link href="/catalogs/operational">Catálogos operativos</Link>
+          <Link
+            className="action-link-button action-link-button--inline"
+            href="/catalogs/operational"
+          >
+            Abrir catálogos operativos
+          </Link>
           {!activeWarehouses.length ? ' y habilita una bodega en Inventario → Bodegas.' : '.'}
         </div>
       ) : null}
