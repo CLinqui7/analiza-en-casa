@@ -64,7 +64,27 @@ referencia visual para jerarquía, navegación oscura, tarjetas activas e iconos
 - Verificación visual local: escritorio 1440 × 1000 y móvil 390 × 844, sin desbordamiento no
   intencional; drawer, encabezado, navegación y pie permanecen utilizables.
 
-La verificación productiva, el identificador de despliegue y el cierre del reporte se completan sólo
-después de publicar y repetir el flujo contra el entorno productivo.
+## Verificación en producción
+
+- Despliegue autoritativo: `dpl_iTg18wmKDhkzfrtorSvLrv5svAQg` en
+  `https://analiza-en-casa-demo.vercel.app`.
+- Salud verificada después del despliegue: `status=ready`, `dataMode=postgresql` y
+  `database=ready`.
+- Se comprobó en el navegador el nuevo menú lateral de escritorio y la navegación privada de
+  Analítica para la cuenta `WEBMASTER` solicitada. La cuenta conserva el menú administrativo y los
+  cuatro usuarios indicados permanecen activos en la bitácora. Ninguna credencial se guardó en el
+  repositorio.
+- Se verificaron en la cotización productiva los atributos `min=1`, `step=1` e
+  `inputMode=numeric` para cantidad, y `min=0`, `max=100`, `step=1` e `inputMode=numeric` para
+  porcentaje.
+- El reporte de Cotizaciones del 2026-10-02 10:46 quedó resuelto con respuesta factual y enlace a
+  la pantalla corregida. Feedback quedó en 52 totales, 0 nuevos, 4 en revisión y 48 resueltos.
+- Los cuatro casos en revisión no se cerraron artificialmente: continúan dependiendo de una regla
+  de negocio, definición clínica o integración externa.
+- La ruta autenticada y transitoria usada para restaurar la cuenta solicitada fue retirada antes del
+  despliegue final; su respuesta productiva posterior es `404` y no forma parte del repositorio.
+- `npm audit --omit=dev` reportó 0 vulnerabilidades de producción. Permanecen 5 avisos altos sólo
+  en la cadena de herramientas de ESLint; la corrección automática propuesta exige un downgrade
+  incompatible con Next.js 16 y no se aplicó.
 
 Commit de implementación verificado: `192f8cd3edc65d76d73ceac9a2e660fbb125b49c`.
