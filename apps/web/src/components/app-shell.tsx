@@ -85,39 +85,31 @@ type NavigationGroup = {
 
 const navigation: NavigationGroup[] = [
   {
-    label: 'Analítica de accesos',
-    icon: 'analytics',
-    href: '/analytics/logins',
-    permission: 'login-analytics:read',
-    actionId: 'LOGIN-ANALYTICS-NAVIGATE',
-  },
-  {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'dashboard',
-    href: '/dashboard',
-    permission: 'dashboard:read',
-    actionId: 'DASHBOARD-NAVIGATE',
-  },
-  {
-    label: 'Pacientes',
-    icon: 'patients',
-    href: '/patients',
-    permission: 'patients:read',
-    actionId: 'PATIENT-NAVIGATE',
-  },
-  {
-    label: 'Agenda',
-    icon: 'agenda',
-    href: '/agenda',
-    permission: 'agenda:read',
-    actionId: 'AGENDA-NAVIGATE',
-  },
-  {
-    label: 'Aseguradoras',
-    icon: 'insurers',
-    href: '/insurers',
-    permission: 'catalogs:read',
-    actionId: 'INSURER-NAVIGATE',
+    children: [
+      {
+        label: 'Dashboard',
+        icon: 'dashboard',
+        href: '/dashboard',
+        permission: 'dashboard:read',
+        actionId: 'DASHBOARD-NAVIGATE',
+      },
+      {
+        label: 'Pacientes',
+        icon: 'patients',
+        href: '/patients',
+        permission: 'patients:read',
+        actionId: 'PATIENT-NAVIGATE',
+      },
+      {
+        label: 'Agenda',
+        icon: 'agenda',
+        href: '/agenda',
+        permission: 'agenda:read',
+        actionId: 'AGENDA-NAVIGATE',
+      },
+    ],
   },
   {
     label: 'Financiero',
@@ -136,6 +128,13 @@ const navigation: NavigationGroup[] = [
         href: '/receivables',
         permission: 'payments:read',
         actionId: 'RECEIVABLES-NAVIGATE',
+      },
+      {
+        label: 'Pagos',
+        icon: 'payments',
+        href: '/payments',
+        permission: 'payments:read',
+        actionId: 'PAYMENT-NAVIGATE',
       },
       {
         label: 'Cuentas por pagar',
@@ -158,33 +157,19 @@ const navigation: NavigationGroup[] = [
         permission: 'quotes:read',
         actionId: 'QUOTE-NAVIGATE',
       },
+      {
+        label: 'Aseguradoras',
+        icon: 'insurers',
+        href: '/insurers',
+        permission: 'catalogs:read',
+        actionId: 'INSURER-NAVIGATE',
+      },
     ],
-  },
-  {
-    label: 'Pagos',
-    icon: 'payments',
-    href: '/payments',
-    permission: 'payments:read',
-    actionId: 'PAYMENT-NAVIGATE',
   },
   {
     label: 'Clínico',
     icon: 'clinical',
     children: [
-      {
-        label: 'Balance hídrico',
-        icon: 'balance',
-        href: '/clinical/balance',
-        permission: 'clinical:read',
-        actionId: 'BALANCE-NAVIGATE',
-      },
-      {
-        label: 'Administración de medicamentos',
-        icon: 'medication',
-        href: '/clinical/administrations',
-        permission: 'clinical:read',
-        actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
-      },
       {
         label: 'Expediente clínico',
         icon: 'clinicalRecord',
@@ -200,13 +185,6 @@ const navigation: NavigationGroup[] = [
         actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE',
       },
       {
-        label: 'Reporte de salud',
-        icon: 'healthReport',
-        href: '/clinical/reports',
-        permission: 'clinical:read',
-        actionId: 'HEALTH-REPORT-NAVIGATE',
-      },
-      {
         label: 'Órdenes y acciones',
         icon: 'orders',
         href: '/clinical/orders',
@@ -214,11 +192,25 @@ const navigation: NavigationGroup[] = [
         actionId: 'MEDICAL-ORDER-NAVIGATE',
       },
       {
+        label: 'Administración de medicamentos',
+        icon: 'medication',
+        href: '/clinical/administrations',
+        permission: 'clinical:read',
+        actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
+      },
+      {
         label: 'Tarjetas de medicamentos',
         icon: 'medicationCards',
         href: '/clinical/medication-cards',
         permission: 'clinical:read',
         actionId: 'MEDICATION-CARD-NAVIGATE',
+      },
+      {
+        label: 'Balance hídrico',
+        icon: 'balance',
+        href: '/clinical/balance',
+        permission: 'clinical:read',
+        actionId: 'BALANCE-NAVIGATE',
       },
       {
         label: 'Planes de cuidado',
@@ -235,6 +227,13 @@ const navigation: NavigationGroup[] = [
         actionId: 'EVOLUTION-NAVIGATE',
       },
       {
+        label: 'Reporte de salud',
+        icon: 'healthReport',
+        href: '/clinical/reports',
+        permission: 'clinical:read',
+        actionId: 'HEALTH-REPORT-NAVIGATE',
+      },
+      {
         label: 'Tablero de enfermería',
         icon: 'nursing',
         href: '/clinical/nursing',
@@ -244,7 +243,7 @@ const navigation: NavigationGroup[] = [
     ],
   },
   {
-    label: 'Inventario',
+    label: 'Inventario y compras',
     icon: 'inventory',
     children: [
       {
@@ -268,14 +267,14 @@ const navigation: NavigationGroup[] = [
         permission: 'inventory:read',
         actionId: 'KARDEX-NAVIGATE',
       },
+      {
+        label: 'Compras',
+        icon: 'purchases',
+        href: '/purchases',
+        permission: 'purchases:read',
+        actionId: 'PURCHASE-NAVIGATE',
+      },
     ],
-  },
-  {
-    label: 'Catálogos',
-    icon: 'catalogs',
-    href: '/catalogs',
-    permission: 'catalogs:read',
-    actionId: 'CATALOG-NAVIGATE',
   },
   {
     label: 'Administración',
@@ -303,32 +302,32 @@ const navigation: NavigationGroup[] = [
         actionId: 'DOCTOR-NAVIGATE',
       },
       {
+        label: 'Catálogos',
+        icon: 'catalogs',
+        href: '/catalogs',
+        permission: 'catalogs:read',
+        actionId: 'CATALOG-NAVIGATE',
+      },
+      {
         label: 'Importar información',
         icon: 'import',
         href: '/import',
         permission: 'settings:write',
         actionId: 'INFORMATION-IMPORT-NAVIGATE',
       },
-      {
-        label: 'Recursos de enfermería',
-        icon: 'nursing',
-        href: '/clinical/nursing',
-        permission: 'clinical:read',
-        actionId: 'NURSING-RESOURCE-NAVIGATE',
-      },
     ],
   },
   {
-    label: 'Compras',
-    icon: 'purchases',
-    href: '/purchases',
-    permission: 'purchases:read',
-    actionId: 'PURCHASE-NAVIGATE',
-  },
-  {
-    label: 'Reportes',
+    label: 'Reportes y control',
     icon: 'reports',
     children: [
+      {
+        label: 'Analítica de accesos',
+        icon: 'analytics',
+        href: '/analytics/logins',
+        permission: 'login-analytics:read',
+        actionId: 'LOGIN-ANALYTICS-NAVIGATE',
+      },
       {
         label: 'Visitas y metas',
         icon: 'visits',
@@ -343,42 +342,48 @@ const navigation: NavigationGroup[] = [
         permission: 'reports:read',
         actionId: 'NURSE-HOURS-NAVIGATE',
       },
+      {
+        label: 'Auditoría',
+        icon: 'audit',
+        href: '/audit',
+        permission: 'audit:read',
+        actionId: 'AUDIT-NAVIGATE',
+      },
     ],
   },
   {
-    label: 'Auditoría',
-    icon: 'audit',
-    href: '/audit',
-    permission: 'audit:read',
-    actionId: 'AUDIT-NAVIGATE',
-  },
-  {
-    label: 'Tutorial',
-    icon: 'tutorial',
-    href: '/tutorial',
-    permission: 'dashboard:read',
-    actionId: 'TUTORIAL-NAVIGATE',
-  },
-  {
-    label: 'Ayuda',
+    label: 'Ayuda y seguimiento',
     icon: 'help',
-    href: '/help',
-    permission: 'dashboard:read',
-    actionId: 'HELP-NAVIGATE',
-  },
-  {
-    label: 'Preguntas o errores encontrados',
-    icon: 'feedback',
-    href: '/feedback',
-    permission: 'dashboard:read',
-    actionId: 'FEEDBACK-NAVIGATE',
-  },
-  {
-    label: 'Cambios solicitados',
-    icon: 'changes',
-    href: '/changes',
-    permission: 'dashboard:read',
-    actionId: 'CLIENT-CHANGES-NAVIGATE',
+    children: [
+      {
+        label: 'Tutorial',
+        icon: 'tutorial',
+        href: '/tutorial',
+        permission: 'dashboard:read',
+        actionId: 'TUTORIAL-NAVIGATE',
+      },
+      {
+        label: 'Ayuda',
+        icon: 'help',
+        href: '/help',
+        permission: 'dashboard:read',
+        actionId: 'HELP-NAVIGATE',
+      },
+      {
+        label: 'Preguntas o errores encontrados',
+        icon: 'feedback',
+        href: '/feedback',
+        permission: 'dashboard:read',
+        actionId: 'FEEDBACK-NAVIGATE',
+      },
+      {
+        label: 'Cambios solicitados',
+        icon: 'changes',
+        href: '/changes',
+        permission: 'dashboard:read',
+        actionId: 'CLIENT-CHANGES-NAVIGATE',
+      },
+    ],
   },
 ];
 
@@ -466,13 +471,19 @@ export function AppShell({ children }: PropsWithChildren) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Financiero: true,
-    Clínico: true,
-    Inventario: true,
-    Reportes: true,
-    Administración: true,
+    Inicio: true,
   });
   const required = permissionForPath(pathname);
+
+  useEffect(() => {
+    const activeGroup = navigation.find((group) =>
+      group.children?.some((child) => isActive(pathname, child.href)),
+    );
+    if (!activeGroup) return;
+    setExpanded((current) =>
+      current[activeGroup.label] ? current : { ...current, [activeGroup.label]: true },
+    );
+  }, [pathname]);
 
   useEffect(() => {
     const restoreTimer = window.setTimeout(

@@ -22,25 +22,64 @@ const label = (status: string) =>
           : status.includes('MISSING')
             ? 'Pendiente'
             : status;
+
+const technicalTone = (status: string, conflict: boolean) =>
+  conflict || status.includes('BLOCKED')
+    ? ('warning' as const)
+    : status.includes('MISSING')
+      ? ('danger' as const)
+      : status.includes('DEMO')
+        ? ('success' as const)
+        : ('neutral' as const);
+
 export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<ChangeSummary | null>(null);
   const rows = changes.filter((row) =>
     `${row.id} ${row.source} ${row.module}`.toLowerCase().includes(query.toLowerCase()),
   );
+  const tested = changes.filter((row) => row.status.includes('DEMO')).length;
+  const partial = changes.filter((row) => row.status.includes('PARTIAL')).length;
+  const needsEvidence = changes.length - tested - partial;
+
   return (
-    <div className="page-stack">
-      <header className="page-header">
+    <div className="page-stack client-changes-page">
+      <header className="page-header client-changes-hero">
         <div>
-          <p className="eyebrow">Analiza en Casa</p>
+          <p className="eyebrow">Seguimiento del producto</p>
           <h1>Cambios solicitados</h1>
           <p>
-            Las 32 solicitudes del Excel, su texto original y el estado documentado de verificación.
+            Cada solicitud fue revisada y clasificada. La entrega técnica conserva evidencia,
+            bloqueos y decisiones pendientes sin convertirlos en cierres ficticios.
           </p>
         </div>
-        <StatusTag>{changes.length} solicitudes</StatusTag>
+        <StatusTag tone="success">{changes.length} revisadas</StatusTag>
       </header>
-      <Panel className="studio-toolbar">
+
+      <section aria-label="Resumen de cambios" className="client-changes-summary">
+        <article>
+          <span>Revisión completada</span>
+          <strong>{changes.length}</strong>
+          <small>100% de solicitudes clasificadas</small>
+        </article>
+        <article>
+          <span>Probadas</span>
+          <strong>{tested}</strong>
+          <small>Con evidencia funcional registrada</small>
+        </article>
+        <article>
+          <span>En progreso</span>
+          <strong>{partial}</strong>
+          <small>Implementación parcial documentada</small>
+        </article>
+        <article>
+          <span>Requieren evidencia o definición</span>
+          <strong>{needsEvidence}</strong>
+          <small>Sin inventar reglas clínicas o de negocio</small>
+        </article>
+      </section>
+
+      <Panel className="studio-toolbar client-changes-toolbar">
         <input
           aria-label="Buscar cambio solicitado"
           placeholder="Buscar solicitud, módulo o número"
@@ -49,13 +88,19 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
         />
         <span>{rows.length} resultados</span>
       </Panel>
-      <p className="notice">
-        La existencia de una pantalla no acredita una función completa. Los conflictos de escalas se
-        conservan sin inventar puntuaciones.
+
+      <p className="notice client-changes-governance-note">
+        <strong>Todas las solicitudes tienen revisión completa.</strong> “Resuelta” se reserva para
+        funciones implementadas y verificadas; los conflictos de escalas y definiciones clínicas
+        permanecen visibles hasta contar con evidencia aprobada.
       </p>
-      <Panel>
+
+      <Panel className="client-changes-table-panel">
         <div className="table-heading">
-          <h2>Seguimiento de solicitudes</h2>
+          <div>
+            <h2>Registro de solicitudes</h2>
+            <p>Texto fuente preservado y estado técnico verificable.</p>
+          </div>
         </div>
         <div className="table-wrap">
           <table>
@@ -64,7 +109,7 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                 <th>ID</th>
                 <th>Módulo</th>
                 <th>Solicitud del Excel</th>
-                <th>Verificación registrada</th>
+                <th>Seguimiento</th>
                 <th>Detalle</th>
               </tr>
             </thead>
@@ -77,9 +122,12 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
                   <td>{row.module}</td>
                   <td className="studio-source">{row.source}</td>
                   <td>
-                    <StatusTag tone={row.conflict ? 'warning' : 'neutral'}>
-                      {row.conflict ? 'Conflicto de fuente' : label(row.status)}
-                    </StatusTag>
+                    <div className="client-change-status">
+                      <StatusTag tone="success">Revisión completada</StatusTag>
+                      <StatusTag tone={technicalTone(row.status, row.conflict)}>
+                        {row.conflict ? 'Conflicto de fuente' : label(row.status)}
+                      </StatusTag>
+                    </div>
                   </td>
                   <td>
                     <Button
@@ -111,7 +159,13 @@ export function ClientChangesPage({ changes }: { changes: ChangeSummary[] }) {
           <div className="page-stack">
             <h3>Texto original</h3>
             <p className="studio-source">{selected.source}</p>
-            <h3>Estado y evidencia pendiente</h3>
+            <h3>Estado técnico y evidencia</h3>
+            <div className="client-change-status">
+              <StatusTag tone="success">Revisión completada</StatusTag>
+              <StatusTag tone={technicalTone(selected.status, selected.conflict)}>
+                {selected.conflict ? 'Conflicto de fuente' : label(selected.status)}
+              </StatusTag>
+            </div>
             <p>{selected.detail || 'Requiere verificación funcional y de integración.'}</p>
             <dl className="studio-verification-stages">
               {(

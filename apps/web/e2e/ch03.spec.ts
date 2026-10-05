@@ -25,6 +25,14 @@ test('CH03-F001 financial navigation has three live, authorized destinations', a
     'href',
     '/receivables',
   );
+  await expect(page.getByRole('link', { name: 'Pagos', exact: true })).toHaveAttribute(
+    'href',
+    '/payments',
+  );
+  await expect(page.getByRole('link', { name: 'Aseguradoras', exact: true })).toHaveAttribute(
+    'href',
+    '/insurers',
+  );
   await page.getByRole('link', { name: 'Preautorizaciones y reclamos' }).click();
   await expect(page).toHaveURL(/\/insurance$/);
 });

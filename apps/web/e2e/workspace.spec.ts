@@ -47,6 +47,7 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
     expect.arrayContaining(['dashboard', 'patients', 'clinical', 'inventory']),
   );
   const clinical = page.getByRole('button', { name: 'Clínico' });
+  if ((await clinical.getAttribute('aria-expanded')) === 'false') await clinical.click();
   await expect(clinical).toHaveAttribute('aria-expanded', 'true');
   await clinical.click();
   await expect(clinical).toHaveAttribute('aria-expanded', 'false');
@@ -56,13 +57,30 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
   await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
-  const inventory = page.getByRole('button', { name: 'Inventario' });
+  const inventory = page.getByRole('button', { name: 'Inventario y compras' });
   if ((await inventory.getAttribute('aria-expanded')) === 'false') await inventory.click();
+  await expect(page.getByRole('link', { name: 'Compras', exact: true })).toHaveAttribute(
+    'href',
+    '/purchases',
+  );
   await page.getByRole('link', { name: 'Kárdex' }).click();
   await expect(page).toHaveURL(/\/inventory\/kardex$/);
   await expect(
     page.getByRole('heading', { name: 'Kárdex de inventario', exact: true }),
   ).toBeVisible();
+});
+
+test('requested changes separate completed review from technical delivery evidence', async ({
+  page,
+}) => {
+  await loginAs(page, 'admin@demo.local', 'demo-admin');
+  await page.goto('/changes');
+  await expect(page.getByRole('heading', { name: 'Cambios solicitados' })).toBeVisible();
+  await expect(page.getByText('32 revisadas', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revisión completada', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Pendiente de definición', { exact: true }).first()).toBeVisible();
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
 });
 
 test('primary navigation requires a session and hides patient access for inventory', async ({
