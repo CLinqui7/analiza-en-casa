@@ -657,12 +657,14 @@
         "playwright:ch02-list-surfaces"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada. La acción de detalle se presenta como botón Consultar con foco visible, borde y área táctil comprobada."
     },
     {
       "requirement_id": "CH02-F003",
@@ -1335,12 +1337,14 @@
         "playwright:ch03-administrative-board"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro. Gestionar y Consultar son controles visibles, sin enlaces de acción subrayados."
     },
     {
       "requirement_id": "CH03-F003",
@@ -1615,12 +1619,14 @@
         "playwright:ch03-quotes-invoice-metadata"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente. Consultar cada cotización usa un botón accesible verificado."
     },
     {
       "requirement_id": "CH03-F010",
@@ -3381,12 +3387,14 @@
       "selenium_test_ids": [
         "SEL-CH07-HOSPITALIZATION-QUOTES"
       ],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data. Quote consultation is exposed as a bordered button rather than underlined action text."
     },
     {
       "requirement_id": "CH07-F02",

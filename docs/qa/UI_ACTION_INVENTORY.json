@@ -155,7 +155,7 @@
       "module": "Pacientes",
       "route": "/patients",
       "control_type": "NAVIGATE",
-      "visible_label": "Detalle del paciente",
+      "visible_label": "Consultar",
       "selector_or_testid": "[data-action-id=PATIENT-DETAIL-NAVIGATE]",
       "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "roles_denied": ["INVENTORY"],
@@ -166,7 +166,10 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": ["SEL-PAT-EDIT"],
-      "playwright_test_ids": ["playwright:patient-detail-complete-edit"],
+      "playwright_test_ids": [
+        "playwright:patient-detail-complete-edit",
+        "playwright:workspace-action-link-buttons"
+      ],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_EXACT",
       "blocker": ""
@@ -1058,7 +1061,7 @@
       "module": "Hospitalizaciones",
       "route": "/hospitalizations",
       "control_type": "NAVIGATE",
-      "visible_label": "Ver",
+      "visible_label": "Gestionar / Consultar",
       "selector_or_testid": "[data-action-id=HOSPITALIZATION-DETAIL-NAVIGATE]",
       "roles_allowed": ["ADMIN", "DOCTOR", "NURSE", "FINANCE", "AUDITOR"],
       "roles_denied": ["INVENTORY"],
@@ -1069,7 +1072,10 @@
       "refresh_required": true,
       "selenium_required": true,
       "selenium_test_ids": ["SEL-HOSP-DETAIL"],
-      "playwright_test_ids": ["playwright:hospitalization-route-parity"],
+      "playwright_test_ids": [
+        "playwright:hospitalization-route-parity",
+        "playwright:workspace-action-link-buttons"
+      ],
       "unit_test_ids": [],
       "status": "IMPLEMENTED_UNVERIFIED",
       "blocker": "Selenium pendiente."
@@ -2649,7 +2655,7 @@
 {"action_id":"QUOTE-ITEM-EDIT","module":"Cotizaciones","route":"/quotes?edit=:id","control_type":"EDIT","visible_label":"Editar línea","selector_or_testid":"[data-action-id=QUOTE-ITEM-EDIT]","roles_allowed":["ADMIN","DOCTOR","FINANCE"],"roles_denied":["NURSE","INVENTORY","AUDITOR"],"preconditions":"Borrador editable","positive_scenario":"Actualiza línea y totales.","negative_scenario":"Versión enviada no expone edición.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-ITEMS"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-ITEM-REMOVE","module":"Cotizaciones","route":"/quotes?edit=:id","control_type":"DELETE","visible_label":"Eliminar","selector_or_testid":"[data-action-id=QUOTE-ITEM-REMOVE]","roles_allowed":["ADMIN","DOCTOR","FINANCE"],"roles_denied":["NURSE","INVENTORY","AUDITOR"],"preconditions":"Borrador editable","positive_scenario":"Elimina línea y recalcula.","negative_scenario":"No permite mutar una enviada.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-ITEMS"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-DISCOUNT-UPDATE","module":"Cotizaciones","route":"/quotes?create=1","control_type":"UPDATE","visible_label":"Descuento general manual","selector_or_testid":"[data-action-id=QUOTE-DISCOUNT-UPDATE]","roles_allowed":["ADMIN","DOCTOR","FINANCE"],"roles_denied":["NURSE","INVENTORY","AUDITOR"],"preconditions":"Valores manuales válidos","positive_scenario":"Actualiza porcentaje, fijo o categorías manuales.","negative_scenario":"No infiere porcentaje ni cobertura.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-DISCOUNT"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":["domain:calculateQuoteTotals"],"status":"IMPLEMENTED_VERIFIED","blocker":"Política comercial permanece configurable por cliente."},
-{"action_id":"QUOTE-DETAIL-NAVIGATE","module":"Cotizaciones","route":"/quotes/:id","control_type":"NAVIGATE","visible_label":"Consultar","selector_or_testid":"[data-action-id=QUOTE-DETAIL-NAVIGATE]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Cotización visible","positive_scenario":"Abre detalle funcional.","negative_scenario":"ID inexistente muestra estado vacío.","persistence_required":false,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-DETAIL"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
+{"action_id":"QUOTE-DETAIL-NAVIGATE","module":"Cotizaciones","route":"/quotes/:id","control_type":"NAVIGATE","visible_label":"Consultar","selector_or_testid":"[data-action-id=QUOTE-DETAIL-NAVIGATE]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Cotización visible","positive_scenario":"Abre detalle funcional.","negative_scenario":"ID inexistente muestra estado vacío.","persistence_required":false,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-DETAIL"],"playwright_test_ids":["playwright:quotes-builder-lifecycle","playwright:workspace-action-link-buttons"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-BACK-TO-LIST","module":"Cotizaciones","route":"/quotes/:id","control_type":"NAVIGATE","visible_label":"Volver a cotizaciones","selector_or_testid":"[data-action-id=QUOTE-BACK-TO-LIST]","roles_allowed":["ADMIN","DOCTOR","FINANCE","AUDITOR"],"roles_denied":["NURSE","INVENTORY"],"preconditions":"Detalle abierto","positive_scenario":"Vuelve al listado.","negative_scenario":"No muta datos.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-DETAIL"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-EDIT","module":"Cotizaciones","route":"/quotes/:id","control_type":"EDIT","visible_label":"Editar borrador","selector_or_testid":"[data-action-id=QUOTE-EDIT]","roles_allowed":["ADMIN","DOCTOR","FINANCE"],"roles_denied":["NURSE","INVENTORY","AUDITOR"],"preconditions":"DRAFT no inmutable","positive_scenario":"Abre constructor prellenado.","negative_scenario":"No aparece para enviada o AUDITOR.","persistence_required":false,"refresh_required":false,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-EDIT"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":["domain:canEditQuote"],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
 {"action_id":"QUOTE-EDIT-SUBMIT","module":"Cotizaciones","route":"/quotes?edit=:id","control_type":"UPDATE","visible_label":"Guardar cambios","selector_or_testid":"[data-action-id=QUOTE-EDIT-SUBMIT]","roles_allowed":["ADMIN","DOCTOR","FINANCE"],"roles_denied":["NURSE","INVENTORY","AUDITOR"],"preconditions":"Borrador editable","positive_scenario":"Persiste el borrador recalculado.","negative_scenario":"Provider rechaza versión inmutable.","persistence_required":true,"refresh_required":true,"selenium_required":true,"selenium_test_ids":["SEL-QUOTE-EDIT"],"playwright_test_ids":["playwright:quotes-builder-lifecycle"],"unit_test_ids":[],"status":"IMPLEMENTED_VERIFIED","blocker":"Certificación Selenium de cotizaciones requerida."},
