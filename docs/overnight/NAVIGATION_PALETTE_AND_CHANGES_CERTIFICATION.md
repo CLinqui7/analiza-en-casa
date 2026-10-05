@@ -62,5 +62,15 @@ Fecha de verificación: 2026-10-05 (America/El_Salvador)
 - Verificación visual: escritorio y móvil 390 × 844; ancho móvil 390/390, sin desbordamiento
   horizontal.
 
-La verificación productiva y el identificador del despliegue se registran después de publicar el
-artefacto verificado.
+## Verificación en producción
+
+- Despliegue autoritativo: `dpl_8HiD4Wn1FxFZhPvac3KZDUHeskRm`.
+- URL: `https://analiza-en-casa-demo.vercel.app`.
+- Estado Vercel: `READY`; build remoto aprobado con 49 páginas estáticas.
+- Salud posterior al despliegue: `status=ready`, `dataMode=postgresql` y `database=ready`.
+- La cuenta `WEBMASTER` abrió `/changes` con las 32 revisiones completas y su estado técnico
+  factual.
+- El grupo Financiero mostró en producción Cuentas por cobrar, Pagos y Aseguradoras con sus rutas
+  correctas; el resto de grupos y permisos se renderizó según el rol.
+- Consola y errores del navegador: sin incidencias. Logs Vercel de nivel `error` desde el despliegue:
+  sin entradas.
