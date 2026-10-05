@@ -1,57 +1,57 @@
 {
   "mode": "FINAL",
-  "startedAt": "2026-09-03T14:02:40.904Z",
+  "startedAt": "2026-10-05T21:39:45.595Z",
   "baseURL": "http://127.0.0.1:4197",
   "routes": {
     "/login": {
-      "navigationMs": 611,
-      "domContentLoadedMs": 44,
-      "loadMs": 159,
+      "navigationMs": 987,
+      "domContentLoadedMs": 53,
+      "loadMs": 295,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
       "storageBytes": 0
     },
     "/dashboard": {
-      "navigationMs": 567,
-      "domContentLoadedMs": 13,
-      "loadMs": 41,
+      "navigationMs": 742,
+      "domContentLoadedMs": 24,
+      "loadMs": 97,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
       "storageBytes": 0
     },
     "/patients": {
-      "navigationMs": 565,
-      "domContentLoadedMs": 32,
-      "loadMs": 49,
+      "navigationMs": 733,
+      "domContentLoadedMs": 46,
+      "loadMs": 82,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
       "storageBytes": 0
     },
     "/hospitalizations": {
-      "navigationMs": 570,
-      "domContentLoadedMs": 24,
-      "loadMs": 41,
+      "navigationMs": 688,
+      "domContentLoadedMs": 30,
+      "loadMs": 63,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
       "storageBytes": 0
     },
     "/quotes": {
-      "navigationMs": 563,
-      "domContentLoadedMs": 24,
-      "loadMs": 43,
+      "navigationMs": 673,
+      "domContentLoadedMs": 31,
+      "loadMs": 89,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
       "storageBytes": 0
     },
     "/insurance": {
-      "navigationMs": 551,
-      "domContentLoadedMs": 21,
-      "loadMs": 32,
+      "navigationMs": 714,
+      "domContentLoadedMs": 27,
+      "loadMs": 56,
       "lcpMs": null,
       "cls": 0,
       "longTasksOver500ms": 0,
@@ -59,10 +59,10 @@
     }
   },
   "scenarios": {
-    "loginMs": 56,
-    "dashboardHotNavigationMs": 54,
-    "patientSearch1000Ms": 29,
-    "modalOpenMs": 66
+    "loginMs": 94,
+    "dashboardHotNavigationMs": 115,
+    "patientSearch1000Ms": 43,
+    "modalOpenMs": 99
   },
   "budgets": {
     "dashboardHotNavigationMs": 500,

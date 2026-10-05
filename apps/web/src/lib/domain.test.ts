@@ -307,10 +307,38 @@ describe('quote domain', () => {
     expect(validateQuoteItem({ ...items[0], quantity: 0 })).toBe(
       'La cantidad debe ser mayor que cero.',
     );
+    expect(validateQuoteItem({ ...items[0], quantity: 1.5 })).toBe(
+      'La cantidad debe ser un número entero.',
+    );
     expect(() => calculateQuoteTotals([{ ...items[0], discountAmount: 99 }], undefined, 0)).toThrow(
       'descuento manual',
     );
     expect(() => calculateQuoteTotals(items, undefined, 99)).toThrow('aseguradora');
+  });
+
+  it('accepts only whole-number percentages while preserving cents for fixed discounts', () => {
+    expect(() => calculateQuoteTotals(items, { type: 'PERCENT', value: 5.5 })).toThrow(
+      'número entero entre 0 y 100',
+    );
+    expect(() =>
+      calculateQuoteTotals(items, {
+        type: 'CATEGORY_PERCENTAGES',
+        categories: {
+          SERVICES: 2.5,
+          STUDIES: 0,
+          MEDICATIONS: 0,
+          SUPPLIES: 0,
+          EQUIPMENT: 0,
+          FEES: 0,
+          EXTRAS: 0,
+          IMAGING: 0,
+        },
+      }),
+    ).toThrow('porcentaje por categoría');
+    expect(() => calculateQuoteTotals(items, { type: 'PERCENT', value: 101 })).toThrow(
+      'número entero entre 0 y 100',
+    );
+    expect(calculateQuoteTotals(items, { type: 'FIXED', value: 1.25 }).total).toBe(23.75);
   });
 
   it('preserves an optional doctor reference for a manual fee without inferring a rate', () => {

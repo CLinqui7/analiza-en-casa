@@ -314,6 +314,8 @@
       "route_id": "ROUTE-PATIENTS",
       "react_route": "/patients",
       "react_files": [
+        "apps/web/src/components/app-shell.tsx",
+        "apps/web/src/app/sidebar.css",
         "apps/web/src/app/(workspace)/patients/page.tsx",
         "apps/web/src/lib/data-provider.ts"
       ],
@@ -334,7 +336,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Jerarquía enlaza sólo módulos operativos presentes."
+      "notes": "Jerarquía enlaza sólo módulos operativos presentes. El rediseño 2026-10-05 conserva permisos, rutas, acordeones, colapso y drawer móvil; añade iconos SVG semánticos, foco visible, movimiento ligero y preferencia de movimiento reducido."
     },
     {
       "requirement_id": "CH01-F009",

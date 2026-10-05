@@ -36,8 +36,16 @@ async function fillRequiredPatientData(
   await dialog.locator('input[name="address.comments"]').fill('Referencia sintética para QA');
 }
 
+// test-id: playwright:workspace-sidebar-accordions
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
   await login(page);
+  const navigationIcons = await page
+    .locator('#main-navigation [data-navigation-icon]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-navigation-icon')));
+  expect(new Set(navigationIcons).size).toBeGreaterThan(20);
+  expect(navigationIcons).toEqual(
+    expect.arrayContaining(['dashboard', 'patients', 'clinical', 'inventory']),
+  );
   const clinical = page.getByRole('button', { name: 'Clínico' });
   await expect(clinical).toHaveAttribute('aria-expanded', 'true');
   await clinical.click();

@@ -862,12 +862,14 @@ function QuoteEditor({
               Cantidad <span aria-hidden="true">*</span>
               <input
                 aria-required="true"
-                min="0.01"
+                inputMode="numeric"
+                min="1"
                 onChange={(event) => setNumber('quantity', event.target.value)}
-                step="0.01"
+                step="1"
                 type="number"
                 value={Number.isFinite(item.quantity) ? item.quantity : ''}
               />
+              <span className="field-help">Use únicamente números enteros positivos.</span>
             </label>
             <label>
               {activeCategory === 'FEES' ? 'Honorario médico (manual)' : 'Precio de venta sin IVA'}
@@ -1038,12 +1040,19 @@ function QuoteEditor({
                   : 'Porcentaje de descuento'}
                 <input
                   data-action-id="QUOTE-DISCOUNT-UPDATE"
+                  inputMode={draft.discount?.type === 'FIXED' ? 'decimal' : 'numeric'}
+                  max={draft.discount?.type === 'FIXED' ? undefined : 100}
                   min="0"
                   onChange={(event) => updateDiscount({ value: Number(event.target.value) })}
-                  step="0.01"
+                  step={draft.discount?.type === 'FIXED' ? '0.01' : '1'}
                   type="number"
                   value={draft.discount?.value ?? 0}
                 />
+                <span className="field-help">
+                  {draft.discount?.type === 'FIXED'
+                    ? 'El monto monetario puede incluir centavos.'
+                    : 'Use un porcentaje entero entre 0 y 100.'}
+                </span>
               </label>
             ) : (
               quoteCategories.map((category) => (
@@ -1051,6 +1060,7 @@ function QuoteEditor({
                   {category.label} (%)
                   <input
                     data-action-id="QUOTE-DISCOUNT-UPDATE"
+                    inputMode="numeric"
                     max="100"
                     min="0"
                     onChange={(event) =>
@@ -1062,7 +1072,7 @@ function QuoteEditor({
                         ),
                       })
                     }
-                    step="0.01"
+                    step="1"
                     type="number"
                     value={draft.discount?.categories?.[category.value] ?? 0}
                   />

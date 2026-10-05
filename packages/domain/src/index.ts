@@ -290,12 +290,41 @@ export function validateQuoteItem(item: QuoteItem): string | undefined {
   if (!item.name.trim()) return 'El concepto es obligatorio.';
   if (!Number.isFinite(item.quantity) || item.quantity <= 0)
     return 'La cantidad debe ser mayor que cero.';
+  if (!Number.isInteger(item.quantity)) return 'La cantidad debe ser un número entero.';
   if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0)
     return 'El precio manual no puede ser negativo.';
   if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0)
     return 'El descuento manual no puede ser negativo.';
   if (item.discountAmount > quoteItemGross(item))
     return 'El descuento manual no puede superar el importe de la línea.';
+  return undefined;
+}
+
+function validateQuoteDiscount(discount?: QuoteDiscount): string | undefined {
+  if (!discount) return undefined;
+  if (discount.type === 'FIXED') {
+    const value = discount.value ?? 0;
+    if (!Number.isFinite(value) || value < 0)
+      return 'El monto fijo de descuento no puede ser negativo.';
+    return undefined;
+  }
+  if (discount.type === 'PERCENT') {
+    const value = discount.value ?? 0;
+    if (!Number.isInteger(value) || value < 0 || value > 100)
+      return 'El porcentaje de descuento debe ser un número entero entre 0 y 100.';
+    return undefined;
+  }
+  const categoryPercentages = Object.values(discount.categories ?? {});
+  if (
+    categoryPercentages.some(
+      (percentage) =>
+        !Number.isFinite(percentage) ||
+        !Number.isInteger(percentage) ||
+        percentage < 0 ||
+        percentage > 100,
+    )
+  )
+    return 'Cada porcentaje por categoría debe ser un número entero entre 0 y 100.';
   return undefined;
 }
 
@@ -341,6 +370,8 @@ export function calculateQuoteTotals(
     const error = validateQuoteItem(item);
     if (error) throw new Error(error);
   }
+  const discountError = validateQuoteDiscount(discount);
+  if (discountError) throw new Error(discountError);
   if (!Number.isFinite(insurerAmount) || insurerAmount < 0)
     throw new Error('El importe explícito de aseguradora no puede ser negativo.');
   const subtotal = roundMoney(items.reduce((sum, item) => sum + quoteItemGross(item), 0));

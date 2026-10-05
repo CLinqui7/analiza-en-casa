@@ -193,6 +193,34 @@ test('catalog search matches code initials, closes on selection and reuses the c
   expect(id).toBeTruthy();
 });
 
+// test-id: playwright:quote-integer-inputs
+test('quote quantities and percentages reject decimals while fixed money keeps cents', async ({
+  page,
+}) => {
+  await login(page);
+  const dialog = await openNewQuote(page);
+  await dialog.getByRole('tab', { name: 'Honorarios' }).click();
+  await dialog.getByLabel('Servicio de honorario').selectOption({ index: 1 });
+  const quantity = dialog.getByLabel('Cantidad');
+  await expect(quantity).toHaveAttribute('min', '1');
+  await expect(quantity).toHaveAttribute('step', '1');
+  await quantity.fill('3.01');
+  await dialog.getByRole('button', { name: 'Agregar línea' }).click();
+  await expect(dialog.getByText('La cantidad debe ser un número entero.')).toBeVisible();
+
+  const percentage = dialog.getByLabel('Porcentaje de descuento');
+  await expect(percentage).toHaveAttribute('step', '1');
+  await expect(percentage).toHaveAttribute('max', '100');
+  await percentage.fill('5.5');
+  expect(await percentage.evaluate((input: HTMLInputElement) => input.checkValidity())).toBe(false);
+
+  await dialog.locator('select[data-action-id="QUOTE-DISCOUNT-UPDATE"]').selectOption('FIXED');
+  const fixedAmount = dialog.getByLabel('Monto de descuento');
+  await expect(fixedAmount).toHaveAttribute('step', '0.01');
+  await fixedAmount.fill('1.25');
+  expect(await fixedAmount.evaluate((input: HTMLInputElement) => input.checkValidity())).toBe(true);
+});
+
 test('draft can be edited, sent and revised without changing the sent version', async ({
   page,
 }) => {
