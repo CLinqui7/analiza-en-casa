@@ -316,6 +316,7 @@
       "react_files": [
         "apps/web/src/components/app-shell.tsx",
         "apps/web/src/app/sidebar.css",
+        "apps/web/src/app/theme.css",
         "apps/web/src/app/(workspace)/patients/page.tsx",
         "apps/web/src/lib/data-provider.ts"
       ],
@@ -335,8 +336,8 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "192f8cd3edc65d76d73ceac9a2e660fbb125b49c",
-      "notes": "Jerarquía enlaza sólo módulos operativos presentes. El rediseño 2026-10-05 conserva permisos, rutas, acordeones, colapso y drawer móvil; añade iconos SVG semánticos, foco visible, movimiento ligero y preferencia de movimiento reducido."
+      "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
+      "notes": "Jerarquía enlaza sólo módulos operativos presentes. El rediseño 2026-10-05 conserva permisos, rutas, acordeones, colapso y drawer móvil; agrupa todos los destinos en Inicio, Financiero, Clínico, Inventario y compras, Administración, Reportes y control, y Ayuda y seguimiento. Mantiene iconos SVG semánticos, foco visible, movimiento ligero y preferencia de movimiento reducido."
     },
     {
       "requirement_id": "CH01-F009",
@@ -1279,6 +1280,7 @@
       "react_files": [
         "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
         "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+        "apps/web/src/components/app-shell.tsx",
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
@@ -1297,8 +1299,8 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Grupo Financiero con tres rutas reales y permisos existentes."
+      "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
+      "notes": "Grupo Financiero conserva Hospitalización, Cuentas por cobrar y Preautorizaciones y reclamos, y reúne además Pagos, Cuentas por pagar, Cotizaciones y Aseguradoras con sus rutas y permisos existentes."
     },
     {
       "requirement_id": "CH03-F002",
