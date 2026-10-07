@@ -1343,13 +1343,36 @@ export function postgresPersistence(): Persistence {
           return item;
         });
       }
-      if (command.command === 'purchase.create') {
+      if (command.command === 'purchase.create' || command.command === 'purchase.update') {
         authorize(actor, 'purchases:write');
         const { purchase } = z
-          .object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() })
+          .object({
+            command: z.enum(['purchase.create', 'purchase.update']),
+            purchase: purchaseSchema.strict(),
+          })
           .strict()
           .parse(input);
+        if (
+          purchase.status !== 'DRAFT' ||
+          purchase.receivedAt ||
+          purchase.traceRecordId ||
+          purchase.cancelledAt ||
+          purchase.cancelReason
+        )
+          throw new MongoInputError('Sólo se puede guardar un borrador sin recepción.');
         return transaction(pool, actor, async (c) => {
+          const previous =
+            command.command === 'purchase.update'
+              ? await c.query<{ body: unknown }>(
+                  'SELECT body FROM analiza.purchases WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+                  [actor.organizationId, purchase.id],
+                )
+              : null;
+          const oldPurchase = previous?.rows[0]
+            ? purchaseSchema.parse(previous.rows[0].body)
+            : null;
+          if (command.command === 'purchase.update' && oldPurchase?.status !== 'DRAFT')
+            throw new MongoConflictError();
           const item = await c.query<{ category: string | null }>(
             "SELECT body->>'category' AS category FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",
             [actor.organizationId, purchase.catalogItemId],
@@ -1376,19 +1399,83 @@ export function postgresPersistence(): Persistence {
             throw new MongoInputError('Indique fecha de vencimiento y lote.');
           if (category === 'EQUIPMENT' && !purchase.serialNumber)
             throw new MongoInputError('Indique el número de serie del equipo.');
-          const normalizedPurchase = normalizePurchaseTraceability(purchase, category ?? undefined);
-          await c.query(
-            `INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body)
-             VALUES($1,$2,$3,$4::jsonb)`,
-            [
-              actor.organizationId,
-              purchase.id,
-              purchase.warehouseId,
-              JSON.stringify(normalizedPurchase),
-            ],
+          if (
+            !Number.isInteger(purchase.quantity) ||
+            !purchase.quantity ||
+            purchase.quantity < 1 ||
+            (category === 'EQUIPMENT' && purchase.quantity !== 1)
+          )
+            throw new MongoInputError(
+              'La cantidad debe ser un entero positivo; cada equipo usa una serie.',
+            );
+          const normalizedPurchase = normalizePurchaseTraceability(
+            { ...purchase, createdAt: oldPurchase?.createdAt ?? purchase.createdAt },
+            category ?? undefined,
           );
-          await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', purchase.id);
+          if (command.command === 'purchase.create') {
+            await c.query(
+              `INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body)
+               VALUES($1,$2,$3,$4::jsonb)`,
+              [
+                actor.organizationId,
+                purchase.id,
+                purchase.warehouseId,
+                JSON.stringify(normalizedPurchase),
+              ],
+            );
+          } else {
+            await c.query(
+              'UPDATE analiza.purchases SET warehouse_id=$3,body=$4::jsonb WHERE organization_id=$1 AND id=$2',
+              [
+                actor.organizationId,
+                purchase.id,
+                purchase.warehouseId,
+                JSON.stringify(normalizedPurchase),
+              ],
+            );
+          }
+          await audit(
+            c,
+            actor,
+            command.command === 'purchase.create'
+              ? 'PURCHASE_DRAFT_CREATED'
+              : 'PURCHASE_DRAFT_UPDATED',
+            'purchase',
+            purchase.id,
+          );
           return normalizedPurchase;
+        });
+      }
+      if (command.command === 'purchase.cancel') {
+        authorize(actor, 'purchases:write');
+        const { purchaseId, reason } = z
+          .object({
+            command: z.literal('purchase.cancel'),
+            purchaseId: z.string().trim().min(1).max(120),
+            reason: z.string().trim().min(1).max(1000),
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const previous = await c.query<{ body: unknown }>(
+            'SELECT body FROM analiza.purchases WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+            [actor.organizationId, purchaseId],
+          );
+          if (!previous.rows[0]) throw new MongoAccessError();
+          const purchase = purchaseSchema.parse(previous.rows[0].body);
+          if (purchase.status !== 'DRAFT') throw new MongoConflictError();
+          const cancelled = {
+            ...purchase,
+            status: 'CANCELLED' as const,
+            cancelledAt: new Date().toISOString(),
+            cancelReason: reason,
+          };
+          await c.query(
+            'UPDATE analiza.purchases SET body=$3::jsonb WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, purchaseId, JSON.stringify(cancelled)],
+          );
+          await audit(c, actor, 'PURCHASE_DRAFT_CANCELLED', 'purchase', purchaseId);
+          return cancelled;
         });
       }
       if (command.command === 'inventory.record') {

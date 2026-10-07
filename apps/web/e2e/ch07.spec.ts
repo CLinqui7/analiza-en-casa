@@ -40,7 +40,7 @@ test('CH07 hospital quote tracking filters, searches and paginates without sendi
   for (const header of [
     'Paciente',
     'DUI/NIT',
-    'Nro.',
+    'Cotización',
     'Estado',
     'Envío preautorización',
     'Respuesta seguro',

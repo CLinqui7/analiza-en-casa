@@ -18,13 +18,12 @@ test('CH13 renders a factual purchase list without financial operations', async 
   for (const header of [
     'Acciones',
     'Tipo',
-    'Número',
+    'Ubicación / referencia',
     'Proveedor',
-    'Total',
-    '# Factura',
+    'Total de compra',
+    'Número de factura',
     'Fecha',
     'Estado',
-    'Registro PT',
   ])
     await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Excel' })).toBeDisabled();

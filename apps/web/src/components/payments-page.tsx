@@ -47,6 +47,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [statementPatientId, setStatementPatientId] = useState('');
   const [paymentCommandKey, setPaymentCommandKey] = useState(() => crypto.randomUUID());
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
@@ -60,6 +61,12 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       ' · saldo ' +
       money(account.balance),
   }));
+  const statementPatientIds = new Set(accounts.map((account) => account.quote.patientId));
+  const statementPatients = patients.filter((patient) => statementPatientIds.has(patient.id));
+  const statementPatient = statementPatients.find((patient) => patient.id === statementPatientId);
+  const statementAccounts = accounts.filter(
+    (account) => account.quote.patientId === statementPatientId,
+  );
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -138,6 +145,29 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     downloadPdf(bytes, `comprobante-pago-${payment.id}.pdf`);
     setMessage('Comprobante interno no fiscal generado.');
   }
+  async function downloadStatement() {
+    if (!statementPatient || !statementAccounts.length) return;
+    try {
+      const [{ buildPatientStatementPdf, downloadPdf }, logoResponse] = await Promise.all([
+        import('@/lib/financial-pdf'),
+        fetch('/brand/analiza-en-casa-logo.png'),
+      ]);
+      const logoBytes = logoResponse.ok
+        ? new Uint8Array(await logoResponse.arrayBuffer())
+        : undefined;
+      const bytes = await buildPatientStatementPdf(
+        statementPatient,
+        statementAccounts,
+        payments,
+        quotes,
+        logoBytes,
+      );
+      downloadPdf(bytes, `estado-cuenta-${statementPatient.id}.pdf`);
+      setMessage('Estado de cuenta individual no fiscal generado para el paciente seleccionado.');
+    } catch {
+      setMessage('No fue posible generar el estado de cuenta. Inténtelo de nuevo.');
+    }
+  }
   const totals = accounts.reduce(
     (sum, item) => ({
       responsibility: sum.responsibility + item.responsibility,
@@ -194,6 +224,85 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           </Panel>
         ))}
       </section>
+      <Panel>
+        <div className="table-heading">
+          <div>
+            <h2>Estado de cuenta por paciente</h2>
+            <p>Consulte cargos, abonos y saldo de un solo paciente.</p>
+          </div>
+        </div>
+        <div className="filter-grid">
+          <label>
+            Paciente
+            <SearchableSelect
+              actionId="PATIENT-STATEMENT-SEARCH"
+              ariaLabel="Buscar paciente para estado de cuenta"
+              onChange={setStatementPatientId}
+              options={statementPatients.map((patient) => ({
+                value: patient.id,
+                label: `${patient.fullName} · ${patient.documentId}`,
+              }))}
+              placeholder="Buscar por nombre o documento"
+              value={statementPatientId}
+            />
+          </label>
+          <div className="action-row">
+            <Button
+              className="button-secondary"
+              data-action-id="PATIENT-STATEMENT-PDF"
+              disabled={!statementPatient || !statementAccounts.length}
+              onClick={() => void downloadStatement()}
+              type="button"
+            >
+              Descargar estado de cuenta PDF
+            </Button>
+          </div>
+        </div>
+        {statementPatient ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cotización</th>
+                  <th>Cargos</th>
+                  <th>Pagos</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statementAccounts.map((account) => (
+                  <tr key={account.quote.id}>
+                    <td>
+                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                    </td>
+                    <td>{money(account.responsibility)}</td>
+                    <td>{money(account.paid)}</td>
+                    <td>{money(account.balance)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total del paciente</th>
+                  <td>
+                    {money(
+                      statementAccounts.reduce((sum, account) => sum + account.responsibility, 0),
+                    )}
+                  </td>
+                  <td>
+                    {money(statementAccounts.reduce((sum, account) => sum + account.paid, 0))}
+                  </td>
+                  <td>
+                    {money(statementAccounts.reduce((sum, account) => sum + account.balance, 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ) : (
+          <p className="field-help">Seleccione un paciente con cotizaciones enviadas.</p>
+        )}
+      </Panel>
       {error ? (
         <p className="notice" role="alert">
           {error}

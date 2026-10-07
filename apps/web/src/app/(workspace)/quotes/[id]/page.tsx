@@ -171,7 +171,17 @@ export default function QuoteDetailPage() {
           <Button
             className="button-secondary"
             data-action-id="QUOTE-PRINT"
-            onClick={() => window.print()}
+            onClick={() => {
+              if (quote.status === 'SENT' && quote.immutable) {
+                window.open(
+                  `/api/quotes/${encodeURIComponent(quote.id)}/pdf?inline=1`,
+                  '_blank',
+                  'noopener,noreferrer',
+                );
+              } else {
+                window.print();
+              }
+            }}
             type="button"
           >
             Imprimir

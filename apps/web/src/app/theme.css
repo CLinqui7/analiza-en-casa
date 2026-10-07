@@ -476,3 +476,43 @@ body {
     content-visibility: visible;
   }
 }
+
+@media print {
+  /* The workspace uses a viewport-height scroll pane on screen. Let documents paginate. */
+  .app-shell,
+  .workspace-main,
+  .main-content,
+  .quote-print-area {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .workspace-topbar,
+  .sidebar,
+  .no-print {
+    display: none !important;
+  }
+
+  .main-content {
+    padding: 0 !important;
+  }
+
+  .main-content > * {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .quote-print-area .panel,
+  .quote-print-area .quote-category,
+  .quote-print-area .table-wrap {
+    break-inside: auto !important;
+    overflow: visible !important;
+  }
+
+  .quote-print-area tr {
+    break-inside: avoid;
+  }
+}

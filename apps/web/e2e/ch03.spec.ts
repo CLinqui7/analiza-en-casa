@@ -66,7 +66,7 @@ test('CH03-F002-F008 board tabs, coherent loading/empty state, filters and activ
   await page.getByRole('tab', { name: 'Ejecución de cotización' }).click();
   await expect(page.getByText('Configuración pendiente')).toBeVisible();
   await page.getByRole('tab', { name: 'Activos' }).click();
-  await page.getByRole('link', { name: /Pacientes · Inactivos/ }).click();
+  await page.getByRole('link', { name: 'Abrir pacientes inactivos' }).click();
   await expect(page).toHaveURL(/\/patients\?tab=INACTIVE/);
 });
 
@@ -78,7 +78,7 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   for (const column of [
     'Paciente',
     'DUI/NIT',
-    'Nro.',
+    'Cotización',
     'Estado',
     'Envío preautorización',
     'Respuesta seguro',

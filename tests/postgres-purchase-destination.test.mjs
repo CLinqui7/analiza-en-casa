@@ -17,7 +17,7 @@ test('purchase destinations remain tenant scoped and historical drafts stay unas
   assert.match(migration, /REFERENCES analiza\.warehouses\(organization_id,id\)/);
   assert.match(migration, /warehouse_id IS NULL AND NOT body \? 'warehouseId'/);
   const create = repository.slice(
-    repository.indexOf("if (command.command === 'purchase.create')"),
+    repository.indexOf("if (command.command === 'purchase.create' || command.command === 'purchase.update')"),
     repository.indexOf("if (command.command === 'inventory.record')"),
   );
   assert.match(create, /status='ACTIVE'/);

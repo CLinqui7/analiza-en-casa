@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
-import type { Payment, Quote } from '@analiza/contracts';
-import { buildPaymentReceiptPdf, buildQuotePdf } from './financial-pdf';
+import { readFile } from 'node:fs/promises';
+import type { Patient, Payment, Quote } from '@analiza/contracts';
+import { buildPatientStatementPdf, buildPaymentReceiptPdf, buildQuotePdf } from './financial-pdf';
 
 const quote: Quote = {
   id: 'quote-pdf-test',
@@ -52,6 +53,48 @@ describe('financial PDF documents', () => {
       createdAt: '2026-09-28T13:00:00.000Z',
     };
     const bytes = await buildPaymentReceiptPdf(payment, quote);
+    expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-');
+    expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
+  });
+
+  it('includes the brand and paginates every item in a long sent quote', async () => {
+    const logo = new Uint8Array(
+      await readFile(new URL('../../public/brand/analiza-en-casa-logo.png', import.meta.url)),
+    );
+    const longQuote: Quote = {
+      ...quote,
+      items: Array.from({ length: 90 }, (_, index) => ({
+        ...quote.items[0],
+        id: `line-${index}`,
+        name: `Servicio sintético de prueba ${index + 1}`,
+      })),
+    };
+    const bytes = await buildQuotePdf(longQuote, undefined, logo);
+    expect((await PDFDocument.load(bytes)).getPageCount()).toBeGreaterThan(1);
+  });
+
+  it('builds one patient statement from their own charges and applied payments', async () => {
+    const patient = {
+      id: 'patient-test',
+      fullName: 'Paciente QA',
+      documentId: '00000000-0',
+    } as Patient;
+    const payments: Payment[] = [
+      {
+        id: 'payment-test',
+        quoteId: quote.id,
+        amount: 20,
+        idempotencyKey: 'patient-statement-test',
+        status: 'APPLIED',
+        createdAt: '2026-09-28T13:00:00.000Z',
+      },
+    ];
+    const bytes = await buildPatientStatementPdf(
+      patient,
+      [{ quote, responsibility: 50, paid: 20, balance: 30 }],
+      payments,
+      [quote],
+    );
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-');
     expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
   });

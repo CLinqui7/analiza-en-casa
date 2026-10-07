@@ -99,6 +99,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   ) => Promise<boolean>;
   addCatalogItem: (item: CatalogItem) => Promise<boolean>;
   addPurchase: (purchase: Purchase) => Promise<boolean>;
+  updatePurchase: (purchase: Purchase) => Promise<boolean>;
+  cancelPurchase: (purchaseId: string, reason: string) => Promise<boolean>;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
   addInsuranceEvent: (event: InsuranceEvent) => boolean;
   recordInsuranceObservation: (input: {
@@ -949,6 +951,32 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ...current,
           purchases: [...current.purchases, purchase],
           auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
+        })),
+      updatePurchase: (purchase) =>
+        saveCommand({ command: 'purchase.update', purchase }, (current) => ({
+          ...current,
+          purchases: current.purchases.map((candidate) =>
+            candidate.id === purchase.id && candidate.status === 'DRAFT' ? purchase : candidate,
+          ),
+          auditEntries: [
+            audit('Borrador de compra actualizado', purchase.id),
+            ...current.auditEntries,
+          ],
+        })),
+      cancelPurchase: (purchaseId, reason) =>
+        saveCommand({ command: 'purchase.cancel', purchaseId, reason }, (current) => ({
+          ...current,
+          purchases: current.purchases.map((candidate) =>
+            candidate.id === purchaseId && candidate.status === 'DRAFT'
+              ? {
+                  ...candidate,
+                  status: 'CANCELLED',
+                  cancelledAt: new Date().toISOString(),
+                  cancelReason: reason,
+                }
+              : candidate,
+          ),
+          auditEntries: [audit('Borrador de compra anulado', purchaseId), ...current.auditEntries],
         })),
       addInsuranceRequest: (request) => {
         // Existing Supabase policies deliberately deny browser writes to this

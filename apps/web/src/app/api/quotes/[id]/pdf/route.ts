@@ -25,7 +25,13 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
         { status: 409, headers: noStore },
       );
     const patient = await backend.patients.get(actor, quote.patientId).catch(() => null);
-    const bytes = await buildQuotePdf(quote, patient ?? undefined);
+    const logoResponse = await fetch(new URL('/brand/analiza-en-casa-logo.png', request.url)).catch(
+      () => null,
+    );
+    const logoBytes = logoResponse?.ok
+      ? new Uint8Array(await logoResponse.arrayBuffer())
+      : undefined;
+    const bytes = await buildQuotePdf(quote, patient ?? undefined, logoBytes);
     const fileName = `cotizacion-${quote.id}-v${quote.version}.pdf`.replace(
       /[^a-zA-Z0-9._-]/g,
       '-',
@@ -35,7 +41,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
       headers: {
         ...noStore,
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Content-Disposition': `${request.nextUrl.searchParams.get('inline') === '1' ? 'inline' : 'attachment'}; filename="${fileName}"`,
         'X-Content-Type-Options': 'nosniff',
       },
     });

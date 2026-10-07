@@ -15,6 +15,7 @@ const schema = z.object({
   supplierCatalogItemId: z.string().min(1, 'Seleccione un proveedor.'),
   warehouseId: z.string().min(1, 'Seleccione una bodega de destino.'),
   reference: z.string().trim().min(1, 'Ingrese una referencia de compra.').max(200),
+  invoiceNumber: z.string().trim().max(100, 'Use un máximo de 100 caracteres.'),
   note: z.string().trim(),
   quantity: z
     .number()
@@ -27,7 +28,15 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
-  const { addPurchase, catalogItems, error, purchases, refreshWorkspace } = useWorkspace();
+  const {
+    addPurchase,
+    updatePurchase,
+    cancelPurchase,
+    catalogItems,
+    error,
+    purchases,
+    refreshWorkspace,
+  } = useWorkspace();
   const { can } = useAuth();
   const {
     warehouses,
@@ -37,6 +46,9 @@ export default function PurchasesPage() {
     execute: executeReceipt,
   } = useOperations();
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Purchase | null>(null);
+  const [cancelling, setCancelling] = useState<Purchase | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [pageSize, setPageSize] = useState(10);
@@ -78,6 +90,7 @@ export default function PurchasesPage() {
       supplierCatalogItemId: suppliers[0]?.id ?? '',
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
+      invoiceNumber: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
@@ -118,7 +131,7 @@ export default function PurchasesPage() {
   const visible = useMemo(
     () =>
       purchases.filter((purchase) =>
-        `${purchase.reference} ${itemNames.get(purchase.catalogItemId) ?? ''} ${warehouseNames.get(purchase.warehouseId ?? '') ?? ''}`
+        `${purchase.reference} ${purchase.invoiceNumber ?? ''} ${itemNames.get(purchase.catalogItemId) ?? ''} ${warehouseNames.get(purchase.warehouseId ?? '') ?? ''}`
           .toLocaleLowerCase('es-SV')
           .includes(query.toLocaleLowerCase('es-SV')),
       ),
@@ -132,6 +145,7 @@ export default function PurchasesPage() {
     const workbookBytes = createXlsxWorkbook(
       [
         { key: 'reference', label: 'Referencia', width: 26 },
+        { key: 'invoiceNumber', label: 'Número de factura', width: 24 },
         { key: 'item', label: 'Ítem', width: 36 },
         { key: 'supplier', label: 'Proveedor', width: 30 },
         { key: 'warehouse', label: 'Bodega', width: 26 },
@@ -143,6 +157,7 @@ export default function PurchasesPage() {
       ],
       visible.map((purchase) => ({
         reference: purchase.reference,
+        invoiceNumber: purchase.invoiceNumber ?? '',
         item: itemNames.get(purchase.catalogItemId) ?? purchase.catalogItemId,
         supplier: itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado',
         warehouse: purchase.warehouseId
@@ -154,7 +169,12 @@ export default function PurchasesPage() {
           purchase.unitCost === undefined
             ? ''
             : ((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2),
-        status: purchase.status === 'RECEIVED' ? 'Recibida en cuarentena' : 'Borrador',
+        status:
+          purchase.status === 'RECEIVED'
+            ? 'Recibida en cuarentena'
+            : purchase.status === 'CANCELLED'
+              ? 'Anulada'
+              : 'Borrador',
         createdAt: purchase.createdAt.slice(0, 10),
       })),
       'Compras',
@@ -174,11 +194,13 @@ export default function PurchasesPage() {
   }
   function close() {
     setOpen(false);
+    setEditing(null);
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
       supplierCatalogItemId: suppliers[0]?.id ?? '',
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
+      invoiceNumber: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
@@ -186,6 +208,24 @@ export default function PurchasesPage() {
       lotNumber: '',
       serialNumber: '',
     });
+  }
+  function edit(purchase: Purchase) {
+    if (purchase.status !== 'DRAFT') return;
+    setEditing(purchase);
+    form.reset({
+      catalogItemId: purchase.catalogItemId,
+      supplierCatalogItemId: purchase.supplierCatalogItemId ?? '',
+      warehouseId: purchase.warehouseId ?? '',
+      reference: purchase.reference,
+      invoiceNumber: purchase.invoiceNumber ?? '',
+      note: purchase.note ?? '',
+      quantity: purchase.quantity ?? 1,
+      unitCost: purchase.unitCost ?? 0,
+      expirationDate: purchase.expirationDate ?? '',
+      lotNumber: purchase.lotNumber ?? '',
+      serialNumber: purchase.serialNumber ?? '',
+    });
+    setOpen(true);
   }
   function selectCatalogItem(itemId: string) {
     const item = purchasableItems.find((candidate) => candidate.id === itemId);
@@ -233,11 +273,12 @@ export default function PurchasesPage() {
     }
     const purchase = normalizePurchaseTraceability(
       {
-        id: crypto.randomUUID(),
+        id: editing?.id ?? crypto.randomUUID(),
         catalogItemId: values.catalogItemId,
         supplierCatalogItemId: values.supplierCatalogItemId,
         warehouseId: values.warehouseId,
         reference: values.reference,
+        invoiceNumber: values.invoiceNumber || undefined,
         note: values.note || undefined,
         quantity: values.quantity,
         unitCost: values.unitCost,
@@ -245,14 +286,33 @@ export default function PurchasesPage() {
         lotNumber: values.lotNumber || undefined,
         serialNumber: values.serialNumber || undefined,
         status: 'DRAFT',
-        createdAt: new Date().toISOString(),
+        createdAt: editing?.createdAt ?? new Date().toISOString(),
       } satisfies Purchase,
       catalogItem.category,
     );
-    const saved = await addPurchase(purchase);
+    const saved = editing ? await updatePurchase(purchase) : await addPurchase(purchase);
     if (!saved) return;
-    setMessage('Compra guardada como borrador con bodega de destino y trazabilidad de inventario.');
+    setMessage(
+      editing
+        ? 'Borrador de compra actualizado y auditado.'
+        : 'Compra guardada como borrador con bodega de destino y trazabilidad de inventario.',
+    );
     close();
+  }
+  async function confirmCancellation(formData: FormData) {
+    if (!cancelling) return;
+    const reason = String(formData.get('reason') ?? '').trim();
+    if (!reason) {
+      setCancelError('Explique por qué se anula el borrador.');
+      return;
+    }
+    if (!(await cancelPurchase(cancelling.id, reason))) {
+      setCancelError('No se pudo anular el borrador. Revise su estado e inténtelo de nuevo.');
+      return;
+    }
+    setCancelling(null);
+    setCancelError(null);
+    setMessage('Borrador anulado con motivo y auditoría. No afectó existencias.');
   }
   async function receivePurchase(formData: FormData) {
     if (!receiptSelection) return;
@@ -320,6 +380,8 @@ export default function PurchasesPage() {
             disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
             onClick={() => {
               setMessage(null);
+              setEditing(null);
+              form.reset();
               setOpen(true);
             }}
             type="button"
@@ -419,13 +481,12 @@ export default function PurchasesPage() {
                 {[
                   'Acciones',
                   'Tipo',
-                  'Número',
+                  'Ubicación / referencia',
                   'Proveedor',
-                  'Total',
-                  '# Factura',
+                  'Total de compra',
+                  'Número de factura',
                   'Fecha',
                   'Estado',
-                  'Registro PT',
                 ].map((header) => (
                   <th key={header}>{header}</th>
                 ))}
@@ -444,6 +505,29 @@ export default function PurchasesPage() {
                       >
                         Abrir
                       </Button>
+                      {can('purchases:write') && purchase.status === 'DRAFT' ? (
+                        <>
+                          <Button
+                            className="button-secondary"
+                            data-action-id="PURCHASE-EDIT"
+                            onClick={() => edit(purchase)}
+                            type="button"
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            className="button-secondary danger"
+                            data-action-id="PURCHASE-CANCEL"
+                            onClick={() => {
+                              setCancelError(null);
+                              setCancelling(purchase);
+                            }}
+                            type="button"
+                          >
+                            Anular
+                          </Button>
+                        </>
+                      ) : null}
                       {can('purchases:write') &&
                       can('inventory:write') &&
                       purchase.status === 'DRAFT' &&
@@ -480,15 +564,20 @@ export default function PurchasesPage() {
                       ? 'No documentado'
                       : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
                   </td>
-                  <td>No documentado</td>
+                  <td>{purchase.invoiceNumber || 'No registrado'}</td>
                   <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
-                  <td>{purchase.status === 'RECEIVED' ? 'Recibida en cuarentena' : 'Borrador'}</td>
-                  <td>No documentado</td>
+                  <td>
+                    {purchase.status === 'RECEIVED'
+                      ? 'Recibida en cuarentena'
+                      : purchase.status === 'CANCELLED'
+                        ? 'Anulada'
+                        : 'Borrador'}
+                  </td>
                 </tr>
               ))}
               {!visible.length ? (
                 <tr>
-                  <td colSpan={9}>
+                  <td colSpan={8}>
                     <EmptyState
                       detail={
                         query
@@ -529,20 +618,24 @@ export default function PurchasesPage() {
         </nav>
       </Panel>
       <Dialog
-        description="Registra el borrador y la trazabilidad de la compra; no descuenta ni recibe inventario automáticamente."
+        description="El borrador conserva la bodega y la trazabilidad; la recepción se confirma por separado."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
             <Button disabled={form.formState.isSubmitting} form="purchase-form" type="submit">
-              {form.formState.isSubmitting ? 'Guardando…' : 'Guardar borrador'}
+              {form.formState.isSubmitting
+                ? 'Guardando…'
+                : editing
+                  ? 'Guardar cambios'
+                  : 'Guardar borrador'}
             </Button>
           </>
         }
         onClose={close}
         open={open}
-        title="Nueva compra"
+        title={editing ? 'Editar compra' : 'Nueva compra'}
       >
         <form
           className="form-grid"
@@ -630,6 +723,13 @@ export default function PurchasesPage() {
               <span className="field-error">{form.formState.errors.reference.message}</span>
             ) : null}
           </label>
+          <label>
+            Número de factura (opcional)
+            <input {...form.register('invoiceNumber')} maxLength={100} />
+            {form.formState.errors.invoiceNumber ? (
+              <span className="field-error">{form.formState.errors.invoiceNumber.message}</span>
+            ) : null}
+          </label>
           {selectedItem?.category === 'MEDICATIONS' || selectedItem?.category === 'SUPPLIES' ? (
             <>
               <label>
@@ -688,6 +788,10 @@ export default function PurchasesPage() {
               <dd>{selected.reference}</dd>
             </div>
             <div>
+              <dt>Número de factura</dt>
+              <dd>{selected.invoiceNumber || 'No registrado'}</dd>
+            </div>
+            <div>
               <dt>Ítem de catálogo</dt>
               <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
             </div>
@@ -705,8 +809,20 @@ export default function PurchasesPage() {
             </div>
             <div>
               <dt>Estado</dt>
-              <dd>{selected.status === 'RECEIVED' ? 'Recibida en cuarentena' : 'Borrador'}</dd>
+              <dd>
+                {selected.status === 'RECEIVED'
+                  ? 'Recibida en cuarentena'
+                  : selected.status === 'CANCELLED'
+                    ? 'Anulada'
+                    : 'Borrador'}
+              </dd>
             </div>
+            {selected.cancelReason ? (
+              <div>
+                <dt>Motivo de anulación</dt>
+                <dd>{selected.cancelReason}</dd>
+              </div>
+            ) : null}
             {selected.receivedAt ? (
               <div>
                 <dt>Recepción física</dt>
@@ -740,6 +856,34 @@ export default function PurchasesPage() {
             </div>
           </dl>
         ) : null}
+      </Dialog>
+      <Dialog
+        description="Sólo se anula un borrador que aún no fue recibido. La anulación queda auditada."
+        footer={
+          <>
+            <Button className="button-secondary" onClick={() => setCancelling(null)} type="button">
+              Volver
+            </Button>
+            <Button form="purchase-cancel-form" type="submit">
+              Confirmar anulación
+            </Button>
+          </>
+        }
+        onClose={() => setCancelling(null)}
+        open={Boolean(cancelling)}
+        title="Anular borrador de compra"
+      >
+        <form action={confirmCancellation} id="purchase-cancel-form">
+          <label>
+            Motivo de anulación
+            <textarea maxLength={1000} name="reason" required rows={3} />
+          </label>
+          {cancelError ? (
+            <p className="notice danger" role="alert">
+              {cancelError}
+            </p>
+          ) : null}
+        </form>
       </Dialog>
       <Dialog
         description="Confirma la recepción física completa en la bodega del borrador. El lote o serie quedará en cuarentena y no se sumará al disponible hasta su liberación."

@@ -68,6 +68,14 @@ const commands = z.discriminatedUnion('command', [
     .strict(),
   z.object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() }).strict(),
   z.object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() }).strict(),
+  z.object({ command: z.literal('purchase.update'), purchase: purchaseSchema.strict() }).strict(),
+  z
+    .object({
+      command: z.literal('purchase.cancel'),
+      purchaseId: identifier,
+      reason: z.string().trim().min(1).max(1000),
+    })
+    .strict(),
   z
     .object({ command: z.literal('clinical.create'), document: clinicalDocumentSchema.strict() })
     .strict(),
@@ -1122,21 +1130,34 @@ export class MongoOperationsRepository {
           await audit('PAYMENT_APPLIED', payment.id);
           return { id: payment.id };
         }
-        if (input.command === 'purchase.create') {
+        if (input.command === 'purchase.create' || input.command === 'purchase.update') {
           permission('purchases:write');
           const purchase = input.purchase;
+          if (
+            purchase.status !== 'DRAFT' ||
+            purchase.receivedAt ||
+            purchase.traceRecordId ||
+            purchase.cancelledAt ||
+            purchase.cancelReason
+          )
+            throw new MongoInputError('Sólo se puede guardar un borrador sin recepción.');
           const previous = await this.database
             .collection('purchases')
             .findOne({ ...scoped, id: purchase.id }, { session });
-          if (previous) {
+          if (previous && input.command === 'purchase.create') {
             assertSameRetry(previous, purchase);
             return { id: previous.id };
           }
+          if (input.command === 'purchase.update' && previous?.status !== 'DRAFT')
+            throw new MongoConflictError();
           const catalogItem = await this.database
             .collection('catalogItems')
             .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session });
-          if (!catalogItem)
-            throw new MongoInputError('Seleccione un artículo activo de esta organización.');
+          if (
+            !catalogItem ||
+            !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(String(catalogItem.category))
+          )
+            throw new MongoInputError('Seleccione un medicamento, insumo o equipo activo.');
           const supplier = await this.database.collection('catalogItems').findOne(
             {
               ...scoped,
@@ -1152,12 +1173,80 @@ export class MongoOperationsRepository {
             .collection('warehouses')
             .findOne({ ...scoped, id: purchase.warehouseId, status: 'ACTIVE' }, { session });
           if (!warehouse) throw new MongoInputError('Seleccione una bodega activa.');
-          const normalizedPurchase = normalizePurchaseTraceability(purchase, catalogItem.category);
-          await this.database
-            .collection('purchases')
-            .insertOne({ ...normalizedPurchase, ...scoped }, { session });
-          await audit('PURCHASE_DRAFT_CREATED', purchase.id);
+          if (
+            !Number.isInteger(purchase.quantity) ||
+            !purchase.quantity ||
+            purchase.quantity < 1 ||
+            (catalogItem.category === 'EQUIPMENT' && purchase.quantity !== 1)
+          )
+            throw new MongoInputError(
+              'La cantidad debe ser un entero positivo; cada equipo usa una serie.',
+            );
+          if (
+            ['MEDICATIONS', 'SUPPLIES'].includes(String(catalogItem.category)) &&
+            (!purchase.expirationDate || !purchase.lotNumber)
+          )
+            throw new MongoInputError('Indique fecha de vencimiento y lote.');
+          if (catalogItem.category === 'EQUIPMENT' && !purchase.serialNumber)
+            throw new MongoInputError('Indique el número de serie del equipo.');
+          const normalizedPurchase = normalizePurchaseTraceability(
+            {
+              ...purchase,
+              createdAt: (previous?.createdAt as string | undefined) ?? purchase.createdAt,
+            },
+            catalogItem.category,
+          );
+          if (input.command === 'purchase.create') {
+            await this.database
+              .collection('purchases')
+              .insertOne({ ...normalizedPurchase, ...scoped }, { session });
+          } else {
+            const unset = Object.fromEntries(
+              (['invoiceNumber', 'note', 'expirationDate', 'lotNumber', 'serialNumber'] as const)
+                .filter(
+                  (key) => previous?.[key] !== undefined && normalizedPurchase[key] === undefined,
+                )
+                .map((key) => [key, '']),
+            );
+            const updated = await this.database.collection('purchases').updateOne(
+              { ...scoped, id: purchase.id, status: 'DRAFT' },
+              {
+                $set: normalizedPurchase,
+                ...(Object.keys(unset).length ? { $unset: unset } : {}),
+              },
+              { session },
+            );
+            if (updated.matchedCount !== 1) throw new MongoConflictError();
+          }
+          await audit(
+            input.command === 'purchase.create'
+              ? 'PURCHASE_DRAFT_CREATED'
+              : 'PURCHASE_DRAFT_UPDATED',
+            purchase.id,
+          );
           return { id: purchase.id };
+        }
+        if (input.command === 'purchase.cancel') {
+          permission('purchases:write');
+          const purchase = await this.database
+            .collection('purchases')
+            .findOne({ ...scoped, id: input.purchaseId }, { session });
+          if (!purchase) throw new MongoAccessError();
+          if (purchase.status !== 'DRAFT') throw new MongoConflictError();
+          const updated = await this.database.collection('purchases').updateOne(
+            { ...scoped, id: input.purchaseId, status: 'DRAFT' },
+            {
+              $set: {
+                status: 'CANCELLED',
+                cancelledAt: new Date().toISOString(),
+                cancelReason: input.reason,
+              },
+            },
+            { session },
+          );
+          if (updated.matchedCount !== 1) throw new MongoConflictError();
+          await audit('PURCHASE_DRAFT_CANCELLED', input.purchaseId);
+          return { id: input.purchaseId };
         }
         if (input.command === 'clinical.create') {
           permission('clinical:write');

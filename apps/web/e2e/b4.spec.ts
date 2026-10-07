@@ -39,7 +39,7 @@ test('a manual doctor fee keeps its selected doctor after save and reload', asyn
   const doctorName = await doctor.locator('option:checked').textContent();
   await dialog.getByLabel('Concepto').fill('Honorario B4');
   await dialog.getByLabel('Cantidad').fill('1');
-  await dialog.getByLabel('Honorario médico (manual)').fill('55');
+  await dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]').selectOption('55');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.getByText(`Médico: ${doctorName}`)).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();

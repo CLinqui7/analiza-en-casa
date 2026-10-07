@@ -84,6 +84,7 @@ type CatalogEntry = {
 const feeServiceCatalog: CatalogEntry[] = [
   { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
+const feeAmountOptions = [0, ...Array.from({ length: 58 }, (_, index) => 15 + index * 5)];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 function updatedCategoryPercentages(
   existing: QuoteDiscount['categories'],
@@ -844,7 +845,7 @@ function QuoteEditor({
                     ))}
                   </select>
                   <span className="field-help">
-                    Honorario médico: importe manual, sin tarifa inferida.
+                    Seleccione el importe solicitado para esta cotización.
                   </span>
                 </label>
               </>
@@ -872,15 +873,31 @@ function QuoteEditor({
               <span className="field-help">Use únicamente números enteros positivos.</span>
             </label>
             <label>
-              {activeCategory === 'FEES' ? 'Honorario médico (manual)' : 'Precio de venta sin IVA'}
-              <input
-                data-action-id={activeCategory === 'FEES' ? 'QUOTE-FEE-AMOUNT' : undefined}
-                min="0"
-                onChange={(event) => setNumber('unitPrice', event.target.value)}
-                step="0.01"
-                type="number"
-                value={Number.isFinite(item.unitPrice) ? item.unitPrice : ''}
-              />
+              {activeCategory === 'FEES' ? 'Honorario médico' : 'Precio de venta sin IVA'}
+              {activeCategory === 'FEES' ? (
+                <select
+                  data-action-id="QUOTE-FEE-AMOUNT"
+                  onChange={(event) => setNumber('unitPrice', event.target.value)}
+                  value={item.unitPrice}
+                >
+                  {!feeAmountOptions.includes(item.unitPrice) ? (
+                    <option value={item.unitPrice}>Importe previo · {money(item.unitPrice)}</option>
+                  ) : null}
+                  {feeAmountOptions.map((amount) => (
+                    <option key={amount} value={amount}>
+                      {money(amount)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  min="0"
+                  onChange={(event) => setNumber('unitPrice', event.target.value)}
+                  step="0.01"
+                  type="number"
+                  value={Number.isFinite(item.unitPrice) ? item.unitPrice : ''}
+                />
+              )}
             </label>
             <label>
               Descuento manual

@@ -48,6 +48,8 @@ export default function CatalogsPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<CatalogItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<Category>('SERVICES');
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
@@ -55,8 +57,16 @@ export default function CatalogsPage() {
   });
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
   const visibleItems = useMemo(
-    () => catalogItems.filter((item) => (item.category ?? 'SUPPLIES') === activeCategory),
-    [activeCategory, catalogItems],
+    () =>
+      catalogItems.filter(
+        (item) =>
+          (item.category ?? 'SUPPLIES') === activeCategory &&
+          (statusFilter === 'ALL' || item.status === statusFilter) &&
+          `${item.sku} ${item.name}`
+            .toLocaleLowerCase('es-SV')
+            .includes(query.trim().toLocaleLowerCase('es-SV')),
+      ),
+    [activeCategory, catalogItems, query, statusFilter],
   );
   function nextSku(category: Category) {
     const prefix = categories.find(([value]) => value === category)?.[2] ?? 'CAT';
@@ -166,6 +176,29 @@ export default function CatalogsPage() {
           <h2>{categories.find(([value]) => value === activeCategory)?.[1]}</h2>
           <StatusTag>{visibleItems.length} registros</StatusTag>
         </div>
+        <div className="filter-grid">
+          <label>
+            Buscar por nombre o código
+            <input
+              data-action-id="CATALOG-SEARCH"
+              onChange={(event) => setQuery(event.target.value)}
+              type="search"
+              value={query}
+            />
+          </label>
+          <label>
+            Estado
+            <select
+              data-action-id="CATALOG-STATUS-FILTER"
+              onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+              value={statusFilter}
+            >
+              <option value="ALL">Todos</option>
+              <option value="ACTIVE">Activos</option>
+              <option value="INACTIVE">Inactivos</option>
+            </select>
+          </label>
+        </div>
         {visibleItems.length ? (
           <div className="table-wrap">
             <table>
@@ -213,7 +246,14 @@ export default function CatalogsPage() {
             </table>
           </div>
         ) : (
-          <EmptyState detail="Cree el primer registro de esta categoría." title="Sin registros" />
+          <EmptyState
+            detail={
+              query || statusFilter !== 'ALL'
+                ? 'Ajuste el texto o el estado para encontrar otro ítem.'
+                : 'Cree el primer registro de esta categoría.'
+            }
+            title="Sin registros"
+          />
         )}
       </Panel>
       <Dialog

@@ -238,7 +238,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editable');
   await openPatientDetail(page, 'Paciente QA Editable');
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Activo');
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await editDialog.getByLabel('Nombre completo').fill('Paciente QA Editado');
   await editDialog.getByLabel('Teléfono celular').fill('7000-4999');
@@ -278,7 +278,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await page.reload();
   await expect(page.getByText('7000-4999')).toBeVisible();
   await expect(page.getByText('https://example.test/editada')).toBeVisible();
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const duplicateEditDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await duplicateEditDialog.locator('select[name="documentType"]').selectOption('DUI');
   await duplicateEditDialog.locator('input[name="documentId"]').fill('123456789');
@@ -334,7 +334,7 @@ test('patient detail keeps auditor read-only and inventory denied', async ({ pag
   await loginAs(page, 'auditor@demo.local', 'demo-auditor');
   await page.goto('/patients/patient-demo-001');
   await expect(page.getByRole('heading', { name: 'Paciente Demo Aurora' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Editar paciente' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Editar paciente' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await page.goto('/patients/patient-demo-001');
@@ -484,7 +484,7 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
   await openPatientDetail(page, 'Paciente Playwright Editable');
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   await page.getByLabel('Teléfono celular').fill('2222 3333');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
@@ -945,7 +945,10 @@ test('catalog items receive unique automatic codes and persist after refresh', a
   await page.getByRole('button', { name: 'Nuevo ítem' }).click();
   const firstCode = await page.getByLabel('Código automático').inputValue();
   await expect(page.getByLabel('Código automático')).toHaveAttribute('readonly', '');
-  await page.getByLabel('Nombre').fill('Ítem sintético de QA');
+  await page
+    .getByRole('dialog', { name: 'Nuevo ítem' })
+    .getByLabel('Nombre', { exact: true })
+    .fill('Ítem sintético de QA');
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('status')).toContainText('creado correctamente');
   await page.reload();

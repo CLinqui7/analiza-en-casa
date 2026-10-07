@@ -345,6 +345,13 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - Definir en qué formularios debe operar el autoguardado, por cuánto tiempo se conserva cada borrador, cómo se recupera o descarta y qué controles adicionales protegen información clínica y evitan cruces entre organizaciones.
 - Definir estados, prioridades, permisos, responsables, reglas de entrega e idempotencia para solicitudes internas de medicamentos, insumos y equipos realizadas por enfermería. Cualquier aviso externo requiere proveedor y consentimiento aprobados, y no puede incluir información clínica sensible.
 
+### Reconciliación individual · 2026-10-06
+
+- `FEEDBACK-6216ADF9`: la cotización precarga el precio de venta del catálogo, pero todavía permite editarlo. Confirmar si se debe prohibir toda excepción de precio o crear una excepción autorizada y auditada; no cambiar silenciosamente cotizaciones enviadas ni las reglas de descuentos observadas en los videos.
+- `FEEDBACK-12C011B0`: entregar catálogos fuente autorizados, códigos, vigencia y precios de Analiza Lab, Fisio e Imágenes para importarlos por organización. Las categorías están creadas; no se inventarán servicios o importes.
+- `FEEDBACK-FBE015F8`: identificar ventanas restantes que requieren el filtro por nombre, DUI o registro médico. El filtro existe en pantallas principales, pero la afirmación «todas» necesita inventario y prueba completa.
+- `FEEDBACK-7BB83834`, `FEEDBACK-C7EF7D96` y `FEEDBACK-95A33BEA`: no llamar «facturación» a cobros ni comprobantes internos; falta la definición fiscal indicada en `MEETING-Q004` antes de una factura real o conversión automática.
+
 ## Deployment
 
 - Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.

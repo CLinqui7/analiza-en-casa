@@ -54,7 +54,9 @@ test('B3 persists multiple admission and discharge periods without accepting att
   await expect(reopened.getByLabel('Ingreso adicional 2')).toHaveCount(0);
   await reopened.getByRole('button', { name: 'Cancelar' }).click();
 
-  const hospitalizationId = await row.locator('td').nth(1).getByRole('link').innerText();
+  const hospitalizationId = (await row.locator('td').nth(1).getByRole('link').innerText())
+    .trim()
+    .replace(/^Consultar\s+/, '');
   await page.goto(`/hospitalizations?edit=${encodeURIComponent(hospitalizationId)}`);
   const directEdit = page.getByRole('dialog', { name: `Editar ${hospitalizationId}` });
   await expect(directEdit.getByLabel('Fecha de ingreso')).toHaveValue('2026-09-10');

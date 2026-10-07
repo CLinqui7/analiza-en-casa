@@ -64,7 +64,7 @@ test('CH01-F003 Studio directory preserves administrative data in the patient de
     'Estado',
     'Acciones',
   ]);
-  await page.getByRole('link', { name: 'Paciente Demo Aurora', exact: true }).click();
+  await page.getByRole('link', { name: 'Detalle de Paciente Demo Aurora' }).click();
   for (const field of [
     'Fecha de nacimiento',
     'Empresa',
@@ -139,7 +139,7 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('CH01-CONSENT');
-  await page.getByRole('link', { name: 'Paciente Consentimiento CH01', exact: true }).click();
+  await page.getByRole('link', { name: 'Detalle de Paciente Consentimiento CH01' }).click();
   await expect(page.getByText('No autorizadas', { exact: true })).toBeVisible();
   await expect(page.getByText('Pendiente administrativo', { exact: true })).toBeVisible();
 });
