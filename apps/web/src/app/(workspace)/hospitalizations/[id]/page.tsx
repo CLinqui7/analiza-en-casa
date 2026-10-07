@@ -34,6 +34,8 @@ export default function HospitalizationDetailPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [referralDoctorQuery, setReferralDoctorQuery] = useState('');
+  const [selectedReferralDoctor, setSelectedReferralDoctor] = useState('');
   const hospitalization = hospitalizations.find((item) => item.id === params.id);
 
   if (loading)
@@ -338,14 +340,36 @@ export default function HospitalizationDetailPage() {
               <input defaultValue={profile?.healthManager ?? ''} name="healthManager" />
             </label>
             <label>
+              Buscar médico referido
+              <input
+                aria-label="Filtrar médico referido"
+                onChange={(event) => setReferralDoctorQuery(event.target.value)}
+                type="search"
+                value={referralDoctorQuery}
+              />
+            </label>
+            <label>
               Referido por
-              <select defaultValue={profile?.referredBy ?? ''} name="referredBy">
+              <select
+                defaultValue={profile?.referredBy ?? ''}
+                name="referredBy"
+                onChange={(event) => setSelectedReferralDoctor(event.target.value)}
+              >
                 <option value="">Sin médico referido</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.fullName}>
-                    {doctor.fullName}
-                  </option>
-                ))}
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(referralDoctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                      doctor.fullName === profile?.referredBy ||
+                      doctor.fullName === selectedReferralDoctor,
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.fullName}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
               </select>
             </label>
             <label>

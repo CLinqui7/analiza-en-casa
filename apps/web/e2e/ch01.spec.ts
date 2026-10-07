@@ -46,7 +46,7 @@ test('CH01-F002 patient-tabs-import exposes the bulk import surface', async ({ p
     ),
   });
   await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
-    '1 filas válidas',
+    '1 fila válida',
   );
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await expect(dialog).toHaveCount(0);

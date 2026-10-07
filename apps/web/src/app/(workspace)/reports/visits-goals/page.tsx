@@ -15,6 +15,8 @@ export default function VisitsGoalsPage() {
   const [dialog, setDialog] = useState<'visit' | 'goal' | null>(null);
   const [message, setMessage] = useState('');
   const [commandKey, setCommandKey] = useState(() => crypto.randomUUID());
+  const [visitPatientQuery, setVisitPatientQuery] = useState('');
+  const [selectedVisitPatientId, setSelectedVisitPatientId] = useState('');
   const monthVisits = operations.visits.filter((item) => item.occurredAt.slice(0, 7) === month);
   const monthGoals = operations.goals.filter((item) => item.month === month);
   const professionals = operations.professionals.filter(
@@ -302,14 +304,35 @@ export default function VisitsGoalsPage() {
                 <input name="date" type="datetime-local" required />
               </label>
               <label>
+                Buscar paciente por nombre o DUI
+                <input
+                  aria-label="Filtrar pacientes de visita"
+                  onChange={(event) => setVisitPatientQuery(event.target.value)}
+                  type="search"
+                  value={visitPatientQuery}
+                />
+              </label>
+              <label>
                 Paciente
-                <select name="patient" required>
+                <select
+                  name="patient"
+                  onChange={(event) => setSelectedVisitPatientId(event.target.value)}
+                  required
+                >
                   <option value="">Seleccionar paciente</option>
-                  {patients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.fullName}
-                    </option>
-                  ))}
+                  {patients
+                    .filter(
+                      (patient) =>
+                        `${patient.fullName} ${patient.documentId}`
+                          .toLocaleLowerCase('es-SV')
+                          .includes(visitPatientQuery.trim().toLocaleLowerCase('es-SV')) ||
+                        patient.id === selectedVisitPatientId,
+                    )
+                    .map((patient) => (
+                      <option key={patient.id} value={patient.id}>
+                        {patient.fullName}
+                      </option>
+                    ))}
                 </select>
               </label>
               <label>

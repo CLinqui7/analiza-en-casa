@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { createXlsxWorkbook } from '../src/lib/xlsx';
 
 async function loginAs(page: import('@playwright/test').Page, email: string, password: string) {
   await page.goto('/login');
@@ -297,7 +298,7 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
 }) => {
   await login(page);
   await page.goto('/patients');
-  await page.getByRole('button', { name: 'Importar CSV' }).click();
+  await page.getByRole('button', { name: 'Importar CSV / Excel' }).click();
   const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'invalido.csv',
@@ -328,6 +329,120 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   expect(csv).toContain('Nombre completo');
   expect(csv).toContain('Importado Uno');
   expect(csv).not.toContain('Importado Dos');
+});
+
+test('patient Excel import previews extended fields and persists the selected rows', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/patients');
+  await page.getByRole('button', { name: 'Importar CSV / Excel' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
+  const columns = [
+    'document',
+    'documentType',
+    'firstName',
+    'lastName',
+    'phone',
+    'company',
+    'addressLine',
+    'contact1FullName',
+    'contact1Phone',
+    'contact1IsPrimary',
+  ];
+  const workbook = createXlsxWorkbook(
+    columns.map((key) => ({ key, label: key })),
+    [
+      {
+        document: 'XLSX-QA-001',
+        documentType: 'OTHER',
+        firstName: 'Excel',
+        lastName: 'Sintético',
+        phone: '7000-5678',
+        company: 'Empresa QA',
+        addressLine: 'Dirección QA',
+        contact1FullName: 'Contacto Sintético',
+        contact1Phone: '7000-0001',
+        contact1IsPrimary: 'true',
+      },
+    ],
+  );
+  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
+    name: 'pacientes.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from(workbook),
+  });
+  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
+    '1 fila válida',
+  );
+  await dialog.getByRole('button', { name: 'Importar pacientes' }).click();
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('Excel Sintético');
+  await expect(page.getByRole('row').filter({ hasText: 'Excel Sintético' })).toBeVisible();
+  const imported = await page.evaluate(() => {
+    const rows = JSON.parse(
+      window.localStorage.getItem('analiza.en.casa.workspace.v3.patients') ?? '[]',
+    );
+    return rows.find((row: { documentId: string }) => row.documentId === 'XLSX-QA-001');
+  });
+  expect(imported.address.line).toBe('Dirección QA');
+  expect(imported.contacts[0]).toMatchObject({ fullName: 'Contacto Sintético', isPrimary: true });
+});
+
+test('unsaved patient details survive navigation within the same signed-in tab', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/patients?create=1');
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByLabel('Nombre completo').fill('Borrador QA Sintético');
+  await dialog.getByLabel('Número de documento').fill('DRAFT-QA-001');
+  await page.waitForTimeout(450);
+  await page.goto('/doctors');
+  await page.goto('/patients?create=1');
+  await expect(
+    page.getByRole('dialog', { name: 'Agregar paciente' }).getByLabel('Nombre completo'),
+  ).toHaveValue('Borrador QA Sintético');
+  await expect(
+    page.getByText('Se recuperó el formulario pendiente de esta pestaña.'),
+  ).toBeVisible();
+});
+
+test('patient doctor pickers filter names while retaining the chosen doctor', async ({ page }) => {
+  await login(page);
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.doctors';
+    window.localStorage.setItem(
+      key,
+      JSON.stringify([
+        {
+          id: 'doctor-filter-a',
+          fullName: 'Médica Alba Sintética',
+          documentId: 'QA-A',
+          specialty: 'General',
+          address: 'Dirección QA',
+          attachments: [],
+        },
+        {
+          id: 'doctor-filter-b',
+          fullName: 'Médico Bruno Sintético',
+          documentId: 'QA-B',
+          specialty: 'General',
+          address: 'Dirección QA',
+          attachments: [],
+        },
+      ]),
+    );
+  });
+  await page.goto('/patients?create=1');
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Alba');
+  const primary = dialog.getByLabel('Médico tratante principal');
+  await expect(primary.locator('option')).toHaveCount(2);
+  await primary.selectOption('doctor-filter-a');
+  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Bruno');
+  await expect(primary.locator('option')).toHaveCount(3);
+  await expect(primary).toHaveValue('doctor-filter-a');
 });
 
 test('patient detail keeps auditor read-only and inventory denied', async ({ page }) => {

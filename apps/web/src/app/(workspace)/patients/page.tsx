@@ -1,10 +1,9 @@
 'use client';
 import { isServerDataMode } from '@/lib/data-mode';
-
 import { isCoreRelease } from '@/lib/release-profile';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { patientDocumentTypeSchema, type Patient } from '@analiza/contracts';
+import { patientDocumentTypeSchema, patientSchema, type Patient } from '@analiza/contracts';
 import {
   ageFromBirthDate,
   documentRules,
@@ -225,6 +224,52 @@ function createContact(isPrimary: boolean): PatientForm['contacts'][number] {
 }
 
 type ImportPreview = { fileName: string; rows: Patient[]; errors: string[]; totalRows: number };
+const patientImportColumns = [
+  'document',
+  'documentType',
+  'firstName',
+  'lastName',
+  'birthDate',
+  'sex',
+  'phone',
+  'homePhone',
+  'email',
+  'company',
+  'retired',
+  'bloodType',
+  'civilStatus',
+  'nationality',
+  'occupation',
+  'triageStatus',
+  'diagnosis',
+  'primaryDoctorId',
+  'secondaryDoctorId',
+  'insurer',
+  'policyNumber',
+  'certificateOrUnit',
+  'holderDocumentId',
+  'holderFullName',
+  'holderBirthDate',
+  'insuranceEffectiveDate',
+  'isPolicyHolder',
+  'botmakerConsent',
+  'addressLine',
+  'addressComments',
+  'addressCoordinates',
+  'addressLocationUrl',
+  'status',
+  ...[1, 2, 3].flatMap((index) => [
+    `contact${index}FullName`,
+    `contact${index}Phone`,
+    `contact${index}Email`,
+    `contact${index}Relationship`,
+    `contact${index}Role`,
+    `contact${index}Country`,
+    `contact${index}DocumentType`,
+    `contact${index}DocumentId`,
+    `contact${index}IsPrimary`,
+  ]),
+];
 
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -256,13 +301,27 @@ function parseCsv(text: string): string[][] {
 
 function previewPatientImport(
   fileName: string,
-  source: string,
+  source: string | string[][],
   existing: readonly Patient[],
 ): ImportPreview {
-  const rows = parseCsv(source);
+  const rows = typeof source === 'string' ? parseCsv(source) : source;
   if (!rows.length) return { fileName, rows: [], errors: ['El archivo está vacío.'], totalRows: 0 };
   const headers = rows[0].map((header) => header.trim());
   const requiredHeaders = ['document', 'firstName', 'lastName'];
+  const unknownHeaders = headers.filter(
+    (header) => header && !patientImportColumns.includes(header),
+  );
+  if (unknownHeaders.length || new Set(headers).size !== headers.length)
+    return {
+      fileName,
+      rows: [],
+      errors: [
+        unknownHeaders.length
+          ? `Encabezados no reconocidos: ${unknownHeaders.slice(0, 5).join(', ')}.`
+          : 'El archivo contiene encabezados duplicados.',
+      ],
+      totalRows: 0,
+    };
   if (requiredHeaders.some((header) => !headers.includes(header)))
     return {
       fileName,
@@ -274,7 +333,7 @@ function previewPatientImport(
     return {
       fileName,
       rows: [],
-      errors: ['La carga demo admite hasta 500 filas por archivo.'],
+      errors: ['La carga admite hasta 500 filas por archivo.'],
       totalRows: rows.length - 1,
     };
   const existingKeys = new Set(
@@ -314,13 +373,70 @@ function previewPatientImport(
       errors.push(`Fila ${rowNumber}: correo inválido.`);
       return;
     }
+    if (record.birthDate && !z.iso.date().safeParse(record.birthDate).success) {
+      errors.push(`Fila ${rowNumber}: fecha de nacimiento inválida; use AAAA-MM-DD.`);
+      return;
+    }
+    if (record.sex && !['M', 'F'].includes(record.sex)) {
+      errors.push(`Fila ${rowNumber}: sexo inválido; use M o F.`);
+      return;
+    }
+    if (record.status && !['ACTIVE', 'INACTIVE'].includes(record.status.toUpperCase())) {
+      errors.push(`Fila ${rowNumber}: estado inválido; use ACTIVE o INACTIVE.`);
+      return;
+    }
+    const contacts: NonNullable<Patient['contacts']> = [];
+    for (const contactIndex of [1, 2, 3]) {
+      const prefix = `contact${contactIndex}`;
+      const fullName = record[`${prefix}FullName`] || '';
+      const phone = record[`${prefix}Phone`] || '';
+      const email = record[`${prefix}Email`] || '';
+      const documentType = record[`${prefix}DocumentType`] || '';
+      const documentId = record[`${prefix}DocumentId`] || '';
+      if (!fullName && !phone && !email && !documentType && !documentId) continue;
+      if (email && !z.email().safeParse(email).success) {
+        errors.push(`Fila ${rowNumber}: correo del contacto ${contactIndex} inválido.`);
+        return;
+      }
+      const normalizedType = documentType.toUpperCase() as Patient['documentType'];
+      if (documentType && !patientDocumentTypeSchema.safeParse(normalizedType).success) {
+        errors.push(`Fila ${rowNumber}: tipo de documento del contacto ${contactIndex} inválido.`);
+        return;
+      }
+      const pairError = validateContactDocumentPair(
+        documentType ? normalizedType : undefined,
+        documentId,
+      );
+      if (pairError) {
+        errors.push(`Fila ${rowNumber}: contacto ${contactIndex}: ${pairError}`);
+        return;
+      }
+      contacts.push({
+        id: crypto.randomUUID(),
+        fullName,
+        phone,
+        email,
+        relationship: record[`${prefix}Relationship`] || undefined,
+        role: record[`${prefix}Role`] || undefined,
+        country: record[`${prefix}Country`] || undefined,
+        documentType: documentType ? normalizedType : undefined,
+        documentId: documentId || undefined,
+        isPrimary: ['true', '1', 'si', 'sí'].includes(
+          (record[`${prefix}IsPrimary`] || '').toLowerCase(),
+        ),
+      });
+    }
+    if (contacts.filter((contact) => contact.isPrimary).length > 1) {
+      errors.push(`Fila ${rowNumber}: sólo un contacto puede ser principal.`);
+      return;
+    }
     const key = `${documentType}:${documentId.replace(/\s/g, '').toUpperCase()}`;
     if (existingKeys.has(key) || batchKeys.has(key)) {
       errors.push(`Fila ${rowNumber}: documento duplicado.`);
       return;
     }
     batchKeys.add(key);
-    patients.push({
+    const candidate: Patient = {
       id: crypto.randomUUID(),
       documentType: documentType as Patient['documentType'],
       documentId,
@@ -329,11 +445,60 @@ function previewPatientImport(
       sex: record.sex === 'M' || record.sex === 'F' ? record.sex : undefined,
       company: record.company || undefined,
       phone: record.phone || undefined,
+      homePhone: record.homePhone || undefined,
       email: record.email || undefined,
+      retired: record.retired?.toLowerCase() === 'true' || record.retired === '1',
+      bloodType: ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'].includes(record.bloodType)
+        ? (record.bloodType as Patient['bloodType'])
+        : undefined,
+      civilStatus: record.civilStatus || undefined,
+      nationality: record.nationality || undefined,
+      occupation: record.occupation || undefined,
+      triageStatus: record.triageStatus || undefined,
+      diagnosis: record.diagnosis || undefined,
+      primaryDoctorId: record.primaryDoctorId || undefined,
+      secondaryDoctorId: record.secondaryDoctorId || undefined,
+      notifications: record.botmakerConsent
+        ? {
+            botmakerConsent: ['true', '1', 'si', 'sí'].includes(
+              record.botmakerConsent.toLowerCase(),
+            ),
+          }
+        : undefined,
+      insurance:
+        record.insurer || record.policyNumber
+          ? {
+              status: 'INSURED',
+              isPolicyHolder: ['true', '1', 'si', 'sí'].includes(
+                (record.isPolicyHolder || '').toLowerCase(),
+              ),
+              insurer: record.insurer || undefined,
+              policyNumber: record.policyNumber || undefined,
+              certificateOrUnit: record.certificateOrUnit || undefined,
+              holderDocumentId: record.holderDocumentId || undefined,
+              holderFullName: record.holderFullName || undefined,
+              holderBirthDate: record.holderBirthDate || undefined,
+              effectiveDate: record.insuranceEffectiveDate || undefined,
+            }
+          : undefined,
+      address:
+        record.addressLine || record.addressComments
+          ? {
+              line: record.addressLine || undefined,
+              comments: record.addressComments || undefined,
+              coordinates: record.addressCoordinates || undefined,
+              locationUrl: record.addressLocationUrl || undefined,
+            }
+          : undefined,
       status: record.status?.toUpperCase() === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
-      retired: false,
-      contacts: [],
-    });
+      contacts,
+    };
+    const checked = patientSchema.safeParse(candidate);
+    if (!checked.success) {
+      errors.push(`Fila ${rowNumber}: datos del paciente inválidos.`);
+      return;
+    }
+    patients.push(checked.data);
   });
   return { fileName, rows: patients, errors, totalRows: rows.length - 1 };
 }
@@ -350,8 +515,9 @@ export default function PatientsPage() {
     updatePatient,
     error: persistenceError,
   } = useWorkspace();
-  const { can } = useAuth();
+  const { can, session } = useAuth();
   const searchParams = useSearchParams();
+  const editRouteId = searchParams.get('edit');
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [dismissedLinkedDialog, setDismissedLinkedDialog] = useState(false);
@@ -368,6 +534,10 @@ export default function PatientsPage() {
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const [doctorQuery, setDoctorQuery] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftRecovered, setDraftRecovered] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showValidationSummary, setShowValidationSummary] = useState(false);
   const [mapVisible, setMapVisible] = useState(false);
@@ -401,6 +571,51 @@ export default function PatientsPage() {
       botmakerConsent: true,
     },
   });
+  const patientDraftKey = session
+    ? `analiza.form-draft.v1.${session.mode}.${session.userId}.patient.new`
+    : null;
+  const patientDraftSkipKey = patientDraftKey ? `${patientDraftKey}.skip` : null;
+  useEffect(() => {
+    if (!patientDraftKey || editRouteId) return;
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = window.sessionStorage.getItem(patientDraftKey);
+        if (stored) {
+          const parsed: unknown = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object' && 'fullName' in parsed) {
+            form.reset(parsed as PatientForm);
+            setDraftRecovered(true);
+          }
+        }
+      } catch {
+        window.sessionStorage.removeItem(patientDraftKey);
+      }
+      setDraftReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [editRouteId, form, patientDraftKey]);
+  useEffect(() => {
+    if (!patientDraftKey || !draftReady || editRouteId) return;
+    let timer: number | undefined;
+    const unsubscribe = form.subscribe({
+      formState: { values: true },
+      callback: ({ values }) => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          if (patientDraftSkipKey && window.sessionStorage.getItem(patientDraftSkipKey)) return;
+          try {
+            window.sessionStorage.setItem(patientDraftKey, JSON.stringify(values));
+          } catch {
+            // Un navegador sin almacenamiento temporal no impide el guardado explícito.
+          }
+        }, 350);
+      },
+    });
+    return () => {
+      window.clearTimeout(timer);
+      unsubscribe();
+    };
+  }, [draftReady, editRouteId, form, patientDraftKey, patientDraftSkipKey]);
   const {
     fields: contactFields,
     append,
@@ -484,6 +699,9 @@ export default function PatientsPage() {
   }, [editDialogOpen, editingPatient, providerMode]);
 
   function closeDialog() {
+    if (patientDraftSkipKey) window.sessionStorage.setItem(patientDraftSkipKey, '1');
+    if (patientDraftKey) window.sessionStorage.removeItem(patientDraftKey);
+    setDraftRecovered(false);
     setIsOpen(false);
     setDismissedLinkedDialog(true);
     setAddressNotice(null);
@@ -495,6 +713,9 @@ export default function PatientsPage() {
     setMapVisible(false);
     setShowValidationSummary(false);
     form.reset();
+    window.setTimeout(() => {
+      if (patientDraftSkipKey) window.sessionStorage.removeItem(patientDraftSkipKey);
+    }, 400);
     if (searchParams.has('create') || searchParams.has('edit')) router.replace('/patients');
   }
   function focusFirstInvalidField(entries: PatientValidationEntry[]) {
@@ -580,26 +801,82 @@ export default function PatientsPage() {
   }
   async function selectImportFile(file: File | undefined) {
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith('.csv') || (file.type && file.type !== 'text/csv')) {
+    const extension = file.name.toLowerCase();
+    if (
+      (!extension.endsWith('.csv') && !extension.endsWith('.xlsx')) ||
+      file.size > 5 * 1024 * 1024
+    ) {
       setImportPreview({
         fileName: file.name,
         rows: [],
-        errors: ['Seleccione un archivo CSV.'],
+        errors: ['Seleccione un archivo CSV o Excel .xlsx de máximo 5 MB.'],
         totalRows: 0,
       });
       return;
     }
-    setImportPreview(previewPatientImport(file.name, await file.text(), patients));
+    try {
+      if (extension.endsWith('.xlsx')) {
+        const { readSheet } = await import('read-excel-file/browser');
+        const rawRows = await readSheet(file);
+        const rows = rawRows.map((row) =>
+          row.map((value) =>
+            value instanceof Date ? value.toISOString().slice(0, 10) : String(value ?? ''),
+          ),
+        );
+        setImportPreview(previewPatientImport(file.name, rows, patients));
+      } else {
+        setImportPreview(previewPatientImport(file.name, await file.text(), patients));
+      }
+    } catch {
+      setImportPreview({
+        fileName: file.name,
+        rows: [],
+        errors: ['No fue posible leer el archivo.'],
+        totalRows: 0,
+      });
+    }
   }
-  function confirmImport() {
-    if (
-      isServerDataMode(providerMode) ||
-      !importPreview?.rows.length ||
-      importPreview.errors.length
-    )
+  async function downloadPatientImportTemplate() {
+    const { createXlsxWorkbook } = await import('@/lib/xlsx');
+    const bytes = createXlsxWorkbook(
+      patientImportColumns.map((key) => ({ key, label: key, width: 22 })),
+      [],
+      'Pacientes',
+    );
+    const url = URL.createObjectURL(
+      new Blob([new Uint8Array(bytes)], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      }),
+    );
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'plantilla_importar_pacientes.xlsx';
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  async function confirmImport() {
+    if (!importPreview?.rows.length || importPreview.errors.length || importing) return;
+    setImporting(true);
+    let imported = 0;
+    if (isServerDataMode(providerMode)) {
+      for (const patient of importPreview.rows) {
+        if (!(await addPatient(patient))) break;
+        imported += 1;
+      }
+    } else {
+      addPatients(importPreview.rows);
+      imported = importPreview.rows.length;
+    }
+    setImporting(false);
+    if (imported !== importPreview.rows.length) {
+      setResult(null);
+      setActionError(
+        `Se guardaron ${imported} de ${importPreview.rows.length} pacientes. Revise el error, actualice la lista y vuelva a preparar solo las filas pendientes; no reimporte las ya guardadas.`,
+      );
+      await refreshPatients();
       return;
-    addPatients(importPreview.rows);
-    setResult(`${importPreview.rows.length} pacientes importados.`);
+    }
+    setResult(`${imported} pacientes importados y persistidos.`);
     setImportOpen(false);
     setImportPreview(null);
     setTab('ACTIVE');
@@ -754,6 +1031,7 @@ export default function PatientsPage() {
       }
     }
     setSaving(false);
+    if (!editingPatient && patientDraftKey) window.sessionStorage.removeItem(patientDraftKey);
     setResult(
       editingPatient
         ? `Paciente ${patient.fullName} actualizado y persistido.`
@@ -772,17 +1050,18 @@ export default function PatientsPage() {
           <p>La búsqueda normaliza mayúsculas, acentos y espacios en todos los resultados.</p>
         </div>
         <div className="patient-header-actions">
-          {!isCoreRelease && can('patients:write') ? (
+          {can('patients:write') ? (
             <Button
               className="button-secondary"
               data-action-id="PATIENT-IMPORT"
               onClick={() => {
+                if (patientDraftSkipKey) window.sessionStorage.removeItem(patientDraftSkipKey);
                 setImportPreview(null);
                 setImportOpen(true);
               }}
               type="button"
             >
-              Importar CSV
+              Importar CSV / Excel
             </Button>
           ) : null}
           <Button
@@ -1154,6 +1433,13 @@ export default function PatientsPage() {
         open={isOpen || linkedDialogOpen || editDialogOpen}
         title={editingPatient ? 'Editar paciente' : 'Agregar paciente'}
       >
+        {!editingPatient ? (
+          <p className="field-help">
+            {draftRecovered
+              ? 'Se recuperó el formulario pendiente de esta pestaña. Aún no está guardado en la base de datos.'
+              : 'Si cambia de pantalla, este formulario se conservará temporalmente en esta pestaña hasta que lo guarde.'}
+          </p>
+        ) : null}
         <form
           className="form-grid"
           id="patient-form"
@@ -1224,25 +1510,53 @@ export default function PatientsPage() {
               <textarea {...form.register('diagnosis')} rows={2} />
             </label>
             <label>
+              Buscar médico por nombre
+              <input
+                aria-label="Filtrar médicos por nombre"
+                data-action-id="PATIENT-DOCTOR-SEARCH"
+                onChange={(event) => setDoctorQuery(event.target.value)}
+                type="search"
+                value={doctorQuery}
+              />
+            </label>
+            <label>
               Médico tratante principal
               <select {...form.register('primaryDoctorId')}>
                 <option value="">Sin asignar</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.fullName}
-                  </option>
-                ))}
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                      doctor.id === form.getValues('primaryDoctorId') ||
+                      doctor.id === form.getValues('secondaryDoctorId'),
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
               </select>
             </label>
             <label>
               Médico tratante secundario
               <select {...form.register('secondaryDoctorId')}>
                 <option value="">Sin asignar</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.fullName}
-                  </option>
-                ))}
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                      doctor.id === form.getValues('primaryDoctorId') ||
+                      doctor.id === form.getValues('secondaryDoctorId'),
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
               </select>
             </label>
             <label>
@@ -1789,7 +2103,7 @@ export default function PatientsPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Carga local CSV. Encabezados requeridos: document, firstName, lastName. Revise la información antes de importarla."
+        description="Cargue CSV o Excel .xlsx. Encabezados requeridos: document, firstName, lastName. Revise todas las filas antes de importar."
         footer={
           <>
             <Button
@@ -1806,14 +2120,12 @@ export default function PatientsPage() {
             <Button
               data-action-id="PATIENT-IMPORT-CONFIRM"
               disabled={
-                isServerDataMode(providerMode) ||
-                !importPreview?.rows.length ||
-                Boolean(importPreview.errors.length)
+                importing || !importPreview?.rows.length || Boolean(importPreview.errors.length)
               }
               onClick={confirmImport}
               type="button"
             >
-              Importar pacientes
+              {importing ? 'Importando…' : 'Importar pacientes'}
             </Button>
           </>
         }
@@ -1824,10 +2136,18 @@ export default function PatientsPage() {
         open={importOpen}
         title="Importar pacientes"
       >
+        <Button
+          className="button-secondary"
+          data-action-id="PATIENT-IMPORT-TEMPLATE"
+          onClick={() => void downloadPatientImportTemplate()}
+          type="button"
+        >
+          Descargar plantilla Excel
+        </Button>
         <label>
-          Archivo CSV
+          Archivo CSV o Excel .xlsx
           <input
-            accept=".csv,text/csv"
+            accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             data-action-id="PATIENT-IMPORT-FILE"
             onChange={(event) => {
               void selectImportFile(event.target.files?.[0]);
@@ -1839,7 +2159,9 @@ export default function PatientsPage() {
           <div data-action-id="PATIENT-IMPORT-PREVIEW">
             <p role="status">Archivo cargado: {importPreview.fileName}</p>
             <p>
-              {importPreview.rows.length} filas válidas de {importPreview.totalRows}.
+              {importPreview.rows.length}{' '}
+              {importPreview.rows.length === 1 ? 'fila válida' : 'filas válidas'} de{' '}
+              {importPreview.totalRows}.
             </p>
             {importPreview.errors.length ? (
               <ul role="alert">

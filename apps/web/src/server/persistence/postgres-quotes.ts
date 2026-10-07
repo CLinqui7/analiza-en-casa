@@ -1,4 +1,4 @@
-import type { Pool } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 import { quoteSchema, type Quote } from '@analiza/contracts';
 import { canEditQuote } from '@analiza/domain';
 import { can } from '@/lib/permissions';
@@ -8,9 +8,42 @@ import type { ServerActor } from '../validation/patients';
 import type { Persistence } from './contracts';
 import { transaction } from './postgres-pool';
 import { audit } from './postgres';
+import { quoteCatalogPriceError } from '../quote-catalog-policy';
 
 function authorize(actor: ServerActor, permission: 'quotes:read' | 'quotes:write') {
   if (!can(actor.role, permission)) throw new MongoAccessError();
+}
+
+async function requireCatalogPrices(
+  client: PoolClient,
+  actor: ServerActor,
+  quote: Quote,
+  previous?: Quote | null,
+) {
+  const catalogIds = quote.items.flatMap((line) =>
+    line.inventoryItemId ? [line.inventoryItemId] : [],
+  );
+  const doctorIds = quote.items.flatMap((line) => (line.doctorId ? [line.doctorId] : []));
+  const [catalog, doctors] = await Promise.all([
+    client.query<{
+      id: string;
+      body: { category: string; status: string; salePriceExcludingTax?: number };
+    }>(
+      'SELECT id,body FROM analiza.catalog_items WHERE organization_id=$1 AND id=ANY($2::text[]) FOR SHARE',
+      [actor.organizationId, catalogIds],
+    ),
+    client.query<{ id: string; body: { medicalFee?: number } }>(
+      'SELECT id,body FROM analiza.doctors WHERE organization_id=$1 AND id=ANY($2::text[]) FOR SHARE',
+      [actor.organizationId, doctorIds],
+    ),
+  ]);
+  const error = quoteCatalogPriceError(
+    quote,
+    catalog.rows.map((row) => ({ id: row.id, ...row.body })),
+    doctors.rows.map((row) => ({ id: row.id, ...row.body })),
+    previous,
+  );
+  if (error) throw new MongoInputError(error);
 }
 
 export function postgresQuotes(pool: Pool): Persistence['quotes'] {
@@ -63,6 +96,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
           }
 
           const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+          let previousQuote: Quote | null = null;
           if (quote.version === 1) {
             if (rootId !== quote.id)
               throw new MongoInputError('La primera versión debe ser su raíz.');
@@ -73,7 +107,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
                 [actor.organizationId, rootId],
               )
             ).rows[0];
-            const previousQuote = previous ? quoteSchema.parse(previous.body) : null;
+            previousQuote = previous ? quoteSchema.parse(previous.body) : null;
             if (
               !previousQuote ||
               !previousQuote.immutable ||
@@ -89,6 +123,8 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
                 'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
               );
           }
+
+          await requireCatalogPrices(client, actor, quote, previousQuote);
 
           const stored: Quote = {
             ...quote,
@@ -140,6 +176,7 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
           throw new MongoInputError(
             'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
           );
+        await requireCatalogPrices(client, actor, quote, currentQuote);
         const updated = await client.query(
           "UPDATE analiza.quotes SET body=$4::jsonb,record_version=record_version+1,updated_at=now() WHERE organization_id=$1 AND id=$2 AND record_version=$3 AND body->>'status'='DRAFT' AND (body->>'immutable')::boolean=false RETURNING body",
           [actor.organizationId, id, expectedVersion, JSON.stringify(quote)],

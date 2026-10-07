@@ -34,6 +34,8 @@ export type Permission =
   | 'agenda:write'
   | 'inventory:read'
   | 'inventory:write'
+  | 'supply-requests:read'
+  | 'supply-requests:write'
   | 'purchases:read'
   | 'purchases:write'
   | 'catalogs:read'
@@ -54,6 +56,7 @@ const allRead: Permission[] = [
   'clinical:read',
   'agenda:read',
   'inventory:read',
+  'supply-requests:read',
   'purchases:read',
   'catalogs:read',
   'reports:read',
@@ -73,6 +76,7 @@ const allWrite: Permission[] = [
   'medical-orders:write',
   'agenda:write',
   'inventory:write',
+  'supply-requests:write',
   'purchases:write',
   'catalogs:write',
   'settings:write',
@@ -100,6 +104,8 @@ const permissions: Record<Role, readonly Permission[]> = {
     'catalogs:write',
     'reports:read',
     'inventory:read',
+    'supply-requests:read',
+    'supply-requests:write',
   ],
   DOCTOR: [
     'dashboard:read',
@@ -125,6 +131,8 @@ const permissions: Record<Role, readonly Permission[]> = {
     'clinical:read',
     'clinical:write',
     'nursing:write',
+    'supply-requests:read',
+    'supply-requests:write',
     'agenda:read',
     'agenda:write',
     'reports:read',
@@ -132,6 +140,7 @@ const permissions: Record<Role, readonly Permission[]> = {
   INVENTORY: [
     'dashboard:read',
     'inventory:read',
+    'supply-requests:read',
     'inventory:write',
     'purchases:read',
     'purchases:write',
@@ -172,6 +181,7 @@ export function isAdministrator(role: Role | undefined): boolean {
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/analytics/logins', permission: 'login-analytics:read' },
   { prefix: '/nursing-team', permission: 'nurses:manage' },
+  { prefix: '/supply-requests', permission: 'supply-requests:read' },
   { prefix: '/changes', permission: 'dashboard:read' },
   { prefix: '/feedback', permission: 'dashboard:read' },
   { prefix: '/tutorial', permission: 'dashboard:read' },

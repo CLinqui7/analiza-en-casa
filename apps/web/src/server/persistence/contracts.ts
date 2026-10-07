@@ -16,6 +16,7 @@ import type { NurseProfile, NurseProfileSubmission } from '@/lib/nurse-profile';
 import type { FeedbackImage, FeedbackReport, FeedbackResolution } from '@/lib/feedback';
 import type { ImportOverview, ImportPreview } from '@/lib/information-import';
 import type { LoginAnalyticsSnapshot } from '@/server/login-analytics';
+import type { SupplyRequest, SupplyRequestCatalogItem } from '@/lib/supply-requests';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -32,6 +33,11 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  supplyRequests?: {
+    list(actor: ServerActor): Promise<SupplyRequest[]>;
+    catalog(actor: ServerActor): Promise<SupplyRequestCatalogItem[]>;
+    create(actor: ServerActor, input: unknown): Promise<SupplyRequest>;
+  };
   loginAnalytics: {
     snapshot(actor: ServerActor): Promise<LoginAnalyticsSnapshot>;
   };

@@ -50,17 +50,49 @@ test('purchase invoice, edit and cancellation persist before receipt', async ({ 
   await expect(cancelled.getByRole('button', { name: 'Recibir' })).toHaveCount(0);
 });
 
-test('quote honorarium uses only requested selectable amounts', async ({ page }) => {
-  await login(page, '/quotes?create=1');
+test('quote honorarium comes from the registered doctor and cannot be edited', async ({ page }) => {
+  await login(page, '/doctors');
+  await page.getByRole('button', { name: 'Nuevo médico' }).click();
+  const doctorDialog = page.getByRole('dialog', { name: 'Nuevo médico' });
+  await doctorDialog.getByLabel('Nombre completo').fill('Médico QA Catálogo');
+  await doctorDialog.getByLabel('JVPM').fill('JVPM-QA-CATALOG');
+  await doctorDialog.getByLabel('DUI').fill('DUI-QA-CATALOG');
+  await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
+  await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
+  await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');
+  await doctorDialog.getByLabel('Honorario médico').fill('75');
+  await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
+  await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   const amount = dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]');
-  await expect(amount).toHaveValue('0');
-  await expect(amount.locator('option')).toHaveCount(59);
-  await amount.selectOption('15');
-  await expect(amount).toHaveValue('15');
-  await amount.selectOption('300');
-  await expect(amount).toHaveValue('300');
+  await expect(amount).toHaveValue('Seleccione un médico');
+  await dialog
+    .locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]')
+    .selectOption({ label: 'Médico QA Catálogo' });
+  await expect(amount).toHaveValue('USD 75.00');
+  await expect(amount).toHaveAttribute('readonly');
+});
+
+test('clinical case pickers filter by patient or case without dropping the selected record', async ({
+  page,
+}) => {
+  await login(page, '/clinical/care-plans');
+  await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
+  const dialog = page.getByRole('dialog');
+  const cases = dialog.getByRole('combobox', { name: 'Hospitalización' });
+  const initial = await cases.inputValue();
+  await dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código').fill('no-existe');
+  await expect(cases.locator('option')).toHaveCount(1);
+  await expect(cases).toHaveValue(initial);
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
+
+  await page.goto('/clinical/balance');
+  const selectedCase = page.getByLabel('Paciente y hospitalización');
+  const initialBalance = await selectedCase.inputValue();
+  await page.getByLabel('Filtrar balances por paciente, DUI o código').fill('no-existe');
+  await expect(selectedCase.locator('option')).toHaveCount(1);
+  await expect(selectedCase).toHaveValue(initialBalance);
 });
 
 test('individual statement scopes charges to the selected patient', async ({ page }) => {

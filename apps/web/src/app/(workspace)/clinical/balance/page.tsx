@@ -11,6 +11,7 @@ export default function BalancePage() {
   const { hospitalizations, patients, nursingResources } = useWorkspace();
   const { session } = useAuth();
   const [caseId, setCaseId] = useState('');
+  const [caseQuery, setCaseQuery] = useState('');
   const [periodId, setPeriodId] = useState('');
   const [dialog, setDialog] = useState<'period' | 'entry' | 'close' | null>(null);
   const [correction, setCorrection] = useState<BalanceEntry | null>(null);
@@ -101,6 +102,15 @@ export default function BalancePage() {
         </div>
       </header>
       <Panel className="studio-toolbar">
+        <label>
+          Buscar paciente, DUI u hospitalización
+          <input
+            aria-label="Filtrar balances por paciente, DUI o código"
+            onChange={(event) => setCaseQuery(event.target.value)}
+            type="search"
+            value={caseQuery}
+          />
+        </label>
         <select
           aria-label="Paciente y hospitalización"
           value={currentCase?.id ?? ''}
@@ -109,11 +119,23 @@ export default function BalancePage() {
             setPeriodId('');
           }}
         >
-          {hospitalizations.map((item) => (
-            <option key={item.id} value={item.id}>
-              {patients.find((row) => row.id === item.patientId)?.fullName} · {item.id}
-            </option>
-          ))}
+          {hospitalizations
+            .filter((item) => {
+              const patient = patients.find((row) => row.id === item.patientId);
+              const query = caseQuery.trim().toLocaleLowerCase('es-SV');
+              return (
+                !query ||
+                item.id === currentCase?.id ||
+                `${item.id} ${patient?.fullName ?? ''} ${patient?.documentId ?? ''}`
+                  .toLocaleLowerCase('es-SV')
+                  .includes(query)
+              );
+            })
+            .map((item) => (
+              <option key={item.id} value={item.id}>
+                {patients.find((row) => row.id === item.patientId)?.fullName} · {item.id}
+              </option>
+            ))}
         </select>
         <select
           aria-label="Período de balance"

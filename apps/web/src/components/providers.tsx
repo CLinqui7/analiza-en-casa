@@ -170,6 +170,11 @@ function AuthProvider({ children }: PropsWithChildren) {
   const logout = useCallback(async () => {
     setError(null);
     await endSession(session);
+    if (typeof window !== 'undefined') {
+      for (const key of Object.keys(window.sessionStorage)) {
+        if (key.startsWith('analiza.form-draft.v1.')) window.sessionStorage.removeItem(key);
+      }
+    }
     setSession(null);
   }, [session]);
   const register = useCallback(async (input: RegistrationInput) => {

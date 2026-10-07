@@ -106,6 +106,7 @@ export default function AgendaPage() {
   const [dates, setDates] = useState<string[]>([initialDate]);
   const [endDayOffset, setEndDayOffset] = useState<0 | 1>(0);
   const [patientQuery, setPatientQuery] = useState('');
+  const [shiftPatientQuery, setShiftPatientQuery] = useState('');
   const [patientFilter, setPatientFilter] = useState('');
   const [calendarAnchor, setCalendarAnchor] = useState(initialDate);
   const [calendarView, setCalendarView] = useState<CalendarView>('MONTH');
@@ -649,14 +650,32 @@ export default function AgendaPage() {
             </select>
           </label>
           <label>
+            Buscar paciente por nombre o DUI
+            <input
+              aria-label="Filtrar pacientes del turno"
+              data-action-id="AGENDA-SHIFT-PATIENT-SEARCH"
+              onChange={(event) => setShiftPatientQuery(event.target.value)}
+              type="search"
+              value={shiftPatientQuery}
+            />
+          </label>
+          <label>
             Paciente
             <select data-action-id="AGENDA-SHIFT-PATIENT-SELECT" {...form.register('patientId')}>
               <option value="">Sin asignar</option>
-              {patients.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.fullName}
-                </option>
-              ))}
+              {patients
+                .filter(
+                  (patient) =>
+                    `${patient.fullName} ${patient.documentId}`
+                      .toLocaleLowerCase('es-SV')
+                      .includes(shiftPatientQuery.trim().toLocaleLowerCase('es-SV')) ||
+                    patient.id === selectedShiftPatientId,
+                )
+                .map((patient) => (
+                  <option key={patient.id} value={patient.id}>
+                    {patient.fullName}
+                  </option>
+                ))}
             </select>
             <span className="field-help">
               Puede quedar sin asignar; no se crea una visita clínica.

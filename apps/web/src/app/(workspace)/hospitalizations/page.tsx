@@ -116,6 +116,7 @@ export default function HospitalizationsPage() {
   const [tab, setTab] = useState<'ACTIVE' | 'QUOTES' | 'PIC'>('ACTIVE');
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [patientQuery, setPatientQuery] = useState('');
+  const [doctorQuery, setDoctorQuery] = useState('');
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Hospitalization['status'] | '',
     startDate: '',
@@ -877,25 +878,53 @@ export default function HospitalizationsPage() {
             <textarea {...form.register('diagnosisSummary')} rows={3} />
           </label>
           <label>
+            Buscar médico por nombre
+            <input
+              aria-label="Filtrar médicos de hospitalización"
+              data-action-id="HOSPITALIZATION-DOCTOR-SEARCH"
+              onChange={(event) => setDoctorQuery(event.target.value)}
+              type="search"
+              value={doctorQuery}
+            />
+          </label>
+          <label>
             Médico tratante principal
             <select {...form.register('primaryDoctorId')}>
               <option value="">Sin asignar</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              {doctors
+                .filter(
+                  (doctor) =>
+                    doctor.fullName
+                      .toLocaleLowerCase('es-SV')
+                      .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                    doctor.id === form.getValues('primaryDoctorId') ||
+                    doctor.id === form.getValues('secondaryDoctorId'),
+                )
+                .map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
             </select>
           </label>
           <label>
             Médico tratante secundario
             <select {...form.register('secondaryDoctorId')}>
               <option value="">Sin asignar</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              {doctors
+                .filter(
+                  (doctor) =>
+                    doctor.fullName
+                      .toLocaleLowerCase('es-SV')
+                      .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                    doctor.id === form.getValues('primaryDoctorId') ||
+                    doctor.id === form.getValues('secondaryDoctorId'),
+                )
+                .map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="full">

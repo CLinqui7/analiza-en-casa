@@ -16,7 +16,7 @@ import {
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 
@@ -84,7 +84,6 @@ type CatalogEntry = {
 const feeServiceCatalog: CatalogEntry[] = [
   { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
 ];
-const feeAmountOptions = [0, ...Array.from({ length: 58 }, (_, index) => 15 + index * 5)];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 function updatedCategoryPercentages(
   existing: QuoteDiscount['categories'],
@@ -144,6 +143,7 @@ function QuoteEditor({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
+  const { session } = useAuth();
   const {
     addQuote,
     catalogItems,
@@ -166,6 +166,53 @@ function QuoteEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshingPatients, setRefreshingPatients] = useState(false);
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
+  const [doctorQuery, setDoctorQuery] = useState('');
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftRecovered, setDraftRecovered] = useState(false);
+  const draftDiscarded = useRef(false);
+  const draftKey = session
+    ? `analiza.form-draft.v1.${session.mode}.${session.userId}.quote.${mode}.${source?.id ?? 'new'}`
+    : null;
+
+  useEffect(() => {
+    if (!draftKey) return;
+    const timer = window.setTimeout(() => {
+      if (draftDiscarded.current) return;
+      try {
+        const stored = window.sessionStorage.getItem(draftKey);
+        if (stored) {
+          const parsed: unknown = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object' && 'draft' in parsed) {
+            const recovered = parsed as { draft: QuoteDraft };
+            if (
+              Array.isArray(recovered.draft?.items) &&
+              typeof recovered.draft.summary === 'string'
+            ) {
+              setDraft(recovered.draft);
+              setDraftRecovered(true);
+            }
+          }
+        }
+      } catch {
+        window.sessionStorage.removeItem(draftKey);
+      }
+      setDraftReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey || !draftReady) return;
+    const timer = window.setTimeout(() => {
+      if (draftDiscarded.current) return;
+      try {
+        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft }));
+      } catch {
+        // La escritura temporal puede fallar por cuota o política del navegador.
+      }
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [draft, draftKey, draftReady]);
 
   const totals = useMemo(() => {
     try {
@@ -241,12 +288,34 @@ function QuoteEditor({
   }
   function selectFeeDoctor(doctorId: string) {
     const doctor = doctors.find((candidate) => candidate.id === doctorId);
-    setItem((current) => ({ ...current, doctorId: doctor?.id, doctorName: doctor?.fullName }));
+    setItem((current) => ({
+      ...current,
+      doctorId: doctor?.id,
+      doctorName: doctor?.fullName,
+      unitPrice: doctor?.medicalFee ?? 0,
+    }));
   }
   function addOrUpdateItem() {
     const validation = validateQuoteItem(item);
     if (validation) {
       setErrors((current) => ({ ...current, item: validation }));
+      return;
+    }
+    if (activeCategory === 'FEES' && !editingItemId) {
+      const doctor = doctors.find((candidate) => candidate.id === item.doctorId);
+      if (!doctor || typeof doctor.medicalFee !== 'number') {
+        setErrors((current) => ({
+          ...current,
+          item: 'Seleccione un médico con honorario configurado en su ficha.',
+        }));
+        return;
+      }
+    }
+    if (activeCategory !== 'FEES' && !editingItemId && !item.inventoryItemId) {
+      setErrors((current) => ({
+        ...current,
+        item: 'Seleccione un ítem del catálogo antes de agregarlo.',
+      }));
       return;
     }
     const persisted = { ...item, id: editingItemId ?? crypto.randomUUID() };
@@ -331,14 +400,23 @@ function QuoteEditor({
         originalQuoteId: id,
         rootQuoteId: id,
       });
-      if (saved) onSaved('Borrador de cotización persistido.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Borrador de cotización persistido.');
+      }
     } else if (mode === 'edit' && source) {
       const saved = await updateQuote({ ...source, ...common });
-      if (saved) onSaved('Borrador de cotización actualizado y persistido.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Borrador de cotización actualizado y persistido.');
+      }
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
       const saved = await addQuote({ ...revision, ...common });
-      if (saved) onSaved('Nueva versión de cotización creada como borrador.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Nueva versión de cotización creada como borrador.');
+      }
     }
   }
   const title =
@@ -366,6 +444,18 @@ function QuoteEditor({
         <>
           <Button
             className="button-secondary"
+            data-action-id="QUOTE-DRAFT-DISCARD"
+            onClick={() => {
+              draftDiscarded.current = true;
+              if (draftKey) window.sessionStorage.removeItem(draftKey);
+              onClose();
+            }}
+            type="button"
+          >
+            Descartar cambios
+          </Button>
+          <Button
+            className="button-secondary"
             data-action-id={cancelAction}
             onClick={onClose}
             type="button"
@@ -385,6 +475,11 @@ function QuoteEditor({
       open={open}
       title={title}
     >
+      <p className="field-help">
+        {draftRecovered
+          ? 'Se recuperó el formulario pendiente de esta pestaña. Aún no está guardado en la base de datos.'
+          : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
+      </p>
       <form
         className="form-grid"
         id="quote-editor-form"
@@ -831,6 +926,16 @@ function QuoteEditor({
                   </select>
                 </label>
                 <label>
+                  Buscar médico por nombre
+                  <input
+                    aria-label="Filtrar médicos de honorarios"
+                    data-action-id="QUOTE-FEE-DOCTOR-SEARCH"
+                    onChange={(event) => setDoctorQuery(event.target.value)}
+                    type="search"
+                    value={doctorQuery}
+                  />
+                </label>
+                <label>
                   Médico
                   <select
                     data-action-id="QUOTE-FEE-DOCTOR-SELECT"
@@ -838,15 +943,21 @@ function QuoteEditor({
                     value={item.doctorId ?? ''}
                   >
                     <option value="">Seleccione un médico</option>
-                    {doctors.map((doctor) => (
-                      <option key={doctor.id} value={doctor.id}>
-                        {doctor.fullName}
-                      </option>
-                    ))}
+                    {doctors
+                      .filter(
+                        (doctor) =>
+                          doctor.fullName
+                            .toLocaleLowerCase('es-SV')
+                            .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                          doctor.id === item.doctorId,
+                      )
+                      .map((doctor) => (
+                        <option key={doctor.id} value={doctor.id}>
+                          {doctor.fullName}
+                        </option>
+                      ))}
                   </select>
-                  <span className="field-help">
-                    Seleccione el importe solicitado para esta cotización.
-                  </span>
+                  <span className="field-help">El honorario proviene de la ficha del médico.</span>
                 </label>
               </>
             ) : null}
@@ -875,29 +986,28 @@ function QuoteEditor({
             <label>
               {activeCategory === 'FEES' ? 'Honorario médico' : 'Precio de venta sin IVA'}
               {activeCategory === 'FEES' ? (
-                <select
+                <input
                   data-action-id="QUOTE-FEE-AMOUNT"
-                  onChange={(event) => setNumber('unitPrice', event.target.value)}
-                  value={item.unitPrice}
-                >
-                  {!feeAmountOptions.includes(item.unitPrice) ? (
-                    <option value={item.unitPrice}>Importe previo · {money(item.unitPrice)}</option>
-                  ) : null}
-                  {feeAmountOptions.map((amount) => (
-                    <option key={amount} value={amount}>
-                      {money(amount)}
-                    </option>
-                  ))}
-                </select>
+                  readOnly
+                  type="text"
+                  value={item.doctorId ? money(item.unitPrice) : 'Seleccione un médico'}
+                />
               ) : (
                 <input
-                  min="0"
-                  onChange={(event) => setNumber('unitPrice', event.target.value)}
-                  step="0.01"
-                  type="number"
-                  value={Number.isFinite(item.unitPrice) ? item.unitPrice : ''}
+                  readOnly
+                  type="text"
+                  value={
+                    item.inventoryItemId || editingItemId
+                      ? money(item.unitPrice)
+                      : 'Seleccione un ítem'
+                  }
                 />
               )}
+              {activeCategory !== 'FEES' ? (
+                <span className="field-help">
+                  El precio proviene del catálogo y queda fijado al agregar la línea.
+                </span>
+              ) : null}
             </label>
             <label>
               Descuento manual
@@ -1193,7 +1303,7 @@ export default function QuotesPage() {
           <p className="eyebrow">Facturación</p>
           <h1>Cotizaciones</h1>
           <p>
-            Crea, edita y envía cotizaciones con importes manuales e historial de versiones.
+            Crea, edita y envía cotizaciones con precios del catálogo e historial de versiones.
             Confirme precios, impuestos y cobertura antes de enviarlas.
           </p>
         </div>

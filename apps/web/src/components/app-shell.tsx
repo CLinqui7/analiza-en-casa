@@ -44,6 +44,7 @@ const navigationIconPaths = {
   nursing: 'M6 3v6a6 6 0 0 0 12 0V3 M8 3v5a4 4 0 0 0 8 0V3 M12 15v6 M9 21h6',
   inventory: 'M12 3 3 8v9l9 5 9-5V8z M3 8l9 5 9-5 M12 13v9 M7 5l9 5',
   stock: 'M4 7l8-4 8 4v10l-8 4-8-4z M4 7l8 4 8-4 M12 11v10 M9 16l2 2 4-5',
+  supplyRequests: 'M5 3h14v18H5z M9 7h6 M9 11h6 M9 15h4 M16 17l2 2 3-4',
   movements: 'M4 7h15 M16 4l3 3-3 3 M20 17H5 M8 14l-3 3 3 3',
   kardex: 'M5 3h14v18H5z M9 8h6 M9 12h6 M9 16h4 M3 7h2 M19 7h2 M3 17h2 M19 17h2',
   catalogs: 'M4 4h7v16H4z M13 4h7v16h-7z M7 8h1 M16 8h1 M7 12h1 M16 12h1',
@@ -246,6 +247,13 @@ const navigation: NavigationGroup[] = [
     label: 'Inventario y compras',
     icon: 'inventory',
     children: [
+      {
+        label: 'Solicitudes de insumos',
+        icon: 'supplyRequests',
+        href: '/supply-requests',
+        permission: 'supply-requests:read',
+        actionId: 'SUPPLY-REQUESTS-NAVIGATE',
+      },
       {
         label: 'Existencias',
         icon: 'stock',

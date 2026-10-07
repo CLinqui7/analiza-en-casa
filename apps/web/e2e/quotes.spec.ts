@@ -183,7 +183,8 @@ test('catalog search matches code initials, closes on selection and reuses the c
   await option.click();
   await expect(option).toHaveCount(0);
   await expect(catalog).toHaveAttribute('placeholder', /SV-E2E-001/);
-  await expect(dialog.getByLabel('Precio de venta sin IVA')).toHaveValue('25.5');
+  await expect(dialog.getByLabel('Precio de venta sin IVA')).toHaveValue('USD 25.50');
+  await expect(dialog.getByLabel('Precio de venta sin IVA')).toHaveAttribute('readonly');
   await dialog.getByLabel('Cantidad').fill('2');
   await dialog.getByRole('button', { name: 'Agregar línea' }).click();
   await expect(dialog.getByRole('region', { name: 'Todos los ítems anexados' })).toContainText(
@@ -191,6 +192,56 @@ test('catalog search matches code initials, closes on selection and reuses the c
   );
   const id = await saveDraft(page, dialog, 'Cotización con catálogo buscable');
   expect(id).toBeTruthy();
+});
+
+test('unsaved quote draft survives navigation but is removed after explicit discard', async ({
+  page,
+}) => {
+  await login(page);
+  let dialog = await openNewQuote(page);
+  await dialog.getByLabel('Resumen operativo').fill('Borrador de cotización QA');
+  await page.waitForTimeout(450);
+  await page.goto('/patients');
+  await page.goto('/quotes?create=1');
+  dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
+  await expect(dialog.getByLabel('Resumen operativo')).toHaveValue('Borrador de cotización QA');
+  await dialog.getByRole('button', { name: 'Descartar cambios' }).click();
+  await page.goto('/quotes?create=1');
+  await expect(
+    page.getByRole('dialog', { name: 'Nueva cotización' }).getByLabel('Resumen operativo'),
+  ).toHaveValue('');
+});
+
+test('medical fee uses the doctor record and filters doctors by name', async ({ page }) => {
+  await login(page);
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.doctors';
+    const doctors = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    doctors.push({
+      id: 'doctor-fee-qa',
+      fullName: 'Médica Honorario QA',
+      documentId: 'DOCTOR-QA',
+      specialty: 'Medicina general',
+      address: 'Dirección QA',
+      medicalFee: 35,
+      attachments: [],
+    });
+    window.localStorage.setItem(key, JSON.stringify(doctors));
+  });
+  const dialog = await openNewQuote(page);
+  await dialog.getByRole('tab', { name: 'Honorarios' }).click();
+  await dialog.getByLabel('Servicio de honorario').selectOption({ index: 1 });
+  await dialog
+    .getByRole('searchbox', { name: 'Filtrar médicos de honorarios' })
+    .fill('Honorario QA');
+  await dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]').selectOption('doctor-fee-qa');
+  await expect(dialog.getByLabel('Honorario médico')).toHaveValue('USD 35.00');
+  await expect(dialog.getByLabel('Honorario médico')).toHaveAttribute('readonly');
+  await dialog.getByLabel('Cantidad').fill('2');
+  await dialog.getByRole('button', { name: 'Agregar línea' }).click();
+  await expect(dialog.getByRole('region', { name: 'Todos los ítems anexados' })).toContainText(
+    'USD 70.00',
+  );
 });
 
 // test-id: playwright:quote-integer-inputs

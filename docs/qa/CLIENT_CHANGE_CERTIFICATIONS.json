@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "468cc6a0048a0d977d4f3d5825ec17c441fa31c00f0a2a2adb540a634318ab19",
+      "functional_fingerprint": "92830b4108ecf6203c130c71a5e3ae60ee28020129f9d0f714d6f578ab098344",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -88,7 +88,7 @@
     },
     "CR-011": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "b53c5f016aed42195e234c20a03a3e06a88aadb31200e9af39cc7ffdbcde3140",
+      "functional_fingerprint": "1e2a91b5347b96ef00f3760ef3be85feddc204924925c19a618ff2f0889ad335",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -97,7 +97,7 @@
     },
     "CR-012": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "f4e01299bf3968067b03b3370fba36dc5ff919769faa1e43e19e3ca9c7e4d11d",
+      "functional_fingerprint": "b754562554b26f1e8c8c549c30ed35e996ec3cf51217668b588439884a8b5746",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -134,7 +134,7 @@
     },
     "CR-017": {
       "implementation_sha": "4b9e3c0fb6100cbe757ef8c524d4d95336eec40e",
-      "functional_fingerprint": "a8d3d65acf7facc0dacbef3ed129630ab21c1f4aced0d2c7b4f86ebe979a0ab5",
+      "functional_fingerprint": "f00cd5fdb601e1782a181bc0a733b77eb45cff04e166314af66cde150b39a21d",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",

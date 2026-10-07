@@ -342,14 +342,14 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Feedback en revisión · 2026-09-24
 
-- Definir en qué formularios debe operar el autoguardado, por cuánto tiempo se conserva cada borrador, cómo se recupera o descarta y qué controles adicionales protegen información clínica y evitan cruces entre organizaciones.
-- Definir estados, prioridades, permisos, responsables, reglas de entrega e idempotencia para solicitudes internas de medicamentos, insumos y equipos realizadas por enfermería. Cualquier aviso externo requiere proveedor y consentimiento aprobados, y no puede incluir información clínica sensible.
+- Autoguardado: el alcance solicitado para crear pacientes y cotizaciones ya conserva borradores sólo en la pestaña y cuenta actuales, permite recuperarlos o descartarlos y los elimina al guardar o cerrar sesión. No se presume autorización para retener formularios clínicos firmados ni para un borrador permanente compartido entre dispositivos.
+- Solicitudes de enfermería: el pedido interno de medicamentos, insumos y equipos ya usa paciente, catálogo, cantidad, prioridad, idempotencia, auditoría y acceso por rol. El aviso externo sigue pendiente de proveedor y consentimiento aprobados y nunca incluirá información clínica sensible.
 
 ### Reconciliación individual · 2026-10-06
 
-- `FEEDBACK-6216ADF9`: la cotización precarga el precio de venta del catálogo, pero todavía permite editarlo. Confirmar si se debe prohibir toda excepción de precio o crear una excepción autorizada y auditada; no cambiar silenciosamente cotizaciones enviadas ni las reglas de descuentos observadas en los videos.
-- `FEEDBACK-12C011B0`: entregar catálogos fuente autorizados, códigos, vigencia y precios de Analiza Lab, Fisio e Imágenes para importarlos por organización. Las categorías están creadas; no se inventarán servicios o importes.
-- `FEEDBACK-FBE015F8`: identificar ventanas restantes que requieren el filtro por nombre, DUI o registro médico. El filtro existe en pantallas principales, pero la afirmación «todas» necesita inventario y prueba completa.
+- `FEEDBACK-6216ADF9`: la instrucción del cliente de usar el catálogo y dejar manual sólo la cantidad resuelve la excepción de precio en el flujo nuevo. La pantalla muestra el precio de sólo lectura y PostgreSQL/MongoDB rechazan precios distintos para líneas nuevas; versiones enviadas e importes históricos permanecen inmutables.
+- `FEEDBACK-12C011B0`: el catálogo conectado contiene actualmente 13 estudios de laboratorio, 3 servicios de fisioterapia y 3 de imágenes con precio configurado, todos seleccionables en cotizaciones. No se agregaron ítems o tarifas inventados. Si se solicita una comparación contra una lista comercial externa, todavía se necesitará esa lista para certificar completitud, sin bloquear el uso del catálogo ya disponible.
+- `FEEDBACK-FBE015F8`: se inventariaron los selectores de pacientes, médicos y hospitalizaciones en las pantallas liberadas; se añadieron filtros faltantes en agenda, paciente, hospitalización, reporte, cotización, balance y documentos clínicos, conservando el registro seleccionado.
 - `FEEDBACK-7BB83834`, `FEEDBACK-C7EF7D96` y `FEEDBACK-95A33BEA`: no llamar «facturación» a cobros ni comprobantes internos; falta la definición fiscal indicada en `MEETING-Q004` antes de una factura real o conversión automática.
 
 ## Deployment

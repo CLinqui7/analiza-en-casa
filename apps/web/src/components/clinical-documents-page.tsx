@@ -68,6 +68,7 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
   const [createSaveFailed, setCreateSaveFailed] = useState(false);
   const [correctionSaveFailed, setCorrectionSaveFailed] = useState(false);
   const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
+  const [caseQuery, setCaseQuery] = useState('');
   const form = useForm<DocumentForm>({
     resolver: zodResolver(documentSchema),
     defaultValues: { caseId: hospitalizations[0]?.id ?? '', title: '', summary: '', author: '' },
@@ -289,15 +290,36 @@ export function ClinicalDocumentsPage({ type }: { type: DocumentType }) {
             </p>
           ) : null}
           <label>
+            Buscar paciente, DUI u hospitalización
+            <input
+              aria-label="Filtrar hospitalizaciones por paciente, DUI o código"
+              onChange={(event) => setCaseQuery(event.target.value)}
+              type="search"
+              value={caseQuery}
+            />
+          </label>
+          <label>
             Hospitalización
             <select {...form.register('caseId')}>
-              {hospitalizations.map((hospitalization) => (
-                <option key={hospitalization.id} value={hospitalization.id}>
-                  {hospitalization.id} ·{' '}
-                  {patients.find((patient) => patient.id === hospitalization.patientId)?.fullName ??
-                    'Paciente no disponible'}
-                </option>
-              ))}
+              {hospitalizations
+                .filter((hospitalization) => {
+                  const patient = patients.find((entry) => entry.id === hospitalization.patientId);
+                  const query = caseQuery.trim().toLocaleLowerCase('es-SV');
+                  return (
+                    !query ||
+                    hospitalization.id === form.getValues('caseId') ||
+                    `${hospitalization.id} ${patient?.fullName ?? ''} ${patient?.documentId ?? ''}`
+                      .toLocaleLowerCase('es-SV')
+                      .includes(query)
+                  );
+                })
+                .map((hospitalization) => (
+                  <option key={hospitalization.id} value={hospitalization.id}>
+                    {hospitalization.id} ·{' '}
+                    {patients.find((patient) => patient.id === hospitalization.patientId)
+                      ?.fullName ?? 'Paciente no disponible'}
+                  </option>
+                ))}
             </select>
             {form.formState.errors.caseId ? (
               <span className="field-error">{form.formState.errors.caseId.message}</span>
