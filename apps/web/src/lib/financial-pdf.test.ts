@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
 import { readFile } from 'node:fs/promises';
 import type { Patient, Payment, Quote } from '@analiza/contracts';
-import { buildPatientStatementPdf, buildPaymentReceiptPdf, buildQuotePdf } from './financial-pdf';
+import {
+  buildPatientStatementPdf,
+  buildPaymentReceiptPdf,
+  buildQuotePdf,
+  quotePdfPresentation,
+} from './financial-pdf';
 
 const quote: Quote = {
   id: 'quote-pdf-test',
@@ -32,6 +37,19 @@ const quote: Quote = {
 };
 
 describe('financial PDF documents', () => {
+  it('uses a date without time, factual payment condition, amount in words and shorter footer', () => {
+    const presentation = quotePdfPresentation({
+      ...quote,
+      paymentCondition: 'Pago acordado al recibir',
+    });
+    expect(presentation.sentDate).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
+    expect(presentation.paymentCondition).toBe('Pago acordado al recibir');
+    expect(presentation.amountInWords).toBe('CINCUENTA DÓLARES CON CERO CENTAVOS');
+    expect(presentation.footer).toBe(
+      'Documento generado para consulta interna autorizada. No contiene reglas fiscales.',
+    );
+    expect(quotePdfPresentation(quote).paymentCondition).toBe('No especificada');
+  });
   it('creates a valid PDF only from an immutable sent quote', async () => {
     const bytes = await buildQuotePdf(quote);
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-');

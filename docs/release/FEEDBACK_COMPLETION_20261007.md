@@ -2,6 +2,8 @@
 
 Este documento continúa la [auditoría individual de los 60 reportes](FEEDBACK_AUDIT_20261006.md). No sustituye el texto fuente de cada reporte. Estado inicial de este lote: 49 resueltos, 11 en revisión. No se cambió información clínica, existencias, compras ni precios registrados para cerrar reportes.
 
+Durante el humo de producción apareció un reporte n.º 61 (`c6362e80`, 7 de octubre, Cotizaciones). Se abrió su imagen adjunta y se comprobaron cuatro anotaciones: quitar la hora de envío, agregar condición de pago, agregar monto en letras y retirar del pie la frase resaltada «de cobertura ni de validez». El primer despliegue de este lote no incluye esa solicitud sobrevenida; el segundo la publicará antes de cerrar su estado.
+
 ## Revisión de los once abiertos
 
 | N.º | Dictamen técnico de este lote | Evidencia y límite |
@@ -27,6 +29,8 @@ El reporte n.º 7 del documento anterior describe una lista manual de honorarios
 - `npm run qa:video-parity`: 210/210; `npm run qa:client-changes`: 32/32; `npm run audit:verify`: 17/17 capítulos. Los fingerprints funcionales afectados de `CR-001`, `CR-011`, `CR-012` y `CR-017` se actualizaron con el código y certificación.
 - TypeScript, ESLint, Prettier, escaneo de secretos, límites React y compilación Next aprobaron. Vitest aprobó 188/188 pruebas en 42 archivos, incluidas las tres pruebas nuevas de precio.
 - Playwright React aprobó la regresión final completa de 206/206 casos (8,6 minutos), incluidos los seis roles demo, portal, importación Excel, autoguardado, cotizaciones, navegación, filtros clínicos y solicitudes internas.
+- El nuevo PDF usa sólo fecha en zona `America/El_Salvador`, condición de pago opcional escrita por el usuario, total USD en palabras y pie abreviado. El campo no calcula plazo, interés ni vencimiento, y las versiones enviadas no se editan. El render sintético de la página carta se inspeccionó visualmente sin cortes, texto superpuesto ni caracteres perdidos. Vitest aprobó 198/198 pruebas y la segunda regresión completa del navegador aprobó 206/206 tras estos cambios.
+- `npm audit --omit=dev` sigue identificando dos avisos altos preexistentes en dependencias transitivas (`sharp` y `source-map-js`). La actualización requiere un lote de dependencias con regresión propia; no se mezcló con la corrección urgente de Feedback.
 
 ## Publicación y estado productivo
 

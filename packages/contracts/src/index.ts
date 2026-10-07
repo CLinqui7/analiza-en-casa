@@ -293,6 +293,8 @@ export const quoteSchema = z.object({
   referralSelections: z.array(z.string().trim().min(1)).optional(),
   giftCardCode: z.string().trim().optional(),
   comments: z.string().trim().optional(),
+  /** Factual free text; no due date, credit policy or external payment action is inferred. */
+  paymentCondition: z.string().trim().max(160).optional(),
   items: z.array(quoteItemSchema).default([]),
   discount: quoteDiscountSchema.optional(),
   subtotal: z.number().nonnegative().default(0),

@@ -26,6 +26,7 @@ type QuoteDraft = Pick<
   | 'summary'
   | 'careSetting'
   | 'comments'
+  | 'paymentCondition'
   | 'items'
   | 'discount'
   | 'insurerAmount'
@@ -58,6 +59,7 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   summary: '',
   careSetting: 'HOSPITALIZATION',
   comments: '',
+  paymentCondition: '',
   invoiceDate: new Date().toISOString().slice(0, 10),
   invoiceDocumentType: 'INVOICE',
   discountGroup: 'Regular',
@@ -113,6 +115,7 @@ function cloneDraft(quote: Quote): QuoteDraft {
     summary: quote.summary,
     careSetting: quote.careSetting ?? 'HOSPITALIZATION',
     comments: quote.comments ?? '',
+    paymentCondition: quote.paymentCondition ?? '',
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
     invoiceDocumentType: quote.invoiceDocumentType ?? 'INVOICE',
     discountGroup: quote.discountGroup ?? 'Regular',
@@ -380,6 +383,7 @@ function QuoteEditor({
       referralLabel: draft.referralQuery.trim() || draft.referralLabel?.trim() || undefined,
       referralSelections: draft.referralSelections?.length ? draft.referralSelections : undefined,
       comments: draft.comments?.trim() || undefined,
+      paymentCondition: draft.paymentCondition?.trim() || undefined,
       items: draft.items,
       discount: draft.discount,
       insurerAmount: draft.insurerAmount,
@@ -638,6 +642,21 @@ function QuoteEditor({
             value={draft.summary}
           />
           {errors.summary ? <span className="field-error">{errors.summary}</span> : null}
+        </label>
+        <label>
+          Condición de pago (opcional)
+          <input
+            data-action-id="QUOTE-PAYMENT-CONDITION"
+            maxLength={160}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, paymentCondition: event.target.value }))
+            }
+            type="text"
+            value={draft.paymentCondition ?? ''}
+          />
+          <span className="field-help">
+            Se mostrará tal como se escriba; no genera vencimientos ni cargos automáticos.
+          </span>
         </label>
         <fieldset className="quote-fieldset full-field">
           <legend>Datos iniciales de factura</legend>

@@ -14,6 +14,7 @@ import { useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { usdAmountInSpanishWords } from '@/lib/money-in-words';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 type PortalShare = {
@@ -230,8 +231,16 @@ export default function QuoteDetailPage() {
             <div>
               <dt>Envío</dt>
               <dd>
-                {quote.sentAt ? new Date(quote.sentAt).toLocaleString('es-SV') : 'No enviada'}
+                {quote.sentAt
+                  ? new Date(quote.sentAt).toLocaleDateString('es-SV', {
+                      timeZone: 'America/El_Salvador',
+                    })
+                  : 'No enviada'}
               </dd>
+            </div>
+            <div>
+              <dt>Condición de pago</dt>
+              <dd>{quote.paymentCondition || 'No especificada'}</dd>
             </div>
           </dl>
         </Panel>
@@ -320,6 +329,10 @@ export default function QuoteDetailPage() {
             <div>
               <dt>Total</dt>
               <dd>{money(quote.total)}</dd>
+            </div>
+            <div>
+              <dt>Monto en letras</dt>
+              <dd>{usdAmountInSpanishWords(quote.total) ?? 'No disponible para este importe.'}</dd>
             </div>
             <div>
               <dt>Aseguradora</dt>

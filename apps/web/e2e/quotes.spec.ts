@@ -277,9 +277,11 @@ test('draft can be edited, sent and revised without changing the sent version', 
 }) => {
   await login(page);
   let dialog = await openNewQuote(page);
+  await dialog.getByLabel('Condición de pago (opcional)').fill('Pago acordado al recibir');
   const quoteId = await saveDraft(page, dialog, 'Flujo de estados E2E');
   expect(quoteId).toBeTruthy();
   await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
+  await expect(page.getByText('Pago acordado al recibir')).toBeVisible();
   await page.getByRole('button', { name: 'Editar borrador' }).click();
   dialog = page.getByRole('dialog', { name: /Editar borrador/ });
   await dialog.getByLabel('Resumen operativo').fill('Flujo de estados E2E editado');

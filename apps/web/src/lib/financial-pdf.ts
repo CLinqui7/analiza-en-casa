@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import type { Patient, Payment, Quote } from '@analiza/contracts';
 import { quoteCategories, quoteDisplayCode } from '@analiza/domain';
+import { usdAmountInSpanishWords } from './money-in-words';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 const safe = (value: string) =>
@@ -10,6 +11,17 @@ const safe = (value: string) =>
     .replace(/[\u201c\u201d]/g, '"')
     .replace(/\u2022/g, '*')
     .replace(/[^\x20-\x7e\u00a1-\u00ff]/g, ' ');
+
+export function quotePdfPresentation(quote: Quote) {
+  return {
+    sentDate: new Date(quote.sentAt ?? quote.createdAt).toLocaleDateString('es-SV', {
+      timeZone: 'America/El_Salvador',
+    }),
+    paymentCondition: quote.paymentCondition || 'No especificada',
+    amountInWords: usdAmountInSpanishWords(quote.total) ?? 'No disponible para este importe.',
+    footer: 'Documento generado para consulta interna autorizada. No contiene reglas fiscales.',
+  };
+}
 
 type LineWriter = (text: string, options?: { bold?: boolean; size?: number; gap?: number }) => void;
 
@@ -112,11 +124,13 @@ export async function buildQuotePdf(
 ): Promise<Uint8Array> {
   if (quote.status !== 'SENT' || !quote.immutable)
     throw new Error('Sólo se exportan versiones enviadas e inmutables.');
+  const presentation = quotePdfPresentation(quote);
   const { document, write, finish } = await documentWithWriter('Cotización informativa', logoBytes);
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
   write(`Referencia: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
-  write(`Fecha de envío: ${new Date(quote.sentAt ?? quote.createdAt).toLocaleString('es-SV')}`);
+  write(`Fecha de envío: ${presentation.sentDate}`);
+  write(`Condición de pago: ${presentation.paymentCondition}`);
   write(`Atención: ${quote.careSetting ?? 'No documentada'}`);
   write(`Hospitalización: ${quote.caseId ?? 'Atención nueva sin hospitalización'}`);
   write(`Resumen: ${quote.summary}`, { gap: 22 });
@@ -141,13 +155,12 @@ export async function buildQuotePdf(
   write(`Subtotal: ${money(quote.subtotal)}`);
   write(`Descuento: ${money(quote.discountAmount)}`);
   write(`Total: ${money(quote.total)}`, { bold: true });
+  write(`Monto en letras: ${presentation.amountInWords}`);
   write(`Responsabilidad de aseguradora: ${money(quote.insurerAmount)}`);
   write(`Responsabilidad del paciente: ${money(quote.patientAmount)}`);
   if (quote.comments) write(`Comentarios: ${quote.comments}`, { gap: 16 });
   write('', { gap: 12 });
-  write(
-    'Documento generado para consulta interna autorizada. No contiene reglas fiscales, de cobertura ni de validez.',
-  );
+  write(presentation.footer);
   finish();
   return document.save();
 }
