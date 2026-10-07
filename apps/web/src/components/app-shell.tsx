@@ -463,7 +463,7 @@ function DeniedRoute({ pathname }: { pathname: string }) {
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
-  const { can, loading, logout, session } = useAuth();
+  const { can, canOpenDashboard, loading, logout, session } = useAuth();
   const userMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const navScrollRef = useRef<HTMLElement>(null);
@@ -643,7 +643,7 @@ export function AppShell({ children }: PropsWithChildren) {
     );
   }
   if (!session) return <DeniedRoute pathname={pathname} />;
-  if (required && !can(required)) {
+  if ((required && !can(required)) || (pathname.startsWith('/dashboard') && !canOpenDashboard)) {
     return (
       <main className="access-denied" role="alert">
         Acceso restringido para el rol {session.role}.
@@ -683,7 +683,7 @@ export function AppShell({ children }: PropsWithChildren) {
             aria-label="Ir al inicio de Analiza en Casa"
             className="brand"
             data-action-id="DASHBOARD-NAVIGATE"
-            href="/dashboard"
+            href={canOpenDashboard ? '/dashboard' : '/patients'}
             scroll={false}
           >
             <Image
@@ -748,7 +748,10 @@ export function AppShell({ children }: PropsWithChildren) {
 
               const childrenForRole =
                 group.children?.filter(
-                  (child) => can(child.permission) && isReleasedPath(child.href),
+                  (child) =>
+                    can(child.permission) &&
+                    (child.href !== '/dashboard' || canOpenDashboard) &&
+                    isReleasedPath(child.href),
                 ) ?? [];
               if (!childrenForRole.length) return null;
               const hasCurrentChild = childrenForRole.some((child) =>

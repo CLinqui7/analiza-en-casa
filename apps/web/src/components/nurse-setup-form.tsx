@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
-import { mongoMutationHeaders } from '@/lib/auth';
+import { canOpenDashboard, mongoMutationHeaders } from '@/lib/auth';
 import { isServerDataMode } from '@/lib/data-mode';
 import {
   emptyNurseProfile,
@@ -128,7 +128,7 @@ export function NurseSetupForm() {
         }
         if (!active) return;
         if (profile.completedAt) {
-          router.replace('/dashboard');
+          router.replace(canOpenDashboard(session) ? '/dashboard' : '/patients');
           return;
         }
         setData(profile);
@@ -144,7 +144,7 @@ export function NurseSetupForm() {
       active = false;
       controller.abort();
     };
-  }, [router, serverBacked, sessionLoading, sessionUserId]);
+  }, [router, serverBacked, session, sessionLoading, sessionUserId]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -235,7 +235,7 @@ export function NurseSetupForm() {
           ? 'Perfil guardado en la base de datos compartida.'
           : 'Perfil guardado en este navegador.',
       );
-      if (complete) router.replace('/dashboard');
+      if (complete) router.replace(canOpenDashboard(session) ? '/dashboard' : '/patients');
       else if (nextStep !== undefined) setStep(nextStep);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No pudimos guardar tu perfil.');

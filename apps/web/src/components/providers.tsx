@@ -38,6 +38,7 @@ import {
 } from '@analiza/domain';
 import {
   loadSession,
+  canOpenDashboard,
   login as authenticate,
   register as registerAccount,
   logout as endSession,
@@ -62,6 +63,7 @@ type AuthContextValue = {
   register: (input: RegistrationInput) => Promise<void>;
   logout: () => Promise<void>;
   can: (permission: Permission) => boolean;
+  canOpenDashboard: boolean;
 };
 
 type WorkspaceContextValue = WorkspaceSnapshot & {
@@ -190,6 +192,7 @@ function AuthProvider({ children }: PropsWithChildren) {
       register,
       logout,
       can: (permission) => can(session?.role, permission),
+      canOpenDashboard: canOpenDashboard(session),
     }),
     [error, loading, login, register, logout, session],
   );

@@ -59,6 +59,7 @@ function asMembership(row: Record<string, unknown>): MembershipRecord | null {
     organizationId: row.organizationId,
     role: row.role,
     active: row.active,
+    dashboardAccess: row.dashboardAccess === true,
   };
 }
 

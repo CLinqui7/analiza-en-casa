@@ -67,6 +67,7 @@ export function sessionResponse(
     {
       userId: result.session.userId,
       role: result.session.role,
+      dashboardAccess: result.session.dashboardAccess,
       csrfToken: result.csrfToken,
     },
     { status, headers: privateHeaders },

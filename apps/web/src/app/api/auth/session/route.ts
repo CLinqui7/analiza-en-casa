@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const auth = (await persistence()).auth;
     const session = await auth.requireSession(request.cookies.get(sessionCookieName)?.value);
     return NextResponse.json(
-      { userId: session.userId, role: session.role },
+      { userId: session.userId, role: session.role, dashboardAccess: session.dashboardAccess },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

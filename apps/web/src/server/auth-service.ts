@@ -6,7 +6,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import { promisify } from 'node:util';
-import { isRole, type Role } from '@/lib/permissions';
+import { can, isRole, type Role } from '@/lib/permissions';
 import { registrationSchema } from '@/lib/registration';
 
 const scrypt = promisify(nodeScrypt);
@@ -23,6 +23,7 @@ export type ServerSession = Readonly<{
   userId: string;
   organizationId: string;
   role: Role;
+  dashboardAccess: boolean;
   expiresAt: Date;
 }>;
 
@@ -37,6 +38,7 @@ export type MembershipRecord = Readonly<{
   organizationId: string;
   role: Role;
   active: boolean;
+  dashboardAccess?: boolean;
 }>;
 export type StoredSession = Readonly<{
   sessionHash: string;
@@ -160,6 +162,9 @@ function sessionFrom(stored: StoredSession, membership: MembershipRecord): Serve
     userId: stored.userId,
     organizationId: membership.organizationId,
     role: membership.role,
+    dashboardAccess:
+      can(membership.role, 'dashboard:read') &&
+      (membership.role !== 'NURSE' || membership.dashboardAccess === true),
     expiresAt: stored.expiresAt,
   };
 }

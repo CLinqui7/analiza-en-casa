@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/providers';
-import { isDemoAuthMode, mockCredentialHint, safeNextPath } from '@/lib/auth';
+import { isDemoAuthMode, landingPath, mockCredentialHint } from '@/lib/auth';
 import { InstallApp } from '@/components/install-app';
 import { isCoreRelease } from '@/lib/release-profile';
 import { isRegistrationEnabled } from '@/lib/registration';
@@ -24,14 +24,13 @@ export function LoginForm() {
   const [submitting, setSubmitting] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
   const [recoveryNotice, setRecoveryNotice] = useState<string | null>(null);
-  const destination = safeNextPath(params.get('next'));
+  const next = params.get('next');
   const emailRef = useRef<HTMLInputElement>(null);
   const loginFlowRef = useRef(false);
 
   useEffect(() => {
-    if (session && !loginFlowRef.current)
-      router.replace(session.role === 'ANALYTICS' ? '/analytics/logins' : destination);
-  }, [destination, router, session]);
+    if (session && !loginFlowRef.current) router.replace(landingPath(session, next));
+  }, [next, router, session]);
 
   useEffect(() => {
     if (!loading && !session) emailRef.current?.focus();
@@ -50,7 +49,7 @@ export function LoginForm() {
     loginFlowRef.current = true;
     try {
       const authenticated = await login(email, password);
-      router.replace(authenticated.role === 'ANALYTICS' ? '/analytics/logins' : destination);
+      router.replace(landingPath(authenticated, next));
     } catch (cause) {
       loginFlowRef.current = false;
       setError(

@@ -2,7 +2,7 @@
 import { isServerDataMode, configuredServerDataMode } from '@/lib/data-mode';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase';
-import { isRole, type Role } from '@/lib/permissions';
+import { can, isRole, type Role } from '@/lib/permissions';
 import { isCoreRelease } from '@/lib/release-profile';
 import type { RegistrationInput } from '@/lib/registration';
 
@@ -11,6 +11,7 @@ let mongoCsrfToken: string | null = null;
 export type AuthSession = {
   userId: string;
   role: Role;
+  dashboardAccess?: boolean;
   mode: 'mock' | 'supabase' | 'mongodb' | 'postgresql';
 };
 
@@ -74,8 +75,8 @@ export async function loadSession(): Promise<AuthSession | null> {
     if (!response.ok) throw new Error('No fue posible validar la sesión segura.');
     const payload: unknown = await response.json();
     if (!payload || typeof payload !== 'object') throw new Error('La sesión segura no es válida.');
-    const { userId, role } = payload as Record<string, unknown>;
-    if (typeof userId !== 'string' || !isRole(role))
+    const { userId, role, dashboardAccess } = payload as Record<string, unknown>;
+    if (typeof userId !== 'string' || !isRole(role) || typeof dashboardAccess !== 'boolean')
       throw new Error('La sesión segura no es válida.');
     const csrfResponse = await fetch('/api/auth/csrf', { credentials: 'same-origin' });
     const csrfPayload: unknown = csrfResponse.ok ? await csrfResponse.json() : null;
@@ -87,7 +88,7 @@ export async function loadSession(): Promise<AuthSession | null> {
         : null;
     if (!csrfToken) throw new Error('No fue posible preparar la sesión segura.');
     mongoCsrfToken = csrfToken;
-    return { userId, role, mode: configuredServerDataMode() };
+    return { userId, role, dashboardAccess, mode: configuredServerDataMode() };
   }
   const client = getSupabaseBrowserClient();
   if (!client) return readMockSession();
@@ -132,12 +133,22 @@ async function serverAuthenticate(
   }
   const payload: unknown = await response.json();
   if (!payload || typeof payload !== 'object') throw new Error('No fue posible iniciar sesión.');
-  const { userId, role, csrfToken: returnedCsrf } = payload as Record<string, unknown>;
-  if (typeof userId !== 'string' || !isRole(role) || typeof returnedCsrf !== 'string') {
+  const {
+    userId,
+    role,
+    dashboardAccess,
+    csrfToken: returnedCsrf,
+  } = payload as Record<string, unknown>;
+  if (
+    typeof userId !== 'string' ||
+    !isRole(role) ||
+    typeof dashboardAccess !== 'boolean' ||
+    typeof returnedCsrf !== 'string'
+  ) {
     throw new Error('No fue posible iniciar sesión.');
   }
   mongoCsrfToken = returnedCsrf;
-  return { userId, role, mode: configuredServerDataMode() };
+  return { userId, role, dashboardAccess, mode: configuredServerDataMode() };
 }
 
 export async function register(input: RegistrationInput): Promise<AuthSession> {
@@ -197,4 +208,19 @@ export function safeNextPath(next: string | null, fallback = '/dashboard') {
   return next && next.startsWith('/') && !next.startsWith('//') && !/[\\\u0000-\u001f]/.test(next)
     ? next
     : fallback;
+}
+
+export function canOpenDashboard(session: AuthSession | null): boolean {
+  return Boolean(
+    session &&
+    can(session.role, 'dashboard:read') &&
+    (session.role !== 'NURSE' || session.dashboardAccess === true),
+  );
+}
+
+export function landingPath(session: AuthSession, next: string | null = null): string {
+  if (session.role === 'ANALYTICS') return '/analytics/logins';
+  const fallback = canOpenDashboard(session) ? '/dashboard' : '/patients';
+  const requested = safeNextPath(next, fallback);
+  return !canOpenDashboard(session) && requested.startsWith('/dashboard') ? fallback : requested;
 }
