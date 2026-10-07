@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { createXlsxWorkbook } from '../src/lib/xlsx';
 
 async function loginAs(page: import('@playwright/test').Page, email: string, password: string) {
   await page.goto('/login');
@@ -36,9 +37,18 @@ async function fillRequiredPatientData(
   await dialog.locator('input[name="address.comments"]').fill('Referencia sintética para QA');
 }
 
+// test-id: playwright:workspace-sidebar-accordions
 test('sidebar accordions preserve stable clinical and inventory routes', async ({ page }) => {
   await login(page);
+  const navigationIcons = await page
+    .locator('#main-navigation [data-navigation-icon]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-navigation-icon')));
+  expect(new Set(navigationIcons).size).toBeGreaterThan(20);
+  expect(navigationIcons).toEqual(
+    expect.arrayContaining(['dashboard', 'patients', 'clinical', 'inventory']),
+  );
   const clinical = page.getByRole('button', { name: 'Clínico' });
+  if ((await clinical.getAttribute('aria-expanded')) === 'false') await clinical.click();
   await expect(clinical).toHaveAttribute('aria-expanded', 'true');
   await clinical.click();
   await expect(clinical).toHaveAttribute('aria-expanded', 'false');
@@ -48,13 +58,30 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
   await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
-  const inventory = page.getByRole('button', { name: 'Inventario' });
+  const inventory = page.getByRole('button', { name: 'Inventario y compras' });
   if ((await inventory.getAttribute('aria-expanded')) === 'false') await inventory.click();
+  await expect(page.getByRole('link', { name: 'Compras', exact: true })).toHaveAttribute(
+    'href',
+    '/purchases',
+  );
   await page.getByRole('link', { name: 'Kárdex' }).click();
   await expect(page).toHaveURL(/\/inventory\/kardex$/);
   await expect(
     page.getByRole('heading', { name: 'Kárdex de inventario', exact: true }),
   ).toBeVisible();
+});
+
+test('requested changes separate completed review from technical delivery evidence', async ({
+  page,
+}) => {
+  await loginAs(page, 'admin@demo.local', 'demo-admin');
+  await page.goto('/changes');
+  await expect(page.getByRole('heading', { name: 'Cambios solicitados' })).toBeVisible();
+  await expect(page.getByText('32 revisadas', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revisión completada', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Pendiente de definición', { exact: true }).first()).toBeVisible();
+  const accessibility = await new AxeBuilder({ page }).analyze();
+  expect(accessibility.violations).toEqual([]);
 });
 
 test('primary navigation requires a session and hides patient access for inventory', async ({
@@ -212,7 +239,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await page.getByLabel('Buscar paciente').fill('Paciente QA Editable');
   await openPatientDetail(page, 'Paciente QA Editable');
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Activo');
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await editDialog.getByLabel('Nombre completo').fill('Paciente QA Editado');
   await editDialog.getByLabel('Teléfono celular').fill('7000-4999');
@@ -252,7 +279,7 @@ test('patient detail uses the complete shared editor and persists edits', async 
   await page.reload();
   await expect(page.getByText('7000-4999')).toBeVisible();
   await expect(page.getByText('https://example.test/editada')).toBeVisible();
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const duplicateEditDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await duplicateEditDialog.locator('select[name="documentType"]').selectOption('DUI');
   await duplicateEditDialog.locator('input[name="documentId"]').fill('123456789');
@@ -271,7 +298,7 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
 }) => {
   await login(page);
   await page.goto('/patients');
-  await page.getByRole('button', { name: 'Importar CSV' }).click();
+  await page.getByRole('button', { name: 'Importar CSV / Excel' }).click();
   const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'invalido.csv',
@@ -304,11 +331,125 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   expect(csv).not.toContain('Importado Dos');
 });
 
+test('patient Excel import previews extended fields and persists the selected rows', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/patients');
+  await page.getByRole('button', { name: 'Importar CSV / Excel' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Importar pacientes' });
+  const columns = [
+    'document',
+    'documentType',
+    'firstName',
+    'lastName',
+    'phone',
+    'company',
+    'addressLine',
+    'contact1FullName',
+    'contact1Phone',
+    'contact1IsPrimary',
+  ];
+  const workbook = createXlsxWorkbook(
+    columns.map((key) => ({ key, label: key })),
+    [
+      {
+        document: 'XLSX-QA-001',
+        documentType: 'OTHER',
+        firstName: 'Excel',
+        lastName: 'Sintético',
+        phone: '7000-5678',
+        company: 'Empresa QA',
+        addressLine: 'Dirección QA',
+        contact1FullName: 'Contacto Sintético',
+        contact1Phone: '7000-0001',
+        contact1IsPrimary: 'true',
+      },
+    ],
+  );
+  await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
+    name: 'pacientes.xlsx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    buffer: Buffer.from(workbook),
+  });
+  await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
+    '1 fila válida',
+  );
+  await dialog.getByRole('button', { name: 'Importar pacientes' }).click();
+  await page.reload();
+  await page.getByLabel('Buscar paciente').fill('Excel Sintético');
+  await expect(page.getByRole('row').filter({ hasText: 'Excel Sintético' })).toBeVisible();
+  const imported = await page.evaluate(() => {
+    const rows = JSON.parse(
+      window.localStorage.getItem('analiza.en.casa.workspace.v3.patients') ?? '[]',
+    );
+    return rows.find((row: { documentId: string }) => row.documentId === 'XLSX-QA-001');
+  });
+  expect(imported.address.line).toBe('Dirección QA');
+  expect(imported.contacts[0]).toMatchObject({ fullName: 'Contacto Sintético', isPrimary: true });
+});
+
+test('unsaved patient details survive navigation within the same signed-in tab', async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto('/patients?create=1');
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByLabel('Nombre completo').fill('Borrador QA Sintético');
+  await dialog.getByLabel('Número de documento').fill('DRAFT-QA-001');
+  await page.waitForTimeout(450);
+  await page.goto('/doctors');
+  await page.goto('/patients?create=1');
+  await expect(
+    page.getByRole('dialog', { name: 'Agregar paciente' }).getByLabel('Nombre completo'),
+  ).toHaveValue('Borrador QA Sintético');
+  await expect(
+    page.getByText('Se recuperó el formulario pendiente de esta pestaña.'),
+  ).toBeVisible();
+});
+
+test('patient doctor pickers filter names while retaining the chosen doctor', async ({ page }) => {
+  await login(page);
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.doctors';
+    window.localStorage.setItem(
+      key,
+      JSON.stringify([
+        {
+          id: 'doctor-filter-a',
+          fullName: 'Médica Alba Sintética',
+          documentId: 'QA-A',
+          specialty: 'General',
+          address: 'Dirección QA',
+          attachments: [],
+        },
+        {
+          id: 'doctor-filter-b',
+          fullName: 'Médico Bruno Sintético',
+          documentId: 'QA-B',
+          specialty: 'General',
+          address: 'Dirección QA',
+          attachments: [],
+        },
+      ]),
+    );
+  });
+  await page.goto('/patients?create=1');
+  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
+  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Alba');
+  const primary = dialog.getByLabel('Médico tratante principal');
+  await expect(primary.locator('option')).toHaveCount(2);
+  await primary.selectOption('doctor-filter-a');
+  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Bruno');
+  await expect(primary.locator('option')).toHaveCount(3);
+  await expect(primary).toHaveValue('doctor-filter-a');
+});
+
 test('patient detail keeps auditor read-only and inventory denied', async ({ page }) => {
   await loginAs(page, 'auditor@demo.local', 'demo-auditor');
   await page.goto('/patients/patient-demo-001');
   await expect(page.getByRole('heading', { name: 'Paciente Demo Aurora' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Editar paciente' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Editar paciente' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'inventory@demo.local', 'demo-inventory');
   await page.goto('/patients/patient-demo-001');
@@ -458,7 +599,7 @@ test('patient detail edits persist after refresh', async ({ page }) => {
   await page.getByRole('button', { name: 'Guardar' }).click();
   await page.getByLabel('Buscar paciente').fill('PATIENT-PLAYWRIGHT-EDIT-001');
   await openPatientDetail(page, 'Paciente Playwright Editable');
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   await page.getByLabel('Teléfono celular').fill('2222 3333');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
@@ -602,6 +743,27 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
   await expect(page.getByRole('status')).toContainText('turno persistido');
   await page.reload();
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
+
+  const shiftRow = page.getByRole('row').filter({ hasText: 'Turno programado de QA.' });
+  await shiftRow.getByRole('button', { name: 'Ver detalle' }).click();
+  await page.getByRole('button', { name: 'Editar turno' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar turno programado' });
+  const nurseSelect = editDialog.getByLabel('Enfermera');
+  const nurseOptions = await nurseSelect.locator('option').evaluateAll((options) =>
+    options.map((option) => ({
+      label: (option as HTMLOptionElement).textContent ?? '',
+      value: (option as HTMLOptionElement).value,
+    })),
+  );
+  if (nurseOptions.length > 1) await nurseSelect.selectOption(nurseOptions[1].value);
+  await editDialog.getByLabel('Inicio').fill('09:00');
+  await editDialog.getByLabel('Fin').fill('13:00');
+  await editDialog.getByRole('button', { name: 'Guardar cambios' }).click();
+  await expect(page.getByRole('status')).toContainText('Turno actualizado');
+  await page.reload();
+  const updatedRow = page.getByRole('row').filter({ hasText: 'Turno programado de QA.' });
+  await expect(updatedRow).toContainText('9:00');
+  if (nurseOptions.length > 1) await expect(updatedRow).toContainText(nurseOptions[1].label);
 });
 
 test('nurse-hours report filters scheduled shifts and exports planned-hour data', async ({
@@ -701,6 +863,8 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
   await expect(page.getByRole('status')).toContainText('enviada e inmutable');
+  await expect(page.locator('[data-action-id="QUOTE-PDF-DOWNLOAD"]')).toBeVisible();
+  await expect(page.locator('[data-action-id="QUOTE-WHATSAPP-DIRECT"]')).toHaveCount(0);
   await page.reload();
   await expect(page.getByText('Enviada e inmutable', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Enviar enlace seguro' })).toHaveCount(0);
@@ -709,32 +873,59 @@ test('quote draft becomes an immutable sent version', async ({ page }) => {
 test('payment application is idempotent and reversal preserves its reason', async ({ page }) => {
   await login(page);
   await page.goto('/quotes');
+  await page.evaluate(() => {
+    const key = 'analiza.en.casa.workspace.v3.catalogItems';
+    const items = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    items.push({
+      id: 'service-payment-e2e',
+      sku: 'PAY-E2E-001',
+      name: 'Servicio sintético de pago',
+      category: 'SERVICES',
+      status: 'ACTIVE',
+      salePriceExcludingTax: 125.5,
+      createdAt: new Date().toISOString(),
+    });
+    window.localStorage.setItem(key, JSON.stringify(items));
+  });
+  await page.reload();
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
   await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
   await page.getByRole('option', { name: 'Amigos & Familia' }).click();
   await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
+  const catalog = page.getByRole('combobox', {
+    name: 'Buscar ítem de catálogo por código o nombre',
+  });
+  await catalog.fill('PAY-E2E');
+  await page.getByRole('option', { name: /PAY-E2E-001/ }).click();
+  await page.getByLabel('Cantidad').fill('1');
+  await page.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
 
   await page.goto('/payments');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
-  await page.getByLabel('Monto ingresado').fill('125.50');
-  await page.getByLabel('Referencia').fill('REF-PAGO-E2E');
-  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
+  const quoteSearch = page.getByRole('combobox', { name: 'Buscar paciente o cotización' });
+  await quoteSearch.fill('Paciente Demo Aurora');
+  await page
+    .getByRole('option', { name: /Paciente Demo Aurora.*COT-/ })
+    .last()
+    .click();
+  await page.getByLabel('Monto ingresado').fill('25.50');
+  await page.getByLabel('Medio de pago').selectOption('TRANSFER');
+  await page.getByLabel('Número de referencia').fill('REF-PAGO-E2E');
+  await expect(page.getByLabel('Clave idempotente')).toHaveCount(0);
   await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
-  await expect(page.getByRole('status')).toContainText('Pago aplicado una sola vez');
+  await expect(page.getByRole('status')).toContainText('Pago aplicado correctamente');
   await page.reload();
   await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  await expect(page.getByText('Transferencia')).toBeVisible();
+  await expect(page.locator('[data-action-id="PAYMENT-RECEIPT-PDF"]')).toBeVisible();
 
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
-  await page.getByLabel('Referencia').fill('REF-PAGO-E2E-DUPLICADO');
-  await page.getByLabel('Clave idempotente').fill('payment-e2e-key');
-  await page.getByRole('button', { name: 'Aplicar pago' }).last().click();
-  await expect(
-    page.getByText('La clave ya fue aplicada; la operación no se duplicó.'),
-  ).toBeVisible();
+  await page.getByLabel('Medio de pago').selectOption('CARD');
+  await expect(page.getByLabel('Número de referencia')).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).first().click();
 
   await page.getByRole('button', { name: 'Reversar' }).click();
@@ -869,7 +1060,10 @@ test('catalog items receive unique automatic codes and persist after refresh', a
   await page.getByRole('button', { name: 'Nuevo ítem' }).click();
   const firstCode = await page.getByLabel('Código automático').inputValue();
   await expect(page.getByLabel('Código automático')).toHaveAttribute('readonly', '');
-  await page.getByLabel('Nombre').fill('Ítem sintético de QA');
+  await page
+    .getByRole('dialog', { name: 'Nuevo ítem' })
+    .getByLabel('Nombre', { exact: true })
+    .fill('Ítem sintético de QA');
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('status')).toContainText('creado correctamente');
   await page.reload();

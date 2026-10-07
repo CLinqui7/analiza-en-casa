@@ -72,6 +72,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addPatients: (patients: Patient[]) => void;
   updatePatient: (patient: Patient) => Promise<boolean>;
   refreshPatients: () => Promise<boolean>;
+  refreshWorkspace: () => Promise<boolean>;
   addVitalReading: (reading: VitalReading) => void;
   addNursingResource: (resource: NursingResource) => void;
   addDoctor: (doctor: Doctor) => Promise<boolean>;
@@ -80,6 +81,7 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   addInventoryMovement: (movement: InventoryMovement) => Promise<boolean>;
   addShift: (shift: Shift) => void;
   addShiftSeries: (shifts: Shift[], idempotencyKey: string) => Promise<boolean>;
+  updateShift: (shift: Shift, idempotencyKey: string) => Promise<boolean>;
   addHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   updateHospitalization: (hospitalization: Hospitalization) => Promise<boolean>;
   addQuote: (quote: Quote) => Promise<boolean>;
@@ -97,6 +99,8 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   ) => Promise<boolean>;
   addCatalogItem: (item: CatalogItem) => Promise<boolean>;
   addPurchase: (purchase: Purchase) => Promise<boolean>;
+  updatePurchase: (purchase: Purchase) => Promise<boolean>;
+  cancelPurchase: (purchaseId: string, reason: string) => Promise<boolean>;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
   addInsuranceEvent: (event: InsuranceEvent) => boolean;
   recordInsuranceObservation: (input: {
@@ -166,6 +170,11 @@ function AuthProvider({ children }: PropsWithChildren) {
   const logout = useCallback(async () => {
     setError(null);
     await endSession(session);
+    if (typeof window !== 'undefined') {
+      for (const key of Object.keys(window.sessionStorage)) {
+        if (key.startsWith('analiza.form-draft.v1.')) window.sessionStorage.removeItem(key);
+      }
+    }
     setSession(null);
   }, [session]);
   const register = useCallback(async (input: RegistrationInput) => {
@@ -320,6 +329,16 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       return false;
     }
   }, [provider]);
+  const refreshWorkspace = useCallback(async (): Promise<boolean> => {
+    try {
+      setSnapshot(await provider.load());
+      setError(null);
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No fue posible actualizar los datos.');
+      return false;
+    }
+  }, [provider]);
   const saveDoctor = useCallback(
     async (doctor: Doctor, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('settings:write')) return false;
@@ -451,6 +470,37 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
     },
     [can, persistMockChange, provider],
   );
+  const replaceShift = useCallback(
+    async (shift: Shift, idempotencyKey: string): Promise<boolean> => {
+      if (!can('agenda:write')) return false;
+      if (isServerDataMode(provider.mode)) {
+        if (!provider.updateShift) {
+          setError('El comando seguro para editar Agenda no está disponible; no se guardó nada.');
+          return false;
+        }
+        try {
+          const saved = await provider.updateShift(shift, idempotencyKey);
+          setSnapshot((current) => ({
+            ...current,
+            shifts: current.shifts.map((candidate) =>
+              candidate.id === saved.id ? saved : candidate,
+            ),
+          }));
+          setError(null);
+          return true;
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : 'No fue posible actualizar el turno.');
+          return false;
+        }
+      }
+      return persistMockChange((current) => ({
+        ...current,
+        shifts: current.shifts.map((candidate) => (candidate.id === shift.id ? shift : candidate)),
+        auditEntries: [audit('Turno actualizado', shift.id), ...current.auditEntries],
+      }));
+    },
+    [can, persistMockChange, provider],
+  );
   const saveQuote = useCallback(
     async (quote: Quote, operation: 'create' | 'replace'): Promise<boolean> => {
       if (!can('quotes:write')) return false;
@@ -480,17 +530,27 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return false;
         }
       }
-      const hospitalization = snapshot.hospitalizations.find(
-        (candidate) => candidate.id === quote.caseId,
-      );
-      if (!hospitalization || hospitalization.patientId !== quote.patientId) return false;
+      const patient = snapshot.patients.find((candidate) => candidate.id === quote.patientId);
+      if (!patient) return false;
+      const hospitalization = quote.caseId
+        ? snapshot.hospitalizations.find((candidate) => candidate.id === quote.caseId)
+        : undefined;
+      if (quote.caseId && (!hospitalization || hospitalization.patientId !== quote.patientId))
+        return false;
       if (operation === 'create' && snapshot.quotes.some((candidate) => candidate.id === quote.id))
         return false;
       const original =
         operation === 'replace'
           ? snapshot.quotes.find((candidate) => candidate.id === quote.id)
           : undefined;
-      if (operation === 'replace' && (!original || !canEditQuote(original))) return false;
+      if (
+        operation === 'replace' &&
+        (!original ||
+          !canEditQuote(original) ||
+          original.patientId !== quote.patientId ||
+          original.caseId !== quote.caseId)
+      )
+        return false;
       try {
         const totals = calculateQuoteTotals(quote.items, quote.discount, quote.insurerAmount);
         const normalized: Quote = {
@@ -524,7 +584,14 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         return false;
       }
     },
-    [can, persistMockChange, provider, snapshot.hospitalizations, snapshot.quotes],
+    [
+      can,
+      persistMockChange,
+      provider,
+      snapshot.hospitalizations,
+      snapshot.patients,
+      snapshot.quotes,
+    ],
   );
   const sendStoredQuote = useCallback(
     async (quoteId: string): Promise<boolean> => {
@@ -708,6 +775,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         })),
       updatePatient: (patient) => savePatient(patient, 'replace'),
       refreshPatients,
+      refreshWorkspace,
       addVitalReading: (reading) =>
         commit((current) => ({
           ...current,
@@ -752,6 +820,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
         }));
       },
       addShiftSeries: saveShiftSeries,
+      updateShift: replaceShift,
       addHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'create'),
       updateHospitalization: (hospitalization) => saveHospitalization(hospitalization, 'replace'),
       addQuote: (quote) => saveQuote(quote, 'create'),
@@ -888,6 +957,32 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           purchases: [...current.purchases, purchase],
           auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
         })),
+      updatePurchase: (purchase) =>
+        saveCommand({ command: 'purchase.update', purchase }, (current) => ({
+          ...current,
+          purchases: current.purchases.map((candidate) =>
+            candidate.id === purchase.id && candidate.status === 'DRAFT' ? purchase : candidate,
+          ),
+          auditEntries: [
+            audit('Borrador de compra actualizado', purchase.id),
+            ...current.auditEntries,
+          ],
+        })),
+      cancelPurchase: (purchaseId, reason) =>
+        saveCommand({ command: 'purchase.cancel', purchaseId, reason }, (current) => ({
+          ...current,
+          purchases: current.purchases.map((candidate) =>
+            candidate.id === purchaseId && candidate.status === 'DRAFT'
+              ? {
+                  ...candidate,
+                  status: 'CANCELLED',
+                  cancelledAt: new Date().toISOString(),
+                  cancelReason: reason,
+                }
+              : candidate,
+          ),
+          auditEntries: [audit('Borrador de compra anulado', purchaseId), ...current.auditEntries],
+        })),
       addInsuranceRequest: (request) => {
         // Existing Supabase policies deliberately deny browser writes to this
         // ledger. Until an approved append-only RPC exists, only the mock
@@ -962,6 +1057,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       loading,
       provider.mode,
       refreshPatients,
+      refreshWorkspace,
       saveDoctor,
       saveCommand,
       saveHospitalization,
@@ -969,6 +1065,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       savePatient,
       saveQuote,
       saveShiftSeries,
+      replaceShift,
       sendStoredQuote,
       snapshot,
     ],

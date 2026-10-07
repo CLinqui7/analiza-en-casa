@@ -11,15 +11,24 @@ export default function VisitsGoalsPage() {
   const { patients } = useWorkspace();
   const { can, session } = useAuth();
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [professionFilter, setProfessionFilter] = useState<'ALL' | 'DOCTOR' | 'NURSE'>('ALL');
   const [dialog, setDialog] = useState<'visit' | 'goal' | null>(null);
   const [message, setMessage] = useState('');
   const [commandKey, setCommandKey] = useState(() => crypto.randomUUID());
-  const visits = operations.visits.filter((item) => item.occurredAt.slice(0, 7) === month);
-  const goals = operations.goals.filter((item) => item.month === month);
-  const professionals = operations.professionals;
+  const [visitPatientQuery, setVisitPatientQuery] = useState('');
+  const [selectedVisitPatientId, setSelectedVisitPatientId] = useState('');
+  const monthVisits = operations.visits.filter((item) => item.occurredAt.slice(0, 7) === month);
+  const monthGoals = operations.goals.filter((item) => item.month === month);
+  const professionals = operations.professionals.filter(
+    (item) => professionFilter === 'ALL' || item.profession === professionFilter,
+  );
+  const professionalIds = new Set(professionals.map((item) => item.userId));
+  const visits = monthVisits.filter((item) => professionalIds.has(item.professionalUserId));
+  const goals = monthGoals.filter((item) => professionalIds.has(item.professionalUserId));
   const manage = can('nurses:manage') || can('payments:write');
   const totalSales = visits.reduce((sum, item) => sum + item.saleAmount, 0);
   const salesGoal = goals.reduce((sum, item) => sum + item.salesTarget, 0);
+  const visitGoal = goals.reduce((sum, item) => sum + item.visitTarget, 0);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
@@ -86,6 +95,21 @@ export default function VisitsGoalsPage() {
             onChange={(event) => setMonth(event.target.value)}
           />
         </label>
+        <label>
+          Profesión{' '}
+          <select
+            aria-label="Filtrar por profesión"
+            data-action-id="VISITS-PROFESSION-FILTER"
+            onChange={(event) =>
+              setProfessionFilter(event.target.value as 'ALL' | 'DOCTOR' | 'NURSE')
+            }
+            value={professionFilter}
+          >
+            <option value="ALL">Todos</option>
+            <option value="DOCTOR">Médicos</option>
+            <option value="NURSE">Enfermería</option>
+          </select>
+        </label>
         <span>{professionals.length} profesionales</span>
       </Panel>
       <section className="studio-metrics">
@@ -94,7 +118,9 @@ export default function VisitsGoalsPage() {
             '⌂',
             'Visitas realizadas',
             String(visits.length),
-            'Visitas registradas, no turnos programados',
+            visitGoal
+              ? `${Math.round((visits.length / visitGoal) * 100)}% de la meta de ${visitGoal}`
+              : 'Visitas registradas, no turnos programados',
           ],
           ['$', 'Ventas registradas', money(totalSales), 'Con referencia de respaldo'],
           [
@@ -175,6 +201,11 @@ export default function VisitsGoalsPage() {
                         ) : (
                           '—'
                         )}
+                        {goal?.visitTarget ? (
+                          <small style={{ display: 'block' }}>
+                            Visitas: {Math.round((rows.length / goal.visitTarget) * 100)}%
+                          </small>
+                        ) : null}
                       </td>
                     </tr>
                   );
@@ -273,14 +304,35 @@ export default function VisitsGoalsPage() {
                 <input name="date" type="datetime-local" required />
               </label>
               <label>
+                Buscar paciente por nombre o DUI
+                <input
+                  aria-label="Filtrar pacientes de visita"
+                  onChange={(event) => setVisitPatientQuery(event.target.value)}
+                  type="search"
+                  value={visitPatientQuery}
+                />
+              </label>
+              <label>
                 Paciente
-                <select name="patient" required>
+                <select
+                  name="patient"
+                  onChange={(event) => setSelectedVisitPatientId(event.target.value)}
+                  required
+                >
                   <option value="">Seleccionar paciente</option>
-                  {patients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.fullName}
-                    </option>
-                  ))}
+                  {patients
+                    .filter(
+                      (patient) =>
+                        `${patient.fullName} ${patient.documentId}`
+                          .toLocaleLowerCase('es-SV')
+                          .includes(visitPatientQuery.trim().toLocaleLowerCase('es-SV')) ||
+                        patient.id === selectedVisitPatientId,
+                    )
+                    .map((patient) => (
+                      <option key={patient.id} value={patient.id}>
+                        {patient.fullName}
+                      </option>
+                    ))}
                 </select>
               </label>
               <label>

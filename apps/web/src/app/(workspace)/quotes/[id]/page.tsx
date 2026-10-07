@@ -1,6 +1,11 @@
 'use client';
 
-import { calculateQuoteBalance, canEditQuote, quoteCategories } from '@analiza/domain';
+import {
+  calculateQuoteBalance,
+  canEditQuote,
+  quoteCategories,
+  quoteDisplayCode,
+} from '@analiza/domain';
 import { Button, EmptyState, Panel } from '@analiza/ui';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -9,6 +14,7 @@ import { useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
+import { usdAmountInSpanishWords } from '@/lib/money-in-words';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 type PortalShare = {
@@ -34,7 +40,7 @@ export default function QuoteDetailPage() {
           detail="La cotización no existe o no está disponible en este espacio de trabajo."
           title="Cotización no encontrada"
         />
-        <Link data-action-id="QUOTE-BACK-TO-LIST" href="/quotes">
+        <Link className="action-link-button" data-action-id="QUOTE-BACK-TO-LIST" href="/quotes">
           Volver a cotizaciones
         </Link>
       </main>
@@ -44,9 +50,8 @@ export default function QuoteDetailPage() {
   const balance = calculateQuoteBalance(currentQuote, payments);
   const whatsappPhone = patient?.phone?.replace(/\D/g, '') ?? '';
   const whatsappAllowed = Boolean(
-    whatsappPhone && patient?.notifications?.botmakerConsent !== false,
+    whatsappPhone && patient?.notifications?.botmakerConsent === true,
   );
-  const whatsappMessage = `Analiza en Casa comparte la cotización ${currentQuote.id} (versión ${currentQuote.version}) por un total de ${money(currentQuote.total)}. Puede responder este mensaje si necesita ayuda.`;
   const historyRoot = currentQuote.rootQuoteId ?? currentQuote.originalQuoteId ?? currentQuote.id;
   const history = quotes
     .filter(
@@ -108,12 +113,33 @@ export default function QuoteDetailPage() {
     await navigator.clipboard.writeText(portalShare.portalUrl);
     setMessage('Enlace seguro copiado.');
   }
+  async function downloadQuote() {
+    try {
+      const response = await fetch(`/api/quotes/${encodeURIComponent(currentQuote.id)}/pdf`, {
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error ?? 'No fue posible generar el PDF.');
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `cotizacion-${currentQuote.id}-v${currentQuote.version}.pdf`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setMessage('PDF interno generado desde la versión enviada e inmutable.');
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : 'No fue posible generar el PDF.');
+    }
+  }
   return (
     <div className="page-stack quote-print-area">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Facturación</p>
-          <h1>{quote.id}</h1>
+          <h1 title={quote.id}>{quoteDisplayCode(quote.id)}</h1>
           <p>
             Versión v{quote.version} ·{' '}
             {quote.immutable ? 'Enviada e inmutable' : 'Borrador editable'}
@@ -146,11 +172,31 @@ export default function QuoteDetailPage() {
           <Button
             className="button-secondary"
             data-action-id="QUOTE-PRINT"
-            onClick={() => window.print()}
+            onClick={() => {
+              if (quote.status === 'SENT' && quote.immutable) {
+                window.open(
+                  `/api/quotes/${encodeURIComponent(quote.id)}/pdf?inline=1`,
+                  '_blank',
+                  'noopener,noreferrer',
+                );
+              } else {
+                window.print();
+              }
+            }}
             type="button"
           >
             Imprimir
           </Button>
+          {quote.status === 'SENT' && quote.immutable ? (
+            <Button
+              className="button-secondary"
+              data-action-id="QUOTE-PDF-DOWNLOAD"
+              onClick={() => void downloadQuote()}
+              type="button"
+            >
+              Descargar PDF
+            </Button>
+          ) : null}
         </div>
       </header>
       {message ? (
@@ -168,7 +214,7 @@ export default function QuoteDetailPage() {
             </div>
             <div>
               <dt>Hospitalización</dt>
-              <dd>{quote.caseId}</dd>
+              <dd>{quote.caseId ?? 'Atención nueva sin hospitalización'}</dd>
             </div>
             <div>
               <dt>Estado</dt>
@@ -185,8 +231,16 @@ export default function QuoteDetailPage() {
             <div>
               <dt>Envío</dt>
               <dd>
-                {quote.sentAt ? new Date(quote.sentAt).toLocaleString('es-SV') : 'No enviada'}
+                {quote.sentAt
+                  ? new Date(quote.sentAt).toLocaleDateString('es-SV', {
+                      timeZone: 'America/El_Salvador',
+                    })
+                  : 'No enviada'}
               </dd>
+            </div>
+            <div>
+              <dt>Condición de pago</dt>
+              <dd>{quote.paymentCondition || 'No especificada'}</dd>
             </div>
           </dl>
         </Panel>
@@ -277,6 +331,10 @@ export default function QuoteDetailPage() {
               <dd>{money(quote.total)}</dd>
             </div>
             <div>
+              <dt>Monto en letras</dt>
+              <dd>{usdAmountInSpanishWords(quote.total) ?? 'No disponible para este importe.'}</dd>
+            </div>
+            <div>
               <dt>Aseguradora</dt>
               <dd>{money(quote.insurerAmount)}</dd>
             </div>
@@ -297,17 +355,6 @@ export default function QuoteDetailPage() {
         <Panel>
           <h2>Acciones relacionadas</h2>
           <div className="action-row no-print">
-            {whatsappAllowed ? (
-              <a
-                className="button"
-                data-action-id="QUOTE-WHATSAPP-DIRECT"
-                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Compartir por WhatsApp
-              </a>
-            ) : null}
             {can('insurance:read') ? (
               <Button
                 className="button-secondary"
@@ -328,7 +375,10 @@ export default function QuoteDetailPage() {
                 Abrir pagos
               </Button>
             ) : null}
-            {providerMode !== 'postgresql' && can('quotes:write') && quote.immutable ? (
+            {providerMode !== 'postgresql' &&
+            can('quotes:write') &&
+            quote.immutable &&
+            whatsappAllowed ? (
               <Button
                 className="button-secondary"
                 data-action-id="QUOTE-PORTAL"
@@ -341,9 +391,9 @@ export default function QuoteDetailPage() {
             ) : null}
           </div>
           <p className="field-help">
-            {whatsappAllowed
-              ? 'El mensaje de WhatsApp incluye únicamente la referencia, versión y total de la cotización; no incluye diagnósticos, tratamientos ni medicamentos.'
-              : 'Registre un teléfono y confirme la autorización de WhatsApp del paciente para habilitar el envío directo.'}
+            La descarga PDF queda dentro de la sesión autorizada. WhatsApp sólo se habilita con
+            consentimiento explícito y un enlace seguro; nunca se adjunta la cotización ni se
+            incluyen conceptos, importes o datos clínicos en el mensaje.
           </p>
           {portalShare ? (
             <div className="portal-share-card">
@@ -366,15 +416,17 @@ export default function QuoteDetailPage() {
                   >
                     Copiar enlace
                   </Button>
-                  <a
-                    className="button"
-                    data-action-id="QUOTE-WHATSAPP"
-                    href={`https://wa.me/${portalShare.whatsappPhone}?text=${encodeURIComponent(`Analiza en Casa: consulte el estado de su trámite mediante este enlace seguro. Se solicitará un código de verificación: ${portalShare.portalUrl}`)}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Enviar por WhatsApp
-                  </a>
+                  {whatsappAllowed ? (
+                    <a
+                      className="button"
+                      data-action-id="QUOTE-WHATSAPP"
+                      href={`https://wa.me/${portalShare.whatsappPhone}?text=${encodeURIComponent(`Analiza en Casa: tiene una notificación disponible en el portal seguro. Se solicitará verificación: ${portalShare.portalUrl}`)}`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      Enviar aviso por WhatsApp
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -404,7 +456,12 @@ export default function QuoteDetailPage() {
                   <td>{version.revisionReason || '—'}</td>
                   <td>{money(version.total)}</td>
                   <td>
-                    <Link href={`/quotes/${version.id}`}>Consultar</Link>
+                    <Link
+                      className="action-link-button action-link-button--compact"
+                      href={`/quotes/${version.id}`}
+                    >
+                      Consultar
+                    </Link>
                   </td>
                 </tr>
               ))}

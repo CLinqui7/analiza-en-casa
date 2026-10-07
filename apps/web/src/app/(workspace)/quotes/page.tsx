@@ -7,6 +7,7 @@ import {
   createQuoteRevision,
   currentInventoryBalance,
   filterQuotes,
+  quoteDisplayCode,
   quoteCategories,
   searchPatients,
   searchQuotes,
@@ -15,17 +16,17 @@ import {
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
   Quote,
-  | 'caseId'
   | 'summary'
   | 'careSetting'
   | 'comments'
+  | 'paymentCondition'
   | 'items'
   | 'discount'
   | 'insurerAmount'
@@ -34,7 +35,13 @@ type QuoteDraft = Pick<
   | 'discountGroup'
   | 'referralLabel'
   | 'referralSelections'
-> & { revisionReason: string; patientId: string; patientQuery: string; referralQuery: string };
+> & {
+  caseId: string;
+  revisionReason: string;
+  patientId: string;
+  patientQuery: string;
+  referralQuery: string;
+};
 
 const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
   id: '',
@@ -52,6 +59,7 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   summary: '',
   careSetting: 'HOSPITALIZATION',
   comments: '',
+  paymentCondition: '',
   invoiceDate: new Date().toISOString().slice(0, 10),
   invoiceDocumentType: 'INVOICE',
   discountGroup: 'Regular',
@@ -100,13 +108,14 @@ function updatedCategoryPercentages(
 
 function cloneDraft(quote: Quote): QuoteDraft {
   return {
-    caseId: quote.caseId,
+    caseId: quote.caseId ?? '',
     patientId: quote.patientId,
     patientQuery: '',
     referralQuery: quote.referralLabel ?? '',
     summary: quote.summary,
     careSetting: quote.careSetting ?? 'HOSPITALIZATION',
     comments: quote.comments ?? '',
+    paymentCondition: quote.paymentCondition ?? '',
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
     invoiceDocumentType: quote.invoiceDocumentType ?? 'INVOICE',
     discountGroup: quote.discountGroup ?? 'Regular',
@@ -137,6 +146,7 @@ function QuoteEditor({
   onClose: () => void;
   onSaved: (message: string) => void;
 }) {
+  const { session } = useAuth();
   const {
     addQuote,
     catalogItems,
@@ -149,14 +159,7 @@ function QuoteEditor({
     updateQuote,
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
-    source
-      ? cloneDraft(source)
-      : emptyDraft(
-          hospitalizations[0]?.id,
-          hospitalizations[0]
-            ? patients.find((patient) => patient.id === hospitalizations[0].patientId)?.id
-            : '',
-        ),
+    source ? cloneDraft(source) : emptyDraft(),
   );
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -166,6 +169,53 @@ function QuoteEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshingPatients, setRefreshingPatients] = useState(false);
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
+  const [doctorQuery, setDoctorQuery] = useState('');
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftRecovered, setDraftRecovered] = useState(false);
+  const draftDiscarded = useRef(false);
+  const draftKey = session
+    ? `analiza.form-draft.v1.${session.mode}.${session.userId}.quote.${mode}.${source?.id ?? 'new'}`
+    : null;
+
+  useEffect(() => {
+    if (!draftKey) return;
+    const timer = window.setTimeout(() => {
+      if (draftDiscarded.current) return;
+      try {
+        const stored = window.sessionStorage.getItem(draftKey);
+        if (stored) {
+          const parsed: unknown = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object' && 'draft' in parsed) {
+            const recovered = parsed as { draft: QuoteDraft };
+            if (
+              Array.isArray(recovered.draft?.items) &&
+              typeof recovered.draft.summary === 'string'
+            ) {
+              setDraft(recovered.draft);
+              setDraftRecovered(true);
+            }
+          }
+        }
+      } catch {
+        window.sessionStorage.removeItem(draftKey);
+      }
+      setDraftReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftKey || !draftReady) return;
+    const timer = window.setTimeout(() => {
+      if (draftDiscarded.current) return;
+      try {
+        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft }));
+      } catch {
+        // La escritura temporal puede fallar por cuota o política del navegador.
+      }
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [draft, draftKey, draftReady]);
 
   const totals = useMemo(() => {
     try {
@@ -241,12 +291,34 @@ function QuoteEditor({
   }
   function selectFeeDoctor(doctorId: string) {
     const doctor = doctors.find((candidate) => candidate.id === doctorId);
-    setItem((current) => ({ ...current, doctorId: doctor?.id, doctorName: doctor?.fullName }));
+    setItem((current) => ({
+      ...current,
+      doctorId: doctor?.id,
+      doctorName: doctor?.fullName,
+      unitPrice: doctor?.medicalFee ?? 0,
+    }));
   }
   function addOrUpdateItem() {
     const validation = validateQuoteItem(item);
     if (validation) {
       setErrors((current) => ({ ...current, item: validation }));
+      return;
+    }
+    if (activeCategory === 'FEES' && !editingItemId) {
+      const doctor = doctors.find((candidate) => candidate.id === item.doctorId);
+      if (!doctor || typeof doctor.medicalFee !== 'number') {
+        setErrors((current) => ({
+          ...current,
+          item: 'Seleccione un médico con honorario configurado en su ficha.',
+        }));
+        return;
+      }
+    }
+    if (activeCategory !== 'FEES' && !editingItemId && !item.inventoryItemId) {
+      setErrors((current) => ({
+        ...current,
+        item: 'Seleccione un ítem del catálogo antes de agregarlo.',
+      }));
       return;
     }
     const persisted = { ...item, id: editingItemId ?? crypto.randomUUID() };
@@ -283,7 +355,9 @@ function QuoteEditor({
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
-    if (!selectedCase) nextErrors.caseId = 'Seleccione una hospitalización válida.';
+    if (!selectedPatient) nextErrors.patientId = 'Seleccione un paciente válido.';
+    if (draft.caseId && !selectedCase)
+      nextErrors.caseId = 'La hospitalización seleccionada no corresponde al paciente.';
     if (!draft.summary.trim()) nextErrors.summary = 'El resumen operativo es obligatorio.';
     if (mode === 'revise' && !draft.revisionReason.trim())
       nextErrors.revisionReason = 'El motivo de revisión es obligatorio.';
@@ -299,8 +373,8 @@ function QuoteEditor({
     }
     const now = new Date().toISOString();
     const common = {
-      caseId: selectedCase!.id,
-      patientId: selectedCase!.patientId,
+      ...(selectedCase ? { caseId: selectedCase.id } : {}),
+      patientId: selectedPatient!.id,
       summary: draft.summary.trim(),
       careSetting: draft.careSetting,
       invoiceDate: draft.invoiceDate,
@@ -309,6 +383,7 @@ function QuoteEditor({
       referralLabel: draft.referralQuery.trim() || draft.referralLabel?.trim() || undefined,
       referralSelections: draft.referralSelections?.length ? draft.referralSelections : undefined,
       comments: draft.comments?.trim() || undefined,
+      paymentCondition: draft.paymentCondition?.trim() || undefined,
       items: draft.items,
       discount: draft.discount,
       insurerAmount: draft.insurerAmount,
@@ -329,14 +404,23 @@ function QuoteEditor({
         originalQuoteId: id,
         rootQuoteId: id,
       });
-      if (saved) onSaved('Borrador de cotización persistido.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Borrador de cotización persistido.');
+      }
     } else if (mode === 'edit' && source) {
       const saved = await updateQuote({ ...source, ...common });
-      if (saved) onSaved('Borrador de cotización actualizado y persistido.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Borrador de cotización actualizado y persistido.');
+      }
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
       const saved = await addQuote({ ...revision, ...common });
-      if (saved) onSaved('Nueva versión de cotización creada como borrador.');
+      if (saved) {
+        if (draftKey) window.sessionStorage.removeItem(draftKey);
+        onSaved('Nueva versión de cotización creada como borrador.');
+      }
     }
   }
   const title =
@@ -364,6 +448,18 @@ function QuoteEditor({
         <>
           <Button
             className="button-secondary"
+            data-action-id="QUOTE-DRAFT-DISCARD"
+            onClick={() => {
+              draftDiscarded.current = true;
+              if (draftKey) window.sessionStorage.removeItem(draftKey);
+              onClose();
+            }}
+            type="button"
+          >
+            Descartar cambios
+          </Button>
+          <Button
+            className="button-secondary"
             data-action-id={cancelAction}
             onClick={onClose}
             type="button"
@@ -383,6 +479,11 @@ function QuoteEditor({
       open={open}
       title={title}
     >
+      <p className="field-help">
+        {draftRecovered
+          ? 'Se recuperó el formulario pendiente de esta pestaña. Aún no está guardado en la base de datos.'
+          : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
+      </p>
       <form
         className="form-grid"
         id="quote-editor-form"
@@ -468,6 +569,7 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              {errors.patientId ? <span className="field-error">{errors.patientId}</span> : null}
             </label>
             <label>
               Documento
@@ -509,7 +611,7 @@ function QuoteEditor({
           </select>
         </label>
         <label>
-          Caso compatible
+          Hospitalización vinculada (opcional)
           <select
             disabled={mode !== 'create'}
             onChange={(event) =>
@@ -517,13 +619,17 @@ function QuoteEditor({
             }
             value={draft.caseId}
           >
-            <option value="">Seleccione una hospitalización</option>
+            <option value="">Sin hospitalización · atención nueva</option>
             {compatibleCases.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.id}
+                {candidate.id} · {candidate.status}
               </option>
             ))}
           </select>
+          <span className="field-help">
+            Para pacientes nuevos puede guardar la cotización sin crear una hospitalización. Vincule
+            una existente sólo cuando la cotización amplíe una atención ya registrada.
+          </span>
           {errors.caseId ? <span className="field-error">{errors.caseId}</span> : null}
         </label>
         <label>
@@ -536,6 +642,21 @@ function QuoteEditor({
             value={draft.summary}
           />
           {errors.summary ? <span className="field-error">{errors.summary}</span> : null}
+        </label>
+        <label>
+          Condición de pago (opcional)
+          <input
+            data-action-id="QUOTE-PAYMENT-CONDITION"
+            maxLength={160}
+            onChange={(event) =>
+              setDraft((current) => ({ ...current, paymentCondition: event.target.value }))
+            }
+            type="text"
+            value={draft.paymentCondition ?? ''}
+          />
+          <span className="field-help">
+            Se mostrará tal como se escriba; no genera vencimientos ni cargos automáticos.
+          </span>
         </label>
         <fieldset className="quote-fieldset full-field">
           <legend>Datos iniciales de factura</legend>
@@ -824,6 +945,16 @@ function QuoteEditor({
                   </select>
                 </label>
                 <label>
+                  Buscar médico por nombre
+                  <input
+                    aria-label="Filtrar médicos de honorarios"
+                    data-action-id="QUOTE-FEE-DOCTOR-SEARCH"
+                    onChange={(event) => setDoctorQuery(event.target.value)}
+                    type="search"
+                    value={doctorQuery}
+                  />
+                </label>
+                <label>
                   Médico
                   <select
                     data-action-id="QUOTE-FEE-DOCTOR-SELECT"
@@ -831,15 +962,21 @@ function QuoteEditor({
                     value={item.doctorId ?? ''}
                   >
                     <option value="">Seleccione un médico</option>
-                    {doctors.map((doctor) => (
-                      <option key={doctor.id} value={doctor.id}>
-                        {doctor.fullName}
-                      </option>
-                    ))}
+                    {doctors
+                      .filter(
+                        (doctor) =>
+                          doctor.fullName
+                            .toLocaleLowerCase('es-SV')
+                            .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                          doctor.id === item.doctorId,
+                      )
+                      .map((doctor) => (
+                        <option key={doctor.id} value={doctor.id}>
+                          {doctor.fullName}
+                        </option>
+                      ))}
                   </select>
-                  <span className="field-help">
-                    Honorario médico: importe manual, sin tarifa inferida.
-                  </span>
+                  <span className="field-help">El honorario proviene de la ficha del médico.</span>
                 </label>
               </>
             ) : null}
@@ -856,23 +993,40 @@ function QuoteEditor({
               Cantidad <span aria-hidden="true">*</span>
               <input
                 aria-required="true"
-                min="0.01"
+                inputMode="numeric"
+                min="1"
                 onChange={(event) => setNumber('quantity', event.target.value)}
-                step="0.01"
+                step="1"
                 type="number"
                 value={Number.isFinite(item.quantity) ? item.quantity : ''}
               />
+              <span className="field-help">Use únicamente números enteros positivos.</span>
             </label>
             <label>
-              {activeCategory === 'FEES' ? 'Honorario médico (manual)' : 'Precio de venta sin IVA'}
-              <input
-                data-action-id={activeCategory === 'FEES' ? 'QUOTE-FEE-AMOUNT' : undefined}
-                min="0"
-                onChange={(event) => setNumber('unitPrice', event.target.value)}
-                step="0.01"
-                type="number"
-                value={Number.isFinite(item.unitPrice) ? item.unitPrice : ''}
-              />
+              {activeCategory === 'FEES' ? 'Honorario médico' : 'Precio de venta sin IVA'}
+              {activeCategory === 'FEES' ? (
+                <input
+                  data-action-id="QUOTE-FEE-AMOUNT"
+                  readOnly
+                  type="text"
+                  value={item.doctorId ? money(item.unitPrice) : 'Seleccione un médico'}
+                />
+              ) : (
+                <input
+                  readOnly
+                  type="text"
+                  value={
+                    item.inventoryItemId || editingItemId
+                      ? money(item.unitPrice)
+                      : 'Seleccione un ítem'
+                  }
+                />
+              )}
+              {activeCategory !== 'FEES' ? (
+                <span className="field-help">
+                  El precio proviene del catálogo y queda fijado al agregar la línea.
+                </span>
+              ) : null}
             </label>
             <label>
               Descuento manual
@@ -1032,12 +1186,19 @@ function QuoteEditor({
                   : 'Porcentaje de descuento'}
                 <input
                   data-action-id="QUOTE-DISCOUNT-UPDATE"
+                  inputMode={draft.discount?.type === 'FIXED' ? 'decimal' : 'numeric'}
+                  max={draft.discount?.type === 'FIXED' ? undefined : 100}
                   min="0"
                   onChange={(event) => updateDiscount({ value: Number(event.target.value) })}
-                  step="0.01"
+                  step={draft.discount?.type === 'FIXED' ? '0.01' : '1'}
                   type="number"
                   value={draft.discount?.value ?? 0}
                 />
+                <span className="field-help">
+                  {draft.discount?.type === 'FIXED'
+                    ? 'El monto monetario puede incluir centavos.'
+                    : 'Use un porcentaje entero entre 0 y 100.'}
+                </span>
               </label>
             ) : (
               quoteCategories.map((category) => (
@@ -1045,6 +1206,7 @@ function QuoteEditor({
                   {category.label} (%)
                   <input
                     data-action-id="QUOTE-DISCOUNT-UPDATE"
+                    inputMode="numeric"
                     max="100"
                     min="0"
                     onChange={(event) =>
@@ -1056,7 +1218,7 @@ function QuoteEditor({
                         ),
                       })
                     }
-                    step="0.01"
+                    step="1"
                     type="number"
                     value={draft.discount?.categories?.[category.value] ?? 0}
                   />
@@ -1160,7 +1322,7 @@ export default function QuotesPage() {
           <p className="eyebrow">Facturación</p>
           <h1>Cotizaciones</h1>
           <p>
-            Crea, edita y envía cotizaciones con importes manuales e historial de versiones.
+            Crea, edita y envía cotizaciones con precios del catálogo e historial de versiones.
             Confirme precios, impuestos y cobertura antes de enviarlas.
           </p>
         </div>
@@ -1293,7 +1455,7 @@ export default function QuotesPage() {
                     return (
                       <tr key={quote.id}>
                         <td>
-                          {quote.id}
+                          <span title={quote.id}>{quoteDisplayCode(quote.id)}</span>
                           <br />
                           <small>v{quote.version}</small>
                         </td>
@@ -1301,7 +1463,7 @@ export default function QuotesPage() {
                           {patients.find((patient) => patient.id === quote.patientId)?.fullName ??
                             'No disponible'}
                           <br />
-                          <small>{quote.caseId}</small>
+                          <small>{quote.caseId ?? 'Atención nueva sin hospitalización'}</small>
                         </td>
                         <td>{new Date(quote.createdAt).toLocaleString('es-SV')}</td>
                         <td>{money(quote.total)}</td>
@@ -1314,7 +1476,11 @@ export default function QuotesPage() {
                           </StatusTag>
                         </td>
                         <td>
-                          <Link data-action-id="QUOTE-DETAIL-NAVIGATE" href={`/quotes/${quote.id}`}>
+                          <Link
+                            className="action-link-button action-link-button--compact"
+                            data-action-id="QUOTE-DETAIL-NAVIGATE"
+                            href={`/quotes/${quote.id}`}
+                          >
                             Consultar
                           </Link>
                         </td>

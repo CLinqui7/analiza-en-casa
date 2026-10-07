@@ -9,6 +9,7 @@ import {
   type ParsedImportRecord,
   type ParsedWorkbookImport,
 } from '@/lib/information-import';
+import { isAdministrator } from '@/lib/permissions';
 import { parseInformationWorkbook } from '@/server/information-import-parser';
 import { MongoAccessError, MongoInputError, type ServerActor } from '@/server/validation/patients';
 import { transaction } from './postgres-pool';
@@ -23,7 +24,7 @@ const referenceRules: ReadonlyArray<readonly [ImportDataset, string, ImportDatas
 ];
 
 function requireAdministrator(actor: ServerActor) {
-  if (actor.role !== 'ADMIN') throw new MongoAccessError();
+  if (!isAdministrator(actor.role)) throw new MongoAccessError();
 }
 
 function recordKey(dataset: ImportDataset, id: string) {

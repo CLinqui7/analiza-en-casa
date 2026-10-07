@@ -17,9 +17,67 @@ import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
 
-type NavigationItem = { label: string; href: string; permission: Permission; actionId: string };
+const navigationIconPaths = {
+  analytics: 'M4 19V10 M10 19V5 M16 19v-7 M22 19H2',
+  dashboard: 'M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z',
+  patients:
+    'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+  agenda: 'M4 5h16v16H4z M16 3v4 M8 3v4 M4 11h16 M8 15h3',
+  insurers: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4',
+  finance: 'M3 6h18v12H3z M3 10h18 M7 15h3',
+  hospital: 'M3 21V5h18v16 M3 13h18 M9 5v8 M15 5v8 M7 17h2 M15 17h2',
+  receivables: 'M3 7h18v12H3z M3 11h18 M8 15h4 M18 4v5 M15 7l3 3 3-3',
+  payables: 'M3 7h18v12H3z M3 11h18 M8 15h4 M18 10V5 M15 7l3-3 3 3',
+  insurance: 'M12 3v18 M3 12a9 9 0 0 1 18 0H3z M7 12v2a2 2 0 0 0 4 0v-2 M15 12v2a2 2 0 0 0 4 0v-2',
+  quotes: 'M6 2h9l5 5v15H6z M14 2v6h6 M9 13h6 M9 17h4',
+  payments: 'M3 6h18v12H3z M3 10h18 M7 15h2 M15 15h2',
+  clinical: 'M2 12h4l3-8 6 16 3-8h4',
+  balance: 'M12 2s6 6.2 6 12a6 6 0 1 1-12 0c0-5.8 6-12 6-12z M9 15c.8 1 1.8 1.5 3 1.5',
+  medication: 'M10 4l10 10a4.24 4.24 0 0 1-6 6L4 10a4.24 4.24 0 0 1 6-6z M7 13l6-6',
+  clinicalRecord: 'M9 5h6 M9 3h6v4H9z M6 5H4v16h16V5h-2 M8 12h8 M8 16h5',
+  clinicalHospital: 'M3 21v-8h18v8 M5 13V8h6v5 M13 13V6h6v7 M7 17h2 M15 17h2',
+  healthReport: 'M5 3h14v18H5z M9 8h6 M9 12h3 M9 16h6 M15 12h2',
+  orders: 'M9 5h6 M9 3h6v4H9z M6 5H4v16h16V5h-2 M8 13l2 2 5-5',
+  medicationCards: 'M12 3v18 M3 12h18 M5 5l14 14',
+  carePlans: 'M12 20s-7-4.35-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.65-7 10-7 10z',
+  evolutions: 'M3 17l6-6 4 4 8-9 M15 6h6v6',
+  nursing: 'M6 3v6a6 6 0 0 0 12 0V3 M8 3v5a4 4 0 0 0 8 0V3 M12 15v6 M9 21h6',
+  inventory: 'M12 3 3 8v9l9 5 9-5V8z M3 8l9 5 9-5 M12 13v9 M7 5l9 5',
+  stock: 'M4 7l8-4 8 4v10l-8 4-8-4z M4 7l8 4 8-4 M12 11v10 M9 16l2 2 4-5',
+  supplyRequests: 'M5 3h14v18H5z M9 7h6 M9 11h6 M9 15h4 M16 17l2 2 3-4',
+  movements: 'M4 7h15 M16 4l3 3-3 3 M20 17H5 M8 14l-3 3 3 3',
+  kardex: 'M5 3h14v18H5z M9 8h6 M9 12h6 M9 16h4 M3 7h2 M19 7h2 M3 17h2 M19 17h2',
+  catalogs: 'M4 4h7v16H4z M13 4h7v16h-7z M7 8h1 M16 8h1 M7 12h1 M16 12h1',
+  administration:
+    'M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M19.4 15l1.6 1-2 3.5-1.8-.8a7.8 7.8 0 0 1-2.2 1.3L15 22h-4l-.2-2a7.8 7.8 0 0 1-2.2-1.3l-1.8.8-2-3.5 1.6-1a8 8 0 0 1 0-2L4.8 12l2-3.5 1.8.8A7.8 7.8 0 0 1 10.8 8L11 6h4l.2 2a7.8 7.8 0 0 1 2.2 1.3l1.8-.8 2 3.5-1.6 1a8 8 0 0 1 0 2z',
+  nurseTeam:
+    'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M18 8v6 M15 11h6',
+  operational: 'M4 7h10 M18 7h2 M14 4v6 M4 17h2 M10 17h10 M6 14v6 M4 12h6 M14 12h6 M10 9v6',
+  doctors: 'M11 17a6 6 0 1 0-6-6 6 6 0 0 0 6 6z M9.5 15.5 14 20 M17 17h5 M19.5 14.5v5',
+  import: 'M12 3v12 M7 10l5 5 5-5 M5 21h14',
+  purchases:
+    'M3 4h2l2 11h10l2-8H6 M9 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2 M17 20a1 1 0 1 0 0-2 1 1 0 0 0 0 2',
+  reports: 'M4 3v18h18 M8 16v-5 M13 16V7 M18 16v-8',
+  visits: 'M12 2v3 M12 19v3 M2 12h3 M19 12h3 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+  nurseHours: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2',
+  audit: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M8 12l2.5 2.5L16 9',
+  tutorial: 'M3 7l9-4 9 4-9 4z M5 10v6c4 3 10 3 14 0v-6 M21 7v7',
+  help: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M9.5 9a2.7 2.7 0 1 1 4.3 2.2c-1.3.9-1.8 1.4-1.8 2.8 M12 18h.01',
+  feedback: 'M4 4h16v12H8l-4 4z M12 8v4 M12 14h.01',
+  changes: 'M3 12a9 9 0 1 0 3-6.7L3 8 M3 3v5h5 M12 7v5l3 2',
+} as const;
+
+type NavigationIconName = keyof typeof navigationIconPaths;
+type NavigationItem = {
+  label: string;
+  href: string;
+  permission: Permission;
+  actionId: string;
+  icon: NavigationIconName;
+};
 type NavigationGroup = {
   label: string;
+  icon: NavigationIconName;
   href?: string;
   permission?: Permission;
   actionId?: string;
@@ -28,119 +86,157 @@ type NavigationGroup = {
 
 const navigation: NavigationGroup[] = [
   {
-    label: 'Dashboard',
-    href: '/dashboard',
-    permission: 'dashboard:read',
-    actionId: 'DASHBOARD-NAVIGATE',
-  },
-  {
-    label: 'Pacientes',
-    href: '/patients',
-    permission: 'patients:read',
-    actionId: 'PATIENT-NAVIGATE',
-  },
-  { label: 'Agenda', href: '/agenda', permission: 'agenda:read', actionId: 'AGENDA-NAVIGATE' },
-  {
-    label: 'Aseguradoras',
-    href: '/insurers',
-    permission: 'catalogs:read',
-    actionId: 'INSURER-NAVIGATE',
+    label: 'Inicio',
+    icon: 'dashboard',
+    children: [
+      {
+        label: 'Dashboard',
+        icon: 'dashboard',
+        href: '/dashboard',
+        permission: 'dashboard:read',
+        actionId: 'DASHBOARD-NAVIGATE',
+      },
+      {
+        label: 'Pacientes',
+        icon: 'patients',
+        href: '/patients',
+        permission: 'patients:read',
+        actionId: 'PATIENT-NAVIGATE',
+      },
+      {
+        label: 'Agenda',
+        icon: 'agenda',
+        href: '/agenda',
+        permission: 'agenda:read',
+        actionId: 'AGENDA-NAVIGATE',
+      },
+    ],
   },
   {
     label: 'Financiero',
+    icon: 'finance',
     children: [
       {
         label: 'Hospitalización',
+        icon: 'hospital',
         href: '/hospitalizations',
         permission: 'cases:read',
         actionId: 'HOSPITALIZATION-NAVIGATE',
       },
       {
         label: 'Cuentas por cobrar',
+        icon: 'receivables',
         href: '/receivables',
         permission: 'payments:read',
         actionId: 'RECEIVABLES-NAVIGATE',
       },
       {
+        label: 'Pagos',
+        icon: 'payments',
+        href: '/payments',
+        permission: 'payments:read',
+        actionId: 'PAYMENT-NAVIGATE',
+      },
+      {
         label: 'Cuentas por pagar',
+        icon: 'payables',
         href: '/payables',
         permission: 'payments:read',
         actionId: 'PAYABLES-NAVIGATE',
       },
       {
         label: 'Preautorizaciones y reclamos',
+        icon: 'insurance',
         href: '/insurance',
         permission: 'insurance:read',
         actionId: 'INSURANCE-NAVIGATE',
       },
       {
         label: 'Cotizaciones',
+        icon: 'quotes',
         href: '/quotes',
         permission: 'quotes:read',
         actionId: 'QUOTE-NAVIGATE',
       },
+      {
+        label: 'Aseguradoras',
+        icon: 'insurers',
+        href: '/insurers',
+        permission: 'catalogs:read',
+        actionId: 'INSURER-NAVIGATE',
+      },
     ],
   },
-  { label: 'Pagos', href: '/payments', permission: 'payments:read', actionId: 'PAYMENT-NAVIGATE' },
   {
     label: 'Clínico',
+    icon: 'clinical',
     children: [
       {
-        label: 'Balance hídrico',
-        href: '/clinical/balance',
-        permission: 'clinical:read',
-        actionId: 'BALANCE-NAVIGATE',
-      },
-      {
-        label: 'Administración de medicamentos',
-        href: '/clinical/administrations',
-        permission: 'clinical:read',
-        actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
-      },
-      {
         label: 'Expediente clínico',
+        icon: 'clinicalRecord',
         href: '/clinical',
         permission: 'clinical:read',
         actionId: 'CLINICAL-HOME-NAVIGATE',
       },
       {
         label: 'Hospitalizaciones clínicas',
+        icon: 'clinicalHospital',
         href: '/clinical/hospitalizations',
         permission: 'clinical:read',
         actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE',
       },
       {
-        label: 'Reporte de salud',
-        href: '/clinical/reports',
-        permission: 'clinical:read',
-        actionId: 'HEALTH-REPORT-NAVIGATE',
-      },
-      {
         label: 'Órdenes y acciones',
+        icon: 'orders',
         href: '/clinical/orders',
         permission: 'clinical:read',
         actionId: 'MEDICAL-ORDER-NAVIGATE',
       },
       {
+        label: 'Administración de medicamentos',
+        icon: 'medication',
+        href: '/clinical/administrations',
+        permission: 'clinical:read',
+        actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
+      },
+      {
         label: 'Tarjetas de medicamentos',
+        icon: 'medicationCards',
         href: '/clinical/medication-cards',
         permission: 'clinical:read',
         actionId: 'MEDICATION-CARD-NAVIGATE',
       },
       {
+        label: 'Balance hídrico',
+        icon: 'balance',
+        href: '/clinical/balance',
+        permission: 'clinical:read',
+        actionId: 'BALANCE-NAVIGATE',
+      },
+      {
         label: 'Planes de cuidado',
+        icon: 'carePlans',
         href: '/clinical/care-plans',
         permission: 'clinical:read',
         actionId: 'CARE-PLAN-NAVIGATE',
       },
       {
         label: 'Evoluciones',
+        icon: 'evolutions',
         href: '/clinical/evolutions',
         permission: 'clinical:read',
         actionId: 'EVOLUTION-NAVIGATE',
       },
       {
+        label: 'Reporte de salud',
+        icon: 'healthReport',
+        href: '/clinical/reports',
+        permission: 'clinical:read',
+        actionId: 'HEALTH-REPORT-NAVIGATE',
+      },
+      {
         label: 'Tablero de enfermería',
+        icon: 'nursing',
         href: '/clinical/nursing',
         permission: 'clinical:read',
         actionId: 'NURSING-RESOURCE-NAVIGATE',
@@ -148,146 +244,181 @@ const navigation: NavigationGroup[] = [
     ],
   },
   {
-    label: 'Inventario',
+    label: 'Inventario y compras',
+    icon: 'inventory',
     children: [
       {
+        label: 'Solicitudes de insumos',
+        icon: 'supplyRequests',
+        href: '/supply-requests',
+        permission: 'supply-requests:read',
+        actionId: 'SUPPLY-REQUESTS-NAVIGATE',
+      },
+      {
         label: 'Existencias',
+        icon: 'stock',
         href: '/inventory',
         permission: 'inventory:read',
         actionId: 'INVENTORY-NAVIGATE',
       },
       {
         label: 'Movimientos',
+        icon: 'movements',
         href: '/inventory/movements',
         permission: 'inventory:read',
         actionId: 'INVENTORY-MOVEMENTS-NAVIGATE',
       },
       {
         label: 'Kárdex',
+        icon: 'kardex',
         href: '/inventory/kardex',
         permission: 'inventory:read',
         actionId: 'KARDEX-NAVIGATE',
       },
+      {
+        label: 'Compras',
+        icon: 'purchases',
+        href: '/purchases',
+        permission: 'purchases:read',
+        actionId: 'PURCHASE-NAVIGATE',
+      },
     ],
   },
   {
-    label: 'Catálogos',
-    href: '/catalogs',
-    permission: 'catalogs:read',
-    actionId: 'CATALOG-NAVIGATE',
-  },
-  {
     label: 'Administración',
+    icon: 'administration',
     children: [
       {
         label: 'Equipo y cuentas de enfermería',
+        icon: 'nurseTeam',
         href: '/nursing-team',
         permission: 'nurses:manage',
         actionId: 'NURSE-TEAM-NAVIGATE',
       },
       {
         label: 'Catálogos operativos',
+        icon: 'operational',
         href: '/catalogs/operational',
         permission: 'catalogs:read',
         actionId: 'OPERATIONAL-CATALOG-NAVIGATE',
       },
       {
         label: 'Médicos y recursos',
+        icon: 'doctors',
         href: '/doctors',
         permission: 'settings:write',
         actionId: 'DOCTOR-NAVIGATE',
       },
       {
+        label: 'Catálogos',
+        icon: 'catalogs',
+        href: '/catalogs',
+        permission: 'catalogs:read',
+        actionId: 'CATALOG-NAVIGATE',
+      },
+      {
         label: 'Importar información',
+        icon: 'import',
         href: '/import',
         permission: 'settings:write',
         actionId: 'INFORMATION-IMPORT-NAVIGATE',
       },
-      {
-        label: 'Recursos de enfermería',
-        href: '/clinical/nursing',
-        permission: 'clinical:read',
-        actionId: 'NURSING-RESOURCE-NAVIGATE',
-      },
     ],
   },
   {
-    label: 'Compras',
-    href: '/purchases',
-    permission: 'purchases:read',
-    actionId: 'PURCHASE-NAVIGATE',
-  },
-  {
-    label: 'Reportes',
+    label: 'Reportes y control',
+    icon: 'reports',
     children: [
       {
+        label: 'Analítica de accesos',
+        icon: 'analytics',
+        href: '/analytics/logins',
+        permission: 'login-analytics:read',
+        actionId: 'LOGIN-ANALYTICS-NAVIGATE',
+      },
+      {
         label: 'Visitas y metas',
+        icon: 'visits',
         href: '/reports/visits-goals',
         permission: 'reports:read',
         actionId: 'VISITS-GOALS-NAVIGATE',
       },
       {
         label: 'Horas de enfermería',
+        icon: 'nurseHours',
         href: '/reports/nurse-hours',
         permission: 'reports:read',
         actionId: 'NURSE-HOURS-NAVIGATE',
       },
+      {
+        label: 'Auditoría',
+        icon: 'audit',
+        href: '/audit',
+        permission: 'audit:read',
+        actionId: 'AUDIT-NAVIGATE',
+      },
     ],
   },
-  { label: 'Auditoría', href: '/audit', permission: 'audit:read', actionId: 'AUDIT-NAVIGATE' },
   {
-    label: 'Tutorial',
-    href: '/tutorial',
-    permission: 'dashboard:read',
-    actionId: 'TUTORIAL-NAVIGATE',
-  },
-  { label: 'Ayuda', href: '/help', permission: 'dashboard:read', actionId: 'HELP-NAVIGATE' },
-  {
-    label: 'Preguntas o errores encontrados',
-    href: '/feedback',
-    permission: 'dashboard:read',
-    actionId: 'FEEDBACK-NAVIGATE',
-  },
-  {
-    label: 'Cambios solicitados',
-    href: '/changes',
-    permission: 'dashboard:read',
-    actionId: 'CLIENT-CHANGES-NAVIGATE',
+    label: 'Ayuda y seguimiento',
+    icon: 'help',
+    children: [
+      {
+        label: 'Tutorial',
+        icon: 'tutorial',
+        href: '/tutorial',
+        permission: 'dashboard:read',
+        actionId: 'TUTORIAL-NAVIGATE',
+      },
+      {
+        label: 'Ayuda',
+        icon: 'help',
+        href: '/help',
+        permission: 'dashboard:read',
+        actionId: 'HELP-NAVIGATE',
+      },
+      {
+        label: 'Preguntas o errores encontrados',
+        icon: 'feedback',
+        href: '/feedback',
+        permission: 'dashboard:read',
+        actionId: 'FEEDBACK-NAVIGATE',
+      },
+      {
+        label: 'Cambios solicitados',
+        icon: 'changes',
+        href: '/changes',
+        permission: 'dashboard:read',
+        actionId: 'CLIENT-CHANGES-NAVIGATE',
+      },
+    ],
   },
 ];
 
-function NavigationGlyph({ label }: { label: string }) {
-  const path =
-    label === 'Dashboard'
-      ? 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z'
-      : label === 'Pacientes'
-        ? 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M20 21v-2a4 4 0 0 0-3-3.9 M16 3.1a4 4 0 0 1 0 7.8'
-        : label === 'Agenda'
-          ? 'M4 5h16v16H4z M16 3v4 M8 3v4 M4 11h16 M8 15h3'
-          : label === 'Inventario' || label === 'Compras'
-            ? 'M12 3 3 8v9l9 5 9-5V8z M3 8l9 5 9-5 M12 13v9 M7 5l9 5'
-            : label === 'Clínico'
-              ? 'M2 12h4l3-8 6 16 3-8h4'
-              : label === 'Reportes'
-                ? 'M4 3v18h18 M9 16V9 M14 16V5 M19 16v-5'
-                : label === 'Financiero' || label === 'Pagos'
-                  ? 'M12 2v20 M17 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H5'
-                  : label === 'Auditoría'
-                    ? 'M4 12l5 5L20 5'
-                    : 'M5 3h10l4 4v14H5z M14 3v5h5 M8 12h8 M8 16h8';
+function NavigationGlyph({
+  icon,
+  compact = false,
+}: {
+  icon: NavigationIconName;
+  compact?: boolean;
+}) {
   return (
-    <span aria-hidden="true" className="nav-item-glyph">
+    <span
+      aria-hidden="true"
+      className={`nav-item-glyph${compact ? ' nav-item-glyph-compact' : ''}`}
+      data-navigation-icon={icon}
+    >
       <svg
-        width="17"
-        height="17"
+        width={compact ? 15 : 18}
+        height={compact ? 15 : 18}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d={path} />
+        <path d={navigationIconPaths[icon]} />
       </svg>
     </span>
   );
@@ -348,11 +479,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    Financiero: true,
-    Clínico: true,
-    Inventario: true,
-    Reportes: true,
-    Administración: true,
+    Inicio: true,
   });
   const required = permissionForPath(pathname);
 
@@ -612,7 +739,7 @@ export function AppShell({ children }: PropsWithChildren) {
                       scroll={false}
                       title={sidebarCollapsed ? group.label : undefined}
                     >
-                      <NavigationGlyph label={group.label} />
+                      <NavigationGlyph icon={group.icon} />
                       <span className="nav-item-label">{group.label}</span>
                     </Link>
                   </li>
@@ -624,10 +751,10 @@ export function AppShell({ children }: PropsWithChildren) {
                   (child) => can(child.permission) && isReleasedPath(child.href),
                 ) ?? [];
               if (!childrenForRole.length) return null;
-              const open = expanded[group.label] ?? false;
               const hasCurrentChild = childrenForRole.some((child) =>
                 isActive(pathname, child.href),
               );
+              const open = expanded[group.label] ?? hasCurrentChild;
 
               return (
                 <li key={group.label} className="nav-group">
@@ -641,7 +768,7 @@ export function AppShell({ children }: PropsWithChildren) {
                     type="button"
                   >
                     <span className="nav-group-copy">
-                      <NavigationGlyph label={group.label} />
+                      <NavigationGlyph icon={group.icon} />
                       <span>{group.label}</span>
                     </span>
                     <span className={`nav-chevron${open ? ' open' : ''}`} aria-hidden="true">
@@ -664,7 +791,7 @@ export function AppShell({ children }: PropsWithChildren) {
                             onClick={() => closeMobileNavigation()}
                             scroll={false}
                           >
-                            <span aria-hidden="true" className="nav-subitem-mark" />
+                            <NavigationGlyph compact icon={child.icon} />
                             <span>{child.label}</span>
                           </Link>
                         </li>
@@ -785,22 +912,24 @@ export function AppShell({ children }: PropsWithChildren) {
             >
               Menú
             </button>
-            <form className="global-search" onSubmit={submitGlobalSearch} role="search">
-              <span aria-hidden="true">⌕</span>
-              <input
-                aria-label="Buscar en Analiza en Casa"
-                onChange={(event) => setGlobalSearch(event.target.value)}
-                placeholder={
-                  isCoreRelease
-                    ? 'Buscar paciente, hospitalización o turno…'
-                    : 'Buscar paciente, caso, cotización o comando…'
-                }
-                ref={globalSearchRef}
-                type="search"
-                value={globalSearch}
-              />
-              <kbd>Ctrl K</kbd>
-            </form>
+            {can('dashboard:read') ? (
+              <form className="global-search" onSubmit={submitGlobalSearch} role="search">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  aria-label="Buscar en Analiza en Casa"
+                  onChange={(event) => setGlobalSearch(event.target.value)}
+                  placeholder={
+                    isCoreRelease
+                      ? 'Buscar paciente, hospitalización o turno…'
+                      : 'Buscar paciente, caso, cotización o comando…'
+                  }
+                  ref={globalSearchRef}
+                  type="search"
+                  value={globalSearch}
+                />
+                <kbd>Ctrl K</kbd>
+              </form>
+            ) : null}
           </div>
           <div className="topbar-actions">
             <span className="topbar-page-name">{currentPageLabel(pathname)}</span>

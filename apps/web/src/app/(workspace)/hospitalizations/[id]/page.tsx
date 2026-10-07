@@ -34,6 +34,8 @@ export default function HospitalizationDetailPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [referralDoctorQuery, setReferralDoctorQuery] = useState('');
+  const [selectedReferralDoctor, setSelectedReferralDoctor] = useState('');
   const hospitalization = hospitalizations.find((item) => item.id === params.id);
 
   if (loading)
@@ -49,7 +51,11 @@ export default function HospitalizationDetailPage() {
           detail="El registro no existe o ya no está disponible en este espacio de trabajo."
           title="Hospitalización no encontrada"
         />
-        <Link data-action-id="HOSPITALIZATION-BACK-TO-LIST" href="/hospitalizations">
+        <Link
+          className="action-link-button"
+          data-action-id="HOSPITALIZATION-BACK-TO-LIST"
+          href="/hospitalizations"
+        >
           Volver al listado
         </Link>
       </main>
@@ -251,8 +257,11 @@ export default function HospitalizationDetailPage() {
               <ul>
                 {linkedQuotes.map((quote) => (
                   <li key={quote.id}>
-                    <Link href={`/quotes/${quote.id}`}>
-                      {quote.id} · v{quote.version}
+                    <Link
+                      className="action-link-button action-link-button--compact"
+                      href={`/quotes/${quote.id}`}
+                    >
+                      Consultar {quote.id} · v{quote.version}
                     </Link>{' '}
                     · {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
                   </li>
@@ -331,14 +340,36 @@ export default function HospitalizationDetailPage() {
               <input defaultValue={profile?.healthManager ?? ''} name="healthManager" />
             </label>
             <label>
+              Buscar médico referido
+              <input
+                aria-label="Filtrar médico referido"
+                onChange={(event) => setReferralDoctorQuery(event.target.value)}
+                type="search"
+                value={referralDoctorQuery}
+              />
+            </label>
+            <label>
               Referido por
-              <select defaultValue={profile?.referredBy ?? ''} name="referredBy">
+              <select
+                defaultValue={profile?.referredBy ?? ''}
+                name="referredBy"
+                onChange={(event) => setSelectedReferralDoctor(event.target.value)}
+              >
                 <option value="">Sin médico referido</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.fullName}>
-                    {doctor.fullName}
-                  </option>
-                ))}
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(referralDoctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                      doctor.fullName === profile?.referredBy ||
+                      doctor.fullName === selectedReferralDoctor,
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.fullName}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
               </select>
             </label>
             <label>

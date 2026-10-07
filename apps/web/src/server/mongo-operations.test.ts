@@ -31,6 +31,92 @@ describe('assigned clinical operations', () => {
     expect(canEditAssignedBalance({ ...nurse, role: 'FINANCE' }, ['nurse-a'])).toBe(false);
     expect(canEditAssignedBalance({ ...nurse, role: 'ADMIN' }, [])).toBe(true);
   });
+
+  it('edits and cancels only tenant purchase drafts with an audit trail', async () => {
+    const purchase: Purchase = {
+      id: 'purchase-edit-qa',
+      catalogItemId: 'equipment-qa',
+      supplierCatalogItemId: 'supplier-qa',
+      warehouseId: 'warehouse-qa',
+      reference: 'COMPRA-QA',
+      invoiceNumber: 'FACT-QA-001',
+      quantity: 1,
+      unitCost: 12,
+      serialNumber: 'SERIE-QA-001',
+      status: 'DRAFT',
+      createdAt: '2026-10-06T12:00:00.000Z',
+    };
+    let persisted: Purchase = purchase;
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const purchaseUpdate = vi.fn(async (_filter: unknown, change: { $set: Partial<Purchase> }) => {
+      persisted = { ...persisted, ...change.$set };
+      return { matchedCount: 1 };
+    });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases')
+          return {
+            findOne: vi.fn(async (filter: { organizationId: string; id: string }) =>
+              filter.organizationId === 'org-a' && filter.id === persisted.id ? persisted : null,
+            ),
+            updateOne: purchaseUpdate,
+          };
+        if (name === 'catalogItems')
+          return {
+            findOne: vi.fn(async (filter: { id: string }) =>
+              filter.id === purchase.catalogItemId
+                ? { id: filter.id, category: 'EQUIPMENT', status: 'ACTIVE' }
+                : { id: filter.id, category: 'PROVIDERS', status: 'ACTIVE' },
+            ),
+          };
+        if (name === 'warehouses')
+          return {
+            findOne: vi.fn().mockResolvedValue({ id: purchase.warehouseId, status: 'ACTIVE' }),
+          };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const repository = new MongoOperationsRepository(database);
+    const actor: ServerActor = { userId: 'buyer-qa', organizationId: 'org-a', role: 'INVENTORY' };
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.update',
+        purchase: { ...purchase, invoiceNumber: 'FACT-QA-002' },
+      }),
+    ).resolves.toEqual({ id: purchase.id });
+    expect(persisted.invoiceNumber).toBe('FACT-QA-002');
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.cancel',
+        purchaseId: purchase.id,
+        reason: 'Borrador QA reemplazado',
+      }),
+    ).resolves.toEqual({ id: purchase.id });
+    expect(persisted).toMatchObject({
+      status: 'CANCELLED',
+      cancelReason: 'Borrador QA reemplazado',
+    });
+    expect(auditInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'PURCHASE_DRAFT_UPDATED' }),
+      expect.anything(),
+    );
+    expect(auditInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'PURCHASE_DRAFT_CANCELLED' }),
+      expect.anything(),
+    );
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.update',
+        purchase: { ...purchase, invoiceNumber: 'FACT-QA-003' },
+      }),
+    ).rejects.toThrow();
+  });
   // test-id: vitest:operations-retry-integrity
   it('accepts identical retries but rejects changed quantities with the same key', () => {
     expect(() => assertSameRetry({ id: 'saved', quantity: 2 }, { quantity: 2 })).not.toThrow();
@@ -114,8 +200,15 @@ describe('assigned clinical operations', () => {
     const purchase: Purchase = {
       id: 'purchase-synthetic-01',
       catalogItemId: 'item-synthetic-01',
+      supplierCatalogItemId: 'supplier-synthetic-01',
+      warehouseId: 'warehouse-synthetic-01',
       reference: 'PURCHASE-SYNTHETIC-01',
       note: 'Datos sintéticos',
+      quantity: 1,
+      unitCost: 25,
+      expirationDate: '2027-01-01',
+      lotNumber: 'LOT-SYNTHETIC-01',
+      serialNumber: 'SERIAL-SYNTHETIC-01',
       status: 'DRAFT',
       createdAt: '2026-09-10T07:00:00.000Z',
     };
@@ -124,11 +217,16 @@ describe('assigned clinical operations', () => {
       endSession: vi.fn(),
     };
     const purchaseFind = vi.fn().mockResolvedValue(null);
-    const catalogFind = vi.fn().mockResolvedValue({
-      id: purchase.catalogItemId,
-      organizationId: 'org-a',
-      status: 'ACTIVE',
-    });
+    const catalogFind = vi.fn(async (filter: { id: string }) =>
+      filter.id === purchase.catalogItemId
+        ? { id: filter.id, organizationId: 'org-a', status: 'ACTIVE', category: 'EQUIPMENT' }
+        : { id: filter.id, organizationId: 'org-a', status: 'ACTIVE', category: 'PROVIDERS' },
+    );
+    const warehouseFind = vi.fn(async (filter: { id: string }) =>
+      filter.id === purchase.warehouseId
+        ? { id: filter.id, organizationId: 'org-a', status: 'ACTIVE' }
+        : null,
+    );
     const purchaseInsert = vi.fn().mockResolvedValue({ acknowledged: true });
     const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
     const database = {
@@ -136,6 +234,7 @@ describe('assigned clinical operations', () => {
       collection: vi.fn((name: string) => {
         if (name === 'purchases') return { findOne: purchaseFind, insertOne: purchaseInsert };
         if (name === 'catalogItems') return { findOne: catalogFind };
+        if (name === 'warehouses') return { findOne: warehouseFind };
         if (name === 'auditEvents') return { insertOne: auditInsert };
         throw new Error(`Unexpected collection ${name}`);
       }),
@@ -156,10 +255,20 @@ describe('assigned clinical operations', () => {
       { organizationId: 'org-a', id: purchase.catalogItemId, status: 'ACTIVE' },
       { session },
     );
-    expect(purchaseInsert).toHaveBeenCalledWith(
-      { ...purchase, organizationId: 'org-a' },
+    expect(warehouseFind).toHaveBeenCalledWith(
+      { organizationId: 'org-a', id: purchase.warehouseId, status: 'ACTIVE' },
       { session },
     );
+    expect(purchaseInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: purchase.id,
+        serialNumber: purchase.serialNumber,
+        organizationId: 'org-a',
+      }),
+      { session },
+    );
+    expect(purchaseInsert.mock.calls[0][0]).not.toHaveProperty('expirationDate');
+    expect(purchaseInsert.mock.calls[0][0]).not.toHaveProperty('lotNumber');
     expect(auditInsert).toHaveBeenCalledWith(
       expect.objectContaining({
         organizationId: 'org-a',
@@ -169,6 +278,16 @@ describe('assigned clinical operations', () => {
       }),
       { session },
     );
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.create',
+        purchase: {
+          ...purchase,
+          id: 'purchase-foreign-warehouse',
+          warehouseId: 'foreign-warehouse',
+        },
+      }),
+    ).rejects.toThrow('Seleccione una bodega activa.');
   });
 
   // test-id: vitest:operations-clinical-create-tenant-audit

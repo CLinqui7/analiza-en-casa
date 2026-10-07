@@ -86,7 +86,8 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
     const body: unknown = await request.json();
     const parsed = feedbackResolutionSchema.safeParse(body);
-    if (!parsed.success) throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
+    if (!parsed.success)
+      throw new MongoInputError('Revisa el estado y la respuesta de resolución.');
     const { id } = await params;
     const report = await backend.feedback.updateStatus(actor, id, parsed.data);
     if (!report) {

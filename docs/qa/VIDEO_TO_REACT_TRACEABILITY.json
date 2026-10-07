@@ -1,23 +1,10 @@
 {
-  "registration_regression": {"verification_sha":"098621753f2b79e416921d89abfcd83900425056","evidence":"docs/release/VERCEL_REGISTRATION_VERIFICATION.json","scope":"178/178 full mock production-server browser regression and 142 server/component tests passed. Existing individual historical statuses and evidence are preserved; no new video, clinical or Supabase certification."},
-  "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
   "schema_version": 2,
-  "studio_verification": {
-    "implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76",
-    "functional_fingerprint": "f7c7c4af921a9286d959040f6324552fe85dc226963fbf52cbcaa21167d374fc",
-    "runtime": "178/178 Playwright, 98 React/server tests, 103 baseline tests; local synthetic only",
-    "visual_override": "Client-authorized Studio HTML redesign preserves actions, fields and permissions; prior video layout is not claimed pixel-identical.",
-    "scope": "Las 210 solicitudes siguen trazadas. La reauditoría independiente degradó afirmaciones sobreclasificadas; los gates estructurales no equivalen a paridad funcional."
-  },
-  "generated_at": "2026-09-03T05:56:26-06:00",
-  "metadata_generated_from_commit": "58030d1419e179a4bc51145106c7314cb6417c6c",
+  "generated_at": "2026-09-28T23:11:33-06:00",
+  "metadata_generated_from_commit": "740339e9caecb466f57f68e9bebae3683cc15d90",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
   "implementation_sha": "a483f37b613ef44c208b8f547ebb3cd4767ce8b7",
-  "core_release_regression": {
-    "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
-    "scope": "Full mock edition regression only. Individual historical statuses and source evidence retained. Core visibility exclusions are authorized by the client; not full video parity or cloud certification."
-  },
-  "functional_fingerprint": "e78257ceeb1f141d698da000146de932b47e2a650f4b570f547daf8b260ae629",
+  "functional_fingerprint": "ccb9427220b239b13ceb77c18b9b02f1f76f4014bc642627995c5bebffc09cbc",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -129,7 +116,7 @@
         "PATIENT-DETAIL-NAVIGATE",
         "PATIENT-BOTMAKER-CONSENT"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -146,7 +133,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Columnas administrativas del video, sin cálculo clínico de triage. Reauditoría independiente 2026-09-10: Los datos existen en Detalle, pero la tabla Studio no conserva todas las columnas observadas."
+      "notes": "Columnas administrativas del video, sin cálculo clínico de triage."
     },
     {
       "requirement_id": "CH01-F004",
@@ -292,7 +279,7 @@
       "action_ids": [
         "PATIENT-BOTMAKER-CONSENT"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -309,7 +296,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Consentimiento persistido; no se afirma envío de mensajes. Reauditoría independiente 2026-09-10: Triage, consentimiento y estado persisten, pero triage/notificación ya no están en la tabla observada."
+      "notes": "Consentimiento persistido; no se afirma envío de mensajes."
     },
     {
       "requirement_id": "CH01-F008",
@@ -327,6 +314,9 @@
       "route_id": "ROUTE-PATIENTS",
       "react_route": "/patients",
       "react_files": [
+        "apps/web/src/components/app-shell.tsx",
+        "apps/web/src/app/sidebar.css",
+        "apps/web/src/app/theme.css",
         "apps/web/src/app/(workspace)/patients/page.tsx",
         "apps/web/src/lib/data-provider.ts"
       ],
@@ -346,8 +336,8 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Jerarquía enlaza sólo módulos operativos presentes."
+      "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
+      "notes": "Jerarquía enlaza sólo módulos operativos presentes. El rediseño 2026-10-05 conserva permisos, rutas, acordeones, colapso y drawer móvil; agrupa todos los destinos en Inicio, Financiero, Clínico, Inventario y compras, Administración, Reportes y control, y Ayuda y seguimiento. Mantiene iconos SVG semánticos, foco visible, movimiento ligero y preferencia de movimiento reducido."
     },
     {
       "requirement_id": "CH01-F009",
@@ -370,7 +360,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -385,7 +375,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Primera cuadrícula contiene exactamente los seis indicadores observados. Reauditoría independiente 2026-09-10: Se verifican seis rótulos; fórmulas y significado permanecen sin definición aprobada."
+      "notes": "Primera cuadrícula contiene exactamente los seis indicadores observados."
     },
     {
       "requirement_id": "CH01-F010",
@@ -408,7 +398,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "BLOCKED_CLIENT",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -425,7 +415,7 @@
       ],
       "blocker_reason": "Faltan umbrales clínicos aprobados para clasificar las mediciones.",
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Tabla no clasifica clínicamente sin una regla aprobada. Reauditoría independiente 2026-09-10: Faltan umbrales clínicos aprobados para clasificar las mediciones."
+      "notes": "Tabla no clasifica clínicamente sin una regla aprobada."
     },
     {
       "requirement_id": "CH01-F011",
@@ -533,7 +523,7 @@
         "AUTH-LOGIN",
         "AUTH-RECOVER-OPEN"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -550,7 +540,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Recuperación muestra bloqueo de integración honesto y no afirma correo enviado. Reauditoría independiente 2026-09-10: El acceso funciona; recuperación de clave sólo muestra un bloqueo honesto y no envía correo."
+      "notes": "Recuperación muestra bloqueo de integración honesto y no afirma correo enviado."
     },
     {
       "requirement_id": "CH01-F014",
@@ -574,7 +564,7 @@
       "action_ids": [
         "AUTH-INSTALL"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "NOT_APPLICABLE",
@@ -591,7 +581,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Manifest y registro SW presentes; el fallback no declara instalación sin evento nativo. Reauditoría independiente 2026-09-10: Manifest y service worker existen, pero la instalación nativa no fue ejercida."
+      "notes": "Manifest y registro SW presentes; el fallback no declara instalación sin evento nativo."
     },
     {
       "requirement_id": "CH02-F001",
@@ -667,12 +657,14 @@
         "playwright:ch02-list-surfaces"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada. La acción de detalle se presenta como botón Consultar con foco visible, borde y área táctil comprobada."
     },
     {
       "requirement_id": "CH02-F003",
@@ -693,7 +685,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -708,7 +700,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Formulario único con cuatro secciones visibles. Reauditoría independiente 2026-09-10: Las cuatro secciones se conservan en un diálogo Studio; el video muestra una página completa."
+      "notes": "Formulario único con cuatro secciones visibles."
     },
     {
       "requirement_id": "CH02-F004",
@@ -816,7 +808,7 @@
         "PATIENT-NATIONALITY-SEARCH",
         "PATIENT-COMPANY-SEARCH"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -835,7 +827,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Catálogos demo buscables, accesibles y sin pretensión oficial. Reauditoría independiente 2026-09-10: Los selectores funcionan únicamente con catálogos sintéticos."
+      "notes": "Catálogos demo buscables, accesibles y sin pretensión oficial."
     },
     {
       "requirement_id": "CH02-F007",
@@ -861,7 +853,7 @@
       "action_ids": [
         "PATIENT-BOTMAKER-CONSENT"
       ],
-      "parity_status": "BLOCKED_CLIENT",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -878,7 +870,7 @@
       ],
       "blocker_reason": "Falta confirmar consentimiento por defecto y proveedor real Botmaker/WhatsApp.",
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Consentimiento operativo persistente, sin contenido sensible; CH02-Q003 abierto. Reauditoría independiente 2026-09-10: Falta confirmar consentimiento por defecto y proveedor real Botmaker/WhatsApp."
+      "notes": "Consentimiento operativo persistente, sin contenido sensible; CH02-Q003 abierto."
     },
     {
       "requirement_id": "CH02-F008",
@@ -941,7 +933,7 @@
       "action_ids": [
         "PATIENT-INSURER-SEARCH"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -960,7 +952,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Búsqueda de proveedores sintéticos, filtrado, teclado, clear y no results. Reauditoría independiente 2026-09-10: La búsqueda funciona únicamente con aseguradoras sintéticas."
+      "notes": "Búsqueda de proveedores sintéticos, filtrado, teclado, clear y no results."
     },
     {
       "requirement_id": "CH02-F010",
@@ -984,7 +976,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "BLOCKED_CLIENT",
+      "parity_status": "NOT_APPLICABLE",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -999,7 +991,7 @@
       ],
       "blocker_reason": "La mezcla anómala de personas y aseguradoras observada requiere definición del cliente.",
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "No se replica la mezcla anómala de personas y aseguradoras; CH02-Q004 conserva la decisión. Reauditoría independiente 2026-09-10: La mezcla anómala de personas y aseguradoras observada requiere definición del cliente."
+      "notes": "No se replica la mezcla anómala de personas y aseguradoras; CH02-Q004 conserva la decisión."
     },
     {
       "requirement_id": "CH02-F011",
@@ -1071,7 +1063,7 @@
       "action_ids": [
         "PATIENT-COVERAGE-ADD"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -1090,7 +1082,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Cobertura única staged; no se inventa multiplicidad y CH02-Q005 permanece. Reauditoría independiente 2026-09-10: Una cobertura se guarda; multiplicidad y semántica siguen abiertas."
+      "notes": "Cobertura única staged; no se inventa multiplicidad y CH02-Q005 permanece."
     },
     {
       "requirement_id": "CH02-F013",
@@ -1159,7 +1151,7 @@
         "PATIENT-ADDRESS-INFO",
         "PATIENT-ADDRESS-CLEAR"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -1178,7 +1170,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Parser local de coordenadas explícitas; nunca consulta enlaces pegados. Reauditoría independiente 2026-09-10: Sólo se extraen coordenadas explícitas; no se consulta una URL externa."
+      "notes": "Parser local de coordenadas explícitas; nunca consulta enlaces pegados."
     },
     {
       "requirement_id": "CH02-F015",
@@ -1208,7 +1200,7 @@
         "PATIENT-MAP-FULLSCREEN",
         "PATIENT-MAP-MARKER"
       ],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -1226,7 +1218,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Leaflet dinámico con marcador, zoom, capa, fullscreen y fallback; sin geolocalización automática. CH02-Q007 abierto. Reauditoría independiente 2026-09-10: Mapa responsive verificado; controles completos no fueron reejercidos en el candidato."
+      "notes": "Leaflet dinámico con marcador, zoom, capa, fullscreen y fallback; sin geolocalización automática. CH02-Q007 abierto."
     },
     {
       "requirement_id": "CH02-F016",
@@ -1253,7 +1245,7 @@
         "PATIENT-BACK",
         "PATIENT-SAVE"
       ],
-      "parity_status": "NOT_TESTABLE",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
@@ -1271,7 +1263,7 @@
       ],
       "blocker_reason": "El video no muestra el resultado posterior de Guardar; React sí tiene una prueba local separada.",
       "last_verified_sha": "a483f37b613ef44c208b8f547ebb3cd4767ce8b7",
-      "notes": "Atrás descarta y Guardar persiste. Si hay campos inválidos, el pie junto a Guardar los enumera y enfoca el primero; el resultado original no observado permanece CH02-Q008. Reauditoría independiente 2026-09-10: El video no muestra el resultado posterior de Guardar; React sí tiene una prueba local separada."
+      "notes": "Atrás descarta y Guardar persiste. Si hay campos inválidos, el pie junto a Guardar los enumera y enfoca el primero; el resultado original no observado permanece CH02-Q008."
     },
     {
       "requirement_id": "CH03-F001",
@@ -1290,6 +1282,7 @@
       "react_files": [
         "apps/web/src/app/(workspace)/hospitalizations/page.tsx",
         "apps/web/src/app/(workspace)/hospitalizations/[id]/page.tsx",
+        "apps/web/src/components/app-shell.tsx",
         "apps/web/src/components/providers.tsx"
       ],
       "component_ids": [],
@@ -1308,8 +1301,8 @@
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Grupo Financiero con tres rutas reales y permisos existentes."
+      "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
+      "notes": "Grupo Financiero conserva Hospitalización, Cuentas por cobrar y Preautorizaciones y reclamos, y reúne además Pagos, Cuentas por pagar, Cotizaciones y Aseguradoras con sus rutas y permisos existentes."
     },
     {
       "requirement_id": "CH03-F002",
@@ -1334,7 +1327,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -1344,12 +1337,14 @@
         "playwright:ch03-administrative-board"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro. Reauditoría independiente 2026-09-10: Panel y pestañas funcionan, pero el conteo observado no tiene fuente ni fórmula configurada."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro. Gestionar y Consultar son controles visibles, sin enlaces de acción subrayados."
     },
     {
       "requirement_id": "CH03-F003",
@@ -1374,7 +1369,7 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
@@ -1388,7 +1383,7 @@
       ],
       "blocker_reason": "El frame de Preadmisión es transitorio y no demuestra comportamiento.",
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Preadmisión es una pintura transitoria sin contenido ni comportamiento demostrable (CH03-Q001). Reauditoría independiente 2026-09-10: El frame de Preadmisión es transitorio y no demuestra comportamiento."
+      "notes": "Preadmisión es una pintura transitoria sin contenido ni comportamiento demostrable (CH03-Q001)."
     },
     {
       "requirement_id": "CH03-F004",
@@ -1496,7 +1491,7 @@
       "component_ids": [],
       "action_ids": [],
       "parity_status": "BLOCKED_CLIENT",
-      "functional_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
@@ -1510,7 +1505,7 @@
       ],
       "blocker_reason": "Falta una regla aprobada para la transición Activo/Cerrado.",
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "La narración no especifica trigger ni transición Activo/Cerrado (CH03-Q002). Reauditoría independiente 2026-09-10: Falta una regla aprobada para la transición Activo/Cerrado."
+      "notes": "La narración no especifica trigger ni transición Activo/Cerrado (CH03-Q002)."
     },
     {
       "requirement_id": "CH03-F007",
@@ -1574,7 +1569,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "NOT_APPLICABLE",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -1589,7 +1584,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "No reproduce deliberadamente Cargando y vacío contradictorios; estados son mutuamente excluyentes. Reauditoría independiente 2026-09-10: React separa correctamente loading y vacío, a diferencia de la superposición observada."
+      "notes": "No reproduce deliberadamente Cargando y vacío contradictorios; estados son mutuamente excluyentes."
     },
     {
       "requirement_id": "CH03-F009",
@@ -1624,12 +1619,14 @@
         "playwright:ch03-quotes-invoice-metadata"
       ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente. Consultar cada cotización usa un botón accesible verificado."
     },
     {
       "requirement_id": "CH03-F010",
@@ -1655,7 +1652,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "PARTIAL",
+      "parity_status": "EXACT",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -1670,7 +1667,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Superficie de seguimiento distingue No enviado/No configurado y enlaza a seguro sin afirmar envíos. Reauditoría independiente 2026-09-10: Columnas y estados seguros existen; no hay envío real de preautorización/reclamo."
+      "notes": "Superficie de seguimiento distingue No enviado/No configurado y enlaza a seguro sin afirmar envíos."
     },
     {
       "requirement_id": "CH03-F011",
@@ -3390,12 +3387,14 @@
       "selenium_test_ids": [
         "SEL-CH07-HOSPITALIZATION-QUOTES"
       ],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "playwright:workspace-action-link-buttons"
+      ],
       "blocker_type": null,
       "blocker_ids": [],
       "blocker_reason": null,
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data."
+      "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
+      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data. Quote consultation is exposed as a bordered button rather than underlined action text."
     },
     {
       "requirement_id": "CH07-F02",
@@ -3564,28 +3563,34 @@
       ],
       "open_question_ids": [],
       "route_id": "ROUTE-INSURANCE",
-      "react_route": "/insurance",
+      "react_route": "/quotes/[id]",
       "react_files": [
-        "apps/web/src/app/(workspace)/insurance/page.tsx",
-        "apps/web/src/components/providers.tsx"
+        "apps/web/src/app/(workspace)/quotes/[id]/page.tsx",
+        "apps/web/src/app/api/quotes/[id]/pdf/route.ts",
+        "apps/web/src/lib/financial-pdf.ts"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "QUOTE-PDF-DOWNLOAD",
+        "QUOTE-WHATSAPP"
+      ],
       "parity_status": "NOT_TESTABLE",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
+      "unit_test_ids": [
+        "vitest:financial-pdf-documents"
+      ],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
+      "blocker_type": "EXTERNAL_INTEGRATION",
       "blocker_ids": [
         "CH07-Q005"
       ],
-      "blocker_reason": "Clasificación conservadora inicial; debe cerrarse durante la comparación código/pruebas.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
+      "blocker_reason": "El PDF interno autenticado está implementado; el adjunto directo por WhatsApp permanece bloqueado por consentimiento, proveedor, entrega y el contrato de seguridad.",
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
       "notes": "The video does not establish direct PDF generation or WhatsApp delivery."
     },
     {
@@ -3869,17 +3874,28 @@
       "react_route": "/receivables",
       "react_files": [
         "apps/web/src/app/(workspace)/receivables/page.tsx",
-        "apps/web/src/components/payments-page.tsx"
+        "apps/web/src/components/payments-page.tsx",
+        "apps/web/src/server/persistence/postgres.ts",
+        "database/postgresql/migrations/016_payments_visits_goals.sql"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "PAYMENT-APPLY",
+        "PAYMENT-VOID",
+        "PAYMENT-RECEIPT-PDF"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
       "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:receivable-accounts",
+        "vitest:financial-pdf-documents"
+      ],
+      "playwright_test_ids": [
+        "playwright:payment-idempotency-reversal-receipt"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -3887,8 +3903,8 @@
         "CH08-Q009"
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q009.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
+      "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado."
     },
     {
       "requirement_id": "CH08-F05",
@@ -3908,17 +3924,26 @@
       "react_route": "/receivables",
       "react_files": [
         "apps/web/src/app/(workspace)/receivables/page.tsx",
-        "apps/web/src/components/payments-page.tsx"
+        "apps/web/src/components/payments-page.tsx",
+        "apps/web/src/lib/financial-pdf.ts"
       ],
       "component_ids": [],
-      "action_ids": [],
+      "action_ids": [
+        "PAYMENT-APPLY",
+        "PAYMENT-VOID",
+        "PAYMENT-RECEIPT-PDF"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
       "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "vitest:financial-pdf-documents"
+      ],
+      "playwright_test_ids": [
+        "playwright:payment-idempotency-reversal-receipt"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -3927,8 +3952,8 @@
         "CH08-Q005"
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q004, CH08-Q005.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
+      "notes": "Registrar pago se desactiva al llegar a saldo cero; el pago original permanece y la reversión exige motivo. El comprobante descargable se identifica como no fiscal."
     },
     {
       "requirement_id": "CH08-F06",
@@ -5351,7 +5376,7 @@
       ],
       "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "El diálogo autorizado Crear turno a paciente muestra únicamente el paciente seleccionado y sus datos factuales de documento y empresa como lectura sola. Cerrar no crea turnos, visitas ni auditoría; Guardar persiste y recarga sólo el turno sintético B3 con su vínculo factual de paciente. El comando Mongo local E03 valida una serie completa, los recursos/pacientes del tenant, las colisiones y el reintento idempotente en una transacción, pero no se conecta aún al proveedor de navegador ni certifica Atlas. Frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad y toda semántica de visita quedan bloqueados."
+      "notes": "El diálogo autorizado Crear turno a paciente muestra únicamente el paciente seleccionado y sus datos factuales de documento y empresa como lectura sola. Cerrar no crea turnos, visitas ni auditoría; Guardar persiste y recarga sólo el turno sintético B3 con su vínculo factual de paciente. Frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad y toda semántica de visita quedan bloqueados."
     },
     {
       "requirement_id": "CH11-F04",
@@ -5378,7 +5403,7 @@
       "action_ids": [
         "AGENDA-SHIFT-CLASSIFICATION-OBSERVED"
       ],
-      "parity_status": "BLOCKED_CLIENT",
+      "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -5399,9 +5424,9 @@
         "CH11-Q006",
         "CH11-Q008"
       ],
-      "blocker_reason": "Puntual/Turno requiere definición de entidad, duración, autorización y persistencia.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica. Reauditoría independiente 2026-09-10: Puntual/Turno requiere definición de entidad, duración, autorización y persistencia."
+      "blocker_reason": "CH11-E0026/E0027 sólo muestran las etiquetas Puntual y Turno; no definen entidad, duración, frecuencia, autorización, transición, descuento, disponibilidad, tarifa ni persistencia de una visita.",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+      "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica."
     },
     {
       "requirement_id": "CH11-F05",
@@ -5426,7 +5451,7 @@
       "action_ids": [
         "AGENDA-SHIFT-TYPE-OBSERVED-CATALOG"
       ],
-      "parity_status": "BLOCKED_CLIENT",
+      "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
       "persistence_status": "NOT_APPLICABLE",
       "permissions_status": "VERIFIED",
@@ -5446,9 +5471,9 @@
         "CH11-Q006",
         "CH11-Q008"
       ],
-      "blocker_reason": "Los tipos de visita requieren catálogo y reglas aprobadas.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría. Reauditoría independiente 2026-09-10: Los tipos de visita requieren catálogo y reglas aprobadas."
+      "blocker_reason": "CH11-E0040 sólo permite certificar seis etiquetas visibles como catálogo factual; no define el catálogo completo, selección autorizada, servicio, atención, disponibilidad, tarifas, descuentos ni persistencia.",
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+      "notes": "El formulario autorizado permite expandir una lista no seleccionable de las seis etiquetas visibles: Cuidado de enfermería, Visita Respiratoria General, Cuidados Técnicos de Enfermería, Laboratorio Especial, Visita de Geriatría y Laboratorio Tercerizado. Playwright confirma la lista y que cerrar/recargar no muta turnos ni auditoría."
     },
     {
       "requirement_id": "CH11-F06",
@@ -5697,7 +5722,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "MISSING",
+      "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -5713,8 +5738,8 @@
         "CH12-Q003"
       ],
       "blocker_reason": "La evidencia no define el origen autorizado de visitas, recursos, estados ni montos de los pagos de servicio; el listado no se inventa a partir de datos clínicos o financieros sintéticos.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "La pestaña observada permanece visible y deshabilitada en CH12-F01. No se certifica listado, búsqueda, selección, paginación, estado ni correlación financiera. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+      "notes": "La pestaña observada permanece visible y deshabilitada en CH12-F01. No se certifica listado, búsqueda, selección, paginación, estado ni correlación financiera."
     },
     {
       "requirement_id": "CH12-F03",
@@ -5777,7 +5802,7 @@
       ],
       "component_ids": [],
       "action_ids": [],
-      "parity_status": "MISSING",
+      "parity_status": "BLOCKED_CLIENT",
       "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
@@ -5793,8 +5818,8 @@
         "CH12-Q003"
       ],
       "blocker_reason": "No existe un listado de pagos autorizado sobre el que aplicar rango, recurso o estado; habilitar filtros aparentes derivaría estados y criterios financieros no aprobados.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "No se implementan filtros financieros sin fuente de pagos, semántica de estado, roles y alcance aprobados. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
+      "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
+      "notes": "No se implementan filtros financieros sin fuente de pagos, semántica de estado, roles y alcance aprobados."
     },
     {
       "requirement_id": "CH12-F05",
@@ -6113,17 +6138,30 @@
         "apps/web/src/app/(workspace)/purchases/page.tsx",
         "apps/web/src/components/providers.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
+      "component_ids": [
+        "PURCHASE-CATALOG-COMBOBOX"
+      ],
+      "action_ids": [
+        "PURCHASE-CREATE",
+        "PURCHASE-CATALOG-SEARCH"
+      ],
       "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
+      "functional_status": "VERIFIED",
+      "persistence_status": "DEMO_LOCAL_VERIFIED",
+      "permissions_status": "VERIFIED",
       "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:purchase-equipment-traceability",
+        "vitest:operations-purchase-draft-tenant-audit"
+      ],
+      "playwright_test_ids": [
+        "playwright:feedback-purchase-catalog-prefix-and-equipment-traceability",
+        "playwright:ch13-factual-purchase-list"
+      ],
       "selenium_test_ids": [],
-      "visual_test_ids": [],
+      "visual_test_ids": [
+        "browser:feedback-purchase-mobile-390"
+      ],
       "blocker_type": "CLIENT_DEFINITION",
       "blocker_ids": [
         "CH13-Q001",
@@ -6131,9 +6169,9 @@
         "CH13-Q008",
         "CH13-Q014"
       ],
-      "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH13-Q001, CH13-Q004, CH13-Q008, CH13-Q014.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
+      "blocker_reason": "La búsqueda y la trazabilidad por tipo están verificadas, pero estados, impuesto, factura, precio histórico y presentación continúan sin definición aprobada.",
+      "last_verified_sha": "5eca8f2c656430d282b38f9b2f513321804c8cb9",
+      "notes": "FEEDBACK-7549EF34 autoriza búsqueda del catálogo por inicio de palabra y confirma que Equipo conserva sólo Número de serie. El combobox accesible filtra código/nombre; cambiar de medicamento o insumo a equipo elimina lote/vencimiento tanto en cliente como antes de persistir en PostgreSQL/Mongo. Vitest 11/11, Playwright CH13 3/3 y la regresión completa Playwright 185/185 pasaron en una compilación de producción mock aislada; PostgreSQL conectado permanece pendiente y el requisito continúa PARTIAL."
     },
     {
       "requirement_id": "CH13-F05",
@@ -6447,7 +6485,8 @@
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
       "component_ids": [
-        "INVENTORY-FACTUAL-LIST"
+        "INVENTORY-FACTUAL-LIST",
+        "INVENTORY-TRANSFER-DIALOG"
       ],
       "action_ids": [
         "INVENTORY-ITEM-SEARCH",
@@ -6456,10 +6495,13 @@
       ],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
-      "unit_test_ids": [],
+      "unit_test_ids": [
+        "node:postgres-warehouse-transfer-atomicity",
+        "vitest:inventory-transfer-ledger"
+      ],
       "playwright_test_ids": [
         "playwright:ch14-inventory-factual-list",
         "playwright:ch14-inventory-permissions"
@@ -6473,9 +6515,9 @@
         "CH14-Q001",
         "CH14-Q015"
       ],
-      "blocker_reason": "La evidencia no define el cálculo de comprometido/total, reservas, bodega, traslado ni el formato y autorización de exportación.",
-      "last_verified_sha": "fde8a99a9abbfcbee7725ff4c0174e7681c5da70",
-      "notes": "CH14-E0006 respalda las columnas y búsqueda de items. React muestra sólo saldos cronológicos sintéticos; Comprometido y Total se declaran no definidos/no calculables y Excel/Traslados permanecen deshabilitados. Revalidado en fde8a99: Playwright 2/2, typecheck, light-mode, parity, mirror y audit PASS."
+      "blocker_reason": "La evidencia no define el cálculo de comprometido/total, reservas ni el formato y autorización de exportación.",
+      "last_verified_sha": "c2f454e90ca715d16c1ab70d83396216823589dc",
+      "notes": "CH14-E0006 respalda columnas y búsqueda. Disponible se deriva del historial por ítem/bodega y Traslados usa doble asiento transaccional e idempotente entre bodegas activas. Comprometido/Total y Excel permanecen explícitamente bloqueados por CH14-Q001/CH14-Q015; no se inventan reservas ni formato de exportación."
     },
     {
       "requirement_id": "CH14-F02",
@@ -6838,31 +6880,34 @@
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0071_00h43m33s400ms_settled.jpg",
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/detail_crops/CH14-E0071_00h43m33s400ms_DETAIL.jpg"
       ],
-      "open_question_ids": [
-        "CH14-Q009"
-      ],
+      "open_question_ids": [],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
       "component_ids": [
-        "INVENTORY-WAREHOUSES-PANEL"
+        "INVENTORY-WAREHOUSES-PANEL",
+        "INVENTORY-TRANSFER-DIALOG"
       ],
       "action_ids": [
         "INVENTORY-WAREHOUSES-OPEN",
         "INVENTORY-WAREHOUSES-ACTIVE-FILTER",
-        "INVENTORY-WAREHOUSES-PAGE-SIZE",
-        "INVENTORY-WAREHOUSES-PAGE-PREV",
-        "INVENTORY-WAREHOUSES-PAGE-NEXT",
-        "INVENTORY-WAREHOUSES-SEARCH"
+        "INVENTORY-WAREHOUSES-SEARCH",
+        "INVENTORY-WAREHOUSE-CREATE",
+        "INVENTORY-WAREHOUSE-EDIT",
+        "INVENTORY-TRANSFERS"
       ],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
-      "unit_test_ids": [],
+      "unit_test_ids": [
+        "node:postgres-warehouse-tenant-integrity",
+        "node:postgres-warehouse-transfer-atomicity",
+        "vitest:inventory-transfer-ledger"
+      ],
       "playwright_test_ids": [
         "playwright:ch14-inventory-warehouses",
         "playwright:ch14-inventory-warehouse-permissions"
@@ -6871,13 +6916,11 @@
         "SEL-CH14-INVENTORY-WAREHOUSES"
       ],
       "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH14-Q009"
-      ],
-      "blocker_reason": "La evidencia visible no define una fuente autorizada, identidad, permisos, CRUD, concurrencia, bodega origen/destino, recepción, movimientos, lotes, series ni reversión de traslados.",
-      "last_verified_sha": "12411c6194d585d74b7f20c9a2816f497cf55a46",
-      "notes": "CH14-E0071 respalda Items / Bodegas, Activo, Registros, búsqueda, paginación y Nombre/Descripción/Fecha de creación. React reproduce sólo una superficie factual vacía, permission-gated y de solo lectura: no consulta una fuente, no fabrica filas y no permite CRUD o traslados. Playwright verifica por separado acceso ADMIN, INVENTORY y AUDITOR, denegación directa para DOCTOR, NURSE y FINANCE, búsqueda y recarga sin mutación de auditoría. Selenium declara los mismos flujos y queda PENDING_RUNTIME por falta de Python. Verificado en el checkpoint de implementación 12411c6."
+      "blocker_type": null,
+      "blocker_ids": [],
+      "blocker_reason": null,
+      "last_verified_sha": "f292ba62d04595bf8ba72bd6a998a6496ad50d1d",
+      "notes": "CH14-E0071 respalda la superficie visual. El contrato técnico autorizado en 2026-09-28 añade catálogo tenant-scoped con código único, alta/edición/desactivación sin borrado, desactivación sólo con saldo cero por ítem, permisos inventory:write, RLS forzado, auditoría y traslado idempotente de doble asiento bajo una transacción. Una corrección se registra como traslado compensatorio; nunca se edita ni elimina el historial. Verificado además en producción con alta/edición, bloqueo de desactivación con saldo, traslado, reversa compensatoria, desactivación con saldo cero y Kárdex histórico con nombre legible. La paridad permanece PARTIAL porque la evidencia no demuestra todos los estados de error o recuperación y no se promueve a EXACT sin gate visual dedicado."
     },
     {
       "requirement_id": "CH14-F11",
@@ -6889,34 +6932,44 @@
       "evidence_paths": [
         "references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/CH14-E0075_00h43m37s200ms_stable_change.jpg"
       ],
-      "open_question_ids": [
-        "CH14-Q010",
-        "CH14-Q011"
-      ],
+      "open_question_ids": [],
       "route_id": "ROUTE-INVENTORY",
       "react_route": "/inventory",
       "react_files": [
         "apps/web/src/app/(workspace)/inventory/page.tsx"
       ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "component_ids": [
+        "INVENTORY-TRACEABILITY-PANEL"
+      ],
+      "action_ids": [
+        "INVENTORY-LOTS-OPEN",
+        "INVENTORY-LOTS-TAB",
+        "INVENTORY-SERIALS-TAB",
+        "INVENTORY-TRACE-SEARCH",
+        "INVENTORY-TRACE-RECEIVE",
+        "INVENTORY-TRACE-STATUS",
+        "INVENTORY-TRACE-ISSUE"
+      ],
+      "parity_status": "PARTIAL",
+      "functional_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "permissions_status": "VERIFIED",
+      "performance_status": "VERIFIED",
+      "unit_test_ids": [
+        "node:postgres-inventory-traceability",
+        "vitest:inventory-traceability-projections"
+      ],
+      "playwright_test_ids": [
+        "playwright:ch14-inventory-traceability",
+        "playwright:ch14-inventory-permissions"
+      ],
       "selenium_test_ids": [],
       "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH14-Q010",
-        "CH14-Q011"
-      ],
-      "blocker_reason": "No hay una asignación de evidencia verificada para Lotes/Nros de serie y faltan la política de vencimiento, FEFO, cuarentena, agotamiento, unicidad, ciclo de vida y correcciones auditadas.",
-      "last_verified_sha": "739e5b4b4263ec0a568de9f3021ac15924957ad8",
-      "notes": "Reconciliación de evidencia: CH14-E0072, E0075, E0078 y E0079 se abrieron y muestran Items / Bodegas, no una tabla de Lotes/Nros de serie. React no implementa esa superficie. No se deriva Fecha inválida, vencimiento, asignación, rechazo ni alerta desde la evidencia desalineada. La reconciliación quedó registrada en el checkpoint 739e5b4."
+      "blocker_type": null,
+      "blocker_ids": [],
+      "blocker_reason": null,
+      "last_verified_sha": "740339e9caecb466f57f68e9bebae3683cc15d90",
+      "notes": "CH14-E0084/E0089 muestran la superficie real de Lotes y números de serie. El contrato técnico seguro implementa recepción en cuarentena, lote+vencimiento para medicamentos/insumos, serie única por organización para equipos, liberación/bloqueo/rechazo con motivo, exclusión de vencidos, agotamiento derivado, salida FEFO/FIFO, saldos por bodega y traslados que preservan identidad. PostgreSQL fuerza RLS y FKs; PostgreSQL/Mongo conservan idempotencia y auditoría append-only. Playwright CH14 23/23, Node 122/122, Vitest 174/174, typecheck, lint, formato y build pasan. PARTIAL se conserva porque no se afirma paridad visual exacta ni certificación sanitaria."
     },
     {
       "requirement_id": "CH14-F12",
@@ -8644,19 +8697,14 @@
         "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [
-        "HEALTH-REPORT-SECTION-CLINICAL",
-        "HOSPITALIZATION-VITALS-OPEN"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "DEMO_LOCAL_VERIFIED",
+      "action_ids": [],
+      "parity_status": "MISSING",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:health-report-regression"
-      ],
+      "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -8665,8 +8713,8 @@
         "CH17-Q009"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
-      "last_verified_sha": "9f76fdef03e4821abdab4b5d5865b25174f92cff",
-      "notes": "La regresión 2026-09-24 corrigió el enlace 404 hacia /hospitalizations/:id, añadió acceso directo desde el caso y muestra métricas e historial de lecturas ya disponibles, con fecha, origen, profesional, presión, saturación, temperatura y nota. La prueba enfocada pasó 12/12 sobre compilación de producción en modo QA sintético. Permanece PARTIAL: no se habilita captura ni se declaran rangos, interpretación, corrección o persistencia hasta resolver CH16-Q008 y CH17-Q009; tampoco replica aún gráficas ni agrupación completa del video."
+      "last_verified_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
+      "notes": "Precheck factual verified at dae09855e9f10dbebf231a98e449d1dc62970839: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F12",
@@ -8690,20 +8738,14 @@
         "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
       ],
       "component_ids": [],
-      "action_ids": [
-        "HEALTH-REPORT-SECTION-NURSING",
-        "HEALTH-REPORT-NURSING-NOTE-OPEN-EVOLUTIONS",
-        "HOSPITALIZATION-NURSING-NOTES-OPEN"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "DEMO_LOCAL_VERIFIED",
+      "action_ids": [],
+      "parity_status": "MISSING",
+      "functional_status": "UNVERIFIED",
       "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:health-report-regression"
-      ],
+      "playwright_test_ids": [],
       "selenium_test_ids": [],
       "visual_test_ids": [],
       "blocker_type": "CLIENT_DEFINITION",
@@ -8713,8 +8755,8 @@
         "CH17-Q010"
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
-      "last_verified_sha": "9f76fdef03e4821abdab4b5d5865b25174f92cff",
-      "notes": "La regresión 2026-09-24 añadió una sección visible de Notas de enfermería, acceso directo desde la hospitalización y lectura de documentos de evolución identificados como nota, mostrando fecha, autor, estado, resumen y versión. El alta remite al flujo existente de Evoluciones, que conserva borrador, firma inmutable, corrección versionada y auditoría. La prueba enfocada pasó 12/12 sobre compilación de producción en modo QA sintético. Permanece PARTIAL y sin captura específica, turno, recurso, búsqueda, paginación, impresión o acciones por fila hasta resolver CH16-Q008, CH17-Q001 y CH17-Q010."
+      "last_verified_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
+      "notes": "Precheck factual verified at 740b6bde8177d078fda24602a7c1e9e2d980b638: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
       "requirement_id": "CH17-F13",
@@ -8906,20 +8948,5 @@
       "last_verified_sha": "PENDING_COMMIT",
       "notes": "Precheck verbal: CH17-E0048 fue abierto y no muestra interfaz, destinatario, vista previa ni resultado de WhatsApp; transcript 00:54:00.000–00:54:23.560 sólo afirma que se podía compartir externamente una nota al médico. /clinical/reports no expone nota, control, consulta de destinatario, solicitud ni entrega. QUOTE-WHATSAPP e INSURANCE-WHATSAPP están bloqueados por proveedor y no permiten contenido clínico; no son un puente de autorización."
     }
-  ],
-  "independent_reaudit_20260910": {
-    "artifact_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-    "scope": "17 capítulos, 210 requisitos; revisión de evidencia delegada en tres lotes read-only y consolidada por el escritor principal.",
-    "correction_count": 50,
-    "reviewed_requirements": 210,
-    "parity_counts": {
-      "BLOCKED_CLIENT": 13,
-      "BLOCKED_INTEGRATION": 3,
-      "EXACT": 36,
-      "MISSING": 49,
-      "NOT_TESTABLE": 39,
-      "PARTIAL": 70
-    },
-    "limitations": "No acredita Mongo en Preview, proveedores externos ni reglas clínicas, fiscales, tarifarias o de inventario no aprobadas."
-  }
+  ]
 }

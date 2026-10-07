@@ -1,4 +1,10 @@
-import { parseShiftSeriesCommand, assertNoSeriesCollisions, overlaps } from './validation/shifts';
+import { createHash } from 'node:crypto';
+import {
+  parseShiftSeriesCommand,
+  parseShiftUpdateCommand,
+  assertNoSeriesCollisions,
+  overlaps,
+} from './validation/shifts';
 export { parseShiftSeriesCommand } from './validation/shifts';
 import {
   nursingResourceSchema,
@@ -7,16 +13,27 @@ import {
   type Shift,
 } from '@analiza/contracts';
 import { can } from '@/lib/permissions';
-import { MongoAccessError, MongoInputError, type ServerActor } from './mongo-patients';
+import {
+  MongoAccessError,
+  MongoConflictError,
+  MongoInputError,
+  type ServerActor,
+} from './mongo-patients';
 
-type StoredShift = Shift & { organizationId: string; createdAt: string };
+type StoredShift = Shift & { organizationId: string; createdAt: string; updatedAt?: string };
 type SeriesCommand = { organizationId: string; idempotencyKey: string; shifts: Shift[] };
+type UpdateCommand = {
+  organizationId: string;
+  idempotencyKey: string;
+  payloadHash: string;
+  shift: Shift;
+};
 type AuditEvent = {
   id: string;
   organizationId: string;
   actorUserId: string;
-  action: 'SHIFT_SERIES_CREATED';
-  resourceType: 'shiftSeries';
+  action: 'SHIFT_SERIES_CREATED' | 'SHIFT_UPDATED';
+  resourceType: 'shiftSeries' | 'shifts';
   resourceId: string;
   occurredAt: Date;
 };
@@ -24,6 +41,7 @@ type Collection<T> = {
   find(filter: Record<string, unknown>): { toArray(): Promise<T[]> };
   findOne(filter: Record<string, unknown>): Promise<T | null>;
   insertOne(document: T): Promise<unknown>;
+  replaceOne(filter: Record<string, unknown>, document: T): Promise<unknown>;
 };
 type TransactionSession = {
   withTransaction<T>(callback: () => Promise<T>): Promise<T>;
@@ -31,7 +49,13 @@ type TransactionSession = {
 };
 export type AgendaDatabase = {
   collection<T>(
-    name: 'shifts' | 'shiftSeriesCommands' | 'auditEvents' | 'nursingResources' | 'patients',
+    name:
+      | 'shifts'
+      | 'shiftSeriesCommands'
+      | 'shiftUpdateCommands'
+      | 'auditEvents'
+      | 'nursingResources'
+      | 'patients',
   ): Collection<T>;
   client: { startSession(): TransactionSession };
 };
@@ -150,6 +174,87 @@ export class MongoShiftRepository {
       await session.endSession();
     }
   }
+
+  async update(actor: ServerActor, input: unknown, now = new Date()): Promise<Shift> {
+    if (!can(actor.role, 'agenda:write')) throw new MongoAccessError();
+    const { shift, idempotencyKey } = parseShiftUpdateCommand(input);
+    const payloadHash = createHash('sha256').update(JSON.stringify(shift)).digest('hex');
+    const session = this.database.client.startSession();
+    try {
+      return await session.withTransaction(async () => {
+        const commands = this.database.collection<UpdateCommand>('shiftUpdateCommands');
+        const previous = await commands.findOne({
+          organizationId: actor.organizationId,
+          idempotencyKey,
+        });
+        if (previous) {
+          if (previous.payloadHash !== payloadHash) throw new MongoConflictError();
+          return shiftSchema.parse(previous.shift);
+        }
+
+        const storedShifts = this.database.collection<StoredShift>('shifts');
+        const current = await storedShifts.findOne({
+          organizationId: actor.organizationId,
+          id: shift.id,
+        });
+        if (!current) throw new MongoInputError('El turno ya no está disponible.');
+        if (current.status !== 'SCHEDULED' || shift.status !== 'SCHEDULED') {
+          throw new MongoInputError('Sólo se pueden editar turnos programados.');
+        }
+        const resource = await this.database
+          .collection<Record<string, unknown>>('nursingResources')
+          .findOne({ id: shift.resourceId, organizationId: actor.organizationId });
+        if (!resource) throw new MongoInputError('El recurso asignado no está disponible.');
+        if (shift.patientId) {
+          const patient = await this.database
+            .collection<Record<string, unknown>>('patients')
+            .findOne({ id: shift.patientId, organizationId: actor.organizationId });
+          if (!patient) throw new MongoInputError('El paciente asignado no está disponible.');
+        }
+        const existing = await storedShifts
+          .find({ organizationId: actor.organizationId, resourceId: shift.resourceId })
+          .toArray();
+        if (
+          existing.some(
+            (candidate) =>
+              candidate.id !== shift.id &&
+              candidate.status !== 'CANCELLED' &&
+              overlaps(shift, candidate),
+          )
+        ) {
+          throw new MongoInputError('El recurso ya tiene un turno que colisiona.');
+        }
+
+        await storedShifts.replaceOne(
+          { organizationId: actor.organizationId, id: shift.id },
+          {
+            ...shift,
+            organizationId: actor.organizationId,
+            createdAt: current.createdAt,
+            updatedAt: now.toISOString(),
+          },
+        );
+        await commands.insertOne({
+          organizationId: actor.organizationId,
+          idempotencyKey,
+          payloadHash,
+          shift,
+        });
+        await this.database.collection<AuditEvent>('auditEvents').insertOne({
+          id: crypto.randomUUID(),
+          organizationId: actor.organizationId,
+          actorUserId: actor.userId,
+          action: 'SHIFT_UPDATED',
+          resourceType: 'shifts',
+          resourceId: shift.id,
+          occurredAt: now,
+        });
+        return shift;
+      });
+    } finally {
+      await session.endSession();
+    }
+  }
 }
 
 export const mongoShiftIndexes = [
@@ -168,6 +273,12 @@ export const mongoShiftIndexes = [
     collection: 'shiftSeriesCommands',
     key: { organizationId: 1, idempotencyKey: 1 },
     name: 'shift_series_org_idempotency_unique',
+    unique: true,
+  },
+  {
+    collection: 'shiftUpdateCommands',
+    key: { organizationId: 1, idempotencyKey: 1 },
+    name: 'shift_update_org_idempotency_unique',
     unique: true,
   },
 ] as const;

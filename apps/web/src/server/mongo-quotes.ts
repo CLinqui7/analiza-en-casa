@@ -8,8 +8,9 @@ import {
   type Quote,
 } from '@analiza/contracts';
 import { calculateQuoteTotals, canEditQuote, isInsuranceRequestStatus } from '@analiza/domain';
-import type { Db } from 'mongodb';
+import type { ClientSession, Db } from 'mongodb';
 import { can } from '@/lib/permissions';
+import { quoteCatalogPriceError } from './quote-catalog-policy';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -54,6 +55,37 @@ function publicQuote(value: StoredQuote): Quote {
 
 function duplicateKey(error: unknown) {
   return Boolean(error && typeof error === 'object' && 'code' in error && error.code === 11000);
+}
+
+async function requireCatalogPrices(
+  database: Db,
+  actor: ServerActor,
+  quote: Quote,
+  session: ClientSession,
+  previous?: Quote | null,
+) {
+  const catalogIds = quote.items.flatMap((line) =>
+    line.inventoryItemId ? [line.inventoryItemId] : [],
+  );
+  const doctorIds = quote.items.flatMap((line) => (line.doctorId ? [line.doctorId] : []));
+  const [catalog, doctors] = await Promise.all([
+    database
+      .collection<{
+        organizationId: string;
+        id: string;
+        category: string;
+        status: string;
+        salePriceExcludingTax?: number;
+      }>('catalogItems')
+      .find({ organizationId: actor.organizationId, id: { $in: catalogIds } }, { session })
+      .toArray(),
+    database
+      .collection<{ organizationId: string; id: string; medicalFee?: number }>('doctors')
+      .find({ organizationId: actor.organizationId, id: { $in: doctorIds } }, { session })
+      .toArray(),
+  ]);
+  const error = quoteCatalogPriceError(quote, catalog, doctors, previous);
+  if (error) throw new MongoInputError(error);
 }
 
 export function parseQuoteCreate(input: unknown): Quote {
@@ -110,17 +142,24 @@ export class MongoQuoteRepository {
     const session = this.database.client.startSession();
     try {
       const result = await session.withTransaction(async () => {
-        const hospitalization = await this.database.collection('hospitalizations').findOne(
-          {
-            organizationId: actor.organizationId,
-            id: quote.caseId,
-            patientId: quote.patientId,
-          },
-          { session },
-        );
-        if (!hospitalization) throw new MongoInputError('La hospitalización no está disponible.');
+        const patient = await this.database
+          .collection('patients')
+          .findOne({ organizationId: actor.organizationId, id: quote.patientId }, { session });
+        if (!patient) throw new MongoInputError('El paciente no está disponible.');
+        if (quote.caseId) {
+          const hospitalization = await this.database.collection('hospitalizations').findOne(
+            {
+              organizationId: actor.organizationId,
+              id: quote.caseId,
+              patientId: quote.patientId,
+            },
+            { session },
+          );
+          if (!hospitalization) throw new MongoInputError('La hospitalización no está disponible.');
+        }
 
         const rootId = quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+        let previousQuote: Quote | null = null;
         if (quote.version === 1) {
           if (rootId !== quote.id)
             throw new MongoInputError('La primera versión debe ser su raíz.');
@@ -139,7 +178,13 @@ export class MongoQuoteRepository {
           ) {
             throw new MongoInputError('La revisión no continúa una versión enviada válida.');
           }
+          if (previous.patientId !== quote.patientId || previous.caseId !== quote.caseId)
+            throw new MongoInputError(
+              'Una revisión debe conservar el paciente y la hospitalización de la versión enviada.',
+            );
+          previousQuote = publicQuote(previous);
         }
+        await requireCatalogPrices(this.database, actor, quote, session, previousQuote);
         const stored: StoredQuote = {
           ...quote,
           rootQuoteId: rootId,
@@ -189,6 +234,11 @@ export class MongoQuoteRepository {
           { session },
         );
         if (!current || !canEditQuote(publicQuote(current))) throw new MongoConflictError();
+        if (current.patientId !== quote.patientId || current.caseId !== quote.caseId)
+          throw new MongoInputError(
+            'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
+          );
+        await requireCatalogPrices(this.database, actor, quote, session, publicQuote(current));
         const updated = await this.database.collection<StoredQuote>('quotes').findOneAndUpdate(
           {
             organizationId: actor.organizationId,

@@ -4,21 +4,42 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Payment } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
+import { quoteDisplayCode } from '@analiza/domain';
+import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { receivableAccounts } from '@/lib/receivables';
 const money = (value: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(value);
 
-const paymentSchema = z.object({
-  quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
-  amount: z.number().positive('Ingrese un monto positivo.'),
-  reference: z.string().trim().min(1, 'Ingrese una referencia.'),
-  idempotencyKey: z.string().trim().min(1, 'Ingrese una clave idempotente.'),
-});
+const paymentSchema = z
+  .object({
+    quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
+    amount: z.number().positive('Ingrese un monto positivo.'),
+    paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']),
+    reference: z.string().trim().max(120, 'Use un máximo de 120 caracteres.').optional(),
+  })
+  .superRefine((payment, context) => {
+    if (
+      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      !payment.reference
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Ingrese el número de referencia.',
+        path: ['reference'],
+      });
+    }
+  });
 type PaymentForm = z.infer<typeof paymentSchema>;
 const paymentStatus = { APPLIED: 'Aplicado', VOIDED: 'Reversado' };
+const paymentMethods = {
+  CASH: 'Efectivo',
+  CHECK: 'Cheque',
+  TRANSFER: 'Transferencia',
+  CARD: 'Tarjeta',
+} as const;
 
 export function PaymentsPage({ receivables = false }: { receivables?: boolean }) {
   const { addPayment, payments, quotes, patients, voidPayment, error } = useWorkspace();
@@ -26,36 +47,64 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [statementPatientId, setStatementPatientId] = useState('');
+  const [paymentCommandKey, setPaymentCommandKey] = useState(() => crypto.randomUUID());
+  const accounts = receivableAccounts(quotes, payments);
+  const openAccounts = accounts.filter((account) => account.balance > 0);
+  const sentQuotes = openAccounts.map((account) => account.quote);
+  const quoteOptions = openAccounts.map((account) => ({
+    value: account.quote.id,
+    label:
+      (patients.find((patient) => patient.id === account.quote.patientId)?.fullName ?? 'Paciente') +
+      ' · ' +
+      quoteDisplayCode(account.quote.id) +
+      ' · saldo ' +
+      money(account.balance),
+  }));
+  const statementPatientIds = new Set(accounts.map((account) => account.quote.patientId));
+  const statementPatients = patients.filter((patient) => statementPatientIds.has(patient.id));
+  const statementPatient = statementPatients.find((patient) => patient.id === statementPatientId);
+  const statementAccounts = accounts.filter(
+    (account) => account.quote.patientId === statementPatientId,
+  );
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
       quoteId: quotes.find((quote) => quote.status === 'SENT')?.id ?? '',
       amount: 1,
+      paymentMethod: 'CASH',
       reference: '',
-      idempotencyKey: crypto.randomUUID(),
     },
   });
   const voidForm = useForm<{ reason: string }>({ defaultValues: { reason: '' } });
+  const selectedQuoteId = useWatch({ control: form.control, name: 'quoteId' });
+  const selectedPaymentMethod = useWatch({ control: form.control, name: 'paymentMethod' });
   function close() {
     setOpen(false);
     form.reset({
       quoteId: quotes.find((quote) => quote.status === 'SENT')?.id ?? '',
       amount: 1,
+      paymentMethod: 'CASH',
       reference: '',
-      idempotencyKey: crypto.randomUUID(),
     });
   }
   async function submit(values: PaymentForm) {
-    if (payments.some((payment) => payment.idempotencyKey === values.idempotencyKey)) {
-      form.setError('idempotencyKey', {
-        type: 'duplicate',
-        message: 'La clave ya fue aplicada; la operación no se duplicó.',
+    const account = accounts.find((candidate) => candidate.quote.id === values.quoteId);
+    if (!account || account.balance <= 0) {
+      form.setError('quoteId', { message: 'La cuenta seleccionada ya está pagada.' });
+      return;
+    }
+    if (Math.round(values.amount * 100) > Math.round(account.balance * 100)) {
+      form.setError('amount', {
+        message: `El monto no puede superar el saldo de ${money(account.balance)}.`,
       });
       return;
     }
     const payment: Payment = {
       id: crypto.randomUUID(),
       ...values,
+      reference: values.reference || undefined,
+      idempotencyKey: paymentCommandKey,
       status: 'APPLIED',
       createdAt: new Date().toISOString(),
     };
@@ -65,7 +114,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       });
       return;
     }
-    setMessage('Pago aplicado una sola vez con clave idempotente y evidencia de auditoría.');
+    setMessage('Pago aplicado correctamente y registrado en auditoría.');
     close();
   }
   async function voidSubmit(values: { reason: string }) {
@@ -84,8 +133,41 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     setVoiding(null);
     voidForm.reset();
   }
-  const sentQuotes = quotes.filter((quote) => quote.status === 'SENT');
-  const accounts = receivableAccounts(quotes, payments);
+  async function downloadReceipt(payment: Payment) {
+    const { buildPaymentReceiptPdf, downloadPdf } = await import('@/lib/financial-pdf');
+    const quote = quotes.find((candidate) => candidate.id === payment.quoteId);
+    if (!quote) {
+      setMessage('No se encontró la cotización asociada al comprobante.');
+      return;
+    }
+    const patient = patients.find((candidate) => candidate.id === quote.patientId);
+    const bytes = await buildPaymentReceiptPdf(payment, quote, patient);
+    downloadPdf(bytes, `comprobante-pago-${payment.id}.pdf`);
+    setMessage('Comprobante interno no fiscal generado.');
+  }
+  async function downloadStatement() {
+    if (!statementPatient || !statementAccounts.length) return;
+    try {
+      const [{ buildPatientStatementPdf, downloadPdf }, logoResponse] = await Promise.all([
+        import('@/lib/financial-pdf'),
+        fetch('/brand/analiza-en-casa-logo.png'),
+      ]);
+      const logoBytes = logoResponse.ok
+        ? new Uint8Array(await logoResponse.arrayBuffer())
+        : undefined;
+      const bytes = await buildPatientStatementPdf(
+        statementPatient,
+        statementAccounts,
+        payments,
+        quotes,
+        logoBytes,
+      );
+      downloadPdf(bytes, `estado-cuenta-${statementPatient.id}.pdf`);
+      setMessage('Estado de cuenta individual no fiscal generado para el paciente seleccionado.');
+    } catch {
+      setMessage('No fue posible generar el estado de cuenta. Inténtelo de nuevo.');
+    }
+  }
   const totals = accounts.reduce(
     (sum, item) => ({
       responsibility: sum.responsibility + item.responsibility,
@@ -107,9 +189,10 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           {can('payments:write') ? (
             <Button
               data-action-id="PAYMENT-APPLY"
-              disabled={!sentQuotes.length}
+              disabled={!openAccounts.length}
               onClick={() => {
                 form.setValue('quoteId', sentQuotes[0]?.id ?? '');
+                setPaymentCommandKey(crypto.randomUUID());
                 setMessage(null);
                 setOpen(true);
               }}
@@ -141,6 +224,85 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           </Panel>
         ))}
       </section>
+      <Panel>
+        <div className="table-heading">
+          <div>
+            <h2>Estado de cuenta por paciente</h2>
+            <p>Consulte cargos, abonos y saldo de un solo paciente.</p>
+          </div>
+        </div>
+        <div className="filter-grid">
+          <label>
+            Paciente
+            <SearchableSelect
+              actionId="PATIENT-STATEMENT-SEARCH"
+              ariaLabel="Buscar paciente para estado de cuenta"
+              onChange={setStatementPatientId}
+              options={statementPatients.map((patient) => ({
+                value: patient.id,
+                label: `${patient.fullName} · ${patient.documentId}`,
+              }))}
+              placeholder="Buscar por nombre o documento"
+              value={statementPatientId}
+            />
+          </label>
+          <div className="action-row">
+            <Button
+              className="button-secondary"
+              data-action-id="PATIENT-STATEMENT-PDF"
+              disabled={!statementPatient || !statementAccounts.length}
+              onClick={() => void downloadStatement()}
+              type="button"
+            >
+              Descargar estado de cuenta PDF
+            </Button>
+          </div>
+        </div>
+        {statementPatient ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cotización</th>
+                  <th>Cargos</th>
+                  <th>Pagos</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statementAccounts.map((account) => (
+                  <tr key={account.quote.id}>
+                    <td>
+                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                    </td>
+                    <td>{money(account.responsibility)}</td>
+                    <td>{money(account.paid)}</td>
+                    <td>{money(account.balance)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Total del paciente</th>
+                  <td>
+                    {money(
+                      statementAccounts.reduce((sum, account) => sum + account.responsibility, 0),
+                    )}
+                  </td>
+                  <td>
+                    {money(statementAccounts.reduce((sum, account) => sum + account.paid, 0))}
+                  </td>
+                  <td>
+                    {money(statementAccounts.reduce((sum, account) => sum + account.balance, 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ) : (
+          <p className="field-help">Seleccione un paciente con cotizaciones enviadas.</p>
+        )}
+      </Panel>
       {error ? (
         <p className="notice" role="alert">
           {error}
@@ -169,7 +331,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                 {accounts.map((account) => (
                   <tr key={account.quote.id}>
                     <td>
-                      <strong>{account.quote.id}</strong>
+                      <strong title={account.quote.id}>{quoteDisplayCode(account.quote.id)}</strong>
                       <small style={{ display: 'block' }}>v{account.quote.version}</small>
                     </td>
                     <td>
@@ -181,26 +343,25 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     <td>{money(account.balance)}</td>
                     <td>
                       <StatusTag tone={account.balance > 0 ? 'neutral' : 'success'}>
-                        {account.balance > 0
-                          ? 'Pendiente'
-                          : account.balance < 0
-                            ? 'Saldo a favor'
-                            : 'Pagado'}
+                        {account.balance > 0 ? 'Pendiente' : 'Pagado'}
                       </StatusTag>
                     </td>
                     <td>
-                      {can('payments:write') ? (
+                      {can('payments:write') && account.balance > 0 ? (
                         <Button
                           className="button-secondary"
                           data-action-id="PAYMENT-APPLY"
                           onClick={() => {
                             form.setValue('quoteId', account.quote.id);
-                            form.setValue('amount', Math.max(account.balance, 0.01));
+                            form.setValue('amount', account.balance);
+                            setPaymentCommandKey(crypto.randomUUID());
                             setOpen(true);
                           }}
                         >
                           Registrar pago
                         </Button>
+                      ) : account.balance <= 0 ? (
+                        <StatusTag tone="success">Pago completado</StatusTag>
                       ) : (
                         'Lectura'
                       )}
@@ -240,39 +401,48 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                   <th>Fecha</th>
                   <th>Cotización</th>
                   <th>Monto ingresado</th>
-                  <th>Referencia</th>
-                  <th>Clave idempotente</th>
+                  <th>Medio de pago</th>
+                  <th>N.º de referencia</th>
                   <th>Estado</th>
-                  <th />
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment) => (
                   <tr key={payment.id}>
                     <td>{new Date(payment.createdAt).toLocaleString('es-SV')}</td>
-                    <td>{payment.quoteId}</td>
+                    <td title={payment.quoteId}>{quoteDisplayCode(payment.quoteId)}</td>
                     <td>{money(payment.amount)}</td>
-                    <td>{payment.reference}</td>
                     <td>
-                      <details>
-                        <summary>Ver clave</summary>
-                        <small>{payment.idempotencyKey}</small>
-                      </details>
+                      {payment.paymentMethod
+                        ? paymentMethods[payment.paymentMethod]
+                        : 'No registrado'}
                     </td>
+                    <td>{payment.reference || 'No aplica'}</td>
                     <td>{paymentStatus[payment.status]}</td>
                     <td>
-                      {payment.status === 'APPLIED' && can('payments:write') ? (
+                      <div className="action-row">
                         <Button
                           className="button-secondary"
-                          data-action-id="PAYMENT-VOID"
-                          onClick={() => setVoiding(payment.id)}
+                          data-action-id="PAYMENT-RECEIPT-PDF"
+                          onClick={() => void downloadReceipt(payment)}
                           type="button"
                         >
-                          Reversar
+                          Comprobante PDF
                         </Button>
-                      ) : (
-                        (payment.voidReason ?? '—')
-                      )}
+                        {payment.status === 'APPLIED' && can('payments:write') ? (
+                          <Button
+                            className="button-secondary"
+                            data-action-id="PAYMENT-VOID"
+                            onClick={() => setVoiding(payment.id)}
+                            type="button"
+                          >
+                            Reversar
+                          </Button>
+                        ) : (
+                          (payment.voidReason ?? '—')
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -284,7 +454,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
         )}
       </Panel>
       <Dialog
-        description="No se aplican reglas de saldo o cobertura sin configuración. La clave idempotente evita duplicar la operación."
+        description="Selecciona cómo se recibió el pago. La plataforma evita duplicados automáticamente."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
@@ -312,13 +482,16 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           ) : null}
           <label>
             Cotización enviada
-            <select {...form.register('quoteId')}>
-              {sentQuotes.map((quote) => (
-                <option key={quote.id} value={quote.id}>
-                  {quote.id}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+              actionId="PAYMENT-QUOTE-SEARCH"
+              ariaLabel="Buscar paciente o cotización"
+              onChange={(value) =>
+                form.setValue('quoteId', value, { shouldDirty: true, shouldValidate: true })
+              }
+              options={quoteOptions}
+              placeholder="Buscar por paciente o código de cotización"
+              value={selectedQuoteId}
+            />
             {form.formState.errors.quoteId ? (
               <span className="field-error">{form.formState.errors.quoteId.message}</span>
             ) : null}
@@ -327,6 +500,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             Monto ingresado
             <input
               {...form.register('amount', { valueAsNumber: true })}
+              max={accounts.find((account) => account.quote.id === selectedQuoteId)?.balance}
               min="0.01"
               step="0.01"
               type="number"
@@ -336,19 +510,35 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             ) : null}
           </label>
           <label>
-            Referencia
-            <input {...form.register('reference')} />
-            {form.formState.errors.reference ? (
-              <span className="field-error">{form.formState.errors.reference.message}</span>
-            ) : null}
+            Medio de pago
+            <select
+              {...form.register('paymentMethod', {
+                onChange: (event) => {
+                  if (event.target.value !== 'TRANSFER' && event.target.value !== 'CARD') {
+                    form.setValue('reference', '');
+                  }
+                },
+              })}
+            >
+              {Object.entries(paymentMethods).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </label>
-          <label>
-            Clave idempotente
-            <input {...form.register('idempotencyKey')} />
-            {form.formState.errors.idempotencyKey ? (
-              <span className="field-error">{form.formState.errors.idempotencyKey.message}</span>
-            ) : null}
-          </label>
+          {selectedPaymentMethod === 'TRANSFER' || selectedPaymentMethod === 'CARD' ? (
+            <label>
+              Número de referencia
+              <input {...form.register('reference')} autoComplete="off" maxLength={120} />
+              <span className="field-help">
+                Obligatorio para identificar transferencias y pagos con tarjeta.
+              </span>
+              {form.formState.errors.reference ? (
+                <span className="field-error">{form.formState.errors.reference.message}</span>
+              ) : null}
+            </label>
+          ) : null}
         </form>
       </Dialog>
       <Dialog

@@ -1,6 +1,12 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import type { Shift } from '@analiza/contracts';
-import { MongoAccessError, MongoInputError, type ServerActor } from './mongo-patients';
+import {
+  MongoAccessError,
+  MongoConflictError,
+  MongoInputError,
+  type ServerActor,
+} from './mongo-patients';
 import { MongoShiftRepository, type AgendaDatabase } from './mongo-shifts';
 
 const administrator: ServerActor = { userId: 'admin-a', organizationId: 'org-a', role: 'ADMIN' };
@@ -14,8 +20,13 @@ const shift = (id: string, startsAt: string, endsAt: string): Shift => ({
   status: 'SCHEDULED',
 });
 
-function database(existing: Shift[] = [], replay: Shift[] | null = null) {
+function database(
+  existing: Shift[] = [],
+  replay: Shift[] | null = null,
+  updateReplay: Shift | null = null,
+) {
   const inserts = vi.fn(async () => ({ acknowledged: true }));
+  const replacements = vi.fn(async () => ({ acknowledged: true }));
   const commands = {
     findOne: vi.fn(async () =>
       replay
@@ -24,26 +35,46 @@ function database(existing: Shift[] = [], replay: Shift[] | null = null) {
     ),
     find: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
     insertOne: inserts,
+    replaceOne: replacements,
+  };
+  const updateCommands = {
+    findOne: vi.fn(async () =>
+      updateReplay
+        ? {
+            organizationId: 'org-a',
+            idempotencyKey: 'update-synthetic-1',
+            payloadHash: createHash('sha256').update(JSON.stringify(updateReplay)).digest('hex'),
+            shift: updateReplay,
+          }
+        : null,
+    ),
+    find: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
+    insertOne: inserts,
+    replaceOne: replacements,
   };
   const shifts = {
-    findOne: vi.fn(async () => null),
+    findOne: vi.fn(async () => existing[0] ?? null),
     find: vi.fn(() => ({ toArray: vi.fn(async () => existing) })),
     insertOne: inserts,
+    replaceOne: replacements,
   };
   const resources = {
     findOne: vi.fn(async () => ({ id: 'nurse-synthetic-1' })),
     find: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
     insertOne: inserts,
+    replaceOne: replacements,
   };
   const patients = {
     findOne: vi.fn(async () => ({ id: 'patient-synthetic-1' })),
     find: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
     insertOne: inserts,
+    replaceOne: replacements,
   };
   const audits = {
     findOne: vi.fn(async () => null),
     find: vi.fn(() => ({ toArray: vi.fn(async () => []) })),
     insertOne: inserts,
+    replaceOne: replacements,
   };
   const transaction = vi.fn(async (callback: () => Promise<unknown>) => callback());
   const store = {
@@ -52,6 +83,7 @@ function database(existing: Shift[] = [], replay: Shift[] | null = null) {
         ({
           shifts,
           shiftSeriesCommands: commands,
+          shiftUpdateCommands: updateCommands,
           nursingResources: resources,
           patients,
           auditEvents: audits,
@@ -59,7 +91,17 @@ function database(existing: Shift[] = [], replay: Shift[] | null = null) {
     ),
     client: { startSession: () => ({ withTransaction: transaction, endSession: vi.fn() }) },
   } as unknown as AgendaDatabase;
-  return { store, inserts, commands, shifts, resources, patients, transaction };
+  return {
+    store,
+    inserts,
+    replacements,
+    commands,
+    updateCommands,
+    shifts,
+    resources,
+    patients,
+    transaction,
+  };
 }
 
 describe('Mongo agenda series commands', () => {
@@ -131,5 +173,65 @@ describe('Mongo agenda series commands', () => {
       }),
     ).resolves.toEqual(series);
     expect(fake.inserts).not.toHaveBeenCalled();
+  });
+
+  // test-id: vitest:e03-shift-update-audited-idempotent
+  it('updates one scheduled shift atomically, checks availability and appends audit evidence', async () => {
+    const current = shift(
+      'shift-synthetic-1',
+      '2026-09-10T20:00:00.000Z',
+      '2026-09-11T04:00:00.000Z',
+    );
+    const updated = { ...current, startsAt: '2026-09-10T21:00:00.000Z' };
+    const fake = database([current]);
+    await expect(
+      new MongoShiftRepository(fake.store).update(administrator, {
+        shift: updated,
+        idempotencyKey: 'update-synthetic-1',
+      }),
+    ).resolves.toEqual(updated);
+    expect(fake.replacements).toHaveBeenCalledWith(
+      { organizationId: 'org-a', id: current.id },
+      expect.objectContaining({ ...updated, organizationId: 'org-a' }),
+    );
+    expect(fake.inserts).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'SHIFT_UPDATED', resourceId: current.id }),
+    );
+  });
+
+  it('rejects an update that collides and replays an idempotent update without writing again', async () => {
+    const current = shift(
+      'shift-synthetic-1',
+      '2026-09-10T20:00:00.000Z',
+      '2026-09-11T04:00:00.000Z',
+    );
+    const collision = shift(
+      'shift-synthetic-2',
+      '2026-09-10T08:00:00.000Z',
+      '2026-09-10T14:00:00.000Z',
+    );
+    const conflicting = { ...current, startsAt: '2026-09-10T09:00:00.000Z' };
+    await expect(
+      new MongoShiftRepository(database([current, collision]).store).update(administrator, {
+        shift: conflicting,
+        idempotencyKey: 'update-collision',
+      }),
+    ).rejects.toBeInstanceOf(MongoInputError);
+
+    const replay = database([current], null, conflicting);
+    await expect(
+      new MongoShiftRepository(replay.store).update(administrator, {
+        shift: conflicting,
+        idempotencyKey: 'update-synthetic-1',
+      }),
+    ).resolves.toEqual(conflicting);
+    expect(replay.replacements).not.toHaveBeenCalled();
+
+    await expect(
+      new MongoShiftRepository(replay.store).update(administrator, {
+        shift: { ...conflicting, endsAt: '2026-09-10T13:00:00.000Z' },
+        idempotencyKey: 'update-synthetic-1',
+      }),
+    ).rejects.toBeInstanceOf(MongoConflictError);
   });
 });

@@ -6,13 +6,21 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
+import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
+import { useOperations } from '@/lib/use-operations';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
   supplierCatalogItemId: z.string().min(1, 'Seleccione un proveedor.'),
-  reference: z.string().trim().min(1, 'Ingrese una referencia de compra.'),
+  warehouseId: z.string().min(1, 'Seleccione una bodega de destino.'),
+  reference: z.string().trim().min(1, 'Ingrese una referencia de compra.').max(200),
+  invoiceNumber: z.string().trim().max(100, 'Use un máximo de 100 caracteres.'),
   note: z.string().trim(),
-  quantity: z.number().positive('La cantidad debe ser mayor que cero.'),
+  quantity: z
+    .number()
+    .int('La cantidad debe ser un número entero.')
+    .positive('La cantidad debe ser mayor que cero.'),
   unitCost: z.number().nonnegative('El costo no puede ser negativo.'),
   expirationDate: z.string(),
   lotNumber: z.string().trim(),
@@ -20,14 +28,37 @@ const schema = z.object({
 });
 type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
-  const { addPurchase, catalogItems, error, purchases } = useWorkspace();
+  const {
+    addPurchase,
+    updatePurchase,
+    cancelPurchase,
+    catalogItems,
+    error,
+    purchases,
+    refreshWorkspace,
+  } = useWorkspace();
   const { can } = useAuth();
+  const {
+    warehouses,
+    connected: warehouseConnected,
+    error: warehouseError,
+    busy: receiptBusy,
+    execute: executeReceipt,
+  } = useOperations();
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Purchase | null>(null);
+  const [cancelling, setCancelling] = useState<Purchase | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Purchase | null>(null);
+  const [receiptSelection, setReceiptSelection] = useState<{
+    purchase: Purchase;
+    receivedAt: string;
+  } | null>(null);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
   const purchasableItems = useMemo(
     () =>
       catalogItems.filter(
@@ -38,16 +69,28 @@ export default function PurchasesPage() {
     [catalogItems],
   );
   const suppliers = useMemo(
-    () =>
-      catalogItems.filter((item) => item.status === 'ACTIVE' && item.category === 'PROVIDERS'),
+    () => catalogItems.filter((item) => item.status === 'ACTIVE' && item.category === 'PROVIDERS'),
     [catalogItems],
+  );
+  const activeWarehouses = useMemo(
+    () =>
+      warehouseConnected
+        ? warehouses.filter((warehouse) => warehouse.status === 'ACTIVE')
+        : [{ id: 'central', name: 'central (demo)', status: 'ACTIVE' as const }],
+    [warehouseConnected, warehouses],
+  );
+  const warehouseNames = useMemo(
+    () => new Map(warehouses.map((warehouse) => [warehouse.id, warehouse.name])),
+    [warehouses],
   );
   const form = useForm<Form>({
     resolver: zodResolver(schema),
     defaultValues: {
       catalogItemId: purchasableItems[0]?.id ?? '',
       supplierCatalogItemId: suppliers[0]?.id ?? '',
+      warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
+      invoiceNumber: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
@@ -66,31 +109,98 @@ export default function PurchasesPage() {
     if (!suppliers.some((item) => item.id === currentSupplier) && suppliers[0]) {
       form.setValue('supplierCatalogItemId', suppliers[0].id, { shouldValidate: true });
     }
-  }, [form, purchasableItems, suppliers]);
+    const currentWarehouse = form.getValues('warehouseId');
+    if (!activeWarehouses.some((warehouse) => warehouse.id === currentWarehouse)) {
+      form.setValue('warehouseId', activeWarehouses[0]?.id ?? '', { shouldValidate: true });
+    }
+  }, [activeWarehouses, form, purchasableItems, suppliers]);
   const itemNames = useMemo(
     () => new Map(catalogItems.map((item) => [item.id, item.name])),
     [catalogItems],
   );
   const selectedCatalogItemId = useWatch({ control: form.control, name: 'catalogItemId' });
   const selectedItem = purchasableItems.find((item) => item.id === selectedCatalogItemId);
+  const purchaseCatalogOptions = useMemo(
+    () =>
+      purchasableItems.map((item) => ({
+        value: item.id,
+        label: `${item.sku} · ${item.name}`,
+      })),
+    [purchasableItems],
+  );
   const visible = useMemo(
     () =>
       purchases.filter((purchase) =>
-        `${purchase.reference} ${itemNames.get(purchase.catalogItemId) ?? ''}`
+        `${purchase.reference} ${purchase.invoiceNumber ?? ''} ${itemNames.get(purchase.catalogItemId) ?? ''} ${warehouseNames.get(purchase.warehouseId ?? '') ?? ''}`
           .toLocaleLowerCase('es-SV')
           .includes(query.toLocaleLowerCase('es-SV')),
       ),
-    [itemNames, purchases, query],
+    [itemNames, purchases, query, warehouseNames],
   );
   const pages = Math.max(1, Math.ceil(visible.length / pageSize));
   const currentPage = Math.min(page, pages);
   const pageRows = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  async function exportPurchasesXlsx() {
+    const { createXlsxWorkbook } = await import('@/lib/xlsx');
+    const workbookBytes = createXlsxWorkbook(
+      [
+        { key: 'reference', label: 'Referencia', width: 26 },
+        { key: 'invoiceNumber', label: 'Número de factura', width: 24 },
+        { key: 'item', label: 'Ítem', width: 36 },
+        { key: 'supplier', label: 'Proveedor', width: 30 },
+        { key: 'warehouse', label: 'Bodega', width: 26 },
+        { key: 'quantity', label: 'Cantidad' },
+        { key: 'unitCost', label: 'Costo unitario' },
+        { key: 'total', label: 'Total' },
+        { key: 'status', label: 'Estado' },
+        { key: 'createdAt', label: 'Fecha de creación', width: 22 },
+      ],
+      visible.map((purchase) => ({
+        reference: purchase.reference,
+        invoiceNumber: purchase.invoiceNumber ?? '',
+        item: itemNames.get(purchase.catalogItemId) ?? purchase.catalogItemId,
+        supplier: itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado',
+        warehouse: purchase.warehouseId
+          ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
+          : 'Sin bodega asignada',
+        quantity: purchase.quantity ?? '',
+        unitCost: purchase.unitCost ?? '',
+        total:
+          purchase.unitCost === undefined
+            ? ''
+            : ((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2),
+        status:
+          purchase.status === 'RECEIVED'
+            ? 'Recibida en cuarentena'
+            : purchase.status === 'CANCELLED'
+              ? 'Anulada'
+              : 'Borrador',
+        createdAt: purchase.createdAt.slice(0, 10),
+      })),
+      'Compras',
+    );
+    const blob = new Blob([workbookBytes], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+    const anchor = document.createElement('a');
+    anchor.download = 'compras-filtradas.xlsx';
+    anchor.href = URL.createObjectURL(blob);
+    document.body.append(anchor);
+    anchor.click();
+    window.setTimeout(() => {
+      URL.revokeObjectURL(anchor.href);
+      anchor.remove();
+    }, 1000);
+  }
   function close() {
     setOpen(false);
+    setEditing(null);
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
       supplierCatalogItemId: suppliers[0]?.id ?? '',
+      warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
+      invoiceNumber: '',
       note: '',
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
@@ -99,11 +209,46 @@ export default function PurchasesPage() {
       serialNumber: '',
     });
   }
+  function edit(purchase: Purchase) {
+    if (purchase.status !== 'DRAFT') return;
+    setEditing(purchase);
+    form.reset({
+      catalogItemId: purchase.catalogItemId,
+      supplierCatalogItemId: purchase.supplierCatalogItemId ?? '',
+      warehouseId: purchase.warehouseId ?? '',
+      reference: purchase.reference,
+      invoiceNumber: purchase.invoiceNumber ?? '',
+      note: purchase.note ?? '',
+      quantity: purchase.quantity ?? 1,
+      unitCost: purchase.unitCost ?? 0,
+      expirationDate: purchase.expirationDate ?? '',
+      lotNumber: purchase.lotNumber ?? '',
+      serialNumber: purchase.serialNumber ?? '',
+    });
+    setOpen(true);
+  }
+  function selectCatalogItem(itemId: string) {
+    const item = purchasableItems.find((candidate) => candidate.id === itemId);
+    form.setValue('catalogItemId', item?.id ?? '', { shouldValidate: true });
+    form.setValue('unitCost', item?.costPrice ?? 0, { shouldValidate: true });
+    if (item?.category === 'EQUIPMENT') {
+      form.setValue('expirationDate', '');
+      form.setValue('lotNumber', '');
+      form.clearErrors(['expirationDate', 'lotNumber']);
+    } else if (item?.category === 'MEDICATIONS' || item?.category === 'SUPPLIES') {
+      form.setValue('serialNumber', '');
+      form.clearErrors('serialNumber');
+    }
+  }
   async function submit(values: Form) {
     const catalogItem = purchasableItems.find((item) => item.id === values.catalogItemId);
     if (!catalogItem) return;
     if (!suppliers.some((item) => item.id === values.supplierCatalogItemId)) {
       form.setError('supplierCatalogItemId', { message: 'Seleccione un proveedor activo.' });
+      return;
+    }
+    if (!activeWarehouses.some((warehouse) => warehouse.id === values.warehouseId)) {
+      form.setError('warehouseId', { message: 'Seleccione una bodega activa.' });
       return;
     }
     if (['MEDICATIONS', 'SUPPLIES'].includes(catalogItem.category ?? '')) {
@@ -120,23 +265,102 @@ export default function PurchasesPage() {
       form.setError('serialNumber', { message: 'Indique el número de serie.' });
       return;
     }
-    const saved = await addPurchase({
-      id: crypto.randomUUID(),
-      catalogItemId: values.catalogItemId,
-      supplierCatalogItemId: values.supplierCatalogItemId,
-      reference: values.reference,
-      note: values.note || undefined,
-      quantity: values.quantity,
-      unitCost: values.unitCost,
-      expirationDate: values.expirationDate || undefined,
-      lotNumber: values.lotNumber || undefined,
-      serialNumber: values.serialNumber || undefined,
-      status: 'DRAFT',
-      createdAt: new Date().toISOString(),
-    } satisfies Purchase);
+    if (catalogItem.category === 'EQUIPMENT' && values.quantity !== 1) {
+      form.setError('quantity', {
+        message: 'Cada equipo con número de serie se registra por unidad.',
+      });
+      return;
+    }
+    const purchase = normalizePurchaseTraceability(
+      {
+        id: editing?.id ?? crypto.randomUUID(),
+        catalogItemId: values.catalogItemId,
+        supplierCatalogItemId: values.supplierCatalogItemId,
+        warehouseId: values.warehouseId,
+        reference: values.reference,
+        invoiceNumber: values.invoiceNumber || undefined,
+        note: values.note || undefined,
+        quantity: values.quantity,
+        unitCost: values.unitCost,
+        expirationDate: values.expirationDate || undefined,
+        lotNumber: values.lotNumber || undefined,
+        serialNumber: values.serialNumber || undefined,
+        status: 'DRAFT',
+        createdAt: editing?.createdAt ?? new Date().toISOString(),
+      } satisfies Purchase,
+      catalogItem.category,
+    );
+    const saved = editing ? await updatePurchase(purchase) : await addPurchase(purchase);
     if (!saved) return;
-    setMessage('Compra guardada como borrador con proveedor y trazabilidad de inventario.');
+    setMessage(
+      editing
+        ? 'Borrador de compra actualizado y auditado.'
+        : 'Compra guardada como borrador con bodega de destino y trazabilidad de inventario.',
+    );
     close();
+  }
+  async function confirmCancellation(formData: FormData) {
+    if (!cancelling) return;
+    const reason = String(formData.get('reason') ?? '').trim();
+    if (!reason) {
+      setCancelError('Explique por qué se anula el borrador.');
+      return;
+    }
+    if (!(await cancelPurchase(cancelling.id, reason))) {
+      setCancelError('No se pudo anular el borrador. Revise su estado e inténtelo de nuevo.');
+      return;
+    }
+    setCancelling(null);
+    setCancelError(null);
+    setMessage('Borrador anulado con motivo y auditoría. No afectó existencias.');
+  }
+  async function receivePurchase(formData: FormData) {
+    if (!receiptSelection) return;
+    const { purchase, receivedAt } = receiptSelection;
+    const reason = String(formData.get('reason') ?? '').trim();
+    if (!reason) {
+      setReceiptError('Indique el motivo de la recepción física.');
+      return;
+    }
+    const item = catalogItems.find((candidate) => candidate.id === purchase.catalogItemId);
+    const number = purchase.serialNumber ?? purchase.lotNumber;
+    if (
+      !item ||
+      !purchase.warehouseId ||
+      !purchase.supplierCatalogItemId ||
+      !number ||
+      !purchase.quantity ||
+      !Number.isInteger(purchase.quantity)
+    ) {
+      setReceiptError('La compra no tiene todos los datos necesarios para una recepción trazada.');
+      return;
+    }
+    const receiptId = `purchase-receipt:${purchase.id}`;
+    const ok = await executeReceipt({
+      command: 'inventory.trace.receive',
+      receipt: {
+        id: receiptId,
+        idempotencyKey: receiptId,
+        purchaseId: purchase.id,
+        kind: item.category === 'EQUIPMENT' ? 'SERIAL' : 'LOT',
+        itemId: purchase.catalogItemId,
+        supplierCatalogItemId: purchase.supplierCatalogItemId,
+        warehouseId: purchase.warehouseId,
+        number,
+        quantity: purchase.quantity,
+        expiresOn: purchase.expirationDate,
+        receiptReference: purchase.reference,
+        reason,
+        receivedAt,
+      },
+    });
+    if (!ok) return;
+    await refreshWorkspace();
+    setReceiptSelection(null);
+    setReceiptError(null);
+    setMessage(
+      'Compra recibida en la bodega indicada. El lote o serie permanece en cuarentena hasta su liberación.',
+    );
   }
   return (
     <div className="page-stack">
@@ -145,16 +369,19 @@ export default function PurchasesPage() {
           <p className="eyebrow">Inventario</p>
           <h1>Compras</h1>
           <p>
-            Registra borradores de compra con proveedor, productos inventariados y trazabilidad de
-            lote, vencimiento o serie.
+            Registra borradores de compra con proveedor, bodega de destino y trazabilidad de lote,
+            vencimiento o serie. La recepción física se confirma desde el borrador y queda visible
+            en Lotes y series.
           </p>
         </div>
         {can('purchases:write') ? (
           <Button
             data-action-id="PURCHASE-CREATE"
-            disabled={!purchasableItems.length || !suppliers.length}
+            disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
             onClick={() => {
               setMessage(null);
+              setEditing(null);
+              form.reset();
               setOpen(true);
             }}
             type="button"
@@ -173,15 +400,25 @@ export default function PurchasesPage() {
           {error}
         </p>
       ) : null}
-      {can('purchases:write') && (!suppliers.length || !purchasableItems.length) ? (
+      {warehouseError ? (
+        <p className="notice danger" role="alert">
+          {warehouseError}
+        </p>
+      ) : null}
+      {can('purchases:write') &&
+      (!suppliers.length || !purchasableItems.length || !activeWarehouses.length) ? (
         <div className="notice" role="status">
           <strong>Antes de registrar una compra:</strong>{' '}
           {!suppliers.length ? 'agrega al menos un proveedor activo' : ''}
           {!suppliers.length && !purchasableItems.length ? ' y ' : ''}
-          {!purchasableItems.length
-            ? 'agrega un medicamento, insumo o equipo activo'
-            : ''}{' '}
-          en <Link href="/catalogs/operational">Catálogos operativos</Link>.
+          {!purchasableItems.length ? 'agrega un medicamento, insumo o equipo activo' : ''} en{' '}
+          <Link
+            className="action-link-button action-link-button--inline"
+            href="/catalogs/operational"
+          >
+            Abrir catálogos operativos
+          </Link>
+          {!activeWarehouses.length ? ' y habilita una bodega en Inventario → Bodegas.' : '.'}
         </div>
       ) : null}
       <Panel>
@@ -196,14 +433,16 @@ export default function PurchasesPage() {
             aria-describedby="purchase-export-help"
             className="button-secondary"
             data-action-id="PURCHASE-LIST-EXPORT"
-            disabled
+            disabled={!visible.length}
+            onClick={() => void exportPurchasesXlsx()}
             type="button"
           >
             Excel
           </Button>
         </div>
         <p className="field-help" id="purchase-export-help">
-          La exportación requiere formato, columnas, permisos y minimización aprobados (CH13-Q012).
+          Descarga las compras visibles según la búsqueda actual en un archivo XLSX. No incluye
+          adjuntos ni datos clínicos.
         </p>
         <div className="filter-grid">
           <label>
@@ -242,13 +481,12 @@ export default function PurchasesPage() {
                 {[
                   'Acciones',
                   'Tipo',
-                  'Número',
+                  'Ubicación / referencia',
                   'Proveedor',
-                  'Total',
-                  '# Factura',
+                  'Total de compra',
+                  'Número de factura',
                   'Fecha',
                   'Estado',
-                  'Registro PT',
                 ].map((header) => (
                   <th key={header}>{header}</th>
                 ))}
@@ -258,19 +496,67 @@ export default function PurchasesPage() {
               {pageRows.map((purchase) => (
                 <tr key={purchase.id}>
                   <td>
-                    <Button
-                      className="button-secondary"
-                      data-action-id="PURCHASE-DETAIL-OPEN"
-                      onClick={() => setSelected(purchase)}
-                      type="button"
-                    >
-                      Abrir
-                    </Button>
+                    <div className="action-row">
+                      <Button
+                        className="button-secondary"
+                        data-action-id="PURCHASE-DETAIL-OPEN"
+                        onClick={() => setSelected(purchase)}
+                        type="button"
+                      >
+                        Abrir
+                      </Button>
+                      {can('purchases:write') && purchase.status === 'DRAFT' ? (
+                        <>
+                          <Button
+                            className="button-secondary"
+                            data-action-id="PURCHASE-EDIT"
+                            onClick={() => edit(purchase)}
+                            type="button"
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            className="button-secondary danger"
+                            data-action-id="PURCHASE-CANCEL"
+                            onClick={() => {
+                              setCancelError(null);
+                              setCancelling(purchase);
+                            }}
+                            type="button"
+                          >
+                            Anular
+                          </Button>
+                        </>
+                      ) : null}
+                      {can('purchases:write') &&
+                      can('inventory:write') &&
+                      purchase.status === 'DRAFT' &&
+                      purchase.warehouseId ? (
+                        <Button
+                          className="button-secondary"
+                          data-action-id="PURCHASE-RECEIVE"
+                          disabled={!warehouseConnected || receiptBusy}
+                          onClick={() => {
+                            setReceiptError(null);
+                            setReceiptSelection({ purchase, receivedAt: new Date().toISOString() });
+                          }}
+                          type="button"
+                        >
+                          Recibir
+                        </Button>
+                      ) : null}
+                    </div>
                   </td>
                   <td>Compra</td>
                   <td>
                     <code>{purchase.reference}</code>
                     <p className="field-help">{purchase.note ?? 'Sin nota documentada'}</p>
+                    <p className="field-help">
+                      Bodega:{' '}
+                      {purchase.warehouseId
+                        ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
+                        : 'Sin bodega asignada'}
+                    </p>
                   </td>
                   <td>{itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado'}</td>
                   <td>
@@ -278,15 +564,20 @@ export default function PurchasesPage() {
                       ? 'No documentado'
                       : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
                   </td>
-                  <td>No documentado</td>
+                  <td>{purchase.invoiceNumber || 'No registrado'}</td>
                   <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
-                  <td>Borrador</td>
-                  <td>No documentado</td>
+                  <td>
+                    {purchase.status === 'RECEIVED'
+                      ? 'Recibida en cuarentena'
+                      : purchase.status === 'CANCELLED'
+                        ? 'Anulada'
+                        : 'Borrador'}
+                  </td>
                 </tr>
               ))}
               {!visible.length ? (
                 <tr>
-                  <td colSpan={9}>
+                  <td colSpan={8}>
                     <EmptyState
                       detail={
                         query
@@ -327,20 +618,24 @@ export default function PurchasesPage() {
         </nav>
       </Panel>
       <Dialog
-        description="Registra el borrador y la trazabilidad de la compra; no descuenta ni recibe inventario automáticamente."
+        description="El borrador conserva la bodega y la trazabilidad; la recepción se confirma por separado."
         footer={
           <>
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
             <Button disabled={form.formState.isSubmitting} form="purchase-form" type="submit">
-              {form.formState.isSubmitting ? 'Guardando…' : 'Guardar borrador'}
+              {form.formState.isSubmitting
+                ? 'Guardando…'
+                : editing
+                  ? 'Guardar cambios'
+                  : 'Guardar borrador'}
             </Button>
           </>
         }
         onClose={close}
         open={open}
-        title="Nueva compra"
+        title={editing ? 'Editar compra' : 'Nueva compra'}
       >
         <form
           className="form-grid"
@@ -350,23 +645,14 @@ export default function PurchasesPage() {
         >
           <label>
             Ítem de catálogo
-            <select
-              {...form.register('catalogItemId')}
-              onChange={(event) => {
-                form.setValue('catalogItemId', event.target.value, { shouldValidate: true });
-                form.setValue(
-                  'unitCost',
-                  purchasableItems.find((item) => item.id === event.target.value)?.costPrice ?? 0,
-                  { shouldValidate: true },
-                );
-              }}
-            >
-              {purchasableItems.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.sku} · {item.name}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+              actionId="PURCHASE-CATALOG-SEARCH"
+              ariaLabel="Ítem de catálogo"
+              onChange={selectCatalogItem}
+              options={purchaseCatalogOptions}
+              placeholder="Escribe el inicio del código o de una palabra"
+              value={selectedCatalogItemId ?? ''}
+            />
             {form.formState.errors.catalogItemId ? (
               <span className="field-error">{form.formState.errors.catalogItemId.message}</span>
             ) : null}
@@ -388,13 +674,31 @@ export default function PurchasesPage() {
             ) : null}
           </label>
           <label>
+            Bodega de destino
+            <select {...form.register('warehouseId')}>
+              <option value="">Seleccione una bodega</option>
+              {activeWarehouses.map((warehouse) => (
+                <option key={warehouse.id} value={warehouse.id}>
+                  {warehouse.name}
+                </option>
+              ))}
+            </select>
+            {form.formState.errors.warehouseId ? (
+              <span className="field-error">{form.formState.errors.warehouseId.message}</span>
+            ) : null}
+          </label>
+          <label>
             Cantidad
             <input
-              min="0.01"
-              step="0.01"
+              min="1"
+              step="1"
+              max={selectedItem?.category === 'EQUIPMENT' ? 1 : 1000000}
               type="number"
               {...form.register('quantity', { valueAsNumber: true })}
             />
+            {selectedItem?.category === 'EQUIPMENT' ? (
+              <span className="field-help">Cada equipo se registra individualmente.</span>
+            ) : null}
             {form.formState.errors.quantity ? (
               <span className="field-error">{form.formState.errors.quantity.message}</span>
             ) : null}
@@ -419,13 +723,22 @@ export default function PurchasesPage() {
               <span className="field-error">{form.formState.errors.reference.message}</span>
             ) : null}
           </label>
+          <label>
+            Número de factura (opcional)
+            <input {...form.register('invoiceNumber')} maxLength={100} />
+            {form.formState.errors.invoiceNumber ? (
+              <span className="field-error">{form.formState.errors.invoiceNumber.message}</span>
+            ) : null}
+          </label>
           {selectedItem?.category === 'MEDICATIONS' || selectedItem?.category === 'SUPPLIES' ? (
             <>
               <label>
                 Fecha de vencimiento
                 <input type="date" {...form.register('expirationDate')} />
                 {form.formState.errors.expirationDate ? (
-                  <span className="field-error">{form.formState.errors.expirationDate.message}</span>
+                  <span className="field-error">
+                    {form.formState.errors.expirationDate.message}
+                  </span>
                 ) : null}
               </label>
               <label>
@@ -475,19 +788,47 @@ export default function PurchasesPage() {
               <dd>{selected.reference}</dd>
             </div>
             <div>
+              <dt>Número de factura</dt>
+              <dd>{selected.invoiceNumber || 'No registrado'}</dd>
+            </div>
+            <div>
               <dt>Ítem de catálogo</dt>
               <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
             </div>
             <div>
               <dt>Proveedor</dt>
+              <dd>{itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}</dd>
+            </div>
+            <div>
+              <dt>Bodega de destino</dt>
               <dd>
-                {itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}
+                {selected.warehouseId
+                  ? (warehouseNames.get(selected.warehouseId) ?? selected.warehouseId)
+                  : 'Sin bodega asignada'}
               </dd>
             </div>
             <div>
               <dt>Estado</dt>
-              <dd>Borrador</dd>
+              <dd>
+                {selected.status === 'RECEIVED'
+                  ? 'Recibida en cuarentena'
+                  : selected.status === 'CANCELLED'
+                    ? 'Anulada'
+                    : 'Borrador'}
+              </dd>
             </div>
+            {selected.cancelReason ? (
+              <div>
+                <dt>Motivo de anulación</dt>
+                <dd>{selected.cancelReason}</dd>
+              </div>
+            ) : null}
+            {selected.receivedAt ? (
+              <div>
+                <dt>Recepción física</dt>
+                <dd>{new Date(selected.receivedAt).toLocaleString('es-SV')}</dd>
+              </div>
+            ) : null}
             <div>
               <dt>Cantidad y costo</dt>
               <dd>
@@ -514,6 +855,73 @@ export default function PurchasesPage() {
               <dd>{selected.serialNumber || 'No aplica'}</dd>
             </div>
           </dl>
+        ) : null}
+      </Dialog>
+      <Dialog
+        description="Sólo se anula un borrador que aún no fue recibido. La anulación queda auditada."
+        footer={
+          <>
+            <Button className="button-secondary" onClick={() => setCancelling(null)} type="button">
+              Volver
+            </Button>
+            <Button form="purchase-cancel-form" type="submit">
+              Confirmar anulación
+            </Button>
+          </>
+        }
+        onClose={() => setCancelling(null)}
+        open={Boolean(cancelling)}
+        title="Anular borrador de compra"
+      >
+        <form action={confirmCancellation} id="purchase-cancel-form">
+          <label>
+            Motivo de anulación
+            <textarea maxLength={1000} name="reason" required rows={3} />
+          </label>
+          {cancelError ? (
+            <p className="notice danger" role="alert">
+              {cancelError}
+            </p>
+          ) : null}
+        </form>
+      </Dialog>
+      <Dialog
+        description="Confirma la recepción física completa en la bodega del borrador. El lote o serie quedará en cuarentena y no se sumará al disponible hasta su liberación."
+        footer={
+          <>
+            <Button
+              className="button-secondary"
+              onClick={() => setReceiptSelection(null)}
+              type="button"
+            >
+              Cancelar
+            </Button>
+            <Button disabled={receiptBusy} form="purchase-receipt-form" type="submit">
+              {receiptBusy ? 'Recibiendo…' : 'Confirmar recepción'}
+            </Button>
+          </>
+        }
+        onClose={() => setReceiptSelection(null)}
+        open={Boolean(receiptSelection)}
+        title="Recibir compra"
+      >
+        {receiptSelection ? (
+          <form action={receivePurchase} className="form-grid" id="purchase-receipt-form">
+            <p className="full-field">
+              {receiptSelection.purchase.reference} ·{' '}
+              {warehouseNames.get(receiptSelection.purchase.warehouseId ?? '') ??
+                receiptSelection.purchase.warehouseId}
+            </p>
+            <label className="full-field">
+              Motivo / constancia de recepción
+              <textarea maxLength={500} name="reason" required rows={3} />
+            </label>
+            {receiptError ? (
+              <p className="notice danger full-field" role="alert">
+                {receiptError}
+              </p>
+            ) : null}
+          </form>
         ) : null}
       </Dialog>
     </div>

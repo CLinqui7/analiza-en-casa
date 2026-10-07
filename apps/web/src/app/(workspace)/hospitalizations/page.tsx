@@ -116,6 +116,7 @@ export default function HospitalizationsPage() {
   const [tab, setTab] = useState<'ACTIVE' | 'QUOTES' | 'PIC'>('ACTIVE');
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [patientQuery, setPatientQuery] = useState('');
+  const [doctorQuery, setDoctorQuery] = useState('');
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Hospitalization['status'] | '',
     startDate: '',
@@ -307,7 +308,12 @@ export default function HospitalizationsPage() {
             .map((file, index) => (
               <span key={file.id}>
                 {index ? ', ' : ''}
-                <a href={privateFileDownloadHref(file.id)}>{file.name}</a>
+                <a
+                  className="action-link-button action-link-button--inline"
+                  href={privateFileDownloadHref(file.id)}
+                >
+                  Descargar {file.name}
+                </a>
               </span>
             ))}
         </p>
@@ -505,11 +511,11 @@ export default function HospitalizationsPage() {
                             <td>
                               <div className="hospitalization-row-actions">
                                 <Link
-                                  className="hospitalization-manage-link"
+                                  className="action-link-button action-link-button--compact hospitalization-manage-link"
                                   data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"
                                   href={`/hospitalizations/${item.id}`}
                                 >
-                                  Gestionar <span aria-hidden="true">→</span>
+                                  Gestionar
                                 </Link>
                                 {can('cases:write') ? (
                                   <Button
@@ -527,10 +533,11 @@ export default function HospitalizationsPage() {
                             </td>
                             <td>
                               <Link
+                                className="action-link-button action-link-button--compact"
                                 data-action-id="HOSPITALIZATION-DETAIL-NAVIGATE"
                                 href={`/hospitalizations/${item.id}`}
                               >
-                                {item.id}
+                                Consultar {item.id}
                               </Link>
                               <br />
                               <small>{patient?.documentId ?? 'No disponible'}</small>
@@ -628,7 +635,13 @@ export default function HospitalizationsPage() {
             <h2>Pacientes inactivos</h2>
             <p>
               La búsqueda, paginación y columnas operativas certificadas se reutilizan en{' '}
-              <Link href="/patients?tab=INACTIVE">Pacientes · Inactivos</Link>.
+              <Link
+                className="action-link-button action-link-button--inline"
+                href="/patients?tab=INACTIVE"
+              >
+                Abrir pacientes inactivos
+              </Link>
+              .
             </p>
           </Panel>
         </>
@@ -865,25 +878,53 @@ export default function HospitalizationsPage() {
             <textarea {...form.register('diagnosisSummary')} rows={3} />
           </label>
           <label>
+            Buscar médico por nombre
+            <input
+              aria-label="Filtrar médicos de hospitalización"
+              data-action-id="HOSPITALIZATION-DOCTOR-SEARCH"
+              onChange={(event) => setDoctorQuery(event.target.value)}
+              type="search"
+              value={doctorQuery}
+            />
+          </label>
+          <label>
             Médico tratante principal
             <select {...form.register('primaryDoctorId')}>
               <option value="">Sin asignar</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              {doctors
+                .filter(
+                  (doctor) =>
+                    doctor.fullName
+                      .toLocaleLowerCase('es-SV')
+                      .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                    doctor.id === form.getValues('primaryDoctorId') ||
+                    doctor.id === form.getValues('secondaryDoctorId'),
+                )
+                .map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
             </select>
           </label>
           <label>
             Médico tratante secundario
             <select {...form.register('secondaryDoctorId')}>
               <option value="">Sin asignar</option>
-              {doctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.fullName}
-                </option>
-              ))}
+              {doctors
+                .filter(
+                  (doctor) =>
+                    doctor.fullName
+                      .toLocaleLowerCase('es-SV')
+                      .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
+                    doctor.id === form.getValues('primaryDoctorId') ||
+                    doctor.id === form.getValues('secondaryDoctorId'),
+                )
+                .map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.fullName}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="full">
@@ -892,7 +933,13 @@ export default function HospitalizationsPage() {
           </label>
           <p className="notice full" role="status">
             Los dispositivos, accesos y enfermeras asignadas se completan después en{' '}
-            <Link href="/clinical/hospitalizations">Hospitalización Clínica</Link>.
+            <Link
+              className="action-link-button action-link-button--inline"
+              href="/clinical/hospitalizations"
+            >
+              Abrir hospitalización clínica
+            </Link>
+            .
           </p>
         </form>
       </Dialog>
@@ -1018,7 +1065,7 @@ function HospitalizationQuoteTracking() {
                 <tr>
                   <th>Paciente</th>
                   <th>DUI/NIT</th>
-                  <th>Nro.</th>
+                  <th>Cotización</th>
                   <th>Estado</th>
                   <th>Envío preautorización</th>
                   <th>Respuesta seguro</th>
@@ -1035,7 +1082,12 @@ function HospitalizationQuoteTracking() {
                       <td>{patient?.fullName ?? 'No disponible'}</td>
                       <td>{patient?.documentId ?? 'No disponible'}</td>
                       <td>
-                        <Link href={`/quotes/${quote.id}`}>{quote.id}</Link>
+                        <Link
+                          className="action-link-button action-link-button--compact"
+                          href={`/quotes/${quote.id}`}
+                        >
+                          Consultar {quote.id}
+                        </Link>
                       </td>
                       <td>
                         <StatusTag tone={quote.status === 'SENT' ? 'success' : 'warning'}>
@@ -1111,7 +1163,11 @@ function HospitalizationQuoteTracking() {
       <p className="field-help">
         Los estados de envío, respuesta y reclamo son superficies seguras: no se crean
         preautorizaciones, envíos ni reclamos desde esta tabla.{' '}
-        <Link data-action-id="QUOTE-INSURANCE-OPEN" href="/insurance">
+        <Link
+          className="action-link-button action-link-button--inline"
+          data-action-id="QUOTE-INSURANCE-OPEN"
+          href="/insurance"
+        >
           Abrir preautorizaciones y reclamos
         </Link>
         .

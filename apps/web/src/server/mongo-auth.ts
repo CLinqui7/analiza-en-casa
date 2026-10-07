@@ -111,6 +111,28 @@ export function mongoAuthStore(database: Db): MongoAuthStore {
     async createSession(session) {
       await sessions.insertOne({ ...session, createdAt: new Date() });
     },
+    async createLoginSession(loginSession, occurredAt) {
+      const transaction = database.client.startSession();
+      try {
+        await transaction.withTransaction(async () => {
+          const options = { session: transaction };
+          await database
+            .collection('sessions')
+            .insertOne({ ...loginSession, createdAt: occurredAt }, options);
+          await database.collection('loginEvents').insertOne(
+            {
+              id: randomUUID(),
+              organizationId: loginSession.organizationId,
+              userId: loginSession.userId,
+              occurredAt,
+            },
+            options,
+          );
+        });
+      } finally {
+        await transaction.endSession();
+      }
+    },
     async findSession(sessionHash) {
       return asStoredSession(await sessions.findOne({ sessionHash }));
     },
@@ -224,6 +246,20 @@ export const mongoAuthIndexes = [
     name: 'memberships_user_org_unique',
     unique: true,
   },
+  {
+    collection: 'memberships',
+    key: { organizationId: 1, role: 1 },
+    name: 'memberships_single_active_analytics',
+    unique: true,
+    partialFilterExpression: { active: true, role: 'ANALYTICS' },
+  },
+  {
+    collection: 'memberships',
+    key: { organizationId: 1, role: 1 },
+    name: 'memberships_single_active_webmaster',
+    unique: true,
+    partialFilterExpression: { active: true, role: 'WEBMASTER' },
+  },
   { collection: 'sessions', key: { sessionHash: 1 }, name: 'sessions_hash_unique', unique: true },
   {
     collection: 'sessions',
@@ -242,5 +278,10 @@ export const mongoAuthIndexes = [
     key: { expiresAt: 1 },
     name: 'auth_rate_limits_expiry_ttl',
     expireAfterSeconds: 0,
+  },
+  {
+    collection: 'loginEvents',
+    key: { organizationId: 1, userId: 1, occurredAt: -1 },
+    name: 'login_events_org_user_time',
   },
 ] as const;

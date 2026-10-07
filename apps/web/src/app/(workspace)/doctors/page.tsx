@@ -233,7 +233,12 @@ export default function DoctorsPage() {
                       {mongoMode && privateFiles[doctor.id]?.length
                         ? privateFiles[doctor.id].map((file) => (
                             <span key={file.id}>
-                              <a href={privateFileDownloadHref(file.id)}>{file.name}</a>{' '}
+                              <a
+                                className="action-link-button action-link-button--compact"
+                                href={privateFileDownloadHref(file.id)}
+                              >
+                                Descargar {file.name}
+                              </a>{' '}
                             </span>
                           ))
                         : doctor.attachments.length

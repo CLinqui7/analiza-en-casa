@@ -132,7 +132,7 @@ test('CR-002 saves, reloads, and edits a resident-card identifier without invent
     .click();
   await expect(page.getByText('RESIDENT_CARD', { exact: true })).toBeVisible();
   await expect(page.getByText('CH02-RESIDENT-001', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   await expect(editDialog.getByLabel('Tipo de documento')).toHaveValue('RESIDENT_CARD');
   await expect(editDialog.getByLabel('Número de documento')).toHaveValue('CH02-RESIDENT-001');
@@ -184,7 +184,7 @@ test('CR-004 rejects partial responsible-contact documents and persists a comple
     .getByRole('link', { name: 'Detalle' })
     .click();
   await expect(page.getByText('CONTACT-CH02-001', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   const editContact = editDialog.getByRole('group', { name: 'Contacto 1' });
   await expect(editContact.getByLabel('Tipo de documento del contacto')).toHaveValue('DUI');
@@ -205,7 +205,7 @@ test('CR-004 rejects partial responsible-contact documents and persists a comple
     .getByRole('link', { name: 'Detalle' })
     .click();
   await expect(page.getByText('CONTACT-CH02-EDIT', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Editar paciente' }).click();
+  await page.getByRole('link', { name: 'Editar paciente' }).click();
   const reopenedDialog = page.getByRole('dialog', { name: 'Editar paciente' });
   const reopenedContact = reopenedDialog.getByRole('group', { name: 'Contacto 1' });
   await expect(reopenedContact.getByLabel('Tipo de documento del contacto')).toHaveValue('DUI');

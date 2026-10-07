@@ -25,6 +25,14 @@ test('CH03-F001 financial navigation has three live, authorized destinations', a
     'href',
     '/receivables',
   );
+  await expect(page.getByRole('link', { name: 'Pagos', exact: true })).toHaveAttribute(
+    'href',
+    '/payments',
+  );
+  await expect(page.getByRole('link', { name: 'Aseguradoras', exact: true })).toHaveAttribute(
+    'href',
+    '/insurers',
+  );
   await page.getByRole('link', { name: 'Preautorizaciones y reclamos' }).click();
   await expect(page).toHaveURL(/\/insurance$/);
 });
@@ -58,7 +66,7 @@ test('CH03-F002-F008 board tabs, coherent loading/empty state, filters and activ
   await page.getByRole('tab', { name: 'Ejecución de cotización' }).click();
   await expect(page.getByText('Configuración pendiente')).toBeVisible();
   await page.getByRole('tab', { name: 'Activos' }).click();
-  await page.getByRole('link', { name: /Pacientes · Inactivos/ }).click();
+  await page.getByRole('link', { name: 'Abrir pacientes inactivos' }).click();
   await expect(page).toHaveURL(/\/patients\?tab=INACTIVE/);
 });
 
@@ -70,7 +78,7 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   for (const column of [
     'Paciente',
     'DUI/NIT',
-    'Nro.',
+    'Cotización',
     'Estado',
     'Envío preautorización',
     'Respuesta seguro',
@@ -85,8 +93,9 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toBeVisible();
-  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención', 'Caso compatible'])
+  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención'])
     await expect(dialog.getByRole('combobox', { name: label, exact: true })).toBeVisible();
+  await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toBeVisible();
   for (const label of [
     'Documento',
     'Teléfono',

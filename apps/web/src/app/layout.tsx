@@ -3,6 +3,8 @@ import { AppProviders } from '@/components/providers';
 import './globals.css';
 import './studio.css';
 import './design-system.css';
+import './sidebar.css';
+import './theme.css';
 
 export const metadata: Metadata = {
   title: {

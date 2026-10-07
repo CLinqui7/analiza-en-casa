@@ -133,18 +133,52 @@ export const nurseHourEntrySchema = z.object({
   service: z.string().trim().min(1),
 });
 
-export const inventoryMovementSchema = z.object({
-  id: z.string(),
-  itemId: z.string(),
-  createdAt: z.string(),
-  kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
-  quantity: z.number().int().positive(),
-  adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
-  reason: z.string().trim().min(1),
-  warehouseId: z.string().trim().optional(),
-  reference: z.string().trim().optional(),
-  user: z.string().trim().optional(),
-});
+export const inventoryMovementSchema = z
+  .object({
+    id: z.string(),
+    itemId: z.string(),
+    createdAt: z.string(),
+    kind: z.enum(['ENTRY', 'EXIT', 'TRANSFER', 'RETURN', 'ADJUSTMENT']),
+    quantity: z.number().int().positive(),
+    adjustmentDirection: z.enum(['IN', 'OUT']).optional(),
+    reason: z.string().trim().min(1),
+    warehouseId: z.string().trim().optional(),
+    reference: z.string().trim().optional(),
+    user: z.string().trim().optional(),
+    transferId: z.string().trim().min(1).optional(),
+    transferDirection: z.enum(['IN', 'OUT']).optional(),
+    counterpartWarehouseId: z.string().trim().min(1).optional(),
+    traceRecordId: z.string().trim().min(1).optional(),
+    traceNumber: z.string().trim().min(1).max(120).optional(),
+  })
+  .superRefine((movement, context) => {
+    if (movement.kind === 'TRANSFER') {
+      for (const field of ['transferId', 'transferDirection', 'counterpartWarehouseId'] as const) {
+        if (!movement[field])
+          context.addIssue({
+            code: 'custom',
+            message: 'El traslado requiere origen, destino y dirección.',
+            path: [field],
+          });
+      }
+    } else if (
+      movement.transferId ||
+      movement.transferDirection ||
+      movement.counterpartWarehouseId
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Los datos de traslado sólo aplican a movimientos de tipo traslado.',
+        path: ['kind'],
+      });
+    }
+    if (Boolean(movement.traceRecordId) !== Boolean(movement.traceNumber))
+      context.addIssue({
+        code: 'custom',
+        message: 'La trazabilidad requiere identificador y número.',
+        path: ['traceRecordId'],
+      });
+  });
 
 export const shiftSchema = z.object({
   id: z.string(),
@@ -244,7 +278,7 @@ export const quoteDiscountSchema = z.object({
 
 export const quoteSchema = z.object({
   id: z.string(),
-  caseId: z.string(),
+  caseId: z.string().trim().min(1).optional(),
   patientId: z.string(),
   version: z.number().int().positive(),
   status: z.enum(['DRAFT', 'SENT']),
@@ -259,6 +293,8 @@ export const quoteSchema = z.object({
   referralSelections: z.array(z.string().trim().min(1)).optional(),
   giftCardCode: z.string().trim().optional(),
   comments: z.string().trim().optional(),
+  /** Factual free text; no due date, credit policy or external payment action is inferred. */
+  paymentCondition: z.string().trim().max(160).optional(),
   items: z.array(quoteItemSchema).default([]),
   discount: quoteDiscountSchema.optional(),
   subtotal: z.number().nonnegative().default(0),
@@ -274,16 +310,30 @@ export const quoteSchema = z.object({
   revisionReason: z.string().trim().optional(),
 });
 
-export const paymentSchema = z.object({
-  id: z.string(),
-  quoteId: z.string(),
-  amount: z.number().positive(),
-  reference: z.string().trim().min(1),
-  idempotencyKey: z.string().trim().min(1),
-  status: z.enum(['APPLIED', 'VOIDED']),
-  createdAt: z.string(),
-  voidReason: z.string().trim().optional(),
-});
+export const paymentSchema = z
+  .object({
+    id: z.string(),
+    quoteId: z.string(),
+    amount: z.number().positive(),
+    paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']).optional(),
+    reference: z.string().trim().max(120).optional(),
+    idempotencyKey: z.string().trim().min(1),
+    status: z.enum(['APPLIED', 'VOIDED']),
+    createdAt: z.string(),
+    voidReason: z.string().trim().optional(),
+  })
+  .superRefine((payment, context) => {
+    if (
+      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      !payment.reference
+    ) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Ingrese el número de referencia.',
+        path: ['reference'],
+      });
+    }
+  });
 
 export const clinicalDocumentSchema = z.object({
   id: z.string(),
@@ -333,14 +383,20 @@ export const purchaseSchema = z.object({
   id: z.string(),
   catalogItemId: z.string(),
   supplierCatalogItemId: z.string().trim().min(1).optional(),
+  warehouseId: z.string().trim().min(1).optional(),
   reference: z.string().trim().min(1),
+  invoiceNumber: z.string().trim().max(100).optional(),
   note: z.string().trim().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
   expirationDate: z.string().trim().optional(),
   lotNumber: z.string().trim().optional(),
   serialNumber: z.string().trim().optional(),
-  status: z.literal('DRAFT'),
+  status: z.enum(['DRAFT', 'RECEIVED', 'CANCELLED']),
+  receivedAt: z.string().optional(),
+  traceRecordId: z.string().optional(),
+  cancelledAt: z.string().optional(),
+  cancelReason: z.string().trim().min(1).max(1000).optional(),
   createdAt: z.string(),
 });
 

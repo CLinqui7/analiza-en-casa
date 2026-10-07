@@ -290,12 +290,41 @@ export function validateQuoteItem(item: QuoteItem): string | undefined {
   if (!item.name.trim()) return 'El concepto es obligatorio.';
   if (!Number.isFinite(item.quantity) || item.quantity <= 0)
     return 'La cantidad debe ser mayor que cero.';
+  if (!Number.isInteger(item.quantity)) return 'La cantidad debe ser un número entero.';
   if (!Number.isFinite(item.unitPrice) || item.unitPrice < 0)
     return 'El precio manual no puede ser negativo.';
   if (!Number.isFinite(item.discountAmount) || item.discountAmount < 0)
     return 'El descuento manual no puede ser negativo.';
   if (item.discountAmount > quoteItemGross(item))
     return 'El descuento manual no puede superar el importe de la línea.';
+  return undefined;
+}
+
+function validateQuoteDiscount(discount?: QuoteDiscount): string | undefined {
+  if (!discount) return undefined;
+  if (discount.type === 'FIXED') {
+    const value = discount.value ?? 0;
+    if (!Number.isFinite(value) || value < 0)
+      return 'El monto fijo de descuento no puede ser negativo.';
+    return undefined;
+  }
+  if (discount.type === 'PERCENT') {
+    const value = discount.value ?? 0;
+    if (!Number.isInteger(value) || value < 0 || value > 100)
+      return 'El porcentaje de descuento debe ser un número entero entre 0 y 100.';
+    return undefined;
+  }
+  const categoryPercentages = Object.values(discount.categories ?? {});
+  if (
+    categoryPercentages.some(
+      (percentage) =>
+        !Number.isFinite(percentage) ||
+        !Number.isInteger(percentage) ||
+        percentage < 0 ||
+        percentage > 100,
+    )
+  )
+    return 'Cada porcentaje por categoría debe ser un número entero entre 0 y 100.';
   return undefined;
 }
 
@@ -341,6 +370,8 @@ export function calculateQuoteTotals(
     const error = validateQuoteItem(item);
     if (error) throw new Error(error);
   }
+  const discountError = validateQuoteDiscount(discount);
+  if (discountError) throw new Error(discountError);
   if (!Number.isFinite(insurerAmount) || insurerAmount < 0)
     throw new Error('El importe explícito de aseguradora no puede ser negativo.');
   const subtotal = roundMoney(items.reduce((sum, item) => sum + quoteItemGross(item), 0));
@@ -374,6 +405,12 @@ export function calculateQuoteBalance(
   return { paid, balance: roundMoney(quote.patientAmount - paid) };
 }
 
+/** A concise display reference. The full immutable identifier remains the database/API key. */
+export function quoteDisplayCode(id: string) {
+  const compact = id.replace(/[^a-z0-9]/gi, '').toUpperCase();
+  return `COT-${compact.slice(-8).padStart(8, '0')}`;
+}
+
 export function searchQuotes(
   quotes: readonly Quote[],
   patients: readonly Patient[],
@@ -385,11 +422,15 @@ export function searchQuotes(
   return quotes.filter((quote) => {
     const patient = patients.find((candidate) => candidate.id === quote.patientId);
     return (
-      [quote.id, quote.caseId, quote.status, patient?.fullName ?? ''].some((value) =>
-        normalizeText(value).includes(needle),
-      ) ||
+      [
+        quote.id,
+        quoteDisplayCode(quote.id),
+        quote.caseId ?? '',
+        quote.status,
+        patient?.fullName ?? '',
+      ].some((value) => normalizeText(value).includes(needle)) ||
       normalizeDocument(quote.id).includes(normalizedNeedle) ||
-      normalizeDocument(quote.caseId).includes(normalizedNeedle)
+      normalizeDocument(quote.caseId ?? '').includes(normalizedNeedle)
     );
   });
 }
@@ -483,19 +524,23 @@ export type KardexRow = InventoryMovement & { delta: number; balance: number };
 
 export function movementDelta(movement: InventoryMovement): number {
   if (movement.kind === 'ENTRY' || movement.kind === 'RETURN') return movement.quantity;
-  if (movement.kind === 'EXIT' || movement.kind === 'TRANSFER') return -movement.quantity;
+  if (movement.kind === 'TRANSFER')
+    return movement.transferDirection === 'IN' ? movement.quantity : -movement.quantity;
+  if (movement.kind === 'EXIT') return -movement.quantity;
   return movement.adjustmentDirection === 'OUT' ? -movement.quantity : movement.quantity;
 }
 
 export function deriveKardex(movements: readonly InventoryMovement[], itemId: string): KardexRow[] {
-  let balance = 0;
+  const balances = new Map<string, number>();
   return movements
     .filter((movement) => movement.itemId === itemId)
     .slice()
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id))
     .map((movement) => {
       const delta = movementDelta(movement);
-      balance += delta;
+      const warehouseId = movement.warehouseId ?? 'central';
+      const balance = (balances.get(warehouseId) ?? 0) + delta;
+      balances.set(warehouseId, balance);
       return { ...movement, delta, balance };
     });
 }
@@ -503,15 +548,26 @@ export function deriveKardex(movements: readonly InventoryMovement[], itemId: st
 export function currentInventoryBalance(
   movements: readonly InventoryMovement[],
   itemId: string,
+  warehouseId?: string,
 ): number {
-  return deriveKardex(movements, itemId).at(-1)?.balance ?? 0;
+  return movements
+    .filter(
+      (movement) =>
+        movement.itemId === itemId &&
+        (!warehouseId || (movement.warehouseId ?? 'central') === warehouseId),
+    )
+    .reduce((balance, movement) => balance + movementDelta(movement), 0);
 }
 
 export function canRecordMovement(
   movements: readonly InventoryMovement[],
   candidate: InventoryMovement,
 ): boolean {
-  const current = currentInventoryBalance(movements, candidate.itemId);
+  const current = currentInventoryBalance(
+    movements,
+    candidate.itemId,
+    candidate.warehouseId ?? 'central',
+  );
   return current + movementDelta(candidate) >= 0;
 }
 

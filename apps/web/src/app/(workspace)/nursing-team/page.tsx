@@ -2,6 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { isAdministrator } from '@/lib/permissions';
 import { useOperations } from '@/lib/use-operations';
 import type { NurseProfileSubmission } from '@/lib/nurse-profile';
 import {
@@ -151,8 +152,13 @@ export default function NursingTeamPage() {
                     </small>
                     {attachments[resource.id]?.map((file) => (
                       <div key={file.id}>
-                        <a href={privateFileDownloadHref(file.id)} target="_blank" rel="noreferrer">
-                          Ver archivo · {file.name}
+                        <a
+                          className="action-link-button action-link-button--compact"
+                          href={privateFileDownloadHref(file.id)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Descargar {file.name}
                         </a>
                       </div>
                     ))}
@@ -248,8 +254,8 @@ export default function NursingTeamPage() {
           <label>
             Rol
             <select name="role" defaultValue="NURSE">
-              {session?.role === 'ADMIN' ? <option value="ADMIN">Administrador</option> : null}
-              {session?.role === 'ADMIN' ? <option value="MANAGER">Gerente</option> : null}
+              {isAdministrator(session?.role) ? <option value="ADMIN">Administrador</option> : null}
+              {isAdministrator(session?.role) ? <option value="MANAGER">Gerente</option> : null}
               <option value="NURSE_MANAGER">Supervisora / jefe de enfermería</option>
               <option value="NURSE">Enfermería</option>
             </select>

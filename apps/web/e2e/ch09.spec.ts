@@ -182,7 +182,7 @@ test('CH09 row actions open the scoped quote and omit undefined clinical workflo
 
   await quoteLink.click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
-  await expect(page.getByRole('heading', { name: 'quote-demo-001' })).toBeVisible();
+  await expect(page.getByRole('heading').first()).toHaveAttribute('title', 'quote-demo-001');
 });
 
 test('CH09 NURSE can read the factual list but cannot expose a quote navigation', async ({

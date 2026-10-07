@@ -43,6 +43,14 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 - `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.
 - `CR-032`: subir el archivo autorizado de pacientes en Excel o CSV para revisar sus columnas y preparar el mapeo hacia todas las ventanas del módulo Pacientes. Respuesta acordada: “Gracias por la solicitud. Por favor suba el archivo de Excel o CSV; nosotros revisaremos su estructura y lo adaptaremos a los campos del módulo Pacientes. Antes de importar, le mostraremos el mapeo, las observaciones y posibles duplicados para que pueda validarlos.” Hasta recibir el archivo no se afirma compatibilidad completa ni se incorporan registros.
 
+## Feedback operativo · 25 septiembre 2026
+
+- `FEEDBACK-7BB83834`: se implementaron gráficos semanales de visitas realizadas, separación Médico/Enfermería, ingresos administrativos y cobros aplicados con persistencia PostgreSQL. Se mantienen separados de cotizaciones y facturación fiscal. `CR-014`/`CR-015` siguen abiertos únicamente para cualquier fórmula comercial/fiscal adicional no definida.
+- `FEEDBACK-11C6094E`: resuelto para bodegas, lotes y series: alta/edición/desactivación de bodegas, recepción trazada en cuarentena, liberación/bloqueo/rechazo auditados, existencias por ubicación, salida FEFO/FIFO y traslado transaccional que conserva lote o serie. No se deriva stock desde borradores de compra.
+- `FEEDBACK-75AE2471`: se implementó PDF interno real, autenticado y sin caché para versiones enviadas/inmutables, y se retiró el envío directo inseguro. El adjunto por WhatsApp sigue bloqueado por `CH07-Q008`/`CH07-Q009`; sólo podrá usarse una notificación genérica con enlace seguro, consentimiento explícito y proveedor verificable.
+- `FEEDBACK-DF6A39DC`: Existencias ya administra bodegas y traslados con permisos y auditoría; proveedores existentes continúan visibles. El ciclo de vida propio de proveedores permanece abierto en `CH14-Q008`.
+- `FEEDBACK-C7EF7D96`: pagos parciales idempotentes, prevención transaccional de sobrepago, reversión auditada, estado Pagado y comprobante PDF no fiscal ya están implementados para PostgreSQL/Mongo. La factura fiscal continúa pendiente de `MEETING-Q004` y `CH07-Q008`; no se inventa emisor, numeración, impuestos ni regla tributaria.
+
 ## CH01 · decisiones pendientes trazadas
 
 - `CH01-Q001`: confirmar si el enlace histórico `/pacientes.php` debe conservar una ruta de retorno después del login. El SPA aplica guardia de sesión; no se inventó una regla de redirección heredada.
@@ -200,7 +208,7 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 
 - `CH13-Q001`: aprobar estados y transiciones exactas para Orden de compra y Caja menuda, roles, precondiciones e irreversibilidad. La plataforma sólo crea `DRAFT`. Evidencia: CH13-E0004 y CH13-E0080.
 - `CH13-Q002`: definir el evento que genera inventario: aprobación, recepción total/parcial u otro hito. Ningún borrador mueve existencias. Evidencia verbal: CH13-E0092.
-- `CH13-Q003`: confirmar recepciones parciales, bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. Evidencia verbal: CH13-E0092.
+- `CH13-Q003`: confirmar recepciones parciales, bodegas, lotes, series, vencimientos, devoluciones e idempotencia del vínculo compra–movimiento. `FEEDBACK-7549EF34` aclara únicamente que una compra de equipo solicita serie y no vencimiento; no resuelve recepción, traslado, devolución ni movimiento de inventario. Evidencia verbal: CH13-E0092.
 - `CH13-Q004`: aprobar captura de impuesto por línea/global, moneda, precisión y redondeo. Se eliminó el IVA 13% inventado; sólo se aceptan montos manuales. Evidencia: CH13-E0057 y CH13-E0065.
 - `CH13-Q005`: definir significado, conceptos, límites, justificación, autorización y efecto contable/fiscal de Extra. Evidencia: CH13-E0070.
 - `CH13-Q006`: definir combinación, límites, autorización y efecto contable/fiscal de descuentos por línea/global. Evidencia: CH13-E0057 y CH13-E0060.
@@ -223,9 +231,9 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 - `CH14-Q006`: determinar qué datos puede borrar Aceptar en un cierre existente, cómo se recupera y quién autoriza. Evidencia: CH14-E0048.
 - `CH14-Q007`: aprobar estados, edición, conciliación, aprobación, cancelación y reversión de cierres, y su relación con cierres administrativos/financieros. Evidencia: CH14-E0050.
 - `CH14-Q008`: definir identidad, unicidad, obligatoriedad y ciclo de vida de proveedores. Evidencia: CH14-E0061.
-- `CH14-Q009`: aprobar creación/edición de bodegas y reglas tenant-safe, transaccionales y reversibles de traslado. Evidencia: CH14-E0068.
-- `CH14-Q010`: definir Fecha inválida, vencimiento, ausencia de fecha, cuarentena, agotamiento, FEFO y alertas. Evidencia: CH14-E0082.
-- `CH14-Q011`: aprobar unicidad y ciclo de vida de lotes/series por organización, item y bodega. Evidencia: CH14-E0078 y CH14-E0092.
+- `CH14-Q009` — resuelta el 2026-09-28 para el alcance seguro autorizado: código único por organización, alta/edición, desactivación sólo con saldo cero por ítem, sin borrado, `inventory:write`, RLS, auditoría e idempotencia. Cada traslado crea salida y entrada en la misma transacción y una corrección se registra como traslado compensatorio. Evidencia visual: CH14-E0068/CH14-E0071; contrato verificable: migración PostgreSQL 017 y repositorios PostgreSQL/MongoDB.
+- `CH14-Q010` — resuelta el 2026-09-28 para el alcance técnico seguro autorizado: medicamentos e insumos exigen lote y vencimiento; equipos usan una serie por unidad sin vencimiento; toda recepción inicia en cuarentena; sólo `AVAILABLE` y vigente entra al disponible; vencido se excluye sin reescribir el estado histórico; las salidas usan FEFO y las series FIFO. Se usan fechas ISO completas y no se inventan alertas clínicas, retiros o plazos regulatorios. Base técnica: WHO GDP, sección de almacenamiento/distribución FEFO y segregación de cuarentena/rechazado/vencido; FDA UDI para identificadores de lote/serie/expiración. Evidencia visual: CH14-E0082/CH14-E0084/CH14-E0089; contrato verificable: migración PostgreSQL 018 y repositorios PostgreSQL/MongoDB.
+- `CH14-Q011` — resuelta el 2026-09-28 para el alcance técnico seguro autorizado: la serie es única por organización; un lote puede repetirse en recepciones distintas; la identidad recibida no se edita ni elimina; estados permitidos `QUARANTINED → AVAILABLE|BLOCKED|REJECTED`, `AVAILABLE → BLOCKED|REJECTED`, `BLOCKED → AVAILABLE|REJECTED`, con `REJECTED` terminal; cada transición exige motivo, idempotencia y auditoría append-only. Los traslados mueven saldos por ubicación sin cambiar identidad ni total global. No equivale a certificación sanitaria ni sustituye procedimientos institucionales de retiro, temperatura o disposición final.
 - `CH14-Q012`: definir la composición versionada de kits, roles autorizados, auditoría, duplicación y eliminación preservando usos históricos. Evidencia: CH14-E0095 y CH14-E0106–CH14-E0117.
 - `CH14-Q013`: confirmar selección de lotes, sustitución, descarga de existencias atómica e idempotente y reversión al consumir kits. Evidencia: CH14-E0106 y CH14-E0117.
 - `CH14-Q014`: identificar qué significa “faltar una cotización”, qué entidad/estado afecta y qué autorización y auditoría requiere. La frase sólo aparece en la transcripción 00:45:10.320–00:45:13.320; `CH14-E0152` no prueba una relación funcional.
@@ -250,7 +258,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 - `CH16-Q001`: ¿Cuál es la entidad objetivo, vigencia, versionado y retiro de un perfil de descuento asignado a paciente, empresa, aseguradora o convenio? Evidencia: CH16-E0034 y CH16-E0035, 00:50:59.200–00:51:00.000.
 - `CH16-Q002`: ¿Cuál es la precedencia autorizada entre perfil, promoción, convenio, condición de jubilado y ajuste manual, y cuándo se admite combinabilidad? Evidencia verbal: CH16-E0003, 00:49:45.400.
-- `CH16-Q003`: ¿Qué precisión, redondeo, rango y límite de monto se aplican a porcentajes y descuentos fijos? No se adopta ningún importe de la grabación como regla financiera. Evidencia: CH16-E0001 y CH16-E0024, 00:49:44.600–00:50:28.400.
+- `CH16-Q003`: ¿Qué precisión, redondeo, rango y límite de monto se aplican a porcentajes y descuentos fijos? No se adopta ningún importe de la grabación como regla financiera. El reporte operativo del 2 de octubre de 2026 sí autoriza enteros para la cantidad de líneas y los porcentajes manuales de cotización; se aplica sólo a esos campos y no resuelve redondeo, límites monetarios, perfiles ni precedencia de descuentos. Evidencia: CH16-E0001 y CH16-E0024, 00:49:44.600–00:50:28.400; Feedback productivo, reporte nuevo de Cotizaciones, 2026-10-02 10:46 America/El_Salvador.
 - `CH16-Q004`: ¿Qué significa exactamente `Es Jubilado`, quién puede actualizarlo y qué evidencia o autorización se requiere? Evidencia: CH16-E0034 y CH16-E0035, 00:50:59.200–00:51:00.000.
 - `CH16-Q005`: ¿Qué roles definitivos pueden crear, editar, inactivar, solicitar y decidir perfiles de descuento, y cómo se debe presentar carga/error en producción? La implementación usa permisos configurados y aprobación nominativa sin inferir la política final. Evidencia: CH16-E0035–CH16-E0039, 00:51:00.000–00:51:07.200.
 - `CH16-Q006`: ¿La exclusión global de medicamentos es obligatoria, condicional o negociable por perfil? Evidencia: CH16-E0003 y CH16-E0024, 00:49:45.400–00:50:28.400.
@@ -334,8 +342,15 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Feedback en revisión · 2026-09-24
 
-- Definir en qué formularios debe operar el autoguardado, por cuánto tiempo se conserva cada borrador, cómo se recupera o descarta y qué controles adicionales protegen información clínica y evitan cruces entre organizaciones.
-- Definir estados, prioridades, permisos, responsables, reglas de entrega e idempotencia para solicitudes internas de medicamentos, insumos y equipos realizadas por enfermería. Cualquier aviso externo requiere proveedor y consentimiento aprobados, y no puede incluir información clínica sensible.
+- Autoguardado: el alcance solicitado para crear pacientes y cotizaciones ya conserva borradores sólo en la pestaña y cuenta actuales, permite recuperarlos o descartarlos y los elimina al guardar o cerrar sesión. No se presume autorización para retener formularios clínicos firmados ni para un borrador permanente compartido entre dispositivos.
+- Solicitudes de enfermería: el pedido interno de medicamentos, insumos y equipos ya usa paciente, catálogo, cantidad, prioridad, idempotencia, auditoría y acceso por rol. El aviso externo sigue pendiente de proveedor y consentimiento aprobados y nunca incluirá información clínica sensible.
+
+### Reconciliación individual · 2026-10-06
+
+- `FEEDBACK-6216ADF9`: la instrucción del cliente de usar el catálogo y dejar manual sólo la cantidad resuelve la excepción de precio en el flujo nuevo. La pantalla muestra el precio de sólo lectura y PostgreSQL/MongoDB rechazan precios distintos para líneas nuevas; versiones enviadas e importes históricos permanecen inmutables.
+- `FEEDBACK-12C011B0`: el catálogo conectado contiene actualmente 13 estudios de laboratorio, 3 servicios de fisioterapia y 3 de imágenes con precio configurado, todos seleccionables en cotizaciones. No se agregaron ítems o tarifas inventados. Si se solicita una comparación contra una lista comercial externa, todavía se necesitará esa lista para certificar completitud, sin bloquear el uso del catálogo ya disponible.
+- `FEEDBACK-FBE015F8`: se inventariaron los selectores de pacientes, médicos y hospitalizaciones en las pantallas liberadas; se añadieron filtros faltantes en agenda, paciente, hospitalización, reporte, cotización, balance y documentos clínicos, conservando el registro seleccionado.
+- `FEEDBACK-7BB83834`, `FEEDBACK-C7EF7D96` y `FEEDBACK-95A33BEA`: no llamar «facturación» a cobros ni comprobantes internos; falta la definición fiscal indicada en `MEETING-Q004` antes de una factura real o conversión automática.
 
 ## Deployment
 
