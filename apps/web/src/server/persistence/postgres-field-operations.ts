@@ -17,6 +17,7 @@ import {
   type OperationsSnapshot,
 } from '@analiza/contracts';
 import { can } from '@/lib/permissions';
+import { commercialScopeForMember } from '../commercial-access';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -54,11 +55,8 @@ async function audit(
 }
 export async function commercialScope(client: PoolClient, actor: ServerActor) {
   const row = (
-    await client.query<{ scope: 'REP' | 'MANAGER' }>(
-      `SELECT CASE
-          WHEN users.email_normalized IN ('claudia.pinzon@labanaliza.com','claudia.pinzon@analizaencasa.com') THEN 'REP'
-          WHEN users.email_normalized IN ('sissy.chavez@labanaliza.com','sissy.chavez@analizaencasa.com') THEN 'MANAGER'
-        END AS scope
+    await client.query<{ role: string; email: string }>(
+      `SELECT membership.role,users.email_normalized AS email
        FROM analiza.memberships membership
        JOIN analiza.users users ON users.id=membership.user_id
        WHERE membership.organization_id=$1 AND membership.user_id=$2 AND membership.active
@@ -66,7 +64,7 @@ export async function commercialScope(client: PoolClient, actor: ServerActor) {
       [actor.organizationId, actor.userId],
     )
   ).rows[0];
-  return row?.scope ?? null;
+  return row ? commercialScopeForMember(row.role, row.email) : null;
 }
 function requireScope(scope: 'REP' | 'MANAGER' | null, allowed: readonly ('REP' | 'MANAGER')[]) {
   if (!scope || !allowed.includes(scope)) throw new MongoAccessError();

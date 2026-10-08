@@ -158,7 +158,7 @@ export default function CommercialVisitsGoalsPage() {
       <Panel>
         <EmptyState
           title="Acceso comercial restringido"
-          detail="Este tablero sólo está habilitado para Claudia y Sissy."
+          detail="Este tablero requiere una cuenta administrativa o comercial autorizada."
         />
       </Panel>
     );

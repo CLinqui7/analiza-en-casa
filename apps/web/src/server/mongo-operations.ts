@@ -40,6 +40,7 @@ import {
   confirmedSaleSchema,
 } from '@analiza/contracts';
 import { can, isAdministrator } from '@/lib/permissions';
+import { commercialScopeForMember } from './commercial-access';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { hashPassword } from './mongo-auth';
 import {
@@ -173,12 +174,8 @@ export async function commercialScope(
   });
   if (!membership) return null;
   const user = await database.collection('users').findOne({ id: actor.userId });
-  const email = String(user?.emailNormalized ?? '').toLowerCase();
-  if (['claudia.pinzon@labanaliza.com', 'claudia.pinzon@analizaencasa.com'].includes(email))
-    return 'REP';
-  if (['sissy.chavez@labanaliza.com', 'sissy.chavez@analizaencasa.com'].includes(email))
-    return 'MANAGER';
-  return null;
+  if (!user || user.disabledAt) return null;
+  return commercialScopeForMember(membership.role, user.emailNormalized);
 }
 
 export function canEditAssignedBalance(actor: ServerActor, assignedUsers: readonly string[]) {

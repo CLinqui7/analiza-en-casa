@@ -28,6 +28,10 @@ test('a cataloged doctor fee keeps its selected doctor after save and reload', a
   await login(page);
   await createDoctorFixture(page);
   await page.goto('/quotes');
+  await expect(page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').first()).toBeVisible();
+  const existingQuoteLinks = await page
+    .locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
   await page.getByRole('button', { name: '+ Nuevo' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
@@ -47,8 +51,18 @@ test('a cataloged doctor fee keeps its selected doctor after save and reload', a
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
   await expect(dialog).toHaveCount(0);
+  const createdQuoteHref = await page
+    .locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]')
+    .evaluateAll(
+      (links, existing) =>
+        links.map((link) => link.getAttribute('href')).find((href) => !existing.includes(href)),
+      existingQuoteLinks,
+    );
+  expect(createdQuoteHref).toBeTruthy();
   await page.reload();
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
+  await page
+    .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="${createdQuoteHref}"]`)
+    .click();
   await expect(page.getByText('Honorario B4')).toBeVisible();
   await expect(page.getByText(`Médico: ${doctorName}`)).toBeVisible();
   await expect(
