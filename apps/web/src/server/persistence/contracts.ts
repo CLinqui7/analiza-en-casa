@@ -17,6 +17,7 @@ import type { FeedbackImage, FeedbackReport, FeedbackResolution } from '@/lib/fe
 import type { ImportOverview, ImportPreview } from '@/lib/information-import';
 import type { LoginAnalyticsSnapshot } from '@/server/login-analytics';
 import type { SupplyRequest, SupplyRequestCatalogItem } from '@/lib/supply-requests';
+import type { AccountProfile, AccountAvatar } from '@/lib/account-profile';
 
 export interface EntityRepository<T, Key extends string> {
   listWithVersions(actor: ServerActor): Promise<Array<Record<Key, T> & { version: number }>>;
@@ -33,6 +34,13 @@ export type WorkspaceResult = WorkspaceSnapshot & {
 
 /** Server-only business operations. No SQL, collections, database handles or DELETE in HTTP/UI. */
 export interface Persistence {
+  accountProfile: {
+    get(actor: ServerActor): Promise<AccountProfile>;
+    rename(actor: ServerActor, displayName: string): Promise<AccountProfile>;
+    avatar(actor: ServerActor): Promise<AccountAvatar | null>;
+    saveAvatar(actor: ServerActor, avatar: AccountAvatar): Promise<AccountProfile>;
+    changePassword(actor: ServerActor, currentPassword: string, newPassword: string): Promise<void>;
+  };
   supplyRequests?: {
     list(actor: ServerActor): Promise<SupplyRequest[]>;
     catalog(actor: ServerActor): Promise<SupplyRequestCatalogItem[]>;

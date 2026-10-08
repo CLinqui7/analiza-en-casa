@@ -143,7 +143,7 @@ export async function hashPassword(password: string): Promise<string> {
   return `scrypt$${salt}$${derived.toString('base64url')}`;
 }
 
-async function passwordMatches(password: string, storedHash: string) {
+export async function passwordMatches(password: string, storedHash: string) {
   const [algorithm, salt, expected] = storedHash.split('$');
   if (algorithm !== 'scrypt' || !salt || !expected) return false;
   const actual = (await scrypt(password, salt, 64)) as Buffer;

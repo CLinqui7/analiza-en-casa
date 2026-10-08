@@ -13,6 +13,8 @@ describe('Core release boundary', () => {
       '/api/files/abc',
       '/api/feedback',
       '/feedback',
+      '/profile',
+      '/api/profile/avatar',
       '/api/health',
     ]) {
       expect(isReleasedPath(path, true), path).toBe(true);
