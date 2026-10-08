@@ -65,10 +65,18 @@ test('a connected user can edit their own name and photo, then change password a
   await page.goto('/profile');
   await expect(page.getByRole('heading', { name: 'Un espacio que se siente tuyo' })).toBeVisible();
   await expect(page.getByText('synthetic@example.test')).toBeVisible();
+  if (process.env.ANALIZA_CAPTURE_PROFILE === '1') {
+    await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' });
+    await page.screenshot({ path: 'docs/release/profile-desktop.png', fullPage: true });
+  }
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#main-navigation')).not.toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
+  if (process.env.ANALIZA_CAPTURE_PROFILE === '1') {
+    await page.screenshot({ path: 'docs/release/profile-mobile.png', fullPage: true });
+  }
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.getByLabel('Nombre', { exact: true }).fill('Synthetic Nurse Updated');
   await page.getByRole('button', { name: 'Guardar nombre' }).click();
