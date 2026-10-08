@@ -22,6 +22,7 @@ export default function HospitalizationDetailPage() {
     clinicalDocuments,
     catalogItems,
     doctors,
+    error: workspaceError,
     hospitalizations,
     loading,
     patients,
@@ -34,6 +35,7 @@ export default function HospitalizationDetailPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [linkingQuoteId, setLinkingQuoteId] = useState<string | null>(null);
   const [referralDoctorQuery, setReferralDoctorQuery] = useState('');
   const [selectedReferralDoctor, setSelectedReferralDoctor] = useState('');
   const hospitalization = hospitalizations.find((item) => item.id === params.id);
@@ -68,7 +70,16 @@ export default function HospitalizationDetailPage() {
     .map((part) => part[0])
     .join('')
     .toLocaleUpperCase('es');
-  const linkedQuotes = quotes.filter((item) => item.caseId === hospitalization.id);
+  const linkedQuotes = quotes.filter(
+    (item) =>
+      item.caseId === hospitalization.id || hospitalization.linkedQuoteIds?.includes(item.id),
+  );
+  const attachableQuotes = quotes.filter(
+    (item) =>
+      item.patientId === hospitalization.patientId &&
+      !item.caseId &&
+      !hospitalization.linkedQuoteIds?.includes(item.id),
+  );
   const linkedDocuments = clinicalDocuments.filter((item) => item.caseId === hospitalization.id);
   const linkedVitals = vitalReadings.filter((item) => item.caseId === hospitalization.id);
   const primaryDoctor = doctors.find((item) => item.id === hospitalization.primaryDoctorId);
@@ -85,6 +96,16 @@ export default function HospitalizationDetailPage() {
   );
   const profileEditingEnabled = providerMode === 'mock' || isServerDataMode(providerMode);
   const closeProfile = () => setProfileOpen(false);
+  const attachQuote = async (quoteId: string) => {
+    setLinkingQuoteId(quoteId);
+    setProfileMessage(null);
+    const saved = await updateHospitalization({
+      ...hospitalization,
+      linkedQuoteIds: [...new Set([...(hospitalization.linkedQuoteIds ?? []), quoteId])],
+    });
+    setLinkingQuoteId(null);
+    if (saved) setProfileMessage('Cotización anexada al expediente sin modificar su versión.');
+  };
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!profileEditingEnabled) return;
@@ -94,6 +115,7 @@ export default function HospitalizationDetailPage() {
     const saved = await updateHospitalization({
       ...hospitalization,
       administrativeProfile: {
+        ...hospitalization.administrativeProfile,
         healthManager: value('healthManager'),
         referredBy: value('referredBy'),
         type: value('type'),
@@ -244,6 +266,11 @@ export default function HospitalizationDetailPage() {
           providerMode={providerMode}
         />
       )}
+      {workspaceError ? (
+        <p className="notice warning" role="alert">
+          No se guardó el cambio: {workspaceError}
+        </p>
+      ) : null}
       {profileMessage ? (
         <p className="notice success" role="status">
           {profileMessage}
@@ -252,7 +279,14 @@ export default function HospitalizationDetailPage() {
       {!isCoreRelease && (
         <div className="dashboard-grid">
           <Panel>
-            <h2>Cotización y seguro</h2>
+            <div className="table-heading">
+              <div>
+                <h2>Cotización y seguro</h2>
+                <p className="muted">
+                  Las versiones enviadas se anexan como referencia; el PDF original no cambia.
+                </p>
+              </div>
+            </div>
             {linkedQuotes.length ? (
               <ul>
                 {linkedQuotes.map((quote) => (
@@ -273,6 +307,36 @@ export default function HospitalizationDetailPage() {
                 title="Sin cotización"
               />
             )}
+            {can('cases:write') && attachableQuotes.length ? (
+              <div className="form-grid">
+                <label>
+                  Anexar cotización existente del mismo paciente
+                  <select id="hospitalization-quote-select" defaultValue="">
+                    <option value="">Seleccione una cotización</option>
+                    {attachableQuotes.map((quote) => (
+                      <option key={quote.id} value={quote.id}>
+                        {quote.id} · versión {quote.version} ·{' '}
+                        {quote.status === 'SENT' ? 'enviada' : 'borrador'}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button
+                  className="button-secondary"
+                  data-action-id="HOSPITALIZATION-QUOTE-ATTACH"
+                  disabled={Boolean(linkingQuoteId)}
+                  onClick={() => {
+                    const element = document.getElementById(
+                      'hospitalization-quote-select',
+                    ) as HTMLSelectElement | null;
+                    if (element?.value) void attachQuote(element.value);
+                  }}
+                  type="button"
+                >
+                  {linkingQuoteId ? 'Anexando…' : 'Anexar al expediente'}
+                </Button>
+              </div>
+            ) : null}
           </Panel>
           <Panel>
             <div className="table-heading">
@@ -335,6 +399,11 @@ export default function HospitalizationDetailPage() {
             id="administrative-profile-form"
             onSubmit={(event) => void saveProfile(event)}
           >
+            {workspaceError ? (
+              <p className="field-error full" role="alert">
+                No se guardó: {workspaceError}
+              </p>
+            ) : null}
             <label>
               Visitador médico
               <input defaultValue={profile?.healthManager ?? ''} name="healthManager" />
@@ -373,8 +442,11 @@ export default function HospitalizationDetailPage() {
               </select>
             </label>
             <label>
-              Tipo
+              Tipo de atención (referencia interna)
               <input defaultValue={profile?.type ?? ''} name="type" />
+              <span className="field-help">
+                Campo descriptivo opcional; no determina cobertura, tarifa ni impuestos.
+              </span>
             </label>
             <label>
               Fecha de inicio
@@ -395,8 +467,25 @@ export default function HospitalizationDetailPage() {
               />
             </label>
             <label>
-              Forma de pago
-              <input defaultValue={profile?.paymentMethod ?? ''} name="paymentMethod" />
+              Forma de pago prevista
+              <select defaultValue={profile?.paymentMethod ?? ''} name="paymentMethod">
+                <option value="">Sin definir</option>
+                {profile?.paymentMethod &&
+                !['Efectivo', 'Cheque', 'Transferencia', 'Tarjeta'].includes(
+                  profile.paymentMethod,
+                ) ? (
+                  <option value={profile.paymentMethod}>
+                    {profile.paymentMethod} (registro anterior)
+                  </option>
+                ) : null}
+                <option value="Efectivo">Efectivo</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Tarjeta">Tarjeta</option>
+              </select>
+              <span className="field-help">
+                No registra un pago; los pagos reales se aplican en Financiero.
+              </span>
             </label>
             <label>
               Aseguradora

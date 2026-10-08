@@ -11,7 +11,7 @@ async function login(
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(email === 'nurse@demo.local' ? /\/patients$/ : /\/dashboard$/);
 }
 
 test('insurance records manual observations, searches, filters and preserves related modules', async ({

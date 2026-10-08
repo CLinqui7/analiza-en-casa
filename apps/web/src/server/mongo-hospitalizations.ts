@@ -51,6 +51,7 @@ export class MongoHospitalizationRepository {
     private readonly hospitalizations: HospitalizationCollection,
     private readonly patients: PatientLookup,
     private readonly nurseAccounts?: { resources: PatientLookup; memberships: PatientLookup },
+    private readonly quotes?: PatientLookup,
   ) {}
 
   async listWithVersions(actor: ServerActor): Promise<HospitalizationWithVersion[]> {
@@ -79,11 +80,23 @@ export class MongoHospitalizationRepository {
   }
 
   private async resolveNurses(actor: ServerActor, hospitalization: Hospitalization) {
+    const linkedQuoteIds = [...new Set(hospitalization.linkedQuoteIds ?? [])];
+    if (linkedQuoteIds.length && !this.quotes)
+      throw new MongoInputError('La validación de cotizaciones no está disponible.');
+    for (const quoteId of linkedQuoteIds) {
+      const quote = (await this.quotes!.findOne({
+        id: quoteId,
+        organizationId: actor.organizationId,
+        patientId: hospitalization.patientId,
+      })) as { caseId?: string } | null;
+      if (!quote || (quote.caseId && quote.caseId !== hospitalization.id))
+        throw new MongoInputError('La cotización debe pertenecer al mismo paciente y caso.');
+    }
     const resourceIds = [...new Set(hospitalization.assignedNursingResourceIds ?? [])];
     if (!this.nurseAccounts) {
       if (resourceIds.length || hospitalization.assignedNurseUserIds?.length)
         throw new MongoInputError('La validación de cuentas de enfermería no está disponible.');
-      return hospitalization;
+      return { ...hospitalization, ...(linkedQuoteIds.length ? { linkedQuoteIds } : {}) };
     }
     if (!resourceIds.length)
       throw new MongoInputError('Asigne al menos una enfermera con cuenta de usuario.');
@@ -109,6 +122,7 @@ export class MongoHospitalizationRepository {
       ...hospitalization,
       assignedNursingResourceIds: resourceIds,
       assignedNurseUserIds: [...new Set(userIds)],
+      ...(linkedQuoteIds.length ? { linkedQuoteIds } : {}),
     };
   }
 

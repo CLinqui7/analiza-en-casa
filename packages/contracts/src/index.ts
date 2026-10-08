@@ -217,6 +217,8 @@ export const hospitalizationSchema = z.object({
   /** Resources assigned to the case; account-level visibility requires a server-side user link. */
   assignedNursingResourceIds: z.array(z.string().trim().min(1)).optional(),
   assignedNurseUserIds: z.array(z.string().trim().min(1)).optional(),
+  /** References only: sent quote versions remain immutable when attached to a case. */
+  linkedQuoteIds: z.array(z.string().trim().min(1)).max(100).optional(),
   /**
    * Administrative execution-profile fields observed in CH08. They are
    * descriptive only and never create insurance, billing, coverage, tax, or

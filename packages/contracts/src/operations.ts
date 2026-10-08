@@ -233,6 +233,106 @@ export const goalInputSchema = z
   .strict();
 export const goalSchema = goalInputSchema.extend({ id });
 export type VisitGoal = z.infer<typeof goalSchema>;
+
+/** Custody at a patient's home is not a warehouse balance. Returned stock stays on hold. */
+export const homeCustodyInputSchema = z
+  .object({
+    id,
+    patientId: id,
+    caseId: id.optional(),
+    itemId: id,
+    warehouseId: id,
+    addressLine: z.string().trim().min(5).max(500),
+    quantity: z.number().int().positive().max(1000000),
+    sentAt: date,
+    reference: z.string().trim().min(1).max(200),
+    note: z.string().trim().max(1000).optional(),
+    idempotencyKey: id,
+  })
+  .strict();
+export const homeCustodySchema = homeCustodyInputSchema.extend({
+  status: z.enum(['OPEN', 'CLOSED']),
+  dispatchedBy: id,
+  returnedQuantity: z.number().int().nonnegative().default(0),
+  receivedAt: date.optional(),
+  returnCondition: z.string().trim().max(1000).optional(),
+  closeKey: id.optional(),
+  traceAllocations: z
+    .array(z.object({ traceRecordId: id, number: id, quantity: z.number().int().positive() }))
+    .default([]),
+});
+export const homeCustodyCloseSchema = z
+  .object({
+    custodyId: id,
+    returnedQuantity: z.number().int().nonnegative().max(1000000),
+    receivedAt: date,
+    conditionNote: z.string().trim().max(1000),
+    idempotencyKey: id,
+  })
+  .strict()
+  .refine((value) => value.returnedQuantity === 0 || value.conditionNote.length > 0, {
+    message: 'Describa el estado de lo devuelto.',
+    path: ['conditionNote'],
+  });
+export type HomeCustody = z.infer<typeof homeCustodySchema>;
+
+export const commercialVisitInputSchema = z
+  .object({
+    id,
+    doctorId: id,
+    occurredAt: date,
+    outcome: z.enum(['CONTACTED', 'FOLLOW_UP', 'NO_CONTACT']),
+    note: z.string().trim().max(1000).optional(),
+    idempotencyKey: id,
+  })
+  .strict();
+export const commercialVisitSchema = commercialVisitInputSchema.extend({ actorUserId: id });
+export type CommercialVisit = z.infer<typeof commercialVisitSchema>;
+export const commercialAdmissionInputSchema = z
+  .object({
+    id,
+    hospitalizationId: id,
+    visitId: id,
+    idempotencyKey: id,
+  })
+  .strict();
+export const commercialAdmissionSchema = commercialAdmissionInputSchema.extend({
+  patientId: id,
+  admittedAt: z.iso.date(),
+  actorUserId: id,
+});
+export type CommercialAdmission = z.infer<typeof commercialAdmissionSchema>;
+export const commercialGoalInputSchema = z
+  .object({
+    id,
+    period: z.enum(['WEEK', 'MONTH']),
+    periodStart: z.iso.date(),
+    doctorTarget: z.number().int().nonnegative().max(1000000),
+    admissionTarget: z.number().int().nonnegative().max(1000000),
+    salesTarget: z.number().finite().nonnegative().max(100000000),
+    idempotencyKey: id,
+  })
+  .strict();
+export const commercialGoalSchema = commercialGoalInputSchema.extend({ setBy: id });
+export type CommercialGoal = z.infer<typeof commercialGoalSchema>;
+export const confirmedSaleInputSchema = z
+  .object({
+    id,
+    occurredAt: date,
+    reference: z.string().trim().min(3).max(200),
+    amount: z.number().finite().positive().max(100000000),
+    category: z.enum(['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT', 'SERVICES', 'OTHER']),
+    quoteId: id.optional(),
+    commercialVisitId: id.optional(),
+    idempotencyKey: id,
+  })
+  .strict()
+  .refine((value) => Math.abs(value.amount * 100 - Math.round(value.amount * 100)) < 0.000001, {
+    message: 'El monto debe tener como máximo dos decimales.',
+    path: ['amount'],
+  });
+export const confirmedSaleSchema = confirmedSaleInputSchema.extend({ confirmedBy: id });
+export type ConfirmedSale = z.infer<typeof confirmedSaleSchema>;
 export type OperationsSnapshot = {
   professionals: Array<{ userId: string; name: string; profession: 'NURSE' | 'DOCTOR' }>;
   configuration: ConfigurationEntry[];
@@ -243,6 +343,14 @@ export type OperationsSnapshot = {
   goals: VisitGoal[];
   warehouses: Warehouse[];
   traceRecords: InventoryTraceRecord[];
+  homeCustodies: HomeCustody[];
+  deliveryPatients: Array<{ id: string; fullName: string; addressLine?: string }>;
+  commercialAccess: 'REP' | 'MANAGER' | null;
+  commercialVisits: CommercialVisit[];
+  commercialDoctors: Array<{ id: string; fullName: string }>;
+  commercialAdmissions: CommercialAdmission[];
+  commercialGoals: CommercialGoal[];
+  confirmedSales: ConfirmedSale[];
 };
 export const emptyOperations = (): OperationsSnapshot => ({
   professionals: [],
@@ -254,6 +362,14 @@ export const emptyOperations = (): OperationsSnapshot => ({
   goals: [],
   warehouses: [],
   traceRecords: [],
+  homeCustodies: [],
+  deliveryPatients: [],
+  commercialAccess: null,
+  commercialVisits: [],
+  commercialDoctors: [],
+  commercialAdmissions: [],
+  commercialGoals: [],
+  confirmedSales: [],
 });
 
 /** Corrections append a new observation; the original remains available for audit. */

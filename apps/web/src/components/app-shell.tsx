@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/components/providers';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
+import { ScreenHelp } from './screen-help';
 
 const navigationIconPaths = {
   analytics: 'M4 19V10 M10 19V5 M16 19v-7 M22 19H2',
@@ -136,6 +137,13 @@ const navigation: NavigationGroup[] = [
         href: '/payments',
         permission: 'payments:read',
         actionId: 'PAYMENT-NAVIGATE',
+      },
+      {
+        label: 'Ventas confirmadas',
+        icon: 'finance',
+        href: '/sales',
+        permission: 'payments:read',
+        actionId: 'SALES-NAVIGATE',
       },
       {
         label: 'Cuentas por pagar',
@@ -269,6 +277,13 @@ const navigation: NavigationGroup[] = [
         actionId: 'INVENTORY-MOVEMENTS-NAVIGATE',
       },
       {
+        label: 'Entregas a domicilio',
+        icon: 'movements',
+        href: '/inventory/home-deliveries',
+        permission: 'inventory:read',
+        actionId: 'HOME-DELIVERIES-NAVIGATE',
+      },
+      {
         label: 'Kárdex',
         icon: 'kardex',
         href: '/inventory/kardex',
@@ -337,11 +352,18 @@ const navigation: NavigationGroup[] = [
         actionId: 'LOGIN-ANALYTICS-NAVIGATE',
       },
       {
-        label: 'Visitas y metas',
+        label: 'Visitas y metas · venta de equipos',
         icon: 'visits',
         href: '/reports/visits-goals',
         permission: 'reports:read',
         actionId: 'VISITS-GOALS-NAVIGATE',
+      },
+      {
+        label: 'Visitas clínicas',
+        icon: 'visits',
+        href: '/reports/home-visits',
+        permission: 'reports:read',
+        actionId: 'HOME-VISITS-NAVIGATE',
       },
       {
         label: 'Horas de enfermería',
@@ -478,10 +500,33 @@ export function AppShell({ children }: PropsWithChildren) {
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
+  const [commercialGrant, setCommercialGrant] = useState<{
+    userId: string;
+    scope: 'REP' | 'MANAGER' | null;
+  } | null>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     Inicio: true,
   });
   const required = permissionForPath(pathname);
+  const sessionUserId = session?.userId;
+  const sessionMode = session?.mode;
+  const commercialAccess =
+    commercialGrant && commercialGrant.userId === sessionUserId ? commercialGrant.scope : null;
+
+  useEffect(() => {
+    if (!sessionUserId || !isServerDataMode(sessionMode)) return;
+    const controller = new AbortController();
+    void fetch('/api/operations/access', { cache: 'no-store', signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : { commercialAccess: null }))
+      .then((result) => {
+        if (!controller.signal.aborted)
+          setCommercialGrant({ userId: sessionUserId, scope: result.commercialAccess ?? null });
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setCommercialGrant({ userId: sessionUserId, scope: null });
+      });
+    return () => controller.abort();
+  }, [sessionUserId, sessionMode]);
 
   useEffect(() => {
     const restoreTimer = window.setTimeout(
@@ -750,6 +795,7 @@ export function AppShell({ children }: PropsWithChildren) {
                 group.children?.filter(
                   (child) =>
                     can(child.permission) &&
+                    (child.href !== '/reports/visits-goals' || commercialAccess !== null) &&
                     (child.href !== '/dashboard' || canOpenDashboard) &&
                     isReleasedPath(child.href),
                 ) ?? [];
@@ -936,6 +982,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </div>
           <div className="topbar-actions">
             <span className="topbar-page-name">{currentPageLabel(pathname)}</span>
+            <ScreenHelp key={pathname} pathname={pathname} pageLabel={currentPageLabel(pathname)} />
             <button
               className="topbar-profile"
               data-action-id="USER-PROFILE-OPEN"

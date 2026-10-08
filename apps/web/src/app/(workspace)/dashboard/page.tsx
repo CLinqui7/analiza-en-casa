@@ -12,6 +12,7 @@ import { isCoreRelease } from '@/lib/release-profile';
 import { CoreDashboard } from '@/components/core-dashboard';
 import { DemoDataButton } from '@/components/demo-data-button';
 import { useOperations } from '@/lib/use-operations';
+import { companySales, periodStarts } from '@/lib/field-metrics';
 
 const currency = new Intl.NumberFormat('es-SV', {
   style: 'currency',
@@ -130,6 +131,24 @@ function FullDashboard() {
       (payment) => payment.status === 'APPLIED' && payment.createdAt.startsWith(dashboardMonth),
     )
     .reduce((sum, payment) => sum + payment.amount, 0);
+  const salesPeriod = periodStarts(new Date());
+  const confirmedSalesWeek = companySales(operations.confirmedSales, salesPeriod.week, 'WEEK');
+  const confirmedSalesMonth = companySales(operations.confirmedSales, salesPeriod.month, 'MONTH');
+  const salesMonths = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(`${salesPeriod.month}T12:00:00Z`);
+    date.setUTCMonth(date.getUTCMonth() - (5 - index));
+    const start = date.toISOString().slice(0, 10);
+    return {
+      label: start.slice(0, 7),
+      total: companySales(operations.confirmedSales, start, 'MONTH'),
+    };
+  });
+  const salesWeeks = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(`${salesPeriod.week}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() - (5 - index) * 7);
+    const start = date.toISOString().slice(0, 10);
+    return { label: start.slice(5), total: companySales(operations.confirmedSales, start, 'WEEK') };
+  });
   const quoteFunnel = [
     { label: 'Borradores', value: latestQuotes.filter((quote) => quote.status === 'DRAFT').length },
     { label: 'Enviadas', value: latestQuotes.filter((quote) => quote.status === 'SENT').length },
@@ -224,6 +243,75 @@ function FullDashboard() {
 
       {!loading && !error ? (
         <>
+          {can('payments:read') ? (
+            <section
+              className="dashboard-sales-overview"
+              aria-label="Ventas confirmadas con referencia"
+            >
+              <Panel className="dashboard-kpi-card">
+                <div>
+                  <small>Ventas confirmadas · semana</small>
+                  <strong>{currency.format(confirmedSalesWeek)}</strong>
+                  <span>Con referencia · desde el lunes</span>
+                </div>
+              </Panel>
+              <Panel className="dashboard-kpi-card">
+                <div>
+                  <small>Ventas confirmadas · mes</small>
+                  <strong>{currency.format(confirmedSalesMonth)}</strong>
+                  <span>Registro interno; no utilidad ni factura fiscal</span>
+                </div>
+              </Panel>
+              <Panel className="dashboard-card">
+                <div className="dashboard-card-heading">
+                  <div>
+                    <h2>Ventas por semana y mes</h2>
+                    <p>
+                      Únicamente registros confirmados con referencia; no se suman cotizaciones ni
+                      pagos.
+                    </p>
+                  </div>
+                  <Link className="action-link-button action-link-button--compact" href="/sales">
+                    Ver registros
+                  </Link>
+                </div>
+                <div className="sales-mini-charts">
+                  <div>
+                    <h3>Últimas seis semanas</h3>
+                    {salesWeeks.map((row) => (
+                      <div className="sales-mini-row" key={row.label}>
+                        <span>{row.label}</span>
+                        <div role="img" aria-label={`${row.label}: ${currency.format(row.total)}`}>
+                          <span
+                            style={{
+                              width: `${row.total ? Math.max(4, (row.total / Math.max(...salesWeeks.map((item) => item.total), 1)) * 100) : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <strong>{currency.format(row.total)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    <h3>Últimos seis meses</h3>
+                    {salesMonths.map((row) => (
+                      <div className="sales-mini-row" key={row.label}>
+                        <span>{row.label}</span>
+                        <div role="img" aria-label={`${row.label}: ${currency.format(row.total)}`}>
+                          <span
+                            style={{
+                              width: `${row.total ? Math.max(4, (row.total / Math.max(...salesMonths.map((item) => item.total), 1)) * 100) : 0}%`,
+                            }}
+                          />
+                        </div>
+                        <strong>{currency.format(row.total)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Panel>
+            </section>
+          ) : null}
           <section className="dashboard-kpi-grid" aria-label="Indicadores operativos">
             <Panel className="dashboard-kpi-card">
               <span className="dashboard-kpi-icon" aria-hidden="true">
@@ -554,9 +642,9 @@ function FullDashboard() {
                 <div className="dashboard-goal-pending">
                   <Link
                     className="action-link-button action-link-button--compact"
-                    href="/reports/visits-goals"
+                    href="/reports/home-visits"
                   >
-                    <strong>Ver visitas y metas</strong>
+                    <strong>Ver visitas clínicas</strong>
                   </Link>
                   <span>Resultados y objetivos por profesional</span>
                 </div>

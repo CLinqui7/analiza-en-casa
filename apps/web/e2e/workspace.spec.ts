@@ -9,7 +9,7 @@ async function loginAs(page: import('@playwright/test').Page, email: string, pas
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(email === 'nurse@demo.local' ? /\/patients$/ : /\/dashboard$/);
 }
 
 async function login(page: import('@playwright/test').Page) {
@@ -129,7 +129,9 @@ test('dashboard presents unclassified measurements and opens authorized operatio
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await loginAs(page, 'nurse@demo.local', 'demo-nurse');
-  await expect(page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]')).toBeVisible();
+  await expect(page).toHaveURL(/\/patients$/);
+  await expect(page.getByRole('button', { name: 'Agregar paciente' })).toBeVisible();
+  await expect(page.locator('[data-action-id="DASHBOARD-PATIENT-CREATE"]')).toHaveCount(0);
   await expect(page.locator('[data-action-id="DASHBOARD-QUOTE-CREATE"]')).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();

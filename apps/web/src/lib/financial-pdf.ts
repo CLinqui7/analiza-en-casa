@@ -62,6 +62,13 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
     });
   }
   drawHeader();
+  const ensureSpace = (height: number) => {
+    if (y - height >= 68) return false;
+    page = document.addPage([612, 792]);
+    drawHeader(true);
+    y = 658;
+    return true;
+  };
   const write: LineWriter = (text, options = {}) => {
     const size = options.size ?? 10;
     if (!text.trim()) {
@@ -81,11 +88,7 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
     }
     lines.push(line);
     for (const [index, currentLine] of lines.entries()) {
-      if (y < 68) {
-        page = document.addPage([612, 792]);
-        drawHeader(true);
-        y = 658;
-      }
+      ensureSpace(size + 7);
       page.drawText(currentLine, {
         x: 48,
         y,
@@ -95,6 +98,105 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
       });
       y -= index === lines.length - 1 ? (options.gap ?? size + 7) : size + 4;
     }
+  };
+  const quoteTableHeader = () => {
+    ensureSpace(28);
+    page.drawRectangle({ x: 48, y: y - 21, width: 516, height: 26, color: rgb(0.92, 0.95, 0.97) });
+    for (const [label, x] of [
+      ['Concepto', 56],
+      ['Cant.', 318],
+      ['Precio', 368],
+      ['Desc.', 438],
+      ['Subtotal', 506],
+    ] as const)
+      page.drawText(label, { x, y: y - 12, size: 8, font: bold, color: rgb(0.17, 0.3, 0.39) });
+    y -= 30;
+  };
+  const quoteCategory = (label: string) => {
+    ensureSpace(48);
+    page.drawRectangle({ x: 48, y: y - 17, width: 516, height: 22, color: rgb(0.9, 0.96, 0.95) });
+    page.drawText(safe(label), {
+      x: 56,
+      y: y - 10,
+      size: 9,
+      font: bold,
+      color: rgb(0.03, 0.33, 0.36),
+    });
+    y -= 25;
+    quoteTableHeader();
+  };
+  const quoteRow = (item: Quote['items'][number], index: number) => {
+    const name = safe(`${item.name}${item.doctorName ? ` | Médico: ${item.doctorName}` : ''}`);
+    const lines: string[] = [];
+    let line = '';
+    for (const word of name.split(/\s+/)) {
+      const next = line ? `${line} ${word}` : word;
+      if (regular.widthOfTextAtSize(next, 8.5) > 250 && line) {
+        lines.push(line);
+        line = word;
+      } else line = next;
+    }
+    lines.push(line);
+    const height = Math.max(28, lines.length * 12 + 12);
+    if (ensureSpace(height)) quoteTableHeader();
+    if (index % 2 === 1)
+      page.drawRectangle({
+        x: 48,
+        y: y - height + 3,
+        width: 516,
+        height,
+        color: rgb(0.975, 0.984, 0.989),
+      });
+    lines.forEach((text, lineIndex) =>
+      page.drawText(text, {
+        x: 56,
+        y: y - 10 - lineIndex * 12,
+        size: 8.5,
+        font: regular,
+        color: rgb(0.06, 0.2, 0.28),
+      }),
+    );
+    const values = [
+      [String(item.quantity), 350],
+      [money(item.unitPrice), 425],
+      [money(item.discountAmount), 495],
+      [money(item.quantity * item.unitPrice - item.discountAmount), 559],
+    ] as const;
+    for (const [value, right] of values)
+      page.drawText(value, {
+        x: right - regular.widthOfTextAtSize(value, 8),
+        y: y - 10,
+        size: 8,
+        font: regular,
+        color: rgb(0.06, 0.2, 0.28),
+      });
+    y -= height;
+    page.drawLine({
+      start: { x: 48, y },
+      end: { x: 564, y },
+      thickness: 0.4,
+      color: rgb(0.89, 0.92, 0.94),
+    });
+  };
+  const quoteTotal = (total: number) => {
+    ensureSpace(50);
+    page.drawRectangle({ x: 48, y: y - 40, width: 516, height: 46, color: rgb(0.04, 0.24, 0.32) });
+    page.drawText('TOTAL COTIZADO', {
+      x: 62,
+      y: y - 22,
+      size: 10,
+      font: bold,
+      color: rgb(1, 1, 1),
+    });
+    const value = money(total);
+    page.drawText(value, {
+      x: 548 - bold.widthOfTextAtSize(value, 17),
+      y: y - 25,
+      size: 17,
+      font: bold,
+      color: rgb(1, 1, 1),
+    });
+    y -= 58;
   };
   const finish = () => {
     const pages = document.getPages();
@@ -114,7 +216,7 @@ async function documentWithWriter(title: string, logoBytes?: Uint8Array) {
       });
     }
   };
-  return { document, write, finish };
+  return { document, write, finish, quoteTableHeader, quoteCategory, quoteRow, quoteTotal };
 }
 
 export async function buildQuotePdf(
@@ -125,7 +227,10 @@ export async function buildQuotePdf(
   if (quote.status !== 'SENT' || !quote.immutable)
     throw new Error('Sólo se exportan versiones enviadas e inmutables.');
   const presentation = quotePdfPresentation(quote);
-  const { document, write, finish } = await documentWithWriter('Cotización informativa', logoBytes);
+  const { document, write, finish, quoteCategory, quoteRow, quoteTotal } = await documentWithWriter(
+    'Cotización informativa',
+    logoBytes,
+  );
   write('No es factura ni documento fiscal.', { bold: true, gap: 22 });
   write(`Referencia: ${quoteDisplayCode(quote.id)} · versión ${quote.version}`);
   write(`Paciente: ${patient?.fullName ?? 'No disponible'}`);
@@ -134,27 +239,19 @@ export async function buildQuotePdf(
   write(`Atención: ${quote.careSetting ?? 'No documentada'}`);
   write(`Hospitalización: ${quote.caseId ?? 'Atención nueva sin hospitalización'}`);
   write(`Resumen: ${quote.summary}`, { gap: 22 });
-  write('Conceptos por categoría', { bold: true, size: 13, gap: 21 });
+  write('Servicios y conceptos cotizados', { bold: true, size: 13, gap: 23 });
   if (!quote.items.length) write('Sin conceptos registrados.');
   for (const category of quoteCategories) {
     const items = quote.items.filter((item) => item.category === category.value);
     if (!items.length) continue;
-    write(category.label, { bold: true, size: 11, gap: 17 });
-    for (const item of items) {
-      const subtotal = item.quantity * item.unitPrice - item.discountAmount;
-      write(item.name, { bold: true, gap: 13 });
-      if (item.doctorName) write(`Médico: ${item.doctorName}`, { size: 9, gap: 12 });
-      write(
-        `Cantidad ${item.quantity} · precio ${money(item.unitPrice)} · descuento ${money(item.discountAmount)} · subtotal ${money(subtotal)}`,
-        { size: 9, gap: 15 },
-      );
-    }
+    quoteCategory(category.label);
+    items.forEach(quoteRow);
   }
   write('', { gap: 7 });
   write('Resumen financiero', { bold: true, size: 13, gap: 21 });
   write(`Subtotal: ${money(quote.subtotal)}`);
   write(`Descuento: ${money(quote.discountAmount)}`);
-  write(`Total: ${money(quote.total)}`, { bold: true });
+  quoteTotal(quote.total);
   write(`Monto en letras: ${presentation.amountInWords}`);
   write(`Responsabilidad de aseguradora: ${money(quote.insurerAmount)}`);
   write(`Responsabilidad del paciente: ${money(quote.patientAmount)}`);

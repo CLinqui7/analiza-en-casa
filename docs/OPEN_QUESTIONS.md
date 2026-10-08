@@ -37,7 +37,8 @@ actual y sus estados verificables constan en `docs/release/CLOUD_RUN_SQL_STATE.j
 ## B0 · Cambios del cliente (Excel auditado)
 
 - `CR-010` / `CR-018`: definir qué entidad representa “Puntual”, sus campos, duración, estados y relación con Hospitalización o Agenda.
-- `CR-014` / `CR-015`: aprobar las fuentes, períodos, permisos y fórmulas de facturación, pacientes mensuales, visitas médicas y cumplimiento de metas; no se usarán cotizaciones ni datos demo como sustituto.
+- `CR-014` / `CR-015` actualizado 2026-10-08: el cliente aclaró que el indicador económico solicitado es **ventas confirmadas con referencia**. El nuevo registro separa esas ventas de pagos, cotizaciones, utilidad y factura fiscal. Claudia registra visitas comerciales; Sissy define metas semanales/mensuales. Sigue abierta únicamente la definición de **facturación fiscal** y del criterio histórico para “pacientes por mes” (ingresados frente a activos al cierre); ninguna de esas dos cifras se infiere.
+- `HOME-RETURN-QUALITY`: las unidades físicamente devueltas se reciben en cuarentena separada de la bodega vendible. Falta procedimiento de inspección y autorización para liberar, destruir o devolver a proveedor, especialmente medicamentos y lotes; hasta entonces no se reincorporan automáticamente a existencias disponibles.
 - `CR-020`–`CR-030`: entregar formularios institucionales versionados y aprobados, reglas de corrección y permisos antes de construir Balance hídrico o escalas clínicas.
 - `CR-022`: confirmar que “Gasglow” corresponde a Glasgow; `CR-024`: que “Ecof” corresponde a ECOG; `CR-026`: que “karnofky” corresponde a Karnofsky.
 - `CR-028`: la fila del Excel dice Dowton/Downton, mientras su captura parece Norton. Confirmar nombre y versión. `CR-029`: la fila no tiene nombre y la captura dice Índice Barthel. `CR-030`: el texto dice Branden y la imagen parece Braden; confirmar versión aprobada.

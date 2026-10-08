@@ -86,6 +86,7 @@ export interface Persistence {
     update(actor: ServerActor, input: unknown): Promise<Shift>;
   };
   operations: {
+    access(actor: ServerActor): Promise<'REP' | 'MANAGER' | null>;
     list(actor: ServerActor): Promise<OperationsSnapshot>;
     execute(actor: ServerActor, input: unknown): Promise<unknown>;
   };
