@@ -14,6 +14,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 import { useAuth } from '@/components/providers';
+import { landingPath, type AuthSession } from '@/lib/auth';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
 import { ScreenHelp } from './screen-help';
@@ -482,6 +483,18 @@ function DeniedRoute({ pathname }: { pathname: string }) {
   );
 }
 
+function DashboardAccessRedirect({ session }: { session: AuthSession }) {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(landingPath(session));
+  }, [router, session]);
+  return (
+    <main className="access-denied" role="status">
+      Abriendo una pantalla disponible para tu cuenta…
+    </main>
+  );
+}
+
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
@@ -688,7 +701,10 @@ export function AppShell({ children }: PropsWithChildren) {
     );
   }
   if (!session) return <DeniedRoute pathname={pathname} />;
-  if ((required && !can(required)) || (pathname.startsWith('/dashboard') && !canOpenDashboard)) {
+  if (pathname.startsWith('/dashboard') && !canOpenDashboard) {
+    return <DashboardAccessRedirect session={session} />;
+  }
+  if (required && !can(required)) {
     return (
       <main className="access-denied" role="alert">
         Acceso restringido para el rol {session.role}.
