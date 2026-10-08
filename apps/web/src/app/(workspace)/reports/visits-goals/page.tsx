@@ -147,6 +147,12 @@ export default function CommercialVisitsGoalsPage() {
         />
       </Panel>
     );
+  if (operations.loading)
+    return (
+      <Panel>
+        <p role="status">Cargando visitas y metas…</p>
+      </Panel>
+    );
   if (operations.error && !operations.commercialAccess)
     return (
       <p className="notice warning" role="alert">
@@ -158,7 +164,7 @@ export default function CommercialVisitsGoalsPage() {
       <Panel>
         <EmptyState
           title="Acceso comercial restringido"
-          detail="Este tablero sólo está habilitado para Claudia y Sissy."
+          detail="Este tablero requiere una cuenta administrativa o comercial autorizada."
         />
       </Panel>
     );
