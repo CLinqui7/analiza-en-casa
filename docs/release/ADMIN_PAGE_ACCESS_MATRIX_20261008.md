@@ -25,5 +25,10 @@ La comprobación `scripts/verify-admin-page-access.mjs` inicia sesión con cada 
 - TypeScript, ESLint y build Next aprobados.
 - CH01 14/14, CH02 16/16 y CH03 13/13 aprobados después de corregir el listado de pruebas que el verificador reconoce; no se elevó ningún estado de paridad del video.
 - Auditoría de evidencia: 17/17 capítulos aprobados. Los resultados de navegador y producción se consignan en la entrega final.
+- Regresión de navegador con datos sintéticos: 212/212 pruebas aprobadas. La prueba de honorario médico se hizo determinista identificando la cotización creada, sin alterar el flujo de cotización.
+
+## Comprobación de despliegue candidato
+
+El despliegue `dpl_BptBMM6RVU5B7gJrqhqSyreiAsDg` quedó listo. En el recorrido autenticado de Karla, Abigail, Abril, Claudia, Nelly, Olaya y Sissy se verificaron rol `ADMIN`, 39 enlaces operativos, cuatro APIs operativas 200, alcance comercial esperado, analítica de accesos 403 y Dashboard según la tabla. Los 39 destinos se abrieron con Karla sin pantalla de acceso denegado. Nancy ya había demostrado rol, página inicial y alcance comercial, pero quedó pendiente la repetición completa de este barrido debido al límite temporal de sesiones de prueba; se respetó el límite y no se deshabilitó. La compilación final agrega un estado de carga claro para evitar mostrar un rechazo comercial transitorio mientras responde la API.
 
 La modificación no cambia registros ni membresías: las ocho membresías `ADMIN` y seis restricciones individuales de Dashboard fueron reconciliadas y verificadas en el lote previo (`docs/release/FULL_NURSING_ADMIN_COHORT_20261008.md`).

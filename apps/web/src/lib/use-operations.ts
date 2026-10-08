@@ -13,6 +13,7 @@ export function useOperations() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const connected = isServerDataMode(session?.mode);
+  const [loading, setLoading] = useState(connected);
   const reload = useCallback(async () => {
     if (!connected) return;
     const response = await fetch('/api/operations', { cache: 'no-store' });
@@ -38,6 +39,9 @@ export function useOperations() {
       })
       .catch((cause) => {
         if (!controller.signal.aborted) setError(cause.message);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
   }, [connected]);
@@ -70,5 +74,5 @@ export function useOperations() {
   const visibleData = connected
     ? data
     : { ...emptyOperations(), configuration: demoOperationsConfiguration };
-  return { ...visibleData, error, busy, connected, execute, reload };
+  return { ...visibleData, error, busy, connected, loading, execute, reload };
 }

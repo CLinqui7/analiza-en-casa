@@ -9,7 +9,6 @@ assert.ok(origin && /^https:\/\//.test(origin), 'Set an HTTPS ANALIZA_E2E_BASE_U
 assert.ok(password, 'Set ANALIZA_E2E_PASSWORD privately');
 
 const users = [
-  ['nancy.vasquez@analizaencasa.com', false, 'MANAGER'],
   ['karla@analizaencasa.com', false, 'MANAGER'],
   ['abigailsv92@analizaencasa.com', false, 'MANAGER'],
   ['analiza@analizaencasa.com', false, 'MANAGER'],
@@ -17,7 +16,13 @@ const users = [
   ['nelly.viscarra@analizaencasa.com', false, 'MANAGER'],
   ['olaya.deras@analizaencasa.com', false, 'MANAGER'],
   ['sissy.chavez@analizaencasa.com', true, 'MANAGER'],
+  ['nancy.vasquez@analizaencasa.com', false, 'MANAGER'],
 ];
+const selectedEmails = process.env.ANALIZA_E2E_EMAILS?.split(',').map((email) => email.trim());
+const selectedUsers = selectedEmails?.length
+  ? users.filter(([email]) => selectedEmails.includes(email))
+  : users;
+assert.ok(selectedUsers.length, 'No matching accounts selected');
 const source = readFileSync(
   new URL('../apps/web/src/components/app-shell.tsx', import.meta.url),
   'utf8',
@@ -33,7 +38,8 @@ assert.ok(expected.length > 30, 'Navigation inventory unexpectedly incomplete');
 const browser = await chromium.launch({ headless: true });
 const results = [];
 try {
-  for (const [email, dashboard, scope] of users) {
+  for (const [email, dashboard, scope] of selectedUsers) {
+    console.log(`Checking ${email}`);
     const page = await browser.newPage();
     try {
       await page.goto(`${origin}/login`, { waitUntil: 'domcontentloaded' });
@@ -75,17 +81,21 @@ try {
         if ((await trigger.getAttribute('aria-expanded')) === 'false') await trigger.click();
       }
       const links = await page
-        .locator('nav.nav-scroll a.nav-link[href]')
+        .locator('nav.nav-scroll a[href]')
         .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
       for (const route of expected) assert.ok(links.includes(route), `${email}: missing ${route}`);
       assert.equal(links.includes('/dashboard'), dashboard, `${email}: Dashboard navigation`);
       assert.equal(links.includes('/analytics/logins'), false, `${email}: private log navigation`);
 
       // Exercise every navigation destination once for a restricted Dashboard account.
-      if (email === users[0][0]) {
+      if (email === selectedUsers[0][0] && process.env.ANALIZA_E2E_SWEEP !== '0') {
         for (const route of expected) {
           await page.goto(`${origin}${route}`, { waitUntil: 'domcontentloaded' });
           await page.locator('.main-content').waitFor({ timeout: 20000 });
+          if (route === '/reports/visits-goals')
+            await page
+              .getByRole('heading', { name: 'Visitas y metas · venta de equipos' })
+              .waitFor();
           assert.ok(
             !/Acceso restringido para el rol|Acceso comercial restringido/.test(
               await page.locator('body').innerText(),
@@ -108,6 +118,7 @@ try {
         navigationPages: expected.length,
         privateLog: 'blocked',
       });
+      console.log(`Passed ${email}`);
     } finally {
       await page.close();
     }

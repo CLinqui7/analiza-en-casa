@@ -147,6 +147,12 @@ export default function CommercialVisitsGoalsPage() {
         />
       </Panel>
     );
+  if (operations.loading)
+    return (
+      <Panel>
+        <p role="status">Cargando visitas y metas…</p>
+      </Panel>
+    );
   if (operations.error && !operations.commercialAccess)
     return (
       <p className="notice warning" role="alert">
