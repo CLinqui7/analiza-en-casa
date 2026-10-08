@@ -15,6 +15,8 @@ El cliente eligió “ventas confirmadas con referencia” para el indicador eco
 
 Los demás reportes en revisión sobre WhatsApp y facturación fiscal siguen abiertos: no hay proveedor, consentimiento, campos ni reglas autorizadas. No se cambia un estado a RESUELTO por la mera presencia de una pantalla.
 
+Consulta productiva del 2026-10-08: 64 reportes, los mismos tres nuevos y seis en revisión; no surgió un reporte adicional. Tras desplegar y comprobar las rutas, los tres nuevos se pasaron a `REVIEWING` con una respuesta factual y la verificación pendiente de cada uno. Resultado: 0 nuevos, 9 en revisión, sin declarar ninguno `RESOLVED`.
+
 ## Movimiento domiciliario y evidencia de video
 
 `CH14-E0018` (00:40:39) muestra origen/destino/paciente; `CH14-E0151` (00:45:27) muestra acuse con paciente, hospitalización, bodega, artículo y cantidad; `CH14-E0042` (00:41:43) muestra cierres. Las evidencias están en `references/video-audit/chapters/CH14_inventario_movimientos_acuses_cierres_bodegas_y_kits/event_frames/` y no se modificaron. El nuevo flujo de custodia domiciliaria es **adicional**, no certifica la paridad exacta de Acuses/Cierres del video: aquéllos incluyen más estados, áreas, aprobaciones y acciones no definidas. Se conservaron las superficies anteriores.
