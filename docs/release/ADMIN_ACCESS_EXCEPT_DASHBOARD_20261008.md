@@ -29,3 +29,4 @@ La exclusión del Dashboard es un indicador individual `dashboard_restricted`, n
 - En la URL pública, las cuatro cuentas iniciaron sesión con el rol y destino previstos. Cotizaciones mostró el botón `+ Nuevo`; Hospitalizaciones mostró `Nueva hospitalización`; las APIs de Cotizaciones, Hospitalizaciones y Feedback respondieron HTTP 200; no hubo errores de página. Karla y Nancy regresaron a Pacientes al abrir `/dashboard` directamente; Claudia y Sissy permanecieron en Dashboard.
 - No se hicieron escrituras de pacientes, cotizaciones ni movimientos reales para probar permisos. Las operaciones de escritura se cubrieron con datos sintéticos en la regresión automatizada.
 - La consulta de errores del despliegue en Vercel para los últimos 30 minutos no encontró registros.
+- Captura con datos sintéticos: `docs/release/screenshots/admin-except-dashboard-quotes-20261008.png`. El menú muestra Cotizaciones disponible y omite Dashboard para el administrador restringido.
