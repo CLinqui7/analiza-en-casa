@@ -10,6 +10,10 @@ const webmasterMigration = await readFile(
   new URL('../database/postgresql/migrations/022_webmaster_role.sql', import.meta.url),
   'utf8',
 );
+const multipleWebmastersMigration = await readFile(
+  new URL('../database/postgresql/migrations/025_multiple_webmasters.sql', import.meta.url),
+  'utf8',
+);
 const runner = await readFile(
   new URL('../scripts/deployment/db-command.mjs', import.meta.url),
   'utf8',
@@ -40,10 +44,11 @@ test('ANALYTICS is a single-purpose, single-active account per organization', ()
   assert.doesNotMatch(permissions, /ANALYTICS:[^\n]+patients:read/);
 });
 
-test('WEBMASTER is single-active and receives ADMIN capabilities plus analytics', () => {
+test('WEBMASTER receives ADMIN capabilities plus analytics and allows multiple explicit accounts', () => {
   assert.match(webmasterMigration, /'WEBMASTER'/);
   assert.match(webmasterMigration, /memberships_single_active_webmaster/);
   assert.match(webmasterMigration, /WHERE active AND role='WEBMASTER'/);
+  assert.match(multipleWebmastersMigration, /DROP INDEX IF EXISTS analiza\.memberships_single_active_webmaster/);
   assert.match(permissions, /WEBMASTER: \[\.\.\.allRead, \.\.\.allWrite, 'login-analytics:read'\]/);
 });
 
