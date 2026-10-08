@@ -16,6 +16,7 @@ export const corePages = [
   '/tutorial',
   '/analytics/logins',
   '/supply-requests',
+  '/profile',
 ] as const;
 const coreApi = [
   '/api/auth',
@@ -33,6 +34,7 @@ const coreApi = [
   '/api/information-import',
   '/api/login-analytics',
   '/api/supply-requests',
+  '/api/profile',
   '/api/admin/nurse-profiles',
 ];
 const within = (path: string, base: string) => path === base || path.startsWith(`${base}/`);

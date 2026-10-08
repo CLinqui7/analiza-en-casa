@@ -84,6 +84,11 @@ export function LoginForm() {
           <h1>Bienvenido</h1>
           <p>Ingrese para continuar al espacio de trabajo de Analiza en Casa.</p>
         </div>
+        {params.get('password') === 'updated' ? (
+          <p className="profile-notice" role="status">
+            Contraseña actualizada. Inicia sesión con tu nueva contraseña.
+          </p>
+        ) : null}
 
         <form
           aria-busy={submitting}

@@ -18,6 +18,7 @@ import { landingPath, type AuthSession } from '@/lib/auth';
 import { permissionForPath, type Permission } from '@/lib/permissions';
 import { isCoreRelease, isReleasedPath } from '@/lib/release-profile';
 import { ScreenHelp } from './screen-help';
+import type { AccountProfile } from '@/lib/account-profile';
 
 const navigationIconPaths = {
   analytics: 'M4 19V10 M10 19V5 M16 19v-7 M22 19H2',
@@ -455,6 +456,7 @@ function isActive(pathname: string, href: string) {
 }
 
 function currentPageLabel(pathname: string) {
+  if (pathname === '/profile') return 'Mi perfil';
   const items: Array<{ href: string; label: string }> = [];
   for (const group of navigation) {
     if (group.href) items.push({ href: group.href, label: group.label });
@@ -510,6 +512,7 @@ export function AppShell({ children }: PropsWithChildren) {
   const globalSearchRef = useRef<HTMLInputElement>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userProfileOpen, setUserProfileOpen] = useState(false);
+  const [accountProfile, setAccountProfile] = useState<AccountProfile | null>(null);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
@@ -525,6 +528,24 @@ export function AppShell({ children }: PropsWithChildren) {
   const sessionMode = session?.mode;
   const commercialAccess =
     commercialGrant && commercialGrant.userId === sessionUserId ? commercialGrant.scope : null;
+
+  useEffect(() => {
+    if (!sessionUserId || !isServerDataMode(sessionMode)) return;
+    const controller = new AbortController();
+    void fetch('/api/profile', { cache: 'no-store', signal: controller.signal })
+      .then((response) => (response.ok ? (response.json() as Promise<AccountProfile>) : null))
+      .then((profile) => {
+        if (!controller.signal.aborted) setAccountProfile(profile);
+      })
+      .catch(() => undefined);
+    const refresh = (event: Event) =>
+      setAccountProfile((event as CustomEvent<AccountProfile>).detail);
+    window.addEventListener('analiza:profile-updated', refresh);
+    return () => {
+      controller.abort();
+      window.removeEventListener('analiza:profile-updated', refresh);
+    };
+  }, [sessionUserId, sessionMode]);
 
   useEffect(() => {
     if (!sessionUserId || !isServerDataMode(sessionMode)) return;
@@ -884,9 +905,21 @@ export function AppShell({ children }: PropsWithChildren) {
               ref={accountMenuTriggerRef}
               type="button"
             >
-              <span className="account-avatar">{session.role.slice(0, 1)}</span>
+              <span className="account-avatar">
+                {accountProfile?.avatarVersion ? (
+                  <Image
+                    alt=""
+                    height={34}
+                    width={34}
+                    unoptimized
+                    src={`/api/profile/avatar?v=${accountProfile.avatarVersion}`}
+                  />
+                ) : (
+                  (accountProfile?.displayName || session.role).slice(0, 1).toUpperCase()
+                )}
+              </span>
               <span className="account-copy">
-                <strong>Mi cuenta</strong>
+                <strong>{accountProfile?.displayName || 'Mi cuenta'}</strong>
                 <small>{session.role}</small>
               </span>
               <span aria-hidden="true">•••</span>
@@ -914,6 +947,18 @@ export function AppShell({ children }: PropsWithChildren) {
                   type="button"
                 >
                   Ver mi usuario
+                </button>
+                <button
+                  data-action-id="USER-PROFILE-EDIT"
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    closeMobileNavigation();
+                    router.push('/profile');
+                  }}
+                  role="menuitem"
+                  type="button"
+                >
+                  Editar mi perfil
                 </button>
                 <button
                   data-action-id="AUTH-LOGOUT"
@@ -1008,9 +1053,21 @@ export function AppShell({ children }: PropsWithChildren) {
               }}
               type="button"
             >
-              <span className="account-avatar">{session.role.slice(0, 1)}</span>
+              <span className="account-avatar">
+                {accountProfile?.avatarVersion ? (
+                  <Image
+                    alt=""
+                    height={34}
+                    width={34}
+                    unoptimized
+                    src={`/api/profile/avatar?v=${accountProfile.avatarVersion}`}
+                  />
+                ) : (
+                  (accountProfile?.displayName || session.role).slice(0, 1).toUpperCase()
+                )}
+              </span>
               <span>
-                <strong>Mi cuenta</strong>
+                <strong>{accountProfile?.displayName || 'Mi cuenta'}</strong>
                 <small>{session.role}</small>
               </span>
               <span aria-hidden="true">⌄</span>
@@ -1052,6 +1109,17 @@ export function AppShell({ children }: PropsWithChildren) {
                   </dl>
                 </div>
                 <div className="dialog-footer">
+                  <button
+                    className="button button-primary"
+                    data-action-id="USER-PROFILE-EDIT"
+                    onClick={() => {
+                      closeUserProfile();
+                      router.push('/profile');
+                    }}
+                    type="button"
+                  >
+                    Editar mi perfil
+                  </button>
                   <button
                     className="button button-secondary"
                     data-action-id="USER-PROFILE-CLOSE"

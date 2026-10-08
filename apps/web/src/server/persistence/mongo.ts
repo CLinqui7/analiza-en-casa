@@ -23,11 +23,13 @@ import type { ServerActor } from '../validation/patients';
 import type { Persistence, WorkspaceResult } from './contracts';
 import { MongoWorkspaceSetupRepository } from '../mongo-workspace-setup';
 import { MongoLoginAnalyticsRepository } from '../login-analytics';
+import { MongoAccountProfileRepository } from '../mongo-account-profile';
 export async function mongoPersistence(): Promise<Persistence> {
   const database = await mongoDatabase();
   const operations = new MongoOperationsRepository(database);
   const quotes = new MongoQuoteRepository(database);
   return {
+    accountProfile: new MongoAccountProfileRepository(database),
     loginAnalytics: new MongoLoginAnalyticsRepository(database),
     onboarding: new MongoWorkspaceSetupRepository(database),
     auth: new MongoAuthService(mongoAuthStore(database)),

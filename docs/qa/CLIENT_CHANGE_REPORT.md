@@ -2,16 +2,16 @@
 
 Fuente: `docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx`
 SHA-256 fuente: `d3a3f872b296aa9f722085f44f8ea11e364669ace3c26707d346a10b022aa6b3`
-HEAD auditado: `d8ee1d6a65fbc0fcbe17e44b18f869587d4ce03c`
+HEAD auditado: `b13115e2c3c6b9fcc3b46c49b09e9297b22fe944`
 
 ## Estado
 
 | Estado | Cantidad |
 |---|---:|
-| IMPLEMENTED_DEMO_ONLY | 7 |
-| PARTIAL | 11 |
-| BLOCKED_CLIENT | 3 |
-| MISSING | 9 |
+| IMPLEMENTED_DEMO_ONLY | 4 |
+| PARTIAL | 8 |
+| MISSING | 14 |
+| BLOCKED_CLIENT | 4 |
 | SOURCE_CONFLICT | 2 |
 
 ## Confirmaciones requeridas
