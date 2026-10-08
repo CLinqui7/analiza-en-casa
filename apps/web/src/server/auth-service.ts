@@ -39,6 +39,7 @@ export type MembershipRecord = Readonly<{
   role: Role;
   active: boolean;
   dashboardAccess?: boolean;
+  dashboardRestricted?: boolean;
 }>;
 export type StoredSession = Readonly<{
   sessionHash: string;
@@ -164,6 +165,7 @@ function sessionFrom(stored: StoredSession, membership: MembershipRecord): Serve
     role: membership.role,
     dashboardAccess:
       can(membership.role, 'dashboard:read') &&
+      !membership.dashboardRestricted &&
       (membership.role !== 'NURSE' || membership.dashboardAccess === true),
     expiresAt: stored.expiresAt,
   };

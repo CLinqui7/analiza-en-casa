@@ -24,7 +24,8 @@ const mockUsers = [
   ['auditor@demo.local', 'demo-auditor', 'AUDITOR'],
   ['analytics@demo.local', 'demo-analytics', 'ANALYTICS'],
   ['webmaster@demo.local', 'demo-webmaster', 'WEBMASTER'],
-] as const satisfies ReadonlyArray<readonly [string, string, Role]>;
+  ['admin-no-dashboard@demo.local', 'demo-admin-restricted', 'ADMIN', false],
+] as const satisfies ReadonlyArray<readonly [string, string, Role, boolean?]>;
 
 export function isSupabaseMode() {
   return getSupabaseBrowserClient() !== null;
@@ -57,7 +58,15 @@ export function readMockSession(): AuthSession | null {
       typeof candidate.userId === 'string' &&
       isRole(candidate.role)
     ) {
-      return { userId: candidate.userId, role: candidate.role, mode: 'mock' };
+      return {
+        userId: candidate.userId,
+        role: candidate.role,
+        dashboardAccess:
+          'dashboardAccess' in candidate && typeof candidate.dashboardAccess === 'boolean'
+            ? candidate.dashboardAccess
+            : undefined,
+        mode: 'mock',
+      };
     }
   } catch {
     // Invalid synthetic session is treated as absent rather than trusted.
@@ -176,6 +185,7 @@ export async function login(email: string, password: string): Promise<AuthSessio
   const session: AuthSession = {
     userId: `mock-${user[2].toLowerCase()}`,
     role: user[2],
+    dashboardAccess: user[3],
     mode: 'mock',
   };
   window.localStorage.setItem(mockSessionKey, JSON.stringify(session));
@@ -214,7 +224,9 @@ export function canOpenDashboard(session: AuthSession | null): boolean {
   return Boolean(
     session &&
     can(session.role, 'dashboard:read') &&
-    (session.role !== 'NURSE' || session.dashboardAccess === true),
+    (session.role === 'NURSE'
+      ? session.dashboardAccess === true
+      : session.dashboardAccess !== false),
   );
 }
 
