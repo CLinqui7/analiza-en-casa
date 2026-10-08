@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const migration = await readFile(
@@ -26,13 +28,57 @@ test('Dashboard exclusion is opt-in and the access-change ledger is tenant-scope
   assert.match(authStore, /dashboard_restricted AS "dashboardRestricted"/);
 });
 
-test('the one-time account grant is scoped, audited, transactional and does not store credentials', () => {
+test('the eight-account plan matches the explicit client list and Dashboard exceptions', () => {
+  const plan = JSON.parse(
+    execFileSync(
+      process.execPath,
+      [
+        fileURLToPath(
+          new URL(
+            '../scripts/deployment/grant-workspace-admin-access-20261008.mjs',
+            import.meta.url,
+          ),
+        ),
+      ],
+      {
+        encoding: 'utf8',
+      },
+    ),
+  );
+  assert.equal(plan.operation, 'PLAN_ONLY');
+  assert.equal(plan.organizationId, 'analiza-main');
+  assert.deepEqual(
+    Object.fromEntries(
+      plan.targets.map(({ email, dashboardRestricted }) => [email, dashboardRestricted]),
+    ),
+    {
+      'karla@analizaencasa.com': true,
+      'nancy.vasquez@analizaencasa.com': true,
+      'abigailsv92@analizaencasa.com': true,
+      'analiza@analizaencasa.com': true,
+      'claudia.pinzon@analizaencasa.com': false,
+      'nelly.viscarra@analizaencasa.com': true,
+      'olaya.deras@analizaencasa.com': true,
+      'sissy.chavez@analizaencasa.com': false,
+    },
+  );
+  assert.equal(plan.targets.length, 8);
+});
+
+test('the account grant is scoped, audited, transactional and does not store credentials', () => {
   assert.match(operator, /ANALIZA_ACCESS_CHANGE_APPROVED/);
   assert.match(operator, /const organizationId = 'analiza-main'/);
   assert.match(operator, /karla@analizaencasa\.com'.*dashboardRestricted: true/);
   assert.match(operator, /nancy\.vasquez@analizaencasa\.com'.*dashboardRestricted: true/);
+  assert.match(operator, /abigailsv92@analizaencasa\.com'.*dashboardRestricted: true/);
+  assert.match(operator, /analiza@analizaencasa\.com'.*dashboardRestricted: true/);
   assert.match(operator, /claudia\.pinzon@analizaencasa\.com'.*dashboardRestricted: false/);
+  assert.match(operator, /nelly\.viscarra@analizaencasa\.com'.*dashboardRestricted: true/);
+  assert.match(operator, /olaya\.deras@analizaencasa\.com'.*dashboardRestricted: true/);
   assert.match(operator, /sissy\.chavez@analizaencasa\.com'.*dashboardRestricted: false/);
-  assert.match(operator, /BEGIN[\s\S]+FOR UPDATE OF u,m[\s\S]+INSERT INTO analiza\.membership_access_changes[\s\S]+UPDATE analiza\.sessions[\s\S]+COMMIT/);
+  assert.match(
+    operator,
+    /BEGIN[\s\S]+FOR UPDATE OF u,m[\s\S]+INSERT INTO analiza\.membership_access_changes[\s\S]+UPDATE analiza\.sessions[\s\S]+COMMIT/,
+  );
   assert.doesNotMatch(operator, /password_hash|password:|service_role/i);
 });

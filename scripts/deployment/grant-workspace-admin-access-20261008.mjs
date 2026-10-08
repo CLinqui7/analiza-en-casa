@@ -2,16 +2,20 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 
-// Explicit, idempotent reconciliation of the four accounts named by the client.
+// Explicit, idempotent reconciliation of the eight accounts named by the client.
 // No passwords, patient data, or credentials are stored in this script.
 const organizationId = 'analiza-main';
 const targets = [
   { email: 'karla@analizaencasa.com', dashboardRestricted: true },
   { email: 'nancy.vasquez@analizaencasa.com', dashboardRestricted: true },
+  { email: 'abigailsv92@analizaencasa.com', dashboardRestricted: true },
+  { email: 'analiza@analizaencasa.com', dashboardRestricted: true },
   { email: 'claudia.pinzon@analizaencasa.com', dashboardRestricted: false },
+  { email: 'nelly.viscarra@analizaencasa.com', dashboardRestricted: true },
+  { email: 'olaya.deras@analizaencasa.com', dashboardRestricted: true },
   { email: 'sissy.chavez@analizaencasa.com', dashboardRestricted: false },
 ];
-const sourceReference = 'client-chat-2026-10-08-admin-except-dashboard';
+const sourceReference = 'client-chat-2026-10-08-complete-nursing-admin-cohort';
 
 if (!process.argv.includes('--apply')) {
   console.log(JSON.stringify({ operation: 'PLAN_ONLY', organizationId, targets }, null, 2));
@@ -33,11 +37,12 @@ await client.connect();
 try {
   await client.query('BEGIN');
   await client.query("SELECT set_config('analiza.organization_id',$1,true)", [organizationId]);
-  await client.query("SELECT pg_advisory_xact_lock(hashtextextended('analiza:membership-access',0))");
-  const migration = await client.query(
-    'SELECT 1 FROM analiza.schema_migrations WHERE version=$1',
-    ['027_admin_dashboard_restriction.sql'],
+  await client.query(
+    "SELECT pg_advisory_xact_lock(hashtextextended('analiza:membership-access',0))",
   );
+  const migration = await client.query('SELECT 1 FROM analiza.schema_migrations WHERE version=$1', [
+    '027_admin_dashboard_restriction.sql',
+  ]);
   assert.equal(migration.rowCount, 1, 'Apply migration 027 before changing accounts');
 
   const current = new Map();
