@@ -4323,6 +4323,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 28px;
+  padding: 4px 20px 18px;
 }
 .sales-mini-charts h3 {
   margin: 0 0 14px;
