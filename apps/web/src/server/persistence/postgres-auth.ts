@@ -32,7 +32,7 @@ export function postgresAuthStore(pool: Pool): AuthStore {
     async findActiveMemberships(id) {
       return (
         await pool.query(
-          'SELECT m.user_id AS "userId", m.organization_id AS "organizationId",m.role,m.active,m.dashboard_access AS "dashboardAccess" FROM analiza.memberships m JOIN analiza.users u ON u.id=m.user_id WHERE m.user_id=$1 AND m.active AND u.disabled_at IS NULL',
+          'SELECT m.user_id AS "userId", m.organization_id AS "organizationId",m.role,m.active,m.dashboard_access AS "dashboardAccess",m.dashboard_restricted AS "dashboardRestricted" FROM analiza.memberships m JOIN analiza.users u ON u.id=m.user_id WHERE m.user_id=$1 AND m.active AND u.disabled_at IS NULL',
           [id],
         )
       ).rows;

@@ -9,6 +9,7 @@ import {
   type MongoAuthStore,
 } from './mongo-auth';
 import { authorizationStatus, resourceStatus } from './http-auth';
+import { can } from '@/lib/permissions';
 
 const syntheticPassword = ['synthetic', 'password'].join('-');
 const rejectedPassword = ['wrong', 'password'].join('-');
@@ -21,7 +22,13 @@ class MemoryAuthStore implements MongoAuthStore {
   private readonly sessions = new Map<string, MemorySession>();
   private readonly attempts = new Map<string, number>();
   user: { id: string; emailNormalized: string; passwordHash: string } | null = null;
-  memberships: Array<{ userId: string; organizationId: string; role: Role; active: boolean }> = [];
+  memberships: Array<{
+    userId: string;
+    organizationId: string;
+    role: Role;
+    active: boolean;
+    dashboardRestricted?: boolean;
+  }> = [];
   successfulLogins: Array<{ userId: string; occurredAt: Date }> = [];
 
   async findUserByEmail(emailNormalized: string) {
@@ -115,6 +122,23 @@ describe('Mongo authentication and authorization', () => {
     });
     store.memberships = [];
     await expect(auth.requireSession(result.sessionToken)).rejects.toBeInstanceOf(SessionError);
+  });
+
+  it('honors an account-specific Dashboard exclusion without removing administrator permissions', async () => {
+    const { auth, store, password } = await fixture();
+    store.memberships[0] = {
+      ...store.memberships[0],
+      role: 'ADMIN',
+      dashboardRestricted: true,
+    };
+    const result = await auth.login({ email: 'user-a@example.test', password });
+    expect(result.session).toMatchObject({ role: 'ADMIN', dashboardAccess: false });
+    expect(can(result.session.role, 'quotes:write')).toBe(true);
+    expect(can(result.session.role, 'cases:write')).toBe(true);
+    await expect(auth.requireSession(result.sessionToken)).resolves.toMatchObject({
+      role: 'ADMIN',
+      dashboardAccess: false,
+    });
   });
 
   // test-id: vitest:m01-server-csrf-logout-revocation

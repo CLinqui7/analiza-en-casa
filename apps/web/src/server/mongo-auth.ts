@@ -60,6 +60,7 @@ function asMembership(row: Record<string, unknown>): MembershipRecord | null {
     role: row.role,
     active: row.active,
     dashboardAccess: row.dashboardAccess === true,
+    dashboardRestricted: row.dashboardRestricted === true,
   };
 }
 

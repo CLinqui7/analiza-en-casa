@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { canOpenDashboard, landingPath, type AuthSession } from './auth';
 
-const session = (role: AuthSession['role'], dashboardAccess = false): AuthSession => ({
+const session = (role: AuthSession['role'], dashboardAccess?: boolean): AuthSession => ({
   userId: 'test-user',
   role,
   dashboardAccess,
@@ -20,6 +20,13 @@ describe('account-specific dashboard access', () => {
     expect(landingPath(session('NURSE', true))).toBe('/dashboard');
     expect(canOpenDashboard(session('ADMIN'))).toBe(true);
     expect(canOpenDashboard(session('WEBMASTER'))).toBe(true);
+  });
+
+  it('keeps all administrator routes except Dashboard for an explicitly restricted account', () => {
+    expect(canOpenDashboard(session('ADMIN', false))).toBe(false);
+    expect(landingPath(session('ADMIN', false))).toBe('/patients');
+    expect(landingPath(session('ADMIN', false), '/dashboard')).toBe('/patients');
+    expect(landingPath(session('ADMIN', false), '/quotes')).toBe('/quotes');
   });
 
   it('preserves the analytics-only landing page', () => {
