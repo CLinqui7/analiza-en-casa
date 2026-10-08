@@ -750,7 +750,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-15"
       ],
         "status": "PARTIAL",
-        "production_status": "PENDING_DEPLOYMENT",
+        "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-DASHBOARD"
       ],
@@ -809,7 +809,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-16"
       ],
         "status": "PARTIAL",
-        "production_status": "PENDING_DEPLOYMENT",
+        "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-AGENDA",
         "ROUTE-DOCTORS"
