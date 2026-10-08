@@ -4310,3 +4310,125 @@ body {
     align-items: flex-start;
   }
 }
+
+.dashboard-sales-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.dashboard-sales-overview > :last-child {
+  grid-column: 1 / -1;
+}
+.sales-mini-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+.sales-mini-charts h3 {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+}
+.sales-mini-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(85px, auto);
+  gap: 10px;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 0.82rem;
+}
+.sales-mini-row > div,
+.commercial-goal-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #e9f0f4;
+  overflow: hidden;
+}
+.sales-mini-row > div > span,
+.commercial-goal-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #137c83, #36aaa0);
+  transition: width 0.35s ease;
+}
+.sales-mini-row strong {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.commercial-goal-bars {
+  display: grid;
+  gap: 20px;
+  padding: 14px 2px;
+}
+.commercial-goal-row > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.commercial-goal-row > div:first-child span {
+  color: #426070;
+  font-variant-numeric: tabular-nums;
+}
+.commercial-goal-track {
+  height: 14px;
+}
+.screen-help-trigger {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  padding: 8px 10px;
+}
+.screen-help-step {
+  min-height: 148px;
+  border-radius: 16px;
+  padding: 20px;
+  background: linear-gradient(145deg, #eef8f7, #f6f9fc);
+  border: 1px solid #d5e9e8;
+}
+.screen-help-step > span {
+  color: #137c83;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.screen-help-step h3 {
+  margin: 12px 0 8px;
+  color: #18394c;
+}
+.screen-help-step p {
+  margin: 0;
+  line-height: 1.55;
+  color: #375567;
+}
+.screen-help-target {
+  outline: 3px solid #2b9b99;
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+@media (max-width: 850px) {
+  .sales-mini-charts {
+    grid-template-columns: 1fr;
+  }
+  .screen-help-trigger {
+    font-size: 0;
+    gap: 0;
+  }
+  .screen-help-trigger::after {
+    content: 'Ayuda';
+    font-size: 0.8rem;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-sales-overview {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-sales-overview > :last-child {
+    grid-column: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sales-mini-row > div > span,
+  .commercial-goal-track > span {
+    transition: none;
+  }
+}

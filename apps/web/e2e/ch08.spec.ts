@@ -85,7 +85,7 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
   });
   await expect(profile.getByLabel('Visitador médico')).toBeVisible();
   await expect(profile.getByLabel('Referido por')).toBeVisible();
-  await expect(profile.getByLabel('Tipo', { exact: true })).toBeVisible();
+  await expect(profile.getByLabel('Tipo de atención (referencia interna)')).toBeVisible();
   await profile.getByLabel('Visitador médico').fill('Coordinación CH08');
   await profile.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByText('Coordinación CH08', { exact: true })).toHaveCount(0);
@@ -94,10 +94,10 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
   const saved = page.getByRole('dialog', { name: `Ejecución de cotización: ${caseId}` });
   await saved.getByLabel('Visitador médico').fill('Coordinación CH08');
   await expect(saved.getByLabel('Referido por')).toHaveValue('');
-  await saved.getByLabel('Tipo', { exact: true }).fill('Normal');
+  await saved.getByLabel('Tipo de atención (referencia interna)').fill('Normal');
   await saved.getByLabel('Fecha de inicio').fill('2026-10-08');
   await saved.getByLabel('Días de duración').fill('5');
-  await saved.getByLabel('Forma de pago').fill('Aseguradora');
+  await saved.getByLabel('Forma de pago prevista').selectOption('Tarjeta');
   await saved.getByLabel('Hospital de origen').fill('Origen sintético');
   await saved.getByLabel('Clase de paciente').fill('Regular');
   await saved.getByRole('button', { name: 'Guardar' }).click();
@@ -112,6 +112,7 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
   });
   await expect(reopened.getByLabel('Visitador médico')).toHaveValue('Coordinación CH08');
   await expect(reopened.getByLabel('Días de duración')).toHaveValue('5');
+  await expect(reopened.getByLabel('Forma de pago prevista')).toHaveValue('Tarjeta');
   await expect(reopened.getByLabel('Hospital de origen')).toHaveValue('Origen sintético');
 });
 

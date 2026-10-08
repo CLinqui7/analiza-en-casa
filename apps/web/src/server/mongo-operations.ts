@@ -27,6 +27,17 @@ import {
   warehouseInputSchema,
   warehouseSchema,
   warehouseTransferSchema,
+  homeCustodyInputSchema,
+  homeCustodyCloseSchema,
+  homeCustodySchema,
+  commercialVisitInputSchema,
+  commercialVisitSchema,
+  commercialAdmissionInputSchema,
+  commercialAdmissionSchema,
+  commercialGoalInputSchema,
+  commercialGoalSchema,
+  confirmedSaleInputSchema,
+  confirmedSaleSchema,
 } from '@analiza/contracts';
 import { can, isAdministrator } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
@@ -132,7 +143,43 @@ const commands = z.discriminatedUnion('command', [
     .strict(),
   z.object({ command: z.literal('visit.create'), visit: visitInputSchema }).strict(),
   z.object({ command: z.literal('goal.save'), goal: goalInputSchema }).strict(),
+  z.object({ command: z.literal('home.dispatch'), dispatch: homeCustodyInputSchema }).strict(),
+  z.object({ command: z.literal('home.close'), closure: homeCustodyCloseSchema }).strict(),
+  z
+    .object({ command: z.literal('commercial.visit.record'), visit: commercialVisitInputSchema })
+    .strict(),
+  z
+    .object({
+      command: z.literal('commercial.admission.link'),
+      admission: commercialAdmissionInputSchema,
+    })
+    .strict(),
+  z
+    .object({ command: z.literal('commercial.goal.save'), goal: commercialGoalInputSchema })
+    .strict(),
+  z
+    .object({ command: z.literal('sale.confirmed.record'), sale: confirmedSaleInputSchema })
+    .strict(),
 ]);
+
+export async function commercialScope(
+  database: Db,
+  actor: ServerActor,
+): Promise<'REP' | 'MANAGER' | null> {
+  const membership = await database.collection('memberships').findOne({
+    organizationId: actor.organizationId,
+    userId: actor.userId,
+    active: true,
+  });
+  if (!membership) return null;
+  const user = await database.collection('users').findOne({ id: actor.userId });
+  const email = String(user?.emailNormalized ?? '').toLowerCase();
+  if (['claudia.pinzon@labanaliza.com', 'claudia.pinzon@analizaencasa.com'].includes(email))
+    return 'REP';
+  if (['sissy.chavez@labanaliza.com', 'sissy.chavez@analizaencasa.com'].includes(email))
+    return 'MANAGER';
+  return null;
+}
 
 export function canEditAssignedBalance(actor: ServerActor, assignedUsers: readonly string[]) {
   return (
@@ -157,6 +204,10 @@ export function assertSameRetry(
 
 export class MongoOperationsRepository {
   constructor(private readonly database: Db) {}
+
+  async access(actor: ServerActor) {
+    return commercialScope(this.database, actor);
+  }
 
   async list(actor: ServerActor): Promise<OperationsSnapshot> {
     const result = emptyOperations();
@@ -278,6 +329,49 @@ export class MongoOperationsRepository {
           )
         : undefined,
     ]);
+    if (can(actor.role, 'inventory:read')) {
+      const rows = await read('homeCustodies');
+      result.homeCustodies = rows.map((row) => homeCustodySchema.strip().parse(row));
+    }
+    if (can(actor.role, 'inventory:write')) {
+      const rows = await read('patients');
+      result.deliveryPatients = rows.map((row) => ({
+        id: String(row.id),
+        fullName: String(row.fullName ?? 'Paciente'),
+        addressLine:
+          typeof (row.address as { line?: unknown } | undefined)?.line === 'string'
+            ? String((row.address as { line: string }).line)
+            : undefined,
+      }));
+    }
+    const scope = await commercialScope(this.database, actor);
+    result.commercialAccess = scope;
+    if (scope) {
+      const [visits, admissions, goals, doctors] = await Promise.all([
+        read('commercialVisits'),
+        read('commercialAdmissions'),
+        read('commercialGoals'),
+        read('doctors'),
+      ]);
+      result.commercialVisits = visits.map((row) => commercialVisitSchema.strip().parse(row));
+      result.commercialAdmissions = admissions.map((row) =>
+        commercialAdmissionSchema.strip().parse(row),
+      );
+      result.commercialGoals = goals.map((row) => commercialGoalSchema.strip().parse(row));
+      result.commercialDoctors = doctors.map((row) => ({
+        id: String(row.id),
+        fullName: String(row.fullName ?? 'Médico'),
+      }));
+    }
+    if (can(actor.role, 'payments:read') || scope) {
+      const sales = await read('confirmedSales');
+      const visitIds = new Set(result.commercialVisits.map((visit) => visit.id));
+      result.confirmedSales = sales
+        .filter(
+          (row) => can(actor.role, 'payments:read') || visitIds.has(String(row.commercialVisitId)),
+        )
+        .map((row) => confirmedSaleSchema.strip().parse(row));
+    }
     return result;
   }
 
@@ -1696,6 +1790,406 @@ export class MongoOperationsRepository {
           await audit('VISIT_GOAL_SAVED', id);
           return { id };
         }
+        if (input.command === 'home.dispatch') {
+          permission('inventory:write');
+          const dispatch = input.dispatch;
+          const old = await this.database
+            .collection('homeCustodies')
+            .findOne({ ...scoped, idempotencyKey: dispatch.idempotencyKey }, { session });
+          if (old) {
+            assertSameRetry(old, dispatch, Object.keys(dispatch));
+            return homeCustodySchema.strip().parse(old);
+          }
+          const [patient, item, warehouse, hospitalization] = await Promise.all([
+            this.database
+              .collection('patients')
+              .findOne({ ...scoped, id: dispatch.patientId }, { session }),
+            this.database.collection('catalogItems').findOne(
+              {
+                ...scoped,
+                id: dispatch.itemId,
+                status: 'ACTIVE',
+                category: { $in: ['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'] },
+              },
+              { session },
+            ),
+            this.database.collection('warehouses').findOne(
+              {
+                ...scoped,
+                id: dispatch.warehouseId,
+                status: 'ACTIVE',
+              },
+              { session },
+            ),
+            dispatch.caseId
+              ? this.database.collection('hospitalizations').findOne(
+                  {
+                    ...scoped,
+                    id: dispatch.caseId,
+                    patientId: dispatch.patientId,
+                  },
+                  { session },
+                )
+              : Promise.resolve(true),
+          ]);
+          if (!patient || !item || !warehouse || !hospitalization)
+            throw new MongoInputError('Seleccione paciente, caso, artículo y bodega válidos.');
+          const records = await this.database
+            .collection('inventoryTraceRecords')
+            .find({ ...scoped, itemId: dispatch.itemId }, { session })
+            .sort({ expiresOn: 1, receivedAt: 1, id: 1 })
+            .toArray();
+          const allocations: Array<{ traceRecordId: string; number: string; quantity: number }> =
+            [];
+          if (records.length) {
+            const dispatchDay = new Intl.DateTimeFormat('en-CA', {
+              timeZone: 'America/El_Salvador',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+            }).format(new Date(dispatch.sentAt));
+            let remaining = dispatch.quantity;
+            const candidates: Array<{ id: string; number: string; quantity: number }> = [];
+            for (const record of records) {
+              if (
+                record.qualityStatus !== 'AVAILABLE' ||
+                (record.expiresOn && String(record.expiresOn) < dispatchDay)
+              )
+                continue;
+              const balance = await this.database.collection('inventoryTraceBalances').findOne(
+                {
+                  ...scoped,
+                  traceRecordId: record.id,
+                  warehouseId: dispatch.warehouseId,
+                },
+                { session },
+              );
+              if (Number(balance?.quantity ?? 0) > 0)
+                candidates.push({
+                  id: String(record.id),
+                  number: String(record.number),
+                  quantity: Number(balance!.quantity),
+                });
+            }
+            if (candidates.reduce((sum, row) => sum + row.quantity, 0) < remaining)
+              throw new MongoInputError('No hay lotes liberados y vigentes suficientes.');
+            await applyStockDelta(
+              this.database,
+              session,
+              actor,
+              dispatch.itemId,
+              dispatch.warehouseId,
+              -dispatch.quantity,
+            );
+            for (const [index, row] of candidates.entries()) {
+              if (!remaining) break;
+              const quantity = Math.min(remaining, row.quantity);
+              remaining -= quantity;
+              const updated = await this.database.collection('inventoryTraceBalances').updateOne(
+                {
+                  ...scoped,
+                  traceRecordId: row.id,
+                  warehouseId: dispatch.warehouseId,
+                  quantity: { $gte: quantity },
+                },
+                { $inc: { quantity: -quantity }, $set: { updatedAt: dispatch.sentAt } },
+                { session },
+              );
+              if (updated.modifiedCount !== 1) throw new MongoConflictError();
+              const movement = inventoryMovementSchema.parse({
+                id: `${dispatch.id}:out:${index}`,
+                itemId: dispatch.itemId,
+                warehouseId: dispatch.warehouseId,
+                kind: 'EXIT',
+                quantity,
+                createdAt: dispatch.sentAt,
+                reason: 'Despacho a custodia domiciliaria',
+                reference: dispatch.reference,
+                user: actor.userId,
+                traceRecordId: row.id,
+                traceNumber: row.number,
+              });
+              await this.database.collection('inventoryMovements').insertOne(
+                {
+                  ...movement,
+                  ...scoped,
+                  idempotencyKey: `${dispatch.idempotencyKey}:out:${index}`,
+                },
+                { session },
+              );
+              await this.database.collection('inventoryTraceEvents').insertOne(
+                {
+                  ...scoped,
+                  id: `${dispatch.id}:trace:${index}`,
+                  traceRecordId: row.id,
+                  eventType: 'ISSUED',
+                  idempotencyKey: `${dispatch.idempotencyKey}:trace:${index}`,
+                  body: { dispatchId: dispatch.id, quantity, traceRecordId: row.id },
+                  occurredAt: dispatch.sentAt,
+                },
+                { session },
+              );
+              allocations.push({ traceRecordId: row.id, number: row.number, quantity });
+            }
+          } else {
+            await applyStockDelta(
+              this.database,
+              session,
+              actor,
+              dispatch.itemId,
+              dispatch.warehouseId,
+              -dispatch.quantity,
+            );
+            const movement = inventoryMovementSchema.parse({
+              id: `${dispatch.id}:out:untraced`,
+              itemId: dispatch.itemId,
+              warehouseId: dispatch.warehouseId,
+              kind: 'EXIT',
+              quantity: dispatch.quantity,
+              createdAt: dispatch.sentAt,
+              reason: 'Despacho a custodia domiciliaria',
+              reference: dispatch.reference,
+              user: actor.userId,
+            });
+            await this.database.collection('inventoryMovements').insertOne(
+              {
+                ...movement,
+                ...scoped,
+                idempotencyKey: `${dispatch.idempotencyKey}:out:untraced`,
+              },
+              { session },
+            );
+          }
+          const custody = homeCustodySchema.parse({
+            ...dispatch,
+            status: 'OPEN',
+            dispatchedBy: actor.userId,
+            returnedQuantity: 0,
+            traceAllocations: allocations,
+          });
+          await this.database
+            .collection('homeCustodies')
+            .insertOne({ ...custody, ...scoped }, { session });
+          await audit('HOME_CUSTODY_DISPATCHED', custody.id);
+          return custody;
+        }
+        if (input.command === 'home.close') {
+          permission('inventory:write');
+          const closure = input.closure;
+          const old = await this.database
+            .collection('homeCustodies')
+            .findOne({ ...scoped, id: closure.custodyId }, { session });
+          if (!old) throw new MongoInputError('El despacho no existe.');
+          const current = homeCustodySchema.strip().parse(old);
+          if (current.status === 'CLOSED') {
+            if (
+              current.closeKey !== closure.idempotencyKey ||
+              current.returnedQuantity !== closure.returnedQuantity ||
+              current.receivedAt !== closure.receivedAt ||
+              current.returnCondition !== closure.conditionNote
+            )
+              throw new MongoConflictError();
+            return current;
+          }
+          if (closure.returnedQuantity > current.quantity)
+            throw new MongoInputError('La devolución no puede exceder lo enviado.');
+          const closed = homeCustodySchema.parse({
+            ...current,
+            status: 'CLOSED',
+            returnedQuantity: closure.returnedQuantity,
+            receivedAt: closure.receivedAt,
+            returnCondition: closure.conditionNote,
+            closeKey: closure.idempotencyKey,
+          });
+          const updated = await this.database.collection('homeCustodies').updateOne(
+            { ...scoped, id: current.id, status: 'OPEN' },
+            {
+              $set: {
+                status: 'CLOSED',
+                returnedQuantity: closed.returnedQuantity,
+                receivedAt: closed.receivedAt,
+                returnCondition: closed.returnCondition,
+                closeKey: closed.closeKey,
+              },
+            },
+            { session },
+          );
+          if (updated.modifiedCount !== 1) throw new MongoConflictError();
+          if (closure.returnedQuantity)
+            await this.database.collection('homeReturnHolds').insertOne(
+              {
+                ...scoped,
+                id: `${current.id}:return`,
+                custodyId: current.id,
+                itemId: current.itemId,
+                quantity: closure.returnedQuantity,
+                conditionNote: closure.conditionNote,
+                receivedAt: closure.receivedAt,
+              },
+              { session },
+            );
+          await audit('HOME_CUSTODY_CLOSED', current.id);
+          return closed;
+        }
+        const scope = await commercialScope(this.database, actor);
+        if (input.command === 'commercial.visit.record') {
+          if (scope !== 'REP') throw new MongoAccessError();
+          const visit = input.visit;
+          const old = await this.database
+            .collection('commercialVisits')
+            .findOne({ ...scoped, idempotencyKey: visit.idempotencyKey }, { session });
+          if (old) {
+            assertSameRetry(old, visit);
+            return commercialVisitSchema.strip().parse(old);
+          }
+          if (
+            !(await this.database
+              .collection('doctors')
+              .findOne({ ...scoped, id: visit.doctorId }, { session }))
+          )
+            throw new MongoInputError('Seleccione un médico del directorio.');
+          const saved = commercialVisitSchema.parse({ ...visit, actorUserId: actor.userId });
+          await this.database
+            .collection('commercialVisits')
+            .insertOne({ ...saved, ...scoped }, { session });
+          await audit('COMMERCIAL_VISIT_RECORDED', saved.id);
+          return saved;
+        }
+        if (input.command === 'commercial.admission.link') {
+          if (!scope) throw new MongoAccessError();
+          const admission = input.admission;
+          const old = await this.database
+            .collection('commercialAdmissions')
+            .findOne({ ...scoped, idempotencyKey: admission.idempotencyKey }, { session });
+          if (old) {
+            assertSameRetry(old, admission);
+            return commercialAdmissionSchema.strip().parse(old);
+          }
+          const visit = await this.database
+            .collection('commercialVisits')
+            .findOne({ ...scoped, id: admission.visitId }, { session });
+          if (!visit || (scope === 'REP' && visit.actorUserId !== actor.userId))
+            throw new MongoInputError('Vincule una visita comercial autorizada.');
+          const hospitalization = await this.database
+            .collection('hospitalizations')
+            .findOne({ ...scoped, id: admission.hospitalizationId }, { session });
+          if (!hospitalization?.startDate)
+            throw new MongoInputError('Seleccione una hospitalización registrada.');
+          const linked = commercialAdmissionSchema.parse({
+            ...admission,
+            patientId: hospitalization.patientId,
+            admittedAt: hospitalization.startDate,
+            actorUserId: actor.userId,
+          });
+          await this.database
+            .collection('commercialAdmissions')
+            .insertOne({ ...linked, ...scoped }, { session });
+          await audit('COMMERCIAL_ADMISSION_LINKED', linked.id);
+          return linked;
+        }
+        if (input.command === 'commercial.goal.save') {
+          if (scope !== 'MANAGER') throw new MongoAccessError();
+          const goal = input.goal;
+          if (
+            (goal.period === 'MONTH' && !goal.periodStart.endsWith('-01')) ||
+            (goal.period === 'WEEK' && new Date(`${goal.periodStart}T00:00:00Z`).getUTCDay() !== 1)
+          )
+            throw new MongoInputError('El período debe iniciar el lunes o el primer día del mes.');
+          const old = await this.database
+            .collection('commercialGoalCommands')
+            .findOne({ ...scoped, idempotencyKey: goal.idempotencyKey }, { session });
+          if (old) {
+            assertSameRetry(old, goal);
+            return commercialGoalSchema.strip().parse(old.result);
+          }
+          const prior = await this.database
+            .collection('commercialGoals')
+            .findOne(
+              { ...scoped, period: goal.period, periodStart: goal.periodStart },
+              { session },
+            );
+          const saved = commercialGoalSchema.parse({
+            ...goal,
+            id: prior?.id ?? goal.id,
+            setBy: actor.userId,
+          });
+          await this.database
+            .collection('commercialGoals')
+            .updateOne(
+              { ...scoped, period: goal.period, periodStart: goal.periodStart },
+              { $set: { ...saved, ...scoped } },
+              { session, upsert: true },
+            );
+          await this.database.collection('commercialGoalCommands').insertOne(
+            {
+              ...goal,
+              ...scoped,
+              result: saved,
+            },
+            { session },
+          );
+          await audit('COMMERCIAL_GOAL_SAVED', saved.id);
+          return saved;
+        }
+        if (input.command === 'sale.confirmed.record') {
+          if (!can(actor.role, 'payments:write') && scope !== 'MANAGER')
+            throw new MongoAccessError();
+          const sale = input.sale;
+          const old = await this.database
+            .collection('confirmedSales')
+            .findOne({ ...scoped, idempotencyKey: sale.idempotencyKey }, { session });
+          if (old) {
+            assertSameRetry(old, sale);
+            return confirmedSaleSchema.strip().parse(old);
+          }
+          if (
+            await this.database.collection('confirmedSales').findOne(
+              {
+                ...scoped,
+                referenceNormalized: sale.reference.toLocaleUpperCase('es-SV'),
+              },
+              { session },
+            )
+          )
+            throw new MongoConflictError();
+          if (sale.quoteId) {
+            const quote = await this.database.collection('quotes').findOne(
+              {
+                ...scoped,
+                id: sale.quoteId,
+                status: 'SENT',
+                immutable: true,
+              },
+              { session },
+            );
+            if (!quote)
+              throw new MongoInputError(
+                'La cotización de respaldo debe estar enviada e inmutable.',
+              );
+          }
+          if (
+            sale.commercialVisitId &&
+            !(await this.database.collection('commercialVisits').findOne(
+              {
+                ...scoped,
+                id: sale.commercialVisitId,
+              },
+              { session },
+            ))
+          )
+            throw new MongoInputError('La visita comercial no está disponible.');
+          const saved = confirmedSaleSchema.parse({ ...sale, confirmedBy: actor.userId });
+          await this.database.collection('confirmedSales').insertOne(
+            {
+              ...saved,
+              ...scoped,
+              referenceNormalized: sale.reference.toLocaleUpperCase('es-SV'),
+            },
+            { session },
+          );
+          await audit('SALE_CONFIRMED', saved.id);
+          return saved;
+        }
         throw new MongoInputError();
       });
     } finally {
@@ -1776,6 +2270,13 @@ export const mongoOperationsIndexes: Array<{
     'warehouses',
     'inventoryTransfers',
     'inventoryTraceRecords',
+    'homeCustodies',
+    'homeReturnHolds',
+    'commercialVisits',
+    'commercialAdmissions',
+    'commercialGoals',
+    'commercialGoalCommands',
+    'confirmedSales',
   ].map((collection) => ({
     collection,
     key: { organizationId: 1, id: 1 },
@@ -1790,6 +2291,42 @@ export const mongoOperationsIndexes: Array<{
       unique: true,
     }),
   ),
+  ...[
+    'homeCustodies',
+    'commercialVisits',
+    'commercialAdmissions',
+    'commercialGoalCommands',
+    'confirmedSales',
+  ].map((collection) => ({
+    collection,
+    key: { organizationId: 1, idempotencyKey: 1 },
+    name: `${collection}_org_idempotency`,
+    unique: true,
+  })),
+  {
+    collection: 'homeReturnHolds',
+    key: { organizationId: 1, custodyId: 1 },
+    name: 'home_return_one_hold',
+    unique: true,
+  },
+  {
+    collection: 'commercialAdmissions',
+    key: { organizationId: 1, hospitalizationId: 1 },
+    name: 'commercial_admission_one_case',
+    unique: true,
+  },
+  {
+    collection: 'commercialGoals',
+    key: { organizationId: 1, period: 1, periodStart: 1 },
+    name: 'commercial_goal_one_period',
+    unique: true,
+  },
+  {
+    collection: 'confirmedSales',
+    key: { organizationId: 1, referenceNormalized: 1 },
+    name: 'confirmed_sale_unique_reference',
+    unique: true,
+  },
   {
     collection: 'inventoryBalances',
     key: { organizationId: 1, itemId: 1, warehouseId: 1 },

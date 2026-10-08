@@ -7,7 +7,7 @@ test('nurse can submit an internal catalog request without external messaging', 
   await page.getByLabel('Usuario o correo').fill('nurse@demo.local');
   await page.getByLabel('Clave').fill('demo-nurse');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/patients$/);
 
   const items = [
     { id: 'supply-qa', sku: 'INS-QA', name: 'Insumo sintético', category: 'SUPPLIES' },

@@ -7115,7 +7115,7 @@
       ],
       "blocker_reason": "No hay fuente autorizada y acotada por organización para paciente/hospitalización ni reglas aprobadas de roles, cantidad disponible/asignada, reserva/entrega, idempotencia, auditoría o reversión. No se expone un formulario ni datos de pacientes/casos.",
       "last_verified_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-      "notes": "CH14-E0149–E0151 muestran menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo la transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para F15. La anatomía F14 no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía."
+      "notes": "CH14-E0149–E0151 muestran menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo la transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para F15. La anatomía F14 no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía. Lote 2026-10-08: /inventory/home-deliveries implementa una custodia domiciliaria adicional, con salida auditada y devolución en cuarentena; no reproduce las pestañas, plantilla, cantidades pendientes ni máquina de estados del Acuse F14, por lo que permanece MISSING para paridad exacta."
     },
     {
       "requirement_id": "CH14-F15",

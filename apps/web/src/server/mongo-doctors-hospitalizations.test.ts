@@ -126,4 +126,29 @@ describe('Mongo doctor and hospitalization commands', () => {
       { returnDocument: 'after' },
     );
   });
+
+  it('attaches only same-patient quote references without editing the quote', async () => {
+    const hospitalizations = collection();
+    const patients = { findOne: vi.fn(async () => ({ id: hospitalization.patientId })) };
+    const quotes = { findOne: vi.fn(async () => ({ patientId: hospitalization.patientId })) };
+    const repository = new MongoHospitalizationRepository(
+      hospitalizations as never,
+      patients,
+      undefined,
+      quotes,
+    );
+    const linked = { ...hospitalization, linkedQuoteIds: ['quote-synthetic-1'] };
+    await expect(repository.create(administrator, { hospitalization: linked })).resolves.toEqual(
+      linked,
+    );
+    expect(quotes.findOne).toHaveBeenCalledWith({
+      id: 'quote-synthetic-1',
+      organizationId: 'org-a',
+      patientId: hospitalization.patientId,
+    });
+    quotes.findOne.mockResolvedValueOnce(null as never);
+    await expect(
+      repository.create(administrator, { hospitalization: linked }),
+    ).rejects.toBeInstanceOf(MongoInputError);
+  });
 });

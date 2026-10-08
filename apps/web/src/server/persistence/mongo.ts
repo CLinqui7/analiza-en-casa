@@ -40,6 +40,7 @@ export async function mongoPersistence(): Promise<Persistence> {
         resources: database.collection('nursingResources'),
         memberships: database.collection('memberships'),
       },
+      database.collection('quotes'),
     ),
     quotes,
     shifts: new MongoShiftRepository(database as never),

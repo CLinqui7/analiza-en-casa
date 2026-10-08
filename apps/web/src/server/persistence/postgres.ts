@@ -71,6 +71,12 @@ import { PostgresFeedbackRepository } from './postgres-feedback';
 import { PostgresInformationImportRepository } from './postgres-information-import';
 import { PostgresSupplyRequestRepository } from './postgres-supply-requests';
 import { postgresQuotes } from './postgres-quotes';
+import {
+  commercialScope,
+  executeFieldCommand,
+  isFieldCommand,
+  populateFieldOperations,
+} from './postgres-field-operations';
 
 export function authorize(actor: ServerActor, permission: Permission) {
   if (!can(actor.role, permission)) throw new MongoAccessError();
@@ -115,6 +121,21 @@ function entityRepository<T extends Entity, K extends string>(
       [actor.organizationId, h.patientId],
     );
     if (!patient.rowCount) throw new MongoInputError('El paciente asociado no está disponible.');
+    const linkedQuoteIds = [...new Set(h.linkedQuoteIds ?? [])];
+    if (linkedQuoteIds.length) {
+      const linked = await client.query<{ id: string; patient_id: string; case_id: string | null }>(
+        `SELECT id,patient_id,case_id FROM analiza.quotes
+         WHERE organization_id=$1 AND id=ANY($2::text[])`,
+        [actor.organizationId, linkedQuoteIds],
+      );
+      if (
+        linked.rowCount !== linkedQuoteIds.length ||
+        linked.rows.some(
+          (quote) => quote.patient_id !== h.patientId || (quote.case_id && quote.case_id !== h.id),
+        )
+      )
+        throw new MongoInputError('La cotización debe pertenecer al mismo paciente y caso.');
+    }
     const ids = [...new Set(h.assignedNursingResourceIds ?? [])];
     const nurses = ids.length
       ? await client.query(
@@ -129,6 +150,7 @@ function entityRepository<T extends Entity, K extends string>(
       ...h,
       assignedNursingResourceIds: ids,
       assignedNurseUserIds: ids.map((id) => nurses.rows.find((r) => r.id === id).user_id),
+      ...(linkedQuoteIds.length ? { linkedQuoteIds } : {}),
     } as T;
   }
   async function write(actor: ServerActor, value: T, version?: number): Promise<T> {
@@ -515,6 +537,9 @@ export function postgresPersistence(): Persistence {
     },
   };
   const operations: Persistence['operations'] = {
+    async access(actor) {
+      return transaction(pool, actor, (c) => commercialScope(c, actor));
+    },
     async list(actor) {
       return transaction(pool, actor, async (c) => {
         const result: OperationsSnapshot = emptyOperations();
@@ -588,12 +613,14 @@ export function postgresPersistence(): Persistence {
           );
           result.goals = goals.rows.map((r) => goalSchema.parse(r.body));
         }
+        await populateFieldOperations(c, actor, result);
         return result;
       });
     },
     async execute(actor, input) {
       rejectBrowserAuthority(input);
       const command = z.object({ command: z.string() }).passthrough().parse(input);
+      if (isFieldCommand(command.command)) return executeFieldCommand(pool, actor, input);
       if (command.command === 'warehouse.save') {
         authorize(actor, 'inventory:write');
         const { warehouse: submitted } = z
@@ -2225,14 +2252,14 @@ export function postgresPersistence(): Persistence {
     files: postgresFiles(pool),
     async ready() {
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql','019_purchase_destination_warehouse.sql','020_login_analytics.sql','021_quotes_without_hospitalization.sql','022_webmaster_role.sql','023_supply_requests.sql','024_nurse_dashboard_access.sql','025_multiple_webmasters.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql','019_purchase_destination_warehouse.sql','020_login_analytics.sql','021_quotes_without_hospitalization.sql','022_webmaster_role.sql','023_supply_requests.sql','024_nurse_dashboard_access.sql','025_multiple_webmasters.sql','026_home_custody_commercial_sales.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 25 ||
+        row.migrations !== 26 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
