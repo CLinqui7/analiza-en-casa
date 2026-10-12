@@ -44,7 +44,8 @@ La imagen corre como UID/GID `1000:1000`, nunca como root. Compose a√±ade tambi√
 ```bash
 git clone https://github.com/CLinqui7/analiza-en-casa.git
 cd analiza-en-casa
-git checkout <SHA_REVISADO_Y_PROBADO>
+ANALIZA_SOURCE_SHA='REEMPLAZAR_SHA_REVISADO_Y_PROBADO'
+git checkout "$ANALIZA_SOURCE_SHA"
 cp deploy/ubuntu/.env.example deploy/ubuntu/.env
 sed -i "s/^POSTGRES_SOCKET_GID=.*/POSTGRES_SOCKET_GID=$(getent group postgres | cut -d: -f3)/" deploy/ubuntu/.env
 editor deploy/ubuntu/.env
