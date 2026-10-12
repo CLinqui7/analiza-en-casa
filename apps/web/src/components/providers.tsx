@@ -101,8 +101,10 @@ type WorkspaceContextValue = WorkspaceSnapshot & {
   ) => Promise<boolean>;
   addCatalogItem: (item: CatalogItem) => Promise<boolean>;
   addPurchase: (purchase: Purchase) => Promise<boolean>;
+  addPurchaseBatch: (purchases: Purchase[]) => Promise<boolean>;
   updatePurchase: (purchase: Purchase) => Promise<boolean>;
   cancelPurchase: (purchaseId: string, reason: string) => Promise<boolean>;
+  voidPurchaseInvoice: (purchaseId: string, reason: string) => Promise<boolean>;
   addInsuranceRequest: (request: InsuranceRequest) => boolean;
   addInsuranceEvent: (event: InsuranceEvent) => boolean;
   recordInsuranceObservation: (input: {
@@ -960,6 +962,14 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           purchases: [...current.purchases, purchase],
           auditEntries: [audit('Compra en borrador creada', purchase.id), ...current.auditEntries],
         })),
+      addPurchaseBatch: (purchases) =>
+        saveCommand({ command: 'purchase.batch.create', purchases }, (current) => ({
+          ...current,
+          purchases: [...current.purchases, ...purchases],
+          auditEntries: purchases
+            .map((purchase) => audit('Línea de factura de compra creada', purchase.id))
+            .concat(current.auditEntries),
+        })),
       updatePurchase: (purchase) =>
         saveCommand({ command: 'purchase.update', purchase }, (current) => ({
           ...current,
@@ -986,6 +996,25 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           ),
           auditEntries: [audit('Borrador de compra anulado', purchaseId), ...current.auditEntries],
         })),
+      voidPurchaseInvoice: (purchaseId, reason) =>
+        saveCommand({ command: 'purchase.invoice.void', purchaseId, reason }, (current) => {
+          const groupId = current.purchases.find(
+            (purchase) => purchase.id === purchaseId,
+          )?.invoiceGroupId;
+          return {
+            ...current,
+            purchases: current.purchases.map((candidate) =>
+              candidate.id === purchaseId || (groupId && candidate.invoiceGroupId === groupId)
+                ? {
+                    ...candidate,
+                    invoiceVoidedAt: new Date().toISOString(),
+                    invoiceVoidReason: reason,
+                  }
+                : candidate,
+            ),
+            auditEntries: [audit('Factura de compra anulada', purchaseId), ...current.auditEntries],
+          };
+        }),
       addInsuranceRequest: (request) => {
         // Existing Supabase policies deliberately deny browser writes to this
         // ledger. Until an approved append-only RPC exists, only the mock

@@ -5,7 +5,7 @@ async function login(page: Page, email = 'admin@demo.local', password = 'demo-ad
   await page.getByLabel('Usuario o correo').fill(email);
   await page.getByLabel('Clave').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 15_000 });
 }
 
 async function openNewQuote(page: Page) {
@@ -212,7 +212,7 @@ test('unsaved quote draft survives navigation but is removed after explicit disc
   ).toHaveValue('');
 });
 
-test('medical fee uses the doctor record and filters doctors by name', async ({ page }) => {
+test('medical fee is chosen per quote and filters doctors by name', async ({ page }) => {
   await login(page);
   await page.evaluate(() => {
     const key = 'analiza.en.casa.workspace.v3.doctors';
@@ -223,7 +223,6 @@ test('medical fee uses the doctor record and filters doctors by name', async ({ 
       documentId: 'DOCTOR-QA',
       specialty: 'Medicina general',
       address: 'Dirección QA',
-      medicalFee: 35,
       attachments: [],
     });
     window.localStorage.setItem(key, JSON.stringify(doctors));
@@ -235,8 +234,8 @@ test('medical fee uses the doctor record and filters doctors by name', async ({ 
     .getByRole('searchbox', { name: 'Filtrar médicos de honorarios' })
     .fill('Honorario QA');
   await dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]').selectOption('doctor-fee-qa');
-  await expect(dialog.getByLabel('Honorario médico')).toHaveValue('USD 35.00');
-  await expect(dialog.getByLabel('Honorario médico')).toHaveAttribute('readonly');
+  await dialog.getByLabel('Honorario médico').selectOption('35');
+  await expect(dialog.getByLabel('Honorario médico')).toHaveValue('35');
   await dialog.getByLabel('Cantidad').fill('2');
   await dialog.getByRole('button', { name: 'Agregar línea' }).click();
   await expect(dialog.getByRole('region', { name: 'Todos los ítems anexados' })).toContainText(

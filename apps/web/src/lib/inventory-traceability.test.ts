@@ -4,6 +4,7 @@ import {
   expiredTraceQuantity,
   inventoryTraceEffectiveStatus,
   inventoryTraceQuantity,
+  unavailableTraceQuantities,
 } from './inventory-traceability';
 
 const record: InventoryTraceRecord = {
@@ -49,5 +50,28 @@ describe('inventory traceability projections', () => {
         '2027-02-01',
       ),
     ).toBe(0);
+  });
+
+  it('shows quarantined and expired receipts even before any stock movement', () => {
+    expect(
+      unavailableTraceQuantities(
+        [{ ...record, qualityStatus: 'QUARANTINED', expiresOn: '2026-10-08' }],
+        'item-1',
+        'warehouse-a',
+        '2026-10-12',
+      ),
+    ).toEqual({ held: 0, expired: 2 });
+    expect(
+      unavailableTraceQuantities(
+        [{ ...record, qualityStatus: 'QUARANTINED' }],
+        'item-1',
+        'warehouse-a',
+        '2026-09-28',
+      ),
+    ).toEqual({ held: 2, expired: 0 });
+    expect(unavailableTraceQuantities([record], 'item-1', 'warehouse-a', '2026-09-28')).toEqual({
+      held: 0,
+      expired: 0,
+    });
   });
 });

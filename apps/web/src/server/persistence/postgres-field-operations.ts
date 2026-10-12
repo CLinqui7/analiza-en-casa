@@ -254,7 +254,9 @@ export async function executeFieldCommand(pool: Pool, actor: ServerActor, raw: u
         ).rows[0]?.balance ?? 0,
       );
       if (balance < dispatch.quantity)
-        throw new MongoInputError('No hay existencias suficientes en esta bodega.');
+        throw new MongoInputError(
+          'No hay existencias liberadas suficientes en esta bodega. Revise Inventario → Lotes: las compras en cuarentena o vencidas no están disponibles para entrega.',
+        );
       const traced = await client.query(
         'SELECT 1 FROM analiza.inventory_trace_records WHERE organization_id=$1 AND item_id=$2 LIMIT 1',
         [actor.organizationId, dispatch.itemId],

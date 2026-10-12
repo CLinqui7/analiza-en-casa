@@ -32,10 +32,6 @@ const doctorFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre del médico.'),
   jvpm: z.string().trim(),
   conadem: z.string().trim(),
-  medicalFee: z
-    .string()
-    .trim()
-    .refine((value) => !value || Number(value) >= 0, 'Ingrese un honorario válido.'),
   documentId: z.string().trim().min(1, 'Ingrese el DUI.'),
   specialty: z.string().trim().min(1, 'Seleccione una especialidad o profesión.'),
   phone: z.string().trim(),
@@ -48,7 +44,6 @@ const emptyDoctor: DoctorForm = {
   fullName: '',
   jvpm: '',
   conadem: '',
-  medicalFee: '',
   documentId: '',
   specialty: '',
   phone: '',
@@ -101,7 +96,6 @@ export default function DoctorsPage() {
       fullName: doctor.fullName,
       jvpm: doctor.jvpm ?? '',
       conadem: doctor.conadem ?? '',
-      medicalFee: doctor.medicalFee?.toString() ?? '',
       documentId: doctor.documentId,
       specialty: doctor.specialty,
       phone: doctor.phone ?? '',
@@ -118,7 +112,6 @@ export default function DoctorsPage() {
       ...values,
       jvpm: values.jvpm || undefined,
       conadem: values.conadem || undefined,
-      medicalFee: values.medicalFee ? Number(values.medicalFee) : undefined,
       phone: values.phone || undefined,
       email: values.email || undefined,
       attachments: mongoMode ? [] : attachments,
@@ -209,7 +202,6 @@ export default function DoctorsPage() {
                   <th>Nombre</th>
                   <th>JVPM</th>
                   <th>CONADEM</th>
-                  <th>Honorario médico</th>
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
                   <th>Archivos</th>
@@ -222,11 +214,6 @@ export default function DoctorsPage() {
                     <td>{doctor.fullName}</td>
                     <td>{doctor.jvpm || 'No registrado'}</td>
                     <td>{doctor.conadem || 'No registrado'}</td>
-                    <td>
-                      {doctor.medicalFee === undefined
-                        ? 'No registrado'
-                        : `USD ${doctor.medicalFee.toFixed(2)}`}
-                    </td>
                     <td>{doctor.documentId}</td>
                     <td>{doctor.specialty}</td>
                     <td>
@@ -309,13 +296,6 @@ export default function DoctorsPage() {
               <span className="field-error" role="alert">
                 {form.formState.errors.fullName.message}
               </span>
-            ) : null}
-          </label>
-          <label>
-            Honorario médico
-            <input {...form.register('medicalFee')} min="0" step="0.01" type="number" />
-            {form.formState.errors.medicalFee ? (
-              <span className="field-error">{form.formState.errors.medicalFee.message}</span>
             ) : null}
           </label>
           <label>

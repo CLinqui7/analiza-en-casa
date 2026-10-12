@@ -44,3 +44,30 @@ export function expiredTraceQuantity(
       0,
     );
 }
+
+/** Physical quantities not eligible for dispatch, grouped without counting a lot twice. */
+export function unavailableTraceQuantities(
+  records: readonly InventoryTraceRecord[],
+  itemId: string,
+  warehouseId: string,
+  today = new Date().toISOString().slice(0, 10),
+) {
+  return records.reduce(
+    (totals, record) => {
+      if (record.itemId !== itemId) return totals;
+      const quantity = record.balances
+        .filter((balance) => balance.warehouseId === warehouseId)
+        .reduce((sum, balance) => sum + balance.quantity, 0);
+      if (!quantity) return totals;
+      if (
+        record.expiresOn &&
+        record.expiresOn < today &&
+        ['QUARANTINED', 'AVAILABLE'].includes(record.qualityStatus)
+      )
+        totals.expired += quantity;
+      else if (record.qualityStatus !== 'AVAILABLE') totals.held += quantity;
+      return totals;
+    },
+    { held: 0, expired: 0 },
+  );
+}

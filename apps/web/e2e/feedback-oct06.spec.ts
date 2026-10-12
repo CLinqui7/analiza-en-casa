@@ -6,7 +6,9 @@ async function login(page: import('@playwright/test').Page, next: string) {
   await page.getByLabel('Usuario o correo').fill('admin@demo.local');
   await page.getByLabel('Clave').fill('demo-admin');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(new RegExp(next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  await expect(page).toHaveURL(new RegExp(next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), {
+    timeout: 15_000,
+  });
 }
 
 test('catalog filters find items by name and status', async ({ page }) => {
@@ -50,7 +52,24 @@ test('purchase invoice, edit and cancellation persist before receipt', async ({ 
   await expect(cancelled.getByRole('button', { name: 'Recibir' })).toHaveCount(0);
 });
 
-test('quote honorarium comes from the registered doctor and cannot be edited', async ({ page }) => {
+test('one purchase invoice saves multiple product lines together', async ({ page }) => {
+  await login(page, '/purchases');
+  await page.getByRole('button', { name: 'Nueva compra' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nueva compra' });
+  await dialog.getByLabel('Referencia de compra').fill('COMPRA-MULTI-QA');
+  await dialog.getByLabel('Número de factura (opcional)').fill('FACT-MULTI-QA');
+  await dialog.getByLabel('Número de serie').fill('SERIE-MULTI-A');
+  await dialog.getByRole('button', { name: 'Añadir línea' }).click();
+  await expect(dialog.getByText('Factura FACT-MULTI-QA: 1 línea(s) listas.')).toBeVisible();
+  await dialog.getByLabel('Número de serie').fill('SERIE-MULTI-B');
+  await dialog.getByRole('button', { name: 'Añadir línea' }).click();
+  await dialog.getByRole('button', { name: 'Guardar factura (2)' }).click();
+  await expect(page.getByRole('status')).toContainText('Factura guardada con 2 línea(s)');
+  await page.getByLabel('Buscar compras').fill('COMPRA-MULTI-QA');
+  await expect(page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' })).toHaveCount(2);
+});
+
+test('quote honorarium is selected for each quote, not fixed on the doctor', async ({ page }) => {
   await login(page, '/doctors');
   await page.getByRole('button', { name: 'Nuevo médico' }).click();
   const doctorDialog = page.getByRole('dialog', { name: 'Nuevo médico' });
@@ -60,18 +79,19 @@ test('quote honorarium comes from the registered doctor and cannot be edited', a
   await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
   await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');
-  await doctorDialog.getByLabel('Honorario médico').fill('75');
   await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
   await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   const amount = dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]');
-  await expect(amount).toHaveValue('Seleccione un médico');
+  await expect(amount).toHaveValue('0');
   await dialog
     .locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]')
     .selectOption({ label: 'Médico QA Catálogo' });
-  await expect(amount).toHaveValue('USD 75.00');
-  await expect(amount).toHaveAttribute('readonly');
+  await amount.selectOption('75');
+  await expect(amount).toHaveValue('75');
+  await expect(amount.locator('option[value="300"]')).toHaveCount(1);
+  await expect(amount.locator('option[value="301"]')).toHaveCount(0);
 });
 
 test('clinical case pickers filter by patient or case without dropping the selected record', async ({

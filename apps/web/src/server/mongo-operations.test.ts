@@ -117,6 +117,187 @@ describe('assigned clinical operations', () => {
       }),
     ).rejects.toThrow();
   });
+  it('voids a received invoice without reversing physical inventory', async () => {
+    const purchase: Purchase = {
+      id: 'received-qa',
+      catalogItemId: 'item-qa',
+      supplierCatalogItemId: 'supplier-qa',
+      warehouseId: 'warehouse-qa',
+      reference: 'REF-QA',
+      invoiceNumber: 'INV-QA',
+      quantity: 2,
+      unitCost: 5,
+      lotNumber: 'LOT-QA',
+      expirationDate: '2027-12-31',
+      status: 'RECEIVED',
+      receivedAt: '2026-10-09T12:00:00.000Z',
+      createdAt: '2026-10-08T12:00:00.000Z',
+    };
+    let persisted = purchase;
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const updateOne = vi.fn(async (_filter: unknown, change: { $set: Partial<Purchase> }) => {
+      persisted = { ...persisted, ...change.$set };
+      return { matchedCount: 1 };
+    });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases') return { findOne: vi.fn(async () => persisted), updateOne };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const repository = new MongoOperationsRepository(database);
+    const actor: ServerActor = { userId: 'buyer-qa', organizationId: 'org-a', role: 'INVENTORY' };
+    await repository.execute(actor, {
+      command: 'purchase.invoice.void',
+      purchaseId: purchase.id,
+      reason: 'Documento duplicado',
+    });
+    expect(persisted).toMatchObject({
+      status: 'RECEIVED',
+      invoiceVoidReason: 'Documento duplicado',
+      quantity: 2,
+      lotNumber: 'LOT-QA',
+    });
+    expect(persisted.invoiceVoidedAt).toBeTruthy();
+    expect(auditInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'PURCHASE_INVOICE_VOIDED' }),
+      expect.anything(),
+    );
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.invoice.void',
+        purchaseId: purchase.id,
+        reason: 'Otra vez',
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('creates multiple invoice lines in one transaction and rejects mismatched headers', async () => {
+    const first: Purchase = {
+      id: 'line-a',
+      catalogItemId: 'item-a',
+      supplierCatalogItemId: 'supplier-a',
+      warehouseId: 'warehouse-a',
+      reference: 'REF-1',
+      invoiceNumber: 'INV-1',
+      invoiceGroupId: 'group-1',
+      quantity: 2,
+      unitCost: 10,
+      lotNumber: 'LOT-A',
+      expirationDate: '2027-12-31',
+      status: 'DRAFT',
+      createdAt: '2026-10-12T12:00:00.000Z',
+    };
+    const second = { ...first, id: 'line-b', catalogItemId: 'item-b', lotNumber: 'LOT-B' };
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const insertMany = vi.fn().mockResolvedValue({ acknowledged: true });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases') return { insertMany };
+        if (name === 'catalogItems')
+          return {
+            findOne: vi.fn(async (filter: { category?: string }) => ({
+              category: filter.category ?? 'MEDICATIONS',
+              status: 'ACTIVE',
+            })),
+          };
+        if (name === 'warehouses')
+          return { findOne: vi.fn().mockResolvedValue({ id: 'warehouse-a', status: 'ACTIVE' }) };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const repository = new MongoOperationsRepository(database);
+    const actor: ServerActor = { userId: 'buyer-qa', organizationId: 'org-a', role: 'INVENTORY' };
+    await expect(
+      repository.execute(actor, { command: 'purchase.batch.create', purchases: [first, second] }),
+    ).resolves.toEqual({ ids: ['line-a', 'line-b'] });
+    expect(insertMany).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'line-a', organizationId: 'org-a' }),
+        expect.objectContaining({ id: 'line-b', organizationId: 'org-a' }),
+      ]),
+      { session },
+    );
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.batch.create',
+        purchases: [first, { ...second, invoiceNumber: 'OTHER' }],
+      }),
+    ).rejects.toThrow('misma factura');
+    expect(insertMany).toHaveBeenCalledTimes(1);
+  });
+  it('voids every received line of one invoice group and keeps both receipts', async () => {
+    const base: Purchase = {
+      id: 'line-one',
+      invoiceGroupId: 'invoice-group-qa',
+      catalogItemId: 'item-one',
+      supplierCatalogItemId: 'supplier-a',
+      warehouseId: 'warehouse-a',
+      reference: 'REF-1',
+      invoiceNumber: 'INV-1',
+      quantity: 1,
+      unitCost: 10,
+      lotNumber: 'LOT-1',
+      expirationDate: '2027-12-31',
+      status: 'RECEIVED',
+      receivedAt: '2026-10-12T12:00:00.000Z',
+      createdAt: '2026-10-12T11:00:00.000Z',
+    };
+    const lines: Purchase[] = [
+      base,
+      { ...base, id: 'line-two', catalogItemId: 'item-two', lotNumber: 'LOT-2' },
+    ];
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases')
+          return {
+            findOne: vi.fn(async () => lines[0]),
+            find: vi.fn(() => ({ toArray: vi.fn(async () => lines) })),
+            updateOne: vi.fn(
+              async (filter: { id: string }, change: { $set: Partial<Purchase> }) => {
+                const index = lines.findIndex((line) => line.id === filter.id);
+                lines[index] = { ...lines[index], ...change.$set };
+                return { matchedCount: 1 };
+              },
+            ),
+          };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const actor: ServerActor = { userId: 'buyer-qa', organizationId: 'org-a', role: 'INVENTORY' };
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.invoice.void',
+        purchaseId: 'line-one',
+        reason: 'Factura duplicada',
+      }),
+    ).resolves.toEqual({ ids: ['line-one', 'line-two'] });
+    expect(
+      lines.every(
+        (line) => line.status === 'RECEIVED' && line.invoiceVoidReason === 'Factura duplicada',
+      ),
+    ).toBe(true);
+    expect(auditInsert).toHaveBeenCalledTimes(2);
+  });
   // test-id: vitest:operations-retry-integrity
   it('accepts identical retries but rejects changed quantities with the same key', () => {
     expect(() => assertSameRetry({ id: 'saved', quantity: 2 }, { quantity: 2 })).not.toThrow();

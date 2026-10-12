@@ -1372,6 +1372,89 @@ export function postgresPersistence(): Persistence {
           return item;
         });
       }
+      if (command.command === 'purchase.batch.create') {
+        authorize(actor, 'purchases:write');
+        const { purchases } = z
+          .object({
+            command: z.literal('purchase.batch.create'),
+            purchases: z.array(purchaseSchema.strict()).min(2).max(50),
+          })
+          .strict()
+          .parse(input);
+        const first = purchases[0];
+        if (
+          !first.invoiceNumber ||
+          !first.invoiceGroupId ||
+          new Set(purchases.map((purchase) => purchase.id)).size !== purchases.length ||
+          purchases.some(
+            (purchase) =>
+              purchase.status !== 'DRAFT' ||
+              purchase.receivedAt ||
+              purchase.traceRecordId ||
+              purchase.cancelledAt ||
+              purchase.cancelReason ||
+              purchase.invoiceVoidedAt ||
+              purchase.invoiceVoidReason ||
+              purchase.invoiceNumber !== first.invoiceNumber ||
+              purchase.invoiceGroupId !== first.invoiceGroupId ||
+              purchase.reference !== first.reference ||
+              purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
+              purchase.warehouseId !== first.warehouseId,
+          )
+        )
+          throw new MongoInputError(
+            'Todas las líneas deben tener la misma factura, referencia, proveedor y bodega, con identificadores únicos.',
+          );
+        return transaction(pool, actor, async (c) => {
+          const supplier = await c.query(
+            "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE' AND body->>'category'='PROVIDERS'",
+            [actor.organizationId, first.supplierCatalogItemId],
+          );
+          if (!supplier.rowCount) throw new MongoInputError('Seleccione un proveedor activo.');
+          const warehouse = await c.query(
+            "SELECT id FROM analiza.warehouses WHERE organization_id=$1 AND id=$2 AND status='ACTIVE'",
+            [actor.organizationId, first.warehouseId],
+          );
+          if (!warehouse.rowCount) throw new MongoInputError('Seleccione una bodega activa.');
+          for (const purchase of purchases) {
+            const item = await c.query<{ category: string | null }>(
+              "SELECT body->>'category' AS category FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",
+              [actor.organizationId, purchase.catalogItemId],
+            );
+            const category = item.rows[0]?.category;
+            if (!category || !['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(category))
+              throw new MongoInputError('Seleccione un medicamento, insumo o equipo activo.');
+            if (
+              ['MEDICATIONS', 'SUPPLIES'].includes(category) &&
+              (!purchase.expirationDate || !purchase.lotNumber)
+            )
+              throw new MongoInputError('Indique fecha de vencimiento y lote en cada línea.');
+            if (category === 'EQUIPMENT' && !purchase.serialNumber)
+              throw new MongoInputError('Indique el número de serie de cada equipo.');
+            if (
+              !Number.isInteger(purchase.quantity) ||
+              !purchase.quantity ||
+              purchase.quantity < 1 ||
+              (category === 'EQUIPMENT' && purchase.quantity !== 1)
+            )
+              throw new MongoInputError(
+                'La cantidad de cada línea debe ser un entero positivo; cada equipo usa una serie.',
+              );
+            const normalized = normalizePurchaseTraceability(purchase, category);
+            await c.query(
+              'INSERT INTO analiza.purchases(organization_id,id,warehouse_id,body) VALUES($1,$2,$3,$4::jsonb)',
+              [
+                actor.organizationId,
+                normalized.id,
+                normalized.warehouseId,
+                JSON.stringify(normalized),
+              ],
+            );
+            await audit(c, actor, 'PURCHASE_DRAFT_CREATED', 'purchase', normalized.id);
+          }
+          return { ids: purchases.map((purchase) => purchase.id) };
+        });
+      }
       if (command.command === 'purchase.create' || command.command === 'purchase.update') {
         authorize(actor, 'purchases:write');
         const { purchase } = z
@@ -1386,7 +1469,9 @@ export function postgresPersistence(): Persistence {
           purchase.receivedAt ||
           purchase.traceRecordId ||
           purchase.cancelledAt ||
-          purchase.cancelReason
+          purchase.cancelReason ||
+          purchase.invoiceVoidedAt ||
+          purchase.invoiceVoidReason
         )
           throw new MongoInputError('Sólo se puede guardar un borrador sin recepción.');
         return transaction(pool, actor, async (c) => {
@@ -1402,6 +1487,23 @@ export function postgresPersistence(): Persistence {
             : null;
           if (command.command === 'purchase.update' && oldPurchase?.status !== 'DRAFT')
             throw new MongoConflictError();
+          if (command.command === 'purchase.update' && oldPurchase?.invoiceGroupId) {
+            const linked = await c.query<{ count: string }>(
+              "SELECT count(*)::text AS count FROM analiza.purchases WHERE organization_id=$1 AND body->>'invoiceGroupId'=$2",
+              [actor.organizationId, oldPurchase.invoiceGroupId],
+            );
+            if (
+              Number(linked.rows[0]?.count ?? 0) > 1 &&
+              (purchase.invoiceGroupId !== oldPurchase.invoiceGroupId ||
+                purchase.invoiceNumber !== oldPurchase.invoiceNumber ||
+                purchase.reference !== oldPurchase.reference ||
+                purchase.supplierCatalogItemId !== oldPurchase.supplierCatalogItemId ||
+                purchase.warehouseId !== oldPurchase.warehouseId)
+            )
+              throw new MongoInputError(
+                'El número, proveedor, referencia y bodega de una factura con varias líneas no se editan por separado.',
+              );
+          }
           const item = await c.query<{ category: string | null }>(
             "SELECT body->>'category' AS category FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",
             [actor.organizationId, purchase.catalogItemId],
@@ -1505,6 +1607,60 @@ export function postgresPersistence(): Persistence {
           );
           await audit(c, actor, 'PURCHASE_DRAFT_CANCELLED', 'purchase', purchaseId);
           return cancelled;
+        });
+      }
+      if (command.command === 'purchase.invoice.void') {
+        authorize(actor, 'purchases:write');
+        const { purchaseId, reason } = z
+          .object({
+            command: z.literal('purchase.invoice.void'),
+            purchaseId: z.string().trim().min(1).max(120),
+            reason: z.string().trim().min(1).max(1000),
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const previous = await c.query<{ body: unknown }>(
+            'SELECT body FROM analiza.purchases WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+            [actor.organizationId, purchaseId],
+          );
+          if (!previous.rows[0]) throw new MongoAccessError();
+          const purchase = purchaseSchema.parse(previous.rows[0].body);
+          if (purchase.status !== 'RECEIVED' || !purchase.invoiceNumber || purchase.invoiceVoidedAt)
+            throw new MongoConflictError();
+          const linked = purchase.invoiceGroupId
+            ? await c.query<{ id: string; body: unknown }>(
+                "SELECT id,body FROM analiza.purchases WHERE organization_id=$1 AND body->>'invoiceGroupId'=$2 FOR UPDATE",
+                [actor.organizationId, purchase.invoiceGroupId],
+              )
+            : { rows: [{ id: purchaseId, body: purchase }] };
+          const lines = linked.rows.map((row) => purchaseSchema.parse(row.body));
+          if (
+            !lines.length ||
+            lines.some(
+              (line) =>
+                !['RECEIVED', 'CANCELLED'].includes(line.status) ||
+                line.invoiceVoidedAt ||
+                line.invoiceNumber !== purchase.invoiceNumber ||
+                line.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
+                line.reference !== purchase.reference ||
+                line.warehouseId !== purchase.warehouseId,
+            )
+          )
+            throw new MongoConflictError();
+          const occurredAt = new Date().toISOString();
+          for (const line of lines) {
+            await c.query(
+              'UPDATE analiza.purchases SET body=$3::jsonb WHERE organization_id=$1 AND id=$2',
+              [
+                actor.organizationId,
+                line.id,
+                JSON.stringify({ ...line, invoiceVoidedAt: occurredAt, invoiceVoidReason: reason }),
+              ],
+            );
+            await audit(c, actor, 'PURCHASE_INVOICE_VOIDED', 'purchase', line.id);
+          }
+          return { ids: lines.map((line) => line.id) };
         });
       }
       if (command.command === 'inventory.record') {

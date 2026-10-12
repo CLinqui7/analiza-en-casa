@@ -1,4 +1,5 @@
 import type { Quote } from '@analiza/contracts';
+import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
 
 type CatalogPrice = Readonly<{
   id: string;
@@ -26,7 +27,7 @@ export function quoteCatalogPriceError(
   previous?: Quote | null,
 ): string | null {
   const items = new Map(catalogItems.map((entry) => [entry.id, entry]));
-  const fees = new Map(doctors.map((entry) => [entry.id, entry]));
+  const doctorIds = new Set(doctors.map((entry) => entry.id));
   for (const line of quote.items) {
     const old = previous?.items.find((entry) => entry.id === line.id);
     if (
@@ -38,9 +39,10 @@ export function quoteCatalogPriceError(
     )
       continue;
     if (line.category === 'FEES') {
-      const price = line.doctorId ? fees.get(line.doctorId)?.medicalFee : undefined;
-      if (typeof price !== 'number' || !Number.isFinite(price) || line.unitPrice !== price)
-        return 'El honorario debe coincidir con el valor configurado en el médico.';
+      if (!line.doctorId || !doctorIds.has(line.doctorId))
+        return 'Seleccione un médico registrado para el honorario.';
+      if (!(quoteMedicalFeeOptions as readonly number[]).includes(line.unitPrice))
+        return 'Seleccione un honorario permitido entre USD 0 y USD 300 para esta cotización.';
       continue;
     }
     const catalog = line.inventoryItemId ? items.get(line.inventoryItemId) : undefined;

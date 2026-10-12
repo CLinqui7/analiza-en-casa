@@ -19,6 +19,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -295,7 +296,9 @@ function QuoteEditor({
       ...current,
       doctorId: doctor?.id,
       doctorName: doctor?.fullName,
-      unitPrice: doctor?.medicalFee ?? 0,
+      unitPrice: (quoteMedicalFeeOptions as readonly number[]).includes(current.unitPrice)
+        ? current.unitPrice
+        : 0,
     }));
   }
   function addOrUpdateItem() {
@@ -306,10 +309,10 @@ function QuoteEditor({
     }
     if (activeCategory === 'FEES' && !editingItemId) {
       const doctor = doctors.find((candidate) => candidate.id === item.doctorId);
-      if (!doctor || typeof doctor.medicalFee !== 'number') {
+      if (!doctor) {
         setErrors((current) => ({
           ...current,
-          item: 'Seleccione un médico con honorario configurado en su ficha.',
+          item: 'Seleccione un médico registrado.',
         }));
         return;
       }
@@ -976,7 +979,7 @@ function QuoteEditor({
                         </option>
                       ))}
                   </select>
-                  <span className="field-help">El honorario proviene de la ficha del médico.</span>
+                  <span className="field-help">El honorario se elige para cada cotización.</span>
                 </label>
               </>
             ) : null}
@@ -1005,12 +1008,23 @@ function QuoteEditor({
             <label>
               {activeCategory === 'FEES' ? 'Honorario médico' : 'Precio de venta sin IVA'}
               {activeCategory === 'FEES' ? (
-                <input
+                <select
                   data-action-id="QUOTE-FEE-AMOUNT"
-                  readOnly
-                  type="text"
-                  value={item.doctorId ? money(item.unitPrice) : 'Seleccione un médico'}
-                />
+                  onChange={(event) => setNumber('unitPrice', event.target.value)}
+                  value={item.unitPrice}
+                >
+                  {quoteMedicalFeeOptions.map((amount) => (
+                    <option key={amount} value={amount}>
+                      USD {amount.toFixed(2)}
+                    </option>
+                  ))}
+                  {editingItemId &&
+                  !(quoteMedicalFeeOptions as readonly number[]).includes(item.unitPrice) ? (
+                    <option value={item.unitPrice}>
+                      Histórico: USD {item.unitPrice.toFixed(2)}
+                    </option>
+                  ) : null}
+                </select>
               ) : (
                 <input
                   readOnly

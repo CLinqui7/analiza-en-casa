@@ -7,10 +7,10 @@ import { useMemo, useState } from 'react';
 import { InventoryTransferDialog, WarehouseManagement } from '@/components/warehouse-management';
 import { InventoryTraceability } from '@/components/inventory-traceability';
 import { useAuth, useWorkspace } from '@/components/providers';
-import { expiredTraceQuantity } from '@/lib/inventory-traceability';
+import { expiredTraceQuantity, unavailableTraceQuantities } from '@/lib/inventory-traceability';
 import { useOperations } from '@/lib/use-operations';
 
-const demoItemCatalog: Record<string, { name: string; sku: string }> = {
+const demoItemCatalog: Record<string, { name: string; sku: string; category?: string }> = {
   'inventory-demo-kit': { name: 'Kit operativo demo', sku: 'KIT-DEMO-001' },
   'inventory-demo-supplies': { name: 'Insumos demo', sku: 'INS-DEMO-001' },
 };
@@ -104,7 +104,10 @@ export default function InventoryPage() {
     () => ({
       ...(providerMode === 'mock' ? demoItemCatalog : {}),
       ...Object.fromEntries(
-        catalogItems.map((item) => [item.id, { name: item.name, sku: item.sku }]),
+        catalogItems.map((item) => [
+          item.id,
+          { name: item.name, sku: item.sku, category: item.category },
+        ]),
       ),
     }),
     [catalogItems, providerMode],
@@ -121,23 +124,43 @@ export default function InventoryPage() {
   const [historyTo, setHistoryTo] = useState('');
   const [transferOpen, setTransferOpen] = useState(false);
   const rows = useMemo(() => {
-    const itemIds = [...new Set(inventoryMovements.map((movement) => movement.itemId))];
+    const itemIds = [
+      ...new Set([
+        ...inventoryMovements.map((movement) => movement.itemId),
+        ...operations.traceRecords.map((record) => record.itemId),
+      ]),
+    ];
     return itemIds
       .flatMap((itemId) => {
         const movements = inventoryMovements.filter((movement) => movement.itemId === itemId);
         const warehouseIds = [
-          ...new Set(movements.map((movement) => movement.warehouseId).filter(Boolean)),
+          ...new Set([
+            ...movements.map((movement) => movement.warehouseId).filter(Boolean),
+            ...operations.traceRecords
+              .filter((record) => record.itemId === itemId)
+              .flatMap((record) => record.balances.map((balance) => balance.warehouseId)),
+          ]),
         ] as string[];
         return (warehouseIds.length ? warehouseIds : ['central']).map((warehouseId) => ({
           rowId: `${itemId}:${warehouseId}`,
           itemId,
-          type: 'Sintético',
+          type:
+            itemCatalog[itemId]?.category === 'MEDICATIONS'
+              ? 'Medicamento'
+              : itemCatalog[itemId]?.category === 'SUPPLIES'
+                ? 'Insumo'
+                : itemCatalog[itemId]?.category === 'EQUIPMENT'
+                  ? 'Equipo'
+                  : 'Otro',
           code: itemCatalog[itemId]?.sku ?? itemId,
           name: itemCatalog[itemId]?.name ?? itemId,
           warehouse: warehouseNames[warehouseId] ?? warehouseId,
-          available:
+          available: Math.max(
+            0,
             currentInventoryBalance(inventoryMovements, itemId, warehouseId) -
-            expiredTraceQuantity(operations.traceRecords, itemId, warehouseId),
+              expiredTraceQuantity(operations.traceRecords, itemId, warehouseId),
+          ),
+          ...unavailableTraceQuantities(operations.traceRecords, itemId, warehouseId),
         }));
       })
       .filter((row) =>
@@ -396,10 +419,10 @@ export default function InventoryPage() {
         <Panel>
           <div className="table-heading">
             <div>
-              <h2>Bodega: Todas las bodegas sintéticas</h2>
+              <h2>Todas las bodegas</h2>
               <p className="field-help">
-                Disponible es el saldo cronológico de los movimientos locales. Comprometido y Total
-                requieren CH14-Q001.
+                Disponible es el saldo liberado y vigente. Retenido y vencido muestran recepciones
+                físicas que no pueden entregarse; abra Lotes para consultar su estado.
               </p>
             </div>
             <StatusTag>{rows.length} visibles</StatusTag>
@@ -446,6 +469,8 @@ export default function InventoryPage() {
                   <th>Nombre</th>
                   <th>Bodega</th>
                   <th>Disp</th>
+                  <th>Retenido</th>
+                  <th>Vencido</th>
                   <th>Comp</th>
                   <th>Total</th>
                 </tr>
@@ -462,6 +487,15 @@ export default function InventoryPage() {
                       >
                         Movimientos de item
                       </Button>
+                      {(row.held > 0 || row.expired > 0) && (
+                        <Button
+                          className="button-secondary"
+                          onClick={() => setSurface('LOTS')}
+                          type="button"
+                        >
+                          Ver lotes
+                        </Button>
+                      )}
                     </td>
                     <td>{row.type}</td>
                     <td>
@@ -470,18 +504,20 @@ export default function InventoryPage() {
                     <td>{row.name}</td>
                     <td>{row.warehouse}</td>
                     <td>{row.available}</td>
+                    <td>{row.held}</td>
+                    <td>{row.expired}</td>
                     <td>No definido</td>
                     <td>No calculable</td>
                   </tr>
                 ))}
                 {!rows.length ? (
                   <tr>
-                    <td colSpan={8}>
+                    <td colSpan={10}>
                       <EmptyState
                         detail={
                           query
-                            ? `No hay ítems sintéticos que coincidan con “${query}”.`
-                            : 'No hay movimientos sintéticos registrados.'
+                            ? `No hay ítems que coincidan con “${query}”.`
+                            : 'No hay existencias ni recepciones registradas.'
                         }
                         title="Sin ítems documentados"
                       />

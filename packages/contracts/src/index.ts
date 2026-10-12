@@ -116,7 +116,7 @@ export const doctorSchema = z.object({
   fullName: z.string().trim().min(1),
   jvpm: z.string().trim().optional(),
   conadem: z.string().trim().optional(),
-  medicalFee: z.number().nonnegative().optional(),
+  medicalFee: z.number().nonnegative().optional(), // Legacy records only; new quote fees are selected per quote.
   documentId: z.string().trim().min(1),
   specialty: z.string().trim().min(1),
   phone: z.string().trim().optional(),
@@ -388,6 +388,7 @@ export const purchaseSchema = z.object({
   warehouseId: z.string().trim().min(1).optional(),
   reference: z.string().trim().min(1),
   invoiceNumber: z.string().trim().max(100).optional(),
+  invoiceGroupId: z.string().trim().min(1).max(120).optional(),
   note: z.string().trim().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
@@ -399,6 +400,8 @@ export const purchaseSchema = z.object({
   traceRecordId: z.string().optional(),
   cancelledAt: z.string().optional(),
   cancelReason: z.string().trim().min(1).max(1000).optional(),
+  invoiceVoidedAt: z.string().optional(),
+  invoiceVoidReason: z.string().trim().min(1).max(1000).optional(),
   createdAt: z.string(),
 });
 

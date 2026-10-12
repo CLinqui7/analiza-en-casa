@@ -52,7 +52,7 @@ describe('quote catalog price policy', () => {
     const changed = { ...base, items: [{ ...base.items[0], quantity: 3 }] };
     expect(quoteCatalogPriceError(changed, [], [], base)).toBeNull();
   });
-  it('requires a configured doctor fee for a new honorarium', () => {
+  it('uses an allowed fee selected per quote, independent of the old doctor fee', () => {
     const fee = {
       ...base,
       items: [
@@ -64,9 +64,39 @@ describe('quote catalog price policy', () => {
         },
       ],
     };
-    expect(quoteCatalogPriceError(fee, [], [{ id: 'doctor-1', medicalFee: 12 }])).toBeNull();
     expect(quoteCatalogPriceError(fee, [], [{ id: 'doctor-1', medicalFee: 14 }])).toContain(
       'honorario',
     );
+    expect(
+      quoteCatalogPriceError(
+        { ...fee, items: [{ ...fee.items[0], unitPrice: 15 }] },
+        [],
+        [{ id: 'doctor-1', medicalFee: 14 }],
+      ),
+    ).toBeNull();
+    expect(
+      quoteCatalogPriceError(
+        { ...fee, items: [{ ...fee.items[0], unitPrice: 0 }] },
+        [],
+        [{ id: 'doctor-1' }],
+      ),
+    ).toBeNull();
+    expect(
+      quoteCatalogPriceError(
+        { ...fee, items: [{ ...fee.items[0], unitPrice: 300 }] },
+        [],
+        [{ id: 'doctor-1' }],
+      ),
+    ).toBeNull();
+    expect(
+      quoteCatalogPriceError(
+        { ...fee, items: [{ ...fee.items[0], unitPrice: 301 }] },
+        [],
+        [{ id: 'doctor-1' }],
+      ),
+    ).toContain('honorario');
+    expect(
+      quoteCatalogPriceError({ ...fee, items: [{ ...fee.items[0], unitPrice: 15 }] }, [], []),
+    ).toContain('médico');
   });
 });

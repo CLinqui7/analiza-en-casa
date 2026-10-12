@@ -30,8 +30,10 @@ type Form = z.infer<typeof schema>;
 export default function PurchasesPage() {
   const {
     addPurchase,
+    addPurchaseBatch,
     updatePurchase,
     cancelPurchase,
+    voidPurchaseInvoice,
     catalogItems,
     error,
     purchases,
@@ -46,8 +48,11 @@ export default function PurchasesPage() {
     execute: executeReceipt,
   } = useOperations();
   const [open, setOpen] = useState(false);
+  const [queuedLines, setQueuedLines] = useState<Purchase[]>([]);
+  const [invoiceGroupId, setInvoiceGroupId] = useState(() => crypto.randomUUID());
   const [editing, setEditing] = useState<Purchase | null>(null);
   const [cancelling, setCancelling] = useState<Purchase | null>(null);
+  const [voidingInvoice, setVoidingInvoice] = useState<Purchase | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -140,6 +145,16 @@ export default function PurchasesPage() {
   const pages = Math.max(1, Math.ceil(visible.length / pageSize));
   const currentPage = Math.min(page, pages);
   const pageRows = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const invoiceLines = (purchase: Purchase) =>
+    purchase.invoiceGroupId
+      ? purchases.filter((line) => line.invoiceGroupId === purchase.invoiceGroupId)
+      : [purchase];
+  const canVoidInvoice = (purchase: Purchase) =>
+    purchase.status === 'RECEIVED' &&
+    Boolean(purchase.invoiceNumber) &&
+    invoiceLines(purchase).every(
+      (line) => ['RECEIVED', 'CANCELLED'].includes(line.status) && !line.invoiceVoidedAt,
+    );
   async function exportPurchasesXlsx() {
     const { createXlsxWorkbook } = await import('@/lib/xlsx');
     const workbookBytes = createXlsxWorkbook(
@@ -171,7 +186,7 @@ export default function PurchasesPage() {
             : ((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2),
         status:
           purchase.status === 'RECEIVED'
-            ? 'Recibida en cuarentena'
+            ? 'Recepción registrada'
             : purchase.status === 'CANCELLED'
               ? 'Anulada'
               : 'Borrador',
@@ -195,6 +210,8 @@ export default function PurchasesPage() {
   function close() {
     setOpen(false);
     setEditing(null);
+    setQueuedLines([]);
+    setInvoiceGroupId(crypto.randomUUID());
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
       supplierCatalogItemId: suppliers[0]?.id ?? '',
@@ -212,6 +229,8 @@ export default function PurchasesPage() {
   function edit(purchase: Purchase) {
     if (purchase.status !== 'DRAFT') return;
     setEditing(purchase);
+    setQueuedLines([]);
+    setInvoiceGroupId(purchase.invoiceGroupId ?? crypto.randomUUID());
     form.reset({
       catalogItemId: purchase.catalogItemId,
       supplierCatalogItemId: purchase.supplierCatalogItemId ?? '',
@@ -240,38 +259,38 @@ export default function PurchasesPage() {
       form.clearErrors('serialNumber');
     }
   }
-  async function submit(values: Form) {
+  function makePurchase(values: Form): Purchase | null {
     const catalogItem = purchasableItems.find((item) => item.id === values.catalogItemId);
-    if (!catalogItem) return;
+    if (!catalogItem) return null;
     if (!suppliers.some((item) => item.id === values.supplierCatalogItemId)) {
       form.setError('supplierCatalogItemId', { message: 'Seleccione un proveedor activo.' });
-      return;
+      return null;
     }
     if (!activeWarehouses.some((warehouse) => warehouse.id === values.warehouseId)) {
       form.setError('warehouseId', { message: 'Seleccione una bodega activa.' });
-      return;
+      return null;
     }
     if (['MEDICATIONS', 'SUPPLIES'].includes(catalogItem.category ?? '')) {
       if (!values.expirationDate) {
         form.setError('expirationDate', { message: 'Indique la fecha de vencimiento.' });
-        return;
+        return null;
       }
       if (!values.lotNumber) {
         form.setError('lotNumber', { message: 'Indique el lote.' });
-        return;
+        return null;
       }
     }
     if (catalogItem.category === 'EQUIPMENT' && !values.serialNumber) {
       form.setError('serialNumber', { message: 'Indique el número de serie.' });
-      return;
+      return null;
     }
     if (catalogItem.category === 'EQUIPMENT' && values.quantity !== 1) {
       form.setError('quantity', {
         message: 'Cada equipo con número de serie se registra por unidad.',
       });
-      return;
+      return null;
     }
-    const purchase = normalizePurchaseTraceability(
+    return normalizePurchaseTraceability(
       {
         id: editing?.id ?? crypto.randomUUID(),
         catalogItemId: values.catalogItemId,
@@ -279,6 +298,7 @@ export default function PurchasesPage() {
         warehouseId: values.warehouseId,
         reference: values.reference,
         invoiceNumber: values.invoiceNumber || undefined,
+        invoiceGroupId: editing?.invoiceGroupId ?? invoiceGroupId,
         note: values.note || undefined,
         quantity: values.quantity,
         unitCost: values.unitCost,
@@ -290,13 +310,79 @@ export default function PurchasesPage() {
       } satisfies Purchase,
       catalogItem.category,
     );
-    const saved = editing ? await updatePurchase(purchase) : await addPurchase(purchase);
+  }
+  function queueLine(values: Form) {
+    if (editing) return;
+    if (!values.invoiceNumber.trim()) {
+      form.setError('invoiceNumber', {
+        message: 'Indique el número de factura para agregar varias líneas.',
+      });
+      return;
+    }
+    const first = queuedLines[0];
+    if (
+      first &&
+      (values.invoiceNumber !== first.invoiceNumber ||
+        values.reference !== first.reference ||
+        values.supplierCatalogItemId !== first.supplierCatalogItemId ||
+        values.warehouseId !== first.warehouseId)
+    ) {
+      form.setError('invoiceNumber', {
+        message:
+          'Todas las líneas deben conservar el número, referencia, proveedor y bodega de la misma factura.',
+      });
+      return;
+    }
+    const purchase = makePurchase(values);
+    if (!purchase) return;
+    setQueuedLines((current) => [...current, purchase]);
+    form.setValue('quantity', 1);
+    form.setValue('lotNumber', '');
+    form.setValue('serialNumber', '');
+    form.setValue('expirationDate', '');
+  }
+  async function submit(values: Form) {
+    const purchase = makePurchase(values);
+    if (!purchase) return;
+    const purchasesToSave = [...queuedLines, purchase];
+    if (
+      queuedLines.length &&
+      purchasesToSave.some(
+        (line) =>
+          line.invoiceNumber !== queuedLines[0].invoiceNumber ||
+          line.reference !== queuedLines[0].reference ||
+          line.supplierCatalogItemId !== queuedLines[0].supplierCatalogItemId ||
+          line.warehouseId !== queuedLines[0].warehouseId,
+      )
+    ) {
+      form.setError('invoiceNumber', {
+        message: 'Todas las líneas deben pertenecer a la misma factura, proveedor y bodega.',
+      });
+      return;
+    }
+    const saved = editing
+      ? await updatePurchase(purchase)
+      : purchasesToSave.length > 1
+        ? await addPurchaseBatch(purchasesToSave)
+        : await addPurchase(purchase);
     if (!saved) return;
     setMessage(
       editing
         ? 'Borrador de compra actualizado y auditado.'
-        : 'Compra guardada como borrador con bodega de destino y trazabilidad de inventario.',
+        : purchasesToSave.length > 1
+          ? `Factura guardada con ${purchasesToSave.length} líneas en una sola operación auditada.`
+          : 'Compra guardada como borrador con bodega de destino y trazabilidad de inventario.',
     );
+    close();
+  }
+  async function saveQueued() {
+    if (!queuedLines.length) return;
+    const saved =
+      queuedLines.length > 1
+        ? await addPurchaseBatch(queuedLines)
+        : await addPurchase(queuedLines[0]);
+    if (!saved) return;
+    setMessage(`Factura guardada con ${queuedLines.length} línea(s) en borrador.`);
     close();
   }
   async function confirmCancellation(formData: FormData) {
@@ -313,6 +399,23 @@ export default function PurchasesPage() {
     setCancelling(null);
     setCancelError(null);
     setMessage('Borrador anulado con motivo y auditoría. No afectó existencias.');
+  }
+  async function confirmInvoiceVoid(formData: FormData) {
+    if (!voidingInvoice) return;
+    const reason = String(formData.get('reason') ?? '').trim();
+    if (!reason) {
+      setCancelError('Explique por qué se anula la factura.');
+      return;
+    }
+    if (!(await voidPurchaseInvoice(voidingInvoice.id, reason))) {
+      setCancelError('No se pudo anular la factura. Revise su estado e inténtelo de nuevo.');
+      return;
+    }
+    setVoidingInvoice(null);
+    setCancelError(null);
+    setMessage(
+      'Factura anulada y auditada. La recepción física y el inventario se conservan; gestione la devolución por separado si corresponde.',
+    );
   }
   async function receivePurchase(formData: FormData) {
     if (!receiptSelection) return;
@@ -371,7 +474,8 @@ export default function PurchasesPage() {
           <p>
             Registra borradores de compra con proveedor, bodega de destino y trazabilidad de lote,
             vencimiento o serie. La recepción física se confirma desde el borrador y queda visible
-            en Lotes y series.
+            en Lotes y series. Cada fila del listado corresponde a un producto; varias filas pueden
+            compartir la misma factura.
           </p>
         </div>
         {can('purchases:write') ? (
@@ -381,6 +485,8 @@ export default function PurchasesPage() {
             onClick={() => {
               setMessage(null);
               setEditing(null);
+              setQueuedLines([]);
+              setInvoiceGroupId(crypto.randomUUID());
               form.reset();
               setOpen(true);
             }}
@@ -528,6 +634,19 @@ export default function PurchasesPage() {
                           </Button>
                         </>
                       ) : null}
+                      {can('purchases:write') && canVoidInvoice(purchase) ? (
+                        <Button
+                          className="button-secondary danger"
+                          data-action-id="PURCHASE-INVOICE-VOID"
+                          onClick={() => {
+                            setCancelError(null);
+                            setVoidingInvoice(purchase);
+                          }}
+                          type="button"
+                        >
+                          Anular factura
+                        </Button>
+                      ) : null}
                       {can('purchases:write') &&
                       can('inventory:write') &&
                       purchase.status === 'DRAFT' &&
@@ -564,11 +683,15 @@ export default function PurchasesPage() {
                       ? 'No documentado'
                       : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
                   </td>
-                  <td>{purchase.invoiceNumber || 'No registrado'}</td>
+                  <td>
+                    {purchase.invoiceNumber
+                      ? `${purchase.invoiceNumber}${purchase.invoiceVoidedAt ? ' · Anulada' : ''}`
+                      : 'No registrado'}
+                  </td>
                   <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
                   <td>
                     {purchase.status === 'RECEIVED'
-                      ? 'Recibida en cuarentena'
+                      ? 'Recepción registrada'
                       : purchase.status === 'CANCELLED'
                         ? 'Anulada'
                         : 'Borrador'}
@@ -624,19 +747,68 @@ export default function PurchasesPage() {
             <Button className="button-secondary" onClick={close} type="button">
               Cancelar
             </Button>
-            <Button disabled={form.formState.isSubmitting} form="purchase-form" type="submit">
-              {form.formState.isSubmitting
-                ? 'Guardando…'
-                : editing
-                  ? 'Guardar cambios'
-                  : 'Guardar borrador'}
-            </Button>
+            {!editing ? (
+              <Button
+                className="button-secondary"
+                data-action-id="PURCHASE-ADD-LINE"
+                onClick={() => void form.handleSubmit(queueLine)()}
+                type="button"
+              >
+                Añadir línea
+              </Button>
+            ) : null}
+            {queuedLines.length ? (
+              <Button
+                data-action-id="PURCHASE-SAVE-INVOICE"
+                onClick={() => void saveQueued()}
+                type="button"
+              >
+                Guardar factura ({queuedLines.length})
+              </Button>
+            ) : (
+              <Button disabled={form.formState.isSubmitting} form="purchase-form" type="submit">
+                {form.formState.isSubmitting
+                  ? 'Guardando…'
+                  : editing
+                    ? 'Guardar cambios'
+                    : 'Guardar borrador'}
+              </Button>
+            )}
           </>
         }
         onClose={close}
         open={open}
         title={editing ? 'Editar compra' : 'Nueva compra'}
       >
+        {queuedLines.length ? (
+          <div className="notice" role="status">
+            <strong>
+              Factura {queuedLines[0].invoiceNumber}: {queuedLines.length} línea(s) listas.
+            </strong>
+            <p>
+              Agrega la línea actual antes de guardar. Las líneas se registran juntas o ninguna.
+            </p>
+            <ul>
+              {queuedLines.map((line, index) => (
+                <li key={line.id}>
+                  {itemNames.get(line.catalogItemId) ?? line.catalogItemId} · {line.quantity} × USD{' '}
+                  {(line.unitCost ?? 0).toFixed(2)}{' '}
+                  <Button
+                    className="button-secondary"
+                    onClick={() =>
+                      setQueuedLines((current) =>
+                        current.filter((candidate) => candidate.id !== line.id),
+                      )
+                    }
+                    type="button"
+                  >
+                    Quitar línea {index + 1}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <form
           className="form-grid"
           id="purchase-form"
@@ -789,8 +961,31 @@ export default function PurchasesPage() {
             </div>
             <div>
               <dt>Número de factura</dt>
-              <dd>{selected.invoiceNumber || 'No registrado'}</dd>
+              <dd>
+                {selected.invoiceNumber || 'No registrado'}
+                {selected.invoiceVoidedAt ? ' · Anulada' : ''}
+              </dd>
             </div>
+            {selected.invoiceGroupId ? (
+              <div>
+                <dt>Factura completa</dt>
+                <dd>
+                  {invoiceLines(selected).length} línea(s) · USD{' '}
+                  {invoiceLines(selected)
+                    .reduce((total, line) => total + (line.quantity ?? 1) * (line.unitCost ?? 0), 0)
+                    .toFixed(2)}
+                </dd>
+              </div>
+            ) : null}
+            {selected.invoiceVoidedAt ? (
+              <div>
+                <dt>Anulación de factura</dt>
+                <dd>
+                  {new Date(selected.invoiceVoidedAt).toLocaleString('es-SV')} ·{' '}
+                  {selected.invoiceVoidReason}
+                </dd>
+              </div>
+            ) : null}
             <div>
               <dt>Ítem de catálogo</dt>
               <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
@@ -811,7 +1006,7 @@ export default function PurchasesPage() {
               <dt>Estado</dt>
               <dd>
                 {selected.status === 'RECEIVED'
-                  ? 'Recibida en cuarentena'
+                  ? 'Recepción registrada'
                   : selected.status === 'CANCELLED'
                     ? 'Anulada'
                     : 'Borrador'}
@@ -874,6 +1069,38 @@ export default function PurchasesPage() {
         title="Anular borrador de compra"
       >
         <form action={confirmCancellation} id="purchase-cancel-form">
+          <label>
+            Motivo de anulación
+            <textarea maxLength={1000} name="reason" required rows={3} />
+          </label>
+          {cancelError ? (
+            <p className="notice danger" role="alert">
+              {cancelError}
+            </p>
+          ) : null}
+        </form>
+      </Dialog>
+      <Dialog
+        description="Anula únicamente el documento de factura. La compra recibida y sus lotes permanecen registrados; si hubo devolución física, debe registrarse por separado para conservar la trazabilidad."
+        footer={
+          <>
+            <Button
+              className="button-secondary"
+              onClick={() => setVoidingInvoice(null)}
+              type="button"
+            >
+              Volver
+            </Button>
+            <Button form="purchase-invoice-void-form" type="submit">
+              Confirmar anulación de factura
+            </Button>
+          </>
+        }
+        onClose={() => setVoidingInvoice(null)}
+        open={Boolean(voidingInvoice)}
+        title="Anular factura recibida"
+      >
+        <form action={confirmInvoiceVoid} id="purchase-invoice-void-form">
           <label>
             Motivo de anulación
             <textarea maxLength={1000} name="reason" required rows={3} />

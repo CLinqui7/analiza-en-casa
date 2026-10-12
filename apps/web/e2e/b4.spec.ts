@@ -18,7 +18,6 @@ async function createDoctorFixture(page: import('@playwright/test').Page) {
   await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await dialog.getByRole('option', { name: 'Nutricionista' }).click();
   await dialog.getByLabel('Dirección').fill('Dirección sintética B4');
-  await dialog.getByLabel('Honorario médico').fill('55');
   await dialog.getByRole('button', { name: 'Guardar médico' }).click();
   await expect(page.getByRole('status')).toContainText('Médica B4 Honorarios registrado');
 }
@@ -44,7 +43,8 @@ test('a cataloged doctor fee keeps its selected doctor after save and reload', a
   const doctorName = await doctor.locator('option:checked').textContent();
   await dialog.getByLabel('Concepto').fill('Honorario B4');
   await dialog.getByLabel('Cantidad').fill('1');
-  await expect(dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]')).toHaveValue('USD 55.00');
+  await dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]').selectOption('55');
+  await expect(dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]')).toHaveValue('55');
   await dialog.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await expect(dialog.getByText(`Médico: ${doctorName}`)).toBeVisible();
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();

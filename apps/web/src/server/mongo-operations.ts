@@ -80,10 +80,23 @@ const commands = z.discriminatedUnion('command', [
     .strict(),
   z.object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() }).strict(),
   z.object({ command: z.literal('purchase.create'), purchase: purchaseSchema.strict() }).strict(),
+  z
+    .object({
+      command: z.literal('purchase.batch.create'),
+      purchases: z.array(purchaseSchema.strict()).min(2).max(50),
+    })
+    .strict(),
   z.object({ command: z.literal('purchase.update'), purchase: purchaseSchema.strict() }).strict(),
   z
     .object({
       command: z.literal('purchase.cancel'),
+      purchaseId: identifier,
+      reason: z.string().trim().min(1).max(1000),
+    })
+    .strict(),
+  z
+    .object({
+      command: z.literal('purchase.invoice.void'),
       purchaseId: identifier,
       reason: z.string().trim().min(1).max(1000),
     })
@@ -1221,6 +1234,81 @@ export class MongoOperationsRepository {
           await audit('PAYMENT_APPLIED', payment.id);
           return { id: payment.id };
         }
+        if (input.command === 'purchase.batch.create') {
+          permission('purchases:write');
+          const first = input.purchases[0];
+          if (
+            !first.invoiceNumber ||
+            !first.invoiceGroupId ||
+            new Set(input.purchases.map((purchase) => purchase.id)).size !==
+              input.purchases.length ||
+            input.purchases.some(
+              (purchase) =>
+                purchase.status !== 'DRAFT' ||
+                purchase.receivedAt ||
+                purchase.traceRecordId ||
+                purchase.cancelledAt ||
+                purchase.cancelReason ||
+                purchase.invoiceVoidedAt ||
+                purchase.invoiceVoidReason ||
+                purchase.invoiceNumber !== first.invoiceNumber ||
+                purchase.invoiceGroupId !== first.invoiceGroupId ||
+                purchase.reference !== first.reference ||
+                purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
+                purchase.warehouseId !== first.warehouseId,
+            )
+          )
+            throw new MongoInputError(
+              'Todas las líneas deben tener la misma factura, referencia, proveedor y bodega, con identificadores únicos.',
+            );
+          const supplier = await this.database.collection('catalogItems').findOne(
+            {
+              ...scoped,
+              id: first.supplierCatalogItemId,
+              status: 'ACTIVE',
+              category: 'PROVIDERS',
+            },
+            { session },
+          );
+          if (!supplier) throw new MongoInputError('Seleccione un proveedor activo.');
+          const warehouse = await this.database
+            .collection('warehouses')
+            .findOne({ ...scoped, id: first.warehouseId, status: 'ACTIVE' }, { session });
+          if (!warehouse) throw new MongoInputError('Seleccione una bodega activa.');
+          const normalizedPurchases = [];
+          for (const purchase of input.purchases) {
+            const item = await this.database
+              .collection('catalogItems')
+              .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session });
+            const category = String(item?.category ?? '');
+            if (!['MEDICATIONS', 'SUPPLIES', 'EQUIPMENT'].includes(category))
+              throw new MongoInputError('Seleccione un medicamento, insumo o equipo activo.');
+            if (
+              ['MEDICATIONS', 'SUPPLIES'].includes(category) &&
+              (!purchase.expirationDate || !purchase.lotNumber)
+            )
+              throw new MongoInputError('Indique fecha de vencimiento y lote en cada línea.');
+            if (category === 'EQUIPMENT' && !purchase.serialNumber)
+              throw new MongoInputError('Indique el número de serie de cada equipo.');
+            if (
+              !Number.isInteger(purchase.quantity) ||
+              !purchase.quantity ||
+              purchase.quantity < 1 ||
+              (category === 'EQUIPMENT' && purchase.quantity !== 1)
+            )
+              throw new MongoInputError(
+                'La cantidad de cada línea debe ser un entero positivo; cada equipo usa una serie.',
+              );
+            normalizedPurchases.push({
+              ...normalizePurchaseTraceability(purchase, category),
+              ...scoped,
+            });
+          }
+          await this.database.collection('purchases').insertMany(normalizedPurchases, { session });
+          for (const purchase of normalizedPurchases)
+            await audit('PURCHASE_DRAFT_CREATED', purchase.id);
+          return { ids: normalizedPurchases.map((purchase) => purchase.id) };
+        }
         if (input.command === 'purchase.create' || input.command === 'purchase.update') {
           permission('purchases:write');
           const purchase = input.purchase;
@@ -1229,7 +1317,9 @@ export class MongoOperationsRepository {
             purchase.receivedAt ||
             purchase.traceRecordId ||
             purchase.cancelledAt ||
-            purchase.cancelReason
+            purchase.cancelReason ||
+            purchase.invoiceVoidedAt ||
+            purchase.invoiceVoidReason
           )
             throw new MongoInputError('Sólo se puede guardar un borrador sin recepción.');
           const previous = await this.database
@@ -1241,6 +1331,23 @@ export class MongoOperationsRepository {
           }
           if (input.command === 'purchase.update' && previous?.status !== 'DRAFT')
             throw new MongoConflictError();
+          if (input.command === 'purchase.update' && previous?.invoiceGroupId) {
+            const linked = await this.database
+              .collection('purchases')
+              .find({ ...scoped, invoiceGroupId: previous.invoiceGroupId }, { session })
+              .toArray();
+            if (
+              linked.length > 1 &&
+              (purchase.invoiceGroupId !== previous.invoiceGroupId ||
+                purchase.invoiceNumber !== previous.invoiceNumber ||
+                purchase.reference !== previous.reference ||
+                purchase.supplierCatalogItemId !== previous.supplierCatalogItemId ||
+                purchase.warehouseId !== previous.warehouseId)
+            )
+              throw new MongoInputError(
+                'El número, proveedor, referencia y bodega de una factura con varias líneas no se editan por separado.',
+              );
+          }
           const catalogItem = await this.database
             .collection('catalogItems')
             .findOne({ ...scoped, id: purchase.catalogItemId, status: 'ACTIVE' }, { session });
@@ -1338,6 +1445,52 @@ export class MongoOperationsRepository {
           if (updated.matchedCount !== 1) throw new MongoConflictError();
           await audit('PURCHASE_DRAFT_CANCELLED', input.purchaseId);
           return { id: input.purchaseId };
+        }
+        if (input.command === 'purchase.invoice.void') {
+          permission('purchases:write');
+          const purchase = await this.database
+            .collection('purchases')
+            .findOne({ ...scoped, id: input.purchaseId }, { session });
+          if (!purchase) throw new MongoAccessError();
+          if (purchase.status !== 'RECEIVED' || !purchase.invoiceNumber || purchase.invoiceVoidedAt)
+            throw new MongoConflictError();
+          const lines = purchase.invoiceGroupId
+            ? await this.database
+                .collection('purchases')
+                .find({ ...scoped, invoiceGroupId: purchase.invoiceGroupId }, { session })
+                .toArray()
+            : [purchase];
+          if (
+            !lines.length ||
+            lines.some(
+              (line) =>
+                !['RECEIVED', 'CANCELLED'].includes(line.status) ||
+                line.invoiceVoidedAt ||
+                line.invoiceNumber !== purchase.invoiceNumber ||
+                line.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
+                line.reference !== purchase.reference ||
+                line.warehouseId !== purchase.warehouseId,
+            )
+          )
+            throw new MongoConflictError();
+          const occurredAt = new Date().toISOString();
+          for (const line of lines) {
+            const updated = await this.database
+              .collection('purchases')
+              .updateOne(
+                {
+                  ...scoped,
+                  id: line.id,
+                  status: line.status,
+                  invoiceVoidedAt: { $exists: false },
+                },
+                { $set: { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason } },
+                { session },
+              );
+            if (updated.matchedCount !== 1) throw new MongoConflictError();
+            await audit('PURCHASE_INVOICE_VOIDED', line.id);
+          }
+          return { ids: lines.map((line) => line.id) };
         }
         if (input.command === 'clinical.create') {
           permission('clinical:write');
