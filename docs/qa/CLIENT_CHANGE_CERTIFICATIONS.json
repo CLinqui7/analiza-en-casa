@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "cc16267653b71f0eb86be4cd4d987ab6e1b95fdbb60bf94a6a6d21cdde8de56c",
+      "functional_fingerprint": "59e2fb6ad120b2dd50cc902faa6e5b887c6beb0cbef55e985e8c126e7c8be126",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -88,7 +88,7 @@
     },
     "CR-011": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "595e80804721b3ccf3e909b3fb4fc3994e5581a2fd210bc5ce66666d76cd4f7c",
+      "functional_fingerprint": "dced4648a13746f20a86553daf0d6a3686861fdebc864c894e5a201f30523329",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -97,7 +97,7 @@
     },
     "CR-012": {
       "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "75e5376e1bbbb053e7bcefc38a0175748e4ef8620489be6336772ea558ee253e",
+      "functional_fingerprint": "afea2c910a4b89a29e24c0cd919f45025fd9f067703777423e8185ae9d6b8348",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -115,15 +115,27 @@
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Facturación puede ser cotización, factura, pago o ingreso; no se infiere."
+      "test_ids": [
+        "vitest:commercial-confirmed-reference-metrics",
+        "vitest:confirmed-sale-unique-reference"
+      ],
+      "production_status": "PARTIAL",
+      "blocker_type": "CLIENT_DEFINITION",
+      "technical_status": "PARTIAL_IMPLEMENTATION",
+      "notes": "Aclaración directa del cliente, 2026-10-08: ventas confirmadas con referencia. Dashboard general y registro interno implementados; no se infiere utilidad, factura fiscal ni estado mensual de pacientes."
     },
     "CR-015": {
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existen médicos, metas ni fórmula aprobada."
+      "test_ids": [
+        "vitest:commercial-salvador-periods",
+        "vitest:commercial-confirmed-reference-metrics"
+      ],
+      "production_status": "PARTIAL",
+      "blocker_type": "CLIENT_DEFINITION",
+      "technical_status": "PARTIAL_IMPLEMENTATION",
+      "notes": "Aclaración directa del cliente, 2026-10-08: Claudia registra médicos visitados y Sissy define metas semanales/mensuales; se cuentan médicos con contacto y pacientes ingresados únicos por período, con hospitalización vinculada, y ventas confirmadas con referencia vinculadas a visita. No sustituye el flujo clínico CH11."
     },
     "CR-016": {
       "implementation_sha": null,

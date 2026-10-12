@@ -1,0 +1,19 @@
+# Revisión del commit de feedback y preparación Hostinger · 12 de octubre de 2026
+
+## Qué llegó a GitHub
+
+`6c2273f3e210b9fea6b4da91dbbd865f03b1b331` está en `main` y en `codex/feedback-requests-20261012`; desciende de `b2b95fe`. No tenía PR abierto al revisar el repositorio. Su diff abarca 21 archivos: inventario con cantidades disponibles/retenidas/vencidas, compras con varias líneas por factura y anulación documental de factura recibida, honorario elegido por cotización, validaciones de MongoDB/PostgreSQL y pruebas. El [informe del autor](NURSE_FEEDBACK_20261012.md) enumera cuatro reportes nuevos y ocho que continúan en revisión. La anulación conserva recepción y existencias: no equivale a devolución física ni reversión fiscal.
+
+## Resultado comprobado en este checkout
+
+- `npm ci`, `npm run repo:preflight`, `npm test` (138/138), `npm run test:react` (243/243), `npm run qa` (76/76), `npm run typecheck`, `npm run lint` y compilación Next aprobaron. `npm audit --omit=dev` encontró cero vulnerabilidades de producción; la instalación completa avisó de cinco altas en dependencias de desarrollo.
+- Playwright de compras, honorarios y cotizaciones aprobó **19/19**; la regresión completa aprobó **216/217** con una prueba conectada omitida. Se usó un build de producción en modo `mock` explícito. El primer intento tomó la configuración MongoDB local y rechazó el usuario demo; no ejecutó mutaciones. Estas pruebas no demuestran el backend PostgreSQL ni producción.
+- `npm run audit:verify` aprobó la integridad de los 17 capítulos y 1.359 eventos. La revisión visual de este lote fue muestral; no hay una nueva certificación visual exhaustiva.
+- El commit llegó con `npm run qa:client-changes` fallando en CR-001, CR-011 y CR-012 por huellas antiguas, y el CSV difería del JSON. Tras la regresión sintética completa se renovaron **sólo esas tres huellas de certificación demo**: el gate ahora pasa 32/32. Ninguna solicitud cambió a estado productivo. `qa:video-parity` global valida estructura, mientras los gates CH01–CH03 rechazan 39 `EXACT` por huella antigua; no se deben presentar como certificación vigente hasta reconciliar alcance y evidencia.
+- El registro de cambios aún describe CR-005–009, CR-013 y CR-016 con notas anteriores a funciones actuales. La pantalla `/changes` lee ese registro; presencia en código no prueba persistencia/permiso productivo. CH10–CH17 conservan 96 requisitos React sin `EXACT` (30 parciales, 35 faltantes, 7 bloqueados por cliente, 24 no comprobables). La matriz de brechas del baseline legado mide otro runtime.
+- La lista actual de honorarios (USD 0 o 15–300 en pasos de 5) está en cliente y servidor. El informe del 7 de octubre describía honorarios tomados de la ficha médica; antes de certificar CR-013 debe conservarse la solicitud fuente y decidir cuál regla está vigente. No modificar tarifas ni registros históricos para reconciliarlo.
+- Se reconciliaron los CSV de las 32 solicitudes y 210 requisitos React con sus JSON canónicos, sin cambiar estados de paridad. Se corrigieron las notas y pruebas de CR-014/015 en certificaciones y resumen Markdown, conservando `NOT_CERTIFIED`. `npm run qa:traceability-mirror`, `npm run qa:client-changes` y `npm run format:check` vuelven a pasar. La verificación de las tres certificaciones demo se hizo sobre el código funcional `6c2273f3e210b9fea6b4da91dbbd865f03b1b331`; los 39 `EXACT` de video mencionados arriba siguen abiertos.
+
+## Límite de verificación
+
+Este checkout no tuvo Docker Linux disponible, así que no se ejecutó `npm run test:ubuntu:selfhosted` ni una restauración PostgreSQL. Tampoco había VPS o dominio definidos por el usuario. Ningún resultado local acredita una migración de datos, un corte DNS o una prueba conectada del nuevo commit en la base productiva. Los ocho reportes de feedback que permanecían en revisión requieren las confirmaciones fiscales, de formato, integración o caso concreto que detalla el informe del autor.
