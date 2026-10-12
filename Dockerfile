@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1
 ARG DATA_MODE=postgresql
 ARG REGISTRATION_MODE=isolated
+ARG RELEASE_PROFILE=core
 FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS build
 ARG DATA_MODE
 ARG REGISTRATION_MODE
+ARG RELEASE_PROFILE
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
@@ -20,12 +22,13 @@ COPY database/postgresql ./database/postgresql
 COPY database/mongodb ./database/mongodb
 COPY scripts/deployment ./scripts/deployment
 ENV ANALIZA_CONTAINER_BUILD=1 \
-    NEXT_PUBLIC_RELEASE_PROFILE=core \
+    NEXT_PUBLIC_RELEASE_PROFILE=$RELEASE_PROFILE \
     NEXT_PUBLIC_DATA_MODE=$DATA_MODE \
     ANALIZA_DATA_MODE=$DATA_MODE \
     NEXT_PUBLIC_REGISTRATION_MODE=$REGISTRATION_MODE \
     ANALIZA_REGISTRATION_MODE=$REGISTRATION_MODE
 RUN case "$DATA_MODE:$REGISTRATION_MODE" in postgresql:disabled|postgresql:isolated|mongodb:disabled|mongodb:isolated) ;; *) exit 1 ;; esac
+RUN case "$RELEASE_PROFILE" in core|full) ;; *) exit 1 ;; esac
 # The build needs no database credentials. Secrets enter at runtime only.
 RUN npm run build
 RUN test -f apps/web/.next/standalone/apps/web/server.js \
@@ -63,11 +66,12 @@ CMD ["--dry-run"]
 FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS runtime
 ARG DATA_MODE
 ARG REGISTRATION_MODE
+ARG RELEASE_PROFILE
 WORKDIR /app
 ARG SOURCE_SHA=local-unversioned
 LABEL org.opencontainers.image.source="https://github.com/CLinqui7/analiza-en-casa" \
     org.opencontainers.image.revision=$SOURCE_SHA \
-    com.analiza.release-profile="core" \
+    com.analiza.release-profile=$RELEASE_PROFILE \
     com.analiza.data-mode=$DATA_MODE \
     com.analiza.schema-contract="analiza-core-v1" \
     com.analiza.registration-mode=$REGISTRATION_MODE
@@ -75,7 +79,7 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 \
     PORT=8080 HOSTNAME=0.0.0.0 \
     ANALIZA_DATA_MODE=$DATA_MODE NEXT_PUBLIC_DATA_MODE=$DATA_MODE \
     ANALIZA_REGISTRATION_MODE=$REGISTRATION_MODE NEXT_PUBLIC_REGISTRATION_MODE=$REGISTRATION_MODE \
-    NEXT_PUBLIC_RELEASE_PROFILE=core ANALIZA_CONTAINER_RUNTIME=1
+    NEXT_PUBLIC_RELEASE_PROFILE=$RELEASE_PROFILE ANALIZA_CONTAINER_RUNTIME=1
 COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /app/apps/web/public ./apps/web/public

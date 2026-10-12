@@ -1475,18 +1475,16 @@ export class MongoOperationsRepository {
             throw new MongoConflictError();
           const occurredAt = new Date().toISOString();
           for (const line of lines) {
-            const updated = await this.database
-              .collection('purchases')
-              .updateOne(
-                {
-                  ...scoped,
-                  id: line.id,
-                  status: line.status,
-                  invoiceVoidedAt: { $exists: false },
-                },
-                { $set: { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason } },
-                { session },
-              );
+            const updated = await this.database.collection('purchases').updateOne(
+              {
+                ...scoped,
+                id: line.id,
+                status: line.status,
+                invoiceVoidedAt: { $exists: false },
+              },
+              { $set: { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason } },
+              { session },
+            );
             if (updated.matchedCount !== 1) throw new MongoConflictError();
             await audit('PURCHASE_INVOICE_VOIDED', line.id);
           }

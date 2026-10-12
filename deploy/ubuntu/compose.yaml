@@ -5,6 +5,7 @@ services:
       context: ../..
       args:
         DATA_MODE: postgresql
+        RELEASE_PROFILE: ${NEXT_PUBLIC_RELEASE_PROFILE:-full}
         SOURCE_SHA: ${SOURCE_SHA:-local-unversioned}
     env_file:
       - ${ANALIZA_ENV_FILE:-.env}
@@ -13,7 +14,7 @@ services:
       HOSTNAME: 0.0.0.0
       ANALIZA_DATA_MODE: postgresql
       NEXT_PUBLIC_DATA_MODE: postgresql
-      NEXT_PUBLIC_RELEASE_PROFILE: core
+      NEXT_PUBLIC_RELEASE_PROFILE: ${NEXT_PUBLIC_RELEASE_PROFILE:-full}
       ANALIZA_DB_TRANSPORT: unix
       PGHOST: /var/run/postgresql
       PGPORT: 5432

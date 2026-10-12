@@ -11,6 +11,9 @@ en Vercel utiliza MongoDB.
 **Para desplegar en Ubuntu / Docker / PostgreSQL local:**
 [guía self-hosted](docs/deployment/UBUNTU_SELF_HOSTED.md).
 
+**Para preparar un VPS Hostinger con la navegación completa:**
+[lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
+
 **Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
 diferido. El preview Vercel se publica mediante un flujo independiente con
 migraciones previas. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
