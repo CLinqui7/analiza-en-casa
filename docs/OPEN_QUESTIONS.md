@@ -335,6 +335,10 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Operación
 
+- `HOSTINGER-001` (2026-10-12): aún no se eligieron VPS ni dominio. Confirmar proveedor DNS, capacidad según usuarios y adjuntos, acceso de operador, origen PostgreSQL y almacén privado efectivos, rol runtime/ACL, ventana de corte, responsables y objetivos de respaldo/restauración antes de mover datos o DNS. Plan: `docs/deployment/HOSTINGER_VPS_READINESS_20261012.md`.
+- `FEEDBACK-51132DD2` (2026-10-12): vincular el texto fuente de la nueva lista de honorarios (USD 0 o 15–300 en incrementos de 5) y resolver su precedencia sobre la instrucción anterior de precio de ficha médica antes de certificar CR-013. No aplicar una tarifa supuesta a cotizaciones históricas.
+- `FEEDBACK-BDDFC1EA` (2026-10-12): confirmar que la anulación solicitada de factura recibida es sólo documental, sin devolución física ni reversión fiscal automática. El flujo actual registra motivo y auditoría, pero conserva la recepción y las existencias.
+
 - Usuario que acepta formalmente el MVP.
 - Horario de soporte durante producción controlada.
 - Cantidad estimada de usuarios concurrentes.

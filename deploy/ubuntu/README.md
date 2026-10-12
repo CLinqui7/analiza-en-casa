@@ -1,5 +1,12 @@
 # Despliegue Ubuntu
 
+Para trasladar la aplicación actual a un VPS Hostinger, revise primero el
+[plan de migración y validación](../../docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
+Esta variante compila y ejecuta el perfil `full`; el perfil `core` de la imagen
+general ocultaría Compras, Inventario y Cotizaciones. Compruebe que
+`NEXT_PUBLIC_RELEASE_PROFILE=full` figura en `deploy/ubuntu/.env` **antes** de
+construir las imágenes, porque las rutas visibles se incorporan al build.
+
 Esta variante ejecuta únicamente Analiza en Docker. PostgreSQL y Nginx permanecen instalados en el host Ubuntu. La web usa el socket local de PostgreSQL; el puerto 5432 no se publica en Internet. Los archivos privados viven en `/opt/analiza/files` y sólo se entregan después de la autorización de las rutas API.
 
 Requisitos: Ubuntu con Docker Engine y Compose v2, PostgreSQL 18, Nginx y un certificado TLS ya administrado por el servidor.
@@ -35,14 +42,15 @@ La imagen corre como UID/GID `1000:1000`, nunca como root. Compose añade tambi�
 ## 2. Configurar y construir
 
 ```bash
-git clone --recurse-submodules https://github.com/CLinqui7/analiza-docker.git
-cd analiza-docker
+git clone https://github.com/CLinqui7/analiza-en-casa.git
+cd analiza-en-casa
+git checkout <SHA_REVISADO_Y_PROBADO>
 cp deploy/ubuntu/.env.example deploy/ubuntu/.env
 sed -i "s/^POSTGRES_SOCKET_GID=.*/POSTGRES_SOCKET_GID=$(getent group postgres | cut -d: -f3)/" deploy/ubuntu/.env
 editor deploy/ubuntu/.env
 chmod 600 deploy/ubuntu/.env
-docker build --build-arg DATA_MODE=postgresql --build-arg SOURCE_SHA="$(git -C source rev-parse HEAD)" -t analiza-web:selfhosted source
-docker build --target operator --build-arg DATA_MODE=postgresql --build-arg SOURCE_SHA="$(git -C source rev-parse HEAD)" -t analiza-operator:postgresql source
+docker build --build-arg DATA_MODE=postgresql --build-arg RELEASE_PROFILE=full --build-arg SOURCE_SHA="$(git rev-parse HEAD)" -t analiza-web:selfhosted .
+docker build --target operator --build-arg DATA_MODE=postgresql --build-arg RELEASE_PROFILE=full --build-arg SOURCE_SHA="$(git rev-parse HEAD)" -t analiza-operator:postgresql .
 ```
 
 Sustituya `PGPASSWORD=CHANGE_ME`. No copie contraseñas en Git ni las imprima en logs.
