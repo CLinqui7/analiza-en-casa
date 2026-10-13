@@ -8,8 +8,19 @@ export RESTIC_REPOSITORY=/opt/analiza-contabo-staging/backups/restic
 export RESTIC_PASSWORD_FILE=/opt/analiza-contabo-staging/secrets/restic-password
 test -f "$RESTIC_REPOSITORY/config" || restic init
 work=$(mktemp -d /opt/analiza-contabo-staging/backups/snapshot.XXXXXX)
-resume() { docker compose start web >/dev/null; }
-trap resume EXIT
+web_stopped=0
+finish() {
+  status=$?
+  trap - EXIT
+  if [ "$web_stopped" = 1 ]; then docker compose start web >/dev/null || status=1; fi
+  case "$work" in
+    /opt/analiza-contabo-staging/backups/snapshot.*) rm -rf -- "$work" || status=1 ;;
+    *) status=2 ;;
+  esac
+  exit "$status"
+}
+trap finish EXIT
+web_stopped=1
 docker compose stop web >/dev/null
 db=$(docker compose ps -q database)
 docker exec "$db" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) pg_dump -h /var/run/postgresql -U analiza_migrator -d analiza_en_casa -Fc' > "$work/database.dump"
@@ -20,10 +31,8 @@ cp -a files "$work/files"
 sha256sum "$work/database.dump" > "$work/database.sha256"
 restic backup "$work" --tag analiza-contabo-staging --quiet
 restic check --quiet
-# Only erase the plaintext workspace we created, after the encrypted snapshot is checked.
-case "$work" in /opt/analiza-contabo-staging/backups/snapshot.*) rm -rf -- "$work" ;; *) exit 2 ;; esac
-resume
-trap - EXIT
+docker compose start web >/dev/null
+web_stopped=0
 for attempt in $(seq 1 20); do
     if curl -fsS http://127.0.0.1:18081/api/health >/dev/null; then exit 0; fi
     sleep 2

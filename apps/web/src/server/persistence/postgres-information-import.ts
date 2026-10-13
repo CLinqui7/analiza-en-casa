@@ -190,11 +190,14 @@ export class PostgresInformationImportRepository {
         );
       }
       for (const record of parsed.records) {
-        const conflict = await client.query(
-          'SELECT 1 FROM analiza.import_records WHERE organization_id=$1 AND dataset=$2 AND record_id=$3 AND body <> $4::jsonb',
+        const existingRows = await client.query<{ record_id: string; differing: boolean }>(
+          'SELECT record_id,body <> $4::jsonb AS differing FROM analiza.import_records WHERE organization_id=$1 AND dataset=$2 AND upper(record_id)=upper($3) LIMIT 2',
           [actor.organizationId, record.dataset, record.id, JSON.stringify(record.values)],
         );
-        if (conflict.rowCount)
+        if (
+          existingRows.rows.length > 1 ||
+          existingRows.rows.some((row) => row.record_id !== record.id || row.differing)
+        )
           throw new MongoInputError(
             `Hoja ${record.sheet}, fila ${record.row}: el registro existente requiere conciliación explícita. No se modificó.`,
           );

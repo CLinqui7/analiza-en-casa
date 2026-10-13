@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { request } from '@playwright/test';
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 
 const webImage = process.env.ANALIZA_VERIFY_IMAGE || 'analiza-web:selfhosted';
 const operatorImage = process.env.ANALIZA_VERIFY_OPERATOR_IMAGE || 'analiza-operator:postgresql';
+const postgresImage = process.env.ANALIZA_VERIFY_POSTGRES_IMAGE || 'postgres:18-bookworm';
 const run = `analiza-ubuntu-${Date.now()}`;
 const names = {
   db: `${run}-postgres18`,
@@ -79,6 +81,8 @@ try {
     names.db,
     '--restart',
     'no',
+    '--network',
+    'none',
     '-e',
     `POSTGRES_DB=${database}`,
     '-e',
@@ -89,7 +93,7 @@ try {
     `${names.data}:/var/lib/postgresql`,
     '-v',
     `${names.socket}:/var/run/postgresql`,
-    'postgres:18-bookworm',
+    postgresImage,
     '-c',
     'listen_addresses=',
     '-c',
@@ -266,6 +270,53 @@ try {
 
   const admin = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
   const foreign = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
+  const template = await readFile('apps/web/public/templates/plantilla_carga_analiza_en_casa.xlsx');
+  function importFixture(serviceId) {
+    const files = unzipSync(template);
+    const rows = [
+      [3, { A: serviceId, B: 'Servicio QA sintético', C: 'Enfermeria', E: 'Visita', G: 31.3528, H: 'USD', L: 'Activo' }],
+      [7, { A: 'QA-RATE', B: serviceId.toLowerCase(), E: 20.125, F: 'USD', K: '2026-10-01', L: '2027-01-01', M: 'Activo' }],
+    ];
+    for (const [index, values] of rows) {
+      const path = `xl/worksheets/sheet${index}.xml`;
+      const row = `<row r="6">${Object.entries(values)
+        .map(([column, value]) =>
+          typeof value === 'number'
+            ? `<c r="${column}6"><v>${value}</v></c>`
+            : `<c r="${column}6" t="inlineStr"><is><t>${value}</t></is></c>`,
+        )
+        .join('')}</row>`;
+      files[path] = strToU8(strFromU8(files[path]).replace(/<row\b[^>]*r="6"[^>]*>[\s\S]*?<\/row>/, row));
+    }
+    return Buffer.from(zipSync(files));
+  }
+  const imported = importFixture('Qa-Case');
+  async function sendImport(bytes, action) {
+    return admin.context.post('/api/information-import', {
+      headers: { 'x-analiza-csrf': admin.csrf },
+      multipart: {
+        action,
+        file: { name: 'ubuntu-synthetic.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: bytes },
+      },
+    });
+  }
+  const importPreview = await sendImport(imported, 'preview');
+  assert.equal(importPreview.status(), 200, await importPreview.text());
+  assert.equal((await importPreview.json()).ready, true);
+  const importCommit = await sendImport(imported, 'import');
+  assert.equal(importCommit.status(), 201, await importCommit.text());
+  const repeated = await sendImport(imported, 'import');
+  assert.equal(repeated.status(), 201, await repeated.text());
+  const link = command([
+    'exec', names.db, 'sh', '-c',
+    "PGPASSWORD=$(cat /run/secrets/postgres_password) psql -U analiza_migrator -d analiza_en_casa -At -c \"SELECT target_record_id FROM analiza.import_record_links WHERE source_record_id='QA-RATE' AND relation='servicio_id'\"",
+  ]);
+  assert.equal(link, 'Qa-Case');
+  const differentCase = await sendImport(importFixture('QA-CASE'), 'import');
+  assert.equal(differentCase.status(), 400, await differentCase.text());
+  assert.equal((await (await foreign.context.get('/api/workspace')).json()).catalogItems.length, 0);
+  checks.push('Synthetic Excel preview, idempotency, case-insensitive reference and duplicate-ID rejection across tenants');
+
   const patient = {
     id: randomUUID(),
     fullName: 'Paciente Ubuntu sintético',
@@ -388,6 +439,7 @@ try {
         run,
         webImage,
         operatorImage,
+        postgresImage,
         transport: 'Unix socket shared between isolated PostgreSQL and application containers',
         storage: 'Docker volume mounted at /data/private-files',
         checks,
