@@ -1,5 +1,7 @@
 # Pruebas ejecutadas para la instancia Contabo
 
+> Resultados históricos del primer despliegue. La verificación de la versión `93d8903` y los límites actuales constan en [CONTABO_COMPLETION_REPORT.md](CONTABO_COMPLETION_REPORT.md).
+
 Fecha: 2026-10-13. Evidencia detallada de infraestructura, importación, navegador y ensayo aislado se guarda en `.local/contabo-*.log` y en archivos privados fuera del repositorio; estos contienen metadatos comerciales o de acceso y no se publican. El código y las pruebas sintéticas sí están versionados.
 
 Capturas sin datos clínicos ni credenciales: [ingreso por túnel](screenshots/contabo-login.png) y [dashboard operativo vacío](screenshots/contabo-empty-dashboard.png).

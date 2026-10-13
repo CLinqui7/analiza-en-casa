@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-10-13T00:28:57-06:00",
-  "metadata_generated_from_commit": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+  "generated_at": "2026-10-13T02:06:23-06:00",
+  "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
   "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-  "functional_fingerprint": "4dc86bc3385a3788afe39974bea8ef440e2295dc3ab42d4db8305990fcf3dd0a",
+  "functional_fingerprint": "abf2db0179cb5b7e2406da3e846b474044437d46bf5d476912ed99d05f5f8375",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -3614,7 +3614,7 @@
       "action_ids": [],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "VERIFIED",
       "unit_test_ids": [],
@@ -3627,8 +3627,8 @@
         "CH07-Q002"
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH07-Q001, CH07-Q002.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Observed administrative observations are recorded append-only; the video does not establish a business state machine."
+      "last_verified_sha": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
+      "notes": "Observed administrative observations persist idempotently and append-only in tenant-scoped PostgreSQL on Contabo; the video does not establish a business state machine."
     },
     {
       "requirement_id": "CH07-F08",
@@ -7758,8 +7758,8 @@
         "CH15-Q004"
       ],
       "blocker_reason": "CH15-E0122/E0128 muestran la tabla y columnas. El Excel oficial aporta 47 candidatos, pero faltan moneda aprobada, categorías y tipos del video, impuesto, descuento, permisos de escritura, auditoría y efectos clínicos/financieros.",
-      "last_verified_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "notes": "La lista factual de /catalogs/services lee 47 candidatos inactivos de la organización en Contabo; importación idempotente, persistencia tras reboot y lectura de navegador verificadas. El precio original permanece en la fuente y la cifra USD operativa queda pendiente. Excel/Nuevo y columnas/reglas financieras del video siguen deshabilitados. La regresión mock cubre permisos ADMIN/INVENTORY/AUDITOR y denegación DOCTOR/NURSE/FINANCE; Selenium histórico no se ejecutó en este lote. Verificado en b993553c30856a86ad98fc4eee1427c9c145c96b."
+      "last_verified_sha": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
+      "notes": "La lista factual de /catalogs/services lee 47 candidatos inactivos de la organización en Contabo; importación idempotente, persistencia tras reboot y lectura de navegador verificadas. El precio original permanece en la fuente y la cifra USD operativa queda pendiente. Excel/Nuevo y columnas/reglas financieras del video siguen deshabilitados. La regresión mock cubre permisos ADMIN/INVENTORY/AUDITOR y denegación DOCTOR/NURSE/FINANCE; Selenium histórico no se ejecutó en este lote. Verificado en 93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1."
     },
     {
       "requirement_id": "CH15-F14",

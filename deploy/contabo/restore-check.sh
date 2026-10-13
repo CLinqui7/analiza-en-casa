@@ -11,7 +11,9 @@ finish() {
   case "$work" in /opt/analiza-contabo-staging/backups/restore-check.*) rm -rf -- "$work" ;; *) return 2 ;; esac
 }
 trap finish EXIT
-restic restore latest --tag analiza-contabo-staging --target "$work" --quiet
+snapshot_id=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("analiza-contabo-staging"))] | max_by(.time).id // empty')
+test -n "$snapshot_id"
+restic restore "$snapshot_id" --target "$work" --quiet
 mapfile -t dumps < <(find "$work" -type f -name database.dump)
 test "${#dumps[@]}" = 1
 snapshot=$(dirname "${dumps[0]}")

@@ -1,5 +1,7 @@
 # Informe ejecutivo · copia privada Contabo
 
+> Informe histórico del primer despliegue `b993553`. El estado actualizado, las 32 migraciones y las pruebas de cierre constan en [CONTABO_COMPLETION_REPORT.md](CONTABO_COMPLETION_REPORT.md).
+
 Fecha: 2026-10-13. Rama `codex/contabo-clean-migration`. Aplicación Contabo: `b993553c30856a86ad98fc4eee1427c9c145c96b`. Vercel permanece en `6c2273f3e210b9fea6b4da91dbbd865f03b1b331`, sin modificar configuración, DNS, base, usuarios ni pipelines originales.
 
 La copia privada está operativa en la VPS de Contabo y el Excel oficial produjo 546 **candidatos de catálogo inactivos**. Se crearon la organización y cuenta administradora independientes. La nueva base conserva cero pacientes y cero transacciones; la copia de datos originales está pendiente porque su procedencia por fila y la autorización de datos sensibles para este proveedor y ubicación todavía no están demostradas. Mantener esta separación evita que registros de prueba se presenten como operaciones reales.

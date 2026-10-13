@@ -374,7 +374,7 @@ try {
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill('7000-0000');
   await dialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
-  await dialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
+  await dialog.getByRole('option', { name: 'Usar “Empresa demo” como nueva opción' }).click();
   await dialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección ficticia QA');
@@ -602,7 +602,7 @@ try {
   await failDialog.getByLabel('Femenino').check();
   await failDialog.getByLabel('Teléfono celular').fill('7000-0000');
   await failDialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
-  await failDialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
+  await failDialog.getByRole('option', { name: 'Usar “Empresa demo” como nueva opción' }).click();
   await failDialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección ficticia QA');
