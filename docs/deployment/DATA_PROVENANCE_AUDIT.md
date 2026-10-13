@@ -1,5 +1,7 @@
 # Procedencia de datos y cuarentena de la copia
 
+**Actualización del 2026-10-13, 16:23 UTC:** el inventario de abajo describe la lectura anterior y ya no representa el corte vigente. El nuevo snapshot exacto contiene 2.559 filas en 47 tablas; 236 referencias técnicas quedaron verificadas y 2.323 filas siguen `UNKNOWN_ORIGIN`. La copia íntegra se restauró en `analiza_source_quarantine` con acceso denegado al rol web; la base operativa conserva cero pacientes originales. [Evidencia, recuperación y alcance actual](CONTABO_SOURCE_QUARANTINE.md).
+
 La consulta a la base original se ejecutó en una transacción `REPEATABLE READ READ ONLY`, limitada a conteos y metadatos. El manifiesto local privado `.local/contabo-source-counts.json` registra 2.455 filas en 45 tablas, incluidas sesiones, eventos de acceso y auditoría. No son 2.455 personas o registros comerciales. Entre los conteos: 35 pacientes, 12 médicos, 20 usuarios, 9 organizaciones, 800 artículos de catálogo, 15 hospitalizaciones, 27 cotizaciones, 15 pagos, 5 compras y 17 movimientos de inventario. Esos conteos prueban existencia, no origen.
 
 | Clasificación de la base original | Filas confirmadas | Acción |

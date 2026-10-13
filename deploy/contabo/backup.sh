@@ -24,6 +24,11 @@ web_stopped=1
 docker compose stop web >/dev/null
 db=$(docker compose ps -q database)
 docker exec "$db" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) pg_dump -h /var/run/postgresql -U analiza_migrator -d analiza_en_casa -Fc' > "$work/database.dump"
+quarantine_exists=$(docker exec "$db" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) psql -h /var/run/postgresql -U analiza_migrator -d analiza_en_casa -Atqc "SELECT 1 FROM pg_database WHERE datname = '\''analiza_source_quarantine'\''"')
+if [ "$quarantine_exists" = 1 ]; then
+  docker exec "$db" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) pg_dump -h /var/run/postgresql -U analiza_migrator -d analiza_source_quarantine -Fc' > "$work/source-quarantine.dump"
+  sha256sum "$work/source-quarantine.dump" > "$work/source-quarantine.sha256"
+fi
 cp .env "$work/release.env"
 cp compose.yaml "$work/compose.yaml"
 cp -a secrets "$work/secrets"

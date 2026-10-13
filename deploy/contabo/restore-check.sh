@@ -19,6 +19,12 @@ test "${#dumps[@]}" = 1
 snapshot=$(dirname "${dumps[0]}")
 expected=$(cut -d' ' -f1 "$snapshot/database.sha256")
 test "$expected" = "$(sha256sum "${dumps[0]}" | cut -d' ' -f1)"
+source_dump="$snapshot/source-quarantine.dump"
+if [ -f "$source_dump" ]; then
+  test -f "$snapshot/source-quarantine.sha256"
+  source_expected=$(cut -d' ' -f1 "$snapshot/source-quarantine.sha256")
+  test "$source_expected" = "$(sha256sum "$source_dump" | cut -d' ' -f1)"
+fi
 image=$(sed -n 's/^POSTGRES_IMAGE=//p' .env)
 docker run -d --name "$container" --network none --tmpfs /var/lib/postgresql:rw,size=1g \
   -e POSTGRES_DB=analiza_en_casa -e POSTGRES_USER=analiza_migrator \
@@ -33,4 +39,9 @@ done
 docker exec "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) psql -U analiza_migrator -d analiza_en_casa -v ON_ERROR_STOP=1 -c "CREATE ROLE analiza_app LOGIN NOINHERIT NOBYPASSRLS"' >/dev/null
 docker exec -i "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) pg_restore -U analiza_migrator -d analiza_en_casa --exit-on-error' < "${dumps[0]}"
 docker exec "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) psql -U analiza_migrator -d analiza_en_casa -At -c "SELECT count(*) FROM analiza.schema_migrations; SELECT count(*) FROM analiza.catalog_items; SELECT count(*) FROM analiza.patients; SELECT count(*) FROM analiza.import_batches; SELECT count(*) FROM pg_class WHERE relnamespace = '\''analiza'\''::regnamespace AND relrowsecurity AND relforcerowsecurity; SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname='\''analiza_app'\'';"'
-echo 'Encrypted dump hash and isolated PostgreSQL restore verified; operational instance unchanged.'
+if [ -f "$source_dump" ]; then
+  docker exec "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) createdb -U analiza_migrator -T template0 analiza_source_quarantine'
+  docker exec -i "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) pg_restore -U analiza_migrator -d analiza_source_quarantine --exit-on-error --no-owner --no-privileges' < "$source_dump"
+  docker exec "$container" sh -c 'PGPASSWORD=$(cat /run/secrets/postgres_password) psql -U analiza_migrator -d analiza_source_quarantine -At -c "SELECT count(*) FROM analiza.schema_migrations; SELECT count(*) FROM analiza.organizations; SELECT count(*) FROM analiza.patients;"'
+fi
+echo 'Encrypted dump hashes and isolated PostgreSQL restores verified; operational instance unchanged.'
