@@ -3,8 +3,8 @@
   "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "59e2fb6ad120b2dd50cc902faa6e5b887c6beb0cbef55e985e8c126e7c8be126",
+      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "functional_fingerprint": "7c0323ce9517fbaa68d11f2ea7d752af9ed6d73762787aeb1ef653e397aba62a",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -87,8 +87,8 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "dced4648a13746f20a86553daf0d6a3686861fdebc864c894e5a201f30523329",
+      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "functional_fingerprint": "fc47b204b61aa1aa004bffc22834f7bbddd001c6366be423c6e87f106c3980ea",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -96,8 +96,8 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
     },
     "CR-012": {
-      "implementation_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "functional_fingerprint": "afea2c910a4b89a29e24c0cd919f45025fd9f067703777423e8185ae9d6b8348",
+      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "functional_fingerprint": "d1ffda9ad04823897aaaf017ef7ea4a4e6bd95968031b2cfcf18236f9af650ac",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"

@@ -1,0 +1,17 @@
+# Procedimiento de copia limpia pendiente de datos originales
+
+## Estado ejecutado
+
+Se creó una base PostgreSQL 18 independiente, se aplicaron 29 migraciones locales con checksum y RLS, se creó la organización y administración autorizadas, y se importó el Excel oficial como catálogo **inactivo**. Se ejecutó un respaldo cifrado restic y su restauración sobre una base descartable. No se copió ni limpió ninguna fila de la base original. El planificador `scripts/deployment/clean-data-plan.mjs` es de lectura únicamente; sus cuatro pruebas sintéticas cubren ausencia de evidencia, dependencia y conflicto real/demo.
+
+## Copia de datos originales cuando se cumplan las condiciones
+
+1. Autorizar expresamente el tratamiento de datos clínicos en el proveedor y región, concretar custodia, cifrado, acceso, retención y plan de respuesta. Conciliar hashes y DDL de las dos migraciones aplicadas en origen que faltan en el checkout.
+2. Tomar un respaldo consistente **cifrado** del origen y validar una restauración fuera de producción. Registrar punto de corte, esquema, conteos, hashes y manifestación de archivos privados. Mantener el original intacto.
+3. Reunir evidencia de procedencia por fila: lote/importación, autor, entorno, seed/fixture verificable, auditoría y relaciones. No inferir demo por nombre, fecha o aspecto. Ejecutar el planificador con las evidencias privadas y revisar toda fila `UNKNOWN_ORIGIN` y conflicto de dependencias.
+4. Generar un manifiesto firmado de inclusión y exclusión. Incluir sólo `REAL_USER_DATA`, `APPROVED_BUSINESS_CATALOG` y `REQUIRED_SYSTEM_REFERENCE` confirmados; excluir sólo `CONFIRMED_DEMO_DATA` demostrados; mantener lo demás en cuarentena. Resolver relaciones entre clases antes de cualquier escritura.
+5. Transformar en una **base de ensayo independiente**, por organización y en orden de claves: identidades, catálogos, casos, operaciones, documentos, archivos y auditoría. Conservar versiones firmadas, importes históricos y claves de idempotencia; no reutilizar sesiones ni secretos. Cada lote debe ser transaccional y reejecutable sin duplicar. La migración MongoDB→PostgreSQL, si la fuente efectiva incluye MongoDB, exige mapeo y pruebas de contratos por entidad.
+6. Comparar conteos e integridad de origen/manifestación/destino por organización y tipo; probar RLS, permisos, archivos, cotizaciones, cobros, reportes y seis roles con datos sintéticos aislados. Eliminar los datos sintéticos de la base de ensayo; jamás introducirlos en la base operativa.
+7. Para el corte futuro, registrar cambios posteriores al respaldo con un cursor fiable, comprobar duplicados e integridad, pactar una ventana de escrituras y repetir la conciliación final. Conservar Vercel como ruta de regreso y tener puntos de restauración verificables. El cambio de DNS o producción requiere autorización posterior.
+
+La importación oficial usa SHA-256 del archivo por organización, bloqueo transaccional, restricción única de lote y `ON CONFLICT DO NOTHING` para artículos; un mismo identificador con contenido diferente se rechaza para conciliación. No cambia precios previamente gestionados. Los artículos se separan de movimientos de inventario. El esquema `029_import_provenance.sql` es aditivo; una reversión de aplicación debe conservar tablas y evidencia importada. Un retiro físico de esa migración sólo sería válido en una base nueva **sin** lotes, después de respaldo y revisión de dependencias; no se ha ejecutado.

@@ -124,8 +124,13 @@ try {
     names.db,
     'sh',
     '-ec',
-    `printf 'local all all scram-sha-256\\n' | cat - "$PGDATA/pg_hba.conf" > /tmp/pg_hba.conf && cat /tmp/pg_hba.conf > "$PGDATA/pg_hba.conf" && pg_ctl reload`,
+    `printf 'local all all scram-sha-256\\n' | cat - "$PGDATA/pg_hba.conf" > /tmp/pg_hba.conf && cat /tmp/pg_hba.conf > "$PGDATA/pg_hba.conf"`,
   ]);
+  await waitFor(
+    () => attempt(['exec', '--user', 'postgres', names.db, 'pg_ctl', 'reload']).status === 0,
+    'PostgreSQL SCRAM reload',
+    30,
+  );
   checks.push('PostgreSQL 18 reachable through a shared Unix socket with SCRAM');
 
   command([
@@ -308,8 +313,9 @@ try {
   const repeated = await sendImport(imported, 'import');
   assert.equal(repeated.status(), 201, await repeated.text());
   const link = command([
-    'exec', names.db, 'sh', '-c',
-    "PGPASSWORD=$(cat /run/secrets/postgres_password) psql -U analiza_migrator -d analiza_en_casa -At -c \"SELECT target_record_id FROM analiza.import_record_links WHERE source_record_id='QA-RATE' AND relation='servicio_id'\"",
+    'exec', '-e', `PGPASSWORD=${migrationPassword}`, names.db,
+    'psql', '-U', migrator, '-d', database, '-At', '-c',
+    "SELECT target_record_id FROM analiza.import_record_links WHERE source_record_id='QA-RATE' AND relation='servicio_id'",
   ]);
   assert.equal(link, 'Qa-Case');
   const differentCase = await sendImport(importFixture('QA-CASE'), 'import');

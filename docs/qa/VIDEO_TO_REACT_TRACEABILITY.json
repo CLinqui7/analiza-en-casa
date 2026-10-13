@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-28T23:11:33-06:00",
-  "metadata_generated_from_commit": "740339e9caecb466f57f68e9bebae3683cc15d90",
+  "generated_at": "2026-10-13T00:28:57-06:00",
+  "metadata_generated_from_commit": "b993553c30856a86ad98fc4eee1427c9c145c96b",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "3b6de3629e62cd3526d5ad647b528eb32fba0521",
-  "functional_fingerprint": "8471f26bd491341d764d0d7f0f1a88960337707fb5abb9d386e487ec8c9a5cc5",
+  "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+  "functional_fingerprint": "4dc86bc3385a3788afe39974bea8ef440e2295dc3ab42d4db8305990fcf3dd0a",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -46,7 +46,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Ruta directa conserva next y exige sesión."
+      "notes": "Ruta directa conserva next y exige sesión. La regresión de acceso restringido verifica en apps/web/e2e/dashboard-landing.spec.ts que un ADMIN excluido del Dashboard conserva acceso a Cotizaciones y Hospitalizaciones; no cambia la clasificación histórica de paridad."
     },
     {
       "requirement_id": "CH01-F002",
@@ -337,7 +337,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
-      "notes": "Jerarquía enlaza sólo módulos operativos presentes. El rediseño 2026-10-05 conserva permisos, rutas, acordeones, colapso y drawer móvil; agrupa todos los destinos en Inicio, Financiero, Clínico, Inventario y compras, Administración, Reportes y control, y Ayuda y seguimiento. Mantiene iconos SVG semánticos, foco visible, movimiento ligero y preferencia de movimiento reducido."
+      "notes": "Jerarquía enlaza sólo módulos operativos presentes."
     },
     {
       "requirement_id": "CH01-F009",
@@ -664,7 +664,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada. La acción de detalle se presenta como botón Consultar con foco visible, borde y área táctil comprobada."
+      "notes": "Vistas, acciones, búsqueda y paginación reutilizan la superficie CH01 verificada."
     },
     {
       "requirement_id": "CH02-F003",
@@ -1302,7 +1302,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "4d7edb007e566c55652677035aae9c258b466297",
-      "notes": "Grupo Financiero conserva Hospitalización, Cuentas por cobrar y Preautorizaciones y reclamos, y reúne además Pagos, Cuentas por pagar, Cotizaciones y Aseguradoras con sus rutas y permisos existentes."
+      "notes": "Grupo Financiero con tres rutas reales y permisos existentes."
     },
     {
       "requirement_id": "CH03-F002",
@@ -1344,7 +1344,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro. Gestionar y Consultar son controles visibles, sin enlaces de acción subrayados."
+      "notes": "Relación de pacientes por empresa y pestañas funcionales; badge sin fórmula muestra estado seguro."
     },
     {
       "requirement_id": "CH03-F003",
@@ -1626,7 +1626,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente. Consultar cada cotización usa un botón accesible verificado."
+      "notes": "Lista ofrece búsqueda normalizada, filtro staged y paginación; Nuevo abre el constructor existente."
     },
     {
       "requirement_id": "CH03-F010",
@@ -3394,7 +3394,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "caba8464ae769b8dcef331dea15b6c6d2ae42cf2",
-      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data. Quote consultation is exposed as a bordered button rather than underlined action text."
+      "notes": "Visible hospital quote tabs, staged filters, search, page controls and new navigation are covered with synthetic data."
     },
     {
       "requirement_id": "CH07-F02",
@@ -7115,7 +7115,7 @@
       ],
       "blocker_reason": "No hay fuente autorizada y acotada por organización para paciente/hospitalización ni reglas aprobadas de roles, cantidad disponible/asignada, reserva/entrega, idempotencia, auditoría o reversión. No se expone un formulario ni datos de pacientes/casos.",
       "last_verified_sha": "bf72a041342fd0cf0ca606f63c48af5dfdc4cb38",
-      "notes": "CH14-E0149–E0151 muestran menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo la transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para F15. La anatomía F14 no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía. Lote 2026-10-08: /inventory/home-deliveries implementa una custodia domiciliaria adicional, con salida auditada y devolución en cuarentena; no reproduce las pestañas, plantilla, cantidades pendientes ni máquina de estados del Acuse F14, por lo que permanece MISSING para paridad exacta."
+      "notes": "CH14-E0149–E0151 muestran menú Nuevo y la anatomía del formulario. CH14-E0152 es sólo la transición posterior oscurecida; safety_022 es la evidencia separada del detalle de faltantes para F15. La anatomía F14 no autoriza crear un acuse ni reservar/descargar existencias; React conserva Acuses como superficie factual vacía."
     },
     {
       "requirement_id": "CH14-F15",
@@ -7741,7 +7741,7 @@
       ],
       "parity_status": "PARTIAL",
       "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "VERIFIED",
       "permissions_status": "VERIFIED",
       "performance_status": "NOT_APPLICABLE",
       "unit_test_ids": [],
@@ -7757,9 +7757,9 @@
       "blocker_ids": [
         "CH15-Q004"
       ],
-      "blocker_reason": "CH15-E0122 muestra la tabla de Servicios y CH15-E0128 sus columnas, pero CH15-Q004 no define una fuente autorizada, tipos o categorías, precios, efectos de Impuesto/Descuento, roles de escritura, validación, auditoría ni efectos clínicos o financieros. React conserva esas operaciones ausentes.",
-      "last_verified_sha": "d9d0c33581418a0ba60e2ea77720124790d3c275",
-      "notes": "React implementa solamente una lista vacía factual de Servicios en /catalogs/services: tabla, búsqueda local y paginación visible; Excel, Nuevo y paginación permanecen deshabilitados. Playwright cubre ADMIN, INVENTORY y AUDITOR permitidos y denegación directa de DOCTOR, NURSE y FINANCE. Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en d9d0c33."
+      "blocker_reason": "CH15-E0122/E0128 muestran la tabla y columnas. El Excel oficial aporta 47 candidatos, pero faltan moneda aprobada, categorías y tipos del video, impuesto, descuento, permisos de escritura, auditoría y efectos clínicos/financieros.",
+      "last_verified_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "notes": "La lista factual de /catalogs/services lee 47 candidatos inactivos de la organización en Contabo; importación idempotente, persistencia tras reboot y lectura de navegador verificadas. El precio original permanece en la fuente y la cifra USD operativa queda pendiente. Excel/Nuevo y columnas/reglas financieras del video siguen deshabilitados. La regresión mock cubre permisos ADMIN/INVENTORY/AUDITOR y denegación DOCTOR/NURSE/FINANCE; Selenium histórico no se ejecutó en este lote. Verificado en b993553c30856a86ad98fc4eee1427c9c145c96b."
     },
     {
       "requirement_id": "CH15-F14",
@@ -8288,7 +8288,7 @@
       ],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
@@ -8305,7 +8305,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define fuente autorizada por organización, roles, campos sensibles permitidos, filtros, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
       "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-      "notes": "CH17-E0001/E0003 respaldan sólo la anatomía visible. React no lee ni expone pacientes, casos, signos vitales o auditorías; búsqueda y paginación se muestran deshabilitadas. El suite enfocado de CH17 completó 6/6 en PLAYWRIGHT_PORT=4205 al SHA fec4aef2d984afc95e4f54c2703d20651116c8c9; funcional, permisos y rendimiento permanecen UNVERIFIED porque no establece los contratos separados de fuente, roles ni rendimiento."
+      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: /clinical/reports consulta hospitalizaciones y pacientes del workspace, lista casos, permite búsqueda y selecciona un caso. En Contabo sólo se verificó la ruta con datos operativos vacíos. La fuente clínica, permisos, auditoría y rendimiento para datos reales permanecen UNVERIFIED; no se certifica el video."
     },
     {
       "requirement_id": "CH17-F02",
@@ -8333,7 +8333,7 @@
       ],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
@@ -8350,7 +8350,7 @@
       ],
       "blocker_reason": "CH17-Q007 no define la hospitalización autorizada, el vínculo por organización, roles, condiciones, auditoría ni destinos seguros de Historia clínica, Claims, visitas, notas, Reporte de salud, Auditorías o Registro XPO.",
       "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-      "notes": "CH17-E0005 respalda sólo los siete rótulos del menú. React abre una anatomía local sin contexto de paciente ni hospitalización; todos los destinos se presentan como no operativos y no hay consulta, navegación ni mutación. El suite enfocado de CH17 completó 6/6 en PLAYWRIGHT_PORT=4205 al SHA fec4aef2d984afc95e4f54c2703d20651116c8c9; funcional, permisos y rendimiento permanecen UNVERIFIED porque no establece los contratos separados de fuente, roles ni rendimiento."
+      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: el menú del caso seleccionado enlaza a hospitalización, visitas y evoluciones; ya no es un menú local inerte. Los siete destinos y condiciones del video, roles y auditoría siguen sin contrato/certificación clínica. Contabo no tiene casos reales."
     },
     {
       "requirement_id": "CH17-F03",
@@ -8383,7 +8383,7 @@
       ],
       "parity_status": "PARTIAL",
       "functional_status": "UNVERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
+      "persistence_status": "UNVERIFIED",
       "permissions_status": "UNVERIFIED",
       "performance_status": "UNVERIFIED",
       "unit_test_ids": [],
@@ -8400,7 +8400,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, retención, minimización ni redacción de ninguna sección del Reporte de salud.",
       "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-      "notes": "CH17-E0008 respalda sólo las seis pestañas visibles. Cada pestaña referencia el tabpanel estable health-report-active-section; React alterna únicamente estados vacíos locales, sin selector, paciente, seguro, hospitalización, datos clínicos, auditoría, documentos, rango temporal, impresión ni navegación de destino. Playwright completó 6/6 al SHA fec4aef2d984afc95e4f54c2703d20651116c8c9, pero no autoriza certificar fuente, permisos o rendimiento."
+      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: las secciones leen signos vitales, médicos y documentos clínicos del workspace; las notas de enfermería se infieren con una expresión regular sobre título/resumen. No son secciones siempre vacías. Falta validar taxonomía clínica, acceso, procedencia y formato frente al video antes de copiar pacientes."
     },
     {
       "requirement_id": "CH17-F04",
@@ -8441,7 +8441,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles ni roles del Reporte de salud; CH17-Q008 no define rango permitido, inclusividad, zona horaria, carga/error/reintento, auditoría, retención ni redacción. Las fechas visibles son ejemplos y no se codifican.",
       "last_verified_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
-      "notes": "Precheck factual reconciled at 98840f19538f15efa4ee6f85e8f864ba753478fc: CH17-E0012 muestra calendario doble, Seleccionar y Cancelar; CH17-E0017 muestra Procesando; CH17-E0019 muestra que el resultado revela campos sensibles. React no muestra calendario, selector, consulta, rango, impresión, exportación ni navegación de reporte."
+      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: existe un botón que llama a window.print() para el reporte visible. El calendario/rango y el flujo del video siguen ausentes; el formato y la autorización de impresión de datos sensibles no están certificados. Se conserva MISSING."
     },
     {
       "requirement_id": "CH17-F05",
@@ -8478,7 +8478,7 @@
       ],
       "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, alcance organizacional, campos sensibles permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
       "last_verified_sha": "7214fe01af9545cac5dc6e269b594ecf946a35ba",
-      "notes": "Precheck factual verified at 7214fe01af9545cac5dc6e269b594ecf946a35ba: CH17-E0019 muestra identidad, identificación, fecha de nacimiento, edad, sexo, periodo de hospitalización y estado. React no expone ni reutiliza esos campos; /clinical/hospitalizations no es fuente autorizada para el Reporte de salud."
+      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: el reporte seleccionado muestra nombre, documento, estado del caso y otros campos del workspace. No se ha comparado ni aprobado el conjunto exacto de identidad/demografía del video, por lo que permanece MISSING y sin certificación clínica."
     },
     {
       "requirement_id": "CH17-F06",
