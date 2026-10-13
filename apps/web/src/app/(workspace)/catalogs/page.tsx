@@ -18,6 +18,7 @@ const categories = [
   ['SUPPLIES', 'Insumos', 'INS'],
   ['EQUIPMENT', 'Equipos', 'EQU'],
   ['PROVIDERS', 'Proveedores', 'PRO'],
+  ['INSURERS', 'Aseguradoras', 'ASE'],
 ] as const;
 type Category = (typeof categories)[number][0];
 const isCategory = (value: CatalogItem['category']): value is Category =>
@@ -32,6 +33,7 @@ const itemSchema = z.object({
     'SUPPLIES',
     'EQUIPMENT',
     'PROVIDERS',
+    'INSURERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
   costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.').optional(),
@@ -54,7 +56,7 @@ export default function CatalogsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
-    defaultValues: { category: 'SERVICES', name: '', costPrice: 0, salePriceExcludingTax: 0 },
+    defaultValues: { category: 'SERVICES', name: '' },
   });
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
   const visibleItems = useMemo(
@@ -83,14 +85,14 @@ export default function CatalogsPage() {
     form.reset({
       category: activeCategory,
       name: '',
-      costPrice: 0,
-      salePriceExcludingTax: 0,
+      costPrice: undefined,
+      salePriceExcludingTax: undefined,
     });
   }
   function create(category: Category = activeCategory) {
     setMessage(null);
     setEditing(null);
-    form.reset({ category, name: '', costPrice: 0, salePriceExcludingTax: 0 });
+    form.reset({ category, name: '', costPrice: undefined, salePriceExcludingTax: undefined });
     setOpen(true);
   }
   function edit(item: CatalogItem) {
@@ -128,8 +130,12 @@ export default function CatalogsPage() {
   async function toggle(item: CatalogItem) {
     if (
       !(await addCatalogItem({ ...item, status: item.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }))
-    )
+    ) {
+      setMessage(
+        'No se pudo cambiar el estado. Revise los datos y la moneda de la fuente importada.',
+      );
       return;
+    }
     setMessage(`${item.name} quedó ${item.status === 'ACTIVE' ? 'inactivo' : 'activo'}.`);
   }
 

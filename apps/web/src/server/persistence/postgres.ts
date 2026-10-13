@@ -1364,6 +1364,16 @@ export function postgresPersistence(): Persistence {
             [actor.organizationId, item.sku, item.id],
           );
           if (duplicate.rowCount) throw new MongoConflictError();
+          if (item.status === 'ACTIVE' && item.category === 'SERVICES') {
+            const pendingSourceCurrency = await c.query(
+              "SELECT 1 FROM analiza.import_records WHERE organization_id=$1 AND record_id=$2 AND dataset='SERVICES' AND body ? 'precio_base' AND coalesce(body->>'moneda','') <> 'USD'",
+              [actor.organizationId, item.id],
+            );
+            if (pendingSourceCurrency.rowCount)
+              throw new MongoInputError(
+                'Confirme la moneda del precio importado antes de activar el servicio.',
+              );
+          }
           if (
             typeof item.salePriceExcludingTax === 'number' ||
             typeof item.costPrice === 'number'
@@ -2432,14 +2442,14 @@ export function postgresPersistence(): Persistence {
       )
         throw new Error('Esquema de importación no disponible.');
       const result = await pool.query(
-        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql','019_purchase_destination_warehouse.sql','020_login_analytics.sql','021_quotes_without_hospitalization.sql','022_webmaster_role.sql','023_supply_requests.sql','024_nurse_dashboard_access.sql','025_multiple_webmasters.sql','026_home_custody_commercial_sales.sql','027_admin_dashboard_restriction.sql','028_account_profiles.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
+        "SELECT current_setting('server_version_num')::int AS version,(SELECT count(*) FROM analiza.schema_migrations WHERE version IN ('001_core.sql','002_workspace_registration.sql','003_nurse_profiles.sql','004_feedback_reports.sql','005_all_memberships_admin.sql','006_single_designated_admin.sql','007_expand_feedback_options.sql','008_quotes.sql','009_information_imports.sql','010_manager_role.sql','011_service_catalogs.sql','012_insurers_and_nurse_files.sql','013_feedback_resolutions_and_purchases.sql','014_clinical_documents.sql','015_inventory_movements.sql','016_payments_visits_goals.sql','017_warehouses_and_transfers.sql','018_inventory_traceability.sql','019_clinical_scale_captures.sql','019_purchase_destination_warehouse.sql','020_account_profile.sql','020_login_analytics.sql','021_quotes_without_hospitalization.sql','022_webmaster_role.sql','023_supply_requests.sql','024_nurse_dashboard_access.sql','025_multiple_webmasters.sql','026_home_custody_commercial_sales.sql','027_admin_dashboard_restriction.sql','028_account_profiles.sql'))::int AS migrations, r.rolsuper OR r.rolbypassrls AS privileged FROM pg_roles r WHERE r.rolname=current_user",
       );
       const row = result.rows[0];
       if (
         !row ||
         row.version < 160000 ||
         row.version >= 200000 ||
-        row.migrations !== 28 ||
+        row.migrations !== 30 ||
         row.privileged
       )
         throw new Error('Esquema o identidad PostgreSQL no disponible.');
