@@ -276,11 +276,33 @@ try {
   const admin = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
   const foreign = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
   const template = await readFile('apps/web/public/templates/plantilla_carga_analiza_en_casa.xlsx');
-  function importFixture(serviceId) {
+  function importFixture(serviceId, { currency = 'USD', rateId = 'QA-RATE' } = {}) {
     const files = unzipSync(template);
     const rows = [
-      [3, { A: serviceId, B: 'Servicio QA sintético', C: 'Enfermeria', E: 'Visita', G: 31.3528, H: 'USD', L: 'Activo' }],
-      [7, { A: 'QA-RATE', B: serviceId.toLowerCase(), E: 20.125, F: 'USD', K: '2026-10-01', L: '2027-01-01', M: 'Activo' }],
+      [
+        3,
+        {
+          A: serviceId,
+          B: 'Servicio QA sintético',
+          C: 'Enfermeria',
+          E: 'Visita',
+          G: 31.3528,
+          ...(currency ? { H: currency } : {}),
+          L: 'Activo',
+        },
+      ],
+      [
+        7,
+        {
+          A: rateId,
+          B: serviceId.toLowerCase(),
+          E: 20.125,
+          F: 'USD',
+          K: '2026-10-01',
+          L: '2027-01-01',
+          M: 'Activo',
+        },
+      ],
     ];
     for (const [index, values] of rows) {
       const path = `xl/worksheets/sheet${index}.xml`;
@@ -291,7 +313,9 @@ try {
             : `<c r="${column}6" t="inlineStr"><is><t>${value}</t></is></c>`,
         )
         .join('')}</row>`;
-      files[path] = strToU8(strFromU8(files[path]).replace(/<row\b[^>]*r="6"[^>]*>[\s\S]*?<\/row>/, row));
+      files[path] = strToU8(
+        strFromU8(files[path]).replace(/<row\b[^>]*r="6"[^>]*>[\s\S]*?<\/row>/, row),
+      );
     }
     return Buffer.from(zipSync(files));
   }
@@ -301,7 +325,11 @@ try {
       headers: { 'x-analiza-csrf': admin.csrf },
       multipart: {
         action,
-        file: { name: 'ubuntu-synthetic.xlsx', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', buffer: bytes },
+        file: {
+          name: 'ubuntu-synthetic.xlsx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: bytes,
+        },
       },
     });
   }
@@ -313,15 +341,51 @@ try {
   const repeated = await sendImport(imported, 'import');
   assert.equal(repeated.status(), 201, await repeated.text());
   const link = command([
-    'exec', '-e', `PGPASSWORD=${migrationPassword}`, names.db,
-    'psql', '-U', migrator, '-d', database, '-At', '-c',
+    'exec',
+    '-e',
+    `PGPASSWORD=${migrationPassword}`,
+    names.db,
+    'psql',
+    '-U',
+    migrator,
+    '-d',
+    database,
+    '-At',
+    '-c',
     "SELECT target_record_id FROM analiza.import_record_links WHERE source_record_id='QA-RATE' AND relation='servicio_id'",
   ]);
   assert.equal(link, 'Qa-Case');
   const differentCase = await sendImport(importFixture('QA-CASE'), 'import');
   assert.equal(differentCase.status(), 400, await differentCase.text());
+  const unpriced = await sendImport(
+    importFixture('No-Currency', { currency: '', rateId: 'QA-RATE-NOCURRENCY' }),
+    'import',
+  );
+  assert.equal(unpriced.status(), 201, await unpriced.text());
+  const catalog = (await (await admin.context.get('/api/workspace')).json()).catalogItems;
+  const pricedService = catalog.find((item) => item.id === 'Qa-Case');
+  const pendingService = catalog.find((item) => item.id === 'No-Currency');
+  assert.equal(pricedService?.salePriceExcludingTax, 31.3528);
+  assert.equal(pendingService?.salePriceExcludingTax, undefined);
+  const correctedPending = await mutate(admin, '/api/operations', {
+    command: 'catalog.save',
+    item: { ...pendingService, name: 'Servicio QA revisado' },
+  });
+  assert.equal(correctedPending.name, 'Servicio QA revisado');
+  const unsafeActivation = await admin.context.post('/api/operations', {
+    headers: { 'x-analiza-csrf': admin.csrf },
+    data: { command: 'catalog.save', item: { ...correctedPending, status: 'ACTIVE' } },
+  });
+  assert.equal(unsafeActivation.status(), 400, await unsafeActivation.text());
+  const activeService = await mutate(admin, '/api/operations', {
+    command: 'catalog.save',
+    item: { ...pricedService, status: 'ACTIVE' },
+  });
+  assert.equal(activeService.status, 'ACTIVE');
   assert.equal((await (await foreign.context.get('/api/workspace')).json()).catalogItems.length, 0);
-  checks.push('Synthetic Excel preview, idempotency, case-insensitive reference and duplicate-ID rejection across tenants');
+  checks.push(
+    'Synthetic Excel idempotency, references, tenant isolation, catalog corrections and unconfirmed-currency activation denial',
+  );
 
   const patient = {
     id: randomUUID(),
@@ -340,6 +404,35 @@ try {
   );
   assert.equal(edited.fullName, 'Paciente Ubuntu editado');
   assert.equal((await foreign.context.get(`/api/patients/${patient.id}`)).status(), 404);
+  const quote = {
+    id: randomUUID(),
+    patientId: patient.id,
+    version: 1,
+    status: 'DRAFT',
+    summary: 'Cotización QA sintética',
+    immutable: false,
+    createdAt: new Date().toISOString(),
+    insurerAmount: 0,
+    items: [
+      {
+        id: randomUUID(),
+        category: 'SERVICES',
+        name: activeService.name,
+        inventoryItemId: activeService.id,
+        quantity: 1,
+        unitPrice: activeService.salePriceExcludingTax,
+        discountAmount: 0,
+      },
+    ],
+  };
+  const createdQuote = await mutate(admin, '/api/quotes', { quote }, 201);
+  assert.ok(createdQuote.total > 0);
+  assert.equal((await (await foreign.context.get('/api/quotes')).json()).quotes.length, 0);
+  assert.equal(
+    (await (await admin.context.get('/api/quotes')).json()).quotes[0].quote.id,
+    quote.id,
+  );
+  checks.push('Active priced service relates to PostgreSQL quote; foreign tenant cannot list it');
 
   const nurseId = randomUUID();
   await mutate(admin, '/api/operations', {
@@ -433,6 +526,17 @@ try {
   assert.equal(
     (await admin.context.get(`/api/hospitalizations/${hospitalization.id}`)).status(),
     200,
+  );
+  const restoredWorkspace = await (await admin.context.get('/api/workspace')).json();
+  assert.equal(
+    restoredWorkspace.quotes.some((entry) => entry.id === quote.id),
+    true,
+  );
+  assert.equal(
+    restoredWorkspace.catalogItems.some(
+      (entry) => entry.id === pendingService.id && entry.status === 'INACTIVE',
+    ),
+    true,
   );
   assert.deepEqual(await (await admin.context.get(`/api/files/${file.id}`)).body(), bytes);
   checks.push('PostgreSQL, session and private file persistence after database and web restarts');

@@ -60,11 +60,14 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
   const inventory = page.getByRole('button', { name: 'Inventario y compras' });
   if ((await inventory.getAttribute('aria-expanded')) === 'false') await inventory.click();
+  await expect(inventory).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByRole('link', { name: 'Compras', exact: true })).toHaveAttribute(
     'href',
     '/purchases',
   );
-  await page.getByRole('link', { name: 'Kárdex' }).click();
+  const kardex = page.getByRole('link', { name: 'Kárdex' });
+  await expect(kardex).toBeVisible();
+  await kardex.click();
   await expect(page).toHaveURL(/\/inventory\/kardex$/);
   await expect(
     page.getByRole('heading', { name: 'Kárdex de inventario', exact: true }),
