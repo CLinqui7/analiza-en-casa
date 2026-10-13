@@ -28,7 +28,11 @@ export function importedCatalogItem(
           ? 'INSURERS'
           : 'SERVICES';
   const price = record.dataset === 'SERVICES' ? values.precio_base : values.precio_venta;
+  // The operational quote model uses USD. Preserve other source prices in
+  // import_records until their currency is confirmed and reconciled.
+  const usdPrice = values.moneda === 'USD' && typeof price === 'number' ? price : undefined;
   const cost = values.costo_unitario;
+  const usdCost = values.moneda === 'USD' && typeof cost === 'number' ? cost : undefined;
   const email =
     typeof values.email === 'string' &&
     catalogItemSchema.shape.email.safeParse(values.email).success
@@ -39,14 +43,10 @@ export function importedCatalogItem(
     sku: String(values.sku_codigo || record.id),
     name: String(values[nameColumn]),
     category,
-    status:
-      String(values.estatus).toLowerCase() === 'activo' &&
-      (typeof price !== 'number' || values.moneda === 'USD')
-        ? 'ACTIVE'
-        : 'INACTIVE',
+    status: 'INACTIVE',
     createdAt,
-    ...(typeof price === 'number' ? { salePriceExcludingTax: price } : {}),
-    ...(typeof cost === 'number' ? { costPrice: cost } : {}),
+    ...(usdPrice !== undefined ? { salePriceExcludingTax: usdPrice } : {}),
+    ...(usdCost !== undefined ? { costPrice: usdCost } : {}),
     ...(record.dataset === 'SUPPLIERS'
       ? {
           ...(email ? { email } : {}),
