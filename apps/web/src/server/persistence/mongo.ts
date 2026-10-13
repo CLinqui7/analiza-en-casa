@@ -45,6 +45,7 @@ export async function mongoPersistence(): Promise<Persistence> {
       database.collection('quotes'),
     ),
     quotes,
+    insuranceObservations: new MongoInsuranceRepository(database),
     shifts: new MongoShiftRepository(database as never),
     operations,
     files: new MongoFileRepository(

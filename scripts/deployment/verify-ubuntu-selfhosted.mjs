@@ -392,6 +392,7 @@ try {
     fullName: 'Paciente Ubuntu sintético',
     documentType: 'OTHER',
     documentId: `UBUNTU-${randomUUID().slice(0, 8)}`,
+    insurer: 'Aseguradora QA sintética',
     status: 'ACTIVE',
   };
   await mutate(admin, '/api/patients', { patient }, 201);
@@ -433,6 +434,37 @@ try {
     quote.id,
   );
   checks.push('Active priced service relates to PostgreSQL quote; foreign tenant cannot list it');
+  const insuranceObservation = {
+    quoteId: quote.id,
+    status: 'SENT_TO_INSURER',
+    note: 'Seguimiento administrativo QA',
+    date: new Date().toISOString(),
+    idempotencyKey: randomUUID(),
+  };
+  const firstInsurance = await mutate(
+    admin,
+    '/api/insurance-observations',
+    insuranceObservation,
+    201,
+  );
+  const repeatedInsurance = await mutate(
+    admin,
+    '/api/insurance-observations',
+    insuranceObservation,
+    201,
+  );
+  assert.equal(repeatedInsurance.event.id, firstInsurance.event.id);
+  assert.equal(repeatedInsurance.request.id, firstInsurance.request.id);
+  const foreignInsurance = await foreign.context.post('/api/insurance-observations', {
+    headers: { 'x-analiza-csrf': foreign.csrf },
+    data: { ...insuranceObservation, idempotencyKey: randomUUID() },
+  });
+  assert.equal(foreignInsurance.status(), 400);
+  assert.equal(
+    (await (await foreign.context.get('/api/workspace')).json()).insuranceRequests.length,
+    0,
+  );
+  checks.push('PostgreSQL insurance observation is idempotent, audited and tenant-scoped');
 
   const nurseId = randomUUID();
   await mutate(admin, '/api/operations', {
@@ -532,6 +564,8 @@ try {
     restoredWorkspace.quotes.some((entry) => entry.id === quote.id),
     true,
   );
+  assert.equal(restoredWorkspace.insuranceRequests.length, 1);
+  assert.equal(restoredWorkspace.insuranceEvents.length, 1);
   assert.equal(
     restoredWorkspace.catalogItems.some(
       (entry) => entry.id === pendingService.id && entry.status === 'INACTIVE',
