@@ -3,9 +3,18 @@
 import { Button, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useWorkspace } from '@/components/providers';
 
 export default function ServicesCatalogPage() {
   const [query, setQuery] = useState('');
+  const { catalogItems } = useWorkspace();
+  const services = catalogItems.filter(
+    (item) =>
+      item.category === 'SERVICES' &&
+      `${item.sku} ${item.name}`
+        .toLocaleLowerCase('es-SV')
+        .includes(query.trim().toLocaleLowerCase('es-SV')),
+  );
   const queryDetail = query.trim()
     ? `No hay servicios documentados para “${query.trim()}”.`
     : 'No existe una fuente autorizada de servicios para este catálogo.';
@@ -16,10 +25,7 @@ export default function ServicesCatalogPage() {
         <div>
           <p className="eyebrow">Items</p>
           <h1>Items / Servicios</h1>
-          <p>
-            Superficie factual de solo lectura basada en CH15-E0122. No carga filas, ni define tipos
-            de producto, categorías, precios, impuestos, descuentos o reglas clínicas o financieras.
-          </p>
+          <p>Servicios registrados en el catálogo de esta organización.</p>
         </div>
         <div className="action-row">
           <Button
@@ -53,7 +59,7 @@ export default function ServicesCatalogPage() {
       <Panel>
         <div className="table-heading">
           <h2>Servicios</h2>
-          <StatusTag>0 registros</StatusTag>
+          <StatusTag>{services.length} registros</StatusTag>
         </div>
         <div className="table-controls">
           <label>
@@ -100,11 +106,27 @@ export default function ServicesCatalogPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td colSpan={8}>
-                  <EmptyState detail={queryDetail} title="Sin servicios documentados" />
-                </td>
-              </tr>
+              {services.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <Link href="/catalogs">Administrar</Link>
+                  </td>
+                  <td>{item.sku}</td>
+                  <td>{item.name}</td>
+                  <td>Servicio</td>
+                  <td>Servicios</td>
+                  <td>Pendiente</td>
+                  <td>Pendiente</td>
+                  <td>{item.status === 'ACTIVE' ? 'Activo' : 'En revisión'}</td>
+                </tr>
+              ))}
+              {!services.length ? (
+                <tr>
+                  <td colSpan={8}>
+                    <EmptyState detail={queryDetail} title="Sin servicios documentados" />
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>

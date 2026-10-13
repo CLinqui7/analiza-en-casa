@@ -76,7 +76,7 @@ const referralCatalog = [
   'Publicidad del Panel',
   'Redes Sociales',
   'Paciente recurrente',
-  'Dr. Jorge Contreras',
+  ...(process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : ['Dr. Jorge Contreras']),
 ];
 type CatalogEntry = {
   id: string;
@@ -85,7 +85,9 @@ type CatalogEntry = {
   salePriceExcludingTax?: number;
 };
 const feeServiceCatalog: CatalogEntry[] = [
-  { id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true },
+  ...(process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
+    ? []
+    : [{ id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true }]),
 ];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 function updatedCategoryPercentages(
@@ -265,7 +267,9 @@ function QuoteEditor({
         ? catalogItems
             .filter(
               (candidate) =>
-                candidate.status === 'ACTIVE' && candidate.category === catalogCategory,
+                candidate.status === 'ACTIVE' &&
+                candidate.category === catalogCategory &&
+                typeof candidate.salePriceExcludingTax === 'number',
             )
             .map((candidate) => ({
               id: candidate.id,

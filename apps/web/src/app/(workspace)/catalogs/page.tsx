@@ -34,11 +34,12 @@ const itemSchema = z.object({
     'PROVIDERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
-  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.'),
+  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.').optional(),
   salePriceExcludingTax: z
     .number()
     .finite()
-    .nonnegative('El precio de venta no puede ser negativo.'),
+    .nonnegative('El precio de venta no puede ser negativo.')
+    .optional(),
 });
 type ItemForm = z.infer<typeof itemSchema>;
 
@@ -98,8 +99,8 @@ export default function CatalogsPage() {
     form.reset({
       category: isCategory(item.category) ? item.category : 'SUPPLIES',
       name: item.name,
-      costPrice: item.costPrice ?? 0,
-      salePriceExcludingTax: item.salePriceExcludingTax ?? 0,
+      costPrice: item.costPrice,
+      salePriceExcludingTax: item.salePriceExcludingTax,
     });
     setOpen(true);
   }
@@ -219,8 +220,12 @@ export default function CatalogsPage() {
                       <code>{item.sku}</code>
                     </td>
                     <td>{item.name}</td>
-                    <td>USD {(item.costPrice ?? 0).toFixed(2)}</td>
-                    <td>USD {(item.salePriceExcludingTax ?? 0).toFixed(2)}</td>
+                    <td>{item.costPrice === undefined ? 'Pendiente' : `USD ${item.costPrice}`}</td>
+                    <td>
+                      {item.salePriceExcludingTax === undefined
+                        ? 'Pendiente'
+                        : `USD ${item.salePriceExcludingTax}`}
+                    </td>
                     <td>
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -303,9 +308,11 @@ export default function CatalogsPage() {
             Precio de costo
             <input
               min="0"
-              step="0.01"
+              step="any"
               type="number"
-              {...form.register('costPrice', { valueAsNumber: true })}
+              {...form.register('costPrice', {
+                setValueAs: (value) => (value === '' ? undefined : Number(value)),
+              })}
             />
             {form.formState.errors.costPrice ? (
               <span className="field-error">{form.formState.errors.costPrice.message}</span>
@@ -315,9 +322,11 @@ export default function CatalogsPage() {
             Precio de venta sin IVA
             <input
               min="0"
-              step="0.01"
+              step="any"
               type="number"
-              {...form.register('salePriceExcludingTax', { valueAsNumber: true })}
+              {...form.register('salePriceExcludingTax', {
+                setValueAs: (value) => (value === '' ? undefined : Number(value)),
+              })}
             />
             {form.formState.errors.salePriceExcludingTax ? (
               <span className="field-error">

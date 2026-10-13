@@ -1,0 +1,6 @@
+[Unit]
+Description=Check independent Analiza readiness and disk
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'curl --fail --silent --max-time 10 http://127.0.0.1:18081/api/health >/dev/null && test $(df --output=pcent /opt/analiza-contabo-staging | tail -1 | tr -dc 0-9) -lt 85'

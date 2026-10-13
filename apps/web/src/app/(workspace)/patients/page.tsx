@@ -1615,7 +1615,11 @@ export default function PatientsPage() {
                     actionId="PATIENT-COMPANY-SEARCH"
                     ariaLabel="Empresa"
                     onChange={field.onChange}
-                    options={companyOptions}
+                    allowCustom={process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'}
+                    placeholder="Buscar o escribir empresa"
+                    options={
+                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : companyOptions
+                    }
                     value={field.value}
                   />
                 )}
@@ -1660,9 +1664,19 @@ export default function PatientsPage() {
               Estado civil
               <select {...form.register('civilStatus')} data-action-id="PATIENT-CIVIL-STATUS">
                 <option value="">Seleccione</option>
-                <option>Soltero/a (demo)</option>
-                <option>Casado/a (demo)</option>
-                <option>Otro (demo)</option>
+                <option>
+                  {process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
+                    ? 'Soltero/a'
+                    : 'Soltero/a (demo)'}
+                </option>
+                <option>
+                  {process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
+                    ? 'Casado/a'
+                    : 'Casado/a (demo)'}
+                </option>
+                <option>
+                  {process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? 'Otro' : 'Otro (demo)'}
+                </option>
               </select>
             </label>
             <label>
@@ -1675,7 +1689,11 @@ export default function PatientsPage() {
                     actionId="PATIENT-NATIONALITY-SEARCH"
                     ariaLabel="Nacionalidad"
                     onChange={field.onChange}
-                    options={nationalityOptions}
+                    allowCustom={process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'}
+                    placeholder="Buscar o escribir nacionalidad"
+                    options={
+                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : nationalityOptions
+                    }
                     value={field.value}
                   />
                 )}

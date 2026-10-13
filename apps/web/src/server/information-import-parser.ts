@@ -1,4 +1,5 @@
 import readWorkbook from 'read-excel-file/node';
+import { parseOfficialCatalogSheets } from './official-catalog-parser';
 import {
   importDatasetDefinitions,
   type ImportCellValue,
@@ -234,6 +235,36 @@ export async function parseInformationWorkbook(
   }
 
   const issues: ImportIssue[] = [];
+  const official = parseOfficialCatalogSheets(sheets);
+  if (official) {
+    const ids = new Set<string>();
+    for (const record of official) {
+      if (ids.has(record.id))
+        pushIssue(issues, {
+          sheet: record.sheet,
+          row: record.row,
+          message: 'Coincidencia ambigua: revise el registro repetido antes de importar.',
+        });
+      ids.add(record.id);
+      if (
+        record.dataset === 'SERVICES' &&
+        (typeof record.values.precio_base !== 'number' || record.values.precio_base < 0)
+      )
+        pushIssue(issues, {
+          sheet: record.sheet,
+          row: record.row,
+          column: 'PRECIO VENTA SIN IVA',
+          message: 'El precio debe ser numérico y no negativo.',
+        });
+    }
+    if (official.length > MAX_IMPORT_ROWS)
+      issues.push({
+        sheet: 'Archivo',
+        row: 0,
+        message: 'El catálogo supera el límite de registros.',
+      });
+    return { fileName, records: official, issues };
+  }
   const records: ParsedImportRecord[] = [];
   const seenIds = new Set<string>();
   const sheetsByName = new Map(sheets.map((sheet) => [sheet.sheet, sheet.data]));
@@ -250,6 +281,7 @@ export async function parseInformationWorkbook(
     }
     const headers = expectedHeaders[definition.dataset];
     const uploadedHeaders = (rows[4] ?? []).map((value) => String(value ?? '').trim());
+    while (uploadedHeaders.at(-1) === '') uploadedHeaders.pop();
     if (
       headers.length !== uploadedHeaders.length ||
       headers.some((header, index) => uploadedHeaders[index] !== header)

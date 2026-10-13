@@ -2,10 +2,12 @@
 ARG DATA_MODE=postgresql
 ARG REGISTRATION_MODE=isolated
 ARG RELEASE_PROFILE=core
+ARG DEMO_SEED_ENABLED=1
 FROM node:24-bookworm-slim@sha256:2fe369e969550cde8e867afc3fe370b260140cab4a23d467074295b42163d553 AS build
 ARG DATA_MODE
 ARG REGISTRATION_MODE
 ARG RELEASE_PROFILE
+ARG DEMO_SEED_ENABLED
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
@@ -27,6 +29,7 @@ ENV ANALIZA_CONTAINER_BUILD=1 \
     ANALIZA_DATA_MODE=$DATA_MODE \
     NEXT_PUBLIC_REGISTRATION_MODE=$REGISTRATION_MODE \
     ANALIZA_REGISTRATION_MODE=$REGISTRATION_MODE
+ENV NEXT_PUBLIC_DEMO_SEED_ENABLED=$DEMO_SEED_ENABLED
 RUN case "$DATA_MODE:$REGISTRATION_MODE" in postgresql:disabled|postgresql:isolated|mongodb:disabled|mongodb:isolated) ;; *) exit 1 ;; esac
 RUN case "$RELEASE_PROFILE" in core|full) ;; *) exit 1 ;; esac
 # The build needs no database credentials. Secrets enter at runtime only.

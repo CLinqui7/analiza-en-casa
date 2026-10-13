@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.ANALIZA_DATA_MODE !== 'mongodb') throw new Error('Portal is unavailable.');
     const database = await mongoDatabase();
     const snapshot = await new MongoPortalService(database).verify(
       await request.json().catch(() => null),
