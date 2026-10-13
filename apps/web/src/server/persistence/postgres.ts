@@ -1364,6 +1364,16 @@ export function postgresPersistence(): Persistence {
             [actor.organizationId, item.sku, item.id],
           );
           if (duplicate.rowCount) throw new MongoConflictError();
+          if (item.status === 'ACTIVE' && typeof item.salePriceExcludingTax === 'number') {
+            const unconfirmedCurrency = await c.query(
+              "SELECT 1 FROM analiza.import_records WHERE organization_id=$1 AND record_id=$2 AND dataset IN ('SERVICES','PRODUCTS') AND coalesce(body->>'moneda','') <> 'USD'",
+              [actor.organizationId, item.id],
+            );
+            if (unconfirmedCurrency.rowCount)
+              throw new MongoInputError(
+                'Confirme la moneda USD de la fuente importada mediante conciliación antes de activar el precio.',
+              );
+          }
           await c.query(
             'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3) ON CONFLICT(organization_id,id) DO UPDATE SET body=EXCLUDED.body',
             [actor.organizationId, item.id, JSON.stringify(item)],

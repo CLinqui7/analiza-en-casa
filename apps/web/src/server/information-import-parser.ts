@@ -156,6 +156,23 @@ const integerColumns = new Set([
 const dateColumns = new Set(['vigencia_desde', 'vigencia_hasta']);
 const emailColumns = new Set(['email', 'correo']);
 const statusValues = new Set(['activo', 'inactivo', 'en revision', 'en revisión']);
+const listColumns: Record<string, string> = {
+  categoria: 'TipoServicio',
+  unidad_cobro: 'UnidadCobro',
+  tipo_proveedor: 'TipoProveedor',
+  tipo_plan: 'TipoSeguro',
+  tipo_producto: 'TipoProducto',
+  moneda: 'Moneda',
+  cobertura_tipo: 'CoberturaTipo',
+  funcion: 'Funcion',
+  disponibilidad: 'Disponibilidad',
+  unidad_medida: 'UnidadMedida',
+  requiere_autorizacion: 'SiNo',
+  requiere_orden_medica: 'SiNo',
+  contrato_vigente: 'SiNo',
+  inventariable: 'SiNo',
+  requiere_receta: 'SiNo',
+};
 
 function cleanCell(value: unknown): ImportCellValue {
   if (value === null || value === undefined || value === '') return null;
@@ -196,7 +213,10 @@ function validateValue(
   }
   if (
     dateColumns.has(column) &&
-    (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    (typeof value !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+      !Number.isFinite(Date.parse(value)) ||
+      new Date(value).toISOString().slice(0, 10) !== value)
   ) {
     pushIssue(issues, { sheet, row, column, message: 'Debe ser una fecha válida.' });
   }
@@ -268,6 +288,26 @@ export async function parseInformationWorkbook(
   const records: ParsedImportRecord[] = [];
   const seenIds = new Set<string>();
   const sheetsByName = new Map(sheets.map((sheet) => [sheet.sheet, sheet.data]));
+  const lists = sheetsByName.get('Listas');
+  const permitted = new Map<string, Set<string>>();
+  if (lists) {
+    (lists[3] ?? []).forEach((heading, column) => {
+      if (typeof heading !== 'string') return;
+      permitted.set(
+        heading,
+        new Set(
+          lists
+            .slice(4)
+            .map((row) =>
+              String(row[column] ?? '')
+                .trim()
+                .toLowerCase(),
+            )
+            .filter(Boolean),
+        ),
+      );
+    });
+  }
 
   for (const definition of importDatasetDefinitions) {
     const rows = sheetsByName.get(definition.sheet);
@@ -323,7 +363,27 @@ export async function parseInformationWorkbook(
       }
       for (const [column, value] of Object.entries(values)) {
         validateValue(issues, definition.sheet, index + 1, column, value);
+        const allowed = permitted.get(listColumns[column]);
+        if (value != null && allowed?.size && !allowed.has(String(value).trim().toLowerCase())) {
+          pushIssue(issues, {
+            sheet: definition.sheet,
+            row: index + 1,
+            column,
+            message: `Use un valor permitido de Listas / ${listColumns[column]}.`,
+          });
+        }
       }
+      if (
+        typeof values.vigencia_desde === 'string' &&
+        typeof values.vigencia_hasta === 'string' &&
+        values.vigencia_desde > values.vigencia_hasta
+      )
+        pushIssue(issues, {
+          sheet: definition.sheet,
+          row: index + 1,
+          column: 'vigencia_hasta',
+          message: 'La vigencia final debe ser posterior o igual a la inicial.',
+        });
       const rawId = values[definition.idColumn];
       const id = typeof rawId === 'string' ? rawId : rawId === null ? '' : String(rawId);
       if (id.length > 120) {

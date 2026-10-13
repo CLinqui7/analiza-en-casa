@@ -41,6 +41,7 @@ describe('operational catalog projection', () => {
           nombre_producto: 'QA',
           tipo_producto: 'Medicamento',
           precio_venta: 0,
+          moneda: 'USD',
           estatus: 'Activo',
         },
       },
@@ -48,6 +49,16 @@ describe('operational catalog projection', () => {
     );
     expect(item).toMatchObject({ category: 'MEDICATIONS', salePriceExcludingTax: 0 });
     expect(item).not.toHaveProperty('stock');
+  });
+  it('keeps unknown or foreign currencies inactive in the USD operational quote model', () => {
+    const record = {
+      dataset: 'SERVICES' as const,
+      id: 'qa-currency',
+      sheet: 'Servicios',
+      row: 6,
+      values: { nombre_servicio: 'QA', precio_base: 10, moneda: 'MXN', estatus: 'Activo' },
+    };
+    expect(importedCatalogItem(record, '2026-10-13')?.status).toBe('INACTIVE');
   });
   it('never converts rate or purchasing references into performed services or transactions', () => {
     expect(

@@ -269,9 +269,17 @@ export class PostgresInformationImportRepository {
         for (const record of parsed.records.filter((candidate) => candidate.dataset === dataset)) {
           const referencedId = record.values[column];
           if (referencedId == null || referencedId === '') continue;
+          // Preview accepts case-insensitive IDs. Resolve the stored spelling before
+          // inserting the composite foreign key, and reject ambiguous source IDs.
+          const matches = await client.query<{ record_id: string }>(
+            'SELECT record_id FROM analiza.import_records WHERE organization_id=$1 AND dataset=$2 AND upper(record_id)=upper($3) LIMIT 2',
+            [actor.organizationId, target, String(referencedId)],
+          );
+          if (matches.rowCount !== 1)
+            throw new MongoInputError(`La referencia ${column} no identifica un único registro.`);
           await client.query(
             'INSERT INTO analiza.import_record_links(organization_id,source_dataset,source_record_id,relation,target_dataset,target_record_id) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING',
-            [actor.organizationId, dataset, record.id, column, target, String(referencedId)],
+            [actor.organizationId, dataset, record.id, column, target, matches.rows[0].record_id],
           );
         }
       }

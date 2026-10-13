@@ -39,7 +39,11 @@ export function importedCatalogItem(
     sku: String(values.sku_codigo || record.id),
     name: String(values[nameColumn]),
     category,
-    status: String(values.estatus).toLowerCase() === 'activo' ? 'ACTIVE' : 'INACTIVE',
+    status:
+      String(values.estatus).toLowerCase() === 'activo' &&
+      (typeof price !== 'number' || values.moneda === 'USD')
+        ? 'ACTIVE'
+        : 'INACTIVE',
     createdAt,
     ...(typeof price === 'number' ? { salePriceExcludingTax: price } : {}),
     ...(typeof cost === 'number' ? { costPrice: cost } : {}),
