@@ -54,7 +54,7 @@ function appendReferenceIssues(
   for (const [dataset, column, target, message] of referenceRules) {
     for (const record of parsed.records.filter((candidate) => candidate.dataset === dataset)) {
       const value = record.values[column];
-      if (value === null || value === '') continue;
+      if (value == null || value === '') continue;
       const referencedId = String(value);
       if (!available.has(recordKey(target, referencedId))) {
         issues.push({ sheet: record.sheet, row: record.row, column, message });
