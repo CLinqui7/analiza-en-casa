@@ -30,7 +30,8 @@ export function importedCatalogItem(
   const price = record.dataset === 'SERVICES' ? values.precio_base : values.precio_venta;
   const cost = values.costo_unitario;
   const email =
-    typeof values.email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
+    typeof values.email === 'string' &&
+    catalogItemSchema.shape.email.safeParse(values.email).success
       ? values.email
       : undefined;
   const raw = {

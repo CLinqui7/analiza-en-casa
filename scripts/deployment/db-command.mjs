@@ -209,6 +209,7 @@ try {
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.commercial_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.import_record_links TO ${role}`);
     if (provision) {
       const runtimeCheck = new Client({
         user: runtimeRole,
