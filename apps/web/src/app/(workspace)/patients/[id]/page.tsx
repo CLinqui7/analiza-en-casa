@@ -321,7 +321,7 @@ export default function PatientDetailPage() {
                     ? 'Real'
                     : 'Prueba'}
               </p>
-              <fieldset disabled={!can('patients:write') || originSaving}>
+              <fieldset disabled={!can('patients:read') || originSaving}>
                 <legend>Seleccione el origen de este registro</legend>
                 <label>
                   <input
@@ -344,7 +344,7 @@ export default function PatientDetailPage() {
                   Registro de prueba
                 </label>
               </fieldset>
-              {can('patients:write') ? (
+              {can('patients:read') ? (
                 <Button type="submit" disabled={!selectedOrigin || originSaving}>
                   Guardar clasificación
                 </Button>

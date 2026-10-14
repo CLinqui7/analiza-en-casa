@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const token = request.cookies.get(sessionCookieName)?.value;
     const actor = await backend.auth.requireSession(token);
     await backend.auth.requireCsrf(token, request.headers.get(csrfHeaderName) ?? undefined);
-    if (!can(actor.role, 'patients:write')) throw new MongoAccessError();
+    if (!can(actor.role, 'patients:read')) throw new MongoAccessError();
     const { id } = await context.params;
     if (!id || id.length > 128) throw new MongoInputError();
     const input = parseInput(await request.json());

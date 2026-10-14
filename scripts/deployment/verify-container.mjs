@@ -508,8 +508,17 @@ try {
     ).rows[0].count,
     2,
   );
+  const financeReview = await mutate(
+    finance,
+    originPath,
+    { classification: 'REAL', reason: 'CORRECCION_CLASIFICACION', expectedVersion: 2 },
+    200,
+    'PUT',
+  );
+  assert.equal(financeReview.version, 3);
+  assert.equal(financeReview.classification, 'REAL');
   passed.push(
-    'Patient origin form: nurse permission, CSRF, tenant isolation, audited changes and idempotency',
+    'Patient origin form: nurse and patient-reader permission, CSRF, tenant isolation, audited changes and idempotency',
   );
   await mutate(a, '/api/operations', {
     command: 'configuration.save',
@@ -799,10 +808,15 @@ try {
   });
   assert.equal(logout.status(), 200);
   assert.equal((await b.context.get('/api/patients')).status(), 401);
-  assert.equal((await a.context.get('/api/quotes')).status(), 404, 'Quotes remain outside Core');
+  const fullRelease = imageInfo.Config.Env.includes('NEXT_PUBLIC_RELEASE_PROFILE=full');
+  assert.equal(
+    (await a.context.get('/api/quotes')).status(),
+    fullRelease ? 200 : 404,
+    fullRelease ? 'Quotes remain available in the full release' : 'Quotes remain outside Core',
+  );
   assert.deepEqual(errors, []);
   passed.push(
-    '30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors',
+    '30 concurrent workspace reads, pool <=5 connections, logout revocation, release scope and browser errors',
   );
   await writeFile(
     out + '/report.json',
