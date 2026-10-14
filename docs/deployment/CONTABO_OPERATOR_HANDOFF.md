@@ -11,7 +11,7 @@ pueden estar trabajando en el mismo VPS.
 | Recurso | Estado comprobado |
 | --- | --- |
 | VPS | Contabo `207.244.227.122`, instancia `vmi3659839`, Ubuntu 24.04.5, 6 vCPU AMD EPYC, 11 GiB RAM |
-| Capacidad al corte | `/`: 193 GiB, 40 GiB usados, **154 GiB disponibles**; 10 GiB RAM disponible, sin swap |
+| Capacidad tras desplegar | `/`: 193 GiB, 41 GiB usados, **153 GiB disponibles**; aproximadamente 10 GiB RAM disponible, sin swap |
 | SSH operador | `root@207.244.227.122` con clave local `C:\Temp\analiza-contabo-private\operator.key`; host key fijada en `C:\Users\carlo\.ssh\known_hosts` |
 | SSH despliegues | `deploy@207.244.227.122` con clave local `C:\Users\carlo\.ssh\analiza-contabo-staging`; pertenece a `sudo`, con permisos sudo completos |
 | Cuenta administradora web | Los datos de acceso y los IDs de Linqui están en el archivo privado local `C:\Temp\analiza-contabo-private\account.json`. Leerlo sólo para una prueba necesaria; nunca mostrar su campo `password` ni copiar el archivo a Git. |
