@@ -199,6 +199,13 @@ export default function QuoteDetailPage() {
           ) : null}
         </div>
       </header>
+      {quote.immutable && can('quotes:write') ? (
+        <p className="field-help no-print">
+          Para añadir o quitar ítems, o extender los días, use «Revisar / nueva versión». Se
+          copiarán los ítems a un borrador nuevo; esta versión enviada seguirá intacta. Al enviar la
+          revisión, la cuenta del paciente usará la última versión enviada de esta cotización.
+        </p>
+      ) : null}
       {message ? (
         <p className="notice" role="status">
           {message}

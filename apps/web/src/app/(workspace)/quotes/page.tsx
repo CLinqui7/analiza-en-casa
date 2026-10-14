@@ -20,6 +20,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
+import { mongoMutationHeaders } from '@/lib/auth';
+import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -175,50 +177,124 @@ function QuoteEditor({
   const [doctorQuery, setDoctorQuery] = useState('');
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
+  const [autosaveError, setAutosaveError] = useState(false);
   const draftDiscarded = useRef(false);
+  const saveChain = useRef<Promise<void>>(Promise.resolve());
   const draftKey = session
     ? `analiza.form-draft.v1.${session.mode}.${session.userId}.quote.${mode}.${source?.id ?? 'new'}`
     : null;
+  const serverDraftUrl =
+    session?.mode === 'postgresql'
+      ? `/api/quotes/form-draft?key=${encodeURIComponent(`quote.${mode}.${source?.id ?? 'new'}`)}`
+      : null;
 
   useEffect(() => {
     if (!draftKey) return;
-    const timer = window.setTimeout(() => {
-      if (draftDiscarded.current) return;
+    let cancelled = false;
+    async function restore() {
+      if (draftDiscarded.current || !draftKey) return;
+      let localSavedAt = 0;
       try {
         const stored = window.sessionStorage.getItem(draftKey);
         if (stored) {
           const parsed: unknown = JSON.parse(stored);
           if (parsed && typeof parsed === 'object' && 'draft' in parsed) {
-            const recovered = parsed as { draft: QuoteDraft };
-            if (
-              Array.isArray(recovered.draft?.items) &&
-              typeof recovered.draft.summary === 'string'
-            ) {
-              setDraft(recovered.draft);
+            const recovered = parsed as { draft: QuoteDraft; savedAt?: number };
+            const valid = quoteFormDraftSchema.safeParse(recovered.draft);
+            if (valid.success) {
+              setDraft(valid.data);
               setDraftRecovered(true);
+              localSavedAt = recovered.savedAt ?? 0;
             }
           }
         }
       } catch {
-        window.sessionStorage.removeItem(draftKey);
+        try {
+          window.sessionStorage.removeItem(draftKey);
+        } catch {
+          // El borrador remoto sigue disponible cuando el navegador bloquea almacenamiento local.
+        }
       }
-      setDraftReady(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [draftKey]);
+      if (serverDraftUrl) {
+        try {
+          const response = await fetch(serverDraftUrl, {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(5000),
+          });
+          if (!response.ok) throw new Error('Draft load failed');
+          const remote = (await response.json()) as { draft?: QuoteDraft; updatedAt?: string };
+          const valid = quoteFormDraftSchema.safeParse(remote.draft);
+          if (!cancelled && valid.success && Date.parse(remote.updatedAt ?? '') > localSavedAt) {
+            setDraft(valid.data);
+            setDraftRecovered(true);
+          }
+        } catch {
+          if (!cancelled) setAutosaveError(true);
+        }
+      }
+      if (!cancelled) setDraftReady(true);
+    }
+    void restore();
+    return () => {
+      cancelled = true;
+    };
+  }, [draftKey, serverDraftUrl]);
 
   useEffect(() => {
     if (!draftKey || !draftReady) return;
     const timer = window.setTimeout(() => {
       if (draftDiscarded.current) return;
       try {
-        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft }));
+        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft, savedAt: Date.now() }));
       } catch {
         // La escritura temporal puede fallar por cuota o política del navegador.
       }
+      if (serverDraftUrl) {
+        saveChain.current = saveChain.current
+          .catch(() => undefined)
+          .then(async () => {
+            if (draftDiscarded.current) return;
+            const response = await fetch(serverDraftUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+              body: JSON.stringify(draft),
+              signal: AbortSignal.timeout(5000),
+            });
+            if (!response.ok) throw new Error('Draft save failed');
+            setAutosaveError(false);
+          })
+          .catch(() => {
+            setAutosaveError(true);
+          });
+      }
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [draft, draftKey, draftReady]);
+  }, [draft, draftKey, draftReady, serverDraftUrl]);
+
+  async function clearDraft(): Promise<boolean> {
+    draftDiscarded.current = true;
+    if (draftKey) {
+      try {
+        window.sessionStorage.removeItem(draftKey);
+      } catch {
+        // La limpieza remota no depende del almacenamiento del navegador.
+      }
+    }
+    if (!serverDraftUrl) return true;
+    try {
+      await saveChain.current;
+      const response = await fetch(serverDraftUrl, {
+        method: 'DELETE',
+        headers: mongoMutationHeaders(),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!response.ok) throw new Error('Draft cleanup failed');
+      return true;
+    } catch {
+      setAutosaveError(true);
+      return false;
+    }
+  }
 
   const totals = useMemo(() => {
     try {
@@ -412,21 +488,33 @@ function QuoteEditor({
         rootQuoteId: id,
       });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Borrador de cotización persistido.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Borrador de cotización persistido.'
+            : 'Borrador de cotización persistido. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     } else if (mode === 'edit' && source) {
       const saved = await updateQuote({ ...source, ...common });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Borrador de cotización actualizado y persistido.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Borrador de cotización actualizado y persistido.'
+            : 'Cotización actualizada. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
       const saved = await addQuote({ ...revision, ...common });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Nueva versión de cotización creada como borrador.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Nueva versión de cotización creada como borrador.'
+            : 'Nueva versión creada. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     }
   }
@@ -457,9 +545,9 @@ function QuoteEditor({
             className="button-secondary"
             data-action-id="QUOTE-DRAFT-DISCARD"
             onClick={() => {
-              draftDiscarded.current = true;
-              if (draftKey) window.sessionStorage.removeItem(draftKey);
-              onClose();
+              void clearDraft().then((cleared) => {
+                if (cleared) onClose();
+              });
             }}
             type="button"
           >
@@ -473,7 +561,12 @@ function QuoteEditor({
           >
             Cancelar
           </Button>
-          <Button data-action-id={saveAction} form="quote-editor-form" type="submit">
+          <Button
+            data-action-id={saveAction}
+            disabled={!draftReady}
+            form="quote-editor-form"
+            type="submit"
+          >
             {mode === 'edit'
               ? 'Guardar cambios'
               : mode === 'revise'
@@ -487,13 +580,25 @@ function QuoteEditor({
       title={title}
     >
       <p className="field-help">
-        {draftRecovered
-          ? 'Se recuperó el formulario pendiente de esta pestaña. Aún no está guardado en la base de datos.'
-          : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
+        {!draftReady
+          ? 'Recuperando el formulario pendiente…'
+          : draftRecovered
+            ? 'Se recuperó el formulario pendiente. Revíselo antes de guardar la cotización.'
+            : serverDraftUrl
+              ? 'El formulario se guarda automáticamente en su cuenta mientras lo completa. La cotización se crea al pulsar Guardar borrador.'
+              : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
       </p>
+      {autosaveError ? (
+        <p className="notice danger" role="status">
+          No se pudo sincronizar el formulario con la base de datos. Compruebe la conexión antes de
+          cerrar esta pestaña.
+        </p>
+      ) : null}
       <form
+        aria-busy={!draftReady}
         className="form-grid"
         id="quote-editor-form"
+        inert={!draftReady}
         noValidate
         onSubmit={(event) => void submit(event)}
       >
