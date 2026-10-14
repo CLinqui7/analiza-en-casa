@@ -88,6 +88,7 @@
     },
     "CR-011": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
       "functional_fingerprint": "b6aecf7cc8808210be7c15af34937da699c557688f940935efa55930a3e9ea20",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
@@ -97,6 +98,7 @@
     },
     "CR-012": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+      "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
       "functional_fingerprint": "b68d886d00fb2b59fe6139255cb2d489439cf0542409674b1bd1b26c39df71ba",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
