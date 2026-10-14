@@ -17,8 +17,8 @@ Fuente inmutable: `docs/client-change-requests/source/cambiosparte1analizacasa_A
 | CR-011 | 12 | Cotizaciones | IMPLEMENTED_DEMO_ONLY | Conservar categoría por línea de cotización |
 | CR-012 | 13 | Cotizaciones · Paciente | IMPLEMENTED_DEMO_ONLY | Refrescar pacientes autorizados, incluso creados por otro usuario |
 | CR-013 | 14 | Cotizaciones · Honorarios | MISSING | Vincular médico y honorario trazable a línea FEES |
-| CR-014 | 15 | Dashboard | BLOCKED_CLIENT | Definir fuente de facturación y estados mensuales antes de gráficas |
-| CR-015 | 16 | Dashboard | BLOCKED_CLIENT | Definir visita válida, meta, período y fórmula de cumplimiento |
+| CR-014 | 15 | Dashboard | PARTIAL | Definir fuente de facturación y estados mensuales antes de gráficas |
+| CR-015 | 16 | Dashboard | PARTIAL | Definir visita válida, meta, período y fórmula de cumplimiento |
 | CR-016 | 17 | Dashboard | MISSING | Métrica/gráfica con datos de seguro y permisos |
 | CR-017 | 18 | Agenda y turnos | IMPLEMENTED_DEMO_ONLY | Crear serie definida de turnos sin duplicados o colisiones |
 | CR-018 | 19 | Agenda y turnos | PARTIAL | Presets 6h/8h y Puntual sujeto a regla aprobada |

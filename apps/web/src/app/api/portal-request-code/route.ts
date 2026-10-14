@@ -8,6 +8,7 @@ const message = 'Si el enlace es válido, enviamos un código al canal registrad
 
 export async function POST(request: NextRequest) {
   try {
+    if (process.env.ANALIZA_DATA_MODE !== 'mongodb') throw new Error('Portal is unavailable.');
     if (!portalDeliveryConfigured()) throw new Error('Portal delivery is not configured.');
     const database = await mongoDatabase();
     await new MongoPortalService(database).requestCode(

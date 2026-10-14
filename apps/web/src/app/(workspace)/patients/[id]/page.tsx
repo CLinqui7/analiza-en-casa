@@ -1,9 +1,17 @@
 'use client';
 
-import { Panel } from '@analiza/ui';
+import { Button, Panel } from '@analiza/ui';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { mongoMutationHeaders } from '@/lib/auth';
+
+type OriginReview = {
+  classification: 'PENDING' | 'REAL' | 'TEST';
+  version: number;
+  reviewedAt: string | null;
+};
 
 function valueOrEmpty(value: string | undefined) {
   return value || 'Sin dato';
@@ -11,8 +19,74 @@ function valueOrEmpty(value: string | undefined) {
 
 export default function PatientDetailPage() {
   const params = useParams<{ id: string }>();
-  const { can } = useAuth();
+  const { can, session } = useAuth();
   const { loading, patients } = useWorkspace();
+  const [originReview, setOriginReview] = useState<OriginReview | null>(null);
+  const [selectedOrigin, setSelectedOrigin] = useState<'REAL' | 'TEST' | ''>('');
+  const [originLoading, setOriginLoading] = useState(true);
+  const [originError, setOriginError] = useState<string | null>(null);
+  const [originSaving, setOriginSaving] = useState(false);
+  useEffect(() => {
+    if (session?.mode !== 'postgresql' || !params.id) return;
+    const controller = new AbortController();
+    void fetch(`/api/patients/${encodeURIComponent(params.id)}/origin`, {
+      credentials: 'same-origin',
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('No fue posible consultar la clasificación.');
+        return (await response.json()) as OriginReview;
+      })
+      .then((review) => {
+        setOriginReview(review);
+        setSelectedOrigin(review.classification === 'PENDING' ? '' : review.classification);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          setOriginError('No fue posible consultar la clasificación.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setOriginLoading(false);
+      });
+    return () => controller.abort();
+  }, [params.id, session?.mode]);
+
+  async function saveOrigin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!originReview || !selectedOrigin || originSaving) return;
+    setOriginSaving(true);
+    setOriginError(null);
+    try {
+      const reason =
+        originReview.classification !== 'PENDING' && originReview.classification !== selectedOrigin
+          ? 'CORRECCION_CLASIFICACION'
+          : selectedOrigin === 'TEST'
+            ? 'PRUEBA_IDENTIFICADA'
+            : 'CONFIRMACION_EQUIPO';
+      const response = await fetch(`/api/patients/${encodeURIComponent(params.id)}/origin`, {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+        body: JSON.stringify({
+          classification: selectedOrigin,
+          reason,
+          expectedVersion: originReview.version,
+        }),
+      });
+      if (!response.ok) {
+        if (response.status === 409)
+          throw new Error('Otra persona actualizó la clasificación. Recargue la página.');
+        throw new Error('No fue posible guardar la clasificación.');
+      }
+      setOriginReview((await response.json()) as OriginReview);
+    } catch (error) {
+      setOriginError(
+        error instanceof Error ? error.message : 'No fue posible guardar la clasificación.',
+      );
+    } finally {
+      setOriginSaving(false);
+    }
+  }
   const patient = patients.find((candidate) => candidate.id === params.id);
   if (loading)
     return (
@@ -229,6 +303,57 @@ export default function PatientDetailPage() {
           </dl>
         </Panel>
       </section>
+      {session?.mode === 'postgresql' ? (
+        <Panel>
+          <h2>Clasificación del registro</h2>
+          <p>
+            Indique si este expediente corresponde a una persona real o a una prueba. La
+            clasificación queda auditada y no borra el registro.
+          </p>
+          {originLoading ? <p role="status">Consultando clasificación…</p> : null}
+          {originReview ? (
+            <form onSubmit={(event) => void saveOrigin(event)}>
+              <p role="status">
+                Estado actual:{' '}
+                {originReview.classification === 'PENDING'
+                  ? 'Pendiente de revisión'
+                  : originReview.classification === 'REAL'
+                    ? 'Real'
+                    : 'Prueba'}
+              </p>
+              <fieldset disabled={!can('patients:read') || originSaving}>
+                <legend>Seleccione el origen de este registro</legend>
+                <label>
+                  <input
+                    type="radio"
+                    name="patient-origin"
+                    value="REAL"
+                    checked={selectedOrigin === 'REAL'}
+                    onChange={() => setSelectedOrigin('REAL')}
+                  />
+                  Persona real
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="patient-origin"
+                    value="TEST"
+                    checked={selectedOrigin === 'TEST'}
+                    onChange={() => setSelectedOrigin('TEST')}
+                  />
+                  Registro de prueba
+                </label>
+              </fieldset>
+              {can('patients:read') ? (
+                <Button type="submit" disabled={!selectedOrigin || originSaving}>
+                  Guardar clasificación
+                </Button>
+              ) : null}
+            </form>
+          ) : null}
+          {originError ? <p role="alert">{originError}</p> : null}
+        </Panel>
+      ) : null}
       <Link className="text-link" data-action-id="PATIENT-BACK-TO-LIST" href="/patients">
         Volver a pacientes
       </Link>

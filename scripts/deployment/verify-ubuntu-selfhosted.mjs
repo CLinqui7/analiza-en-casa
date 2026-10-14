@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { request } from '@playwright/test';
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 
 const webImage = process.env.ANALIZA_VERIFY_IMAGE || 'analiza-web:selfhosted';
 const operatorImage = process.env.ANALIZA_VERIFY_OPERATOR_IMAGE || 'analiza-operator:postgresql';
+const postgresImage = process.env.ANALIZA_VERIFY_POSTGRES_IMAGE || 'postgres:18-bookworm';
 const run = `analiza-ubuntu-${Date.now()}`;
 const names = {
   db: `${run}-postgres18`,
@@ -79,6 +81,8 @@ try {
     names.db,
     '--restart',
     'no',
+    '--network',
+    'none',
     '-e',
     `POSTGRES_DB=${database}`,
     '-e',
@@ -89,7 +93,7 @@ try {
     `${names.data}:/var/lib/postgresql`,
     '-v',
     `${names.socket}:/var/run/postgresql`,
-    'postgres:18-bookworm',
+    postgresImage,
     '-c',
     'listen_addresses=',
     '-c',
@@ -120,8 +124,13 @@ try {
     names.db,
     'sh',
     '-ec',
-    `printf 'local all all scram-sha-256\\n' | cat - "$PGDATA/pg_hba.conf" > /tmp/pg_hba.conf && cat /tmp/pg_hba.conf > "$PGDATA/pg_hba.conf" && pg_ctl reload`,
+    `printf 'local all all scram-sha-256\\n' | cat - "$PGDATA/pg_hba.conf" > /tmp/pg_hba.conf && cat /tmp/pg_hba.conf > "$PGDATA/pg_hba.conf"`,
   ]);
+  await waitFor(
+    () => attempt(['exec', '--user', 'postgres', names.db, 'pg_ctl', 'reload']).status === 0,
+    'PostgreSQL SCRAM reload',
+    30,
+  );
   checks.push('PostgreSQL 18 reachable through a shared Unix socket with SCRAM');
 
   command([
@@ -266,11 +275,124 @@ try {
 
   const admin = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
   const foreign = await register(`ubuntu-${randomUUID()}@example.test`, accountPassword);
+  const template = await readFile('apps/web/public/templates/plantilla_carga_analiza_en_casa.xlsx');
+  function importFixture(serviceId, { currency = 'USD', rateId = 'QA-RATE' } = {}) {
+    const files = unzipSync(template);
+    const rows = [
+      [
+        3,
+        {
+          A: serviceId,
+          B: `Servicio QA sintético ${serviceId}`,
+          C: 'Enfermeria',
+          E: 'Visita',
+          G: 31.3528,
+          ...(currency ? { H: currency } : {}),
+          L: 'Activo',
+        },
+      ],
+      [
+        7,
+        {
+          A: rateId,
+          B: serviceId.toLowerCase(),
+          E: 20.125,
+          F: 'USD',
+          K: '2026-10-01',
+          L: '2027-01-01',
+          M: 'Activo',
+        },
+      ],
+    ];
+    for (const [index, values] of rows) {
+      const path = `xl/worksheets/sheet${index}.xml`;
+      const row = `<row r="6">${Object.entries(values)
+        .map(([column, value]) =>
+          typeof value === 'number'
+            ? `<c r="${column}6"><v>${value}</v></c>`
+            : `<c r="${column}6" t="inlineStr"><is><t>${value}</t></is></c>`,
+        )
+        .join('')}</row>`;
+      files[path] = strToU8(
+        strFromU8(files[path]).replace(/<row\b[^>]*r="6"[^>]*>[\s\S]*?<\/row>/, row),
+      );
+    }
+    return Buffer.from(zipSync(files));
+  }
+  const imported = importFixture('Qa-Case');
+  async function sendImport(bytes, action) {
+    return admin.context.post('/api/information-import', {
+      headers: { 'x-analiza-csrf': admin.csrf },
+      multipart: {
+        action,
+        file: {
+          name: 'ubuntu-synthetic.xlsx',
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: bytes,
+        },
+      },
+    });
+  }
+  const importPreview = await sendImport(imported, 'preview');
+  assert.equal(importPreview.status(), 200, await importPreview.text());
+  assert.equal((await importPreview.json()).ready, true);
+  const importCommit = await sendImport(imported, 'import');
+  assert.equal(importCommit.status(), 201, await importCommit.text());
+  const repeated = await sendImport(imported, 'import');
+  assert.equal(repeated.status(), 201, await repeated.text());
+  const link = command([
+    'exec',
+    '-e',
+    `PGPASSWORD=${migrationPassword}`,
+    names.db,
+    'psql',
+    '-U',
+    migrator,
+    '-d',
+    database,
+    '-At',
+    '-c',
+    "SELECT target_record_id FROM analiza.import_record_links WHERE source_record_id='QA-RATE' AND relation='servicio_id'",
+  ]);
+  assert.equal(link, 'Qa-Case');
+  const differentCase = await sendImport(importFixture('QA-CASE'), 'import');
+  assert.equal(differentCase.status(), 400, await differentCase.text());
+  const unpriced = await sendImport(
+    importFixture('No-Currency', { currency: '', rateId: 'QA-RATE-NOCURRENCY' }),
+    'import',
+  );
+  assert.equal(unpriced.status(), 201, await unpriced.text());
+  const catalog = (await (await admin.context.get('/api/workspace')).json()).catalogItems;
+  const pricedService = catalog.find((item) => item.id === 'Qa-Case');
+  const pendingService = catalog.find((item) => item.id === 'No-Currency');
+  assert.equal(pricedService?.salePriceExcludingTax, 31.3528);
+  assert.equal(pendingService?.salePriceExcludingTax, undefined);
+  const correctedPending = await mutate(admin, '/api/operations', {
+    command: 'catalog.save',
+    item: { ...pendingService, name: 'Servicio QA revisado' },
+  });
+  assert.equal(correctedPending.name, 'Servicio QA revisado');
+  const unsafeActivation = await admin.context.post('/api/operations', {
+    headers: { 'x-analiza-csrf': admin.csrf },
+    data: { command: 'catalog.save', item: { ...correctedPending, status: 'ACTIVE' } },
+  });
+  assert.equal(unsafeActivation.status(), 400, await unsafeActivation.text());
+  const activeService = await mutate(admin, '/api/operations', {
+    command: 'catalog.save',
+    item: { ...pricedService, status: 'ACTIVE' },
+  });
+  assert.equal(activeService.status, 'ACTIVE');
+  assert.equal((await (await foreign.context.get('/api/workspace')).json()).catalogItems.length, 0);
+  checks.push(
+    'Synthetic Excel idempotency, references, tenant isolation, catalog corrections and unconfirmed-currency activation denial',
+  );
+
   const patient = {
     id: randomUUID(),
     fullName: 'Paciente Ubuntu sintético',
     documentType: 'OTHER',
     documentId: `UBUNTU-${randomUUID().slice(0, 8)}`,
+    insurer: 'Aseguradora QA sintética',
     status: 'ACTIVE',
   };
   await mutate(admin, '/api/patients', { patient }, 201);
@@ -283,6 +405,66 @@ try {
   );
   assert.equal(edited.fullName, 'Paciente Ubuntu editado');
   assert.equal((await foreign.context.get(`/api/patients/${patient.id}`)).status(), 404);
+  const quote = {
+    id: randomUUID(),
+    patientId: patient.id,
+    version: 1,
+    status: 'DRAFT',
+    summary: 'Cotización QA sintética',
+    immutable: false,
+    createdAt: new Date().toISOString(),
+    insurerAmount: 0,
+    items: [
+      {
+        id: randomUUID(),
+        category: 'SERVICES',
+        name: activeService.name,
+        inventoryItemId: activeService.id,
+        quantity: 1,
+        unitPrice: activeService.salePriceExcludingTax,
+        discountAmount: 0,
+      },
+    ],
+  };
+  const createdQuote = await mutate(admin, '/api/quotes', { quote }, 201);
+  assert.ok(createdQuote.total > 0);
+  assert.equal((await (await foreign.context.get('/api/quotes')).json()).quotes.length, 0);
+  assert.equal(
+    (await (await admin.context.get('/api/quotes')).json()).quotes[0].quote.id,
+    quote.id,
+  );
+  checks.push('Active priced service relates to PostgreSQL quote; foreign tenant cannot list it');
+  const insuranceObservation = {
+    quoteId: quote.id,
+    status: 'SENT_TO_INSURER',
+    note: 'Seguimiento administrativo QA',
+    date: new Date().toISOString(),
+    idempotencyKey: randomUUID(),
+  };
+  const firstInsurance = await mutate(
+    admin,
+    '/api/insurance-observations',
+    insuranceObservation,
+    201,
+  );
+  const repeatedInsurance = await mutate(
+    admin,
+    '/api/insurance-observations',
+    insuranceObservation,
+    201,
+  );
+  assert.equal(repeatedInsurance.event.id, firstInsurance.event.id);
+  assert.equal(repeatedInsurance.request.id, firstInsurance.request.id);
+  const foreignInsurance = await foreign.context.post('/api/insurance-observations', {
+    headers: { 'x-analiza-csrf': foreign.csrf },
+    data: { ...insuranceObservation, idempotencyKey: randomUUID() },
+  });
+  assert.equal(foreignInsurance.status(), 400);
+  assert.equal(
+    (await (await foreign.context.get('/api/workspace')).json()).insuranceRequests.length,
+    0,
+  );
+  checks.push('PostgreSQL insurance observation is idempotent, audited and tenant-scoped');
 
   const nurseId = randomUUID();
   await mutate(admin, '/api/operations', {
@@ -377,6 +559,19 @@ try {
     (await admin.context.get(`/api/hospitalizations/${hospitalization.id}`)).status(),
     200,
   );
+  const restoredWorkspace = await (await admin.context.get('/api/workspace')).json();
+  assert.equal(
+    restoredWorkspace.quotes.some((entry) => entry.id === quote.id),
+    true,
+  );
+  assert.equal(restoredWorkspace.insuranceRequests.length, 1);
+  assert.equal(restoredWorkspace.insuranceEvents.length, 1);
+  assert.equal(
+    restoredWorkspace.catalogItems.some(
+      (entry) => entry.id === pendingService.id && entry.status === 'INACTIVE',
+    ),
+    true,
+  );
   assert.deepEqual(await (await admin.context.get(`/api/files/${file.id}`)).body(), bytes);
   checks.push('PostgreSQL, session and private file persistence after database and web restarts');
 
@@ -388,6 +583,7 @@ try {
         run,
         webImage,
         operatorImage,
+        postgresImage,
         transport: 'Unix socket shared between isolated PostgreSQL and application containers',
         storage: 'Docker volume mounted at /data/private-files',
         checks,

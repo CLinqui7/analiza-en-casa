@@ -1,0 +1,6 @@
+[Unit]
+Description=Check Analiza readiness, disk and backup age
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/opt/analiza-contabo-staging/health.sh

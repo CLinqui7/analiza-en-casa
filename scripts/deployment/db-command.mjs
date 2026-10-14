@@ -205,10 +205,17 @@ try {
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.home_custodies TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_return_holds TO ${role}`);
     await client.query(`GRANT SELECT ON analiza.commercial_access TO ${role}`);
-    await client.query(`GRANT SELECT,INSERT ON analiza.commercial_visits,analiza.commercial_admissions,analiza.confirmed_sales TO ${role}`);
+    await client.query(
+      `GRANT SELECT,INSERT ON analiza.commercial_visits,analiza.commercial_admissions,analiza.confirmed_sales TO ${role}`,
+    );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.commercial_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.import_batches TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.import_records TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.import_record_links TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.insurance_requests TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.insurance_events TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.patient_origin_reviews TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.patient_origin_review_events TO ${role}`);
     if (provision) {
       const runtimeCheck = new Client({
         user: runtimeRole,

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
 import {
   importDatasetDefinitions,
@@ -11,6 +11,7 @@ import {
 } from '@/lib/information-import';
 import { isAdministrator } from '@/lib/permissions';
 import { parseInformationWorkbook } from '@/server/information-import-parser';
+import { importedCatalogItem } from '@/server/information-import-catalog';
 import { MongoAccessError, MongoInputError, type ServerActor } from '@/server/validation/patients';
 import { transaction } from './postgres-pool';
 
@@ -53,7 +54,7 @@ function appendReferenceIssues(
   for (const [dataset, column, target, message] of referenceRules) {
     for (const record of parsed.records.filter((candidate) => candidate.dataset === dataset)) {
       const value = record.values[column];
-      if (value === null || value === '') continue;
+      if (value == null || value === '') continue;
       const referencedId = String(value);
       if (!available.has(recordKey(target, referencedId))) {
         issues.push({ sheet: record.sheet, row: record.row, column, message });
@@ -160,19 +161,64 @@ export class PostgresInformationImportRepository {
   async commit(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportOverview> {
     requireAdministrator(actor);
     const parsed = await parseInformationWorkbook(fileName, bytes);
+    const sourceHash = createHash('sha256').update(bytes).digest('hex');
     return transaction(this.pool, actor, async (client) => {
+      await client.query(
+        "SELECT pg_advisory_xact_lock(hashtextextended('analiza:import:' || $1,0))",
+        [actor.organizationId],
+      );
+      const duplicateBatch = await client.query(
+        'SELECT id FROM analiza.import_batches WHERE organization_id=$1 AND source_sha256=$2',
+        [actor.organizationId, sourceHash],
+      );
+      if (duplicateBatch.rowCount) {
+        const rows = (
+          await client.query<{ dataset: ImportDataset; count: number }>(
+            'SELECT dataset,count(*)::int AS count FROM analiza.import_records WHERE organization_id=$1 GROUP BY dataset',
+            [actor.organizationId],
+          )
+        ).rows;
+        return {
+          records: Object.fromEntries(rows.map((row) => [row.dataset, row.count])),
+          batches: [],
+        };
+      }
       const preview = previewFromParsed(parsed, await currentKeys(client, actor.organizationId));
       if (!preview.ready) {
         throw new MongoInputError(
           preview.issues[0]?.message ?? 'La plantilla no contiene registros válidos.',
         );
       }
+      for (const record of parsed.records) {
+        const existingRows = await client.query<{ record_id: string; differing: boolean }>(
+          'SELECT record_id,body <> $4::jsonb AS differing FROM analiza.import_records WHERE organization_id=$1 AND dataset=$2 AND upper(record_id)=upper($3) LIMIT 2',
+          [actor.organizationId, record.dataset, record.id, JSON.stringify(record.values)],
+        );
+        if (
+          existingRows.rows.length > 1 ||
+          existingRows.rows.some((row) => row.record_id !== record.id || row.differing)
+        )
+          throw new MongoInputError(
+            `Hoja ${record.sheet}, fila ${record.row}: el registro existente requiere conciliación explícita. No se modificó.`,
+          );
+        const item = importedCatalogItem(record, new Date().toISOString());
+        if (item) {
+          const candidate = await client.query(
+            "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id<>$2 AND (upper(body->>'sku')=upper($3) OR (body->>'category'=$4 AND lower(trim(body->>'name'))=lower(trim($5))))",
+            [actor.organizationId, item.id, item.sku, item.category ?? null, item.name],
+          );
+          if (candidate.rowCount)
+            throw new MongoInputError(
+              `Hoja ${record.sheet}, fila ${record.row}: posible catálogo existente; confirme la coincidencia antes de importar.`,
+            );
+        }
+      }
       const batchId = randomUUID();
       const counts = importedCounts(parsed.records);
       await client.query(
         `INSERT INTO analiza.import_batches
-         (organization_id,id,file_name,imported_by,total_rows,counts)
-         VALUES($1,$2,$3,$4,$5,$6::jsonb)`,
+         (organization_id,id,file_name,imported_by,total_rows,counts,source_sha256)
+         VALUES($1,$2,$3,$4,$5,$6::jsonb,$7)`,
         [
           actor.organizationId,
           batchId,
@@ -180,6 +226,7 @@ export class PostgresInformationImportRepository {
           actor.userId,
           parsed.records.length,
           JSON.stringify(counts),
+          sourceHash,
         ],
       );
       await client.query(
@@ -189,10 +236,7 @@ export class PostgresInformationImportRepository {
          FROM jsonb_to_recordset($3::jsonb) AS row(
            dataset text,record_id text,source_sheet text,source_row integer,body jsonb,imported_by text
          )
-         ON CONFLICT(organization_id,dataset,record_id) DO UPDATE SET
-           batch_id=EXCLUDED.batch_id,source_sheet=EXCLUDED.source_sheet,
-           source_row=EXCLUDED.source_row,body=EXCLUDED.body,
-           imported_by=EXCLUDED.imported_by,updated_at=now()`,
+         ON CONFLICT(organization_id,dataset,record_id) DO NOTHING`,
         [
           actor.organizationId,
           batchId,
@@ -210,25 +254,37 @@ export class PostgresInformationImportRepository {
       );
 
       const products = parsed.records
-        .filter((record) => record.dataset === 'PRODUCTS')
-        .map((record) => ({
-          id: record.id,
-          sku: String(record.values.sku_codigo || record.id),
-          name: String(record.values.nombre_producto),
-          status: String(record.values.estatus).toLowerCase() === 'activo' ? 'ACTIVE' : 'INACTIVE',
-          createdAt: new Date().toISOString(),
-        }));
+        .map((record) => importedCatalogItem(record, new Date().toISOString()))
+        .filter((item) => item !== null);
       if (products.length) {
         await client.query(
           `INSERT INTO analiza.catalog_items(organization_id,id,body)
            SELECT $1,item.id,item.body
            FROM jsonb_to_recordset($2::jsonb) AS item(id text,body jsonb)
-           ON CONFLICT(organization_id,id) DO UPDATE SET body=EXCLUDED.body`,
+           ON CONFLICT(organization_id,id) DO NOTHING`,
           [
             actor.organizationId,
             JSON.stringify(products.map((product) => ({ id: product.id, body: product }))),
           ],
         );
+      }
+      for (const [dataset, column, target] of referenceRules) {
+        for (const record of parsed.records.filter((candidate) => candidate.dataset === dataset)) {
+          const referencedId = record.values[column];
+          if (referencedId == null || referencedId === '') continue;
+          // Preview accepts case-insensitive IDs. Resolve the stored spelling before
+          // inserting the composite foreign key, and reject ambiguous source IDs.
+          const matches = await client.query<{ record_id: string }>(
+            'SELECT record_id FROM analiza.import_records WHERE organization_id=$1 AND dataset=$2 AND upper(record_id)=upper($3) LIMIT 2',
+            [actor.organizationId, target, String(referencedId)],
+          );
+          if (matches.rowCount !== 1)
+            throw new MongoInputError(`La referencia ${column} no identifica un único registro.`);
+          await client.query(
+            'INSERT INTO analiza.import_record_links(organization_id,source_dataset,source_record_id,relation,target_dataset,target_record_id) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING',
+            [actor.organizationId, dataset, record.id, column, target, matches.rows[0].record_id],
+          );
+        }
       }
 
       await client.query(

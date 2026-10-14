@@ -2,8 +2,9 @@
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
-PostgreSQL 18, incluido registro individual y cuestionario. El preview independiente
-en Vercel utiliza MongoDB.
+PostgreSQL 18, incluido registro individual y cuestionario. La variante activa de
+Vercel comprobada el 2026-10-13 usa PostgreSQL; también permanece código histórico
+para MongoDB.
 
 **Para desplegar en Cloud Run / Cloud SQL:**
 [guía del ingeniero, imágenes y variables](docs/deployment/CLOUD_SQL_HANDOFF.md).
@@ -11,9 +12,17 @@ en Vercel utiliza MongoDB.
 **Para desplegar en Ubuntu / Docker / PostgreSQL local:**
 [guía self-hosted](docs/deployment/UBUNTU_SELF_HOSTED.md).
 
-**Estado:** Docker verificado localmente. Preparación cloud disponible; despliegue
-diferido. El preview Vercel se publica mediante un flujo independiente con
-migraciones previas. Las pruebas y el seed utilizan exclusivamente datos sintéticos.
+**Segunda instancia aislada en Contabo:**
+[estado y acceso privado](docs/deployment/CONTABO_DEPLOYMENT.md),
+[auditoría y límites de la migración](docs/deployment/CONTABO_FINAL_REPORT.md).
+
+**Para preparar un VPS Hostinger con la navegación completa:**
+[lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
+
+**Estado de esta rama:** la instancia Contabo está desplegada de forma privada;
+la migración de datos clínicos y el cambio de dominio siguen pendientes. Vercel
+continúa con su despliegue independiente. Las pruebas sintéticas de integración
+se ejecutan en contenedores descartables separados de la base operativa.
 
 ## Registro, cuestionario y migraciones
 

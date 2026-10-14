@@ -187,3 +187,7 @@ La migración no autoriza el uso con datos reales. Quedan por trasladar con pari
 ### Addendum · 2026-09-14 · Cloud Run / PostgreSQL Core
 
 La orden actual conserva la aplicación y migra el Core a PostgreSQL 18 y GCS privado. Hay esquema, migrador versionado, seed sintético, repositories, RLS, RBAC y pruebas reales de la imagen local. El frontend completo histórico pasó 178/178 pruebas de regresión; no es una nueva certificación de paridad completa. El estado vigente, imagen/evidencia y límites están en `docs/release/CLOUD_RUN_SQL_STATE.json`; los comandos del ingeniero en `docs/deployment/CLOUD_RUN.md`. GCP devuelve cuentas vacías/proyecto sin configurar; no se publicó ni desplegó y no se aplicó Terraform.
+
+### Addendum · 2026-10-13 · Instancia privada Contabo
+
+La rama `codex/contabo-clean-migration` instaló una copia Next.js/PostgreSQL 18 independiente y un importador del Excel oficial. Los 546 artículos quedaron como candidatos inactivos, sin pacientes, compras ni inventario ficticios. La consulta al origen fue de sólo lectura; 2.455 filas de metadatos permanecen sin clasificación individual y no se trasladó información clínica. Respaldo cifrado y restauración de staging pasaron, igual que pruebas sintéticas de dos tenants y regresión de navegador. La copia no se considera producción ni certificación completa de video. Evidencia, límites y aprobaciones pendientes: `docs/deployment/CONTABO_FINAL_REPORT.md`.

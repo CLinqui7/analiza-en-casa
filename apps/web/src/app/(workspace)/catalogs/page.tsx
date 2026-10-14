@@ -18,6 +18,7 @@ const categories = [
   ['SUPPLIES', 'Insumos', 'INS'],
   ['EQUIPMENT', 'Equipos', 'EQU'],
   ['PROVIDERS', 'Proveedores', 'PRO'],
+  ['INSURERS', 'Aseguradoras', 'ASE'],
 ] as const;
 type Category = (typeof categories)[number][0];
 const isCategory = (value: CatalogItem['category']): value is Category =>
@@ -32,13 +33,15 @@ const itemSchema = z.object({
     'SUPPLIES',
     'EQUIPMENT',
     'PROVIDERS',
+    'INSURERS',
   ]),
   name: z.string().trim().min(1, 'El nombre es obligatorio.'),
-  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.'),
+  costPrice: z.number().finite().nonnegative('El costo no puede ser negativo.').optional(),
   salePriceExcludingTax: z
     .number()
     .finite()
-    .nonnegative('El precio de venta no puede ser negativo.'),
+    .nonnegative('El precio de venta no puede ser negativo.')
+    .optional(),
 });
 type ItemForm = z.infer<typeof itemSchema>;
 
@@ -53,7 +56,7 @@ export default function CatalogsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const form = useForm<ItemForm>({
     resolver: zodResolver(itemSchema),
-    defaultValues: { category: 'SERVICES', name: '', costPrice: 0, salePriceExcludingTax: 0 },
+    defaultValues: { category: 'SERVICES', name: '' },
   });
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
   const visibleItems = useMemo(
@@ -82,14 +85,14 @@ export default function CatalogsPage() {
     form.reset({
       category: activeCategory,
       name: '',
-      costPrice: 0,
-      salePriceExcludingTax: 0,
+      costPrice: undefined,
+      salePriceExcludingTax: undefined,
     });
   }
   function create(category: Category = activeCategory) {
     setMessage(null);
     setEditing(null);
-    form.reset({ category, name: '', costPrice: 0, salePriceExcludingTax: 0 });
+    form.reset({ category, name: '', costPrice: undefined, salePriceExcludingTax: undefined });
     setOpen(true);
   }
   function edit(item: CatalogItem) {
@@ -98,8 +101,8 @@ export default function CatalogsPage() {
     form.reset({
       category: isCategory(item.category) ? item.category : 'SUPPLIES',
       name: item.name,
-      costPrice: item.costPrice ?? 0,
-      salePriceExcludingTax: item.salePriceExcludingTax ?? 0,
+      costPrice: item.costPrice,
+      salePriceExcludingTax: item.salePriceExcludingTax,
     });
     setOpen(true);
   }
@@ -127,8 +130,12 @@ export default function CatalogsPage() {
   async function toggle(item: CatalogItem) {
     if (
       !(await addCatalogItem({ ...item, status: item.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' }))
-    )
+    ) {
+      setMessage(
+        'No se pudo cambiar el estado. Revise los datos y la moneda de la fuente importada.',
+      );
       return;
+    }
     setMessage(`${item.name} quedó ${item.status === 'ACTIVE' ? 'inactivo' : 'activo'}.`);
   }
 
@@ -219,8 +226,12 @@ export default function CatalogsPage() {
                       <code>{item.sku}</code>
                     </td>
                     <td>{item.name}</td>
-                    <td>USD {(item.costPrice ?? 0).toFixed(2)}</td>
-                    <td>USD {(item.salePriceExcludingTax ?? 0).toFixed(2)}</td>
+                    <td>{item.costPrice === undefined ? 'Pendiente' : `USD ${item.costPrice}`}</td>
+                    <td>
+                      {item.salePriceExcludingTax === undefined
+                        ? 'Pendiente'
+                        : `USD ${item.salePriceExcludingTax}`}
+                    </td>
                     <td>
                       <StatusTag tone={item.status === 'ACTIVE' ? 'success' : 'neutral'}>
                         {item.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -303,9 +314,11 @@ export default function CatalogsPage() {
             Precio de costo
             <input
               min="0"
-              step="0.01"
+              step="any"
               type="number"
-              {...form.register('costPrice', { valueAsNumber: true })}
+              {...form.register('costPrice', {
+                setValueAs: (value) => (value === '' ? undefined : Number(value)),
+              })}
             />
             {form.formState.errors.costPrice ? (
               <span className="field-error">{form.formState.errors.costPrice.message}</span>
@@ -315,9 +328,11 @@ export default function CatalogsPage() {
             Precio de venta sin IVA
             <input
               min="0"
-              step="0.01"
+              step="any"
               type="number"
-              {...form.register('salePriceExcludingTax', { valueAsNumber: true })}
+              {...form.register('salePriceExcludingTax', {
+                setValueAs: (value) => (value === '' ? undefined : Number(value)),
+              })}
             />
             {form.formState.errors.salePriceExcludingTax ? (
               <span className="field-error">

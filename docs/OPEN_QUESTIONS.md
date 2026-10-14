@@ -335,6 +335,23 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Operación
 
+### Segunda instancia Contabo · 2026-10-13
+
+- `CONTABO-Q001` — AUTORIZACIÓN DE ALCANCE RESUELTA: el usuario afirmó expresamente que tiene autoridad sobre las nueve organizaciones y autorizó trasladarlas al VPS de Contabo en US-central. El snapshot cifrado y las 2.559 filas restauradas en una base de cuarentena separada constan en `docs/deployment/CONTABO_SOURCE_QUARANTINE.md`. La política institucional de retención, custodia e incidentes sigue pendiente en `CONTABO-Q006`/`CONTABO-Q008`.
+- `CONTABO-Q002` — PARCIAL: el snapshot actual tiene 2.559 filas en 47 tablas; 236 referencias técnicas se verificaron con fuentes Git y 2.323 filas siguen `UNKNOWN_ORIGIN`, incluida una referencia por defecto alterada. Identificar demos dentro de las organizaciones clínicas, aprobar el manifiesto de inclusión/exclusión y reconciliar las nuevas escrituras de Vercel antes de promover a la base operativa. Ninguna fila original se eliminó; la copia íntegra está aislada de la aplicación.
+- `CONTABO-Q003` — RESUELTA: se recuperaron las fuentes originales de Git, sus SHA-256 coinciden con `schema_migrations` de origen y sus objetos se conciliaron en PostgreSQL aislado y Contabo. Ver `docs/deployment/CONTABO_SCHEMA_RECONCILIATION.md`.
+- `CONTABO-Q004`: confirmar moneda, redondeo comercial, costos y unidades de los 47 servicios; corregir los dos correos de proveedores inválidos y verificar vigencia fiscal/contacto. Los 546 candidatos permanecen inactivos.
+- `CONTABO-Q005`: definir identidad y autorización de Personal, efecto operativo de Tarifas_Coberturas y Compras_Proveedor, así como correspondencia de proveedores/aseguradoras preexistentes; hoy sólo se guardan origen y enlaces sin transacciones.
+- `CONTABO-Q006` — PARCIAL: el snapshot restic `d78a7c05` incluye tanto la base operativa como la cuarentena, con hashes y restauración aislada de ambos volcados. Su copia cifrada fuera del VPS en OneDrive local pasó `restic check --read-data`; la tarea programada terminó con código 0. Falta confirmar sincronización efectiva con la nube, automatización continua independiente de esta PC, retención/objetivos y respuesta a incidentes aprobados, y si Auto Backup de Contabo está contratado.
+- `CONTABO-Q007`: antes del dominio, decidir nombre DNS, HTTPS, política de ingreso, sincronización final con Vercel, ventana de escrituras, aceptación funcional con roles reales y plan de regreso. No hay cambio de producción autorizado.
+- `CONTABO-Q008`: acordar custodia y recuperación segura de la clave SSH del operador (`C:\Users\carlo\.ssh\analiza-contabo-staging` en este equipo), y rotación de las contraseñas iniciales comunicadas por chat. SSH por contraseña ya está deshabilitado; la consola del proveedor conserva su mecanismo independiente.
+- `CONTABO-Q009`: revisar antes de promover expedientes a la base operativa la pantalla `/clinical/reports`: hoy lee casos, pacientes, signos vitales y documentos del workspace, infiere notas por texto y ofrece imprimir. Confirmar fuente, roles, minimización, formato, auditoría y paridad CH17; la prueba Contabo sólo cubrió la pantalla vacía.
+- `CONTABO-Q010`: para habilitar el portal PostgreSQL, aprobar destinatarios y canal de entrega de códigos, consentimiento, segundo factor, caducidad, reintentos, protección contra enumeración, auditoría y alcance exacto de datos por paciente. Los endpoints siguen en 503 seguro y no dependen de DUI como único factor.
+
+- `HOSTINGER-001` (2026-10-12): aún no se eligieron VPS ni dominio. Confirmar proveedor DNS, capacidad según usuarios y adjuntos, acceso de operador, origen PostgreSQL y almacén privado efectivos, rol runtime/ACL, ventana de corte, responsables y objetivos de respaldo/restauración antes de mover datos o DNS. Plan: `docs/deployment/HOSTINGER_VPS_READINESS_20261012.md`.
+- `FEEDBACK-51132DD2` (2026-10-12): vincular el texto fuente de la nueva lista de honorarios (USD 0 o 15–300 en incrementos de 5) y resolver su precedencia sobre la instrucción anterior de precio de ficha médica antes de certificar CR-013. No aplicar una tarifa supuesta a cotizaciones históricas.
+- `FEEDBACK-BDDFC1EA` (2026-10-12): confirmar que la anulación solicitada de factura recibida es sólo documental, sin devolución física ni reversión fiscal automática. El flujo actual registra motivo y auditoría, pero conserva la recepción y las existencias.
+
 - Usuario que acepta formalmente el MVP.
 - Horario de soporte durante producción controlada.
 - Cantidad estimada de usuarios concurrentes.

@@ -1,6 +1,8 @@
 import type {
   Doctor,
   Hospitalization,
+  InsuranceEvent,
+  InsuranceRequest,
   NursingResource,
   OperationsSnapshot,
   Patient,
@@ -53,6 +55,13 @@ export interface Persistence {
     overview(actor: ServerActor): Promise<ImportOverview>;
     preview(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportPreview>;
     commit(actor: ServerActor, fileName: string, bytes: Uint8Array): Promise<ImportOverview>;
+  };
+  insuranceObservations: {
+    list(actor: ServerActor): Promise<{ requests: InsuranceRequest[]; events: InsuranceEvent[] }>;
+    recordObservation(
+      actor: ServerActor,
+      input: unknown,
+    ): Promise<{ request: InsuranceRequest; event: InsuranceEvent }>;
   };
   feedback?: {
     list(actor: ServerActor): Promise<FeedbackReport[]>;

@@ -374,7 +374,7 @@ try {
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill('7000-0000');
   await dialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
-  await dialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
+  await dialog.getByRole('option', { name: 'Usar “Empresa demo” como nueva opción' }).click();
   await dialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección ficticia QA');
@@ -442,6 +442,83 @@ try {
   assert.equal(await page.evaluate(() => JSON.stringify(localStorage)), storageBefore);
   passed.push(
     'React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected',
+  );
+  const originPath = `/api/patients/${patient.id}/origin`;
+  assert.deepEqual(await (await a.context.get(originPath)).json(), {
+    classification: 'PENDING',
+    version: 0,
+    reviewedAt: null,
+  });
+  assert.equal((await c.context.get(originPath)).status(), 404);
+  assert.equal(
+    (
+      await nurse.context.put(originPath, {
+        data: { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 0 },
+      })
+    ).status(),
+    403,
+  );
+  const reviewed = await mutate(
+    nurse,
+    originPath,
+    { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 0 },
+    200,
+    'PUT',
+  );
+  assert.equal(reviewed.version, 1);
+  assert.equal(reviewed.classification, 'REAL');
+  assert.equal(
+    (
+      await mutate(
+        nurse,
+        originPath,
+        { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 1 },
+        200,
+        'PUT',
+      )
+    ).version,
+    1,
+  );
+  await mutate(
+    nurse,
+    originPath,
+    { classification: 'TEST', reason: 'CORRECCION_CLASIFICACION', expectedVersion: 0 },
+    409,
+    'PUT',
+  );
+  assert.equal(
+    (
+      await admin.query(
+        'SELECT count(*)::int AS count FROM analiza.patient_origin_review_events WHERE organization_id=$1 AND patient_id=$2',
+        ['qa-org-a', patient.id],
+      )
+    ).rows[0].count,
+    1,
+  );
+  await page.goto(base + '/patients/' + encodeURIComponent(patient.id));
+  await page.getByLabel('Registro de prueba').check();
+  await page.getByRole('button', { name: 'Guardar clasificación' }).click();
+  await page.getByText('Estado actual: Prueba').waitFor();
+  assert.equal(
+    (
+      await admin.query(
+        'SELECT count(*)::int AS count FROM analiza.patient_origin_review_events WHERE organization_id=$1 AND patient_id=$2',
+        ['qa-org-a', patient.id],
+      )
+    ).rows[0].count,
+    2,
+  );
+  const financeReview = await mutate(
+    finance,
+    originPath,
+    { classification: 'REAL', reason: 'CORRECCION_CLASIFICACION', expectedVersion: 2 },
+    200,
+    'PUT',
+  );
+  assert.equal(financeReview.version, 3);
+  assert.equal(financeReview.classification, 'REAL');
+  passed.push(
+    'Patient origin form: nurse and patient-reader permission, CSRF, tenant isolation, audited changes and idempotency',
   );
   await mutate(a, '/api/operations', {
     command: 'configuration.save',
@@ -602,7 +679,7 @@ try {
   await failDialog.getByLabel('Femenino').check();
   await failDialog.getByLabel('Teléfono celular').fill('7000-0000');
   await failDialog.getByLabel('Empresa', { exact: true }).fill('Empresa demo');
-  await failDialog.getByRole('option', { name: 'Empresa demo', exact: true }).click();
+  await failDialog.getByRole('option', { name: 'Usar “Empresa demo” como nueva opción' }).click();
   await failDialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección ficticia QA');
@@ -731,10 +808,15 @@ try {
   });
   assert.equal(logout.status(), 200);
   assert.equal((await b.context.get('/api/patients')).status(), 401);
-  assert.equal((await a.context.get('/api/quotes')).status(), 404, 'Quotes remain outside Core');
+  const fullRelease = imageInfo.Config.Env.includes('NEXT_PUBLIC_RELEASE_PROFILE=full');
+  assert.equal(
+    (await a.context.get('/api/quotes')).status(),
+    fullRelease ? 200 : 404,
+    fullRelease ? 'Quotes remain available in the full release' : 'Quotes remain outside Core',
+  );
   assert.deepEqual(errors, []);
   passed.push(
-    '30 concurrent workspace reads, pool <=5 connections, logout revocation, Core scope and browser errors',
+    '30 concurrent workspace reads, pool <=5 connections, logout revocation, release scope and browser errors',
   );
   await writeFile(
     out + '/report.json',

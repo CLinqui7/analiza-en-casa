@@ -11,7 +11,8 @@ export function DemoDataButton() {
   const operations = useOperations();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  if (!can(session?.role, 'patients:write')) return null;
+  if (process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' || !can(session?.role, 'patients:write'))
+    return null;
 
   async function loadExamples() {
     if (!session || loading) return;

@@ -1,5 +1,8 @@
 # Migración preparada; despliegue aplazado por el cliente
 
+> Documento histórico de una fase anterior. El despliegue actual en Contabo
+> está descrito en [CONTABO_OPERATOR_HANDOFF.md](CONTABO_OPERATOR_HANDOFF.md).
+
 El alcance vigente es dejar la aplicación existente conectada y probada para un
 despliegue posterior. No publicar ni desplegar ahora. Se conserva la rama
 `codex/cloud-run-cloud-sql` como origen de la integración en `main` mediante el PR #7
