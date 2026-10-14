@@ -146,6 +146,11 @@ comprueba su salud. Se verificó una copia externa del repositorio cifrado en
 `C:\Users\carlo\OneDrive\Analiza en Casa\respaldos-cifrados\snapshot-20261014T054915Z`
 con `restic check --read-data`; no hay datos SQL en claro en OneDrive. El
 trabajo programado local se llama `Analiza-Contabo-Offsite-Restic`.
+La copia externa manual del 14 de octubre pasó íntegramente, pero un disparo
+manual del trabajo de Windows terminó con código `0xC000013A` y dejó un
+directorio `.partial`; la ejecución directa del mismo script sí pasó. Revisar
+el resultado de la próxima ejecución programada antes de dar por verificada
+la automatización externa posterior al corte.
 
 Docker 29.9, Node 24.13, npm 11, Nginx, Certbot, restic, UFW y PostgreSQL 18
 están instalados. El proyecto TuVet corre aparte bajo
