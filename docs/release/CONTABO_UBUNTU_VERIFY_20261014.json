@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "run": "analiza-ubuntu-1791956218477",
+  "webImage": "analiza-qa-web-isolated:6841394",
+  "operatorImage": "analiza-qa-operator:6841394",
+  "postgresImage": "postgres@sha256:afc7e2d441324c0388fa80c3d24f733b4194a4eb7f47dd8ee2b08eb1a24a647c",
+  "transport": "Unix socket shared between isolated PostgreSQL and application containers",
+  "storage": "Docker volume mounted at /data/private-files",
+  "checks": [
+    "PostgreSQL 18 reachable through a shared Unix socket with SCRAM",
+    "Explicit operator migration and restricted runtime-role provisioning over Unix",
+    "Liveness and PostgreSQL readiness through the final non-root image",
+    "Synthetic Excel idempotency, references, tenant isolation, catalog corrections and unconfirmed-currency activation denial",
+    "Active priced service relates to PostgreSQL quote; foreign tenant cannot list it",
+    "PostgreSQL insurance observation is idempotent, audited and tenant-scoped",
+    "Registration/login session, patient create/edit, hospitalization and shift over PostgreSQL",
+    "Filesystem upload/download, SHA256, private tenant denial and persisted bytes",
+    "PostgreSQL, session and private file persistence after database and web restarts"
+  ],
+  "checkedAt": "2026-10-14T05:37:15.478Z"
+}

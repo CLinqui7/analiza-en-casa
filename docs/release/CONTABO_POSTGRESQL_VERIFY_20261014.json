@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "run": "analiza-sqlqa-1791956729204",
+  "image": "sha256:35545376e1a98a5aaf3db52176052c21500b73f670a5e3625f9637f63e142c9a",
+  "sourceSha": "cd3203d",
+  "base": "http://localhost:40505",
+  "checks": [
+    "PostgreSQL health, 8 independent account sessions, anonymous denial and CSRF",
+    "PostgreSQL registration and onboarding: atomic rollback, concurrent versions, tenant RLS, CSRF, permissions and no DELETE",
+    "React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected",
+    "Patient origin form: nurse and patient-reader permission, CSRF, tenant isolation, audited changes and idempotency",
+    "React doctor create and API edit; hospitalization create/edit with active assigned nurse; role and organization denials",
+    "Shift creation, idempotent retry, existing and concurrent scheduling conflicts",
+    "GCS SDK with explicit local emulator: real bytes, private metadata, authorized second session and foreign denial",
+    "Real SQL outage: failed save stays open, no localStorage write, no success and no database record",
+    "Web container restart: external PostgreSQL data, sessions, GCS emulator bytes and tenant isolation persist; graceful pool shutdown",
+    "SIGTERM with a real blocked SQL mutation: timeout, rollback, HTTP 503 and exit 143 within 10 seconds",
+    "30 concurrent workspace reads, pool <=5 connections, logout revocation, release scope and browser errors"
+  ],
+  "connections": 5,
+  "p95Ms": 772,
+  "database": "PostgreSQL 18 local QA",
+  "databaseVersion": "18.6 (Debian 18.6-1.pgdg12+2)",
+  "storage": "Google SDK + local GCS emulator; real GCS/IAM pending",
+  "checkedAt": "2026-10-14T05:46:05.334Z"
+}
