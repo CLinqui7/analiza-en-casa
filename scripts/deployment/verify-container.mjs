@@ -443,6 +443,74 @@ try {
   passed.push(
     'React patient create; versioned edit; session B read; foreign tenant, role, stale version and forged tenant rejected',
   );
+  const originPath = `/api/patients/${patient.id}/origin`;
+  assert.deepEqual(await (await a.context.get(originPath)).json(), {
+    classification: 'PENDING',
+    version: 0,
+    reviewedAt: null,
+  });
+  assert.equal((await c.context.get(originPath)).status(), 404);
+  assert.equal(
+    (
+      await nurse.context.put(originPath, {
+        data: { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 0 },
+      })
+    ).status(),
+    403,
+  );
+  const reviewed = await mutate(
+    nurse,
+    originPath,
+    { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 0 },
+    200,
+    'PUT',
+  );
+  assert.equal(reviewed.version, 1);
+  assert.equal(reviewed.classification, 'REAL');
+  assert.equal(
+    (
+      await mutate(
+        nurse,
+        originPath,
+        { classification: 'REAL', reason: 'CONFIRMACION_EQUIPO', expectedVersion: 1 },
+        200,
+        'PUT',
+      )
+    ).version,
+    1,
+  );
+  await mutate(
+    nurse,
+    originPath,
+    { classification: 'TEST', reason: 'CORRECCION_CLASIFICACION', expectedVersion: 0 },
+    409,
+    'PUT',
+  );
+  assert.equal(
+    (
+      await admin.query(
+        'SELECT count(*)::int AS count FROM analiza.patient_origin_review_events WHERE organization_id=$1 AND patient_id=$2',
+        ['qa-org-a', patient.id],
+      )
+    ).rows[0].count,
+    1,
+  );
+  await page.goto(base + '/patients/' + encodeURIComponent(patient.id));
+  await page.getByLabel('Registro de prueba').check();
+  await page.getByRole('button', { name: 'Guardar clasificación' }).click();
+  await page.getByText('Estado actual: Prueba').waitFor();
+  assert.equal(
+    (
+      await admin.query(
+        'SELECT count(*)::int AS count FROM analiza.patient_origin_review_events WHERE organization_id=$1 AND patient_id=$2',
+        ['qa-org-a', patient.id],
+      )
+    ).rows[0].count,
+    2,
+  );
+  passed.push(
+    'Patient origin form: nurse permission, CSRF, tenant isolation, audited changes and idempotency',
+  );
   await mutate(a, '/api/operations', {
     command: 'configuration.save',
     entry: {
