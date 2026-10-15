@@ -6,8 +6,22 @@ contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
 pueden estar trabajando en el mismo VPS.
 
-**Actualización de feedback, 14 de octubre de 2026 (El Salvador):** la imagen
-web activa es `f82a4e44c0a6b1277b5bab081c973d88551b49a5`; la migración
+**Actualización posterior al feedback, 14 de octubre de 2026 (El Salvador):**
+la imagen web activa y saludable es
+`da68d1a9550f18009a327ac6bfe64cea8ce79714`. La base activa y el entorno
+del operador apuntan a `analiza_live_20261014`; la migración
+`033_purchase_orders.sql` está registrada. La tabla `analiza.purchase_orders`
+tiene RLS habilitado y forzado; `analiza_app` sólo tiene `SELECT/INSERT`.
+El despliegue tomó y comprobó el snapshot cifrado restic `67cb480b` antes de
+aplicar la migración. El reporte completo de pruebas y de los ocho reportes
+está en `docs/feedback/REVIEW_2026-10-14.md`. Vercel sigue redirigiendo al
+VPS. Conservar la imagen anterior `f82a4e44c0a6b1277b5bab081c973d88551b49a5`
+para reversión de la web; las migraciones `032` y `033` son aditivas y no se
+deben borrar borradores ni órdenes. TuVet permanece separado y no se modificó.
+
+**Actualización previa de feedback, 14 de octubre de 2026 (El Salvador):** la
+imagen web activa en ese momento era
+`f82a4e44c0a6b1277b5bab081c973d88551b49a5`; la migración
 `032_quote_form_drafts.sql` está aplicada en `analiza_live_20261014`. El
 operador en `secrets/operator.env` apunta ahora a esa misma base activa; antes
 apuntaba a `analiza_en_casa`, que ya no es la base de la web. El despliegue
@@ -72,8 +86,10 @@ público. La base activa en el contenedor
 `analiza-contabo-staging-database-1` es `analiza_live_20261014`. El servicio
 `analiza-contabo-staging-web-1` usa una imagen Next.js 16 de perfil `full`,
 modo PostgreSQL, registro público deshabilitado y seed demo deshabilitado.
-Su etiqueta de código verificada es `cd3203d`; la imagen del operador lleva
-el mismo SHA. El contenedor web se comprobó `healthy` tras desplegarlo.
+En el corte inicial, su etiqueta de código verificada era `cd3203d`; la imagen
+del operador llevaba el mismo SHA. Consultar la actualización superior para
+la etiqueta activa actual. El contenedor web se comprobó `healthy` tras cada
+despliegue documentado.
 Los archivos privados se guardan en `/opt/analiza-contabo-staging/files`, no en
 Vercel ni en una URL pública.
 
