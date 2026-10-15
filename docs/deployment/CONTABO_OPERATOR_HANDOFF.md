@@ -6,6 +6,42 @@ contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
 pueden estar trabajando en el mismo VPS.
 
+## GitHub antes de cada despliegue
+
+El cliente exige que **todo código, migración y configuración se suba a GitHub
+antes de desplegar**. Hacer commit y push a una rama `codex/*`, verificar con
+`git ls-remote` que el SHA remoto coincide con el commit seleccionado y crear
+el archivo de publicación desde ese commit exacto. Si el push o la
+verificación del SHA falla, no ejecutar `deploy-release.sh`. Tras desplegar,
+subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
+Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
+automáticamente.
+
+**Actualización posterior al feedback, 14 de octubre de 2026 (El Salvador):**
+la imagen web activa y saludable es
+`da68d1a9550f18009a327ac6bfe64cea8ce79714`. La base activa y el entorno
+del operador apuntan a `analiza_live_20261014`; la migración
+`033_purchase_orders.sql` está registrada. La tabla `analiza.purchase_orders`
+tiene RLS habilitado y forzado; `analiza_app` sólo tiene `SELECT/INSERT`.
+El despliegue tomó y comprobó el snapshot cifrado restic `67cb480b` antes de
+aplicar la migración. El reporte completo de pruebas y de los ocho reportes
+está en `docs/feedback/REVIEW_2026-10-14.md`. Vercel sigue redirigiendo al
+VPS. Conservar la imagen anterior `f82a4e44c0a6b1277b5bab081c973d88551b49a5`
+para reversión de la web; las migraciones `032` y `033` son aditivas y no se
+deben borrar borradores ni órdenes. TuVet permanece separado y no se modificó.
+
+**Actualización previa de feedback, 14 de octubre de 2026 (El Salvador):** la
+imagen web activa en ese momento era
+`f82a4e44c0a6b1277b5bab081c973d88551b49a5`; la migración
+`032_quote_form_drafts.sql` está aplicada en `analiza_live_20261014`. El
+operador en `secrets/operator.env` apunta ahora a esa misma base activa; antes
+apuntaba a `analiza_en_casa`, que ya no es la base de la web. El despliegue
+generó el snapshot restic `22399516`, comprobó el repositorio y verificó salud
+de la nueva web. El informe de pruebas y límites está en
+`docs/feedback/REVIEW_2026-10-14.md`. Conservar la imagen previa `cd3203d`
+para reversión de la web; la migración es aditiva y no se debe eliminar una
+tabla que pueda contener borradores.
+
 ## Acceso y capacidad
 
 | Recurso | Estado comprobado |
@@ -61,8 +97,10 @@ público. La base activa en el contenedor
 `analiza-contabo-staging-database-1` es `analiza_live_20261014`. El servicio
 `analiza-contabo-staging-web-1` usa una imagen Next.js 16 de perfil `full`,
 modo PostgreSQL, registro público deshabilitado y seed demo deshabilitado.
-Su etiqueta de código verificada es `cd3203d`; la imagen del operador lleva
-el mismo SHA. El contenedor web se comprobó `healthy` tras desplegarlo.
+En el corte inicial, su etiqueta de código verificada era `cd3203d`; la imagen
+del operador llevaba el mismo SHA. Consultar la actualización superior para
+la etiqueta activa actual. El contenedor web se comprobó `healthy` tras cada
+despliegue documentado.
 Los archivos privados se guardan en `/opt/analiza-contabo-staging/files`, no en
 Vercel ni en una URL pública.
 
@@ -155,12 +193,35 @@ la automatización externa posterior al corte.
 Docker 29.9, Node 24.13, npm 11, Nginx, Certbot, restic, UFW y PostgreSQL 18
 están instalados. El proyecto TuVet corre aparte bajo
 `/opt/tuvet-staging` y `tuvet-postgres.service`, sin puerto público ni acceso
-a los secretos de Analiza. Su base `tuvet_staging` tenía **cero tablas de
-usuario** en la revisión del 14 de octubre; no hay evidencia de que el socio
-haya migrado la aplicación o sus datos. No mover ni reiniciar sus recursos al migrar otro
-proyecto. `deploy` tiene sudo completo, por lo que cada nuevo proyecto debe
+a los secretos de Analiza. En la nueva revisión del 14 de octubre (hora de El
+Salvador), su base `tuvet_staging` tenía **21 tablas y datos cargados**; hay
+una entrega de código y respaldos en su chroot. Aún no existe un servicio web
+de TuVet habilitado ni un puerto público para la aplicación. No mover ni
+reiniciar sus recursos al migrar otro proyecto. `deploy` tiene sudo completo,
+por lo que cada nuevo proyecto debe
 tener sus propios directorios, usuarios, red, puertos, base, secretos y copia
 de seguridad. Reservar capacidad antes de instalar otra base o contenedores.
+
+El panel visual del VPS sólo se enciende por orden SSH y se sirve en
+`127.0.0.1:18090` mediante túnel; su código y guía están en
+`C:\Temp\contabo-vps-monitor`. El lanzador local
+`C:\Users\carlo\OneDrive\Escritorio\Abrir Panel VPS.cmd` arranca el colector
+`vps-monitor.service` y la web `vps-monitor-web.service`, abre el túnel y el
+navegador, y apaga ambos servicios al cerrar la sesión. Los servicios están
+deshabilitados al arranque; el colector tiene un límite de ocho horas por si
+la sesión local termina de forma anormal. Exporta métricas agregadas por
+proyecto sin dar acceso del navegador a Docker o a datos clínicos. El panel
+muestra consumo de recursos, no costos monetarios.
+
+En la revisión del 15 de octubre se comprobó que el archivo ext4 reservado
+para TuVet en `/var/lib/tuvet-guard/staging.ext4` ocupa **20 GiB** del disco
+raíz, aunque sólo unos **1.4 GiB** están usados dentro. El panel ahora lo
+atribuye a TuVet una sola vez. Se eliminaron exclusivamente `node_modules`
+reproducibles de cinco releases antiguos de Analiza y caché Docker de más de
+24 horas. Analiza quedó en unos **281 MiB** de directorio de producción y
+volumen PostgreSQL; su QA aislada y las imágenes Docker se muestran aparte.
+El VPS tenía unos **160 GiB libres** después de la limpieza. La aplicación
+Analiza y PostgreSQL permanecieron saludables; no se modificó TuVet.
 
 Para migrar otro proyecto en este VPS: inventariar primero `docker ps`,
 `systemctl list-units --type=service`, `ss -ltnp`, `df -h /` y `free -h`;

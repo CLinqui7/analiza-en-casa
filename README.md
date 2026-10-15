@@ -2,9 +2,15 @@
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
-PostgreSQL 18, incluido registro individual y cuestionario. La variante activa de
-Vercel comprobada el 2026-10-13 usa PostgreSQL; también permanece código histórico
-para MongoDB.
+PostgreSQL 18, incluido registro individual y cuestionario. La aplicación
+pública opera en Contabo con PostgreSQL; la URL anterior de Vercel redirige al
+VPS. También permanece código histórico para MongoDB.
+
+**Regla de publicación:** antes de cualquier despliegue, hacer commit y push
+del código, migraciones y configuración a una rama `codex/*` de GitHub.
+Verificar que el SHA remoto contiene exactamente el SHA que se va a desplegar.
+Si el push falla, detener el despliegue. Después, subir también el informe de
+verificación. Nunca incluir contraseñas, claves ni archivos privados en Git.
 
 **Para desplegar en Cloud Run / Cloud SQL:**
 [guía del ingeniero, imágenes y variables](docs/deployment/CLOUD_SQL_HANDOFF.md).
@@ -12,17 +18,16 @@ para MongoDB.
 **Para desplegar en Ubuntu / Docker / PostgreSQL local:**
 [guía self-hosted](docs/deployment/UBUNTU_SELF_HOSTED.md).
 
-**Segunda instancia aislada en Contabo:**
-[estado y acceso privado](docs/deployment/CONTABO_DEPLOYMENT.md),
-[auditoría y límites de la migración](docs/deployment/CONTABO_FINAL_REPORT.md).
+**Instancia activa en Contabo:**
+[guía operativa vigente](docs/deployment/CONTABO_OPERATOR_HANDOFF.md),
+[revisión del feedback](docs/feedback/REVIEW_2026-10-14.md).
 
 **Para preparar un VPS Hostinger con la navegación completa:**
 [lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
 
-**Estado de esta rama:** la instancia Contabo está desplegada de forma privada;
-la migración de datos clínicos y el cambio de dominio siguen pendientes. Vercel
-continúa con su despliegue independiente. Las pruebas sintéticas de integración
-se ejecutan en contenedores descartables separados de la base operativa.
+**Estado de esta rama:** la aplicación pública y su base PostgreSQL están en
+Contabo. El dominio propio sigue pendiente; Vercel sólo redirige al VPS. Las
+pruebas de escritura usan datos sintéticos en una organización QA separada.
 
 ## Registro, cuestionario y migraciones
 

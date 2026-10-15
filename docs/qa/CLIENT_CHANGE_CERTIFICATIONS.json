@@ -88,21 +88,23 @@
     },
     "CR-011": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "fc47b204b61aa1aa004bffc22834f7bbddd001c6366be423c6e87f106c3980ea",
+      "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
+      "functional_fingerprint": "b6aecf7cc8808210be7c15af34937da699c557688f940935efa55930a3e9ea20",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones."
     },
     "CR-012": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "d1ffda9ad04823897aaaf017ef7ea4a4e6bd95968031b2cfcf18236f9af650ac",
+      "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
+      "functional_fingerprint": "b68d886d00fb2b59fe6139255cb2d489439cf0542409674b1bd1b26c39df71ba",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
       ],
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. Huella funcional recalculada 2026-10-14 tras el autoguardado; la selección y actualización de pacientes permanece en la regresión de cotizaciones."
     },
     "CR-013": {
       "implementation_sha": null,

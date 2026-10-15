@@ -299,6 +299,13 @@ const navigation: NavigationGroup[] = [
         permission: 'purchases:read',
         actionId: 'PURCHASE-NAVIGATE',
       },
+      {
+        label: 'Órdenes a proveedores',
+        icon: 'purchases',
+        href: '/purchase-orders',
+        permission: 'purchases:read',
+        actionId: 'PURCHASE-ORDERS-NAVIGATE',
+      },
     ],
   },
   {
