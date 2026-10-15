@@ -193,12 +193,21 @@ la automatización externa posterior al corte.
 Docker 29.9, Node 24.13, npm 11, Nginx, Certbot, restic, UFW y PostgreSQL 18
 están instalados. El proyecto TuVet corre aparte bajo
 `/opt/tuvet-staging` y `tuvet-postgres.service`, sin puerto público ni acceso
-a los secretos de Analiza. Su base `tuvet_staging` tenía **cero tablas de
-usuario** en la revisión del 14 de octubre; no hay evidencia de que el socio
-haya migrado la aplicación o sus datos. No mover ni reiniciar sus recursos al migrar otro
-proyecto. `deploy` tiene sudo completo, por lo que cada nuevo proyecto debe
+a los secretos de Analiza. En la nueva revisión del 14 de octubre (hora de El
+Salvador), su base `tuvet_staging` tenía **21 tablas y datos cargados**; hay
+una entrega de código y respaldos en su chroot. Aún no existe un servicio web
+de TuVet habilitado ni un puerto público para la aplicación. No mover ni
+reiniciar sus recursos al migrar otro proyecto. `deploy` tiene sudo completo,
+por lo que cada nuevo proyecto debe
 tener sus propios directorios, usuarios, red, puertos, base, secretos y copia
 de seguridad. Reservar capacidad antes de instalar otra base o contenedores.
+
+El panel visual del VPS se sirve sólo en `127.0.0.1:18090` mediante túnel SSH;
+su código y guía están en `C:\Temp\contabo-vps-monitor`. El lanzador local
+`C:\Users\carlo\OneDrive\Escritorio\Abrir Panel VPS.cmd` abre el túnel y el
+navegador. El colector `vps-monitor.service` exporta métricas agregadas por
+proyecto sin dar acceso del navegador a Docker o a datos clínicos. El panel
+muestra consumo de recursos, no costos monetarios.
 
 Para migrar otro proyecto en este VPS: inventariar primero `docker ps`,
 `systemctl list-units --type=service`, `ss -ltnp`, `df -h /` y `free -h`;
