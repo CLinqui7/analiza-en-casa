@@ -213,6 +213,16 @@ la sesión local termina de forma anormal. Exporta métricas agregadas por
 proyecto sin dar acceso del navegador a Docker o a datos clínicos. El panel
 muestra consumo de recursos, no costos monetarios.
 
+En la revisión del 15 de octubre se comprobó que el archivo ext4 reservado
+para TuVet en `/var/lib/tuvet-guard/staging.ext4` ocupa **20 GiB** del disco
+raíz, aunque sólo unos **1.4 GiB** están usados dentro. El panel ahora lo
+atribuye a TuVet una sola vez. Se eliminaron exclusivamente `node_modules`
+reproducibles de cinco releases antiguos de Analiza y caché Docker de más de
+24 horas. Analiza quedó en unos **281 MiB** de directorio de producción y
+volumen PostgreSQL; su QA aislada y las imágenes Docker se muestran aparte.
+El VPS tenía unos **160 GiB libres** después de la limpieza. La aplicación
+Analiza y PostgreSQL permanecieron saludables; no se modificó TuVet.
+
 Para migrar otro proyecto en este VPS: inventariar primero `docker ps`,
 `systemctl list-units --type=service`, `ss -ltnp`, `df -h /` y `free -h`;
 asignar un directorio y una identidad distintos, un puerto de loopback libre,
