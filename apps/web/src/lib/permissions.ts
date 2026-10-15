@@ -197,6 +197,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/agenda', permission: 'agenda:read' },
   { prefix: '/inventory', permission: 'inventory:read' },
   { prefix: '/purchases', permission: 'purchases:read' },
+  { prefix: '/purchase-orders', permission: 'purchases:read' },
   { prefix: '/catalogs', permission: 'catalogs:read' },
   { prefix: '/insurers', permission: 'catalogs:read' },
   { prefix: '/reports', permission: 'reports:read' },

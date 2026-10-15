@@ -496,21 +496,26 @@ export default function PurchasesPage() {
           </p>
         </div>
         {can('purchases:write') ? (
-          <Button
-            data-action-id="PURCHASE-CREATE"
-            disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
-            onClick={() => {
-              setMessage(null);
-              setEditing(null);
-              setQueuedLines([]);
-              setInvoiceGroupId(crypto.randomUUID());
-              form.reset();
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Nueva compra
-          </Button>
+          <div className="action-row">
+            <Link className="action-link-button action-link-button--inline" href="/purchase-orders">
+              Órdenes a proveedores
+            </Link>
+            <Button
+              data-action-id="PURCHASE-CREATE"
+              disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
+              onClick={() => {
+                setMessage(null);
+                setEditing(null);
+                setQueuedLines([]);
+                setInvoiceGroupId(crypto.randomUUID());
+                form.reset();
+                setOpen(true);
+              }}
+              type="button"
+            >
+              Nueva compra
+            </Button>
+          </div>
         ) : null}
       </header>
       {message ? (

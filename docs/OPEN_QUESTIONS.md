@@ -372,6 +372,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ### Feedback nuevo · 2026-10-14
 
+- `FEEDBACK-27D5919C`: para órdenes a proveedores se usa una referencia interna `OC-<UUID>`, fecha de emisión y precios de referencia USD ingresados por el usuario; el documento no es factura ni recibe inventario. Confirmar si se requiere numeración secuencial aprobada, otra moneda, condiciones comerciales, aprobación interna o envío automático al proveedor antes de activar esas capacidades. No inferir impuestos ni precios del catálogo.
 - `FEEDBACK-82AA73E0`: el cliente indicó expresamente que **no se retiren** los campos obligatorios del alta de médicos, incluido DUI. Conservar su validación actual; no implementar la solicitud anterior de hacer opcionales DUI y dirección.
 - `FEEDBACK-E160AC3B` y `FEEDBACK-B26F0653`: la lista de compras se agrupa por identificador de factura y permite abrir sus líneas. Para producir una factura electrónica o fiscal real todavía se necesitan campos, emisor, numeración, impuestos y proceso de anulación autorizados; la vista agrupada no implica emisión fiscal.
 - `FEEDBACK-8B7489AB`: la revisión existente copia los renglones de una cotización enviada, crea una versión nueva y evita duplicar la cuenta por cobrar. Confirmar si la extensión de días debe reemplazar el total de la misma cotización o generar un cargo independiente antes de crear otra cadena contable.
