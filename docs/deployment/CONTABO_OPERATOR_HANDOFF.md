@@ -202,10 +202,14 @@ por lo que cada nuevo proyecto debe
 tener sus propios directorios, usuarios, red, puertos, base, secretos y copia
 de seguridad. Reservar capacidad antes de instalar otra base o contenedores.
 
-El panel visual del VPS se sirve sólo en `127.0.0.1:18090` mediante túnel SSH;
-su código y guía están en `C:\Temp\contabo-vps-monitor`. El lanzador local
-`C:\Users\carlo\OneDrive\Escritorio\Abrir Panel VPS.cmd` abre el túnel y el
-navegador. El colector `vps-monitor.service` exporta métricas agregadas por
+El panel visual del VPS sólo se enciende por orden SSH y se sirve en
+`127.0.0.1:18090` mediante túnel; su código y guía están en
+`C:\Temp\contabo-vps-monitor`. El lanzador local
+`C:\Users\carlo\OneDrive\Escritorio\Abrir Panel VPS.cmd` arranca el colector
+`vps-monitor.service` y la web `vps-monitor-web.service`, abre el túnel y el
+navegador, y apaga ambos servicios al cerrar la sesión. Los servicios están
+deshabilitados al arranque; el colector tiene un límite de ocho horas por si
+la sesión local termina de forma anormal. Exporta métricas agregadas por
 proyecto sin dar acceso del navegador a Docker o a datos clínicos. El panel
 muestra consumo de recursos, no costos monetarios.
 
