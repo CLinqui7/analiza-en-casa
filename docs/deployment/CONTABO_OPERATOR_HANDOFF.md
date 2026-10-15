@@ -6,6 +6,17 @@ contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
 pueden estar trabajando en el mismo VPS.
 
+## GitHub antes de cada despliegue
+
+El cliente exige que **todo código, migración y configuración se suba a GitHub
+antes de desplegar**. Hacer commit y push a una rama `codex/*`, verificar con
+`git ls-remote` que el SHA remoto coincide con el commit seleccionado y crear
+el archivo de publicación desde ese commit exacto. Si el push o la
+verificación del SHA falla, no ejecutar `deploy-release.sh`. Tras desplegar,
+subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
+Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
+automáticamente.
+
 **Actualización posterior al feedback, 14 de octubre de 2026 (El Salvador):**
 la imagen web activa y saludable es
 `da68d1a9550f18009a327ac6bfe64cea8ce79714`. La base activa y el entorno
