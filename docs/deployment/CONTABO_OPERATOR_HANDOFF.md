@@ -6,6 +6,17 @@ contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
 pueden estar trabajando en el mismo VPS.
 
+**Actualización de feedback, 14 de octubre de 2026 (El Salvador):** la imagen
+web activa es `f82a4e44c0a6b1277b5bab081c973d88551b49a5`; la migración
+`032_quote_form_drafts.sql` está aplicada en `analiza_live_20261014`. El
+operador en `secrets/operator.env` apunta ahora a esa misma base activa; antes
+apuntaba a `analiza_en_casa`, que ya no es la base de la web. El despliegue
+generó el snapshot restic `22399516`, comprobó el repositorio y verificó salud
+de la nueva web. El informe de pruebas y límites está en
+`docs/feedback/REVIEW_2026-10-14.md`. Conservar la imagen previa `cd3203d`
+para reversión de la web; la migración es aditiva y no se debe eliminar una
+tabla que pueda contener borradores.
+
 ## Acceso y capacidad
 
 | Recurso | Estado comprobado |
