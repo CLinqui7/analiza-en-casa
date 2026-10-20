@@ -1,6 +1,6 @@
 # Analiza en Casa en Contabo: entrega para el siguiente Codex
 
-Estado comprobado el 14 de octubre de 2026 (UTC). Este documento sustituye el
+Estado comprobado el 20 de octubre de 2026. Este documento sustituye el
 estado de despliegue aplazado descrito en `MIGRATION_HANDOFF.md`. No contiene
 contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
@@ -16,6 +16,22 @@ verificación del SHA falla, no ejecutar `deploy-release.sh`. Tras desplegar,
 subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
 Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
 automáticamente.
+
+**Actualización de feedback, 20 de octubre de 2026 (El Salvador):** la imagen
+web activa y saludable es `1c298ca39a0db4df30f2ab9b8fae99405652ef5c`,
+subida y comprobada en GitHub antes del despliegue. La base activa continúa
+siendo `analiza_live_20261014`. Se aplicaron las migraciones
+`034_quote_decisions.sql` y `035_satisfaction_surveys.sql`; sus tablas tienen
+RLS habilitado y forzado. La salud pública devolvió HTTP 200. Tras solucionar
+un bloqueo restic caducado y verificar el repositorio, la copia cifrada de
+`analiza-contabo-backup.service` terminó con `Result=success`; el snapshot más
+reciente es `44ec62e3` y el temporizador está activo. La próxima ejecución
+automática del timer y la tarea externa de Windows siguen pendientes de
+comprobación; esta última registró `0xC000013A` el 19 de octubre. El informe
+del lote y los diez estados de feedback están en
+`docs/feedback/REVIEW_2026-10-20.md`. La imagen anterior
+`da68d1a9550f18009a327ac6bfe64cea8ce79714` se conserva para reversión
+de la web; las migraciones son aditivas y los registros no deben borrarse.
 
 **Actualización posterior al feedback, 14 de octubre de 2026 (El Salvador):**
 la imagen web activa y saludable es
@@ -175,8 +191,9 @@ ufw status
 ```
 
 Las copias cifradas con restic están en
-`/opt/analiza-contabo-staging/backups/restic`. El snapshot comprobado tras el
-despliegue final es `a6fdcfd7`: incluye la base activa, archivos privados, configuración
+`/opt/analiza-contabo-staging/backups/restic`. El snapshot comprobado tras la
+migración inicial fue `a6fdcfd7`; el más reciente se indica en la actualización
+del 20 de octubre. Incluye la base activa, archivos privados, configuración
 de despliegue, secretos cifrados dentro del repositorio restic, certificado y
 configuración Nginx. El servicio `analiza-contabo-backup.service` y su timer
 están activos; el servicio detiene brevemente la web durante la copia y luego
