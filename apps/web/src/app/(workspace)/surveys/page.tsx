@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Panel } from '@analiza/ui';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
@@ -11,8 +12,9 @@ type Summary = {
   responded: number;
   questions: { question: string; counts: Record<string, number> }[];
   comments: string[];
+  respondents: { name: string; respondedAt: string }[];
 };
-const blank: Summary = { invited: 0, responded: 0, questions: [], comments: [] };
+const blank: Summary = { invited: 0, responded: 0, questions: [], comments: [], respondents: [] };
 
 export default function SurveysPage() {
   const { session } = useAuth();
@@ -24,25 +26,33 @@ export default function SurveysPage() {
   const [kind, setKind] = useState<SurveyKind>('PATIENT');
   const [targetId, setTargetId] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
-  const [consentConfirmed, setConsentConfirmed] = useState(false);
+  const [shareMode, setShareMode] = useState<'LINK' | 'QR'>('LINK');
   const [inviteUrl, setInviteUrl] = useState('');
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copyMessage, setCopyMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canInvite = ['ADMIN', 'MANAGER', 'WEBMASTER'].includes(session?.role ?? '');
   const targets = kind === 'PATIENT' ? patients : doctors;
-  const selected = targets.find((target) => target.id === targetId);
-  const phone = selected?.phone ?? '';
-  const digits = phone.replace(/\D/g, '');
-  const whatsappNumber =
-    digits.length === 8
-      ? `503${digits}`
-      : digits.startsWith('503') && digits.length === 11
-        ? digits
-        : '';
-  const whatsappText = encodeURIComponent(
-    'Analiza en Casa le invita a responder una encuesta de satisfacción. Puede abrir este enlace seguro: ' +
-      inviteUrl,
-  );
+
+  useEffect(() => {
+    if (!inviteUrl || shareMode !== 'QR') return;
+    let active = true;
+    void import('qrcode')
+      .then(({ default: QRCode }) =>
+        QRCode.toDataURL(inviteUrl, { errorCorrectionLevel: 'M', margin: 2, width: 320 }),
+      )
+      .then((value) => {
+        if (active) setQrDataUrl(value);
+      })
+      .catch(() => {
+        if (active)
+          setError('No se pudo generar el QR. Seleccione «Enlace para copiar» para compartirlo.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [inviteUrl, shareMode]);
 
   async function refresh() {
     const response = await fetch('/api/surveys', { cache: 'no-store' });
@@ -69,32 +79,32 @@ export default function SurveysPage() {
   }, []);
 
   async function createInvitation() {
-    if (!targetId || !expiresAt || !consentConfirmed || !phone.trim()) {
-      setError(
-        'Seleccione destinatario con teléfono, vencimiento y confirme número y consentimiento.',
-      );
+    if (!expiresAt) {
+      setError('Seleccione cuándo vencerá este enlace de un solo uso.');
       return;
     }
     setBusy(true);
     setError(null);
     setInviteUrl('');
+    setQrDataUrl('');
+    setCopyMessage('');
     try {
       const response = await fetch('/api/surveys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
         body: JSON.stringify({
           kind,
-          targetId,
+          ...(targetId ? { targetId } : {}),
           expiresAt: new Date(expiresAt).toISOString(),
-          consentConfirmed,
         }),
       });
       if (!response.ok)
-        throw new Error('No se pudo crear el enlace. Verifique el número y la fecha.');
+        throw new Error('No se pudo crear la invitación. Verifique el vencimiento.');
       const payload = (await response.json()) as { url: string };
       setInviteUrl(payload.url);
-      setConsentConfirmed(false);
-      await refresh();
+      void refresh().catch(() =>
+        setError('La invitación se creó, pero no se pudo actualizar el resumen.'),
+      );
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo crear el enlace.');
     } finally {
@@ -116,10 +126,11 @@ export default function SurveysPage() {
       ) : null}
       {canInvite ? (
         <Panel>
-          <h2>Crear invitación segura</h2>
+          <h2>Crear enlace o QR</h2>
           <p className="field-help">
-            Verifique el teléfono y el consentimiento antes de abrir WhatsApp. El mensaje contiene
-            sólo un enlace; el envío se confirma en WhatsApp.
+            Cree una invitación por persona. El formulario se abre en una pantalla separada y sólo
+            puede contestarse una vez. Comparta el enlace o el QR usted mismo; el sistema no envía
+            mensajes.
           </p>
           <div className="form-grid">
             <label>
@@ -130,6 +141,7 @@ export default function SurveysPage() {
                   setKind(event.target.value as SurveyKind);
                   setTargetId('');
                   setInviteUrl('');
+                  setQrDataUrl('');
                 }}
                 value={kind}
               >
@@ -138,16 +150,17 @@ export default function SurveysPage() {
               </select>
             </label>
             <label>
-              Destinatario
+              Destinatario del directorio (opcional)
               <select
                 data-action-id="SURVEY-TARGET"
                 onChange={(event) => {
                   setTargetId(event.target.value);
                   setInviteUrl('');
+                  setQrDataUrl('');
                 }}
                 value={targetId}
               >
-                <option value="">Seleccione</option>
+                <option value="">Compartir manualmente sin elegir registro</option>
                 {targets.map((target) => (
                   <option key={target.id} value={target.id}>
                     {target.fullName}
@@ -155,9 +168,6 @@ export default function SurveysPage() {
                 ))}
               </select>
             </label>
-            <p>
-              Teléfono registrado: <strong>{phone || 'No disponible'}</strong>
-            </p>
             <label>
               Vencimiento del enlace
               <input
@@ -167,16 +177,29 @@ export default function SurveysPage() {
                 value={expiresAt}
               />
             </label>
-            <label>
-              <input
-                checked={consentConfirmed}
-                data-action-id="SURVEY-CONSENT"
-                onChange={(event) => setConsentConfirmed(event.target.checked)}
-                type="checkbox"
-              />{' '}
-              Confirmo que verifiqué este número y que el destinatario consintió recibir la
-              encuesta.
-            </label>
+            <fieldset>
+              <legend>Cómo compartir</legend>
+              <label>
+                <input
+                  checked={shareMode === 'LINK'}
+                  data-action-id="SURVEY-SHARE-LINK"
+                  name="survey-share-mode"
+                  onChange={() => setShareMode('LINK')}
+                  type="radio"
+                />{' '}
+                Enlace para copiar
+              </label>
+              <label>
+                <input
+                  checked={shareMode === 'QR'}
+                  data-action-id="SURVEY-SHARE-QR"
+                  name="survey-share-mode"
+                  onChange={() => setShareMode('QR')}
+                  type="radio"
+                />{' '}
+                Código QR para mostrar o descargar
+              </label>
+            </fieldset>
           </div>
           <Button
             data-action-id="SURVEY-CREATE"
@@ -184,32 +207,53 @@ export default function SurveysPage() {
             onClick={() => void createInvitation()}
             type="button"
           >
-            {busy ? 'Creando…' : 'Crear enlace'}
+            {busy ? 'Creando…' : 'Crear invitación'}
           </Button>
           {inviteUrl ? (
             <div className="notice success" role="status">
-              <p>Enlace creado. Compártalo sólo con el destinatario verificado.</p>
-              <div className="action-row">
-                <Button
-                  className="button-secondary"
-                  onClick={() => void navigator.clipboard.writeText(inviteUrl)}
-                  type="button"
-                >
-                  Copiar enlace
-                </Button>
-                {whatsappNumber ? (
-                  <a
-                    className="action-link-button"
-                    href={`https://wa.me/${whatsappNumber}?text=${whatsappText}`}
-                    rel="noopener noreferrer"
-                    target="_blank"
+              <p>Invitación creada. Entréguela sólo a la persona elegida antes de que venza.</p>
+              {shareMode === 'LINK' ? (
+                <>
+                  <label>
+                    Enlace de la encuesta
+                    <textarea readOnly rows={3} value={inviteUrl} />
+                  </label>
+                  <Button
+                    className="button-secondary"
+                    onClick={() =>
+                      void navigator.clipboard
+                        .writeText(inviteUrl)
+                        .then(() => setCopyMessage('Enlace copiado.'))
+                        .catch(() => setCopyMessage('Seleccione y copie el enlace mostrado.'))
+                    }
+                    type="button"
                   >
-                    Abrir WhatsApp para enviar
-                  </a>
-                ) : (
-                  <p>Revise el formato internacional del teléfono antes de enviarlo.</p>
-                )}
-              </div>
+                    Copiar enlace
+                  </Button>
+                  {copyMessage ? <p role="status">{copyMessage}</p> : null}
+                </>
+              ) : qrDataUrl ? (
+                <div>
+                  <Image
+                    alt="Código QR de la invitación a la encuesta"
+                    height={320}
+                    src={qrDataUrl}
+                    unoptimized
+                    width={320}
+                  />
+                  <p>
+                    <a download="encuesta-analiza-qr.png" href={qrDataUrl}>
+                      Descargar QR
+                    </a>
+                  </p>
+                </div>
+              ) : (
+                <p>Preparando QR…</p>
+              )}
+              <p className="field-help">
+                Guarde ahora el enlace o QR: por seguridad el código no se recupera después de
+                cerrar esta pantalla.
+              </p>
             </div>
           ) : null}
         </Panel>
@@ -242,6 +286,18 @@ export default function SurveysPage() {
               <ul>
                 {summaries.DOCTOR.comments.map((comment, index) => (
                   <li key={`${index}-${comment.slice(0, 20)}`}>{comment}</li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+          {surveyKind === 'DOCTOR' && summaries.DOCTOR.respondents.length ? (
+            <details>
+              <summary>
+                Nombres declarados por médicos ({summaries.DOCTOR.respondents.length})
+              </summary>
+              <ul>
+                {summaries.DOCTOR.respondents.map((respondent, index) => (
+                  <li key={`${respondent.respondedAt}-${index}`}>{respondent.name}</li>
                 ))}
               </ul>
             </details>

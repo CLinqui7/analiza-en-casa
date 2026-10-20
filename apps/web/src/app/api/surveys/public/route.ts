@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import {
+  doctorRespondentNameSchema,
   surveyPublicInputSchema,
   surveyQuestions,
   validSurveyAnswers,
@@ -18,6 +19,7 @@ const inputSchema = z.discriminatedUnion('action', [
   surveyPublicInputSchema.extend({
     action: z.literal('SUBMIT'),
     answers: z.array(z.string().max(1000)).max(7),
+    respondentName: doctorRespondentNameSchema.optional(),
   }),
 ]);
 
@@ -36,15 +38,22 @@ export async function POST(request: NextRequest) {
         kind: SurveyKind;
         expires_at: Date;
         response: unknown;
+        respondent_name: string | null;
       }>(
-        'SELECT id,kind,expires_at,response FROM analiza.survey_invitations WHERE organization_id=$1 AND token_hash=$2 FOR UPDATE',
+        'SELECT id,kind,expires_at,response,respondent_name FROM analiza.survey_invitations WHERE organization_id=$1 AND token_hash=$2 FOR UPDATE',
         [input.organizationId, hash],
       );
       const invitation = rows.rows[0];
       if (!invitation) return null;
+      if (
+        input.action === 'SUBMIT' &&
+        (invitation.kind === 'DOCTOR' ? !input.respondentName : Boolean(input.respondentName))
+      )
+        return null;
       if (invitation.response) {
         return input.action === 'SUBMIT' &&
           validSurveyAnswers(invitation.kind, input.answers) &&
+          (invitation.respondent_name ?? null) === (input.respondentName ?? null) &&
           JSON.stringify(invitation.response) === JSON.stringify(input.answers)
           ? { accepted: true }
           : null;
@@ -54,8 +63,13 @@ export async function POST(request: NextRequest) {
         return { kind: invitation.kind, questions: surveyQuestions[invitation.kind] };
       if (!validSurveyAnswers(invitation.kind, input.answers)) return null;
       await client.query(
-        'UPDATE analiza.survey_invitations SET response=$3::jsonb,responded_at=now() WHERE organization_id=$1 AND id=$2 AND response IS NULL',
-        [input.organizationId, invitation.id, JSON.stringify(input.answers)],
+        'UPDATE analiza.survey_invitations SET response=$3::jsonb,respondent_name=$4,responded_at=now() WHERE organization_id=$1 AND id=$2 AND response IS NULL',
+        [
+          input.organizationId,
+          invitation.id,
+          JSON.stringify(input.answers),
+          input.respondentName ?? null,
+        ],
       );
       return { accepted: true };
     });

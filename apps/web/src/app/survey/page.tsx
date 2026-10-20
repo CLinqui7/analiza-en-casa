@@ -9,6 +9,7 @@ export default function PublicSurveyPage() {
   const [kind, setKind] = useState<SurveyKind | null>(null);
   const [questions, setQuestions] = useState<readonly SurveyQuestion[]>([]);
   const [answers, setAnswers] = useState<string[]>([]);
+  const [respondentName, setRespondentName] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,10 @@ export default function PublicSurveyPage() {
   }, []);
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (kind === 'DOCTOR' && respondentName.trim().length < 2) {
+      setError('Escriba el nombre del médico.');
+      return;
+    }
     if (questions.some((question, index) => question.options && !answers[index])) {
       setError('Responda todas las preguntas de selección.');
       return;
@@ -50,7 +55,12 @@ export default function PublicSurveyPage() {
       const response = await fetch('/api/surveys/public', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'SUBMIT', ...link.current, answers }),
+        body: JSON.stringify({
+          action: 'SUBMIT',
+          ...link.current,
+          answers,
+          ...(kind === 'DOCTOR' ? { respondentName: respondentName.trim() } : {}),
+        }),
       });
       if (!response.ok) throw new Error();
       setDone(true);
@@ -80,6 +90,21 @@ export default function PublicSurveyPage() {
               personales en comentarios.
             </p>
             <form onSubmit={(event) => void submit(event)}>
+              {kind === 'DOCTOR' ? (
+                <label style={{ display: 'block', marginBottom: '1.5rem' }}>
+                  Nombre del médico
+                  <input
+                    autoComplete="name"
+                    maxLength={120}
+                    minLength={2}
+                    onChange={(event) => setRespondentName(event.target.value)}
+                    required
+                    type="text"
+                    value={respondentName}
+                  />
+                  <small>El equipo autorizado podrá ver el nombre que escriba.</small>
+                </label>
+              ) : null}
               {questions.map((question, index) => (
                 <fieldset key={question.text} style={{ marginBottom: '1.5rem' }}>
                   <legend>

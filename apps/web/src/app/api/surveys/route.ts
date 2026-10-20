@@ -43,7 +43,7 @@ function failure(error: unknown) {
     {
       error:
         status === 400
-          ? 'Verifique destinatario, consentimiento y vencimiento.'
+          ? 'Verifique el tipo de encuesta, destinatario y vencimiento.'
           : status === 401
             ? 'Inicie sesión para continuar.'
             : status === 403
@@ -58,8 +58,13 @@ export async function GET(request: NextRequest) {
   try {
     const actor = await actorFor(request, false);
     const result = await transaction(postgresPool(), actor, async (client) => {
-      const rows = await client.query<{ kind: string; response: unknown }>(
-        'SELECT kind,response FROM analiza.survey_invitations WHERE organization_id=$1 ORDER BY created_at DESC',
+      const rows = await client.query<{
+        kind: string;
+        response: unknown;
+        respondent_name: string | null;
+        responded_at: Date | null;
+      }>(
+        'SELECT kind,response,respondent_name,responded_at FROM analiza.survey_invitations WHERE organization_id=$1 ORDER BY created_at DESC',
         [actor.organizationId],
       );
       return Object.fromEntries(
@@ -79,6 +84,21 @@ export async function GET(request: NextRequest) {
                   ? responses
                       .map((answers) => answers[6]?.trim())
                       .filter(Boolean)
+                      .slice(0, 100)
+                  : [],
+              respondents:
+                kind === 'DOCTOR' && ['ADMIN', 'MANAGER', 'WEBMASTER'].includes(actor.role)
+                  ? subset
+                      .filter(
+                        (row) =>
+                          validSurveyAnswers('DOCTOR', row.response) &&
+                          row.respondent_name &&
+                          row.responded_at,
+                      )
+                      .map((row) => ({
+                        name: row.respondent_name,
+                        respondedAt: row.responded_at!.toISOString(),
+                      }))
                       .slice(0, 100)
                   : [],
             },
@@ -104,12 +124,14 @@ export async function POST(request: NextRequest) {
     const token = randomBytes(32).toString('base64url');
     const tokenHash = createHash('sha256').update(token).digest('hex');
     await transaction(postgresPool(), actor, async (client) => {
-      const table = input.kind === 'PATIENT' ? 'patients' : 'doctors';
-      const target = await client.query<{ body: { phone?: string } }>(
-        `SELECT body FROM analiza.${table} WHERE organization_id=$1 AND id=$2`,
-        [actor.organizationId, input.targetId],
-      );
-      if (!target.rows[0]?.body.phone?.trim()) throw new InvalidInvitation();
+      if (input.targetId) {
+        const table = input.kind === 'PATIENT' ? 'patients' : 'doctors';
+        const target = await client.query(
+          `SELECT 1 FROM analiza.${table} WHERE organization_id=$1 AND id=$2`,
+          [actor.organizationId, input.targetId],
+        );
+        if (!target.rowCount) throw new InvalidInvitation();
+      }
       const inviteId = randomUUID();
       await client.query(
         'INSERT INTO analiza.survey_invitations(organization_id,id,kind,target_id,token_hash,expires_at,created_by) VALUES($1,$2,$3,$4,$5,$6,$7)',
@@ -117,7 +139,7 @@ export async function POST(request: NextRequest) {
           actor.organizationId,
           inviteId,
           input.kind,
-          input.targetId,
+          input.targetId ?? null,
           tokenHash,
           expiry,
           actor.userId,

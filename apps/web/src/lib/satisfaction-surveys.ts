@@ -70,9 +70,8 @@ export const surveyQuestions: Record<SurveyKind, readonly SurveyQuestion[]> = {
 export const surveyInvitationInputSchema = z
   .object({
     kind: surveyKindSchema,
-    targetId: z.string().trim().min(1).max(200),
+    targetId: z.string().trim().min(1).max(200).optional(),
     expiresAt: z.string().datetime(),
-    consentConfirmed: z.literal(true),
   })
   .strict();
 
@@ -82,6 +81,8 @@ export const surveyPublicInputSchema = z
     token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
   })
   .strict();
+
+export const doctorRespondentNameSchema = z.string().trim().min(2).max(120);
 
 export function validSurveyAnswers(kind: SurveyKind, answers: unknown): answers is string[] {
   if (!Array.isArray(answers) || answers.length !== surveyQuestions[kind].length) return false;
