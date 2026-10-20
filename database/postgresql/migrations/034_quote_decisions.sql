@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS analiza.quote_decisions (
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (organization_id,id),
   FOREIGN KEY (organization_id,quote_id) REFERENCES analiza.quotes(organization_id,id),
-  CONSTRAINT quote_decisions_reason_check CHECK (
+  CONSTRAINT quote_decisions_state_reason_check CHECK (
     (decision='APPROVED' AND reason IS NULL) OR
     (decision='NOT_APPROVED' AND reason IS NOT NULL)
   )
