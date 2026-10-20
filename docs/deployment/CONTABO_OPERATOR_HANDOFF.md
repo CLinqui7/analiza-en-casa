@@ -17,6 +17,21 @@ subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
 Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
 automáticamente.
 
+**Campos de médico, 20 de octubre de 2026 (El Salvador):** la imagen web activa
+y sana es `01ef03fe6865b4d6f925b66eff31a874670d807a`, subida y comprobada
+en GitHub antes del despliegue. La base activa sigue siendo
+`analiza_live_20261014`; este cambio no agregó migraciones porque el perfil del
+médico se conserva en el JSON existente. El despliegue tomó y verificó el
+snapshot cifrado `64cbffc6`; la URL pública respondió HTTP 200. Se comprobó en
+la organización sintética de QA el alta sin DUI ni dirección, el teléfono fijo
+obligatorio, campos opcionales, edición con versión y pantalla conectada. Los
+reportes `6486d7b8` y `82aa73e0` quedaron resueltos en la organización
+principal con la instrucción actualizada; no se importaron médicos antiguos.
+Detalle en `docs/feedback/DOCTOR_FIELDS_2026-10-20.md`. La imagen anterior
+`b1db386ada0c3435827f2454bb004ad3dbdcdd2e` se conserva para reversión
+de la web; el timer de respaldo sigue activo, pero la ejecución automática
+posterior al cambio todavía no está verificada.
+
 **Estado de encuestas al cierre del 20 de octubre de 2026 (El Salvador):** la
 imagen activa es `b1db386ada0c3435827f2454bb004ad3dbdcdd2e`, subida a
 GitHub antes del despliegue. La migración `036_manual_survey_sharing.sql` está
