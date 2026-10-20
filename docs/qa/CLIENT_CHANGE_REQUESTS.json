@@ -58,7 +58,8 @@
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-        "functional_fingerprint": "7c0323ce9517fbaa68d11f2ea7d752af9ed6d73762787aeb1ef653e397aba62a",
+      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "functional_fingerprint": "e55f433b5c98eb0cd63ae0587946ece79ff1007427e1b58c3152621c8513ec5f",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -317,14 +318,21 @@
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx",
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/server/validation/doctors.ts",
+        "packages/contracts/src/index.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:feedback-doctor-optional-profile"
+      ],
+      "playwright_test_ids": [
+        "playwright:feedback-doctor-optional-profile"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B2"
@@ -333,14 +341,15 @@
       "blocker_reason": null,
       "client_question": null,
       "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "functional_fingerprint": "b5cf1d38eadadeaf9ad3c4486fddacc13acf5d8c7d75f2b0faca3b6c00950d71",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "notes": "La instrucción directa del 20 de octubre de 2026 permite DUI y dirección vacíos, exige nombre, especialidad y teléfono fijo y agrega campos opcionales. Se retiró la petición de importar médicos antiguos. El formulario, la API, la persistencia JSON y pruebas focalizadas cubren este cambio; la certificación global de CR-006 sigue parcial."
     },
     {
       "change_id": "CR-007",
@@ -609,7 +618,8 @@
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-        "functional_fingerprint": "fc47b204b61aa1aa004bffc22834f7bbddd001c6366be423c6e87f106c3980ea",
+      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "functional_fingerprint": "ea3a3024e9491fc687e56db386c711ac2ab3ae80536fb401d379e942eef3968a",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -668,7 +678,7 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "d1ffda9ad04823897aaaf017ef7ea4a4e6bd95968031b2cfcf18236f9af650ac",
+      "functional_fingerprint": "b68d886d00fb2b59fe6139255cb2d489439cf0542409674b1bd1b26c39df71ba",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,

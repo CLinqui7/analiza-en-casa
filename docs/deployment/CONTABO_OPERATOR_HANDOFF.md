@@ -1,10 +1,101 @@
 # Analiza en Casa en Contabo: entrega para el siguiente Codex
 
-Estado comprobado el 14 de octubre de 2026 (UTC). Este documento sustituye el
+Estado comprobado el 20 de octubre de 2026. Este documento sustituye el
 estado de despliegue aplazado descrito en `MIGRATION_HANDOFF.md`. No contiene
 contraseñas, claves privadas, cadenas de conexión ni datos identificables de
 pacientes. Antes de cambiar algo, comprobar el estado actual: otros agentes
 pueden estar trabajando en el mismo VPS.
+
+## GitHub antes de cada despliegue
+
+El cliente exige que **todo código, migración y configuración se suba a GitHub
+antes de desplegar**. Hacer commit y push a una rama `codex/*`, verificar con
+`git ls-remote` que el SHA remoto coincide con el commit seleccionado y crear
+el archivo de publicación desde ese commit exacto. Si el push o la
+verificación del SHA falla, no ejecutar `deploy-release.sh`. Tras desplegar,
+subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
+Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
+automáticamente.
+
+**Campos de médico, 20 de octubre de 2026 (El Salvador):** la imagen web activa
+y sana es `01ef03fe6865b4d6f925b66eff31a874670d807a`, subida y comprobada
+en GitHub antes del despliegue. La base activa sigue siendo
+`analiza_live_20261014`; este cambio no agregó migraciones porque el perfil del
+médico se conserva en el JSON existente. El despliegue tomó y verificó el
+snapshot cifrado `64cbffc6`; la URL pública respondió HTTP 200. Se comprobó en
+la organización sintética de QA el alta sin DUI ni dirección, el teléfono fijo
+obligatorio, campos opcionales, edición con versión y pantalla conectada. Los
+reportes `6486d7b8` y `82aa73e0` quedaron resueltos en la organización
+principal con la instrucción actualizada; no se importaron médicos antiguos.
+Detalle en `docs/feedback/DOCTOR_FIELDS_2026-10-20.md`. La imagen anterior
+`b1db386ada0c3435827f2454bb004ad3dbdcdd2e` se conserva para reversión
+de la web; el timer de respaldo sigue activo, pero la ejecución automática
+posterior al cambio todavía no está verificada.
+
+**Estado de encuestas al cierre del 20 de octubre de 2026 (El Salvador):** la
+imagen activa es `b1db386ada0c3435827f2454bb004ad3dbdcdd2e`, subida a
+GitHub antes del despliegue. La migración `036_manual_survey_sharing.sql` está
+aplicada en `analiza_live_20261014`; `survey_invitations` mantiene RLS
+habilitado y forzado. El origen público de encuestas está configurado en el
+entorno privado de la web; se comprobó que los enlaces apuntan al dominio
+público y que el formulario de médico, el QR, la respuesta única y el resumen
+funcionan con datos sintéticos. La salud pública respondió HTTP 200. El
+snapshot cifrado más reciente es `15ee253b`; el servicio de respaldo terminó
+correctamente y el timer está activo. Quedan por comprobar su próxima
+ejecución automática y la tarea externa de Windows. Detalle en
+`docs/feedback/MANUAL_SURVEYS_2026-10-20.md`. Conservar la imagen anterior
+`128956e0b6ad7ea3a9da6578e288917ee1d76940` para reversión de la web;
+la migración es aditiva y los registros no deben borrarse.
+
+**Enlaces de encuestas, 20 de octubre de 2026:** la ruta `/api/surveys` requiere
+`ANALIZA_PUBLIC_ORIGIN` en `secrets/web.env` para construir el enlace público
+desde un origen HTTPS explícito. En Contabo debe apuntar al dominio público
+vigente de Analiza, sin barra final obligatoria ni ruta. La aplicación rechaza
+orígenes internos o inseguros y valida el origen antes de guardar cada
+invitación. Al cambiar el dominio, actualizar este valor privado y recrear la
+web desde una imagen ya publicada en GitHub. El formulario `/survey` no aparece
+en el menú y sus enlaces o QR son de un solo uso por persona.
+
+**Actualización de feedback, 20 de octubre de 2026 (El Salvador):** la imagen
+web activa y saludable es `1c298ca39a0db4df30f2ab9b8fae99405652ef5c`,
+subida y comprobada en GitHub antes del despliegue. La base activa continúa
+siendo `analiza_live_20261014`. Se aplicaron las migraciones
+`034_quote_decisions.sql` y `035_satisfaction_surveys.sql`; sus tablas tienen
+RLS habilitado y forzado. La salud pública devolvió HTTP 200. Tras solucionar
+un bloqueo restic caducado y verificar el repositorio, la copia cifrada de
+`analiza-contabo-backup.service` terminó con `Result=success`; el snapshot de
+esa verificación fue `44ec62e3` y el temporizador está activo. La próxima ejecución
+automática del timer y la tarea externa de Windows siguen pendientes de
+comprobación; esta última registró `0xC000013A` el 19 de octubre. El informe
+del lote y los diez estados de feedback están en
+`docs/feedback/REVIEW_2026-10-20.md`. La imagen anterior
+`da68d1a9550f18009a327ac6bfe64cea8ce79714` se conserva para reversión
+de la web; las migraciones son aditivas y los registros no deben borrarse.
+
+**Actualización posterior al feedback, 14 de octubre de 2026 (El Salvador):**
+la imagen web activa y saludable es
+`da68d1a9550f18009a327ac6bfe64cea8ce79714`. La base activa y el entorno
+del operador apuntan a `analiza_live_20261014`; la migración
+`033_purchase_orders.sql` está registrada. La tabla `analiza.purchase_orders`
+tiene RLS habilitado y forzado; `analiza_app` sólo tiene `SELECT/INSERT`.
+El despliegue tomó y comprobó el snapshot cifrado restic `67cb480b` antes de
+aplicar la migración. El reporte completo de pruebas y de los ocho reportes
+está en `docs/feedback/REVIEW_2026-10-14.md`. Vercel sigue redirigiendo al
+VPS. Conservar la imagen anterior `f82a4e44c0a6b1277b5bab081c973d88551b49a5`
+para reversión de la web; las migraciones `032` y `033` son aditivas y no se
+deben borrar borradores ni órdenes. TuVet permanece separado y no se modificó.
+
+**Actualización previa de feedback, 14 de octubre de 2026 (El Salvador):** la
+imagen web activa en ese momento era
+`f82a4e44c0a6b1277b5bab081c973d88551b49a5`; la migración
+`032_quote_form_drafts.sql` está aplicada en `analiza_live_20261014`. El
+operador en `secrets/operator.env` apunta ahora a esa misma base activa; antes
+apuntaba a `analiza_en_casa`, que ya no es la base de la web. El despliegue
+generó el snapshot restic `22399516`, comprobó el repositorio y verificó salud
+de la nueva web. El informe de pruebas y límites está en
+`docs/feedback/REVIEW_2026-10-14.md`. Conservar la imagen previa `cd3203d`
+para reversión de la web; la migración es aditiva y no se debe eliminar una
+tabla que pueda contener borradores.
 
 ## Acceso y capacidad
 
@@ -61,8 +152,10 @@ público. La base activa en el contenedor
 `analiza-contabo-staging-database-1` es `analiza_live_20261014`. El servicio
 `analiza-contabo-staging-web-1` usa una imagen Next.js 16 de perfil `full`,
 modo PostgreSQL, registro público deshabilitado y seed demo deshabilitado.
-Su etiqueta de código verificada es `cd3203d`; la imagen del operador lleva
-el mismo SHA. El contenedor web se comprobó `healthy` tras desplegarlo.
+En el corte inicial, su etiqueta de código verificada era `cd3203d`; la imagen
+del operador llevaba el mismo SHA. Consultar la actualización superior para
+la etiqueta activa actual. El contenedor web se comprobó `healthy` tras cada
+despliegue documentado.
 Los archivos privados se guardan en `/opt/analiza-contabo-staging/files`, no en
 Vercel ni en una URL pública.
 
@@ -137,8 +230,9 @@ ufw status
 ```
 
 Las copias cifradas con restic están en
-`/opt/analiza-contabo-staging/backups/restic`. El snapshot comprobado tras el
-despliegue final es `a6fdcfd7`: incluye la base activa, archivos privados, configuración
+`/opt/analiza-contabo-staging/backups/restic`. El snapshot comprobado tras la
+migración inicial fue `a6fdcfd7`; el más reciente se indica en la actualización
+del 20 de octubre. Incluye la base activa, archivos privados, configuración
 de despliegue, secretos cifrados dentro del repositorio restic, certificado y
 configuración Nginx. El servicio `analiza-contabo-backup.service` y su timer
 están activos; el servicio detiene brevemente la web durante la copia y luego
@@ -155,12 +249,35 @@ la automatización externa posterior al corte.
 Docker 29.9, Node 24.13, npm 11, Nginx, Certbot, restic, UFW y PostgreSQL 18
 están instalados. El proyecto TuVet corre aparte bajo
 `/opt/tuvet-staging` y `tuvet-postgres.service`, sin puerto público ni acceso
-a los secretos de Analiza. Su base `tuvet_staging` tenía **cero tablas de
-usuario** en la revisión del 14 de octubre; no hay evidencia de que el socio
-haya migrado la aplicación o sus datos. No mover ni reiniciar sus recursos al migrar otro
-proyecto. `deploy` tiene sudo completo, por lo que cada nuevo proyecto debe
+a los secretos de Analiza. En la nueva revisión del 14 de octubre (hora de El
+Salvador), su base `tuvet_staging` tenía **21 tablas y datos cargados**; hay
+una entrega de código y respaldos en su chroot. Aún no existe un servicio web
+de TuVet habilitado ni un puerto público para la aplicación. No mover ni
+reiniciar sus recursos al migrar otro proyecto. `deploy` tiene sudo completo,
+por lo que cada nuevo proyecto debe
 tener sus propios directorios, usuarios, red, puertos, base, secretos y copia
 de seguridad. Reservar capacidad antes de instalar otra base o contenedores.
+
+El panel visual del VPS sólo se enciende por orden SSH y se sirve en
+`127.0.0.1:18090` mediante túnel; su código y guía están en
+`C:\Temp\contabo-vps-monitor`. El lanzador local
+`C:\Users\carlo\OneDrive\Escritorio\Abrir Panel VPS.cmd` arranca el colector
+`vps-monitor.service` y la web `vps-monitor-web.service`, abre el túnel y el
+navegador, y apaga ambos servicios al cerrar la sesión. Los servicios están
+deshabilitados al arranque; el colector tiene un límite de ocho horas por si
+la sesión local termina de forma anormal. Exporta métricas agregadas por
+proyecto sin dar acceso del navegador a Docker o a datos clínicos. El panel
+muestra consumo de recursos, no costos monetarios.
+
+En la revisión del 15 de octubre se comprobó que el archivo ext4 reservado
+para TuVet en `/var/lib/tuvet-guard/staging.ext4` ocupa **20 GiB** del disco
+raíz, aunque sólo unos **1.4 GiB** están usados dentro. El panel ahora lo
+atribuye a TuVet una sola vez. Se eliminaron exclusivamente `node_modules`
+reproducibles de cinco releases antiguos de Analiza y caché Docker de más de
+24 horas. Analiza quedó en unos **281 MiB** de directorio de producción y
+volumen PostgreSQL; su QA aislada y las imágenes Docker se muestran aparte.
+El VPS tenía unos **160 GiB libres** después de la limpieza. La aplicación
+Analiza y PostgreSQL permanecieron saludables; no se modificó TuVet.
 
 Para migrar otro proyecto en este VPS: inventariar primero `docker ps`,
 `systemctl list-units --type=service`, `ss -ltnp`, `df -h /` y `free -h`;

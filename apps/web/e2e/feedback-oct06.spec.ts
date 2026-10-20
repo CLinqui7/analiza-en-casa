@@ -66,7 +66,41 @@ test('one purchase invoice saves multiple product lines together', async ({ page
   await dialog.getByRole('button', { name: 'Guardar factura (2)' }).click();
   await expect(page.getByRole('status')).toContainText('Factura guardada con 2 línea(s)');
   await page.getByLabel('Buscar compras').fill('COMPRA-MULTI-QA');
-  await expect(page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' })).toHaveCount(2);
+  const invoice = page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' });
+  await expect(invoice).toHaveCount(1);
+  await expect(invoice).toContainText('2 línea(s) en esta factura');
+  await expect(invoice.getByRole('button', { name: 'Editar líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Recibir líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Anular factura' })).toBeVisible();
+  if (process.env.ANALIZA_CAPTURE_FEEDBACK_SCREENSHOTS === '1') {
+    await page.screenshot({
+      path: 'docs/feedback/purchases-grouped-synthetic.png',
+      fullPage: true,
+      animations: 'disabled',
+    });
+  }
+  await invoice.getByRole('button', { name: 'Abrir' }).click();
+  const detail = page.getByRole('dialog', { name: 'Detalle de factura o compra' });
+  await expect(detail.getByRole('row')).toHaveCount(3);
+  if (process.env.ANALIZA_CAPTURE_FEEDBACK_SCREENSHOTS === '1') {
+    await detail.getByRole('table', { name: 'Líneas de la factura' }).scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: 'docs/feedback/purchases-detail-synthetic.png',
+      fullPage: true,
+      animations: 'disabled',
+    });
+  }
+  await expect(detail.getByRole('button', { name: 'Editar línea' })).toHaveCount(2);
+  await expect(detail.getByRole('button', { name: 'Recibir línea' })).toHaveCount(2);
+  await detail.getByRole('button', { name: 'Ver línea' }).nth(1).click();
+  await expect(detail).toContainText('SERIE-MULTI-B');
+  await detail.getByRole('button', { name: 'Anular línea' }).first().click();
+  const cancellation = page.getByRole('dialog', { name: 'Anular borrador de compra' });
+  await cancellation.getByLabel('Motivo de anulación').fill('Línea de prueba sustituida');
+  await cancellation.getByRole('button', { name: 'Confirmar anulación' }).click();
+  await invoice.getByRole('button', { name: 'Abrir' }).click();
+  await expect(detail.getByRole('row')).toHaveCount(3);
+  await expect(detail.getByRole('button', { name: 'Recibir línea' })).toHaveCount(1);
 });
 
 test('quote honorarium is selected for each quote, not fixed on the doctor', async ({ page }) => {
@@ -76,9 +110,11 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await doctorDialog.getByLabel('Nombre completo').fill('Médico QA Catálogo');
   await doctorDialog.getByLabel('JVPM').fill('JVPM-QA-CATALOG');
   await doctorDialog.getByLabel('DUI').fill('DUI-QA-CATALOG');
+  await doctorDialog.getByLabel('Relación del médico').selectOption('NEW');
   await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
   await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');
+  await doctorDialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0600');
   await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
   await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });

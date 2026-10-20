@@ -360,7 +360,7 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Feedback en revisión · 2026-09-24
 
-- Autoguardado: el alcance solicitado para crear pacientes y cotizaciones ya conserva borradores sólo en la pestaña y cuenta actuales, permite recuperarlos o descartarlos y los elimina al guardar o cerrar sesión. No se presume autorización para retener formularios clínicos firmados ni para un borrador permanente compartido entre dispositivos.
+- Autoguardado: los formularios de pacientes siguen conservando borradores sólo en la pestaña actual. Para cotizaciones se preparó autoguardado de formularios incompletos por organización y usuario en PostgreSQL (`032_quote_form_drafts.sql`), además de recuperación temporal en la pestaña; se elimina al guardar o descartar. Sigue pendiente definir cuánto tiempo conservar borradores abandonados y el procedimiento institucional para depurarlos. No se extiende este flujo a documentos clínicos firmados.
 - Solicitudes de enfermería: el pedido interno de medicamentos, insumos y equipos ya usa paciente, catálogo, cantidad, prioridad, idempotencia, auditoría y acceso por rol. El aviso externo sigue pendiente de proveedor y consentimiento aprobados y nunca incluirá información clínica sensible.
 
 ### Reconciliación individual · 2026-10-06
@@ -369,6 +369,19 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 - `FEEDBACK-12C011B0`: el catálogo conectado contiene actualmente 13 estudios de laboratorio, 3 servicios de fisioterapia y 3 de imágenes con precio configurado, todos seleccionables en cotizaciones. No se agregaron ítems o tarifas inventados. Si se solicita una comparación contra una lista comercial externa, todavía se necesitará esa lista para certificar completitud, sin bloquear el uso del catálogo ya disponible.
 - `FEEDBACK-FBE015F8`: se inventariaron los selectores de pacientes, médicos y hospitalizaciones en las pantallas liberadas; se añadieron filtros faltantes en agenda, paciente, hospitalización, reporte, cotización, balance y documentos clínicos, conservando el registro seleccionado.
 - `FEEDBACK-7BB83834`, `FEEDBACK-C7EF7D96` y `FEEDBACK-95A33BEA`: no llamar «facturación» a cobros ni comprobantes internos; falta la definición fiscal indicada en `MEETING-Q004` antes de una factura real o conversión automática.
+
+### Feedback nuevo · 2026-10-14
+
+- `FEEDBACK-27D5919C`: para órdenes a proveedores se usa una referencia interna `OC-<UUID>`, fecha de emisión y precios de referencia USD ingresados por el usuario; el documento no es factura ni recibe inventario. Confirmar si se requiere numeración secuencial aprobada, otra moneda, condiciones comerciales, aprobación interna o envío automático al proveedor antes de activar esas capacidades. No inferir impuestos ni precios del catálogo.
+- `FEEDBACK-82AA73E0`: la instrucción del 14 de octubre de conservar DUI y dirección obligatorios fue sustituida expresamente por la instrucción del 20 de octubre. Véase `FEEDBACK-6486D7B8` abajo.
+- `FEEDBACK-E160AC3B` y `FEEDBACK-B26F0653`: la lista de compras se agrupa por identificador de factura y permite abrir sus líneas. Para producir una factura electrónica o fiscal real todavía se necesitan campos, emisor, numeración, impuestos y proceso de anulación autorizados; la vista agrupada no implica emisión fiscal.
+- `FEEDBACK-8B7489AB` **resuelta el 14 de octubre de 2026**: el cliente confirmó que ampliar días crea una nueva versión de la misma cotización y reemplaza su total; no genera un cargo independiente. La versión enviada original permanece inmutable, la cuenta por cobrar usa sólo la última versión enviada y conserva los pagos ya registrados. Si el nuevo total es menor que lo pagado, el crédito queda visible para revisión; no se aplica una devolución automática.
+
+### Feedback recibido el 15–16 de octubre de 2026
+
+- `FEEDBACK-704AD5EE` y `FEEDBACK-0F06AF75`: el cliente aclaró el 20 de octubre que quiere un enlace o QR de un solo uso por persona, compartido manualmente, y que el médico escriba su nombre en el formulario. No se requiere envío automático ni proveedor de WhatsApp para cerrar estos dos reportes. El enlace no se muestra en el menú público y no verifica por sí mismo la identidad de quien responde; el nombre del médico es declarado por esa persona. El vencimiento sigue siendo elegido por el operador.
+- `FEEDBACK-6486D7B8` y `FEEDBACK-82AA73E0`: el 20 de octubre el cliente revocó la instrucción anterior y aprobó que DUI y dirección sean opcionales. Nombre, especialidad y teléfono fijo son obligatorios en altas y ediciones nuevas; relación nuevo/recurrente conserva su validación por `FEEDBACK-6C828E53`. Los otros campos del listado se pueden completar después. Se retiró expresamente la solicitud de importar médicos antiguos de Laboratorios Analiza: no importar ni inventar registros de terceros. Los médicos históricos sin teléfono fijo se pueden leer y quedan pendientes de completarlo cuando se editen.
+- `FEEDBACK-C41E590C` y `FEEDBACK-0DC28CA1`: el cliente indicó expresamente IVA 13% calculado y percepción 1% seleccionada manualmente para compras. Es un cálculo administrativo aplicado a documentos nuevos, con precios de hasta cuatro decimales y redondeo por línea; no certifica un DTE ni reemplaza la factura fiscal del proveedor. Confirmar con el responsable fiscal el tratamiento de exenciones, descuentos, notas de crédito y anulaciones, y el alcance de una futura integración tributaria. La imagen de factura aportada permanece privada y no entra a Git.
 
 ## Deployment
 

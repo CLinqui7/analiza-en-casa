@@ -299,6 +299,13 @@ const navigation: NavigationGroup[] = [
         permission: 'purchases:read',
         actionId: 'PURCHASE-NAVIGATE',
       },
+      {
+        label: 'Órdenes a proveedores',
+        icon: 'purchases',
+        href: '/purchase-orders',
+        permission: 'purchases:read',
+        actionId: 'PURCHASE-ORDERS-NAVIGATE',
+      },
     ],
   },
   {
@@ -346,6 +353,13 @@ const navigation: NavigationGroup[] = [
     label: 'Reportes y control',
     icon: 'reports',
     children: [
+      {
+        label: 'Encuestas de satisfacción',
+        icon: 'reports',
+        href: '/surveys',
+        permission: 'reports:read',
+        actionId: 'SURVEYS-NAVIGATE',
+      },
       {
         label: 'Analítica de accesos',
         icon: 'analytics',

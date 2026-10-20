@@ -10,11 +10,16 @@ import { Button, EmptyState, Panel } from '@analiza/ui';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import { usdAmountInSpanishWords } from '@/lib/money-in-words';
+import {
+  quoteDecisionReasonLabels,
+  quoteDecisionSchema,
+  type QuoteDecision,
+} from '@/lib/quote-decision';
 
 const money = (value: number) => `USD ${value.toFixed(2)}`;
 type PortalShare = {
@@ -32,7 +37,30 @@ export default function QuoteDetailPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [portalShare, setPortalShare] = useState<PortalShare | null>(null);
   const [creatingPortal, setCreatingPortal] = useState(false);
+  const [decisions, setDecisions] = useState<QuoteDecision[]>([]);
+  const [decisionValue, setDecisionValue] = useState('');
+  const [decisionReason, setDecisionReason] = useState('');
+  const [decisionBusy, setDecisionBusy] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [decisionRequestId, setDecisionRequestId] = useState(() => crypto.randomUUID());
   const quote = quotes.find((candidate) => candidate.id === id);
+  useEffect(() => {
+    if (providerMode !== 'postgresql' || quote?.status !== 'SENT') return;
+    let active = true;
+    void fetch(`/api/quotes/${encodeURIComponent(id)}/decision`, { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        const payload = (await response.json()) as { decisions: unknown[] };
+        if (active)
+          setDecisions(payload.decisions.map((entry) => quoteDecisionSchema.parse(entry)));
+      })
+      .catch(() => {
+        if (active) setDecisionError('No se pudo cargar el historial de decisiones.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [id, providerMode, quote?.status]);
   if (!quote)
     return (
       <main className="page-stack">
@@ -65,6 +93,41 @@ export default function QuoteDetailPage() {
     const saved = await sendQuote(currentQuote.id);
     if (saved) {
       setMessage('La versión se marcó como enviada e inmutable.');
+    }
+  }
+  async function saveDecision() {
+    if (decisionValue !== 'APPROVED' && decisionValue !== 'NOT_APPROVED') {
+      setDecisionError('Seleccione si el servicio fue aprobado.');
+      return;
+    }
+    if (decisionValue === 'NOT_APPROVED' && !decisionReason) {
+      setDecisionError('Seleccione el motivo de no aprobación.');
+      return;
+    }
+    setDecisionBusy(true);
+    setDecisionError(null);
+    try {
+      const response = await fetch(`/api/quotes/${encodeURIComponent(currentQuote.id)}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+        body: JSON.stringify({
+          id: decisionRequestId,
+          decision: decisionValue,
+          reason: decisionValue === 'NOT_APPROVED' ? decisionReason : null,
+        }),
+      });
+      if (!response.ok)
+        throw new Error('No se pudo guardar la decisión. Revise la versión e inténtelo de nuevo.');
+      const saved = quoteDecisionSchema.parse(await response.json());
+      setDecisions((current) => [saved, ...current.filter((entry) => entry.id !== saved.id)]);
+      setDecisionRequestId(crypto.randomUUID());
+      setDecisionValue('');
+      setDecisionReason('');
+      setMessage('Decisión registrada y auditada sin modificar la cotización enviada.');
+    } catch (error) {
+      setDecisionError(error instanceof Error ? error.message : 'No se pudo guardar la decisión.');
+    } finally {
+      setDecisionBusy(false);
     }
   }
   async function createPortalShare() {
@@ -199,10 +262,100 @@ export default function QuoteDetailPage() {
           ) : null}
         </div>
       </header>
+      {quote.immutable && can('quotes:write') ? (
+        <p className="field-help no-print">
+          Para añadir o quitar ítems, o extender los días, use «Revisar / nueva versión». Se
+          copiarán los ítems a un borrador nuevo; esta versión enviada seguirá intacta. Al enviar la
+          revisión, la cuenta del paciente usará la última versión enviada de esta cotización.
+        </p>
+      ) : null}
       {message ? (
         <p className="notice" role="status">
           {message}
         </p>
+      ) : null}
+      {quote.status === 'SENT' && providerMode === 'postgresql' ? (
+        <Panel>
+          <h2>Aprobación del servicio</h2>
+          <p className="field-help">
+            La decisión se registra por versión; cada cambio conserva su historial. No altera el
+            total ni la versión enviada.
+          </p>
+          <p>
+            Estado actual:{' '}
+            <strong>
+              {decisions[0]
+                ? decisions[0].decision === 'APPROVED'
+                  ? 'Aprobado'
+                  : `No aprobado · ${quoteDecisionReasonLabels[decisions[0].reason!]}`
+                : 'Sin decisión registrada'}
+            </strong>
+          </p>
+          {can('quotes:write') ? (
+            <div className="form-grid no-print">
+              <label>
+                ¿Fue aprobado el servicio?
+                <select
+                  data-action-id="QUOTE-DECISION"
+                  onChange={(event) => {
+                    setDecisionValue(event.target.value);
+                    setDecisionReason('');
+                  }}
+                  value={decisionValue}
+                >
+                  <option value="">Seleccione</option>
+                  <option value="APPROVED">Aprobado</option>
+                  <option value="NOT_APPROVED">No aprobado</option>
+                </select>
+              </label>
+              {decisionValue === 'NOT_APPROVED' ? (
+                <label>
+                  Motivo
+                  <select
+                    data-action-id="QUOTE-DECISION-REASON"
+                    onChange={(event) => setDecisionReason(event.target.value)}
+                    value={decisionReason}
+                  >
+                    <option value="">Seleccione un motivo</option>
+                    {Object.entries(quoteDecisionReasonLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <Button
+                data-action-id="QUOTE-DECISION-SAVE"
+                disabled={decisionBusy}
+                onClick={() => void saveDecision()}
+                type="button"
+              >
+                {decisionBusy ? 'Guardando…' : 'Guardar decisión'}
+              </Button>
+            </div>
+          ) : null}
+          {decisionError ? (
+            <p className="notice danger" role="alert">
+              {decisionError}
+            </p>
+          ) : null}
+          {decisions.length > 1 ? (
+            <details>
+              <summary>Historial de decisiones ({decisions.length})</summary>
+              <ul>
+                {decisions.map((entry) => (
+                  <li key={entry.id}>
+                    {new Date(entry.createdAt).toLocaleString('es-SV')} ·{' '}
+                    {entry.decision === 'APPROVED'
+                      ? 'Aprobado'
+                      : `No aprobado: ${quoteDecisionReasonLabels[entry.reason!]}`}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : null}
+        </Panel>
       ) : null}
       <div className="two-column">
         <Panel>
