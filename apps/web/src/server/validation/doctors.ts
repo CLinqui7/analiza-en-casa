@@ -16,6 +16,9 @@ function parseDoctor(value: unknown): Doctor {
         'Los archivos se cargan de forma privada después de guardar el médico.',
       );
     }
+    if (!doctor.landlinePhone?.trim()) {
+      throw new MongoInputError('Ingrese el teléfono fijo del médico.');
+    }
     return doctor;
   } catch (error) {
     if (error instanceof MongoInputError) throw error;

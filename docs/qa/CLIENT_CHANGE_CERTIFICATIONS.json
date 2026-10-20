@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "15b77e7d1ca9ad5fcb2ee95008d290a7001c22028548fdf330b54fabcbcb1a71",
+      "functional_fingerprint": "e55f433b5c98eb0cd63ae0587946ece79ff1007427e1b58c3152621c8513ec5f",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -50,8 +50,11 @@
       "implementation_sha": null,
       "functional_fingerprint": null,
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "test_ids": [
+        "vitest:feedback-doctor-optional-profile",
+        "playwright:feedback-doctor-optional-profile"
+      ],
+      "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original."
     },
     "CR-007": {
       "implementation_sha": null,
@@ -89,7 +92,7 @@
     "CR-011": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
-      "functional_fingerprint": "6fd0c8de8f5d6e6108bafbaa1d6d491c95ef14957b19b687332be93beb48ff80",
+      "functional_fingerprint": "ea3a3024e9491fc687e56db386c711ac2ab3ae80536fb401d379e942eef3968a",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"

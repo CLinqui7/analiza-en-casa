@@ -120,13 +120,24 @@ export const doctorSchema = z.object({
   jvpm: z.string().trim().optional(),
   conadem: z.string().trim().optional(),
   medicalFee: z.number().nonnegative().optional(), // Legacy records only; new quote fees are selected per quote.
-  documentId: z.string().trim().min(1),
+  /** Older doctors may have no document; new records can complete it later. */
+  documentId: z.string().trim().optional(),
   specialty: z.string().trim().min(1),
   /** Historical records remain unclassified until a user reviews them. */
   referralCategory: z.enum(['NEW', 'RECURRENT']).optional(),
   phone: z.string().trim().optional(),
+  /** Optional in stored records for compatibility; new saves require it at the API boundary. */
+  landlinePhone: z.string().trim().optional(),
+  birthDate: z.string().trim().optional(),
+  clinicName: z.string().trim().optional(),
+  nit: z.string().trim().optional(),
+  consultationHours: z.string().trim().optional(),
+  medicalVisitHours: z.string().trim().optional(),
+  zone: z.string().trim().optional(),
+  secretaryName: z.string().trim().optional(),
+  secretaryBirthday: z.string().trim().optional(),
   email: z.string().trim().optional(),
-  address: z.string().trim().min(1),
+  address: z.string().trim().optional(),
   attachments: z.array(doctorAttachmentSchema).default([]),
 });
 

@@ -17,6 +17,7 @@ const doctor: Doctor = {
   documentId: '00000000-0',
   specialty: 'Medicina interna',
   referralCategory: 'NEW',
+  landlinePhone: '2222-0000',
   address: 'Dirección sintética',
   attachments: [],
 };
@@ -40,6 +41,50 @@ function collection() {
 }
 
 describe('Mongo doctor and hospitalization commands', () => {
+  // test-id: vitest:feedback-doctor-optional-profile
+  it('accepts a doctor without DUI or address and retains the requested optional profile', async () => {
+    const doctors = collection();
+    const repository = new MongoDoctorRepository(doctors as never);
+    const optionalDoctor: Doctor = {
+      ...doctor,
+      documentId: undefined,
+      address: undefined,
+      birthDate: '1980-01-02',
+      clinicName: 'Clínica sintética',
+      nit: 'NIT-SYN-001',
+      consultationHours: 'Lunes',
+      medicalVisitHours: 'Martes',
+      zone: 'Zona sintética',
+      secretaryName: 'Secretaria Sintética',
+      secretaryBirthday: '1990-03-04',
+    };
+    await expect(repository.create(administrator, { doctor: optionalDoctor })).resolves.toEqual(
+      optionalDoctor,
+    );
+    expect(doctors.insertOne).toHaveBeenCalledWith(
+      expect.objectContaining({ clinicName: 'Clínica sintética', landlinePhone: '2222-0000' }),
+    );
+    await expect(
+      repository.create(administrator, { doctor: { ...optionalDoctor, landlinePhone: '' } }),
+    ).rejects.toThrow('teléfono fijo');
+    await expect(
+      repository.replace(administrator, doctor.id, {
+        doctor: { ...optionalDoctor, landlinePhone: undefined },
+        expectedVersion: 1,
+      }),
+    ).rejects.toThrow('teléfono fijo');
+    doctors.findOne.mockResolvedValueOnce({
+      ...doctor,
+      landlinePhone: undefined,
+      organizationId: administrator.organizationId,
+      version: 1,
+      createdAt: '2026-01-01',
+      updatedAt: '2026-01-01',
+    } as never);
+    await expect(repository.get(administrator, doctor.id)).resolves.toMatchObject({
+      id: doctor.id,
+    });
+  });
   it('requires classification for a new doctor and a principal doctor for a new hospitalization', async () => {
     await expect(
       new MongoDoctorRepository(collection() as never).create(administrator, {

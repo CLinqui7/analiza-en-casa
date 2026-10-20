@@ -179,6 +179,8 @@ class Quotes(unittest.TestCase):
         specialty.send_keys('Nutri')
         self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Nutricionista']"))).click()
         self.fill('Dirección', 'Dirección sintética Selenium')
+        self.fill('Teléfono fijo (obligatorio)', '2222-0400')
+        Select(self.action('DOCTOR-REFERRAL-CATEGORY')).select_by_value('NEW')
         self.click('DOCTOR-SAVE')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Médica Selenium Honorarios registrado')]")))
 

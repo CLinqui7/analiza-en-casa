@@ -58,7 +58,7 @@
       "client_question": null,
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-        "functional_fingerprint": "15b77e7d1ca9ad5fcb2ee95008d290a7001c22028548fdf330b54fabcbcb1a71",
+      "functional_fingerprint": "e55f433b5c98eb0cd63ae0587946ece79ff1007427e1b58c3152621c8513ec5f",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -317,14 +317,21 @@
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx"
+        "apps/web/src/app/(workspace)/clinical/nursing/page.tsx",
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "apps/web/src/server/validation/doctors.ts",
+        "packages/contracts/src/index.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:feedback-doctor-optional-profile"
+      ],
+      "playwright_test_ids": [
+        "playwright:feedback-doctor-optional-profile"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B2"
@@ -340,7 +347,7 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "notes": "La instrucción directa del 20 de octubre de 2026 permite DUI y dirección vacíos, exige nombre, especialidad y teléfono fijo y agrega campos opcionales. Se retiró la petición de importar médicos antiguos. El formulario, la API, la persistencia JSON y pruebas focalizadas cubren este cambio; la certificación global de CR-006 sigue parcial."
     },
     {
       "change_id": "CR-007",
@@ -609,7 +616,7 @@
       "client_question": null,
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "6fd0c8de8f5d6e6108bafbaa1d6d491c95ef14957b19b687332be93beb48ff80",
+      "functional_fingerprint": "ea3a3024e9491fc687e56db386c711ac2ab3ae80536fb401d379e942eef3968a",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,

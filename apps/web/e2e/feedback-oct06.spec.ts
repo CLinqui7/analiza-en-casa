@@ -114,6 +114,7 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
   await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');
+  await doctorDialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0600');
   await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
   await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
