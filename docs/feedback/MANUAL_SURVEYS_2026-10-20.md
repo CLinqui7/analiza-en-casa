@@ -10,6 +10,8 @@ El médico escribe su nombre antes de enviar. El nombre declarado se guarda con 
 
 La migración aditiva `036_manual_survey_sharing.sql` permite que `target_id` y la antigua atestación de consentimiento queden vacíos para invitaciones manuales, y añade `respondent_name` con límite de longitud. Conserva RLS forzado y la política por organización de `survey_invitations`.
 
+La primera prueba conectada descubrió que Next recibía la dirección interna `0.0.0.0:8080` detrás del proxy y la usaba al crear el enlace. La corrección exige `ANALIZA_PUBLIC_ORIGIN` en el entorno privado del servidor, valida que sea un origen HTTPS sin ruta ni credenciales y construye la invitación desde ese origen antes de guardarla. La invitación sintética creada durante el hallazgo no se compartió; su token no se conserva y vencerá según la fecha de prueba. No se cerrarán los reportes hasta comprobar un enlace externo nuevo.
+
 ## Verificación local
 
 - `npm run check`: 143 pruebas Node, 76 controles QA y build standalone, aprobado.

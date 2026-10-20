@@ -17,6 +17,15 @@ subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
 Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
 automáticamente.
 
+**Enlaces de encuestas, 20 de octubre de 2026:** la ruta `/api/surveys` requiere
+`ANALIZA_PUBLIC_ORIGIN` en `secrets/web.env` para construir el enlace público
+desde un origen HTTPS explícito. En Contabo debe apuntar al dominio público
+vigente de Analiza, sin barra final obligatoria ni ruta. La aplicación rechaza
+orígenes internos o inseguros y valida el origen antes de guardar cada
+invitación. Al cambiar el dominio, actualizar este valor privado y recrear la
+web desde una imagen ya publicada en GitHub. El formulario `/survey` no aparece
+en el menú y sus enlaces o QR son de un solo uso por persona.
+
 **Actualización de feedback, 20 de octubre de 2026 (El Salvador):** la imagen
 web activa y saludable es `1c298ca39a0db4df30f2ab9b8fae99405652ef5c`,
 subida y comprobada en GitHub antes del despliegue. La base activa continúa

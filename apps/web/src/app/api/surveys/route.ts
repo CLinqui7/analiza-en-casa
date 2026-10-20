@@ -12,6 +12,7 @@ import { csrfHeaderName, sessionCookieName } from '@/server/auth-service';
 import { authorizationStatus } from '@/server/http-auth';
 import { persistence } from '@/server/persistence';
 import { postgresPool, transaction } from '@/server/persistence/postgres-pool';
+import { publicOrigin } from '@/server/public-origin';
 import { MongoAccessError } from '@/server/validation/patients';
 
 export const runtime = 'nodejs';
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
     const expiry = new Date(input.expiresAt);
     if (!Number.isFinite(expiry.valueOf()) || expiry.valueOf() <= Date.now())
       throw new InvalidInvitation();
+    const origin = publicOrigin();
     const token = randomBytes(32).toString('base64url');
     const tokenHash = createHash('sha256').update(token).digest('hex');
     await transaction(postgresPool(), actor, async (client) => {
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
         ],
       );
     });
-    const url = new URL('/survey', request.url);
+    const url = new URL('/survey', origin);
     url.searchParams.set('o', actor.organizationId);
     url.hash = token;
     return NextResponse.json(
