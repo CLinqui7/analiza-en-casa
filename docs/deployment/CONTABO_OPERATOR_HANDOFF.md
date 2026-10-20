@@ -17,6 +17,21 @@ subir al mismo PR el informe de pruebas, SHA activo y estado del respaldo.
 Nunca subir credenciales, secretos ni archivos privados. No fusionar a `main`
 automáticamente.
 
+**Estado de encuestas al cierre del 20 de octubre de 2026 (El Salvador):** la
+imagen activa es `b1db386ada0c3435827f2454bb004ad3dbdcdd2e`, subida a
+GitHub antes del despliegue. La migración `036_manual_survey_sharing.sql` está
+aplicada en `analiza_live_20261014`; `survey_invitations` mantiene RLS
+habilitado y forzado. El origen público de encuestas está configurado en el
+entorno privado de la web; se comprobó que los enlaces apuntan al dominio
+público y que el formulario de médico, el QR, la respuesta única y el resumen
+funcionan con datos sintéticos. La salud pública respondió HTTP 200. El
+snapshot cifrado más reciente es `15ee253b`; el servicio de respaldo terminó
+correctamente y el timer está activo. Quedan por comprobar su próxima
+ejecución automática y la tarea externa de Windows. Detalle en
+`docs/feedback/MANUAL_SURVEYS_2026-10-20.md`. Conservar la imagen anterior
+`128956e0b6ad7ea3a9da6578e288917ee1d76940` para reversión de la web;
+la migración es aditiva y los registros no deben borrarse.
+
 **Enlaces de encuestas, 20 de octubre de 2026:** la ruta `/api/surveys` requiere
 `ANALIZA_PUBLIC_ORIGIN` en `secrets/web.env` para construir el enlace público
 desde un origen HTTPS explícito. En Contabo debe apuntar al dominio público
@@ -33,8 +48,8 @@ siendo `analiza_live_20261014`. Se aplicaron las migraciones
 `034_quote_decisions.sql` y `035_satisfaction_surveys.sql`; sus tablas tienen
 RLS habilitado y forzado. La salud pública devolvió HTTP 200. Tras solucionar
 un bloqueo restic caducado y verificar el repositorio, la copia cifrada de
-`analiza-contabo-backup.service` terminó con `Result=success`; el snapshot más
-reciente es `44ec62e3` y el temporizador está activo. La próxima ejecución
+`analiza-contabo-backup.service` terminó con `Result=success`; el snapshot de
+esa verificación fue `44ec62e3` y el temporizador está activo. La próxima ejecución
 automática del timer y la tarea externa de Windows siguen pendientes de
 comprobación; esta última registró `0xC000013A` el 19 de octubre. El informe
 del lote y los diez estados de feedback están en

@@ -15,10 +15,14 @@ La primera prueba conectada descubrió que Next recibía la dirección interna `
 ## Verificación local
 
 - `npm run check`: 143 pruebas Node, 76 controles QA y build standalone, aprobado.
-- `npm run test:react`: 272/272, incluidos el esquema de invitación sin registro previo y la validación del nombre del médico.
+- `npm run test:react`: 274/274, incluidos el esquema de invitación sin registro previo, la validación del nombre del médico y el origen HTTPS explícito.
 - Prueba Playwright del formulario público: nombre solicitado, envío de respuesta y borrado del token de la barra de direcciones, aprobada.
 - `npm run build`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run qa:client-changes` (32/32), `npm run qa:video-parity` (210/210) y `npm run audit:verify` (17/17), aprobados.
 
-## Publicación y estado del feedback
+## Publicación y verificación conectada
 
-Pendiente de registrar el SHA subido a GitHub, la migración y prueba conectada en el VPS, y la actualización de los dos reportes en la aplicación. El código debe estar en GitHub antes de desplegar. No fusionar el PR automáticamente.
+- Los commits `128956e0b6ad7ea3a9da6578e288917ee1d76940` (formulario, QR y migración) y `b1db386ada0c3435827f2454bb004ad3dbdcdd2e` (origen público) se subieron a GitHub y se verificó cada SHA remoto **antes** de desplegarlo. La imagen activa de Contabo corresponde a `b1db386ada0c3435827f2454bb004ad3dbdcdd2e`.
+- La migración `036_manual_survey_sharing.sql` se ensayó con `BEGIN`/`ROLLBACK` antes del primer despliegue y figura aplicada en `analiza_live_20261014`. `survey_invitations` conserva RLS habilitado y forzado. La configuración privada `ANALIZA_PUBLIC_ORIGIN` apunta al dominio público y la API devuelve enlaces desde ese origen; no se incluyó ningún secreto en Git.
+- Con la organización sintética de QA se comprobó en el VPS: enlace público de médico, nombre obligatorio, envío desde navegador, borrado del token de la barra de direcciones, rechazo de reutilización y resumen interno con nombre declarado; enlace y respuesta de paciente, rechazo de reutilización y conteo agregado; generación visual de QR, descarga y cambio al enlace en la pantalla interna. El servidor no envió mensajes. Los intentos iniciales de QA que no llegaron a completarse quedaron sin compartir y vencerán según su fecha de prueba.
+- La salud pública devolvió HTTP 200 y la imagen activa coincide con el SHA publicado. El despliegue tomó respaldo cifrado; el snapshot restic más reciente es `15ee253b`, con `analiza-contabo-backup.service` en `Result=success` y su timer activo. La próxima ejecución automática y la copia externa de Windows aún deben comprobarse.
+- Los reportes `704ad5ee` y `0f06af75` se actualizaron a `RESOLVED` mediante la API autenticada de feedback con explicación y ruta `/surveys`. Estado de la organización principal: **0 `NEW`, 11 `REVIEWING`, 75 `RESOLVED`**. Los demás reportes en revisión conservan sus dependencias. El [PR #20](https://github.com/CLinqui7/analiza-en-casa/pull/20) sigue abierto y no se fusionó a `main`.
