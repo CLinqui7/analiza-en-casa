@@ -69,6 +69,9 @@ test('one purchase invoice saves multiple product lines together', async ({ page
   const invoice = page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' });
   await expect(invoice).toHaveCount(1);
   await expect(invoice).toContainText('2 línea(s) en esta factura');
+  await expect(invoice.getByRole('button', { name: 'Editar líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Recibir líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Anular factura' })).toBeVisible();
   if (process.env.ANALIZA_CAPTURE_FEEDBACK_SCREENSHOTS === '1') {
     await page.screenshot({
       path: 'docs/feedback/purchases-grouped-synthetic.png',
@@ -107,6 +110,7 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await doctorDialog.getByLabel('Nombre completo').fill('Médico QA Catálogo');
   await doctorDialog.getByLabel('JVPM').fill('JVPM-QA-CATALOG');
   await doctorDialog.getByLabel('DUI').fill('DUI-QA-CATALOG');
+  await doctorDialog.getByLabel('Relación del médico').selectOption('NEW');
   await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
   await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');

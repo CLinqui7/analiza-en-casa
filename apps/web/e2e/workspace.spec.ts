@@ -32,6 +32,7 @@ async function fillRequiredPatientData(
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill(values.phone);
   await dialog.getByLabel('Empresa').fill('Empresa QA Sintética');
+  await dialog.getByLabel('Origen del paciente').selectOption('FAMILY_FRIENDS');
   await dialog.getByLabel('Correo').fill(values.email ?? 'paciente.qa@example.test');
   await dialog.locator('input[name="address.line"]').fill('Calle sintética 123');
   await dialog.locator('input[name="address.comments"]').fill('Referencia sintética para QA');
@@ -308,14 +309,16 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'invalido.csv',
     mimeType: 'text/csv',
-    buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento'),
+    buffer: Buffer.from(
+      'document,firstName,lastName,referralOrigin\n,Sin,Documento,FAMILY_FRIENDS',
+    ),
   });
   await expect(dialog.getByRole('alert')).toContainText('Fila 2');
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'pacientes-validos.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(
-      'document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE',
+      'document,firstName,lastName,documentType,phone,email,company,status,referralOrigin\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE,FAMILY_FRIENDS\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE,SOCIAL_MEDIA',
     ),
   });
   await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
@@ -348,6 +351,7 @@ test('patient Excel import previews extended fields and persists the selected ro
     'documentType',
     'firstName',
     'lastName',
+    'referralOrigin',
     'phone',
     'company',
     'addressLine',
@@ -363,6 +367,7 @@ test('patient Excel import previews extended fields and persists the selected ro
         documentType: 'OTHER',
         firstName: 'Excel',
         lastName: 'Sintético',
+        referralOrigin: 'FAMILY_FRIENDS',
         phone: '7000-5678',
         company: 'Empresa QA',
         addressLine: 'Dirección QA',
@@ -629,6 +634,21 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   browser,
 }) => {
   await login(page);
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.doctors',
+      JSON.stringify([
+        {
+          id: 'doctor-workspace-qa',
+          fullName: 'Médico Workspace QA',
+          documentId: 'DUI-WORKSPACE',
+          specialty: 'General',
+          address: 'Dirección sintética',
+          attachments: [],
+        },
+      ]),
+    ),
+  );
   await page.goto('/hospitalizations');
   await expect(page.getByRole('columnheader', { name: 'Identificador' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
@@ -647,6 +667,7 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(createDialog.getByText('Seleccione un paciente.')).toBeVisible();
   await createDialog.getByLabel('Paciente').selectOption('patient-demo-001');
+  await createDialog.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await createDialog.getByLabel('Tipo de cuenta').selectOption('EMPRESA');
   await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
   await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');

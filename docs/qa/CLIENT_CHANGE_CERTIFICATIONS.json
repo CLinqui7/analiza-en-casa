@@ -4,7 +4,7 @@
   "certifications": {
     "CR-001": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "7c0323ce9517fbaa68d11f2ea7d752af9ed6d73762787aeb1ef653e397aba62a",
+      "functional_fingerprint": "15b77e7d1ca9ad5fcb2ee95008d290a7001c22028548fdf330b54fabcbcb1a71",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -89,7 +89,7 @@
     "CR-011": {
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
-      "functional_fingerprint": "b6aecf7cc8808210be7c15af34937da699c557688f940935efa55930a3e9ea20",
+      "functional_fingerprint": "6fd0c8de8f5d6e6108bafbaa1d6d491c95ef14957b19b687332be93beb48ff80",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"

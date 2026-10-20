@@ -16,6 +16,7 @@ const doctor: Doctor = {
   jvpm: 'JVPM-SYN-001',
   documentId: '00000000-0',
   specialty: 'Medicina interna',
+  referralCategory: 'NEW',
   address: 'Dirección sintética',
   attachments: [],
 };
@@ -26,6 +27,7 @@ const hospitalization: Hospitalization = {
   admissionPeriods: [{ admissionDate: '2026-09-09' }],
   status: 'ACTIVE',
   accountType: 'PARTICULAR',
+  primaryDoctorId: doctor.id,
 };
 
 function collection() {
@@ -38,6 +40,32 @@ function collection() {
 }
 
 describe('Mongo doctor and hospitalization commands', () => {
+  it('requires classification for a new doctor and a principal doctor for a new hospitalization', async () => {
+    await expect(
+      new MongoDoctorRepository(collection() as never).create(administrator, {
+        doctor: { ...doctor, referralCategory: undefined },
+      }),
+    ).rejects.toThrow('médico es nuevo o recurrente');
+    await expect(
+      new MongoHospitalizationRepository(collection() as never, collection() as never).create(
+        administrator,
+        { hospitalization: { ...hospitalization, primaryDoctorId: undefined } },
+      ),
+    ).rejects.toThrow('médico tratante principal');
+    await expect(
+      new MongoDoctorRepository(collection() as never).replace(administrator, doctor.id, {
+        doctor: { ...doctor, referralCategory: undefined },
+        expectedVersion: 1,
+      }),
+    ).rejects.toThrow('médico es nuevo o recurrente');
+    await expect(
+      new MongoHospitalizationRepository(collection() as never, collection() as never).replace(
+        administrator,
+        hospitalization.id,
+        { hospitalization: { ...hospitalization, primaryDoctorId: undefined }, expectedVersion: 1 },
+      ),
+    ).rejects.toThrow('médico tratante principal');
+  });
   // test-id: vitest:e02-doctor-private-file-command-boundary
   it('creates a tenant-scoped doctor but rejects browser authority and filename-only attachments', async () => {
     const doctors = collection();

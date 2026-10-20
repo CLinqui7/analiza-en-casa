@@ -10,6 +10,7 @@ import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { invoiceVoidSource } from '@/lib/purchase-invoice-groups';
+import { purchaseTotals } from '@/lib/purchase-totals';
 import { useOperations } from '@/lib/use-operations';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
@@ -50,6 +51,7 @@ export default function PurchasesPage() {
   } = useOperations();
   const [open, setOpen] = useState(false);
   const [queuedLines, setQueuedLines] = useState<Purchase[]>([]);
+  const [applyPerception, setApplyPerception] = useState(false);
   const [invoiceGroupId, setInvoiceGroupId] = useState(() => crypto.randomUUID());
   const [editing, setEditing] = useState<Purchase | null>(null);
   const [cancelling, setCancelling] = useState<Purchase | null>(null);
@@ -228,6 +230,7 @@ export default function PurchasesPage() {
     setOpen(false);
     setEditing(null);
     setQueuedLines([]);
+    setApplyPerception(false);
     setInvoiceGroupId(crypto.randomUUID());
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
@@ -247,6 +250,7 @@ export default function PurchasesPage() {
     if (purchase.status !== 'DRAFT') return;
     setEditing(purchase);
     setQueuedLines([]);
+    setApplyPerception(purchase.taxRates?.perception === 0.01);
     setInvoiceGroupId(purchase.invoiceGroupId ?? crypto.randomUUID());
     form.reset({
       catalogItemId: purchase.catalogItemId,
@@ -319,6 +323,9 @@ export default function PurchasesPage() {
         note: values.note || undefined,
         quantity: values.quantity,
         unitCost: values.unitCost,
+        taxRates: editing
+          ? editing.taxRates
+          : { iva: 0.13, perception: applyPerception ? 0.01 : 0 },
         expirationDate: values.expirationDate || undefined,
         lotNumber: values.lotNumber || undefined,
         serialNumber: values.serialNumber || undefined,
@@ -352,6 +359,12 @@ export default function PurchasesPage() {
     }
     const purchase = makePurchase(values);
     if (!purchase) return;
+    if (first && first.taxRates?.perception !== purchase.taxRates?.perception) {
+      form.setError('invoiceNumber', {
+        message: 'Mantenga la misma selección de percepción para todas las líneas.',
+      });
+      return;
+    }
     setQueuedLines((current) => [...current, purchase]);
     form.setValue('quantity', 1);
     form.setValue('lotNumber', '');
@@ -369,7 +382,8 @@ export default function PurchasesPage() {
           line.invoiceNumber !== queuedLines[0].invoiceNumber ||
           line.reference !== queuedLines[0].reference ||
           line.supplierCatalogItemId !== queuedLines[0].supplierCatalogItemId ||
-          line.warehouseId !== queuedLines[0].warehouseId,
+          line.warehouseId !== queuedLines[0].warehouseId ||
+          line.taxRates?.perception !== queuedLines[0].taxRates?.perception,
       )
     ) {
       form.setError('invoiceNumber', {
@@ -428,10 +442,13 @@ export default function PurchasesPage() {
       setCancelError('No se pudo anular la factura. Revise su estado e inténtelo de nuevo.');
       return;
     }
+    const cancelledDraft = voidingInvoice.status === 'DRAFT';
     setVoidingInvoice(null);
     setCancelError(null);
     setMessage(
-      'Factura anulada y auditada. La recepción física y el inventario se conservan; gestione la devolución por separado si corresponde.',
+      cancelledDraft
+        ? 'Factura en borrador anulada completa y auditada. No afectó existencias.'
+        : 'Factura anulada y auditada. La recepción física y el inventario se conservan; gestione la devolución por separado si corresponde.',
     );
   }
   async function receivePurchase(formData: FormData) {
@@ -624,6 +641,7 @@ export default function PurchasesPage() {
               {pageRows.map((lines) => {
                 const purchase = lines[0];
                 const voidSource = invoiceVoidSource(lines);
+                const totals = purchaseTotals(lines);
                 return (
                   <tr key={purchase.invoiceGroupId ?? purchase.id}>
                     <td>
@@ -636,6 +654,13 @@ export default function PurchasesPage() {
                         >
                           Abrir
                         </Button>
+                        <a
+                          className="action-link-button action-link-button--inline"
+                          data-action-id="PURCHASE-INVOICE-PDF"
+                          href={`/api/purchases/${encodeURIComponent(purchase.invoiceGroupId ?? purchase.id)}/pdf`}
+                        >
+                          PDF
+                        </a>
                         {lines.length === 1 &&
                         can('purchases:write') &&
                         purchase.status === 'DRAFT' ? (
@@ -660,6 +685,17 @@ export default function PurchasesPage() {
                               Anular
                             </Button>
                           </>
+                        ) : null}
+                        {lines.length > 1 &&
+                        can('purchases:write') &&
+                        lines.some((line) => line.status === 'DRAFT') ? (
+                          <Button
+                            className="button-secondary"
+                            onClick={() => setSelected(purchase)}
+                            type="button"
+                          >
+                            Editar líneas
+                          </Button>
                         ) : null}
                         {can('purchases:write') && voidSource ? (
                           <Button
@@ -695,6 +731,19 @@ export default function PurchasesPage() {
                             Recibir
                           </Button>
                         ) : null}
+                        {lines.length > 1 &&
+                        can('purchases:write') &&
+                        can('inventory:write') &&
+                        lines.some((line) => line.status === 'DRAFT' && line.warehouseId) ? (
+                          <Button
+                            className="button-secondary"
+                            disabled={!warehouseConnected || receiptBusy}
+                            onClick={() => setSelected(purchase)}
+                            type="button"
+                          >
+                            Recibir líneas
+                          </Button>
+                        ) : null}
                       </div>
                     </td>
                     <td>Compra</td>
@@ -713,9 +762,11 @@ export default function PurchasesPage() {
                       {itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado'}
                     </td>
                     <td>
-                      {lines.some((line) => line.unitCost === undefined)
-                        ? 'No documentado'
-                        : `USD ${lines.reduce((sum, line) => sum + (line.quantity ?? 1) * (line.unitCost ?? 0), 0).toFixed(2)}`}
+                      {totals
+                        ? `USD ${totals.total.toFixed(2)}`
+                        : lines.some((line) => line.unitCost === undefined)
+                          ? 'No documentado'
+                          : `USD ${lines.reduce((sum, line) => sum + (line.quantity ?? 1) * (line.unitCost ?? 0), 0).toFixed(2)}`}
                     </td>
                     <td>
                       {purchase.invoiceNumber
@@ -827,7 +878,7 @@ export default function PurchasesPage() {
               {queuedLines.map((line, index) => (
                 <li key={line.id}>
                   {itemNames.get(line.catalogItemId) ?? line.catalogItemId} · {line.quantity} × USD{' '}
-                  {(line.unitCost ?? 0).toFixed(2)}{' '}
+                  {(line.unitCost ?? 0).toFixed(4)}{' '}
                   <Button
                     className="button-secondary"
                     onClick={() =>
@@ -842,6 +893,14 @@ export default function PurchasesPage() {
                 </li>
               ))}
             </ul>
+            {purchaseTotals(queuedLines) ? (
+              <p>
+                Subtotal: USD {purchaseTotals(queuedLines)!.subtotal.toFixed(2)} · IVA 13%: USD{' '}
+                {purchaseTotals(queuedLines)!.iva.toFixed(2)} · Percepción: USD{' '}
+                {purchaseTotals(queuedLines)!.perception.toFixed(2)} · Total: USD{' '}
+                {purchaseTotals(queuedLines)!.total.toFixed(2)}
+              </p>
+            ) : null}
           </div>
         ) : null}
         <form
@@ -914,7 +973,7 @@ export default function PurchasesPage() {
             Costo unitario
             <input
               min="0"
-              step="0.01"
+              step="0.0001"
               type="number"
               {...form.register('unitCost', { valueAsNumber: true })}
             />
@@ -922,6 +981,20 @@ export default function PurchasesPage() {
             {form.formState.errors.unitCost ? (
               <span className="field-error">{form.formState.errors.unitCost.message}</span>
             ) : null}
+          </label>
+          <label>
+            <input
+              checked={applyPerception}
+              data-action-id="PURCHASE-PERCEPTION"
+              disabled={Boolean(editing)}
+              onChange={(event) => setApplyPerception(event.target.checked)}
+              type="checkbox"
+            />{' '}
+            Aplicar percepción del 1% a esta factura
+            <span className="field-help">
+              Los precios ingresados son sin IVA. El IVA solicitado del 13% se calcula
+              automáticamente; la percepción se activa sólo cuando corresponda.
+            </span>
           </label>
           <label>
             Referencia de compra
@@ -1007,14 +1080,35 @@ export default function PurchasesPage() {
                   <dt>Factura completa</dt>
                   <dd>
                     {invoiceLines(selected).length} línea(s) · USD{' '}
-                    {invoiceLines(selected)
-                      .reduce(
+                    {(
+                      purchaseTotals(invoiceLines(selected))?.total ??
+                      invoiceLines(selected).reduce(
                         (total, line) => total + (line.quantity ?? 1) * (line.unitCost ?? 0),
                         0,
                       )
-                      .toFixed(2)}
+                    ).toFixed(2)}
                   </dd>
                 </div>
+              ) : null}
+              {purchaseTotals(invoiceLines(selected)) ? (
+                <>
+                  <div>
+                    <dt>Subtotal sin IVA</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.subtotal.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>IVA 13%</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.iva.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>IVA percibido 1% (selección manual)</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.perception.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>Total</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.total.toFixed(2)}</dd>
+                  </div>
+                </>
               ) : null}
               {selected.invoiceVoidedAt ? (
                 <div>
@@ -1066,7 +1160,7 @@ export default function PurchasesPage() {
               <div>
                 <dt>Cantidad y costo</dt>
                 <dd>
-                  {selected.quantity ?? 1} × USD {(selected.unitCost ?? 0).toFixed(2)} = USD{' '}
+                  {selected.quantity ?? 1} × USD {(selected.unitCost ?? 0).toFixed(4)} = USD{' '}
                   {((selected.quantity ?? 1) * (selected.unitCost ?? 0)).toFixed(2)}
                 </dd>
               </div>
@@ -1218,7 +1312,11 @@ export default function PurchasesPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Anula únicamente el documento de factura. La compra recibida y sus lotes permanecen registrados; si hubo devolución física, debe registrarse por separado para conservar la trazabilidad."
+        description={
+          voidingInvoice?.status === 'DRAFT'
+            ? 'Anula todas las líneas en borrador de esta factura en una operación. No afecta inventario.'
+            : 'Anula únicamente el documento de factura. La compra recibida y sus lotes permanecen registrados; si hubo devolución física, debe registrarse por separado para conservar la trazabilidad.'
+        }
         footer={
           <>
             <Button
@@ -1235,7 +1333,7 @@ export default function PurchasesPage() {
         }
         onClose={() => setVoidingInvoice(null)}
         open={Boolean(voidingInvoice)}
-        title="Anular factura recibida"
+        title="Anular factura"
       >
         <form action={confirmInvoiceVoid} id="purchase-invoice-void-form">
           <label>

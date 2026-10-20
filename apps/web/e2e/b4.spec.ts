@@ -15,6 +15,7 @@ async function createDoctorFixture(page: import('@playwright/test').Page) {
   await dialog.getByLabel('Nombre completo').fill('Médica B4 Honorarios');
   await dialog.getByLabel('JVPM').fill('JVPM-B4-FEE');
   await dialog.getByLabel('DUI').fill('DUI-B4-FEE');
+  await dialog.getByLabel('Relación del médico').selectOption('NEW');
   await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await dialog.getByRole('option', { name: 'Nutricionista' }).click();
   await dialog.getByLabel('Dirección').fill('Dirección sintética B4');

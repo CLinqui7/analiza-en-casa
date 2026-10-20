@@ -38,6 +38,7 @@ import {
 } from '@analiza/contracts';
 import { can, isAdministrator, type Permission } from '@/lib/permissions';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
+import { samePurchaseTaxRates } from '@/lib/purchase-totals';
 import { emptyServerWorkspace } from '@/lib/workspace-empty';
 import { AuthService, hashPassword } from '../auth-service';
 import {
@@ -1412,6 +1413,7 @@ export function postgresPersistence(): Persistence {
           new Set(purchases.map((purchase) => purchase.id)).size !== purchases.length ||
           purchases.some(
             (purchase) =>
+              !purchase.taxRates ||
               purchase.status !== 'DRAFT' ||
               purchase.receivedAt ||
               purchase.traceRecordId ||
@@ -1423,7 +1425,8 @@ export function postgresPersistence(): Persistence {
               purchase.invoiceGroupId !== first.invoiceGroupId ||
               purchase.reference !== first.reference ||
               purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
-              purchase.warehouseId !== first.warehouseId,
+              purchase.warehouseId !== first.warehouseId ||
+              !samePurchaseTaxRates(purchase.taxRates, first.taxRates),
           )
         )
           throw new MongoInputError(
@@ -1489,6 +1492,7 @@ export function postgresPersistence(): Persistence {
           .strict()
           .parse(input);
         if (
+          (command.command === 'purchase.create' && !purchase.taxRates) ||
           purchase.status !== 'DRAFT' ||
           purchase.receivedAt ||
           purchase.traceRecordId ||
@@ -1511,6 +1515,14 @@ export function postgresPersistence(): Persistence {
             : null;
           if (command.command === 'purchase.update' && oldPurchase?.status !== 'DRAFT')
             throw new MongoConflictError();
+          if (
+            command.command === 'purchase.update' &&
+            oldPurchase &&
+            !samePurchaseTaxRates(purchase.taxRates, oldPurchase.taxRates)
+          )
+            throw new MongoInputError(
+              'Los impuestos de una compra registrada no se cambian al editarla.',
+            );
           if (command.command === 'purchase.update' && oldPurchase?.invoiceGroupId) {
             const linked = await c.query<{ count: string }>(
               "SELECT count(*)::text AS count FROM analiza.purchases WHERE organization_id=$1 AND body->>'invoiceGroupId'=$2",
@@ -1522,7 +1534,8 @@ export function postgresPersistence(): Persistence {
                 purchase.invoiceNumber !== oldPurchase.invoiceNumber ||
                 purchase.reference !== oldPurchase.reference ||
                 purchase.supplierCatalogItemId !== oldPurchase.supplierCatalogItemId ||
-                purchase.warehouseId !== oldPurchase.warehouseId)
+                purchase.warehouseId !== oldPurchase.warehouseId ||
+                !samePurchaseTaxRates(purchase.taxRates, oldPurchase.taxRates))
             )
               throw new MongoInputError(
                 'El número, proveedor, referencia y bodega de una factura con varias líneas no se editan por separado.',
@@ -1650,7 +1663,12 @@ export function postgresPersistence(): Persistence {
           );
           if (!previous.rows[0]) throw new MongoAccessError();
           const purchase = purchaseSchema.parse(previous.rows[0].body);
-          if (purchase.status !== 'RECEIVED' || !purchase.invoiceNumber || purchase.invoiceVoidedAt)
+          const draftGroup = purchase.status === 'DRAFT' && Boolean(purchase.invoiceGroupId);
+          if (
+            (!draftGroup && purchase.status !== 'RECEIVED') ||
+            !purchase.invoiceNumber ||
+            purchase.invoiceVoidedAt
+          )
             throw new MongoConflictError();
           const linked = purchase.invoiceGroupId
             ? await c.query<{ id: string; body: unknown }>(
@@ -1661,9 +1679,12 @@ export function postgresPersistence(): Persistence {
           const lines = linked.rows.map((row) => purchaseSchema.parse(row.body));
           if (
             !lines.length ||
+            (draftGroup && lines.length < 2) ||
             lines.some(
               (line) =>
-                !['RECEIVED', 'CANCELLED'].includes(line.status) ||
+                (draftGroup
+                  ? line.status !== 'DRAFT'
+                  : !['RECEIVED', 'CANCELLED'].includes(line.status)) ||
                 line.invoiceVoidedAt ||
                 line.invoiceNumber !== purchase.invoiceNumber ||
                 line.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
@@ -1674,15 +1695,27 @@ export function postgresPersistence(): Persistence {
             throw new MongoConflictError();
           const occurredAt = new Date().toISOString();
           for (const line of lines) {
+            const updatedLine = draftGroup
+              ? {
+                  ...line,
+                  status: 'CANCELLED' as const,
+                  cancelledAt: occurredAt,
+                  cancelReason: reason,
+                  invoiceVoidedAt: occurredAt,
+                  invoiceVoidReason: reason,
+                }
+              : { ...line, invoiceVoidedAt: occurredAt, invoiceVoidReason: reason };
             await c.query(
               'UPDATE analiza.purchases SET body=$3::jsonb WHERE organization_id=$1 AND id=$2',
-              [
-                actor.organizationId,
-                line.id,
-                JSON.stringify({ ...line, invoiceVoidedAt: occurredAt, invoiceVoidReason: reason }),
-              ],
+              [actor.organizationId, line.id, JSON.stringify(updatedLine)],
             );
-            await audit(c, actor, 'PURCHASE_INVOICE_VOIDED', 'purchase', line.id);
+            await audit(
+              c,
+              actor,
+              draftGroup ? 'PURCHASE_DRAFT_INVOICE_CANCELLED' : 'PURCHASE_INVOICE_VOIDED',
+              'purchase',
+              line.id,
+            );
           }
           return { ids: lines.map((line) => line.id) };
         });

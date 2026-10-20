@@ -20,6 +20,7 @@ const patient: Patient = {
   fullName: 'Paciente Sintético',
   documentType: 'DUI',
   documentId: '00000000-0',
+  referralOrigin: 'FAMILY_FRIENDS',
   status: 'ACTIVE',
 };
 
@@ -47,6 +48,12 @@ function repositoryFor(patients: PatientCollectionDouble) {
 }
 
 describe('Mongo patient repository', () => {
+  it('rejects a new patient without an explicit referral origin', async () => {
+    const repository = repositoryFor(collection());
+    await expect(
+      repository.create(admin, { patient: { ...patient, referralOrigin: undefined } }),
+    ).rejects.toThrow('origen del paciente');
+  });
   // test-id: vitest:db01-mongo-tenant-create
   it('derives the organization from the trusted actor and preserves a UUID', async () => {
     const patients = collection();

@@ -354,6 +354,13 @@ const navigation: NavigationGroup[] = [
     icon: 'reports',
     children: [
       {
+        label: 'Encuestas de satisfacción',
+        icon: 'reports',
+        href: '/surveys',
+        permission: 'reports:read',
+        actionId: 'SURVEYS-NAVIGATE',
+      },
+      {
         label: 'Analítica de accesos',
         icon: 'analytics',
         href: '/analytics/logins',

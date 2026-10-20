@@ -2,6 +2,7 @@ import { z } from 'zod';
 export * from './operations';
 
 export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER']);
+export const patientReferralOriginSchema = z.enum(['SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR']);
 
 export const patientInsuranceSchema = z.object({
   status: z.enum(['REGULAR', 'INSURED']).default('REGULAR'),
@@ -45,6 +46,8 @@ export const patientSchema = z.object({
   birthDate: z.string().optional(),
   sex: z.enum(['M', 'F']).optional(),
   company: z.string().trim().optional(),
+  /** Historical patients can lack this value; new registrations require an explicit choice. */
+  referralOrigin: patientReferralOriginSchema.optional(),
   homePhone: z.string().trim().optional(),
   email: z.string().trim().optional(),
   retired: z.boolean().optional(),
@@ -119,6 +122,8 @@ export const doctorSchema = z.object({
   medicalFee: z.number().nonnegative().optional(), // Legacy records only; new quote fees are selected per quote.
   documentId: z.string().trim().min(1),
   specialty: z.string().trim().min(1),
+  /** Historical records remain unclassified until a user reviews them. */
+  referralCategory: z.enum(['NEW', 'RECURRENT']).optional(),
   phone: z.string().trim().optional(),
   email: z.string().trim().optional(),
   address: z.string().trim().min(1),
@@ -392,6 +397,10 @@ export const purchaseSchema = z.object({
   note: z.string().trim().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
+  /** Client-requested arithmetic snapshot; this is an internal purchase record, not a fiscal DTE. */
+  taxRates: z
+    .object({ iva: z.literal(0.13), perception: z.union([z.literal(0), z.literal(0.01)]) })
+    .optional(),
   expirationDate: z.string().trim().optional(),
   lotNumber: z.string().trim().optional(),
   serialNumber: z.string().trim().optional(),

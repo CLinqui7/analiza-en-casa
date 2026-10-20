@@ -27,6 +27,7 @@ test('B2 keeps doctor and resource creation independent and persists the doctor 
   await dialog.getByLabel('Nombre completo').fill('Médica B2 QA');
   await dialog.getByLabel('JVPM').fill('JVPM-B2-001');
   await dialog.getByLabel('DUI').fill('DUI-B2-001');
+  await dialog.getByLabel('Relación del médico').selectOption('NEW');
   await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await dialog.getByRole('option', { name: 'Nutricionista' }).click();
   await dialog.getByLabel('Teléfono').fill('7000-0200');

@@ -9,12 +9,14 @@ import { mongoMutationHeaders } from '@/lib/auth';
 import {
   purchaseOrderInputSchema,
   purchaseOrderLineTotal,
+  purchaseOrderTotals,
   purchaseOrderSchema,
   type PurchaseOrder,
 } from '@/lib/purchase-order';
 
 type Line = { catalogItemId: string; quantity: number; referenceUnitPrice: number };
 const money = (value: number) => `USD ${value.toFixed(2)}`;
+const unitPrice = (value: number) => `USD ${value.toFixed(4)}`;
 
 export default function PurchaseOrdersPage() {
   const { session, can } = useAuth();
@@ -25,6 +27,7 @@ export default function PurchaseOrdersPage() {
   const [quantity, setQuantity] = useState('1');
   const [price, setPrice] = useState('');
   const [lines, setLines] = useState<Line[]>([]);
+  const [applyPerception, setApplyPerception] = useState(false);
   const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +49,7 @@ export default function PurchaseOrdersPage() {
     () => new Map(catalogItems.map((item) => [item.id, `${item.sku} · ${item.name}`])),
     [catalogItems],
   );
-  const total = lines.reduce(
-    (sum, line) => sum + purchaseOrderLineTotal(line.quantity, line.referenceUnitPrice),
-    0,
-  );
+  const totals = purchaseOrderTotals(lines, applyPerception);
 
   useEffect(() => {
     if (session?.mode !== 'postgresql' || !can('purchases:read')) return;
@@ -77,7 +77,7 @@ export default function PurchaseOrdersPage() {
     const valid = purchaseOrderInputSchema.shape.items.element.safeParse(candidate);
     if (!valid.success || !products.some((item) => item.id === productId) || !price.trim()) {
       setError(
-        'Seleccione un producto activo, una cantidad entera y un precio de referencia positivo con hasta dos decimales.',
+        'Seleccione un producto activo, una cantidad entera y un precio de referencia positivo con hasta cuatro decimales.',
       );
       return;
     }
@@ -92,6 +92,7 @@ export default function PurchaseOrdersPage() {
     const parsed = purchaseOrderInputSchema.safeParse({
       id: requestId,
       supplierCatalogItemId: supplierId,
+      applyPerception,
       items: lines,
     });
     if (!parsed.success || !suppliers.some((item) => item.id === supplierId)) {
@@ -117,6 +118,7 @@ export default function PurchaseOrdersPage() {
       setMessage(`Orden ${order.orderNumber} guardada. Puede descargar su PDF.`);
       setLines([]);
       setSupplierId('');
+      setApplyPerception(false);
       setRequestId(crypto.randomUUID());
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo emitir la orden.');
@@ -158,7 +160,8 @@ export default function PurchaseOrdersPage() {
           <h2>Nueva orden</h2>
           <p className="field-help">
             El número y la fecha se asignan al guardar. Los precios son referencias ingresadas por
-            usted; no se calculan impuestos.
+            usted, sin IVA. Se calcula el IVA solicitado del 13%; la percepción del 1% se activa
+            manualmente cuando corresponda.
           </p>
           <div className="form-grid">
             <label>
@@ -197,14 +200,23 @@ export default function PurchaseOrdersPage() {
             <label>
               Precio de referencia por unidad (USD)
               <input
-                min="0.01"
+                min="0.0001"
                 onChange={(event) => setPrice(event.target.value)}
-                step="0.01"
+                step="0.0001"
                 type="number"
                 value={price}
               />
             </label>
           </div>
+          <label>
+            <input
+              checked={applyPerception}
+              data-action-id="PURCHASE-ORDER-PERCEPTION"
+              onChange={(event) => setApplyPerception(event.target.checked)}
+              type="checkbox"
+            />{' '}
+            Aplicar percepción del 1%
+          </label>
           <div className="action-row">
             <Button data-action-id="PURCHASE-ORDER-ADD-LINE" onClick={addLine} type="button">
               Agregar producto
@@ -227,7 +239,7 @@ export default function PurchaseOrdersPage() {
                     <tr key={`${line.catalogItemId}-${index}`}>
                       <td>{names.get(line.catalogItemId) ?? line.catalogItemId}</td>
                       <td>{line.quantity}</td>
-                      <td>{money(line.referenceUnitPrice)}</td>
+                      <td>{unitPrice(line.referenceUnitPrice)}</td>
                       <td>
                         {money(purchaseOrderLineTotal(line.quantity, line.referenceUnitPrice))}
                       </td>
@@ -251,7 +263,8 @@ export default function PurchaseOrdersPage() {
             </div>
           ) : null}
           <p>
-            <strong>Total de orden: {money(total)}</strong>
+            Subtotal: {money(totals.subtotal)} · IVA 13%: {money(totals.iva)} · Percepción:{' '}
+            {money(totals.perception)} · <strong>Total de orden: {money(totals.total)}</strong>
           </p>
           <Button
             data-action-id="PURCHASE-ORDER-ISSUE"

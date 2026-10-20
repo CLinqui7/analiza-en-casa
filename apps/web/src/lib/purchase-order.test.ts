@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { purchaseOrderInputSchema, purchaseOrderLineTotal } from './purchase-order';
+import {
+  purchaseOrderInputSchema,
+  purchaseOrderLineTotal,
+  purchaseOrderTotals,
+} from './purchase-order';
 import { buildPurchaseOrderPdf } from './purchase-order-pdf';
 
 describe('supplier purchase orders', () => {
@@ -12,7 +16,7 @@ describe('supplier purchase orders', () => {
     ],
   };
 
-  it('requires whole quantities and user entered two-decimal reference prices', () => {
+  it('requires whole quantities and user entered four-decimal reference prices', () => {
     expect(purchaseOrderInputSchema.safeParse(input).success).toBe(true);
     expect(
       purchaseOrderInputSchema.safeParse({
@@ -23,11 +27,24 @@ describe('supplier purchase orders', () => {
     expect(
       purchaseOrderInputSchema.safeParse({
         ...input,
-        items: [{ ...input.items[0], referenceUnitPrice: 1.001 }],
+        items: [{ ...input.items[0], referenceUnitPrice: 1.00001 }],
       }).success,
     ).toBe(false);
     expect(purchaseOrderInputSchema.safeParse({ ...input, items: [] }).success).toBe(false);
     expect(purchaseOrderLineTotal(3, 1.25) + purchaseOrderLineTotal(2, 2.1)).toBe(7.95);
+    expect(
+      purchaseOrderInputSchema.safeParse({
+        ...input,
+        items: [{ ...input.items[0], referenceUnitPrice: 1.725 }],
+      }).success,
+    ).toBe(true);
+    expect(purchaseOrderLineTotal(12, 1.725)).toBe(20.7);
+    expect(purchaseOrderTotals(input.items, true)).toEqual({
+      subtotal: 7.95,
+      iva: 1.03,
+      perception: 0.08,
+      total: 9.06,
+    });
   });
 
   it('creates a printable multi-item PDF from an immutable order snapshot', async () => {

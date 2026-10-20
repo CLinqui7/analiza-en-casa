@@ -34,18 +34,22 @@ const doctorFormSchema = z.object({
   conadem: z.string().trim(),
   documentId: z.string().trim().min(1, 'Ingrese el DUI.'),
   specialty: z.string().trim().min(1, 'Seleccione una especialidad o profesión.'),
+  referralCategory: z.enum(['NEW', 'RECURRENT'], {
+    error: 'Seleccione si el médico es nuevo o recurrente.',
+  }),
   phone: z.string().trim(),
   email: optionalEmailSchema,
   address: z.string().trim().min(1, 'Ingrese la dirección.'),
 });
 type DoctorForm = z.infer<typeof doctorFormSchema>;
 
-const emptyDoctor: DoctorForm = {
+const emptyDoctor = {
   fullName: '',
   jvpm: '',
   conadem: '',
   documentId: '',
   specialty: '',
+  referralCategory: undefined,
   phone: '',
   email: '',
   address: '',
@@ -98,6 +102,7 @@ export default function DoctorsPage() {
       conadem: doctor.conadem ?? '',
       documentId: doctor.documentId,
       specialty: doctor.specialty,
+      referralCategory: doctor.referralCategory,
       phone: doctor.phone ?? '',
       email: doctor.email ?? '',
       address: doctor.address,
@@ -204,6 +209,7 @@ export default function DoctorsPage() {
                   <th>CONADEM</th>
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
+                  <th>Relación</th>
                   <th>Archivos</th>
                   <th>Acción</th>
                 </tr>
@@ -216,6 +222,13 @@ export default function DoctorsPage() {
                     <td>{doctor.conadem || 'No registrado'}</td>
                     <td>{doctor.documentId}</td>
                     <td>{doctor.specialty}</td>
+                    <td>
+                      {doctor.referralCategory === 'RECURRENT'
+                        ? 'Recurrente'
+                        : doctor.referralCategory === 'NEW'
+                          ? 'Nuevo'
+                          : 'Sin clasificar'}
+                    </td>
                     <td>
                       {mongoMode && privateFiles[doctor.id]?.length
                         ? privateFiles[doctor.id].map((file) => (
@@ -350,6 +363,25 @@ export default function DoctorsPage() {
               {form.formState.errors.specialty.message}
             </span>
           ) : null}
+          <label>
+            Relación del médico{' '}
+            <span className="required-marker" aria-label="obligatorio">
+              *
+            </span>
+            <select
+              {...form.register('referralCategory')}
+              data-action-id="DOCTOR-REFERRAL-CATEGORY"
+            >
+              <option value="">Seleccione</option>
+              <option value="NEW">Médico nuevo</option>
+              <option value="RECURRENT">Médico recurrente</option>
+            </select>
+            {form.formState.errors.referralCategory ? (
+              <span className="field-error" role="alert">
+                {form.formState.errors.referralCategory.message}
+              </span>
+            ) : null}
+          </label>
           <label>
             Teléfono
             <input {...form.register('phone')} type="tel" />

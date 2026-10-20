@@ -22,9 +22,26 @@ test('B3 persists multiple admission and discharge periods without accepting att
   page,
 }) => {
   await login(page, '/hospitalizations');
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.doctors',
+      JSON.stringify([
+        {
+          id: 'doctor-b3-qa',
+          fullName: 'Médico B3 QA',
+          documentId: 'DUI-B3',
+          specialty: 'General',
+          address: 'Dirección sintética',
+          attachments: [],
+        },
+      ]),
+    ),
+  );
+  await page.reload();
   await page.getByRole('button', { name: 'Nueva hospitalización' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva hospitalización' });
   await dialog.getByLabel('Paciente').selectOption('patient-demo-001');
+  await dialog.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await dialog.getByLabel('Fecha de ingreso').fill('2026-09-10');
   await dialog.getByLabel('Fecha de egreso (opcional)').fill('2026-09-12');
   await dialog.getByRole('button', { name: 'Agregar período' }).click();

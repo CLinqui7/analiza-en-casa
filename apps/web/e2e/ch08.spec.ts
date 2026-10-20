@@ -59,9 +59,26 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
   page,
 }) => {
   await login(page);
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.doctors',
+      JSON.stringify([
+        {
+          id: 'doctor-ch08-qa',
+          fullName: 'Médico CH08 QA',
+          documentId: 'DUI-CH08',
+          specialty: 'General',
+          address: 'Dirección sintética',
+          attachments: [],
+        },
+      ]),
+    ),
+  );
+  await page.reload();
   await page.getByRole('button', { name: 'Nueva hospitalización' }).click();
   const create = page.getByRole('dialog', { name: 'Nueva hospitalización' });
   await create.getByLabel('Paciente').selectOption('patient-demo-001');
+  await create.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await create.getByLabel('Fecha de ingreso').fill('2026-10-08');
   await create.getByLabel('Próxima acción').fill('CH08 perfil administrativo');
   await create.getByRole('button', { name: 'Guardar hospitalización' }).click();

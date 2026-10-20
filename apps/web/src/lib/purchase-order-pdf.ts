@@ -65,7 +65,7 @@ export async function buildPurchaseOrderPdf(order: PurchaseOrder): Promise<Uint8
     }
     draw(item.sku.slice(0, 25), 42, 9, true);
     draw(String(item.quantity), 330, 9);
-    drawRight(money(item.referenceUnitPrice), 445);
+    drawRight(`USD ${item.referenceUnitPrice.toFixed(4)}`, 445);
     drawRight(money(item.lineTotal), 570);
     y -= 14;
     draw(item.name.slice(0, 58), 42, 9);
@@ -81,12 +81,20 @@ export async function buildPurchaseOrderPdf(order: PurchaseOrder): Promise<Uint8
     }
     y -= 14;
   }
-  if (y < 105) {
+  if (y < 165) {
     page = document.addPage([612, 792]);
     y = 742;
   }
   page.drawLine({ start: { x: 42, y }, end: { x: 570, y }, thickness: 0.7 });
   y -= 23;
+  if (order.subtotal !== undefined && order.iva !== undefined && order.perception !== undefined) {
+    drawRight(`Subtotal: ${money(order.subtotal)}`, 570);
+    y -= 16;
+    drawRight(`IVA 13%: ${money(order.iva)}`, 570);
+    y -= 16;
+    drawRight(`IVA percibido 1%: ${money(order.perception)}`, 570);
+    y -= 19;
+  }
   drawRight(`Total de orden: ${money(order.total)}`, 570, 11, true);
   y -= 35;
   draw('Documento de solicitud. No es factura ni registra recepcion de inventario.', 42, 8);

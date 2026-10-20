@@ -13,6 +13,12 @@ const line = purchaseSchema.parse({
 });
 
 describe('invoice group actions', () => {
+  it('offers an atomic invoice cancellation only while every grouped line is draft', () => {
+    const second = { ...line, id: 'synthetic-line-2' };
+    expect(invoiceVoidSource([line, second])).toEqual(line);
+    expect(invoiceVoidSource([line])).toBeNull();
+    expect(invoiceVoidSource([line, { ...second, invoiceNumber: 'another' }])).toBeNull();
+  });
   it('uses a received line when the first line was cancelled', () => {
     const received = { ...line, id: 'synthetic-line-2', status: 'RECEIVED' as const };
     expect(invoiceVoidSource([{ ...line, status: 'CANCELLED' }, received])).toEqual(received);

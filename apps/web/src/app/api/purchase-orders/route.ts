@@ -6,6 +6,7 @@ import { can } from '@/lib/permissions';
 import {
   purchaseOrderInputSchema,
   purchaseOrderLineTotal,
+  purchaseOrderTotals,
   purchaseOrderSchema,
 } from '@/lib/purchase-order';
 import { boundedJson, privateHeaders } from '@/server/auth-http';
@@ -119,8 +120,7 @@ export async function POST(request: NextRequest) {
         issuedAt: new Date().toISOString(),
         supplierName: supplier.name,
         items: lines,
-        total:
-          Math.round(lines.reduce((sum, line) => sum + Math.round(line.lineTotal * 100), 0)) / 100,
+        ...purchaseOrderTotals(lines, input.applyPerception === true),
         fingerprint,
       });
       const inserted = await client.query(
