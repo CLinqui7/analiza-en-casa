@@ -24,6 +24,6 @@ El reporte indica: «eliminar la obligatoriedad del DUI y la dirección» y reti
 | Nombre de la secretaria | No | Formulario y persistencia |
 | Cumpleaños de la secretaria | No | Formulario y persistencia |
 
-La relación nuevo/recurrente sigue siendo obligatoria por el reporte independiente `6c828e53`. Los médicos históricos sin teléfono fijo continúan visibles y deben completarlo cuando se editen. La aplicación no inventa datos para ellos. No se importa ninguna base antigua de médicos.
+La relación nuevo/recurrente sigue siendo obligatoria por el reporte independiente `6c828e53`. Los médicos históricos sin teléfono fijo continúan visibles y deben completarlo cuando se editen. La aplicación no inventa datos para ellos. No se importa ninguna base antigua de médicos. Código verificado en el commit `b2ba1ef206e20eff729ff87552cf44e82b837696`.
 
 Verificación local: `npm run repo:preflight`, `npm run typecheck`, `npm run test:react` (275/275), `npm run check` (143/143 pruebas Node, 76/76 QA), `npm run qa:client-changes` (32/32), `npm run qa:video-parity` (210/210), `npm run audit:verify` (17/17), `npm run build`, lint, formato, seguridad, límites React, Playwright B2 (7/7) + B4/feedback (9/9) y Selenium de médicos (6/6). La prueba inicial de Playwright cargó la configuración local de la base conectada y rechazó las cuentas demo; al ejecutar explícitamente el modo demo, las 16 pruebas pasaron. El primer intento de Selenium alcanzó el buscador del listado al buscar JVPM; se limitó el selector al diálogo y la suite pasó al repetirla.
