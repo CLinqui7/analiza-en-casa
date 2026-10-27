@@ -3,7 +3,7 @@ set -euo pipefail
 umask 077
 cd /opt/analiza-contabo-staging
 exec 9>/run/lock/analiza-contabo-backup.lock
-flock -n 9 || exit 0
+flock -n 9 || { echo 'Backup is already running; refusing to continue without a new snapshot' >&2; exit 1; }
 export RESTIC_REPOSITORY=/opt/analiza-contabo-staging/backups/restic
 export RESTIC_PASSWORD_FILE=/opt/analiza-contabo-staging/secrets/restic-password
 test -f "$RESTIC_REPOSITORY/config" || restic init

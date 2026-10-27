@@ -42,7 +42,15 @@ rollback() {
 
 # The database is backed up before additive DDL. The old web image stays
 # available and running while the new operator migrates the local database.
+export RESTIC_REPOSITORY="$base/backups/restic"
+export RESTIC_PASSWORD_FILE="$base/secrets/restic-password"
+snapshot_before=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("analiza-contabo-staging"))] | max_by(.time).id // empty')
 ./backup.sh
+snapshot_after=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("analiza-contabo-staging"))] | max_by(.time).id // empty')
+[[ -n "$snapshot_after" && "$snapshot_after" != "$snapshot_before" ]] || {
+  echo 'No new verified backup snapshot; refusing database migration' >&2
+  exit 1
+}
 trap rollback ERR
 sed -i "s/^OPERATOR_IMAGE=.*/OPERATOR_IMAGE=analiza-contabo-operator:$sha/" .env
 docker compose --profile operator run --rm --no-deps migrate

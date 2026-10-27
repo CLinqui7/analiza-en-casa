@@ -8,6 +8,11 @@ pueden estar trabajando en el mismo VPS.
 
 ## GitHub antes de cada despliegue
 
+**Agenda y mantenimiento, 27 de octubre de 2026 (El Salvador):** la imagen web activa y sana es `e3de685cc566254c6a29c68b0d7c5899e7c75368`, subida a GitHub y verificada antes de publicar. El rol web recibió el permiso mínimo `UPDATE` sobre `analiza.shifts` para editar turnos. La cuenta sintética de QA confirmó edición HTTP 200, rechazo por colisión HTTP 400 con mensaje específico y salud HTTP 200. El despliegue creó y comprobó el snapshot cifrado `0a498f1d`. Ambos contenedores están sanos, el timer de respaldo tiene resultado satisfactorio (27 de octubre), el disco tiene 175 GiB libres y el certificado de Analiza vence el 12 de enero de 2027. El error exacto del alta en la captura del cliente no puede atribuirse retroactivamente con certeza; el cliente web ahora muestra el rechazo de validación en vez de ocultarlo. Detalle en `docs/feedback/AGENDA_SHIFT_FIX_2026-10-27.md`.
+
+La copia externa programada del 27 de octubre terminó con código 1 al añadirse un índice restic durante la transferencia. Se recuperó el archivo faltante, se compararon los 150 archivos cifrados por SHA-256 con el VPS y la copia pasó `restic check --read-data`. Las mejoras al bloqueo del respaldo, la comprobación del snapshot antes de migrar y el reintento incremental de la copia externa están documentados en `docs/deployment/CONTABO_MAINTENANCE_2026-10-27.md`. Comprobar la siguiente ejecución automática.
+
+
 El cliente exige que **todo código, migración y configuración se suba a GitHub
 antes de desplegar**. Hacer commit y push a una rama `codex/*`, verificar con
 `git ls-remote` que el SHA remoto coincide con el commit seleccionado y crear
