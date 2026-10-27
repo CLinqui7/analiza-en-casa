@@ -522,7 +522,7 @@ export default function QuoteDetailPage() {
               <Button
                 className="button-secondary"
                 data-action-id="QUOTE-OPEN-PAYMENT"
-                onClick={() => router.push(`/payments?quote=${encodeURIComponent(quote.id)}`)}
+                onClick={() => router.push(`/receivables?quote=${encodeURIComponent(quote.id)}`)}
                 type="button"
               >
                 Abrir pagos

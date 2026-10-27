@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { quoteDisplayCode } from '@analiza/domain';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { paymentMethodLabel, paymentStatusLabel } from '@/lib/payment-report';
 import { receivableAccounts } from '@/lib/receivables';
 const money = (value: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(value);
@@ -33,15 +34,7 @@ const paymentSchema = z
     }
   });
 type PaymentForm = z.infer<typeof paymentSchema>;
-const paymentStatus = { APPLIED: 'Aplicado', VOIDED: 'Reversado' };
-const paymentMethods = {
-  CASH: 'Efectivo',
-  CHECK: 'Cheque',
-  TRANSFER: 'Transferencia',
-  CARD: 'Tarjeta',
-} as const;
-
-export function PaymentsPage({ receivables = false }: { receivables?: boolean }) {
+export function PaymentsPage() {
   const { addPayment, payments, quotes, patients, voidPayment, error } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
@@ -176,13 +169,12 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     }),
     { responsibility: 0, paid: 0, balance: 0 },
   );
-  const title = receivables ? 'Cuentas por cobrar' : 'Pagos';
   return (
     <div className="page-stack payments-page">
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
-          <h1>{title}</h1>
+          <h1>Cuentas por cobrar</h1>
           <p>Responsabilidad del paciente, pagos, comprobantes y estado de cuenta.</p>
         </div>
         <div className="header-actions">
@@ -191,7 +183,10 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
               data-action-id="PAYMENT-APPLY"
               disabled={!openAccounts.length}
               onClick={() => {
-                form.setValue('quoteId', sentQuotes[0]?.id ?? '');
+                const requestedQuote = new URLSearchParams(window.location.search).get('quote');
+                const account = openAccounts.find((item) => item.quote.id === requestedQuote);
+                form.setValue('quoteId', account?.quote.id ?? sentQuotes[0]?.id ?? '');
+                if (account) form.setValue('amount', account.balance);
                 setPaymentCommandKey(crypto.randomUUID());
                 setMessage(null);
                 setOpen(true);
@@ -415,11 +410,11 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     <td>{money(payment.amount)}</td>
                     <td>
                       {payment.paymentMethod
-                        ? paymentMethods[payment.paymentMethod]
+                        ? paymentMethodLabel[payment.paymentMethod]
                         : 'No registrado'}
                     </td>
                     <td>{payment.reference || 'No aplica'}</td>
-                    <td>{paymentStatus[payment.status]}</td>
+                    <td>{paymentStatusLabel[payment.status]}</td>
                     <td>
                       <div className="action-row">
                         <Button
@@ -520,7 +515,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                 },
               })}
             >
-              {Object.entries(paymentMethods).map(([value, label]) => (
+              {Object.entries(paymentMethodLabel).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>

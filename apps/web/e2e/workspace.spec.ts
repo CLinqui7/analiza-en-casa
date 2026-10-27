@@ -930,7 +930,7 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
   await page.getByRole('button', { name: 'Enviar versión' }).click();
 
-  await page.goto('/payments');
+  await page.goto('/receivables');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
   const quoteSearch = page.getByRole('combobox', { name: 'Buscar paciente o cotización' });
   await quoteSearch.fill('Paciente Demo Aurora');
@@ -959,8 +959,24 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.getByRole('button', { name: 'Confirmar reversión' }).click();
   await expect(page.getByRole('status')).toContainText('Pago reversado con motivo');
   await page.reload();
-  await expect(page.getByText('Reversado')).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Reversado' })).toBeVisible();
   await expect(page.getByText('Corrección de QA sintética.')).toBeVisible();
+  await page.goto('/payments');
+  await expect(page.getByRole('heading', { name: 'Reporte de pagos' })).toBeVisible();
+  await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Reversado' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Aplicar pago' })).toHaveCount(0);
+  await page.getByLabel('Estado').selectOption('APPLIED');
+  await expect(page.getByText('REF-PAGO-E2E')).toHaveCount(0);
+  await page.getByLabel('Estado').selectOption('VOIDED');
+  await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  const reportDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Descargar CSV' }).click();
+  await expect((await reportDownload).suggestedFilename()).toBe('reporte-pagos.csv');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
 });
 
 test('signed clinical documents remain immutable and corrections create a new version', async ({

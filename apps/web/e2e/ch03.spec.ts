@@ -25,7 +25,9 @@ test('CH03-F001 financial navigation has three live, authorized destinations', a
     'href',
     '/receivables',
   );
-  await expect(page.getByRole('link', { name: 'Pagos', exact: true })).toHaveAttribute(
+  const reports = page.getByRole('button', { name: 'Reportes y control' });
+  if ((await reports.getAttribute('aria-expanded')) === 'false') await reports.click();
+  await expect(page.getByRole('link', { name: 'Reporte de pagos' })).toHaveAttribute(
     'href',
     '/payments',
   );

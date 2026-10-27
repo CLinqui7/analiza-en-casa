@@ -3904,7 +3904,7 @@
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q009.",
       "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
-      "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado."
+      "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado. La solicitud posterior del cliente mueve Pagos a un reporte de sólo lectura y concentra las operaciones en Cuentas por cobrar; CH08-F04 permanece PARTIAL y CH08-Q009 sigue abierto."
     },
     {
       "requirement_id": "CH08-F05",

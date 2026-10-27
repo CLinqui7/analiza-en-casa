@@ -31,10 +31,10 @@ const knowledgeBase = [
     id: 'payment',
     question: '¿Cómo veo un pago?',
     answer:
-      'Abra Pagos o Cuentas por cobrar y seleccione el registro correspondiente. Los pagos requieren permiso financiero.',
-    steps: ['Abrir Pagos', 'Buscar el caso', 'Consultar el historial'],
+      'Abra Reporte de pagos para consultar todos los movimientos; en Cuentas por cobrar puede aplicar pagos, descargar comprobantes y reversar con motivo. Se requiere permiso financiero.',
+    steps: ['Abrir Reporte de pagos', 'Buscar el movimiento', 'Consultar el historial'],
     href: '/payments',
-    label: 'Abrir pagos',
+    label: 'Abrir reporte de pagos',
     terms: ['pago', 'pagos', 'cobro'],
   },
   {

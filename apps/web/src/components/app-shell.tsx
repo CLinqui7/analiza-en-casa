@@ -134,13 +134,6 @@ const navigation: NavigationGroup[] = [
         actionId: 'RECEIVABLES-NAVIGATE',
       },
       {
-        label: 'Pagos',
-        icon: 'payments',
-        href: '/payments',
-        permission: 'payments:read',
-        actionId: 'PAYMENT-NAVIGATE',
-      },
-      {
         label: 'Ventas confirmadas',
         icon: 'finance',
         href: '/sales',
@@ -353,6 +346,13 @@ const navigation: NavigationGroup[] = [
     label: 'Reportes y control',
     icon: 'reports',
     children: [
+      {
+        label: 'Reporte de pagos',
+        icon: 'payments',
+        href: '/payments',
+        permission: 'payments:read',
+        actionId: 'PAYMENT-REPORT-NAVIGATE',
+      },
       {
         label: 'Encuestas de satisfacción',
         icon: 'reports',
