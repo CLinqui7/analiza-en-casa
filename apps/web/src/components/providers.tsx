@@ -461,7 +461,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           setError(
             cause instanceof Error ? cause.message : 'No fue posible guardar la serie de turnos.',
           );
-          return false;
+          throw cause;
         }
       }
       return persistMockChange((current) => ({
@@ -495,7 +495,7 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
           return true;
         } catch (cause) {
           setError(cause instanceof Error ? cause.message : 'No fue posible actualizar el turno.');
-          return false;
+          throw cause;
         }
       }
       return persistMockChange((current) => ({

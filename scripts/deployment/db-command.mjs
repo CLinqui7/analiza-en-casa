@@ -188,8 +188,10 @@ try {
     await client.query(
       `GRANT SELECT,INSERT,UPDATE ON analiza.users,analiza.memberships,analiza.sessions,analiza.auth_rate_limits,analiza.patients,analiza.doctors,analiza.nursing_resources,analiza.hospitalizations,analiza.hospitalization_nurses,analiza.configuration_entries,analiza.quotes,analiza.purchases,analiza.clinical_documents TO ${role}`,
     );
+    // Editing a scheduled shift locks and updates its row. Commands and audit remain append-only.
+    await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.shifts TO ${role}`);
     await client.query(
-      `GRANT SELECT,INSERT ON analiza.shifts,analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements,analiza.inventory_transfers TO ${role}`,
+      `GRANT SELECT,INSERT ON analiza.commands,analiza.file_metadata,analiza.audit_events,analiza.inventory_movements,analiza.inventory_transfers TO ${role}`,
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.payments TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_visits TO ${role}`);
