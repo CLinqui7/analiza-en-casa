@@ -1,5 +1,9 @@
 # Analiza en Casa en Contabo: entrega para el siguiente Codex
 
+Para instalar **otros proyectos** en este VPS, usar también
+`CODEX_MULTIPROJECT_VPS_HANDOFF.md`. Su anexo sensible permanece únicamente
+en la PC del operador, fuera de Git.
+
 Estado comprobado el 20 de octubre de 2026. Este documento sustituye el
 estado de despliegue aplazado descrito en `MIGRATION_HANDOFF.md`. No contiene
 contraseñas, claves privadas, cadenas de conexión ni datos identificables de
