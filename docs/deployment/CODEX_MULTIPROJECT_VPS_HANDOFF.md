@@ -85,7 +85,7 @@ siendo la activa cuando otro chat lea este documento.
 ## Comprobación rápida de Analiza
 
 ```powershell
-curl.exe -I https://analiza.207.244.227.122.sslip.io/api/health
+curl.exe -sS -o NUL -w 'HTTP %{http_code}\n' https://analiza.207.244.227.122.sslip.io/api/health
 curl.exe -I https://analiza-en-casa-demo.vercel.app/
 ssh -T -i 'C:\Temp\analiza-contabo-private\operator.key' -o BatchMode=yes -o StrictHostKeyChecking=yes root@207.244.227.122 'cd /opt/analiza-contabo-staging && docker compose ps && systemctl show analiza-contabo-backup.service -p Result -p ExecMainStatus && df -h /'
 ```
