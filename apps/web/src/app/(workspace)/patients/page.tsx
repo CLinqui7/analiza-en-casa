@@ -27,6 +27,7 @@ import {
   companyOptions,
   insuranceProviderOptions,
   nationalityOptions,
+  productionNationalityOptions,
   normalizeCoverage,
   parseExplicitCoordinates,
   prefillPolicyHolder,
@@ -518,7 +519,6 @@ export default function PatientsPage() {
     addPatient,
     addPatients,
     catalogItems,
-    doctors,
     patients,
     providerMode,
     refreshPatients,
@@ -544,7 +544,6 @@ export default function PatientsPage() {
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
-  const [doctorQuery, setDoctorQuery] = useState('');
   const [importing, setImporting] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
@@ -1535,60 +1534,6 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </label>
-            <label className="full">
-              Diagnóstico
-              <textarea {...form.register('diagnosis')} rows={2} />
-            </label>
-            <label>
-              Buscar médico por nombre
-              <input
-                aria-label="Filtrar médicos por nombre"
-                data-action-id="PATIENT-DOCTOR-SEARCH"
-                onChange={(event) => setDoctorQuery(event.target.value)}
-                type="search"
-                value={doctorQuery}
-              />
-            </label>
-            <label>
-              Médico tratante principal
-              <select {...form.register('primaryDoctorId')}>
-                <option value="">Sin asignar</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
-                      doctor.id === form.getValues('primaryDoctorId') ||
-                      doctor.id === form.getValues('secondaryDoctorId'),
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
-              Médico tratante secundario
-              <select {...form.register('secondaryDoctorId')}>
-                <option value="">Sin asignar</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
-                      doctor.id === form.getValues('primaryDoctorId') ||
-                      doctor.id === form.getValues('secondaryDoctorId'),
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
-              </select>
-            </label>
             <label>
               Fecha de nacimiento{' '}
               <span className="required-marker" aria-label="obligatorio">
@@ -1735,10 +1680,11 @@ export default function PatientsPage() {
                     actionId="PATIENT-NATIONALITY-SEARCH"
                     ariaLabel="Nacionalidad"
                     onChange={field.onChange}
-                    allowCustom={process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'}
-                    placeholder="Buscar o escribir nacionalidad"
+                    placeholder="Seleccione la nacionalidad"
                     options={
-                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : nationalityOptions
+                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
+                        ? productionNationalityOptions
+                        : nationalityOptions
                     }
                     value={field.value}
                   />

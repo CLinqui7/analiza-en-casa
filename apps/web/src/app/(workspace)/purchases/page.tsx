@@ -11,6 +11,7 @@ import { useAuth, useWorkspace } from '@/components/providers';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
 import { invoiceVoidSource } from '@/lib/purchase-invoice-groups';
 import { purchaseTotals } from '@/lib/purchase-totals';
+import { purchaseOrderSchema, type PurchaseOrder } from '@/lib/purchase-order';
 import { useOperations } from '@/lib/use-operations';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
@@ -18,7 +19,10 @@ const schema = z.object({
   warehouseId: z.string().min(1, 'Seleccione una bodega de destino.'),
   reference: z.string().trim().min(1, 'Ingrese una referencia de compra.').max(200),
   invoiceNumber: z.string().trim().max(100, 'Use un máximo de 100 caracteres.'),
+  purchaseOrderId: z.string().trim(),
   note: z.string().trim(),
+  usefulLife: z.string().trim().max(120),
+  isFixedAsset: z.boolean(),
   quantity: z
     .number()
     .int('La cantidad debe ser un número entero.')
@@ -40,6 +44,7 @@ export default function PurchasesPage() {
     error,
     purchases,
     refreshWorkspace,
+    providerMode,
   } = useWorkspace();
   const { can } = useAuth();
   const {
@@ -51,6 +56,7 @@ export default function PurchasesPage() {
   } = useOperations();
   const [open, setOpen] = useState(false);
   const [queuedLines, setQueuedLines] = useState<Purchase[]>([]);
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [applyPerception, setApplyPerception] = useState(false);
   const [invoiceGroupId, setInvoiceGroupId] = useState(() => crypto.randomUUID());
   const [editing, setEditing] = useState<Purchase | null>(null);
@@ -99,7 +105,10 @@ export default function PurchasesPage() {
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
       invoiceNumber: '',
+      purchaseOrderId: '',
       note: '',
+      usefulLife: '',
+      isFixedAsset: false,
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
       expirationDate: '',
@@ -107,6 +116,20 @@ export default function PurchasesPage() {
       serialNumber: '',
     },
   });
+  useEffect(() => {
+    if (providerMode !== 'postgresql') return;
+    let active = true;
+    void fetch('/api/purchase-orders', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        const payload = (await response.json()) as { orders: unknown[] };
+        if (active) setOrders(payload.orders.map((entry) => purchaseOrderSchema.parse(entry)));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [providerMode]);
   useEffect(() => {
     const current = form.getValues('catalogItemId');
     if (!purchasableItems.some((item) => item.id === current) && purchasableItems[0]) {
@@ -127,6 +150,7 @@ export default function PurchasesPage() {
     [catalogItems],
   );
   const selectedCatalogItemId = useWatch({ control: form.control, name: 'catalogItemId' });
+  const selectedSupplierId = useWatch({ control: form.control, name: 'supplierCatalogItemId' });
   const selectedItem = purchasableItems.find((item) => item.id === selectedCatalogItemId);
   const purchaseCatalogOptions = useMemo(
     () =>
@@ -238,7 +262,10 @@ export default function PurchasesPage() {
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
       invoiceNumber: '',
+      purchaseOrderId: '',
       note: '',
+      usefulLife: '',
+      isFixedAsset: false,
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
       expirationDate: '',
@@ -258,7 +285,10 @@ export default function PurchasesPage() {
       warehouseId: purchase.warehouseId ?? '',
       reference: purchase.reference,
       invoiceNumber: purchase.invoiceNumber ?? '',
+      purchaseOrderId: purchase.purchaseOrderId ?? '',
       note: purchase.note ?? '',
+      usefulLife: purchase.usefulLife ?? '',
+      isFixedAsset: purchase.isFixedAsset ?? false,
       quantity: purchase.quantity ?? 1,
       unitCost: purchase.unitCost ?? 0,
       expirationDate: purchase.expirationDate ?? '',
@@ -286,6 +316,19 @@ export default function PurchasesPage() {
     if (!suppliers.some((item) => item.id === values.supplierCatalogItemId)) {
       form.setError('supplierCatalogItemId', { message: 'Seleccione un proveedor activo.' });
       return null;
+    }
+    if (values.purchaseOrderId) {
+      const order = orders.find((candidate) => candidate.id === values.purchaseOrderId);
+      if (
+        !order ||
+        order.supplierCatalogItemId !== values.supplierCatalogItemId ||
+        !order.items.some((line) => line.catalogItemId === values.catalogItemId)
+      ) {
+        form.setError('purchaseOrderId', {
+          message: 'Seleccione una orden del mismo proveedor y artículo.',
+        });
+        return null;
+      }
     }
     if (!activeWarehouses.some((warehouse) => warehouse.id === values.warehouseId)) {
       form.setError('warehouseId', { message: 'Seleccione una bodega activa.' });
@@ -321,6 +364,9 @@ export default function PurchasesPage() {
         invoiceNumber: values.invoiceNumber || undefined,
         invoiceGroupId: editing?.invoiceGroupId ?? invoiceGroupId,
         note: values.note || undefined,
+        usefulLife: values.usefulLife || undefined,
+        isFixedAsset: values.isFixedAsset,
+        purchaseOrderId: values.purchaseOrderId || undefined,
         quantity: values.quantity,
         unitCost: values.unitCost,
         taxRates: editing
@@ -349,6 +395,7 @@ export default function PurchasesPage() {
       (values.invoiceNumber !== first.invoiceNumber ||
         values.reference !== first.reference ||
         values.supplierCatalogItemId !== first.supplierCatalogItemId ||
+        (values.purchaseOrderId || undefined) !== first.purchaseOrderId ||
         values.warehouseId !== first.warehouseId)
     ) {
       form.setError('invoiceNumber', {
@@ -382,6 +429,7 @@ export default function PurchasesPage() {
           line.invoiceNumber !== queuedLines[0].invoiceNumber ||
           line.reference !== queuedLines[0].reference ||
           line.supplierCatalogItemId !== queuedLines[0].supplierCatalogItemId ||
+          line.purchaseOrderId !== queuedLines[0].purchaseOrderId ||
           line.warehouseId !== queuedLines[0].warehouseId ||
           line.taxRates?.perception !== queuedLines[0].taxRates?.perception,
       )
@@ -940,6 +988,26 @@ export default function PurchasesPage() {
             ) : null}
           </label>
           <label>
+            Orden de compra vinculada (opcional)
+            <select {...form.register('purchaseOrderId')}>
+              <option value="">Compra sin orden vinculada</option>
+              {orders
+                .filter(
+                  (order) =>
+                    order.supplierCatalogItemId === selectedSupplierId &&
+                    order.items.some((line) => line.catalogItemId === selectedCatalogItemId),
+                )
+                .map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.orderNumber}
+                  </option>
+                ))}
+            </select>
+            {form.formState.errors.purchaseOrderId ? (
+              <span className="field-error">{form.formState.errors.purchaseOrderId.message}</span>
+            ) : null}
+          </label>
+          <label>
             Bodega de destino
             <select {...form.register('warehouseId')}>
               <option value="">Seleccione una bodega</option>
@@ -1009,6 +1077,23 @@ export default function PurchasesPage() {
             {form.formState.errors.invoiceNumber ? (
               <span className="field-error">{form.formState.errors.invoiceNumber.message}</span>
             ) : null}
+          </label>
+          <label>
+            Vida útil del artículo
+            <input
+              {...form.register('usefulLife')}
+              data-action-id="PURCHASE-USEFUL-LIFE"
+              maxLength={120}
+              placeholder="Indique duración y unidad"
+            />
+          </label>
+          <label>
+            <input
+              {...form.register('isFixedAsset')}
+              data-action-id="PURCHASE-FIXED-ASSET"
+              type="checkbox"
+            />{' '}
+            Registrar como activo fijo
           </label>
           {selectedItem?.category === 'MEDICATIONS' || selectedItem?.category === 'SUPPLIES' ? (
             <>

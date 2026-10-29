@@ -32,20 +32,17 @@ type PortalShare = {
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { patients, payments, providerMode, quotes, sendQuote } = useWorkspace();
+  const { patients, payments, providerMode, quotes } = useWorkspace();
   const { can } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
   const [portalShare, setPortalShare] = useState<PortalShare | null>(null);
   const [creatingPortal, setCreatingPortal] = useState(false);
   const [decisions, setDecisions] = useState<QuoteDecision[]>([]);
-  const [decisionValue, setDecisionValue] = useState('');
-  const [decisionReason, setDecisionReason] = useState('');
-  const [decisionBusy, setDecisionBusy] = useState(false);
   const [decisionError, setDecisionError] = useState<string | null>(null);
-  const [decisionRequestId, setDecisionRequestId] = useState(() => crypto.randomUUID());
   const quote = quotes.find((candidate) => candidate.id === id);
+  const quoteExists = Boolean(quote);
   useEffect(() => {
-    if (providerMode !== 'postgresql' || quote?.status !== 'SENT') return;
+    if (providerMode !== 'postgresql' || !quoteExists) return;
     let active = true;
     void fetch(`/api/quotes/${encodeURIComponent(id)}/decision`, { cache: 'no-store' })
       .then(async (response) => {
@@ -60,7 +57,7 @@ export default function QuoteDetailPage() {
     return () => {
       active = false;
     };
-  }, [id, providerMode, quote?.status]);
+  }, [id, providerMode, quoteExists]);
   if (!quote)
     return (
       <main className="page-stack">
@@ -89,47 +86,6 @@ export default function QuoteDetailPage() {
     .slice()
     .sort((a, b) => a.version - b.version);
   const editable = can('quotes:write') && canEditQuote(currentQuote);
-  async function send() {
-    const saved = await sendQuote(currentQuote.id);
-    if (saved) {
-      setMessage('La versión se marcó como enviada e inmutable.');
-    }
-  }
-  async function saveDecision() {
-    if (decisionValue !== 'APPROVED' && decisionValue !== 'NOT_APPROVED') {
-      setDecisionError('Seleccione si el servicio fue aprobado.');
-      return;
-    }
-    if (decisionValue === 'NOT_APPROVED' && !decisionReason) {
-      setDecisionError('Seleccione el motivo de no aprobación.');
-      return;
-    }
-    setDecisionBusy(true);
-    setDecisionError(null);
-    try {
-      const response = await fetch(`/api/quotes/${encodeURIComponent(currentQuote.id)}/decision`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
-        body: JSON.stringify({
-          id: decisionRequestId,
-          decision: decisionValue,
-          reason: decisionValue === 'NOT_APPROVED' ? decisionReason : null,
-        }),
-      });
-      if (!response.ok)
-        throw new Error('No se pudo guardar la decisión. Revise la versión e inténtelo de nuevo.');
-      const saved = quoteDecisionSchema.parse(await response.json());
-      setDecisions((current) => [saved, ...current.filter((entry) => entry.id !== saved.id)]);
-      setDecisionRequestId(crypto.randomUUID());
-      setDecisionValue('');
-      setDecisionReason('');
-      setMessage('Decisión registrada y auditada sin modificar la cotización enviada.');
-    } catch (error) {
-      setDecisionError(error instanceof Error ? error.message : 'No se pudo guardar la decisión.');
-    } finally {
-      setDecisionBusy(false);
-    }
-  }
   async function createPortalShare() {
     setCreatingPortal(true);
     setMessage(null);
@@ -227,11 +183,6 @@ export default function QuoteDetailPage() {
               Revisar / nueva versión
             </Button>
           ) : null}
-          {editable ? (
-            <Button data-action-id="QUOTE-SEND" onClick={() => void send()} type="button">
-              Enviar versión
-            </Button>
-          ) : null}
           <Button
             className="button-secondary"
             data-action-id="QUOTE-PRINT"
@@ -274,7 +225,7 @@ export default function QuoteDetailPage() {
           {message}
         </p>
       ) : null}
-      {quote.status === 'SENT' && providerMode === 'postgresql' ? (
+      {providerMode === 'postgresql' ? (
         <Panel>
           <h2>Aprobación del servicio</h2>
           <p className="field-help">
@@ -287,54 +238,10 @@ export default function QuoteDetailPage() {
               {decisions[0]
                 ? decisions[0].decision === 'APPROVED'
                   ? 'Aprobado'
-                  : `No aprobado · ${quoteDecisionReasonLabels[decisions[0].reason!]}`
+                  : `No aprobado · ${quoteDecisionReasonLabels[decisions[0].reason!] ?? decisions[0].reason}`
                 : 'Sin decisión registrada'}
             </strong>
           </p>
-          {can('quotes:write') ? (
-            <div className="form-grid no-print">
-              <label>
-                ¿Fue aprobado el servicio?
-                <select
-                  data-action-id="QUOTE-DECISION"
-                  onChange={(event) => {
-                    setDecisionValue(event.target.value);
-                    setDecisionReason('');
-                  }}
-                  value={decisionValue}
-                >
-                  <option value="">Seleccione</option>
-                  <option value="APPROVED">Aprobado</option>
-                  <option value="NOT_APPROVED">No aprobado</option>
-                </select>
-              </label>
-              {decisionValue === 'NOT_APPROVED' ? (
-                <label>
-                  Motivo
-                  <select
-                    data-action-id="QUOTE-DECISION-REASON"
-                    onChange={(event) => setDecisionReason(event.target.value)}
-                    value={decisionReason}
-                  >
-                    <option value="">Seleccione un motivo</option>
-                    {Object.entries(quoteDecisionReasonLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              <Button
-                data-action-id="QUOTE-DECISION-SAVE"
-                disabled={decisionBusy}
-                onClick={() => void saveDecision()}
-                type="button"
-              >
-                {decisionBusy ? 'Guardando…' : 'Guardar decisión'}
-              </Button>
-            </div>
-          ) : null}
           {decisionError ? (
             <p className="notice danger" role="alert">
               {decisionError}
@@ -349,7 +256,7 @@ export default function QuoteDetailPage() {
                     {new Date(entry.createdAt).toLocaleString('es-SV')} ·{' '}
                     {entry.decision === 'APPROVED'
                       ? 'Aprobado'
-                      : `No aprobado: ${quoteDecisionReasonLabels[entry.reason!]}`}
+                      : `No aprobado: ${quoteDecisionReasonLabels[entry.reason!] ?? entry.reason}`}
                   </li>
                 ))}
               </ul>

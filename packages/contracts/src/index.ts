@@ -117,6 +117,7 @@ export const doctorAttachmentSchema = z.object({
 export const doctorSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
+  medicalVisitorId: z.string().trim().optional(),
   jvpm: z.string().trim().optional(),
   conadem: z.string().trim().optional(),
   medicalFee: z.number().nonnegative().optional(), // Legacy records only; new quote fees are selected per quote.
@@ -230,6 +231,7 @@ export const hospitalizationSchema = z.object({
   secondaryDoctorId: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
   devices: z.array(z.string().trim().min(1)).optional(),
+  patientHas: z.string().trim().max(2000).optional(),
   /** Resources assigned to the case; account-level visibility requires a server-side user link. */
   assignedNursingResourceIds: z.array(z.string().trim().min(1)).optional(),
   assignedNurseUserIds: z.array(z.string().trim().min(1)).optional(),
@@ -302,6 +304,18 @@ export const quoteSchema = z.object({
   status: z.enum(['DRAFT', 'SENT']),
   summary: z.string().trim().min(1),
   careSetting: z.enum(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT']).optional(),
+  diagnosisSummary: z.string().trim().max(4000).optional(),
+  primaryDoctorId: z.string().trim().optional(),
+  secondaryDoctorId: z.string().trim().optional(),
+  insurer: z.string().trim().optional(),
+  admissionDate: z.string().trim().optional(),
+  dischargeDate: z.string().trim().optional(),
+  accountType: z.enum(['SEGURO', 'PARTICULAR', 'EMPRESA']).optional(),
+  manager: z.string().trim().optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  /** Entered per quote; these amounts do not imply an insurer coverage rule. */
+  deductibleAmount: z.number().finite().nonnegative().optional(),
+  coinsuranceAmount: z.number().finite().nonnegative().optional(),
   /** Administrative invoice fields observed in CH03.  They do not alter totals. */
   invoiceDate: z.string().optional(),
   invoiceDocumentType: z.enum(['INVOICE', 'TAX_CREDIT']).optional(),
@@ -406,6 +420,9 @@ export const purchaseSchema = z.object({
   invoiceNumber: z.string().trim().max(100).optional(),
   invoiceGroupId: z.string().trim().min(1).max(120).optional(),
   note: z.string().trim().optional(),
+  usefulLife: z.string().trim().max(120).optional(),
+  isFixedAsset: z.boolean().optional(),
+  purchaseOrderId: z.string().uuid().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
   /** Client-requested arithmetic snapshot; this is an internal purchase record, not a fiscal DTE. */

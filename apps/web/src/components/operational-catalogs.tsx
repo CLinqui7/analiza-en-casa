@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { configurationCategories, type ConfigurationEntry } from '@analiza/contracts';
+import { useSearchParams } from 'next/navigation';
 import { useAuth, useWorkspace } from './providers';
 import { useOperations } from '@/lib/use-operations';
 
@@ -10,12 +11,17 @@ export const categoryLabels = {
   DOSE: 'Dosis registradas',
   INSURER: 'Seguros y descuentos',
   MEDICATION: 'Medicamentos y presentaciones',
+  MEDICAL_VISITOR: 'Visitadores médicos',
 };
 export function OperationalCatalogs() {
+  const searchParams = useSearchParams();
   const operations = useOperations();
   const { can } = useAuth();
   const { catalogItems } = useWorkspace();
-  const [category, setCategory] = useState<ConfigurationEntry['category']>('SPECIALTY');
+  const [category, setCategory] = useState<ConfigurationEntry['category']>(() => {
+    const requested = searchParams.get('category');
+    return configurationCategories.find((entry) => entry === requested) ?? 'SPECIALTY';
+  });
   const [editing, setEditing] = useState<ConfigurationEntry | null>(null);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState('');

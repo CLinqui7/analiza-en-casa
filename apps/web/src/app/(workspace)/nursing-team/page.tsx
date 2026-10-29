@@ -2,7 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Button, Dialog, Panel, StatusTag } from '@analiza/ui';
 import { useAuth, useWorkspace } from '@/components/providers';
-import { isAdministrator } from '@/lib/permissions';
+import { isAdministrator, type Role } from '@/lib/permissions';
 import { useOperations } from '@/lib/use-operations';
 import type { NurseProfileSubmission } from '@/lib/nurse-profile';
 import {
@@ -27,6 +27,8 @@ export default function NursingTeamPage() {
   const { session } = useAuth();
   const operations = useOperations();
   const [open, setOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<Role>('NURSE');
+  const isNursingRole = selectedRole === 'NURSE' || selectedRole === 'NURSE_MANAGER';
   const [message, setMessage] = useState('');
   const [profiles, setProfiles] = useState<NurseProfileSubmission[]>([]);
   const [profilesError, setProfilesError] = useState('');
@@ -68,25 +70,35 @@ export default function NursingTeamPage() {
     const form = new FormData(event.currentTarget);
     const resourceId = crypto.randomUUID();
     const selectedFile = form.get('credentialFile');
-    const result = await operations.execute({
-      command: 'nurse.create',
-      email: form.get('email'),
-      password: form.get('password'),
-      role: form.get('role'),
-      resource: {
-        id: resourceId,
-        displayName: form.get('name'),
-        territory: form.get('territory'),
-        boardRegistrationNumber: form.get('registration'),
-        shift: form.get('shift'),
-        capacity: 1,
-        availability: 'AVAILABLE',
-        patientTypes: form.getAll('patientTypes'),
-        comments: form.get('comments') || undefined,
-      },
-    });
+    const result = await operations.execute(
+      isNursingRole
+        ? {
+            command: 'nurse.create',
+            email: form.get('email'),
+            password: form.get('password'),
+            role: selectedRole,
+            resource: {
+              id: resourceId,
+              displayName: form.get('name'),
+              territory: form.get('territory'),
+              boardRegistrationNumber: form.get('registration'),
+              shift: form.get('shift'),
+              capacity: 1,
+              availability: 'AVAILABLE',
+              patientTypes: form.getAll('patientTypes'),
+              comments: form.get('comments') || undefined,
+            },
+          }
+        : {
+            command: 'team.account.create',
+            displayName: form.get('name'),
+            email: form.get('email'),
+            password: form.get('password'),
+            role: selectedRole,
+          },
+    );
     if (result) {
-      if (selectedFile instanceof File && selectedFile.size) {
+      if (isNursingRole && selectedFile instanceof File && selectedFile.size) {
         try {
           const uploaded = await uploadPrivateFiles('nursing_resource', resourceId, [selectedFile]);
           setAttachments((current) => ({ ...current, [resourceId]: uploaded }));
@@ -108,8 +120,8 @@ export default function NursingTeamPage() {
       <header className="page-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
-          <h1>Usuarios y equipo de enfermería</h1>
-          <p>Cuentas de acceso, roles y asignación para la atención domiciliaria.</p>
+          <h1>Equipo y cuentas</h1>
+          <p>Registro de cuentas de todos los roles y recursos de enfermería de la organización.</p>
         </div>
         <Button data-action-id="NURSE-ACCOUNT-CREATE" onClick={() => setOpen(true)}>
           + Crear perfil de usuario
@@ -253,60 +265,78 @@ export default function NursingTeamPage() {
           </label>
           <label>
             Rol
-            <select name="role" defaultValue="NURSE">
-              {isAdministrator(session?.role) ? <option value="ADMIN">Administrador</option> : null}
-              {isAdministrator(session?.role) ? <option value="MANAGER">Gerente</option> : null}
+            <select
+              name="role"
+              onChange={(event) => setSelectedRole(event.target.value as Role)}
+              value={selectedRole}
+            >
+              {isAdministrator(session?.role) ? (
+                <>
+                  <option value="ADMIN">Administrador</option>
+                  <option value="MANAGER">Gerente</option>
+                  <option value="DOCTOR">Médico</option>
+                  <option value="INVENTORY">Inventario</option>
+                  <option value="FINANCE">Finanzas</option>
+                  <option value="AUDITOR">Auditoría</option>
+                  <option value="ANALYTICS">Analítica</option>
+                  <option value="WEBMASTER">Webmaster</option>
+                </>
+              ) : null}
               <option value="NURSE_MANAGER">Supervisora / jefe de enfermería</option>
               <option value="NURSE">Enfermería</option>
             </select>
           </label>
-          <label>
-            Registro profesional
-            <input name="registration" required />
-          </label>
-          <fieldset className="full checkbox-fieldset">
-            <legend>Tipos de pacientes que está capacitada para atender</legend>
-            <div className="checkbox-grid">
-              {patientTypeOptions.map(([value, label]) => (
-                <label key={value} className="checkbox-option">
-                  <input name="patientTypes" type="checkbox" value={value} />
-                  <span>{label}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <label className="full">
-            Comentarios
-            <textarea
-              name="comments"
-              maxLength={2000}
-              placeholder="Experiencia, restricciones, certificaciones u otra información útil."
-              rows={4}
-            />
-          </label>
-          <label className="full">
-            Adjuntar archivo
-            <input
-              name="credentialFile"
-              type="file"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-            />
-            <span className="field-help">
-              Credencial, certificación o documento de respaldo. Máximo 25 MB.
-            </span>
-          </label>
-          <label>
-            Zona
-            <input name="territory" required />
-          </label>
-          <label>
-            Turno
-            <select name="shift">
-              <option value="MORNING">Mañana</option>
-              <option value="AFTERNOON">Tarde</option>
-              <option value="NIGHT">Noche</option>
-            </select>
-          </label>
+          {isNursingRole ? (
+            <>
+              <label>
+                Registro profesional
+                <input name="registration" required />
+              </label>
+              <fieldset className="full checkbox-fieldset">
+                <legend>Tipos de pacientes que está capacitada para atender</legend>
+                <div className="checkbox-grid">
+                  {patientTypeOptions.map(([value, label]) => (
+                    <label key={value} className="checkbox-option">
+                      <input name="patientTypes" type="checkbox" value={value} />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <label className="full">
+                Comentarios
+                <textarea
+                  name="comments"
+                  maxLength={2000}
+                  placeholder="Experiencia, restricciones, certificaciones u otra información útil."
+                  rows={4}
+                />
+              </label>
+              <label className="full">
+                Adjuntar archivo
+                <input
+                  name="credentialFile"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                />
+                <span className="field-help">
+                  Credencial, certificación o documento de respaldo. Máximo 25 MB.
+                </span>
+              </label>
+              <label>
+                Zona
+                <input name="territory" required />
+              </label>
+              <label>
+                Turno
+                <select name="shift">
+                  <option value="MORNING">Mañana</option>
+                  <option value="AFTERNOON">Tarde</option>
+                  <option value="NIGHT">Noche</option>
+                </select>
+              </label>
+            </>
+          ) : null}
           <label>
             Correo de acceso
             <input name="email" type="email" autoComplete="off" required />

@@ -18,11 +18,41 @@ async function login(
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/agenda$/);
 }
+async function showAugustFixture(page: import('@playwright/test').Page) {
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    if (await page.getByLabel('Calendario de agosto de 2026').count()) return;
+    await page.locator('[data-action-id="AGENDA-CALENDAR-PREV"]').click();
+  }
+  throw new Error('No se pudo navegar al mes de los turnos sintéticos.');
+}
+async function openAttention(page: import('@playwright/test').Page) {
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.nursingResources',
+      JSON.stringify([
+        {
+          id: 'nurse-demo-001',
+          userId: 'nurse-user-qa',
+          displayName: 'Enfermería Demo Norte',
+          territory: 'Zona demo norte',
+          shift: 'MORNING',
+          availability: 'AVAILABLE',
+          capacity: 3,
+          boardRegistrationNumber: 'REG-DEMO-001',
+        },
+      ]),
+    ),
+  );
+  await page.goto('/clinical/hospitalizations');
+  await page.getByRole('button', { name: 'Atención' }).first().click();
+  return page.getByRole('dialog', { name: /Atención clínica/ });
+}
 
 test('CH11 filters the factual agenda and colored calendar by selected patient', async ({
   page,
 }) => {
   await login(page);
+  await showAugustFixture(page);
   await expect(page.getByRole('heading', { name: 'Agenda por paciente' })).toBeVisible();
   await page.getByLabel('Buscar paciente').fill('Aurora');
   await page.locator('[data-action-id="AGENDA-PATIENT-FILTER"]').selectOption('patient-demo-001');
@@ -41,6 +71,7 @@ test('CH11 filters the factual agenda and colored calendar by selected patient',
 
 test('CH11 permits DOCTOR to use the factual agenda filter', async ({ page }) => {
   await login(page, 'doctor@demo.local', 'demo-doctor');
+  await showAugustFixture(page);
   await page.locator('[data-action-id="AGENDA-PATIENT-FILTER"]').selectOption('patient-demo-002');
   await expect(page.getByLabel('Calendario de agosto de 2026')).toContainText(
     'Paciente Demo Brisa',
@@ -67,6 +98,7 @@ test('CH11 lets DOCTOR inspect an existing synthetic shift without changing visi
   page,
 }) => {
   await login(page, 'doctor@demo.local', 'demo-doctor');
+  await showAugustFixture(page);
   const storedBefore = await page.evaluate(() => [
     localStorage.getItem('analiza.en.casa.workspace.v3.shifts'),
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
@@ -93,7 +125,7 @@ test('CH11 lets DOCTOR inspect an existing synthetic shift without changing visi
     .toEqual(storedBefore);
 });
 
-test('CH11 shows factual patient context in the authorized shift form without creating a clinical visit', async ({
+test('CH11 opens the authorized clinical attention form without creating a visit', async ({
   page,
 }) => {
   await login(page);
@@ -101,16 +133,10 @@ test('CH11 shows factual patient context in the authorized shift form without cr
     localStorage.getItem('analiza.en.casa.workspace.v3.shifts'),
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   ]);
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog
-    .locator('[data-action-id="AGENDA-SHIFT-PATIENT-SELECT"]')
-    .selectOption('patient-demo-002');
-  await expect(dialog.getByLabel('Documento del paciente')).toHaveValue('OTHER DEMO-002');
-  await expect(dialog.getByLabel('Empresa del paciente')).toHaveValue('Sin empresa registrada');
-  await expect(dialog.getByRole('button', { name: 'Cerrar', exact: true })).toBeVisible();
-  await expect(dialog.getByRole('button', { name: 'Guardar' })).toBeVisible();
-  await dialog.locator('[data-action-id="AGENDA-SHIFT-CLOSE"]').click();
+  const dialog = await openAttention(page);
+  await expect(dialog.getByLabel('Paciente ya cuenta con:')).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Guardar atención' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await expect(dialog).toHaveCount(0);
   await page.reload();
   await expect
@@ -123,22 +149,14 @@ test('CH11 shows factual patient context in the authorized shift form without cr
     .toEqual(storedBefore);
 });
 
-test('CH11 persists only the existing synthetic shift after choosing its factual patient context', async ({
-  page,
-}) => {
+test('CH11 persists an assigned shift from the clinical case', async ({ page }) => {
   await login(page);
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog
-    .locator('[data-action-id="AGENDA-SHIFT-PATIENT-SELECT"]')
-    .selectOption('patient-demo-001');
-  await expect(dialog.getByLabel('Documento del paciente')).toHaveValue('DUI 12345678-9');
-  await expect(dialog.getByLabel('Empresa del paciente')).toHaveValue('Sin empresa registrada');
-  await dialog.getByLabel('Notas').fill('CH11 F03 turno sintético vinculado');
-  await dialog.locator('[data-action-id="AGENDA-SHIFT-SAVE"]').click();
-  await expect(page.getByRole('status')).toContainText('turno persistido');
-  await page.reload();
-  await expect(page.getByText('CH11 F03 turno sintético vinculado', { exact: true })).toBeVisible();
+  const dialog = await openAttention(page);
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-DATE"]').fill('2026-11-03');
+  await dialog.getByLabel('Notas del turno').fill('CH11 F03 turno sintético vinculado');
+  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await page.goto('/agenda');
   await expect
     .poll(() =>
       page.evaluate(() =>
@@ -150,7 +168,7 @@ test('CH11 persists only the existing synthetic shift after choosing its factual
     .toMatchObject({ patientId: 'patient-demo-001' });
 });
 
-test('CH11 displays observed classification and type labels without allowing visit semantics or mutation', async ({
+test('CH11 keeps Puntual disabled in clinical scheduling without a visit mutation', async ({
   page,
 }) => {
   await login(page);
@@ -158,23 +176,12 @@ test('CH11 displays observed classification and type labels without allowing vis
     localStorage.getItem('analiza.en.casa.workspace.v3.shifts'),
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   ]);
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  const classification = dialog.locator('[data-action-id="AGENDA-SHIFT-CLASSIFICATION-OBSERVED"]');
-  await expect(classification).toContainText('Puntual');
-  await expect(classification).toContainText('Turno');
-  await expect(classification).toContainText('No son seleccionables, no se guardan');
-  const catalog = dialog.locator('[data-action-id="AGENDA-SHIFT-TYPE-OBSERVED-CATALOG"]');
-  await expect(catalog).not.toHaveAttribute('open', '');
-  await catalog.locator('summary').click();
-  await expect(catalog).toHaveAttribute('open', '');
-  await expect(catalog.getByRole('list')).toContainText('Cuidado de enfermería');
-  await expect(catalog.getByRole('list')).toContainText('Visita Respiratoria General');
-  await expect(catalog.getByRole('list')).toContainText('Cuidados Técnicos de Enfermería');
-  await expect(catalog.getByRole('list')).toContainText('Laboratorio Especial');
-  await expect(catalog.getByRole('list')).toContainText('Visita de Geriatría');
-  await expect(catalog.getByRole('list')).toContainText('Laboratorio Tercerizado');
-  await dialog.locator('[data-action-id="AGENDA-SHIFT-CLOSE"]').click();
+  const dialog = await openAttention(page);
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
+  await expect(
+    dialog.getByRole('button', { name: 'Puntual (pendiente de definición)' }),
+  ).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await page.reload();
   await expect
     .poll(() =>
@@ -194,13 +201,13 @@ test('CH11 navigates and changes read-only calendar views without mutating shift
     localStorage.getItem('analiza.en.casa.workspace.v3.shifts'),
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   ]);
-  await expect(page.locator('.agenda-period-label')).toContainText('agosto de 2026');
+  const currentMonth = new RegExp(await page.locator('.agenda-period-label').innerText(), 'i');
   await page.locator('[data-action-id="AGENDA-CALENDAR-PREV"]').click();
-  await expect(page.locator('.agenda-period-label')).toContainText('julio de 2026');
+  await expect(page.locator('.agenda-period-label')).not.toHaveText(currentMonth);
   await page.locator('[data-action-id="AGENDA-CALENDAR-NEXT"]').click();
-  await expect(page.locator('.agenda-period-label')).toContainText('agosto de 2026');
+  await expect(page.locator('.agenda-period-label')).toHaveText(currentMonth);
   await page.locator('[data-action-id="AGENDA-CALENDAR-TODAY"]').click();
-  await expect(page.locator('.agenda-period-label')).toContainText('agosto de 2026');
+  await expect(page.locator('.agenda-period-label')).toHaveText(currentMonth);
   await page.locator('[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]').click();
   await expect(page.locator('[data-action-id="AGENDA-CALENDAR-VIEW-WEEK"]')).toHaveAttribute(
     'aria-pressed',

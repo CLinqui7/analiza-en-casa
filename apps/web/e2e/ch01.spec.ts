@@ -91,8 +91,8 @@ test('CH01-F006 list state represents an empty filtered result safely', async ({
 
 test('CH01-F008 hierarchical menu exposes only live routes', async ({ page }) => {
   await login(page);
-  const clinical = page.getByRole('button', { name: 'Clínico' });
-  if ((await clinical.getAttribute('aria-expanded')) === 'false') await clinical.click();
+  const reports = page.getByRole('button', { name: 'Reportes' });
+  if ((await reports.getAttribute('aria-expanded')) === 'false') await reports.click();
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
 });

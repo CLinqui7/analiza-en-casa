@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     const orders = await transaction(postgresPool(), actor, async (client) =>
       (
         await client.query<{ body: unknown }>(
-          'SELECT body FROM analiza.purchase_orders WHERE organization_id=$1 ORDER BY created_at DESC LIMIT 100',
+          'SELECT body FROM analiza.purchase_orders WHERE organization_id=$1 ORDER BY created_at DESC',
           [actor.organizationId],
         )
       ).rows.map((row) => purchaseOrderSchema.parse(row.body)),

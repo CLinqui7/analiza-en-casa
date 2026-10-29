@@ -55,7 +55,7 @@ async function expectReadOnlyProfile(
     .toEqual(before);
 }
 
-test('CH08 stores an execution administrative profile and keeps cancellation non-persistent', async ({
+test('CH08 keeps the execution profile visible and limits case editing to clinical fields', async ({
   page,
 }) => {
   await login(page);
@@ -91,68 +91,56 @@ test('CH08 stores an execution administrative profile and keeps cancellation non
     )?.id as string;
   });
   expect(caseId).toBeTruthy();
+  await page.evaluate((id) => {
+    const key = 'analiza.en.casa.workspace.v3.hospitalizations';
+    const records = JSON.parse(localStorage.getItem(key) ?? '[]');
+    const record = records.find((item: { id: string }) => item.id === id);
+    record.administrativeProfile = {
+      healthManager: 'Coordinación CH08',
+      type: 'Normal',
+      startDate: '2026-10-08',
+      durationDays: '5',
+      paymentMethod: 'Tarjeta',
+      originatingHospital: 'Origen sintético',
+      patientClass: 'Regular',
+    };
+    localStorage.setItem(key, JSON.stringify(records));
+  }, caseId);
   await page.goto(`/hospitalizations/${caseId}`);
   await expect(
     page.getByRole('heading', { name: 'Perfil administrativo · Ejecución de cotización' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
-  const profile = page.getByRole('dialog', {
-    name: `Ejecución de cotización: ${caseId}`,
-  });
-  await expect(profile.getByLabel('Visitador médico')).toBeVisible();
-  await expect(profile.getByLabel('Referido por')).toBeVisible();
-  await expect(profile.getByLabel('Tipo de atención (referencia interna)')).toBeVisible();
-  await profile.getByLabel('Visitador médico').fill('Coordinación CH08');
-  await profile.getByRole('button', { name: 'Cancelar' }).click();
-  await expect(page.getByText('Coordinación CH08', { exact: true })).toHaveCount(0);
-
-  await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
-  const saved = page.getByRole('dialog', { name: `Ejecución de cotización: ${caseId}` });
-  await saved.getByLabel('Visitador médico').fill('Coordinación CH08');
-  await expect(saved.getByLabel('Referido por')).toHaveValue('');
-  await saved.getByLabel('Tipo de atención (referencia interna)').fill('Normal');
-  await saved.getByLabel('Fecha de inicio').fill('2026-10-08');
-  await saved.getByLabel('Días de duración').fill('5');
-  await saved.getByLabel('Forma de pago prevista').selectOption('Tarjeta');
-  await saved.getByLabel('Hospital de origen').fill('Origen sintético');
-  await saved.getByLabel('Clase de paciente').fill('Regular');
-  await saved.getByRole('button', { name: 'Guardar' }).click();
-  await expect(
-    page.getByText('Perfil de ejecución de cotización guardado.', { exact: true }),
-  ).toBeVisible();
   await expect(page.getByText('Coordinación CH08', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Editar perfil administrativo' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Editar caso' }).first().click();
+  const edit = page.getByRole('dialog', { name: 'Editar caso' });
+  await expect(edit.getByLabel('Resumen diagnóstico')).toBeVisible();
+  await expect(edit.getByLabel('Médico tratante principal')).toBeVisible();
+  await expect(edit.getByLabel('Visitador médico')).toHaveCount(0);
+  await edit.getByRole('button', { name: 'Cancelar' }).click();
   await page.reload();
-  await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
-  const reopened = page.getByRole('dialog', {
-    name: `Ejecución de cotización: ${caseId}`,
-  });
-  await expect(reopened.getByLabel('Visitador médico')).toHaveValue('Coordinación CH08');
-  await expect(reopened.getByLabel('Días de duración')).toHaveValue('5');
-  await expect(reopened.getByLabel('Forma de pago prevista')).toHaveValue('Tarjeta');
-  await expect(reopened.getByLabel('Hospital de origen')).toHaveValue('Origen sintético');
+  await expect(page.getByText('Coordinación CH08', { exact: true })).toBeVisible();
 });
 
-test('CH08 ADMIN can open the administrative profile on a direct hospitalization detail route', async ({
-  page,
-}) => {
+test('CH08 ADMIN sees profile read-only and can open limited case editing', async ({ page }) => {
   await loginToDetail(page, 'admin@demo.local', 'demo-admin');
-  await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Ejecución de cotización: case-demo-001' }),
+    page.getByRole('heading', { name: 'Perfil administrativo · Ejecución de cotización' }),
   ).toBeVisible();
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Editar perfil administrativo' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Editar caso' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Editar caso' })).toBeVisible();
 });
 
-test('CH08 DOCTOR can open the administrative profile on a direct hospitalization detail route', async ({
-  page,
-}) => {
+test('CH08 DOCTOR sees profile read-only and can open limited case editing', async ({ page }) => {
   await loginToDetail(page, 'doctor@demo.local', 'demo-doctor');
-  await page.getByRole('button', { name: 'Editar perfil administrativo' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Ejecución de cotización: case-demo-001' }),
+    page.getByRole('heading', { name: 'Perfil administrativo · Ejecución de cotización' }),
   ).toBeVisible();
-  await expect(page.locator('[data-action-id="HOSPITALIZATION-ADMIN-PROFILE-SAVE"]')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Editar perfil administrativo' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Editar caso' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Editar caso' })).toBeVisible();
 });
 
 test('CH08 NURSE reads the direct detail without profile controls or mutation', async ({

@@ -30,6 +30,7 @@ const optionalEmailSchema = z
 
 const doctorFormSchema = z.object({
   fullName: z.string().trim().min(1, 'Ingrese el nombre del médico.'),
+  medicalVisitorId: z.string().trim(),
   jvpm: z.string().trim(),
   conadem: z.string().trim(),
   documentId: z.string().trim(),
@@ -54,6 +55,7 @@ type DoctorForm = z.infer<typeof doctorFormSchema>;
 
 const emptyDoctor = {
   fullName: '',
+  medicalVisitorId: '',
   jvpm: '',
   conadem: '',
   documentId: '',
@@ -116,6 +118,7 @@ export default function DoctorsPage() {
     setActionError(null);
     form.reset({
       fullName: doctor.fullName,
+      medicalVisitorId: doctor.medicalVisitorId ?? '',
       jvpm: doctor.jvpm ?? '',
       conadem: doctor.conadem ?? '',
       documentId: doctor.documentId ?? '',
@@ -142,6 +145,7 @@ export default function DoctorsPage() {
     const doctor: Doctor = {
       id: editingDoctor?.id ?? crypto.randomUUID(),
       ...values,
+      medicalVisitorId: values.medicalVisitorId || undefined,
       jvpm: values.jvpm || undefined,
       conadem: values.conadem || undefined,
       documentId: values.documentId || undefined,
@@ -246,6 +250,7 @@ export default function DoctorsPage() {
                   <th>CONADEM</th>
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
+                  <th>Visitador médico</th>
                   <th>Teléfono fijo</th>
                   <th>Relación</th>
                   <th>Archivos</th>
@@ -260,6 +265,11 @@ export default function DoctorsPage() {
                     <td>{doctor.conadem || 'No registrado'}</td>
                     <td>{doctor.documentId || 'No registrado'}</td>
                     <td>{doctor.specialty}</td>
+                    <td>
+                      {operations.configuration.find(
+                        (entry) => entry.id === doctor.medicalVisitorId,
+                      )?.label ?? 'Sin asignar'}
+                    </td>
                     <td>{doctor.landlinePhone || 'Pendiente'}</td>
                     <td>
                       {doctor.referralCategory === 'RECURRENT'
@@ -349,6 +359,25 @@ export default function DoctorsPage() {
                 {form.formState.errors.fullName.message}
               </span>
             ) : null}
+          </label>
+          <label>
+            Visitador médico a cargo
+            <select {...form.register('medicalVisitorId')} data-action-id="DOCTOR-MEDICAL-VISITOR">
+              <option value="">Sin asignar</option>
+              {operations.configuration
+                .filter((entry) => entry.category === 'MEDICAL_VISITOR' && entry.active)
+                .map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.label}
+                  </option>
+                ))}
+            </select>
+            <Link
+              className="action-link-button action-link-button--inline"
+              href="/catalogs/operational?category=MEDICAL_VISITOR"
+            >
+              Gestionar visitadores
+            </Link>
           </label>
           <label>
             JVPM (opcional)

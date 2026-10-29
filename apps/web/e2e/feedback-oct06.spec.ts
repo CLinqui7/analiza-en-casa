@@ -118,12 +118,12 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
   await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
+  await dialog
+    .locator('[data-action-id="QUOTE-PRIMARY-DOCTOR"]')
+    .selectOption({ label: 'Médico QA Catálogo' });
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   const amount = dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]');
   await expect(amount).toHaveValue('0');
-  await dialog
-    .locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]')
-    .selectOption({ label: 'Médico QA Catálogo' });
   await amount.selectOption('75');
   await expect(amount).toHaveValue('75');
   await expect(amount.locator('option[value="300"]')).toHaveCount(1);
@@ -192,7 +192,7 @@ test('quote print layout paginates long content instead of clipping at viewport 
   page,
 }) => {
   await login(page, '/quotes');
-  await page.getByRole('link', { name: 'Consultar' }).first().click();
+  await page.getByRole('link', { name: 'Editar' }).first().click();
   await expect(page.locator('.quote-print-area')).toBeVisible();
   await page.evaluate(() => {
     const area = document.querySelector('.quote-print-area');

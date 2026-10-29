@@ -1,12 +1,6 @@
 import { z } from 'zod';
 
-export const quoteDecisionReasonSchema = z.enum([
-  'COST',
-  'DEATH',
-  'INSURER_NOT_APPROVED',
-  'OUT_OF_COVERAGE',
-  'CONTINUE_IN_HOSPITAL',
-]);
+export const quoteDecisionReasonSchema = z.string().trim().min(1).max(1000);
 
 export const quoteDecisionInputSchema = z.discriminatedUnion('decision', [
   z
@@ -31,10 +25,8 @@ export const quoteDecisionSchema = z.object({
 
 export type QuoteDecision = z.infer<typeof quoteDecisionSchema>;
 
-export const quoteDecisionReasonLabels: Record<
-  z.infer<typeof quoteDecisionReasonSchema>,
-  string
-> = {
+/** Labels for decisions recorded before free-text rejection reasons were enabled. */
+export const quoteDecisionReasonLabels: Record<string, string> = {
   COST: 'Costos',
   DEATH: 'Fallecimiento',
   INSURER_NOT_APPROVED: 'No aprobación de la aseguradora',

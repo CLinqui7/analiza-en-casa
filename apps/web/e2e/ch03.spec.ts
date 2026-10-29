@@ -13,24 +13,26 @@ async function login(page: import('@playwright/test').Page, path = '/hospitaliza
   await expect(page).toHaveURL(new RegExp(`${path.replace('/', '\/')}$`));
 }
 
-test('CH03-F001 financial navigation has three live, authorized destinations', async ({ page }) => {
+test('CH03-F001 navigation follows the approved clinical and financial grouping', async ({
+  page,
+}) => {
   await login(page);
   const financial = page.getByRole('button', { name: 'Financiero' });
   if ((await financial.getAttribute('aria-expanded')) === 'false') await financial.click();
-  await expect(page.getByRole('link', { name: 'Hospitalización' })).toHaveAttribute(
-    'href',
-    '/hospitalizations',
-  );
+  await expect(page.getByRole('link', { name: 'Hospitalización' })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Cuentas por cobrar' })).toHaveAttribute(
     'href',
     '/receivables',
   );
-  const reports = page.getByRole('button', { name: 'Reportes y control' });
+  const reports = page.getByRole('button', { name: 'Reportes' });
   if ((await reports.getAttribute('aria-expanded')) === 'false') await reports.click();
-  await expect(page.getByRole('link', { name: 'Reporte de pagos' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Pagos reportados' })).toHaveAttribute(
     'href',
     '/payments',
   );
+  const administration = page.getByRole('button', { name: 'Administración' });
+  if ((await administration.getAttribute('aria-expanded')) === 'false')
+    await administration.click();
   await expect(page.getByRole('link', { name: 'Aseguradoras', exact: true })).toHaveAttribute(
     'href',
     '/insurers',
@@ -72,9 +74,7 @@ test('CH03-F002-F008 board tabs, coherent loading/empty state, filters and activ
   await expect(page).toHaveURL(/\/patients\?tab=INACTIVE/);
 });
 
-test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields are usable', async ({
-  page,
-}) => {
+test('CH03-F009-F013 quote tracking and the new clinical fields are usable', async ({ page }) => {
   await login(page);
   await page.getByRole('tab', { name: 'Cotizaciones' }).click();
   for (const column of [
@@ -94,25 +94,28 @@ test('CH03-F009-F013 quote tracking, safe insurance states and invoice fields ar
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
-  await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toBeVisible();
-  for (const label of ['Buscar paciente', 'Paciente', 'Modalidad de atención'])
+  await expect(
+    dialog.getByRole('group', { name: 'Datos clínicos y administrativos de la cotización' }),
+  ).toBeVisible();
+  await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toHaveCount(0);
+  for (const label of ['Buscar paciente', 'Paciente', 'Ingreso clínico'])
     await expect(dialog.getByRole('combobox', { name: label, exact: true })).toBeVisible();
   await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toBeVisible();
   for (const label of [
     'Documento',
     'Teléfono',
     'Correo',
-    'Resumen operativo',
-    'Fecha',
-    'Origen del contacto (opcional)',
-    'Comentarios',
+    'Diagnóstico',
+    'Responsable administrativo',
   ])
     await expect(dialog.getByRole('textbox', { name: label, exact: true })).toBeVisible();
-  await expect(dialog.locator('[data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"]')).toBeVisible();
-  await expect(dialog.locator('[data-action-id="QUOTE-DISCOUNT-GROUP"]')).toBeVisible();
-  await expect(dialog.getByRole('button', { name: 'Mostrar opciones de referido' })).toBeVisible();
+  await expect(dialog.getByRole('searchbox', { name: 'Buscar médico por nombre' })).toBeVisible();
+  await expect(dialog.locator('[data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"]')).toHaveCount(0);
+  await expect(dialog.getByRole('combobox', { name: 'Médico tratante principal' })).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Tipo de cuenta' })).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Aseguradora' })).toBeVisible();
   await expect(dialog.getByRole('textbox', { name: 'Documento', exact: true })).toBeDisabled();
-  await expect(dialog.getByRole('textbox', { name: 'Fecha', exact: true })).not.toHaveValue('');
+  await expect(dialog.getByLabel('Fecha de ingreso')).not.toHaveValue('');
   await dialog.getByRole('combobox', { name: 'Buscar paciente', exact: true }).fill('Aurora');
   await dialog.getByRole('combobox', { name: 'Paciente', exact: true }).selectOption({ index: 1 });
   await expect(dialog.getByRole('textbox', { name: 'Documento', exact: true })).not.toHaveValue(

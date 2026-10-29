@@ -21,7 +21,17 @@ const shiftSchema = z.object({
 });
 type ShiftForm = z.infer<typeof shiftSchema>;
 const statusLabel = { SCHEDULED: 'Programado', CANCELLED: 'Cancelado', COMPLETED: 'Completado' };
-const initialDate = '2026-08-29';
+function currentDateInElSalvador() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/El_Salvador',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const get = (type: 'year' | 'month' | 'day') => parts.find((part) => part.type === type)?.value;
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+const initialDate = currentDateInElSalvador();
 type CalendarView = 'MONTH' | 'WEEK' | 'LIST_WEEK' | 'LIST_DAY';
 
 function isoDate(date: Date) {
@@ -289,19 +299,6 @@ export default function AgendaPage() {
               : 'Turnos auditables; las horas se derivan de su intervalo programado.'}
           </p>
         </div>
-        {can('agenda:write') ? (
-          <Button
-            data-action-id="AGENDA-SHIFT-CREATE"
-            onClick={() => {
-              setEditingShift(null);
-              setMessage(null);
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Crear turno
-          </Button>
-        ) : null}
       </header>
       {message ? (
         <p className="notice success" role="status">
@@ -375,7 +372,7 @@ export default function AgendaPage() {
             <Button
               className="button-secondary"
               data-action-id="AGENDA-CALENDAR-TODAY"
-              onClick={() => setCalendarAnchor(initialDate)}
+              onClick={() => setCalendarAnchor(currentDateInElSalvador())}
               type="button"
             >
               Hoy

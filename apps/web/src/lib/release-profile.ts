@@ -50,6 +50,7 @@ export function isReleasedCommand(command: unknown, core = isCoreRelease): boole
   return (
     !core ||
     command === 'nurse.create' ||
+    command === 'team.account.create' ||
     command === 'catalog.save' ||
     command === 'configuration.save' ||
     command === 'workspace.seed-demo'

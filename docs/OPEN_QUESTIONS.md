@@ -385,6 +385,14 @@ Todos estos puntos permanecen `NEEDS_CLIENT_CONFIRMATION`; el checkpoint no inve
 
 ## Deployment
 
+### Reunión del 26 de octubre de 2026
+
+- `MEETING-20261026-Q001`: el equipo debe proporcionar fuentes, definición de costo y gasto, atribución de ventas, período, moneda, permisos y fórmula de margen para activar los reportes de costos, gastos y márgenes. La pantalla «Otros reportes» no inventa cifras.
+- `MEETING-20261026-Q002`: definir conciliación, reversión y autorización para registrar pagos a proveedores. Cuentas por pagar actualmente muestra órdenes y facturas aprobadas; no simula desembolsos.
+- `MEETING-20261026-Q003`: precisar si la programación desde Atención debe ser atómica con la edición de caso. Hoy se informa explícitamente cuando el caso se guarda y el turno no queda confirmado; no se afirma un éxito total.
+- `MEETING-20261026-Q004`: el cliente autorizó cualquier usuario con sesión para decidir cotizaciones. Confirmar en la revisión de roles si la cuenta especial ANALYTICS debe conservar esa facultad y acceso a cotizaciones; ambos están habilitados por la instrucción actual.
+- Fuente íntegra y estado: `docs/qa/MEETING_2026_10_26_SOURCE.json` y `docs/qa/MEETING_2026_10_26_IMPLEMENTATION.md`.
+
 - Scheduler de reintentos: Vercel no expone el plan mediante la CLI usada en la reconciliación. `vercel.json` conserva el cron de 15 minutos y `api/cron-retries.js` permanece intacto; no se puede certificar su programación hasta confirmar Vercel Pro o aprobar un scheduler externo. No se sustituye silenciosamente por una frecuencia diaria.
 - `AUTOMATIC_SCHEDULER_PENDING_EXTERNAL_CONFIGURATION`: el preview de Vercel se despliega con `vercel.preview.json`, que omite únicamente el scheduler de 15 minutos bloqueado por el plan Hobby. Producción debe conservar `vercel.json` y requiere Vercel Pro o un scheduler externo aprobado antes de certificar reintentos automáticos.
 

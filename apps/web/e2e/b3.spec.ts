@@ -81,58 +81,64 @@ test('B3 persists multiple admission and discharge periods without accepting att
   await expect(directEdit.getByLabel('Egreso adicional 1')).toHaveValue('2026-09-26');
 });
 
-test('B3 creates persisted multi-day 6h shifts and keeps Puntual blocked', async ({ page }) => {
-  await login(page, '/agenda');
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog.getByLabel('Fecha 1').fill('2026-09-24');
+test('B3 schedules a multi-day 6h shift from clinical attention and keeps Puntual blocked', async ({
+  page,
+}) => {
+  await login(page, '/clinical/hospitalizations');
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.nursingResources',
+      JSON.stringify([
+        {
+          id: 'nurse-demo-001',
+          userId: 'nurse-user-qa',
+          displayName: 'Enfermería Demo Norte',
+          territory: 'Zona demo norte',
+          shift: 'MORNING',
+          availability: 'AVAILABLE',
+          capacity: 3,
+          boardRegistrationNumber: 'REG-DEMO-001',
+        },
+      ]),
+    ),
+  );
+  await page.reload();
+  await page.getByRole('button', { name: 'Atención' }).first().click();
+  const dialog = page.getByRole('dialog', { name: /Atención clínica/ });
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
+  await dialog.getByLabel('Fecha 1').fill('2026-11-01');
   await dialog.getByRole('button', { name: 'Agregar fecha' }).click();
-  await dialog.getByRole('textbox', { name: 'Fecha 2' }).fill('2026-09-25');
+  await dialog.getByLabel('Fecha 2').fill('2026-11-02');
   await dialog.getByRole('button', { name: 'Quitar fecha 2' }).click();
-  await expect(dialog.getByLabel('Fecha 1')).toHaveValue('2026-09-24');
+  await expect(dialog.getByLabel('Fecha 1')).toHaveValue('2026-11-01');
   await expect(dialog.getByLabel('Fecha 2')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Agregar fecha' }).click();
+  await dialog.getByLabel('Fecha 2').fill('2026-11-02');
   await dialog.getByLabel('Inicio').fill('20:00');
-  await dialog.getByRole('button', { name: 'Turno 6 horas' }).click();
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-PRESET"]').selectOption('SIX_HOURS');
   await expect(dialog.getByLabel('Fin')).toHaveValue('02:00');
-  await expect(dialog.getByText('Finaliza el día siguiente.')).toBeVisible();
+  await expect(dialog.getByLabel('Termina al día siguiente')).toBeChecked();
   await expect(
     dialog.getByRole('button', { name: 'Puntual (pendiente de definición)' }),
   ).toBeDisabled();
-  await dialog.getByLabel('Notas').fill('B3 multi-day 6h');
-  await dialog.getByRole('button', { name: 'Guardar' }).click();
-  await page.reload();
-  await expect(page.getByText('B3 multi-day 6h', { exact: true })).toHaveCount(1);
+  await dialog.getByLabel('Notas del turno').fill('B3 multi-day 6h');
+  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await page.goto('/agenda');
   const persisted = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').filter(
       (shift: { note?: string }) => shift.note === 'B3 multi-day 6h',
     ),
   );
-  expect(persisted).toHaveLength(1);
+  expect(persisted).toHaveLength(2);
+  expect(persisted[0].id).not.toBe(persisted[1].id);
   expect(new Date(persisted[0].endsAt).getTime() - new Date(persisted[0].startsAt).getTime()).toBe(
     6 * 60 * 60 * 1000,
   );
 });
 
-test('B3 lets NURSE persist an overnight 8h shift', async ({ page }) => {
+test('B3 removes direct turn creation from the nurse agenda', async ({ page }) => {
   await login(page, '/agenda', 'nurse@demo.local', 'demo-nurse');
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  await dialog.getByLabel('Fecha 1').fill('2026-09-26');
-  await dialog.getByLabel('Inicio').fill('20:00');
-  await dialog.getByRole('button', { name: 'Turno 8 horas' }).click();
-  await expect(dialog.getByLabel('Fin')).toHaveValue('04:00');
-  await dialog.getByLabel('Notas').fill('B3 nurse overnight 8h');
-  await dialog.getByRole('button', { name: 'Guardar' }).click();
-  await page.reload();
-  const persisted = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').find(
-      (shift: { note?: string }) => shift.note === 'B3 nurse overnight 8h',
-    ),
-  );
-  expect(persisted).toBeTruthy();
-  expect(new Date(persisted.endsAt).getTime() - new Date(persisted.startsAt).getTime()).toBe(
-    8 * 60 * 60 * 1000,
-  );
+  await expect(page.getByRole('button', { name: 'Crear turno' })).toHaveCount(0);
 });
 
 async function expectAgendaWriteDenied(

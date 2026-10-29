@@ -8,6 +8,12 @@ import { FormEvent, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { AdministrativeProfilePanel } from '@/components/administrative-profile-panel';
 import { isCoreRelease } from '@/lib/release-profile';
+import {
+  listPrivateFiles,
+  privateFileDownloadHref,
+  uploadPrivateFiles,
+  type PrivateFileMetadata,
+} from '@/lib/private-files';
 
 const labels = {
   ACTIVE: 'Activo',
@@ -33,6 +39,14 @@ export default function HospitalizationDetailPage() {
   } = useWorkspace();
   const { can } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [caseEditOpen, setCaseEditOpen] = useState(false);
+  const [caseEditBusy, setCaseEditBusy] = useState(false);
+  const [caseEditError, setCaseEditError] = useState<string | null>(null);
+  const [caseDiagnosis, setCaseDiagnosis] = useState('');
+  const [casePrimaryDoctorId, setCasePrimaryDoctorId] = useState('');
+  const [caseSecondaryDoctorId, setCaseSecondaryDoctorId] = useState('');
+  const [caseFiles, setCaseFiles] = useState<PrivateFileMetadata[]>([]);
+  const [pendingCaseFiles, setPendingCaseFiles] = useState<File[]>([]);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
   const [profileSaving, setProfileSaving] = useState(false);
   const [linkingQuoteId, setLinkingQuoteId] = useState<string | null>(null);
@@ -95,6 +109,63 @@ export default function HospitalizationDetailPage() {
     (item) => item.category === 'INSURERS' && item.status === 'ACTIVE',
   );
   const profileEditingEnabled = providerMode === 'mock' || isServerDataMode(providerMode);
+  const openCaseEdit = () => {
+    setCaseDiagnosis(hospitalization.diagnosisSummary ?? linkedQuotes[0]?.diagnosisSummary ?? '');
+    setCasePrimaryDoctorId(
+      hospitalization.primaryDoctorId ?? linkedQuotes[0]?.primaryDoctorId ?? '',
+    );
+    setCaseSecondaryDoctorId(
+      hospitalization.secondaryDoctorId ?? linkedQuotes[0]?.secondaryDoctorId ?? '',
+    );
+    setPendingCaseFiles([]);
+    setCaseEditError(null);
+    setCaseEditOpen(true);
+    if (isServerDataMode(providerMode))
+      void listPrivateFiles('hospitalization', hospitalization.id)
+        .then(setCaseFiles)
+        .catch(() => setCaseEditError('No se pudo cargar el listado de archivos privados.'));
+  };
+  const saveCaseEdit = async () => {
+    if (
+      (casePrimaryDoctorId && !doctors.some((doctor) => doctor.id === casePrimaryDoctorId)) ||
+      (caseSecondaryDoctorId && !doctors.some((doctor) => doctor.id === caseSecondaryDoctorId))
+    ) {
+      setCaseEditError('Seleccione médicos tratantes registrados.');
+      return;
+    }
+    setCaseEditBusy(true);
+    setCaseEditError(null);
+    const saved = await updateHospitalization({
+      ...hospitalization,
+      diagnosisSummary: caseDiagnosis.trim() || undefined,
+      primaryDoctorId: casePrimaryDoctorId || undefined,
+      secondaryDoctorId: caseSecondaryDoctorId || undefined,
+    });
+    if (!saved) {
+      setCaseEditError('No se pudo guardar el caso.');
+      setCaseEditBusy(false);
+      return;
+    }
+    if (pendingCaseFiles.length && isServerDataMode(providerMode)) {
+      try {
+        const uploaded = await uploadPrivateFiles(
+          'hospitalization',
+          hospitalization.id,
+          pendingCaseFiles,
+        );
+        setCaseFiles((current) => [...current, ...uploaded]);
+      } catch (error) {
+        setCaseEditError(
+          `El caso se guardó, pero los archivos no se cargaron: ${error instanceof Error ? error.message : 'inténtelo de nuevo.'}`,
+        );
+        setCaseEditBusy(false);
+        return;
+      }
+    }
+    setCaseEditBusy(false);
+    setCaseEditOpen(false);
+    setProfileMessage('Caso clínico actualizado con auditoría.');
+  };
   const closeProfile = () => setProfileOpen(false);
   const attachQuote = async (quoteId: string) => {
     setLinkingQuoteId(quoteId);
@@ -157,12 +228,10 @@ export default function HospitalizationDetailPage() {
           {can('cases:write') ? (
             <Button
               data-action-id="HOSPITALIZATION-DETAIL-EDIT"
-              onClick={() =>
-                router.push(`/hospitalizations?edit=${encodeURIComponent(hospitalization.id)}`)
-              }
+              onClick={openCaseEdit}
               type="button"
             >
-              Editar hospitalización
+              Editar caso
             </Button>
           ) : null}
         </div>
@@ -242,13 +311,7 @@ export default function HospitalizationDetailPage() {
             <h2>Seguimiento del caso</h2>
             <p>{hospitalization.nextAction ?? 'Sin acción documentada'}</p>
             {can('cases:write') ? (
-              <Button
-                className="button-secondary"
-                onClick={() =>
-                  router.push(`/hospitalizations?edit=${encodeURIComponent(hospitalization.id)}`)
-                }
-                type="button"
-              >
+              <Button className="button-secondary" onClick={openCaseEdit} type="button">
                 Editar caso
               </Button>
             ) : null}
@@ -257,7 +320,7 @@ export default function HospitalizationDetailPage() {
       </Panel>
       {!isCoreRelease && (
         <AdministrativeProfilePanel
-          canWrite={can('cases:write')}
+          canWrite={false}
           hospitalization={hospitalization}
           onOpen={() => {
             setProfileMessage(null);
@@ -266,6 +329,104 @@ export default function HospitalizationDetailPage() {
           providerMode={providerMode}
         />
       )}
+      <Dialog
+        description="Actualice el resumen clínico, los médicos y los archivos privados de este caso."
+        footer={
+          <>
+            <Button
+              className="button-secondary"
+              onClick={() => setCaseEditOpen(false)}
+              type="button"
+            >
+              Cancelar
+            </Button>
+            <Button
+              data-action-id="CLINICAL-CASE-EDIT-SAVE"
+              disabled={caseEditBusy}
+              onClick={() => void saveCaseEdit()}
+              type="button"
+            >
+              {caseEditBusy ? 'Guardando…' : 'Guardar caso'}
+            </Button>
+          </>
+        }
+        onClose={() => setCaseEditOpen(false)}
+        open={caseEditOpen}
+        title="Editar caso"
+      >
+        <div className="form-grid">
+          {caseEditError ? (
+            <p className="notice danger full" role="alert">
+              {caseEditError}
+            </p>
+          ) : null}
+          <label className="full">
+            Resumen diagnóstico
+            <textarea
+              data-action-id="CLINICAL-CASE-DIAGNOSIS"
+              onChange={(event) => setCaseDiagnosis(event.target.value)}
+              rows={3}
+              value={caseDiagnosis}
+            />
+          </label>
+          <label>
+            Médico tratante principal
+            <select
+              data-action-id="CLINICAL-CASE-PRIMARY-DOCTOR"
+              onChange={(event) => setCasePrimaryDoctorId(event.target.value)}
+              value={casePrimaryDoctorId}
+            >
+              <option value="">Seleccione un médico</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Médico tratante secundario
+            <select
+              data-action-id="CLINICAL-CASE-SECONDARY-DOCTOR"
+              onChange={(event) => setCaseSecondaryDoctorId(event.target.value)}
+              value={caseSecondaryDoctorId}
+            >
+              <option value="">Sin asignar</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.fullName}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="full">
+            Archivos privados de hospitalización
+            <input
+              data-action-id="CLINICAL-CASE-FILES"
+              disabled={!isServerDataMode(providerMode)}
+              multiple
+              onChange={(event) => setPendingCaseFiles(Array.from(event.target.files ?? []))}
+              type="file"
+            />
+            {!isServerDataMode(providerMode) ? (
+              <span className="field-help">
+                Los archivos demo no se almacenan como archivos privados.
+              </span>
+            ) : null}
+          </label>
+          {caseFiles.length ? (
+            <ul className="full">
+              {caseFiles.map((file) => (
+                <li key={file.id}>
+                  <a href={privateFileDownloadHref(file.id)} rel="noreferrer" target="_blank">
+                    {file.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </Dialog>
       {workspaceError ? (
         <p className="notice warning" role="alert">
           No se guardó el cambio: {workspaceError}

@@ -17,15 +17,18 @@ async function openNewQuote(page: Page) {
 async function saveDraft(page: Page, dialog: Locator, summary: string) {
   const patient = dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]');
   if (!(await patient.inputValue())) await patient.selectOption({ index: 1 });
-  await dialog.getByLabel('Resumen operativo').fill(summary);
+  await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
+  await dialog.getByLabel('Diagnóstico').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
-  return page.evaluate((expectedSummary) => {
+  return page.evaluate((diagnosis) => {
     const quotes = JSON.parse(
       window.localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]',
     );
-    return quotes.find((quote: { summary: string }) => quote.summary === expectedSummary)?.id;
+    return quotes.find(
+      (quote: { diagnosisSummary?: string }) => quote.diagnosisSummary === diagnosis,
+    )?.id;
   }, summary);
 }
 
@@ -45,13 +48,16 @@ test('quotes list searches normalized id, patient, case and status, then clears'
   await expect(search).toHaveValue('');
 });
 
-test('modern quote builder keeps the requested categories and optional origin', async ({
+test('modern quote builder keeps categories and the requested clinical fields', async ({
   page,
 }) => {
   await login(page);
   const dialog = await openNewQuote(page);
   await expect(dialog.getByRole('group', { name: 'Datos del paciente' })).toBeVisible();
-  await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toBeVisible();
+  await expect(
+    dialog.getByRole('group', { name: 'Datos clínicos y administrativos de la cotización' }),
+  ).toBeVisible();
+  await expect(dialog.getByRole('group', { name: 'Datos iniciales de factura' })).toHaveCount(0);
   await expect(dialog.getByRole('group', { name: 'Constructor por categorías' })).toBeVisible();
   await expect(dialog.getByRole('tab')).toHaveText([
     'Servicios',
@@ -63,11 +69,10 @@ test('modern quote builder keeps the requested categories and optional origin', 
     'Fisioterapia',
     'Imágenes',
   ]);
-  await expect(dialog.getByLabel('Origen del contacto (opcional)')).toBeVisible();
+  await expect(dialog.getByLabel('Diagnóstico')).toBeVisible();
+  await expect(dialog.getByLabel('Médico tratante principal')).toBeVisible();
   await expect(dialog.getByText('Presentación', { exact: true })).toHaveCount(0);
   await expect(dialog.getByText('Unidades por presentación', { exact: true })).toHaveCount(0);
-  await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
-  await expect(dialog.getByText('El resumen operativo es obligatorio.')).toBeVisible();
   const id = await saveDraft(page, dialog, 'Cotización moderna sin referido');
   expect(id).toBeTruthy();
 });
@@ -101,7 +106,7 @@ test('new patient quote saves without creating or requiring a hospitalization', 
   await expect(page.getByText('Atención nueva sin hospitalización')).toBeVisible();
 });
 
-test('exact patient search selects its compatible hospitalization before saving', async ({
+test('exact patient search leaves hospitalization unlinked until the user selects it', async ({
   page,
 }) => {
   await login(page);
@@ -148,6 +153,8 @@ test('exact patient search selects its compatible hospitalization before saving'
   await expect(dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]')).toHaveValue(
     'patient-quote-exact',
   );
+  await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toHaveValue('');
+  await dialog.getByLabel('Hospitalización vinculada (opcional)').selectOption('case-quote-exact');
   await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toHaveValue(
     'case-quote-exact',
   );
@@ -199,20 +206,22 @@ test('unsaved quote draft survives navigation but is removed after explicit disc
 }) => {
   await login(page);
   let dialog = await openNewQuote(page);
-  await dialog.getByLabel('Resumen operativo').fill('Borrador de cotización QA');
+  await dialog.getByLabel('Diagnóstico').fill('Borrador de cotización QA');
   await page.waitForTimeout(450);
   await page.goto('/patients');
   await page.goto('/quotes?create=1');
   dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
-  await expect(dialog.getByLabel('Resumen operativo')).toHaveValue('Borrador de cotización QA');
+  await expect(dialog.getByLabel('Diagnóstico')).toHaveValue('Borrador de cotización QA');
   await dialog.getByRole('button', { name: 'Descartar cambios' }).click();
   await page.goto('/quotes?create=1');
   await expect(
-    page.getByRole('dialog', { name: 'Nueva cotización' }).getByLabel('Resumen operativo'),
+    page.getByRole('dialog', { name: 'Nueva cotización' }).getByLabel('Diagnóstico'),
   ).toHaveValue('');
 });
 
-test('medical fee is chosen per quote and filters doctors by name', async ({ page }) => {
+test('medical fee inherits the primary doctor selected at the start of the quote', async ({
+  page,
+}) => {
   await login(page);
   await page.evaluate(() => {
     const key = 'analiza.en.casa.workspace.v3.doctors';
@@ -228,12 +237,13 @@ test('medical fee is chosen per quote and filters doctors by name', async ({ pag
     window.localStorage.setItem(key, JSON.stringify(doctors));
   });
   const dialog = await openNewQuote(page);
+  await dialog.getByRole('searchbox', { name: 'Buscar médico por nombre' }).fill('Honorario QA');
+  await dialog.getByLabel('Médico tratante principal').selectOption('doctor-fee-qa');
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   await dialog.getByLabel('Servicio de honorario').selectOption({ index: 1 });
-  await dialog
-    .getByRole('searchbox', { name: 'Filtrar médicos de honorarios' })
-    .fill('Honorario QA');
-  await dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]').selectOption('doctor-fee-qa');
+  await expect(
+    dialog.getByRole('searchbox', { name: 'Filtrar médicos de honorarios' }),
+  ).toHaveCount(0);
   await dialog.getByLabel('Honorario médico').selectOption('35');
   await expect(dialog.getByLabel('Honorario médico')).toHaveValue('35');
   await dialog.getByLabel('Cantidad').fill('2');
@@ -244,9 +254,7 @@ test('medical fee is chosen per quote and filters doctors by name', async ({ pag
 });
 
 // test-id: playwright:quote-integer-inputs
-test('quote quantities and percentages reject decimals while fixed money keeps cents', async ({
-  page,
-}) => {
+test('quote quantities and category percentages reject decimals', async ({ page }) => {
   await login(page);
   const dialog = await openNewQuote(page);
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
@@ -258,37 +266,43 @@ test('quote quantities and percentages reject decimals while fixed money keeps c
   await dialog.getByRole('button', { name: 'Agregar línea' }).click();
   await expect(dialog.getByText('La cantidad debe ser un número entero.')).toBeVisible();
 
-  const percentage = dialog.getByLabel('Porcentaje de descuento');
+  const percentage = dialog.getByLabel('Porcentaje único');
   await expect(percentage).toHaveAttribute('step', '1');
   await expect(percentage).toHaveAttribute('max', '100');
   await percentage.fill('5.5');
   expect(await percentage.evaluate((input: HTMLInputElement) => input.checkValidity())).toBe(false);
 
-  await dialog.locator('select[data-action-id="QUOTE-DISCOUNT-UPDATE"]').selectOption('FIXED');
-  const fixedAmount = dialog.getByLabel('Monto de descuento');
-  await expect(fixedAmount).toHaveAttribute('step', '0.01');
-  await fixedAmount.fill('1.25');
-  expect(await fixedAmount.evaluate((input: HTMLInputElement) => input.checkValidity())).toBe(true);
+  await expect(dialog.getByLabel('Monto de descuento')).toHaveCount(0);
+  await dialog.getByRole('checkbox', { name: 'Servicios' }).check();
+  await expect(dialog.getByRole('checkbox', { name: 'Servicios' })).toBeChecked();
 });
 
-test('draft can be edited, sent and revised without changing the sent version', async ({
+test('draft can be edited and a previously sent version can be revised without changing it', async ({
   page,
 }) => {
   await login(page);
   let dialog = await openNewQuote(page);
-  await dialog.getByLabel('Condición de pago (opcional)').fill('Pago acordado al recibir');
   const quoteId = await saveDraft(page, dialog, 'Flujo de estados E2E');
   expect(quoteId).toBeTruthy();
   await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
-  await expect(page.getByText('Pago acordado al recibir')).toBeVisible();
   await page.getByRole('button', { name: 'Editar borrador' }).click();
   dialog = page.getByRole('dialog', { name: /Editar borrador/ });
-  await dialog.getByLabel('Resumen operativo').fill('Flujo de estados E2E editado');
+  await dialog.getByLabel('Diagnóstico').fill('Flujo de estados E2E editado');
   await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
   await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
-  await page.getByRole('button', { name: 'Enviar versión' }).click();
-  await expect(page.getByRole('status')).toContainText('inmutable');
+  await expect(page).toHaveURL(new RegExp(`/quotes/${quoteId}$`));
+  await expect(page.getByRole('button', { name: 'Enviar versión' })).toHaveCount(0);
+  await page.evaluate((id) => {
+    const key = 'analiza.en.casa.workspace.v3.quotes';
+    const quotes = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    const target = quotes.find((candidate: { id: string }) => candidate.id === id);
+    target.status = 'SENT';
+    target.immutable = true;
+    target.sentAt = new Date().toISOString();
+    window.localStorage.setItem(key, JSON.stringify(quotes));
+  }, quoteId);
+  await page.goto(`/quotes/${quoteId}`);
   await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Revisar / nueva versión' }).click();
   dialog = page.getByRole('dialog', { name: /Revisar/ });

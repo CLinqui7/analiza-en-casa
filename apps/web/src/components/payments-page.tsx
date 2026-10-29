@@ -23,12 +23,17 @@ const paymentSchema = z
   })
   .superRefine((payment, context) => {
     if (
-      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      (payment.paymentMethod === 'TRANSFER' ||
+        payment.paymentMethod === 'CARD' ||
+        payment.paymentMethod === 'CHECK') &&
       !payment.reference
     ) {
       context.addIssue({
         code: 'custom',
-        message: 'Ingrese el número de referencia.',
+        message:
+          payment.paymentMethod === 'CHECK'
+            ? 'Ingrese el número de cheque.'
+            : 'Ingrese el número de referencia.',
         path: ['reference'],
       });
     }
@@ -45,6 +50,9 @@ export function PaymentsPage() {
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
   const sentQuotes = openAccounts.map((account) => account.quote);
+  const insurerAccounts = accounts.filter(
+    (account) => account.quote.accountType === 'SEGURO' || account.quote.insurerAmount > 0,
+  );
   const quoteOptions = openAccounts.map((account) => ({
     value: account.quote.id,
     label:
@@ -373,9 +381,50 @@ export function PaymentsPage() {
           />
         )}
       </Panel>
+      <Panel>
+        <div className="table-heading">
+          <h2>Cotizaciones de aseguradora</h2>
+          <StatusTag>{insurerAccounts.length} cotizaciones</StatusTag>
+        </div>
+        <p className="field-help">
+          Los importes de deducible, coaseguro y responsabilidad de aseguradora se capturan por
+          cotización. La aplicación no infiere cobertura ni descuenta pagos de aseguradora que no
+          estén registrados en un flujo aprobado.
+        </p>
+        {insurerAccounts.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cotización</th>
+                  <th>Aseguradora</th>
+                  <th>Deducible declarado</th>
+                  <th>Coaseguro declarado</th>
+                  <th>Responsabilidad de aseguradora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insurerAccounts.map((account) => (
+                  <tr key={account.quote.id}>
+                    <td>
+                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                    </td>
+                    <td>{account.quote.insurer || 'Sin registrar'}</td>
+                    <td>{money(account.quote.deductibleAmount ?? 0)}</td>
+                    <td>{money(account.quote.coinsuranceAmount ?? 0)}</td>
+                    <td>{money(account.quote.insurerAmount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="field-help">Sin cotizaciones de aseguradora enviadas.</p>
+        )}
+      </Panel>
       {!sentQuotes.length ? (
         <p className="notice" role="status">
-          Envíe una cotización antes de aplicar un pago.
+          Apruebe una cotización antes de aplicar un pago.
         </p>
       ) : null}
       {message ? (
@@ -509,7 +558,11 @@ export function PaymentsPage() {
             <select
               {...form.register('paymentMethod', {
                 onChange: (event) => {
-                  if (event.target.value !== 'TRANSFER' && event.target.value !== 'CARD') {
+                  if (
+                    event.target.value !== 'TRANSFER' &&
+                    event.target.value !== 'CARD' &&
+                    event.target.value !== 'CHECK'
+                  ) {
                     form.setValue('reference', '');
                   }
                 },
@@ -522,13 +575,13 @@ export function PaymentsPage() {
               ))}
             </select>
           </label>
-          {selectedPaymentMethod === 'TRANSFER' || selectedPaymentMethod === 'CARD' ? (
+          {selectedPaymentMethod === 'TRANSFER' ||
+          selectedPaymentMethod === 'CARD' ||
+          selectedPaymentMethod === 'CHECK' ? (
             <label>
-              Número de referencia
+              {selectedPaymentMethod === 'CHECK' ? 'Número de cheque' : 'Número de referencia'}
               <input {...form.register('reference')} autoComplete="off" maxLength={120} />
-              <span className="field-help">
-                Obligatorio para identificar transferencias y pagos con tarjeta.
-              </span>
+              <span className="field-help">Obligatorio para identificar este medio de pago.</span>
               {form.formState.errors.reference ? (
                 <span className="field-error">{form.formState.errors.reference.message}</span>
               ) : null}
