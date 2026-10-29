@@ -51,6 +51,13 @@ snapshot_after=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("a
   echo 'No new verified backup snapshot; refusing database migration' >&2
   exit 1
 }
+for required_file in active-database.dump active-database.name active-database.sha256; do
+  restic ls "$snapshot_after" --json | jq -e --arg name "/$required_file" \
+    'select((.path? // "") | endswith($name))' >/dev/null || {
+    echo "Verified backup is missing $required_file; refusing database migration" >&2
+    exit 1
+  }
+done
 trap rollback ERR
 sed -i "s/^OPERATOR_IMAGE=.*/OPERATOR_IMAGE=analiza-contabo-operator:$sha/" .env
 docker compose --profile operator run --rm --no-deps migrate
