@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
+  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "e55f433b5c98eb0cd63ae0587946ece79ff1007427e1b58c3152621c8513ec5f",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "51c78a10d7012d415d8be2ee4e95afe311ada8d056ce1a950e83c0328c254012",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -92,9 +92,9 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "ea3a3024e9491fc687e56db386c711ac2ab3ae80536fb401d379e942eef3968a",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "6ee294c42a371e0d1ff4f8e28a375bed7dcbe6e8bfba04fc7d9c36a1a222c13f",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -102,9 +102,9 @@
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones."
     },
     "CR-012": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "verification_sha": "17cc1c1a92a9589a9d58b436deb4bde0b3e6075f",
-      "functional_fingerprint": "b68d886d00fb2b59fe6139255cb2d489439cf0542409674b1bd1b26c39df71ba",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "10d4f86d8b23cc905e225f3547b63a87803fd6a58533d87e58422885ed73b8af",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
@@ -152,15 +152,16 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": "4b9e3c0fb6100cbe757ef8c524d4d95336eec40e",
-      "functional_fingerprint": "f00cd5fdb601e1782a181bc0a733b77eb45cff04e166314af66cde150b39a21d",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
         "playwright:cr017-multi-day-shifts",
         "SEL-B3-AGENDA-SERIES"
       ],
-      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
+      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador.",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025"
     },
     "CR-018": {
       "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",

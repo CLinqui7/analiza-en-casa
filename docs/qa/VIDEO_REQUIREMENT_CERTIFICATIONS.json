@@ -7,7 +7,7 @@
   "cloud_run_sql_regression": {"verification_sha":"5b92c7f4294442ae07c6ef4dc65e3418cd260d3a","evidence":"docs/release/CLOUD_RUN_SQL_STATE.json","scope":"178/178 full mock production-server Playwright regression and 127 React/server unit tests passed. Fingerprint renewal preserves all historical statuses and individual evidence; no new EXACT/clinical/full-video/Supabase certification. PostgreSQL Core container validation is reported separately."},
   "contabo_completion_regression": {"verification_sha":"93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1","evidence":"docs/deployment/CONTABO_COMPLETION_REPORT.md; scripts/deployment/verify-ubuntu-selfhosted.mjs; scripts/deployment/verify-container.mjs; apps/web/e2e/workspace.spec.ts","scope":"216/216 production-build mock browser tests plus one PostgreSQL-mode profile test, isolated PostgreSQL/Ubuntu tests and real Contabo staging smoke/restart passed. CH07-F07 and CH15-F13 remain PARTIAL; no full video, clinical, financial or real-data certification is claimed."},
   "schema_version": 1,
-  "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
+  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
   "historical_implementation_sha": "58030d1419e179a4bc51145106c7314cb6417c6c",
   "core_release_regression": {
     "evidence": "docs/release/CORE_RELEASE_VERIFICATION.json",
@@ -15,7 +15,7 @@
   },
   "verification_status": "VERIFIED_AT_COMMITTED_SHA",
   "verification_blocker": "CH16-Q001/Q002/Q003/Q005 leave discount profiles, values, calculation, source, roles and audit undefined. CH15-Q004/Q006 and CH14-F07 remain explicitly blocked; real Supabase/RLS, provider and client-approval gates remain external.",
-  "functional_fingerprint": "abf2db0179cb5b7e2406da3e846b474044437d46bf5d476912ed99d05f5f8375",
+  "functional_fingerprint": "b9d331e4e28c7771730a83121c21815ad2ea707683c2233a04c6dda16d31956a",
   "studio_verification": {"implementation_sha": "ec2c984b191ca8fa78dfc9656b35930cf83bdc76", "status": "LOCAL_PLAYWRIGHT_VERIFIED_SELENIUM_PENDING", "evidence": "178/178 Playwright against fresh Next production server; includes CH01-CH03, route roles and portal safety. Historical certification fields below retain their original verification SHA. No new EXACT promotion."},
   "certification_created_at": "2026-09-03T05:56:00-06:00",
   "certification_test_evidence": "Release verification at implementation SHA 58030d1419e179a4bc51145106c7314cb6417c6c passed format, lint, TypeScript, 98 domain tests, 37 React tests, 178/178 fresh-server Playwright tests, 181/181 Selenium tests, declared Selenium coverage 334/334, client changes 32/32, video traceability 210/210, mirror checks and the 17/17 video audit. The Leaflet patient-map teardown path is covered by the shared-editor Playwright test, which asserts no page error after closing the dialog. No undefined financial, clinical, provider or external operation is certified.",

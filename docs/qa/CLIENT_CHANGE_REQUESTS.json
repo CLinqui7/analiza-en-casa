@@ -59,7 +59,7 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "e55f433b5c98eb0cd63ae0587946ece79ff1007427e1b58c3152621c8513ec5f",
+      "functional_fingerprint": "51c78a10d7012d415d8be2ee4e95afe311ada8d056ce1a950e83c0328c254012",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -619,7 +619,7 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "ea3a3024e9491fc687e56db386c711ac2ab3ae80536fb401d379e942eef3968a",
+      "functional_fingerprint": "6ee294c42a371e0d1ff4f8e28a375bed7dcbe6e8bfba04fc7d9c36a1a222c13f",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -678,7 +678,7 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "b68d886d00fb2b59fe6139255cb2d489439cf0542409674b1bd1b26c39df71ba",
+      "functional_fingerprint": "10d4f86d8b23cc905e225f3547b63a87803fd6a58533d87e58422885ed73b8af",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -759,35 +759,35 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-15"
       ],
-        "status": "PARTIAL",
-        "production_status": "PARTIAL",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-DASHBOARD"
       ],
       "video_requirement_ids": [
         "CH01-F008"
       ],
-        "react_files": [
-          "apps/web/src/app/(workspace)/dashboard/page.tsx",
-          "apps/web/src/app/(workspace)/sales/page.tsx",
-          "apps/web/src/lib/field-metrics.ts"
-        ],
-        "db_objects": [
-          "database/postgresql/migrations/026_home_custody_commercial_sales.sql"
-        ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/dashboard/page.tsx",
+        "apps/web/src/app/(workspace)/sales/page.tsx",
+        "apps/web/src/lib/field-metrics.ts"
+      ],
+      "db_objects": [
+        "database/postgresql/migrations/026_home_custody_commercial_sales.sql"
+      ],
       "action_ids": [],
-        "unit_test_ids": [
-          "vitest:commercial-confirmed-reference-metrics",
-          "vitest:confirmed-sale-unique-reference"
-        ],
+      "unit_test_ids": [
+        "vitest:commercial-confirmed-reference-metrics",
+        "vitest:confirmed-sale-unique-reference"
+      ],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B4"
       ],
       "blocker_type": "CLIENT_DEFINITION",
-        "blocker_reason": "El cliente definió ventas confirmadas con referencia para el indicador económico; aún faltan la definición fiscal de facturación y el criterio histórico de pacientes por mes.",
-        "client_question": "¿La otra gráfica requiere factura fiscal y pacientes ingresados o activos al cierre de cada mes?",
+      "blocker_reason": "El cliente definió ventas confirmadas con referencia para el indicador económico; aún faltan la definición fiscal de facturación y el criterio histórico de pacientes por mes.",
+      "client_question": "¿La otra gráfica requiere factura fiscal y pacientes ingresados o activos al cierre de cada mes?",
       "acceptance_criteria": "Definir fuente de facturación y estados mensuales antes de gráficas",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -795,8 +795,8 @@
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
-        "technical_status": "PARTIAL_IMPLEMENTATION",
-        "notes": "Aclaración directa del cliente, 2026-10-08: ventas confirmadas con referencia. Dashboard general y registro interno implementados; no se infiere utilidad, factura fiscal ni estado mensual de pacientes."
+      "technical_status": "PARTIAL_IMPLEMENTATION",
+      "notes": "Aclaración directa del cliente, 2026-10-08: ventas confirmadas con referencia. Dashboard general y registro interno implementados; no se infiere utilidad, factura fiscal ni estado mensual de pacientes."
     },
     {
       "change_id": "CR-015",
@@ -818,8 +818,8 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-16"
       ],
-        "status": "PARTIAL",
-        "production_status": "PARTIAL",
+      "status": "PARTIAL",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-AGENDA",
         "ROUTE-DOCTORS"
@@ -827,27 +827,27 @@
       "video_requirement_ids": [
         "CH11-F001"
       ],
-        "react_files": [
-          "apps/web/src/app/(workspace)/agenda/page.tsx",
-          "apps/web/src/app/(workspace)/reports/visits-goals/page.tsx",
-          "apps/web/src/lib/field-metrics.ts"
-        ],
-        "db_objects": [
-          "database/postgresql/migrations/026_home_custody_commercial_sales.sql"
-        ],
+      "react_files": [
+        "apps/web/src/app/(workspace)/agenda/page.tsx",
+        "apps/web/src/app/(workspace)/reports/visits-goals/page.tsx",
+        "apps/web/src/lib/field-metrics.ts"
+      ],
+      "db_objects": [
+        "database/postgresql/migrations/026_home_custody_commercial_sales.sql"
+      ],
       "action_ids": [],
-        "unit_test_ids": [
-          "vitest:commercial-salvador-periods",
-          "vitest:commercial-confirmed-reference-metrics"
-        ],
+      "unit_test_ids": [
+        "vitest:commercial-salvador-periods",
+        "vitest:commercial-confirmed-reference-metrics"
+      ],
       "playwright_test_ids": [],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B4"
       ],
       "blocker_type": "CLIENT_DEFINITION",
-        "blocker_reason": "El nuevo tablero comercial está implementado pero no certificado en producción con las cuentas de Claudia y Sissy; la visita clínica del video es un flujo distinto.",
-        "client_question": "¿Se requieren criterios adicionales para un contacto comercial válido o una atribución de ingreso?",
+      "blocker_reason": "El nuevo tablero comercial está implementado pero no certificado en producción con las cuentas de Claudia y Sissy; la visita clínica del video es un flujo distinto.",
+      "client_question": "¿Se requieren criterios adicionales para un contacto comercial válido o una atribución de ingreso?",
       "acceptance_criteria": "Definir visita válida, meta, período y fórmula de cumplimiento",
       "implementation_sha": null,
       "functional_fingerprint": null,
@@ -855,8 +855,8 @@
       "write_required": false,
       "multiuser_required": false,
       "clinical_change": false,
-        "technical_status": "PARTIAL_IMPLEMENTATION",
-        "notes": "Aclaración directa del cliente, 2026-10-08: Claudia registra médicos visitados y Sissy define metas semanales/mensuales; se cuentan médicos con contacto y pacientes ingresados únicos por período, con hospitalización vinculada, y ventas confirmadas con referencia vinculadas a visita. No sustituye el flujo clínico CH11."
+      "technical_status": "PARTIAL_IMPLEMENTATION",
+      "notes": "Aclaración directa del cliente, 2026-10-08: Claudia registra médicos visitados y Sissy define metas semanales/mensuales; se cuentan médicos con contacto y pacientes ingresados únicos por período, con hospitalización vinculada, y ventas confirmadas con referencia vinculadas a visita. No sustituye el flujo clínico CH11."
     },
     {
       "change_id": "CR-016",
@@ -965,7 +965,7 @@
       "client_question": null,
       "acceptance_criteria": "Crear serie definida de turnos sin duplicados o colisiones",
       "implementation_sha": "4b9e3c0fb6100cbe757ef8c524d4d95336eec40e",
-      "functional_fingerprint": "f00cd5fdb601e1782a181bc0a733b77eb45cff04e166314af66cde150b39a21d",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
