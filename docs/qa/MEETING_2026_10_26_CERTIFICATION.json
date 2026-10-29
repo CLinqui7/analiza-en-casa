@@ -18,10 +18,12 @@
     "video_audit": "PASS: 17/17 chapters",
     "video_parity_ch01_ch03": "PASS: CH01 14/14, CH02 16/16, CH03 13/13",
     "client_change_gate": "PASS: 32/32",
-    "traceability_mirror": "PASS"
+    "traceability_mirror": "PASS",
+    "isolated_postgresql_schema": "PASS: migrations 037 and 038 applied twice over a schema-only copy, then QA database removed",
+    "contabo_read_only_smoke": "PASS: health, login, quotes, payables, clinical admissions, payment report and other reports"
   },
   "limits": [
-    "No local PostgreSQL integration instance was available; the production migration requires a verified backup and isolated SQL validation before switching the web container.",
+    "The PostgreSQL migration was validated against an isolated schema-only copy; financial and clinical write flows were not exercised against production data.",
     "The clinical attention and shift scheduling UI uses two server operations; a second-operation failure is shown to the user and must be retried after checking Agenda.",
     "Costs, expenses, margins, insurer rules, and supplier payment reconciliation remain pending client-supplied source data and rules."
   ]

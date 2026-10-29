@@ -12,7 +12,20 @@ pueden estar trabajando en el mismo VPS.
 
 ## GitHub antes de cada despliegue
 
-**Finanzas, 27 de octubre de 2026 (El Salvador):** la imagen web activa y sana es `47c8a522e1007f0231d89b1789edb42c62098d5e`, subida y verificada en GitHub antes de publicar. La imagen anterior `e3de685cc566254c6a29c68b0d7c5899e7c75368` se conserva para reversión de la web. El respaldo cifrado previo `ebc6bf89` pasó y el nuevo script de despliegue comprobó que era distinto del anterior antes de migrar. Cuentas por cobrar concentra la operación y `/payments` presenta el reporte de todos los pagos, incluidos reversados; la organización principal mostró 21/21 registros mediante prueba de sólo lectura. Ambos contenedores están sanos y la salud pública respondió HTTP 200. Detalle en `docs/feedback/FINANCIAL_NAVIGATION_2026-10-27.md` y `docs/deployment/CONTABO_MAINTENANCE_2026-10-27.md`.
+**Actualización del 29 de octubre de 2026:** la imagen web sana es
+`dfdcd98045cd806d7d85c582ba79681f1bea560c`, verificada en GitHub antes de
+publicar. Las migraciones 037 y 038 están aplicadas a `analiza_live_20261014`;
+la salud pública respondió HTTP 200 y cinco rutas privadas pasaron una prueba
+de navegador de sólo lectura. El script de respaldo anterior volcaba
+`analiza_en_casa`, que no es la base activa. No asumir que los snapshots
+anteriores al cambio `f719f0500cc23ff5f94373c90bca980648783454` contienen
+la base activa. El snapshot nuevo `e9768ef6` contiene
+`active-database.dump`, `active-database.name` y su SHA-256: se comprobó el
+hash y la lectura del archivo PostgreSQL directamente desde restic. El script
+de despliegue ahora exige esos tres archivos antes de migrar. Ver el informe
+`CONTABO_MAINTENANCE_2026-10-29.md` para el estado de la copia externa.
+
+**Registro histórico de Finanzas, 27 de octubre de 2026 (El Salvador):** la imagen web de ese día fue `47c8a522e1007f0231d89b1789edb42c62098d5e`, subida y verificada en GitHub antes de publicar. La imagen anterior `e3de685cc566254c6a29c68b0d7c5899e7c75368` se conserva para reversión de la web. El respaldo cifrado previo `ebc6bf89` pasó, pero se descubrió después que el script anterior no volcaba la base activa; consultar la actualización del 29 de octubre. Cuentas por cobrar concentra la operación y `/payments` presenta el reporte de todos los pagos, incluidos reversados; la organización principal mostró 21/21 registros mediante prueba de sólo lectura. Ambos contenedores estaban sanos y la salud pública respondió HTTP 200. Detalle en `docs/feedback/FINANCIAL_NAVIGATION_2026-10-27.md` y `docs/deployment/CONTABO_MAINTENANCE_2026-10-27.md`.
 
 La tarea externa cifrada de Windows, ejecutada manualmente después de publicar, terminó con código 0: 154 archivos comparados por SHA-256, `restic check --read-data` aprobado y snapshot `ebc6bf89` presente en la copia. La ejecución automática del siguiente día sigue pendiente de observación.
 
@@ -246,7 +259,8 @@ ufw status
 Las copias cifradas con restic están en
 `/opt/analiza-contabo-staging/backups/restic`. El snapshot comprobado tras la
 migración inicial fue `a6fdcfd7`; el más reciente se indica en la actualización
-del 20 de octubre. Incluye la base activa, archivos privados, configuración
+del 29 de octubre. Desde `e9768ef6`, incluye la base activa como
+`active-database.dump` y su nombre en `active-database.name`, además de archivos privados, configuración
 de despliegue, secretos cifrados dentro del repositorio restic, certificado y
 configuración Nginx. El servicio `analiza-contabo-backup.service` y su timer
 están activos; el servicio detiene brevemente la web durante la copia y luego
