@@ -3,7 +3,7 @@
   "generated_at": "2026-10-13T02:06:23-06:00",
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+  "implementation_sha": "1a4bd436730065f06f9579b1f40f305dfb71dfb7",
   "functional_fingerprint": "14bcdcb0602ce72f745756c5ae5a6c3cd82b05fe8844661c41dfe88fffb9499b",
   "requirements": [
     {
