@@ -12,6 +12,8 @@ pueden estar trabajando en el mismo VPS.
 
 ## GitHub antes de cada despliegue
 
+**Estado actual, 30 de octubre de 2026:** imagen web `5dab7a143f0a9acbf799a272bf14a1a8fa310d72`, subida a GitHub antes de desplegar, con descuento por categorías corregido, Atención reorganizada y página propia de visitadores. La prueba conectada sintética verificó escritura/recarga de descuentos y visitadores; salud pública HTTP 200 y ambos contenedores sanos. Respaldo previo `392b3c39` con la base activa y copia externa manual verificada (182 archivos cifrados, integridad completa y tarea con código 0). Se corrigieron locks caducados de restic y se añadió preflight al respaldo antes de detener la web. Ubuntu sigue en 24.04.5 LTS; 19 actualizaciones pendientes, incluidas Docker/containerd, requieren ventana coordinada. Ver `CONTABO_UI_RELEASE_2026-10-30.md` y `../feedback/UI_REVIEW_2026-10-29.md`. La versión anterior `dfdcd98045cd806d7d85c582ba79681f1bea560c` se conserva para reversión.
+
 **Actualización del 29 de octubre de 2026:** la imagen web sana es
 `dfdcd98045cd806d7d85c582ba79681f1bea560c`, verificada en GitHub antes de
 publicar. Las migraciones 037 y 038 están aplicadas a `analiza_live_20261014`;
