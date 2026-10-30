@@ -94,6 +94,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     'patients:write',
     'cases:read',
     'cases:write',
+    'quotes:read',
     'clinical:read',
     'clinical:write',
     'nursing:write',
@@ -128,6 +129,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     'patients:read',
     'patients:write',
     'cases:read',
+    'quotes:read',
     'clinical:read',
     'clinical:write',
     'nursing:write',
@@ -140,6 +142,7 @@ const permissions: Record<Role, readonly Permission[]> = {
   INVENTORY: [
     'dashboard:read',
     'inventory:read',
+    'quotes:read',
     'supply-requests:read',
     'inventory:write',
     'purchases:read',
@@ -162,7 +165,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     'reports:read',
   ],
   AUDITOR: allRead,
-  ANALYTICS: ['login-analytics:read'],
+  ANALYTICS: ['login-analytics:read', 'quotes:read'],
   WEBMASTER: [...allRead, ...allWrite, 'login-analytics:read'],
 };
 
@@ -197,6 +200,7 @@ const routePermissions: Array<{ prefix: string; permission: Permission }> = [
   { prefix: '/agenda', permission: 'agenda:read' },
   { prefix: '/inventory', permission: 'inventory:read' },
   { prefix: '/purchases', permission: 'purchases:read' },
+  { prefix: '/purchase-orders', permission: 'purchases:read' },
   { prefix: '/catalogs', permission: 'catalogs:read' },
   { prefix: '/insurers', permission: 'catalogs:read' },
   { prefix: '/reports', permission: 'reports:read' },

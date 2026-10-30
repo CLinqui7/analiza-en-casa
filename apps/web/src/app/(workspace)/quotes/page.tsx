@@ -1,6 +1,6 @@
 'use client';
 
-import type { Quote, QuoteDiscount, QuoteItem, QuoteItemCategory } from '@analiza/contracts';
+import type { Quote, QuoteItem, QuoteItemCategory } from '@analiza/contracts';
 import {
   calculateQuoteBalance,
   calculateQuoteTotals,
@@ -20,12 +20,26 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
+import { mongoMutationHeaders } from '@/lib/auth';
+import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
+import { quoteDecisionSchema, type QuoteDecision } from '@/lib/quote-decision';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
   Quote,
   | 'summary'
   | 'careSetting'
+  | 'diagnosisSummary'
+  | 'primaryDoctorId'
+  | 'secondaryDoctorId'
+  | 'insurer'
+  | 'admissionDate'
+  | 'dischargeDate'
+  | 'accountType'
+  | 'manager'
+  | 'priority'
+  | 'deductibleAmount'
+  | 'coinsuranceAmount'
   | 'comments'
   | 'paymentCondition'
   | 'items'
@@ -42,6 +56,7 @@ type QuoteDraft = Pick<
   patientId: string;
   patientQuery: string;
   referralQuery: string;
+  doctorQuery: string;
 };
 
 const emptyItem = (category: QuoteItemCategory = 'SERVICES'): QuoteItem => ({
@@ -57,8 +72,20 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   patientId,
   patientQuery: '',
   referralQuery: '',
+  doctorQuery: '',
   summary: '',
   careSetting: 'HOSPITALIZATION',
+  diagnosisSummary: '',
+  primaryDoctorId: '',
+  secondaryDoctorId: '',
+  insurer: '',
+  admissionDate: new Date().toISOString().slice(0, 10),
+  dischargeDate: '',
+  accountType: 'PARTICULAR',
+  manager: '',
+  priority: 'MEDIUM',
+  deductibleAmount: 0,
+  coinsuranceAmount: 0,
   comments: '',
   paymentCondition: '',
   invoiceDate: new Date().toISOString().slice(0, 10),
@@ -71,13 +98,6 @@ const emptyDraft = (caseId = '', patientId = ''): QuoteDraft => ({
   insurerAmount: 0,
   revisionReason: '',
 });
-const referralCatalog = [
-  'Amigos & Familia',
-  'Publicidad del Panel',
-  'Redes Sociales',
-  'Paciente recurrente',
-  ...(process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : ['Dr. Jorge Contreras']),
-];
 type CatalogEntry = {
   id: string;
   label: string;
@@ -85,38 +105,30 @@ type CatalogEntry = {
   salePriceExcludingTax?: number;
 };
 const feeServiceCatalog: CatalogEntry[] = [
-  ...(process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
-    ? []
-    : [{ id: 'fee-demo-follow-up', label: 'Seguimiento disponible', inventoryAvailable: true }]),
+  { id: 'fee-visit', label: 'Visita', inventoryAvailable: true },
+  { id: 'fee-follow-up', label: 'Seguimiento', inventoryAvailable: true },
 ];
 const money = (value: number) => `USD ${value.toFixed(2)}`;
-function updatedCategoryPercentages(
-  existing: QuoteDiscount['categories'],
-  category: QuoteItemCategory,
-  value: number,
-): Record<QuoteItemCategory, number> {
-  const result: Record<QuoteItemCategory, number> = {
-    SERVICES: existing?.SERVICES ?? 0,
-    STUDIES: existing?.STUDIES ?? 0,
-    MEDICATIONS: existing?.MEDICATIONS ?? 0,
-    SUPPLIES: existing?.SUPPLIES ?? 0,
-    EQUIPMENT: existing?.EQUIPMENT ?? 0,
-    FEES: existing?.FEES ?? 0,
-    EXTRAS: existing?.EXTRAS ?? 0,
-    IMAGING: existing?.IMAGING ?? 0,
-  };
-  result[category] = value;
-  return result;
-}
-
 function cloneDraft(quote: Quote): QuoteDraft {
   return {
     caseId: quote.caseId ?? '',
     patientId: quote.patientId,
     patientQuery: '',
     referralQuery: quote.referralLabel ?? '',
+    doctorQuery: '',
     summary: quote.summary,
     careSetting: quote.careSetting ?? 'HOSPITALIZATION',
+    diagnosisSummary: quote.diagnosisSummary ?? '',
+    primaryDoctorId: quote.primaryDoctorId ?? '',
+    secondaryDoctorId: quote.secondaryDoctorId ?? '',
+    insurer: quote.insurer ?? '',
+    admissionDate: quote.admissionDate ?? quote.createdAt.slice(0, 10),
+    dischargeDate: quote.dischargeDate ?? '',
+    accountType: quote.accountType ?? 'PARTICULAR',
+    manager: quote.manager ?? '',
+    priority: quote.priority ?? 'MEDIUM',
+    deductibleAmount: quote.deductibleAmount ?? 0,
+    coinsuranceAmount: quote.coinsuranceAmount ?? 0,
     comments: quote.comments ?? '',
     paymentCondition: quote.paymentCondition ?? '',
     invoiceDate: quote.invoiceDate ?? quote.createdAt.slice(0, 10),
@@ -168,57 +180,129 @@ function QuoteEditor({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<QuoteItemCategory>('SERVICES');
   const [processingItem, setProcessingItem] = useState(false);
-  const [referralCatalogOpen, setReferralCatalogOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [refreshingPatients, setRefreshingPatients] = useState(false);
   const [patientRefreshNotice, setPatientRefreshNotice] = useState<string | null>(null);
-  const [doctorQuery, setDoctorQuery] = useState('');
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
+  const [autosaveError, setAutosaveError] = useState(false);
   const draftDiscarded = useRef(false);
+  const saveChain = useRef<Promise<void>>(Promise.resolve());
   const draftKey = session
     ? `analiza.form-draft.v1.${session.mode}.${session.userId}.quote.${mode}.${source?.id ?? 'new'}`
     : null;
+  const serverDraftUrl =
+    session?.mode === 'postgresql'
+      ? `/api/quotes/form-draft?key=${encodeURIComponent(`quote.${mode}.${source?.id ?? 'new'}`)}`
+      : null;
 
   useEffect(() => {
     if (!draftKey) return;
-    const timer = window.setTimeout(() => {
-      if (draftDiscarded.current) return;
+    let cancelled = false;
+    async function restore() {
+      if (draftDiscarded.current || !draftKey) return;
+      let localSavedAt = 0;
       try {
         const stored = window.sessionStorage.getItem(draftKey);
         if (stored) {
           const parsed: unknown = JSON.parse(stored);
           if (parsed && typeof parsed === 'object' && 'draft' in parsed) {
-            const recovered = parsed as { draft: QuoteDraft };
-            if (
-              Array.isArray(recovered.draft?.items) &&
-              typeof recovered.draft.summary === 'string'
-            ) {
-              setDraft(recovered.draft);
+            const recovered = parsed as { draft: QuoteDraft; savedAt?: number };
+            const valid = quoteFormDraftSchema.safeParse(recovered.draft);
+            if (valid.success) {
+              setDraft(valid.data);
               setDraftRecovered(true);
+              localSavedAt = recovered.savedAt ?? 0;
             }
           }
         }
       } catch {
-        window.sessionStorage.removeItem(draftKey);
+        try {
+          window.sessionStorage.removeItem(draftKey);
+        } catch {
+          // El borrador remoto sigue disponible cuando el navegador bloquea almacenamiento local.
+        }
       }
-      setDraftReady(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [draftKey]);
+      if (serverDraftUrl) {
+        try {
+          const response = await fetch(serverDraftUrl, {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(5000),
+          });
+          if (!response.ok) throw new Error('Draft load failed');
+          const remote = (await response.json()) as { draft?: QuoteDraft; updatedAt?: string };
+          const valid = quoteFormDraftSchema.safeParse(remote.draft);
+          if (!cancelled && valid.success && Date.parse(remote.updatedAt ?? '') > localSavedAt) {
+            setDraft(valid.data);
+            setDraftRecovered(true);
+          }
+        } catch {
+          if (!cancelled) setAutosaveError(true);
+        }
+      }
+      if (!cancelled) setDraftReady(true);
+    }
+    void restore();
+    return () => {
+      cancelled = true;
+    };
+  }, [draftKey, serverDraftUrl]);
 
   useEffect(() => {
     if (!draftKey || !draftReady) return;
     const timer = window.setTimeout(() => {
       if (draftDiscarded.current) return;
       try {
-        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft }));
+        window.sessionStorage.setItem(draftKey, JSON.stringify({ draft, savedAt: Date.now() }));
       } catch {
         // La escritura temporal puede fallar por cuota o política del navegador.
       }
+      if (serverDraftUrl) {
+        saveChain.current = saveChain.current
+          .catch(() => undefined)
+          .then(async () => {
+            if (draftDiscarded.current) return;
+            const response = await fetch(serverDraftUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+              body: JSON.stringify(draft),
+              signal: AbortSignal.timeout(5000),
+            });
+            if (!response.ok) throw new Error('Draft save failed');
+            setAutosaveError(false);
+          })
+          .catch(() => {
+            setAutosaveError(true);
+          });
+      }
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [draft, draftKey, draftReady]);
+  }, [draft, draftKey, draftReady, serverDraftUrl]);
+
+  async function clearDraft(): Promise<boolean> {
+    draftDiscarded.current = true;
+    if (draftKey) {
+      try {
+        window.sessionStorage.removeItem(draftKey);
+      } catch {
+        // La limpieza remota no depende del almacenamiento del navegador.
+      }
+    }
+    if (!serverDraftUrl) return true;
+    try {
+      await saveChain.current;
+      const response = await fetch(serverDraftUrl, {
+        method: 'DELETE',
+        headers: mongoMutationHeaders(),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!response.ok) throw new Error('Draft cleanup failed');
+      return true;
+    } catch {
+      setAutosaveError(true);
+      return false;
+    }
+  }
 
   const totals = useMemo(() => {
     try {
@@ -281,7 +365,7 @@ function QuoteEditor({
             }))
         : [];
 
-  function setNumber(key: 'quantity' | 'unitPrice' | 'discountAmount', value: string) {
+  function setNumber(key: 'quantity' | 'unitPrice', value: string) {
     setItem((current) => ({ ...current, [key]: Number(value) }));
   }
   async function refreshPatientOptions() {
@@ -294,29 +378,18 @@ function QuoteEditor({
         : 'No fue posible actualizar la lista. Su selección no se modificó.',
     );
   }
-  function selectFeeDoctor(doctorId: string) {
-    const doctor = doctors.find((candidate) => candidate.id === doctorId);
-    setItem((current) => ({
-      ...current,
-      doctorId: doctor?.id,
-      doctorName: doctor?.fullName,
-      unitPrice: (quoteMedicalFeeOptions as readonly number[]).includes(current.unitPrice)
-        ? current.unitPrice
-        : 0,
-    }));
-  }
   function addOrUpdateItem() {
     const validation = validateQuoteItem(item);
     if (validation) {
       setErrors((current) => ({ ...current, item: validation }));
       return;
     }
-    if (activeCategory === 'FEES' && !editingItemId) {
-      const doctor = doctors.find((candidate) => candidate.id === item.doctorId);
+    if (activeCategory === 'FEES') {
+      const doctor = doctors.find((candidate) => candidate.id === draft.primaryDoctorId);
       if (!doctor) {
         setErrors((current) => ({
           ...current,
-          item: 'Seleccione un médico registrado.',
+          item: 'Seleccione el médico tratante principal al inicio de la cotización.',
         }));
         return;
       }
@@ -328,7 +401,14 @@ function QuoteEditor({
       }));
       return;
     }
-    const persisted = { ...item, id: editingItemId ?? crypto.randomUUID() };
+    const feeDoctor = doctors.find((candidate) => candidate.id === draft.primaryDoctorId);
+    const persisted = {
+      ...item,
+      id: editingItemId ?? crypto.randomUUID(),
+      ...(activeCategory === 'FEES'
+        ? { doctorId: feeDoctor?.id, doctorName: feeDoctor?.fullName }
+        : {}),
+    };
     setDraft((current) => ({
       ...current,
       items: editingItemId
@@ -353,19 +433,20 @@ function QuoteEditor({
       items: current.items.filter((candidate) => candidate.id !== id),
     }));
   }
-  function updateDiscount(next: Partial<QuoteDiscount>) {
-    setDraft((current) => ({
-      ...current,
-      discount: { type: current.discount?.type ?? 'PERCENT', ...current.discount, ...next },
-    }));
-  }
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: Record<string, string> = {};
     if (!selectedPatient) nextErrors.patientId = 'Seleccione un paciente válido.';
     if (draft.caseId && !selectedCase)
       nextErrors.caseId = 'La hospitalización seleccionada no corresponde al paciente.';
-    if (!draft.summary.trim()) nextErrors.summary = 'El resumen operativo es obligatorio.';
+    if (draft.careSetting === 'HOSPITALIZATION' && !draft.primaryDoctorId)
+      nextErrors.primaryDoctorId = 'Seleccione el médico tratante principal.';
+    if (draft.primaryDoctorId && !doctors.some((doctor) => doctor.id === draft.primaryDoctorId))
+      nextErrors.primaryDoctorId = 'Seleccione un médico registrado.';
+    if (draft.secondaryDoctorId && !doctors.some((doctor) => doctor.id === draft.secondaryDoctorId))
+      nextErrors.secondaryDoctorId = 'Seleccione un médico registrado.';
+    if (draft.dischargeDate && draft.admissionDate && draft.dischargeDate < draft.admissionDate)
+      nextErrors.dischargeDate = 'El alta no puede ser anterior al ingreso.';
     if (mode === 'revise' && !draft.revisionReason.trim())
       nextErrors.revisionReason = 'El motivo de revisión es obligatorio.';
     try {
@@ -382,15 +463,30 @@ function QuoteEditor({
     const common = {
       ...(selectedCase ? { caseId: selectedCase.id } : {}),
       patientId: selectedPatient!.id,
-      summary: draft.summary.trim(),
+      summary: draft.summary.trim() || `Cotización de ${selectedPatient!.fullName}`,
       careSetting: draft.careSetting,
-      invoiceDate: draft.invoiceDate,
-      invoiceDocumentType: draft.invoiceDocumentType,
-      discountGroup: draft.discountGroup?.trim() || 'Regular',
-      referralLabel: draft.referralQuery.trim() || draft.referralLabel?.trim() || undefined,
-      referralSelections: draft.referralSelections?.length ? draft.referralSelections : undefined,
+      diagnosisSummary: draft.diagnosisSummary?.trim() || undefined,
+      primaryDoctorId: draft.primaryDoctorId || undefined,
+      secondaryDoctorId: draft.secondaryDoctorId || undefined,
+      insurer: draft.insurer?.trim() || undefined,
+      admissionDate: draft.admissionDate || undefined,
+      dischargeDate: draft.dischargeDate || undefined,
+      accountType: draft.accountType,
+      manager: draft.manager?.trim() || undefined,
+      priority: draft.priority,
+      deductibleAmount: draft.deductibleAmount ?? 0,
+      coinsuranceAmount: draft.coinsuranceAmount ?? 0,
+      ...(source
+        ? {
+            invoiceDate: draft.invoiceDate,
+            invoiceDocumentType: draft.invoiceDocumentType,
+            discountGroup: draft.discountGroup,
+            referralLabel: draft.referralLabel,
+            referralSelections: draft.referralSelections,
+            paymentCondition: draft.paymentCondition,
+          }
+        : {}),
       comments: draft.comments?.trim() || undefined,
-      paymentCondition: draft.paymentCondition?.trim() || undefined,
       items: draft.items,
       discount: draft.discount,
       insurerAmount: draft.insurerAmount,
@@ -412,21 +508,33 @@ function QuoteEditor({
         rootQuoteId: id,
       });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Borrador de cotización persistido.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Borrador de cotización persistido.'
+            : 'Borrador de cotización persistido. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     } else if (mode === 'edit' && source) {
       const saved = await updateQuote({ ...source, ...common });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Borrador de cotización actualizado y persistido.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Borrador de cotización actualizado y persistido.'
+            : 'Cotización actualizada. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     } else if (mode === 'revise' && source) {
       const revision = createQuoteRevision(source, crypto.randomUUID(), draft.revisionReason, now);
       const saved = await addQuote({ ...revision, ...common });
       if (saved) {
-        if (draftKey) window.sessionStorage.removeItem(draftKey);
-        onSaved('Nueva versión de cotización creada como borrador.');
+        const cleared = await clearDraft();
+        onSaved(
+          cleared
+            ? 'Nueva versión de cotización creada como borrador.'
+            : 'Nueva versión creada. La copia automática pendiente deberá descartarse al volver al formulario.',
+        );
       }
     }
   }
@@ -457,9 +565,9 @@ function QuoteEditor({
             className="button-secondary"
             data-action-id="QUOTE-DRAFT-DISCARD"
             onClick={() => {
-              draftDiscarded.current = true;
-              if (draftKey) window.sessionStorage.removeItem(draftKey);
-              onClose();
+              void clearDraft().then((cleared) => {
+                if (cleared) onClose();
+              });
             }}
             type="button"
           >
@@ -473,7 +581,12 @@ function QuoteEditor({
           >
             Cancelar
           </Button>
-          <Button data-action-id={saveAction} form="quote-editor-form" type="submit">
+          <Button
+            data-action-id={saveAction}
+            disabled={!draftReady}
+            form="quote-editor-form"
+            type="submit"
+          >
             {mode === 'edit'
               ? 'Guardar cambios'
               : mode === 'revise'
@@ -487,13 +600,25 @@ function QuoteEditor({
       title={title}
     >
       <p className="field-help">
-        {draftRecovered
-          ? 'Se recuperó el formulario pendiente de esta pestaña. Aún no está guardado en la base de datos.'
-          : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
+        {!draftReady
+          ? 'Recuperando el formulario pendiente…'
+          : draftRecovered
+            ? 'Se recuperó el formulario pendiente. Revíselo antes de guardar la cotización.'
+            : serverDraftUrl
+              ? 'El formulario se guarda automáticamente en su cuenta mientras lo completa. La cotización se crea al pulsar Guardar borrador.'
+              : 'Los cambios de este formulario se conservan temporalmente en esta pestaña al cambiar de pantalla hasta que los guarde.'}
       </p>
+      {autosaveError ? (
+        <p className="notice danger" role="status">
+          No se pudo sincronizar el formulario con la base de datos. Compruebe la conexión antes de
+          cerrar esta pestaña.
+        </p>
+      ) : null}
       <form
+        aria-busy={!draftReady}
         className="form-grid"
         id="quote-editor-form"
+        inert={!draftReady}
         noValidate
         onSubmit={(event) => void submit(event)}
       >
@@ -516,14 +641,17 @@ function QuoteEditor({
                       candidate.fullName.trim().toLocaleLowerCase('es-SV') === normalizedQuery ||
                       candidate.documentId.trim().toLocaleLowerCase('es-SV') === normalizedQuery,
                   );
-                  const exactCase = exactPatient
-                    ? hospitalizations.find((candidate) => candidate.patientId === exactPatient.id)
-                    : undefined;
                   setDraft((current) => ({
                     ...current,
                     patientQuery,
                     ...(exactPatient
-                      ? { patientId: exactPatient.id, caseId: exactCase?.id ?? '' }
+                      ? {
+                          patientId: exactPatient.id,
+                          caseId: '',
+                          diagnosisSummary: exactPatient.diagnosis ?? '',
+                          primaryDoctorId: exactPatient.primaryDoctorId ?? '',
+                          secondaryDoctorId: exactPatient.secondaryDoctorId ?? '',
+                        }
                       : {}),
                   }));
                   if (exactPatient) setErrors((current) => ({ ...current, caseId: '' }));
@@ -557,16 +685,17 @@ function QuoteEditor({
               <select
                 data-action-id="QUOTE-PATIENT-SELECT"
                 disabled={mode !== 'create'}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const patient = patients.find((candidate) => candidate.id === event.target.value);
                   setDraft((current) => ({
                     ...current,
                     patientId: event.target.value,
-                    caseId:
-                      hospitalizations.find(
-                        (candidate) => candidate.patientId === event.target.value,
-                      )?.id ?? '',
-                  }))
-                }
+                    caseId: '',
+                    diagnosisSummary: patient?.diagnosis ?? '',
+                    primaryDoctorId: patient?.primaryDoctorId ?? '',
+                    secondaryDoctorId: patient?.secondaryDoctorId ?? '',
+                  }));
+                }}
                 value={draft.patientId}
               >
                 <option value="">Seleccione un paciente</option>
@@ -601,8 +730,234 @@ function QuoteEditor({
             </p>
           ) : null}
         </fieldset>
+        <fieldset className="quote-fieldset full-field">
+          <legend>Datos clínicos y administrativos de la cotización</legend>
+          <div className="form-grid form-grid-compact">
+            <label className="full-field">
+              Diagnóstico
+              <textarea
+                data-action-id="QUOTE-DIAGNOSIS"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, diagnosisSummary: event.target.value }))
+                }
+                rows={2}
+                value={draft.diagnosisSummary ?? ''}
+              />
+            </label>
+            <label>
+              Buscar médico por nombre
+              <input
+                data-action-id="QUOTE-DOCTOR-SEARCH"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, doctorQuery: event.target.value }))
+                }
+                type="search"
+                value={draft.doctorQuery}
+              />
+            </label>
+            <label>
+              Médico tratante principal
+              <select
+                data-action-id="QUOTE-PRIMARY-DOCTOR"
+                onChange={(event) => {
+                  const doctorId = event.target.value;
+                  const doctorName = doctors.find((doctor) => doctor.id === doctorId)?.fullName;
+                  setDraft((current) => ({
+                    ...current,
+                    primaryDoctorId: doctorId,
+                    items: current.items.map((line) =>
+                      line.category === 'FEES' ? { ...line, doctorId, doctorName } : line,
+                    ),
+                  }));
+                }}
+                value={draft.primaryDoctorId ?? ''}
+              >
+                <option value="">Seleccione un médico</option>
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(draft.doctorQuery.toLocaleLowerCase('es-SV')) ||
+                      doctor.id === draft.primaryDoctorId ||
+                      doctor.id === draft.secondaryDoctorId,
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
+              </select>
+              {errors.primaryDoctorId ? (
+                <span className="field-error" role="alert">
+                  {errors.primaryDoctorId}
+                </span>
+              ) : null}
+            </label>
+            <label>
+              Médico tratante secundario
+              <select
+                data-action-id="QUOTE-SECONDARY-DOCTOR"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, secondaryDoctorId: event.target.value }))
+                }
+                value={draft.secondaryDoctorId ?? ''}
+              >
+                <option value="">Sin asignar</option>
+                {doctors
+                  .filter(
+                    (doctor) =>
+                      doctor.fullName
+                        .toLocaleLowerCase('es-SV')
+                        .includes(draft.doctorQuery.toLocaleLowerCase('es-SV')) ||
+                      doctor.id === draft.secondaryDoctorId,
+                  )
+                  .map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.fullName}
+                    </option>
+                  ))}
+              </select>
+              {errors.secondaryDoctorId ? (
+                <span className="field-error" role="alert">
+                  {errors.secondaryDoctorId}
+                </span>
+              ) : null}
+            </label>
+            <label>
+              Tipo de cuenta
+              <select
+                data-action-id="QUOTE-ACCOUNT-TYPE"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    accountType: event.target.value as Quote['accountType'],
+                  }))
+                }
+                value={draft.accountType ?? 'PARTICULAR'}
+              >
+                <option value="PARTICULAR">Particular</option>
+                <option value="SEGURO">Seguro</option>
+                <option value="EMPRESA">Empresa</option>
+              </select>
+            </label>
+            <label>
+              Aseguradora
+              <select
+                data-action-id="QUOTE-INSURER"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, insurer: event.target.value }))
+                }
+                value={draft.insurer ?? ''}
+              >
+                <option value="">Sin aseguradora</option>
+                {catalogItems
+                  .filter((entry) => entry.status === 'ACTIVE' && entry.category === 'INSURERS')
+                  .map((entry) => (
+                    <option key={entry.id} value={entry.name}>
+                      {entry.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              Fecha de ingreso
+              <input
+                data-action-id="QUOTE-ADMISSION-DATE"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, admissionDate: event.target.value }))
+                }
+                type="date"
+                value={draft.admissionDate ?? ''}
+              />
+            </label>
+            <label>
+              Fecha de egreso
+              <input
+                data-action-id="QUOTE-DISCHARGE-DATE"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, dischargeDate: event.target.value }))
+                }
+                type="date"
+                value={draft.dischargeDate ?? ''}
+              />
+              {errors.dischargeDate ? (
+                <span className="field-error" role="alert">
+                  {errors.dischargeDate}
+                </span>
+              ) : null}
+            </label>
+            <label>
+              Responsable administrativo
+              <input
+                data-action-id="QUOTE-MANAGER"
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, manager: event.target.value }))
+                }
+                value={draft.manager ?? ''}
+              />
+            </label>
+            <label>
+              Prioridad
+              <select
+                data-action-id="QUOTE-PRIORITY"
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    priority: event.target.value as Quote['priority'],
+                  }))
+                }
+                value={draft.priority ?? 'MEDIUM'}
+              >
+                <option value="LOW">Baja</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HIGH">Alta</option>
+              </select>
+            </label>
+            {draft.accountType === 'SEGURO' ? (
+              <>
+                <label>
+                  Deducible declarado (USD)
+                  <input
+                    data-action-id="QUOTE-DEDUCTIBLE"
+                    min="0"
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        deductibleAmount: Number(event.target.value),
+                      }))
+                    }
+                    step="0.01"
+                    type="number"
+                    value={draft.deductibleAmount ?? 0}
+                  />
+                </label>
+                <label>
+                  Coaseguro declarado (USD)
+                  <input
+                    data-action-id="QUOTE-COINSURANCE"
+                    min="0"
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        coinsuranceAmount: Number(event.target.value),
+                      }))
+                    }
+                    step="0.01"
+                    type="number"
+                    value={draft.coinsuranceAmount ?? 0}
+                  />
+                </label>
+              </>
+            ) : null}
+          </div>
+          <p className="field-help">
+            Deducible y coaseguro son importes declarados para esta versión. El equipo confirma la
+            responsabilidad de pago; no se aplica ninguna regla automática de cobertura.
+          </p>
+        </fieldset>
         <label>
-          Modalidad de atención
+          Ingreso clínico
           <select
             onChange={(event) =>
               setDraft((current) => ({
@@ -639,194 +994,6 @@ function QuoteEditor({
           </span>
           {errors.caseId ? <span className="field-error">{errors.caseId}</span> : null}
         </label>
-        <label>
-          Resumen operativo
-          <textarea
-            onChange={(event) =>
-              setDraft((current) => ({ ...current, summary: event.target.value }))
-            }
-            rows={3}
-            value={draft.summary}
-          />
-          {errors.summary ? <span className="field-error">{errors.summary}</span> : null}
-        </label>
-        <label>
-          Condición de pago (opcional)
-          <input
-            data-action-id="QUOTE-PAYMENT-CONDITION"
-            maxLength={160}
-            onChange={(event) =>
-              setDraft((current) => ({ ...current, paymentCondition: event.target.value }))
-            }
-            type="text"
-            value={draft.paymentCondition ?? ''}
-          />
-          <span className="field-help">
-            Se mostrará tal como se escriba; no genera vencimientos ni cargos automáticos.
-          </span>
-        </label>
-        <fieldset className="quote-fieldset full-field">
-          <legend>Datos iniciales de factura</legend>
-          <div className="form-grid form-grid-compact">
-            <label>
-              Fecha <span aria-hidden="true">*</span>
-              <input
-                data-action-id="QUOTE-INVOICE-DATE"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, invoiceDate: event.target.value }))
-                }
-                type="date"
-                value={draft.invoiceDate ?? ''}
-              />
-            </label>
-            <label>
-              Tipo de comprobante
-              <select
-                data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    invoiceDocumentType: event.target.value as Quote['invoiceDocumentType'],
-                  }))
-                }
-                value={draft.invoiceDocumentType ?? 'INVOICE'}
-              >
-                <option value="INVOICE">Factura</option>
-                <option value="TAX_CREDIT">Crédito fiscal</option>
-              </select>
-              <span className="field-help">
-                Clasificación administrativa; no calcula impuestos ni reglas fiscales.
-              </span>
-            </label>
-            <label>
-              Grupo de descuento <span aria-hidden="true">*</span>
-              <select
-                data-action-id="QUOTE-DISCOUNT-GROUP"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, discountGroup: event.target.value }))
-                }
-                value={draft.discountGroup ?? 'Regular'}
-              >
-                <option value="Regular">Regular</option>
-              </select>
-            </label>
-            <div className="full-field referral-field">
-              <label htmlFor="quote-referral">Origen del contacto (opcional)</label>
-              <div className="referral-input-row">
-                <input
-                  aria-controls={referralCatalogOpen ? 'quote-referral-catalog' : undefined}
-                  aria-describedby={errors.referral ? 'quote-referral-error' : undefined}
-                  aria-invalid={Boolean(errors.referral)}
-                  data-action-id="QUOTE-REFERRAL"
-                  id="quote-referral"
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setDraft((current) => ({
-                      ...current,
-                      referralQuery: value,
-                      referralLabel: value,
-                    }));
-                    setReferralCatalogOpen(true);
-                  }}
-                  value={draft.referralQuery}
-                />
-                <Button
-                  aria-expanded={referralCatalogOpen}
-                  aria-label="Mostrar opciones de referido"
-                  className="referral-catalog-toggle"
-                  data-action-id="QUOTE-REFERRAL-CATALOG"
-                  onClick={() => setReferralCatalogOpen((current) => !current)}
-                  type="button"
-                >
-                  +
-                </Button>
-              </div>
-              {errors.referral ? (
-                <p className="field-error" id="quote-referral-error" role="alert">
-                  {errors.referral}
-                </p>
-              ) : null}
-              {draft.referralSelections?.length ? (
-                <div aria-label="Referidos seleccionados" className="action-row">
-                  {draft.referralSelections.map((label) => (
-                    <span className="status-tag" key={label}>
-                      {label}
-                      <button
-                        aria-label={`Quitar ${label}`}
-                        data-action-id="QUOTE-REFERRAL-REMOVE"
-                        onClick={() =>
-                          setDraft((current) => ({
-                            ...current,
-                            referralSelections:
-                              current.referralSelections?.filter(
-                                (selection) => selection !== label,
-                              ) ?? [],
-                          }))
-                        }
-                        type="button"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {referralCatalogOpen ? (
-                <div
-                  aria-label="Catálogo de referidos"
-                  className="referral-catalog"
-                  id="quote-referral-catalog"
-                  role="listbox"
-                  tabIndex={0}
-                >
-                  {referralCatalog
-                    .filter((label) =>
-                      label.toLocaleLowerCase().includes(draft.referralQuery.toLocaleLowerCase()),
-                    )
-                    .map((label) => (
-                      <button
-                        aria-selected={draft.referralSelections?.includes(label)}
-                        data-action-id="QUOTE-REFERRAL-ADD"
-                        key={label}
-                        onClick={() => {
-                          setDraft((current) => ({
-                            ...current,
-                            referralSelections: current.referralSelections?.includes(label)
-                              ? current.referralSelections.filter(
-                                  (selection) => selection !== label,
-                                )
-                              : [...(current.referralSelections ?? []), label],
-                            referralLabel: '',
-                            referralQuery: '',
-                          }));
-                          setErrors((current) => ({ ...current, referral: '' }));
-                        }}
-                        role="option"
-                        type="button"
-                      >
-                        {label}
-                      </button>
-                    ))}
-                </div>
-              ) : null}
-            </div>
-            <label className="full">
-              Comentarios <span aria-hidden="true">*</span>
-              <textarea
-                data-action-id="QUOTE-COMMENTS"
-                onChange={(event) =>
-                  setDraft((current) => ({ ...current, comments: event.target.value }))
-                }
-                rows={3}
-                value={draft.comments ?? ''}
-              />
-            </label>
-          </div>
-          <p className="field-help">
-            El origen del contacto es opcional y sólo sirve para seguimiento administrativo; no
-            aplica descuentos, impuestos, saldo ni cobertura.
-          </p>
-        </fieldset>
         {mode === 'revise' ? (
           <label className="full-field">
             Motivo de revisión
@@ -917,7 +1084,7 @@ function QuoteEditor({
                   <span className="field-help">Primero cree servicios activos en Catálogos.</span>
                 ) : null}
               </label>
-            ) : (
+            ) : activeCategory !== 'FEES' ? (
               <label>
                 Concepto
                 <input
@@ -927,7 +1094,7 @@ function QuoteEditor({
                   value={item.name}
                 />
               </label>
-            )}
+            ) : null}
             {activeCategory === 'FEES' ? (
               <>
                 <label>
@@ -952,38 +1119,14 @@ function QuoteEditor({
                   </select>
                 </label>
                 <label>
-                  Buscar médico por nombre
-                  <input
-                    aria-label="Filtrar médicos de honorarios"
-                    data-action-id="QUOTE-FEE-DOCTOR-SEARCH"
-                    onChange={(event) => setDoctorQuery(event.target.value)}
-                    type="search"
-                    value={doctorQuery}
-                  />
-                </label>
-                <label>
                   Médico
-                  <select
-                    data-action-id="QUOTE-FEE-DOCTOR-SELECT"
-                    onChange={(event) => selectFeeDoctor(event.target.value)}
-                    value={item.doctorId ?? ''}
-                  >
-                    <option value="">Seleccione un médico</option>
-                    {doctors
-                      .filter(
-                        (doctor) =>
-                          doctor.fullName
-                            .toLocaleLowerCase('es-SV')
-                            .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
-                          doctor.id === item.doctorId,
-                      )
-                      .map((doctor) => (
-                        <option key={doctor.id} value={doctor.id}>
-                          {doctor.fullName}
-                        </option>
-                      ))}
-                  </select>
-                  <span className="field-help">El honorario se elige para cada cotización.</span>
+                  <input
+                    readOnly
+                    value={
+                      doctors.find((doctor) => doctor.id === draft.primaryDoctorId)?.fullName ??
+                      'Seleccione el médico tratante principal'
+                    }
+                  />
                 </label>
               </>
             ) : null}
@@ -1046,16 +1189,6 @@ function QuoteEditor({
                 </span>
               ) : null}
             </label>
-            <label>
-              Descuento manual
-              <input
-                min="0"
-                onChange={(event) => setNumber('discountAmount', event.target.value)}
-                step="0.01"
-                type="number"
-                value={Number.isFinite(item.discountAmount) ? item.discountAmount : ''}
-              />
-            </label>
             <div className="quote-item-total">
               <span>Subtotal de línea</span>
               <strong>
@@ -1107,8 +1240,8 @@ function QuoteEditor({
                   <th>Concepto</th>
                   <th>Cantidad</th>
                   <th>Precio</th>
-                  <th>Descuento</th>
-                  <th>Subtotal</th>
+                  <th>Descuento de línea</th>
+                  <th>Importe base</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -1177,72 +1310,110 @@ function QuoteEditor({
           </div>
         </fieldset>
         <fieldset className="quote-fieldset full-field">
-          <legend>Descuento general manual</legend>
+          <legend>Descuento por categoría</legend>
+          <div className="discount-preview" aria-live="polite">
+            <span>Descuento aplicado</span>
+            <strong>{money(totals.generalDiscountAmount)}</strong>
+            <span>
+              Total de la cotización <strong>{money(totals.total)}</strong>
+            </span>
+          </div>
+          {draft.discount?.type === 'CATEGORY_PERCENTAGES' &&
+          (draft.discount.value ?? 0) > 0 &&
+          !draft.items.some((line) => (draft.discount?.categories?.[line.category] ?? 0) > 0) ? (
+            <p className="field-help" role="status">
+              El descuento es cero porque aún no hay líneas en las categorías seleccionadas.
+              Seleccione una categoría con líneas o agregue los artículos correspondientes.
+            </p>
+          ) : null}
+          {draft.discount && draft.discount.type !== 'CATEGORY_PERCENTAGES' ? (
+            <p className="field-help">
+              Descuento histórico conservado:{' '}
+              {draft.discount.type === 'FIXED' ? 'monto fijo' : 'porcentaje'}. Al definir un
+              porcentaje por categorías se reemplazará en esta nueva versión.
+            </p>
+          ) : null}
           <div className="form-grid form-grid-compact">
             <label>
-              Tipo
-              <select
+              Porcentaje único
+              <input
                 data-action-id="QUOTE-DISCOUNT-UPDATE"
-                onChange={(event) =>
-                  updateDiscount({
-                    type: event.target.value as QuoteDiscount['type'],
-                    value: 0,
-                    categories: undefined,
-                  })
+                inputMode="numeric"
+                max="100"
+                min="0"
+                onChange={(event) => {
+                  const percentage = Number(event.target.value);
+                  setDraft((current) => ({
+                    ...current,
+                    discount: {
+                      type: 'CATEGORY_PERCENTAGES',
+                      value: percentage,
+                      categories: Object.fromEntries(
+                        Object.keys(current.discount?.categories ?? {}).map((key) => [
+                          key,
+                          percentage,
+                        ]),
+                      ) as Record<QuoteItemCategory, number>,
+                    },
+                  }));
+                }}
+                step="1"
+                type="number"
+                value={
+                  draft.discount?.type === 'CATEGORY_PERCENTAGES' ? (draft.discount.value ?? 0) : 0
                 }
-                value={draft.discount?.type ?? 'PERCENT'}
-              >
-                <option value="PERCENT">Porcentaje</option>
-                <option value="FIXED">Monto fijo</option>
-                <option value="CATEGORY_PERCENTAGES">Por categoría</option>
-              </select>
+              />
             </label>
-            {draft.discount?.type !== 'CATEGORY_PERCENTAGES' ? (
-              <label>
-                {draft.discount?.type === 'FIXED'
-                  ? 'Monto de descuento'
-                  : 'Porcentaje de descuento'}
-                <input
-                  data-action-id="QUOTE-DISCOUNT-UPDATE"
-                  inputMode={draft.discount?.type === 'FIXED' ? 'decimal' : 'numeric'}
-                  max={draft.discount?.type === 'FIXED' ? undefined : 100}
-                  min="0"
-                  onChange={(event) => updateDiscount({ value: Number(event.target.value) })}
-                  step={draft.discount?.type === 'FIXED' ? '0.01' : '1'}
-                  type="number"
-                  value={draft.discount?.value ?? 0}
-                />
-                <span className="field-help">
-                  {draft.discount?.type === 'FIXED'
-                    ? 'El monto monetario puede incluir centavos.'
-                    : 'Use un porcentaje entero entre 0 y 100.'}
-                </span>
-              </label>
-            ) : (
-              quoteCategories.map((category) => (
-                <label key={category.value}>
-                  {category.label} (%)
-                  <input
-                    data-action-id="QUOTE-DISCOUNT-UPDATE"
-                    inputMode="numeric"
-                    max="100"
-                    min="0"
-                    onChange={(event) =>
-                      updateDiscount({
-                        categories: updatedCategoryPercentages(
-                          draft.discount?.categories,
-                          category.value,
-                          Number(event.target.value),
-                        ),
-                      })
-                    }
-                    step="1"
-                    type="number"
-                    value={draft.discount?.categories?.[category.value] ?? 0}
-                  />
-                </label>
-              ))
-            )}
+            <fieldset className="full-field checkbox-fieldset discount-categories">
+              <legend>Aplicar a estas categorías</legend>
+              <div className="checkbox-grid">
+                {quoteCategories.map((category) => (
+                  <label className="checkbox-option" key={category.value}>
+                    <input
+                      checked={Object.prototype.hasOwnProperty.call(
+                        draft.discount?.categories ?? {},
+                        category.value,
+                      )}
+                      data-action-id="QUOTE-DISCOUNT-CATEGORY"
+                      onChange={(event) => {
+                        const checked = event.target.checked;
+                        setDraft((current) => {
+                          const categories = { ...current.discount?.categories } as Record<
+                            QuoteItemCategory,
+                            number
+                          >;
+                          if (checked) categories[category.value] = current.discount?.value ?? 0;
+                          else delete categories[category.value];
+                          return {
+                            ...current,
+                            discount: {
+                              type: 'CATEGORY_PERCENTAGES',
+                              value:
+                                current.discount?.type === 'CATEGORY_PERCENTAGES'
+                                  ? (current.discount.value ?? 0)
+                                  : 0,
+                              categories,
+                            },
+                          };
+                        });
+                      }}
+                      type="checkbox"
+                    />{' '}
+                    <span>
+                      {category.label}
+                      <small>
+                        {draft.items.filter((line) => line.category === category.value).length}{' '}
+                        líneas
+                      </small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <p className="field-help">
+                Seleccione las categorías de las líneas que desea descontar. Las demás conservan su
+                precio.
+              </p>
+            </fieldset>
             <label>
               Responsabilidad explícita de aseguradora
               <input
@@ -1295,12 +1466,18 @@ function QuoteEditor({
 }
 
 export default function QuotesPage() {
-  const { patients, payments, quotes } = useWorkspace();
-  const { can } = useAuth();
+  const { patients, payments, providerMode, quotes, refreshWorkspace } = useWorkspace();
+  const { can, session } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
   const [message, setMessage] = useState<string | null>(null);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
+  const [decisionBusy, setDecisionBusy] = useState<string | null>(null);
+  const [decisions, setDecisions] = useState<Record<string, QuoteDecision>>({});
+  const [rejecting, setRejecting] = useState<Quote | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const decisionKeys = useRef<Record<string, string>>({});
   const [draftFilters, setDraftFilters] = useState({
     status: '' as Quote['status'] | '',
     createdDate: '',
@@ -1326,6 +1503,67 @@ export default function QuotesPage() {
   const totalPages = Math.max(1, Math.ceil(visibleQuotes.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const pagedQuotes = visibleQuotes.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  useEffect(() => {
+    if (providerMode !== 'postgresql' || !session) return;
+    let active = true;
+    void fetch('/api/quote-decisions', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('No se pudo cargar el estado de las cotizaciones.');
+        const payload = (await response.json()) as { decisions: unknown[] };
+        if (active)
+          setDecisions(
+            Object.fromEntries(
+              payload.decisions.map((entry) => {
+                const decision = quoteDecisionSchema.parse(entry);
+                return [decision.quoteId, decision];
+              }),
+            ),
+          );
+      })
+      .catch(() => {
+        if (active) setDecisionError('No se pudo cargar el estado de aprobación.');
+      });
+    return () => {
+      active = false;
+    };
+  }, [providerMode, session]);
+  async function decide(quote: Quote, decision: 'APPROVED' | 'NOT_APPROVED', reason?: string) {
+    if (providerMode !== 'postgresql' || !session) return;
+    const key = decisionKeys.current[quote.id] ?? crypto.randomUUID();
+    decisionKeys.current[quote.id] = key;
+    setDecisionBusy(quote.id);
+    setDecisionError(null);
+    try {
+      const response = await fetch(`/api/quotes/${encodeURIComponent(quote.id)}/decision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
+        body: JSON.stringify({
+          id: key,
+          decision,
+          reason: decision === 'APPROVED' ? null : reason,
+        }),
+      });
+      if (!response.ok) {
+        const payload = (await response.json()) as { error?: string };
+        throw new Error(payload.error ?? 'No se pudo guardar la decisión.');
+      }
+      const saved = quoteDecisionSchema.parse(await response.json());
+      setDecisions((current) => ({ ...current, [quote.id]: saved }));
+      setRejecting(null);
+      setRejectionReason('');
+      delete decisionKeys.current[quote.id];
+      await refreshWorkspace();
+      setMessage(
+        decision === 'APPROVED'
+          ? 'Cotización aprobada; la cuenta y, si corresponde, el ingreso clínico fueron actualizados.'
+          : 'Motivo de rechazo guardado en el historial de la cotización.',
+      );
+    } catch (error) {
+      setDecisionError(error instanceof Error ? error.message : 'No se pudo guardar la decisión.');
+    } finally {
+      setDecisionBusy(null);
+    }
+  }
   function close() {
     router.push('/quotes');
   }
@@ -1357,6 +1595,11 @@ export default function QuotesPage() {
       {message ? (
         <p className="notice success" role="status">
           {message}
+        </p>
+      ) : null}
+      {decisionError ? (
+        <p className="notice danger" role="alert">
+          {decisionError}
         </p>
       ) : null}
       <Panel>
@@ -1489,18 +1732,58 @@ export default function QuotesPage() {
                         <td>{money(quote.patientAmount)}</td>
                         <td>{money(balance.balance)}</td>
                         <td>
-                          <StatusTag tone={quote.immutable ? 'success' : 'warning'}>
-                            {quote.immutable ? 'Enviada' : 'Borrador'}
+                          <StatusTag
+                            tone={
+                              decisions[quote.id]?.decision === 'APPROVED' ? 'success' : 'warning'
+                            }
+                          >
+                            {decisions[quote.id]?.decision === 'APPROVED'
+                              ? 'Aprobada'
+                              : decisions[quote.id]?.decision === 'NOT_APPROVED'
+                                ? 'Rechazada'
+                                : quote.immutable
+                                  ? 'Enviada'
+                                  : 'Borrador'}
                           </StatusTag>
                         </td>
                         <td>
-                          <Link
-                            className="action-link-button action-link-button--compact"
-                            data-action-id="QUOTE-DETAIL-NAVIGATE"
-                            href={`/quotes/${quote.id}`}
-                          >
-                            Consultar
-                          </Link>
+                          <div className="action-row">
+                            <Link
+                              className="action-link-button action-link-button--compact"
+                              data-action-id="QUOTE-DETAIL-NAVIGATE"
+                              href={`/quotes/${quote.id}`}
+                            >
+                              Editar
+                            </Link>
+                            {providerMode === 'postgresql' ? (
+                              <>
+                                <Button
+                                  data-action-id="QUOTE-APPROVE"
+                                  disabled={
+                                    Boolean(decisions[quote.id]) || decisionBusy === quote.id
+                                  }
+                                  onClick={() => void decide(quote, 'APPROVED')}
+                                  type="button"
+                                >
+                                  Aprobada
+                                </Button>
+                                <Button
+                                  className="button-secondary"
+                                  data-action-id="QUOTE-REJECT"
+                                  disabled={
+                                    Boolean(decisions[quote.id]) || decisionBusy === quote.id
+                                  }
+                                  onClick={() => {
+                                    setRejecting(quote);
+                                    setRejectionReason('');
+                                  }}
+                                  type="button"
+                                >
+                                  Rechazada
+                                </Button>
+                              </>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1545,6 +1828,35 @@ export default function QuotesPage() {
           />
         )}
       </Panel>
+      <Dialog
+        description="Escriba el motivo del rechazo. Quedará registrado con usuario y fecha."
+        onClose={() => setRejecting(null)}
+        open={Boolean(rejecting)}
+        title="Rechazar cotización"
+      >
+        <label>
+          Motivo
+          <textarea
+            data-action-id="QUOTE-REJECTION-REASON"
+            maxLength={1000}
+            onChange={(event) => setRejectionReason(event.target.value)}
+            rows={4}
+            value={rejectionReason}
+          />
+        </label>
+        <div className="action-row">
+          <Button
+            data-action-id="QUOTE-REJECTION-CONFIRM"
+            disabled={!rejectionReason.trim() || Boolean(decisionBusy)}
+            onClick={() => {
+              if (rejecting) void decide(rejecting, 'NOT_APPROVED', rejectionReason.trim());
+            }}
+            type="button"
+          >
+            Guardar rechazo
+          </Button>
+        </div>
+      </Dialog>
       {mode ? (
         <QuoteEditor
           key={`${mode}-${source?.id ?? 'new'}`}

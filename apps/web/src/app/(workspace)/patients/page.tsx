@@ -27,6 +27,7 @@ import {
   companyOptions,
   insuranceProviderOptions,
   nationalityOptions,
+  productionNationalityOptions,
   normalizeCoverage,
   parseExplicitCoordinates,
   prefillPolicyHolder,
@@ -72,7 +73,8 @@ const patientFormSchema = z
     birthDate: z.string().min(1, 'Ingrese la fecha de nacimiento.'),
     sex: z.enum(['M', 'F'], { error: 'Seleccione el sexo.' }),
     phone: z.string().trim().min(1, 'Ingrese el teléfono celular.'),
-    company: z.string().trim().min(1, 'Ingrese la empresa.'),
+    company: z.string().trim(),
+    referralOrigin: z.enum(['', 'SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR']),
     homePhone: z.string().trim(),
     email: optionalEmailSchema,
     retired: z.boolean(),
@@ -155,6 +157,7 @@ function patientValidationEntries(errors: FieldErrors<PatientForm>): PatientVali
   add(errors.sex, 'Sexo', '[name="sex"]');
   add(errors.phone, 'Teléfono celular', '[name="phone"]');
   add(errors.company, 'Empresa', '[data-action-id="PATIENT-COMPANY-SEARCH"]');
+  add(errors.referralOrigin, 'Origen del paciente', '[name="referralOrigin"]');
   add(errors.email, 'Correo', '[name="email"]');
   add(errors.insurance?.insurer, 'Aseguradora', '[data-action-id="PATIENT-INSURER-SEARCH"]');
   add(errors.insurance?.policyNumber, 'Número de póliza', '[name="insurance.policyNumber"]');
@@ -235,6 +238,7 @@ const patientImportColumns = [
   'homePhone',
   'email',
   'company',
+  'referralOrigin',
   'retired',
   'bloodType',
   'civilStatus',
@@ -307,7 +311,7 @@ function previewPatientImport(
   const rows = typeof source === 'string' ? parseCsv(source) : source;
   if (!rows.length) return { fileName, rows: [], errors: ['El archivo está vacío.'], totalRows: 0 };
   const headers = rows[0].map((header) => header.trim());
-  const requiredHeaders = ['document', 'firstName', 'lastName'];
+  const requiredHeaders = ['document', 'firstName', 'lastName', 'referralOrigin'];
   const unknownHeaders = headers.filter(
     (header) => header && !patientImportColumns.includes(header),
   );
@@ -326,7 +330,9 @@ function previewPatientImport(
     return {
       fileName,
       rows: [],
-      errors: ['Encabezados inválidos. Se requieren document, firstName y lastName.'],
+      errors: [
+        'Encabezados inválidos. Se requieren document, firstName, lastName y referralOrigin.',
+      ],
       totalRows: 0,
     };
   if (rows.length - 1 > 500)
@@ -383,6 +389,10 @@ function previewPatientImport(
     }
     if (record.status && !['ACTIVE', 'INACTIVE'].includes(record.status.toUpperCase())) {
       errors.push(`Fila ${rowNumber}: estado inválido; use ACTIVE o INACTIVE.`);
+      return;
+    }
+    if (!['SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR'].includes(record.referralOrigin)) {
+      errors.push(`Fila ${rowNumber}: origen inválido; use SOCIAL_MEDIA, FAMILY_FRIENDS o DOCTOR.`);
       return;
     }
     const contacts: NonNullable<Patient['contacts']> = [];
@@ -444,6 +454,7 @@ function previewPatientImport(
       birthDate: record.birthDate || undefined,
       sex: record.sex === 'M' || record.sex === 'F' ? record.sex : undefined,
       company: record.company || undefined,
+      referralOrigin: record.referralOrigin as Patient['referralOrigin'],
       phone: record.phone || undefined,
       homePhone: record.homePhone || undefined,
       email: record.email || undefined,
@@ -508,7 +519,6 @@ export default function PatientsPage() {
     addPatient,
     addPatients,
     catalogItems,
-    doctors,
     patients,
     providerMode,
     refreshPatients,
@@ -534,7 +544,6 @@ export default function PatientsPage() {
   const [coverageNotice, setCoverageNotice] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
-  const [doctorQuery, setDoctorQuery] = useState('');
   const [importing, setImporting] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
   const [draftRecovered, setDraftRecovered] = useState(false);
@@ -554,6 +563,7 @@ export default function PatientsPage() {
       sex: undefined,
       phone: '',
       company: '',
+      referralOrigin: '',
       homePhone: '',
       email: '',
       retired: false,
@@ -621,13 +631,20 @@ export default function PatientsPage() {
     append,
     remove,
   } = useFieldArray({ control: form.control, name: 'contacts', keyName: 'fieldKey' });
+  const editingPatient = patients.find((patient) => patient.id === searchParams.get('edit'));
   const documentType = useWatch({ control: form.control, name: 'documentType' });
   const insuranceStatus = useWatch({ control: form.control, name: 'insurance.status' });
   const insurer = useWatch({ control: form.control, name: 'insurance.insurer' });
+  const referralOrigin = useWatch({ control: form.control, name: 'referralOrigin' });
   const contacts = (useWatch({ control: form.control, name: 'contacts' }) ??
     []) as PatientForm['contacts'];
   const validationEntries = showValidationSummary
-    ? patientValidationEntries(form.formState.errors)
+    ? [
+        ...patientValidationEntries(form.formState.errors),
+        ...(!editingPatient && !referralOrigin && !form.formState.errors.referralOrigin
+          ? [{ label: 'Origen del paciente', selector: '[name="referralOrigin"]' }]
+          : []),
+      ]
     : [];
   const visiblePatients = useMemo(
     () =>
@@ -641,7 +658,6 @@ export default function PatientsPage() {
   const currentPage = Math.min(page, pages);
   const pageRows = visiblePatients.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const documentInput = form.register('documentId');
-  const editingPatient = patients.find((patient) => patient.id === searchParams.get('edit'));
   const linkedDialogOpen =
     searchParams.get('create') === '1' && can('patients:write') && !dismissedLinkedDialog;
   const editDialogOpen = Boolean(editingPatient && can('patients:write') && !dismissedLinkedDialog);
@@ -656,6 +672,7 @@ export default function PatientsPage() {
       sex: editingPatient.sex,
       phone: editingPatient.phone ?? '',
       company: editingPatient.company ?? '',
+      referralOrigin: editingPatient.referralOrigin ?? '',
       homePhone: editingPatient.homePhone ?? '',
       email: editingPatient.email ?? '',
       retired: editingPatient.retired ?? false,
@@ -941,6 +958,17 @@ export default function PatientsPage() {
   async function onSubmit(values: PatientForm) {
     setActionError(null);
     setShowValidationSummary(false);
+    if (!editingPatient && !values.referralOrigin) {
+      form.setError('referralOrigin', {
+        type: 'required',
+        message: 'Seleccione el origen del paciente.',
+      });
+      setShowValidationSummary(true);
+      focusFirstInvalidField([
+        { label: 'Origen del paciente', selector: '[name="referralOrigin"]' },
+      ]);
+      return;
+    }
     const documentError = validateDocument(values.documentType, values.documentId);
     if (documentError) {
       form.setError('documentId', { type: 'validate', message: documentError });
@@ -975,6 +1003,7 @@ export default function PatientsPage() {
       birthDate: values.birthDate,
       sex: values.sex,
       company: values.company,
+      referralOrigin: values.referralOrigin || undefined,
       homePhone: values.homePhone || undefined,
       email: values.email || undefined,
       retired: values.retired,
@@ -1505,60 +1534,6 @@ export default function PatientsPage() {
                 </span>
               ) : null}
             </label>
-            <label className="full">
-              Diagnóstico
-              <textarea {...form.register('diagnosis')} rows={2} />
-            </label>
-            <label>
-              Buscar médico por nombre
-              <input
-                aria-label="Filtrar médicos por nombre"
-                data-action-id="PATIENT-DOCTOR-SEARCH"
-                onChange={(event) => setDoctorQuery(event.target.value)}
-                type="search"
-                value={doctorQuery}
-              />
-            </label>
-            <label>
-              Médico tratante principal
-              <select {...form.register('primaryDoctorId')}>
-                <option value="">Sin asignar</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
-                      doctor.id === form.getValues('primaryDoctorId') ||
-                      doctor.id === form.getValues('secondaryDoctorId'),
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
-              Médico tratante secundario
-              <select {...form.register('secondaryDoctorId')}>
-                <option value="">Sin asignar</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(doctorQuery.trim().toLocaleLowerCase('es-SV')) ||
-                      doctor.id === form.getValues('primaryDoctorId') ||
-                      doctor.id === form.getValues('secondaryDoctorId'),
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
-              </select>
-            </label>
             <label>
               Fecha de nacimiento{' '}
               <span className="required-marker" aria-label="obligatorio">
@@ -1603,10 +1578,7 @@ export default function PatientsPage() {
               ) : null}
             </label>
             <label>
-              Empresa{' '}
-              <span className="required-marker" aria-label="obligatorio">
-                *
-              </span>
+              Empresa (opcional)
               <Controller
                 control={form.control}
                 name="company"
@@ -1627,6 +1599,25 @@ export default function PatientsPage() {
               {form.formState.errors.company ? (
                 <span className="field-error" role="alert">
                   {form.formState.errors.company.message}
+                </span>
+              ) : null}
+            </label>
+            <label>
+              Origen del paciente{' '}
+              {!editingPatient ? (
+                <span className="required-marker" aria-label="obligatorio">
+                  *
+                </span>
+              ) : null}
+              <select {...form.register('referralOrigin')} data-action-id="PATIENT-REFERRAL-ORIGIN">
+                <option value="">Seleccione</option>
+                <option value="SOCIAL_MEDIA">Redes sociales</option>
+                <option value="FAMILY_FRIENDS">Familia y amigos</option>
+                <option value="DOCTOR">Médico</option>
+              </select>
+              {form.formState.errors.referralOrigin ? (
+                <span className="field-error" role="alert">
+                  {form.formState.errors.referralOrigin.message}
                 </span>
               ) : null}
             </label>
@@ -1689,10 +1680,11 @@ export default function PatientsPage() {
                     actionId="PATIENT-NATIONALITY-SEARCH"
                     ariaLabel="Nacionalidad"
                     onChange={field.onChange}
-                    allowCustom={process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'}
-                    placeholder="Buscar o escribir nacionalidad"
+                    placeholder="Seleccione la nacionalidad"
                     options={
-                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0' ? [] : nationalityOptions
+                      process.env.NEXT_PUBLIC_DEMO_SEED_ENABLED === '0'
+                        ? productionNationalityOptions
+                        : nationalityOptions
                     }
                     value={field.value}
                   />

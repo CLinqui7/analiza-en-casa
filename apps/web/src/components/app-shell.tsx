@@ -106,61 +106,12 @@ const navigation: NavigationGroup[] = [
         permission: 'patients:read',
         actionId: 'PATIENT-NAVIGATE',
       },
-      {
-        label: 'Agenda',
-        icon: 'agenda',
-        href: '/agenda',
-        permission: 'agenda:read',
-        actionId: 'AGENDA-NAVIGATE',
-      },
     ],
   },
   {
-    label: 'Financiero',
-    icon: 'finance',
+    label: 'Clínico',
+    icon: 'clinical',
     children: [
-      {
-        label: 'Hospitalización',
-        icon: 'hospital',
-        href: '/hospitalizations',
-        permission: 'cases:read',
-        actionId: 'HOSPITALIZATION-NAVIGATE',
-      },
-      {
-        label: 'Cuentas por cobrar',
-        icon: 'receivables',
-        href: '/receivables',
-        permission: 'payments:read',
-        actionId: 'RECEIVABLES-NAVIGATE',
-      },
-      {
-        label: 'Pagos',
-        icon: 'payments',
-        href: '/payments',
-        permission: 'payments:read',
-        actionId: 'PAYMENT-NAVIGATE',
-      },
-      {
-        label: 'Ventas confirmadas',
-        icon: 'finance',
-        href: '/sales',
-        permission: 'payments:read',
-        actionId: 'SALES-NAVIGATE',
-      },
-      {
-        label: 'Cuentas por pagar',
-        icon: 'payables',
-        href: '/payables',
-        permission: 'payments:read',
-        actionId: 'PAYABLES-NAVIGATE',
-      },
-      {
-        label: 'Preautorizaciones y reclamos',
-        icon: 'insurance',
-        href: '/insurance',
-        permission: 'insurance:read',
-        actionId: 'INSURANCE-NAVIGATE',
-      },
       {
         label: 'Cotizaciones',
         icon: 'quotes',
@@ -169,18 +120,12 @@ const navigation: NavigationGroup[] = [
         actionId: 'QUOTE-NAVIGATE',
       },
       {
-        label: 'Aseguradoras',
-        icon: 'insurers',
-        href: '/insurers',
-        permission: 'catalogs:read',
-        actionId: 'INSURER-NAVIGATE',
+        label: 'Ingresos clínicos',
+        icon: 'clinicalHospital',
+        href: '/clinical/hospitalizations',
+        permission: 'clinical:read',
+        actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE',
       },
-    ],
-  },
-  {
-    label: 'Clínico',
-    icon: 'clinical',
-    children: [
       {
         label: 'Expediente clínico',
         icon: 'clinicalRecord',
@@ -189,11 +134,11 @@ const navigation: NavigationGroup[] = [
         actionId: 'CLINICAL-HOME-NAVIGATE',
       },
       {
-        label: 'Hospitalizaciones clínicas',
-        icon: 'clinicalHospital',
-        href: '/clinical/hospitalizations',
-        permission: 'clinical:read',
-        actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE',
+        label: 'Agenda',
+        icon: 'agenda',
+        href: '/agenda',
+        permission: 'agenda:read',
+        actionId: 'AGENDA-NAVIGATE',
       },
       {
         label: 'Órdenes y acciones',
@@ -210,7 +155,7 @@ const navigation: NavigationGroup[] = [
         actionId: 'MEDICATION-ADMINISTRATION-NAVIGATE',
       },
       {
-        label: 'Tarjetas de medicamentos',
+        label: 'Tarjeta de medicamentos',
         icon: 'medicationCards',
         href: '/clinical/medication-cards',
         permission: 'clinical:read',
@@ -237,19 +182,39 @@ const navigation: NavigationGroup[] = [
         permission: 'clinical:read',
         actionId: 'EVOLUTION-NAVIGATE',
       },
+    ],
+  },
+  {
+    label: 'Financiero',
+    icon: 'finance',
+    children: [
       {
-        label: 'Reporte de salud',
-        icon: 'healthReport',
-        href: '/clinical/reports',
-        permission: 'clinical:read',
-        actionId: 'HEALTH-REPORT-NAVIGATE',
+        label: 'Cuentas por cobrar',
+        icon: 'receivables',
+        href: '/receivables',
+        permission: 'payments:read',
+        actionId: 'RECEIVABLES-NAVIGATE',
       },
       {
-        label: 'Tablero de enfermería',
-        icon: 'nursing',
-        href: '/clinical/nursing',
-        permission: 'clinical:read',
-        actionId: 'NURSING-RESOURCE-NAVIGATE',
+        label: 'Ventas confirmadas',
+        icon: 'finance',
+        href: '/sales',
+        permission: 'payments:read',
+        actionId: 'SALES-NAVIGATE',
+      },
+      {
+        label: 'Cuentas por pagar',
+        icon: 'payables',
+        href: '/payables',
+        permission: 'payments:read',
+        actionId: 'PAYABLES-NAVIGATE',
+      },
+      {
+        label: 'Preautorizaciones y reclamos',
+        icon: 'insurance',
+        href: '/insurance',
+        permission: 'insurance:read',
+        actionId: 'INSURANCE-NAVIGATE',
       },
     ],
   },
@@ -299,6 +264,13 @@ const navigation: NavigationGroup[] = [
         permission: 'purchases:read',
         actionId: 'PURCHASE-NAVIGATE',
       },
+      {
+        label: 'Órdenes a proveedores',
+        icon: 'purchases',
+        href: '/purchase-orders',
+        permission: 'purchases:read',
+        actionId: 'PURCHASE-ORDERS-NAVIGATE',
+      },
     ],
   },
   {
@@ -306,25 +278,11 @@ const navigation: NavigationGroup[] = [
     icon: 'administration',
     children: [
       {
-        label: 'Equipo y cuentas de enfermería',
-        icon: 'nurseTeam',
-        href: '/nursing-team',
-        permission: 'nurses:manage',
-        actionId: 'NURSE-TEAM-NAVIGATE',
-      },
-      {
-        label: 'Catálogos operativos',
-        icon: 'operational',
-        href: '/catalogs/operational',
+        label: 'Aseguradoras',
+        icon: 'insurers',
+        href: '/insurers',
         permission: 'catalogs:read',
-        actionId: 'OPERATIONAL-CATALOG-NAVIGATE',
-      },
-      {
-        label: 'Médicos y recursos',
-        icon: 'doctors',
-        href: '/doctors',
-        permission: 'settings:write',
-        actionId: 'DOCTOR-NAVIGATE',
+        actionId: 'INSURER-NAVIGATE',
       },
       {
         label: 'Catálogos',
@@ -334,24 +292,46 @@ const navigation: NavigationGroup[] = [
         actionId: 'CATALOG-NAVIGATE',
       },
       {
+        label: 'Médicos y recursos',
+        icon: 'doctors',
+        href: '/doctors',
+        permission: 'settings:write',
+        actionId: 'DOCTOR-NAVIGATE',
+      },
+      {
+        label: 'Visitadores médicos',
+        icon: 'doctors',
+        href: '/catalogs/medical-visitors',
+        permission: 'catalogs:read',
+        actionId: 'MEDICAL-VISITOR-NAVIGATE',
+      },
+      {
+        label: 'Catálogos operativos',
+        icon: 'operational',
+        href: '/catalogs/operational',
+        permission: 'catalogs:read',
+        actionId: 'OPERATIONAL-CATALOG-NAVIGATE',
+      },
+      {
+        label: 'Equipo y cuentas',
+        icon: 'nurseTeam',
+        href: '/nursing-team',
+        permission: 'nurses:manage',
+        actionId: 'NURSE-TEAM-NAVIGATE',
+      },
+      {
         label: 'Importar información',
         icon: 'import',
         href: '/import',
         permission: 'settings:write',
         actionId: 'INFORMATION-IMPORT-NAVIGATE',
       },
-    ],
-  },
-  {
-    label: 'Reportes y control',
-    icon: 'reports',
-    children: [
       {
-        label: 'Analítica de accesos',
-        icon: 'analytics',
-        href: '/analytics/logins',
-        permission: 'login-analytics:read',
-        actionId: 'LOGIN-ANALYTICS-NAVIGATE',
+        label: 'Encuestas de satisfacción',
+        icon: 'reports',
+        href: '/surveys',
+        permission: 'reports:read',
+        actionId: 'SURVEYS-NAVIGATE',
       },
       {
         label: 'Visitas y metas · venta de equipos',
@@ -359,6 +339,40 @@ const navigation: NavigationGroup[] = [
         href: '/reports/visits-goals',
         permission: 'reports:read',
         actionId: 'VISITS-GOALS-NAVIGATE',
+      },
+      {
+        label: 'Auditoría',
+        icon: 'audit',
+        href: '/audit',
+        permission: 'audit:read',
+        actionId: 'AUDIT-NAVIGATE',
+      },
+      {
+        label: 'Tablero de enfermería',
+        icon: 'nursing',
+        href: '/clinical/nursing',
+        permission: 'clinical:read',
+        actionId: 'NURSING-RESOURCE-NAVIGATE',
+      },
+    ],
+  },
+  {
+    label: 'Reportes',
+    icon: 'reports',
+    children: [
+      {
+        label: 'Pagos reportados',
+        icon: 'payments',
+        href: '/payments',
+        permission: 'payments:read',
+        actionId: 'PAYMENT-REPORT-NAVIGATE',
+      },
+      {
+        label: 'Analítica de accesos',
+        icon: 'analytics',
+        href: '/analytics/logins',
+        permission: 'login-analytics:read',
+        actionId: 'LOGIN-ANALYTICS-NAVIGATE',
       },
       {
         label: 'Visitas clínicas',
@@ -375,11 +389,18 @@ const navigation: NavigationGroup[] = [
         actionId: 'NURSE-HOURS-NAVIGATE',
       },
       {
-        label: 'Auditoría',
-        icon: 'audit',
-        href: '/audit',
-        permission: 'audit:read',
-        actionId: 'AUDIT-NAVIGATE',
+        label: 'Reporte de salud',
+        icon: 'healthReport',
+        href: '/clinical/reports',
+        permission: 'clinical:read',
+        actionId: 'HEALTH-REPORT-NAVIGATE',
+      },
+      {
+        label: 'Otros reportes',
+        icon: 'reports',
+        href: '/reports/other',
+        permission: 'reports:read',
+        actionId: 'OTHER-REPORTS-NAVIGATE',
       },
     ],
   },
@@ -451,7 +472,13 @@ function NavigationGlyph({
 function isActive(pathname: string, href: string) {
   return (
     pathname === href ||
-    (href !== '/dashboard' && href !== '/clinical' && pathname.startsWith(`${href}/`))
+    (href !== '/dashboard' &&
+      href !== '/clinical' &&
+      !(
+        href === '/catalogs' &&
+        (pathname === '/catalogs/operational' || pathname === '/catalogs/medical-visitors')
+      ) &&
+      pathname.startsWith(`${href}/`))
   );
 }
 

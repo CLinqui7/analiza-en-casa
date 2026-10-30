@@ -2,6 +2,7 @@ import { z } from 'zod';
 export * from './operations';
 
 export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER']);
+export const patientReferralOriginSchema = z.enum(['SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR']);
 
 export const patientInsuranceSchema = z.object({
   status: z.enum(['REGULAR', 'INSURED']).default('REGULAR'),
@@ -45,6 +46,8 @@ export const patientSchema = z.object({
   birthDate: z.string().optional(),
   sex: z.enum(['M', 'F']).optional(),
   company: z.string().trim().optional(),
+  /** Historical patients can lack this value; new registrations require an explicit choice. */
+  referralOrigin: patientReferralOriginSchema.optional(),
   homePhone: z.string().trim().optional(),
   email: z.string().trim().optional(),
   retired: z.boolean().optional(),
@@ -114,14 +117,28 @@ export const doctorAttachmentSchema = z.object({
 export const doctorSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
+  medicalVisitorId: z.string().trim().optional(),
   jvpm: z.string().trim().optional(),
   conadem: z.string().trim().optional(),
   medicalFee: z.number().nonnegative().optional(), // Legacy records only; new quote fees are selected per quote.
-  documentId: z.string().trim().min(1),
+  /** Older doctors may have no document; new records can complete it later. */
+  documentId: z.string().trim().optional(),
   specialty: z.string().trim().min(1),
+  /** Historical records remain unclassified until a user reviews them. */
+  referralCategory: z.enum(['NEW', 'RECURRENT']).optional(),
   phone: z.string().trim().optional(),
+  /** Optional in stored records for compatibility; new saves require it at the API boundary. */
+  landlinePhone: z.string().trim().optional(),
+  birthDate: z.string().trim().optional(),
+  clinicName: z.string().trim().optional(),
+  nit: z.string().trim().optional(),
+  consultationHours: z.string().trim().optional(),
+  medicalVisitHours: z.string().trim().optional(),
+  zone: z.string().trim().optional(),
+  secretaryName: z.string().trim().optional(),
+  secretaryBirthday: z.string().trim().optional(),
   email: z.string().trim().optional(),
-  address: z.string().trim().min(1),
+  address: z.string().trim().optional(),
   attachments: z.array(doctorAttachmentSchema).default([]),
 });
 
@@ -214,6 +231,7 @@ export const hospitalizationSchema = z.object({
   secondaryDoctorId: z.string().trim().optional(),
   nextAction: z.string().trim().optional(),
   devices: z.array(z.string().trim().min(1)).optional(),
+  patientHas: z.string().trim().max(2000).optional(),
   /** Resources assigned to the case; account-level visibility requires a server-side user link. */
   assignedNursingResourceIds: z.array(z.string().trim().min(1)).optional(),
   assignedNurseUserIds: z.array(z.string().trim().min(1)).optional(),
@@ -275,7 +293,8 @@ export const quoteItemSchema = z.object({
 export const quoteDiscountSchema = z.object({
   type: z.enum(['PERCENT', 'FIXED', 'CATEGORY_PERCENTAGES']),
   value: z.number().nonnegative().optional(),
-  categories: z.record(quoteItemCategorySchema, z.number().min(0).max(100)).optional(),
+  // Only selected categories are sent; unselected categories receive no discount.
+  categories: z.partialRecord(quoteItemCategorySchema, z.number().min(0).max(100)).optional(),
 });
 
 export const quoteSchema = z.object({
@@ -286,6 +305,18 @@ export const quoteSchema = z.object({
   status: z.enum(['DRAFT', 'SENT']),
   summary: z.string().trim().min(1),
   careSetting: z.enum(['HOSPITALIZATION', 'HOME_OUTPATIENT', 'CLINIC_OUTPATIENT']).optional(),
+  diagnosisSummary: z.string().trim().max(4000).optional(),
+  primaryDoctorId: z.string().trim().optional(),
+  secondaryDoctorId: z.string().trim().optional(),
+  insurer: z.string().trim().optional(),
+  admissionDate: z.string().trim().optional(),
+  dischargeDate: z.string().trim().optional(),
+  accountType: z.enum(['SEGURO', 'PARTICULAR', 'EMPRESA']).optional(),
+  manager: z.string().trim().optional(),
+  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']).optional(),
+  /** Entered per quote; these amounts do not imply an insurer coverage rule. */
+  deductibleAmount: z.number().finite().nonnegative().optional(),
+  coinsuranceAmount: z.number().finite().nonnegative().optional(),
   /** Administrative invoice fields observed in CH03.  They do not alter totals. */
   invoiceDate: z.string().optional(),
   invoiceDocumentType: z.enum(['INVOICE', 'TAX_CREDIT']).optional(),
@@ -390,8 +421,15 @@ export const purchaseSchema = z.object({
   invoiceNumber: z.string().trim().max(100).optional(),
   invoiceGroupId: z.string().trim().min(1).max(120).optional(),
   note: z.string().trim().optional(),
+  usefulLife: z.string().trim().max(120).optional(),
+  isFixedAsset: z.boolean().optional(),
+  purchaseOrderId: z.string().uuid().optional(),
   quantity: z.number().positive().optional(),
   unitCost: z.number().nonnegative().optional(),
+  /** Client-requested arithmetic snapshot; this is an internal purchase record, not a fiscal DTE. */
+  taxRates: z
+    .object({ iva: z.literal(0.13), perception: z.union([z.literal(0), z.literal(0.01)]) })
+    .optional(),
   expirationDate: z.string().trim().optional(),
   lotNumber: z.string().trim().optional(),
   serialNumber: z.string().trim().optional(),

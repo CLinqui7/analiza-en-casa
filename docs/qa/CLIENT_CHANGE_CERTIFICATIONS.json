@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
-  "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
+  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "7c0323ce9517fbaa68d11f2ea7d752af9ed6d73762787aeb1ef653e397aba62a",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "2850bf6f10c89ce3479348f852898c08d3ad679e84c992db7986a7ec3110170d",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
@@ -47,11 +48,15 @@
       "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
     },
     "CR-006": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "functional_fingerprint": "b5cf1d38eadadeaf9ad3c4486fddacc13acf5d8c7d75f2b0faca3b6c00950d71",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "test_ids": [
+        "vitest:feedback-doctor-optional-profile",
+        "playwright:feedback-doctor-optional-profile"
+      ],
+      "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original."
     },
     "CR-007": {
       "implementation_sha": null,
@@ -87,22 +92,24 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "fc47b204b61aa1aa004bffc22834f7bbddd001c6366be423c6e87f106c3980ea",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "1fd4d13d82868546b6ac48bf4687b7fab5e3f78c8de17b1d0540228e9d84d695",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones."
     },
     "CR-012": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "d1ffda9ad04823897aaaf017ef7ea4a4e6bd95968031b2cfcf18236f9af650ac",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "2a940fe1bfd057ffb8433be9924a34a4b84ce2aa3a7cdc494743897a1c6c2bea",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
       ],
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. Huella funcional recalculada 2026-10-14 tras el autoguardado; la selección y actualización de pacientes permanece en la regresión de cotizaciones."
     },
     "CR-013": {
       "implementation_sha": null,
@@ -145,15 +152,16 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": "4b9e3c0fb6100cbe757ef8c524d4d95336eec40e",
-      "functional_fingerprint": "f00cd5fdb601e1782a181bc0a733b77eb45cff04e166314af66cde150b39a21d",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
         "playwright:cr017-multi-day-shifts",
         "SEL-B3-AGENDA-SERIES"
       ],
-      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
+      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador.",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025"
     },
     "CR-018": {
       "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",

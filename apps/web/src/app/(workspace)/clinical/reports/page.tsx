@@ -703,7 +703,9 @@ function MedicalSection({
               <small>{role}</small>
               <h3>{doctor.fullName}</h3>
               <p>{doctor.specialty}</p>
-              <span>{doctor.phone || doctor.email || 'Sin contacto registrado'}</span>
+              <span>
+                {doctor.phone || doctor.landlinePhone || doctor.email || 'Sin contacto registrado'}
+              </span>
             </div>
           </article>
         ) : (

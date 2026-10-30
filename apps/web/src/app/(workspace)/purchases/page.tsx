@@ -9,6 +9,9 @@ import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
+import { invoiceVoidSource } from '@/lib/purchase-invoice-groups';
+import { purchaseTotals } from '@/lib/purchase-totals';
+import { purchaseOrderSchema, type PurchaseOrder } from '@/lib/purchase-order';
 import { useOperations } from '@/lib/use-operations';
 const schema = z.object({
   catalogItemId: z.string().min(1, 'Seleccione un ítem de catálogo.'),
@@ -16,7 +19,10 @@ const schema = z.object({
   warehouseId: z.string().min(1, 'Seleccione una bodega de destino.'),
   reference: z.string().trim().min(1, 'Ingrese una referencia de compra.').max(200),
   invoiceNumber: z.string().trim().max(100, 'Use un máximo de 100 caracteres.'),
+  purchaseOrderId: z.string().trim(),
   note: z.string().trim(),
+  usefulLife: z.string().trim().max(120),
+  isFixedAsset: z.boolean(),
   quantity: z
     .number()
     .int('La cantidad debe ser un número entero.')
@@ -38,6 +44,7 @@ export default function PurchasesPage() {
     error,
     purchases,
     refreshWorkspace,
+    providerMode,
   } = useWorkspace();
   const { can } = useAuth();
   const {
@@ -49,6 +56,8 @@ export default function PurchasesPage() {
   } = useOperations();
   const [open, setOpen] = useState(false);
   const [queuedLines, setQueuedLines] = useState<Purchase[]>([]);
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+  const [applyPerception, setApplyPerception] = useState(false);
   const [invoiceGroupId, setInvoiceGroupId] = useState(() => crypto.randomUUID());
   const [editing, setEditing] = useState<Purchase | null>(null);
   const [cancelling, setCancelling] = useState<Purchase | null>(null);
@@ -96,7 +105,10 @@ export default function PurchasesPage() {
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
       invoiceNumber: '',
+      purchaseOrderId: '',
       note: '',
+      usefulLife: '',
+      isFixedAsset: false,
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
       expirationDate: '',
@@ -104,6 +116,20 @@ export default function PurchasesPage() {
       serialNumber: '',
     },
   });
+  useEffect(() => {
+    if (providerMode !== 'postgresql') return;
+    let active = true;
+    void fetch('/api/purchase-orders', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        const payload = (await response.json()) as { orders: unknown[] };
+        if (active) setOrders(payload.orders.map((entry) => purchaseOrderSchema.parse(entry)));
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [providerMode]);
   useEffect(() => {
     const current = form.getValues('catalogItemId');
     if (!purchasableItems.some((item) => item.id === current) && purchasableItems[0]) {
@@ -124,6 +150,7 @@ export default function PurchasesPage() {
     [catalogItems],
   );
   const selectedCatalogItemId = useWatch({ control: form.control, name: 'catalogItemId' });
+  const selectedSupplierId = useWatch({ control: form.control, name: 'supplierCatalogItemId' });
   const selectedItem = purchasableItems.find((item) => item.id === selectedCatalogItemId);
   const purchaseCatalogOptions = useMemo(
     () =>
@@ -133,28 +160,42 @@ export default function PurchasesPage() {
       })),
     [purchasableItems],
   );
+  const purchaseGroups = useMemo(() => {
+    const groups = new Map<string, Purchase[]>();
+    for (const purchase of purchases) {
+      // The invoice number alone is not an identity: different suppliers can reuse it.
+      const key = purchase.invoiceGroupId
+        ? `invoice:${purchase.invoiceGroupId}`
+        : `line:${purchase.id}`;
+      const lines = groups.get(key);
+      if (lines) lines.push(purchase);
+      else groups.set(key, [purchase]);
+    }
+    return [...groups.values()];
+  }, [purchases]);
   const visible = useMemo(
     () =>
-      purchases.filter((purchase) =>
-        `${purchase.reference} ${purchase.invoiceNumber ?? ''} ${itemNames.get(purchase.catalogItemId) ?? ''} ${warehouseNames.get(purchase.warehouseId ?? '') ?? ''}`
-          .toLocaleLowerCase('es-SV')
-          .includes(query.toLocaleLowerCase('es-SV')),
+      purchaseGroups.filter((lines) =>
+        lines.some((purchase) =>
+          `${purchase.reference} ${purchase.invoiceNumber ?? ''} ${itemNames.get(purchase.catalogItemId) ?? ''} ${warehouseNames.get(purchase.warehouseId ?? '') ?? ''}`
+            .toLocaleLowerCase('es-SV')
+            .includes(query.toLocaleLowerCase('es-SV')),
+        ),
       ),
-    [itemNames, purchases, query, warehouseNames],
+    [itemNames, purchaseGroups, query, warehouseNames],
   );
   const pages = Math.max(1, Math.ceil(visible.length / pageSize));
   const currentPage = Math.min(page, pages);
   const pageRows = visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const invoiceLines = (purchase: Purchase) =>
-    purchase.invoiceGroupId
-      ? purchases.filter((line) => line.invoiceGroupId === purchase.invoiceGroupId)
-      : [purchase];
-  const canVoidInvoice = (purchase: Purchase) =>
-    purchase.status === 'RECEIVED' &&
-    Boolean(purchase.invoiceNumber) &&
-    invoiceLines(purchase).every(
-      (line) => ['RECEIVED', 'CANCELLED'].includes(line.status) && !line.invoiceVoidedAt,
-    );
+    purchaseGroups.find((lines) => lines.some((line) => line.id === purchase.id)) ?? [purchase];
+  const invoiceStatus = (lines: Purchase[]) => {
+    if (lines.every((line) => line.invoiceVoidedAt)) return 'Factura anulada';
+    if (lines.every((line) => line.status === 'CANCELLED')) return 'Anulada';
+    if (lines.every((line) => line.status === 'RECEIVED')) return 'Recepción registrada';
+    if (lines.some((line) => line.status === 'RECEIVED')) return 'Recepción parcial';
+    return 'Borrador';
+  };
   async function exportPurchasesXlsx() {
     const { createXlsxWorkbook } = await import('@/lib/xlsx');
     const workbookBytes = createXlsxWorkbook(
@@ -170,28 +211,30 @@ export default function PurchasesPage() {
         { key: 'status', label: 'Estado' },
         { key: 'createdAt', label: 'Fecha de creación', width: 22 },
       ],
-      visible.map((purchase) => ({
-        reference: purchase.reference,
-        invoiceNumber: purchase.invoiceNumber ?? '',
-        item: itemNames.get(purchase.catalogItemId) ?? purchase.catalogItemId,
-        supplier: itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado',
-        warehouse: purchase.warehouseId
-          ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
-          : 'Sin bodega asignada',
-        quantity: purchase.quantity ?? '',
-        unitCost: purchase.unitCost ?? '',
-        total:
-          purchase.unitCost === undefined
-            ? ''
-            : ((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2),
-        status:
-          purchase.status === 'RECEIVED'
-            ? 'Recepción registrada'
-            : purchase.status === 'CANCELLED'
-              ? 'Anulada'
-              : 'Borrador',
-        createdAt: purchase.createdAt.slice(0, 10),
-      })),
+      visible
+        .flatMap((lines) => lines)
+        .map((purchase) => ({
+          reference: purchase.reference,
+          invoiceNumber: purchase.invoiceNumber ?? '',
+          item: itemNames.get(purchase.catalogItemId) ?? purchase.catalogItemId,
+          supplier: itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado',
+          warehouse: purchase.warehouseId
+            ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
+            : 'Sin bodega asignada',
+          quantity: purchase.quantity ?? '',
+          unitCost: purchase.unitCost ?? '',
+          total:
+            purchase.unitCost === undefined
+              ? ''
+              : ((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2),
+          status:
+            purchase.status === 'RECEIVED'
+              ? 'Recepción registrada'
+              : purchase.status === 'CANCELLED'
+                ? 'Anulada'
+                : 'Borrador',
+          createdAt: purchase.createdAt.slice(0, 10),
+        })),
       'Compras',
     );
     const blob = new Blob([workbookBytes], {
@@ -211,6 +254,7 @@ export default function PurchasesPage() {
     setOpen(false);
     setEditing(null);
     setQueuedLines([]);
+    setApplyPerception(false);
     setInvoiceGroupId(crypto.randomUUID());
     form.reset({
       catalogItemId: purchasableItems[0]?.id ?? '',
@@ -218,7 +262,10 @@ export default function PurchasesPage() {
       warehouseId: activeWarehouses[0]?.id ?? '',
       reference: '',
       invoiceNumber: '',
+      purchaseOrderId: '',
       note: '',
+      usefulLife: '',
+      isFixedAsset: false,
       quantity: 1,
       unitCost: purchasableItems[0]?.costPrice ?? 0,
       expirationDate: '',
@@ -230,6 +277,7 @@ export default function PurchasesPage() {
     if (purchase.status !== 'DRAFT') return;
     setEditing(purchase);
     setQueuedLines([]);
+    setApplyPerception(purchase.taxRates?.perception === 0.01);
     setInvoiceGroupId(purchase.invoiceGroupId ?? crypto.randomUUID());
     form.reset({
       catalogItemId: purchase.catalogItemId,
@@ -237,7 +285,10 @@ export default function PurchasesPage() {
       warehouseId: purchase.warehouseId ?? '',
       reference: purchase.reference,
       invoiceNumber: purchase.invoiceNumber ?? '',
+      purchaseOrderId: purchase.purchaseOrderId ?? '',
       note: purchase.note ?? '',
+      usefulLife: purchase.usefulLife ?? '',
+      isFixedAsset: purchase.isFixedAsset ?? false,
       quantity: purchase.quantity ?? 1,
       unitCost: purchase.unitCost ?? 0,
       expirationDate: purchase.expirationDate ?? '',
@@ -265,6 +316,19 @@ export default function PurchasesPage() {
     if (!suppliers.some((item) => item.id === values.supplierCatalogItemId)) {
       form.setError('supplierCatalogItemId', { message: 'Seleccione un proveedor activo.' });
       return null;
+    }
+    if (values.purchaseOrderId) {
+      const order = orders.find((candidate) => candidate.id === values.purchaseOrderId);
+      if (
+        !order ||
+        order.supplierCatalogItemId !== values.supplierCatalogItemId ||
+        !order.items.some((line) => line.catalogItemId === values.catalogItemId)
+      ) {
+        form.setError('purchaseOrderId', {
+          message: 'Seleccione una orden del mismo proveedor y artículo.',
+        });
+        return null;
+      }
     }
     if (!activeWarehouses.some((warehouse) => warehouse.id === values.warehouseId)) {
       form.setError('warehouseId', { message: 'Seleccione una bodega activa.' });
@@ -300,8 +364,14 @@ export default function PurchasesPage() {
         invoiceNumber: values.invoiceNumber || undefined,
         invoiceGroupId: editing?.invoiceGroupId ?? invoiceGroupId,
         note: values.note || undefined,
+        usefulLife: values.usefulLife || undefined,
+        isFixedAsset: values.isFixedAsset,
+        purchaseOrderId: values.purchaseOrderId || undefined,
         quantity: values.quantity,
         unitCost: values.unitCost,
+        taxRates: editing
+          ? editing.taxRates
+          : { iva: 0.13, perception: applyPerception ? 0.01 : 0 },
         expirationDate: values.expirationDate || undefined,
         lotNumber: values.lotNumber || undefined,
         serialNumber: values.serialNumber || undefined,
@@ -325,6 +395,7 @@ export default function PurchasesPage() {
       (values.invoiceNumber !== first.invoiceNumber ||
         values.reference !== first.reference ||
         values.supplierCatalogItemId !== first.supplierCatalogItemId ||
+        (values.purchaseOrderId || undefined) !== first.purchaseOrderId ||
         values.warehouseId !== first.warehouseId)
     ) {
       form.setError('invoiceNumber', {
@@ -335,6 +406,12 @@ export default function PurchasesPage() {
     }
     const purchase = makePurchase(values);
     if (!purchase) return;
+    if (first && first.taxRates?.perception !== purchase.taxRates?.perception) {
+      form.setError('invoiceNumber', {
+        message: 'Mantenga la misma selección de percepción para todas las líneas.',
+      });
+      return;
+    }
     setQueuedLines((current) => [...current, purchase]);
     form.setValue('quantity', 1);
     form.setValue('lotNumber', '');
@@ -352,7 +429,9 @@ export default function PurchasesPage() {
           line.invoiceNumber !== queuedLines[0].invoiceNumber ||
           line.reference !== queuedLines[0].reference ||
           line.supplierCatalogItemId !== queuedLines[0].supplierCatalogItemId ||
-          line.warehouseId !== queuedLines[0].warehouseId,
+          line.purchaseOrderId !== queuedLines[0].purchaseOrderId ||
+          line.warehouseId !== queuedLines[0].warehouseId ||
+          line.taxRates?.perception !== queuedLines[0].taxRates?.perception,
       )
     ) {
       form.setError('invoiceNumber', {
@@ -411,10 +490,13 @@ export default function PurchasesPage() {
       setCancelError('No se pudo anular la factura. Revise su estado e inténtelo de nuevo.');
       return;
     }
+    const cancelledDraft = voidingInvoice.status === 'DRAFT';
     setVoidingInvoice(null);
     setCancelError(null);
     setMessage(
-      'Factura anulada y auditada. La recepción física y el inventario se conservan; gestione la devolución por separado si corresponde.',
+      cancelledDraft
+        ? 'Factura en borrador anulada completa y auditada. No afectó existencias.'
+        : 'Factura anulada y auditada. La recepción física y el inventario se conservan; gestione la devolución por separado si corresponde.',
     );
   }
   async function receivePurchase(formData: FormData) {
@@ -474,26 +556,31 @@ export default function PurchasesPage() {
           <p>
             Registra borradores de compra con proveedor, bodega de destino y trazabilidad de lote,
             vencimiento o serie. La recepción física se confirma desde el borrador y queda visible
-            en Lotes y series. Cada fila del listado corresponde a un producto; varias filas pueden
-            compartir la misma factura.
+            en Lotes y series. El listado agrupa las líneas que comparten una factura; abra una fila
+            para consultar y gestionar cada producto.
           </p>
         </div>
         {can('purchases:write') ? (
-          <Button
-            data-action-id="PURCHASE-CREATE"
-            disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
-            onClick={() => {
-              setMessage(null);
-              setEditing(null);
-              setQueuedLines([]);
-              setInvoiceGroupId(crypto.randomUUID());
-              form.reset();
-              setOpen(true);
-            }}
-            type="button"
-          >
-            Nueva compra
-          </Button>
+          <div className="action-row">
+            <Link className="action-link-button action-link-button--inline" href="/purchase-orders">
+              Órdenes a proveedores
+            </Link>
+            <Button
+              data-action-id="PURCHASE-CREATE"
+              disabled={!purchasableItems.length || !suppliers.length || !activeWarehouses.length}
+              onClick={() => {
+                setMessage(null);
+                setEditing(null);
+                setQueuedLines([]);
+                setInvoiceGroupId(crypto.randomUUID());
+                form.reset();
+                setOpen(true);
+              }}
+              type="button"
+            >
+              Nueva compra
+            </Button>
+          </div>
         ) : null}
       </header>
       {message ? (
@@ -547,8 +634,8 @@ export default function PurchasesPage() {
           </Button>
         </div>
         <p className="field-help" id="purchase-export-help">
-          Descarga las compras visibles según la búsqueda actual en un archivo XLSX. No incluye
-          adjuntos ni datos clínicos.
+          Descarga todas las líneas de las facturas visibles según la búsqueda actual en un archivo
+          XLSX. No incluye adjuntos ni datos clínicos.
         </p>
         <div className="filter-grid">
           <label>
@@ -599,105 +686,146 @@ export default function PurchasesPage() {
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((purchase) => (
-                <tr key={purchase.id}>
-                  <td>
-                    <div className="action-row">
-                      <Button
-                        className="button-secondary"
-                        data-action-id="PURCHASE-DETAIL-OPEN"
-                        onClick={() => setSelected(purchase)}
-                        type="button"
-                      >
-                        Abrir
-                      </Button>
-                      {can('purchases:write') && purchase.status === 'DRAFT' ? (
-                        <>
+              {pageRows.map((lines) => {
+                const purchase = lines[0];
+                const voidSource = invoiceVoidSource(lines);
+                const totals = purchaseTotals(lines);
+                return (
+                  <tr key={purchase.invoiceGroupId ?? purchase.id}>
+                    <td>
+                      <div className="action-row">
+                        <Button
+                          className="button-secondary"
+                          data-action-id="PURCHASE-DETAIL-OPEN"
+                          onClick={() => setSelected(purchase)}
+                          type="button"
+                        >
+                          Abrir
+                        </Button>
+                        <a
+                          className="action-link-button action-link-button--inline"
+                          data-action-id="PURCHASE-INVOICE-PDF"
+                          href={`/api/purchases/${encodeURIComponent(purchase.invoiceGroupId ?? purchase.id)}/pdf`}
+                        >
+                          PDF
+                        </a>
+                        {lines.length === 1 &&
+                        can('purchases:write') &&
+                        purchase.status === 'DRAFT' ? (
+                          <>
+                            <Button
+                              className="button-secondary"
+                              data-action-id="PURCHASE-EDIT"
+                              onClick={() => edit(purchase)}
+                              type="button"
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              className="button-secondary danger"
+                              data-action-id="PURCHASE-CANCEL"
+                              onClick={() => {
+                                setCancelError(null);
+                                setCancelling(purchase);
+                              }}
+                              type="button"
+                            >
+                              Anular
+                            </Button>
+                          </>
+                        ) : null}
+                        {lines.length > 1 &&
+                        can('purchases:write') &&
+                        lines.some((line) => line.status === 'DRAFT') ? (
                           <Button
                             className="button-secondary"
-                            data-action-id="PURCHASE-EDIT"
-                            onClick={() => edit(purchase)}
+                            onClick={() => setSelected(purchase)}
                             type="button"
                           >
-                            Editar
+                            Editar líneas
                           </Button>
+                        ) : null}
+                        {can('purchases:write') && voidSource ? (
                           <Button
                             className="button-secondary danger"
-                            data-action-id="PURCHASE-CANCEL"
+                            data-action-id="PURCHASE-INVOICE-VOID"
                             onClick={() => {
                               setCancelError(null);
-                              setCancelling(purchase);
+                              setVoidingInvoice(voidSource);
                             }}
                             type="button"
                           >
-                            Anular
+                            Anular factura
                           </Button>
-                        </>
-                      ) : null}
-                      {can('purchases:write') && canVoidInvoice(purchase) ? (
-                        <Button
-                          className="button-secondary danger"
-                          data-action-id="PURCHASE-INVOICE-VOID"
-                          onClick={() => {
-                            setCancelError(null);
-                            setVoidingInvoice(purchase);
-                          }}
-                          type="button"
-                        >
-                          Anular factura
-                        </Button>
-                      ) : null}
-                      {can('purchases:write') &&
-                      can('inventory:write') &&
-                      purchase.status === 'DRAFT' &&
-                      purchase.warehouseId ? (
-                        <Button
-                          className="button-secondary"
-                          data-action-id="PURCHASE-RECEIVE"
-                          disabled={!warehouseConnected || receiptBusy}
-                          onClick={() => {
-                            setReceiptError(null);
-                            setReceiptSelection({ purchase, receivedAt: new Date().toISOString() });
-                          }}
-                          type="button"
-                        >
-                          Recibir
-                        </Button>
-                      ) : null}
-                    </div>
-                  </td>
-                  <td>Compra</td>
-                  <td>
-                    <code>{purchase.reference}</code>
-                    <p className="field-help">{purchase.note ?? 'Sin nota documentada'}</p>
-                    <p className="field-help">
-                      Bodega:{' '}
-                      {purchase.warehouseId
-                        ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
-                        : 'Sin bodega asignada'}
-                    </p>
-                  </td>
-                  <td>{itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado'}</td>
-                  <td>
-                    {purchase.unitCost === undefined
-                      ? 'No documentado'
-                      : `USD ${((purchase.quantity ?? 1) * purchase.unitCost).toFixed(2)}`}
-                  </td>
-                  <td>
-                    {purchase.invoiceNumber
-                      ? `${purchase.invoiceNumber}${purchase.invoiceVoidedAt ? ' · Anulada' : ''}`
-                      : 'No registrado'}
-                  </td>
-                  <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
-                  <td>
-                    {purchase.status === 'RECEIVED'
-                      ? 'Recepción registrada'
-                      : purchase.status === 'CANCELLED'
-                        ? 'Anulada'
-                        : 'Borrador'}
-                  </td>
-                </tr>
-              ))}
+                        ) : null}
+                        {lines.length === 1 &&
+                        can('purchases:write') &&
+                        can('inventory:write') &&
+                        purchase.status === 'DRAFT' &&
+                        purchase.warehouseId ? (
+                          <Button
+                            className="button-secondary"
+                            data-action-id="PURCHASE-RECEIVE"
+                            disabled={!warehouseConnected || receiptBusy}
+                            onClick={() => {
+                              setReceiptError(null);
+                              setReceiptSelection({
+                                purchase,
+                                receivedAt: new Date().toISOString(),
+                              });
+                            }}
+                            type="button"
+                          >
+                            Recibir
+                          </Button>
+                        ) : null}
+                        {lines.length > 1 &&
+                        can('purchases:write') &&
+                        can('inventory:write') &&
+                        lines.some((line) => line.status === 'DRAFT' && line.warehouseId) ? (
+                          <Button
+                            className="button-secondary"
+                            disabled={!warehouseConnected || receiptBusy}
+                            onClick={() => setSelected(purchase)}
+                            type="button"
+                          >
+                            Recibir líneas
+                          </Button>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td>Compra</td>
+                    <td>
+                      <code>{purchase.reference}</code>
+                      <p className="field-help">{lines.length} línea(s) en esta factura</p>
+                      <p className="field-help">{purchase.note ?? 'Sin nota documentada'}</p>
+                      <p className="field-help">
+                        Bodega:{' '}
+                        {purchase.warehouseId
+                          ? (warehouseNames.get(purchase.warehouseId) ?? purchase.warehouseId)
+                          : 'Sin bodega asignada'}
+                      </p>
+                    </td>
+                    <td>
+                      {itemNames.get(purchase.supplierCatalogItemId ?? '') ?? 'No documentado'}
+                    </td>
+                    <td>
+                      {totals
+                        ? `USD ${totals.total.toFixed(2)}`
+                        : lines.some((line) => line.unitCost === undefined)
+                          ? 'No documentado'
+                          : `USD ${lines.reduce((sum, line) => sum + (line.quantity ?? 1) * (line.unitCost ?? 0), 0).toFixed(2)}`}
+                    </td>
+                    <td>
+                      {purchase.invoiceNumber
+                        ? `${purchase.invoiceNumber}${lines.every((line) => line.invoiceVoidedAt) ? ' · Anulada' : ''}`
+                        : 'No registrado'}
+                    </td>
+                    <td>{new Date(purchase.createdAt).toLocaleDateString('es-SV')}</td>
+                    <td>{invoiceStatus(lines)}</td>
+                  </tr>
+                );
+              })}
               {!visible.length ? (
                 <tr>
                   <td colSpan={8}>
@@ -727,7 +855,7 @@ export default function PurchasesPage() {
           </Button>
           <span>
             Página {visible.length ? currentPage : 0} de {visible.length ? pages : 0} ·{' '}
-            {visible.length} registros
+            {visible.length} facturas/compras
           </span>
           <Button
             className="button-secondary"
@@ -780,6 +908,12 @@ export default function PurchasesPage() {
         open={open}
         title={editing ? 'Editar compra' : 'Nueva compra'}
       >
+        {editing && invoiceLines(editing).length > 1 ? (
+          <p className="field-help">
+            Esta línea pertenece a una factura con varias líneas. El número de factura, proveedor,
+            referencia y bodega deben mantenerse iguales en toda la factura.
+          </p>
+        ) : null}
         {queuedLines.length ? (
           <div className="notice" role="status">
             <strong>
@@ -792,7 +926,7 @@ export default function PurchasesPage() {
               {queuedLines.map((line, index) => (
                 <li key={line.id}>
                   {itemNames.get(line.catalogItemId) ?? line.catalogItemId} · {line.quantity} × USD{' '}
-                  {(line.unitCost ?? 0).toFixed(2)}{' '}
+                  {(line.unitCost ?? 0).toFixed(4)}{' '}
                   <Button
                     className="button-secondary"
                     onClick={() =>
@@ -807,6 +941,14 @@ export default function PurchasesPage() {
                 </li>
               ))}
             </ul>
+            {purchaseTotals(queuedLines) ? (
+              <p>
+                Subtotal: USD {purchaseTotals(queuedLines)!.subtotal.toFixed(2)} · IVA 13%: USD{' '}
+                {purchaseTotals(queuedLines)!.iva.toFixed(2)} · Percepción: USD{' '}
+                {purchaseTotals(queuedLines)!.perception.toFixed(2)} · Total: USD{' '}
+                {purchaseTotals(queuedLines)!.total.toFixed(2)}
+              </p>
+            ) : null}
           </div>
         ) : null}
         <form
@@ -846,6 +988,26 @@ export default function PurchasesPage() {
             ) : null}
           </label>
           <label>
+            Orden de compra vinculada (opcional)
+            <select {...form.register('purchaseOrderId')}>
+              <option value="">Compra sin orden vinculada</option>
+              {orders
+                .filter(
+                  (order) =>
+                    order.supplierCatalogItemId === selectedSupplierId &&
+                    order.items.some((line) => line.catalogItemId === selectedCatalogItemId),
+                )
+                .map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.orderNumber}
+                  </option>
+                ))}
+            </select>
+            {form.formState.errors.purchaseOrderId ? (
+              <span className="field-error">{form.formState.errors.purchaseOrderId.message}</span>
+            ) : null}
+          </label>
+          <label>
             Bodega de destino
             <select {...form.register('warehouseId')}>
               <option value="">Seleccione una bodega</option>
@@ -879,7 +1041,7 @@ export default function PurchasesPage() {
             Costo unitario
             <input
               min="0"
-              step="0.01"
+              step="0.0001"
               type="number"
               {...form.register('unitCost', { valueAsNumber: true })}
             />
@@ -887,6 +1049,20 @@ export default function PurchasesPage() {
             {form.formState.errors.unitCost ? (
               <span className="field-error">{form.formState.errors.unitCost.message}</span>
             ) : null}
+          </label>
+          <label>
+            <input
+              checked={applyPerception}
+              data-action-id="PURCHASE-PERCEPTION"
+              disabled={Boolean(editing)}
+              onChange={(event) => setApplyPerception(event.target.checked)}
+              type="checkbox"
+            />{' '}
+            Aplicar percepción del 1% a esta factura
+            <span className="field-help">
+              Los precios ingresados son sin IVA. El IVA solicitado del 13% se calcula
+              automáticamente; la percepción se activa sólo cuando corresponda.
+            </span>
           </label>
           <label>
             Referencia de compra
@@ -901,6 +1077,23 @@ export default function PurchasesPage() {
             {form.formState.errors.invoiceNumber ? (
               <span className="field-error">{form.formState.errors.invoiceNumber.message}</span>
             ) : null}
+          </label>
+          <label>
+            Vida útil del artículo
+            <input
+              {...form.register('usefulLife')}
+              data-action-id="PURCHASE-USEFUL-LIFE"
+              maxLength={120}
+              placeholder="Indique duración y unidad"
+            />
+          </label>
+          <label>
+            <input
+              {...form.register('isFixedAsset')}
+              data-action-id="PURCHASE-FIXED-ASSET"
+              type="checkbox"
+            />{' '}
+            Registrar como activo fijo
           </label>
           {selectedItem?.category === 'MEDICATIONS' || selectedItem?.category === 'SUPPLIES' ? (
             <>
@@ -938,7 +1131,7 @@ export default function PurchasesPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Detalle persistido del borrador de compra."
+        description="Detalle persistido de la factura y sus líneas. Cada recepción se registra por separado."
         footer={
           <Button
             className="button-secondary"
@@ -951,105 +1144,228 @@ export default function PurchasesPage() {
         }
         onClose={() => setSelected(null)}
         open={Boolean(selected)}
-        title="Detalle de compra sintética"
+        title="Detalle de factura o compra"
       >
         {selected ? (
-          <dl className="detail-grid">
-            <div>
-              <dt>Referencia</dt>
-              <dd>{selected.reference}</dd>
-            </div>
-            <div>
-              <dt>Número de factura</dt>
-              <dd>
-                {selected.invoiceNumber || 'No registrado'}
-                {selected.invoiceVoidedAt ? ' · Anulada' : ''}
-              </dd>
-            </div>
-            {selected.invoiceGroupId ? (
+          <>
+            <dl className="detail-grid">
               <div>
-                <dt>Factura completa</dt>
+                <dt>Referencia</dt>
+                <dd>{selected.reference}</dd>
+              </div>
+              <div>
+                <dt>Número de factura</dt>
                 <dd>
-                  {invoiceLines(selected).length} línea(s) · USD{' '}
-                  {invoiceLines(selected)
-                    .reduce((total, line) => total + (line.quantity ?? 1) * (line.unitCost ?? 0), 0)
-                    .toFixed(2)}
+                  {selected.invoiceNumber || 'No registrado'}
+                  {selected.invoiceVoidedAt ? ' · Anulada' : ''}
                 </dd>
               </div>
-            ) : null}
-            {selected.invoiceVoidedAt ? (
+              {selected.invoiceGroupId ? (
+                <div>
+                  <dt>Factura completa</dt>
+                  <dd>
+                    {invoiceLines(selected).length} línea(s) · USD{' '}
+                    {(
+                      purchaseTotals(invoiceLines(selected))?.total ??
+                      invoiceLines(selected).reduce(
+                        (total, line) => total + (line.quantity ?? 1) * (line.unitCost ?? 0),
+                        0,
+                      )
+                    ).toFixed(2)}
+                  </dd>
+                </div>
+              ) : null}
+              {purchaseTotals(invoiceLines(selected)) ? (
+                <>
+                  <div>
+                    <dt>Subtotal sin IVA</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.subtotal.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>IVA 13%</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.iva.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>IVA percibido 1% (selección manual)</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.perception.toFixed(2)}</dd>
+                  </div>
+                  <div>
+                    <dt>Total</dt>
+                    <dd>USD {purchaseTotals(invoiceLines(selected))!.total.toFixed(2)}</dd>
+                  </div>
+                </>
+              ) : null}
+              {selected.invoiceVoidedAt ? (
+                <div>
+                  <dt>Anulación de factura</dt>
+                  <dd>
+                    {new Date(selected.invoiceVoidedAt).toLocaleString('es-SV')} ·{' '}
+                    {selected.invoiceVoidReason}
+                  </dd>
+                </div>
+              ) : null}
               <div>
-                <dt>Anulación de factura</dt>
+                <dt>Ítem de catálogo</dt>
+                <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
+              </div>
+              <div>
+                <dt>Proveedor</dt>
+                <dd>{itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}</dd>
+              </div>
+              <div>
+                <dt>Bodega de destino</dt>
                 <dd>
-                  {new Date(selected.invoiceVoidedAt).toLocaleString('es-SV')} ·{' '}
-                  {selected.invoiceVoidReason}
+                  {selected.warehouseId
+                    ? (warehouseNames.get(selected.warehouseId) ?? selected.warehouseId)
+                    : 'Sin bodega asignada'}
                 </dd>
               </div>
-            ) : null}
-            <div>
-              <dt>Ítem de catálogo</dt>
-              <dd>{itemNames.get(selected.catalogItemId) ?? selected.catalogItemId}</dd>
-            </div>
-            <div>
-              <dt>Proveedor</dt>
-              <dd>{itemNames.get(selected.supplierCatalogItemId ?? '') ?? 'No documentado'}</dd>
-            </div>
-            <div>
-              <dt>Bodega de destino</dt>
-              <dd>
-                {selected.warehouseId
-                  ? (warehouseNames.get(selected.warehouseId) ?? selected.warehouseId)
-                  : 'Sin bodega asignada'}
-              </dd>
-            </div>
-            <div>
-              <dt>Estado</dt>
-              <dd>
-                {selected.status === 'RECEIVED'
-                  ? 'Recepción registrada'
-                  : selected.status === 'CANCELLED'
-                    ? 'Anulada'
-                    : 'Borrador'}
-              </dd>
-            </div>
-            {selected.cancelReason ? (
               <div>
-                <dt>Motivo de anulación</dt>
-                <dd>{selected.cancelReason}</dd>
+                <dt>Estado de esta línea</dt>
+                <dd>
+                  {selected.status === 'RECEIVED'
+                    ? 'Recepción registrada'
+                    : selected.status === 'CANCELLED'
+                      ? 'Anulada'
+                      : 'Borrador'}
+                </dd>
+              </div>
+              {selected.cancelReason ? (
+                <div>
+                  <dt>Motivo de anulación</dt>
+                  <dd>{selected.cancelReason}</dd>
+                </div>
+              ) : null}
+              {selected.receivedAt ? (
+                <div>
+                  <dt>Recepción física</dt>
+                  <dd>{new Date(selected.receivedAt).toLocaleString('es-SV')}</dd>
+                </div>
+              ) : null}
+              <div>
+                <dt>Cantidad y costo</dt>
+                <dd>
+                  {selected.quantity ?? 1} × USD {(selected.unitCost ?? 0).toFixed(4)} = USD{' '}
+                  {((selected.quantity ?? 1) * (selected.unitCost ?? 0)).toFixed(2)}
+                </dd>
+              </div>
+              <div>
+                <dt>Fecha de creación</dt>
+                <dd>{new Date(selected.createdAt).toLocaleString('es-SV')}</dd>
+              </div>
+              <div>
+                <dt>Nota</dt>
+                <dd>{selected.note || 'Sin nota documentada'}</dd>
+              </div>
+              <div>
+                <dt>Lote / vencimiento</dt>
+                <dd>
+                  {selected.lotNumber || 'Sin lote'} ·{' '}
+                  {selected.expirationDate || 'Sin vencimiento'}
+                </dd>
+              </div>
+              <div>
+                <dt>Número de serie</dt>
+                <dd>{selected.serialNumber || 'No aplica'}</dd>
+              </div>
+            </dl>
+            {invoiceLines(selected).length > 1 ? (
+              <div className="table-wrap">
+                <table>
+                  <caption>Líneas de la factura</caption>
+                  <thead>
+                    <tr>
+                      <th>Ítem</th>
+                      <th>Cantidad</th>
+                      <th>Costo</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoiceLines(selected).map((line) => (
+                      <tr key={line.id}>
+                        <td>{itemNames.get(line.catalogItemId) ?? line.catalogItemId}</td>
+                        <td>{line.quantity ?? 1}</td>
+                        <td>
+                          {line.unitCost === undefined
+                            ? 'No documentado'
+                            : `USD ${((line.quantity ?? 1) * line.unitCost).toFixed(2)}`}
+                        </td>
+                        <td>
+                          {line.status === 'RECEIVED'
+                            ? 'Recibida'
+                            : line.status === 'CANCELLED'
+                              ? 'Anulada'
+                              : 'Borrador'}
+                        </td>
+                        <td>
+                          <div className="action-row">
+                            <Button
+                              className="button-secondary"
+                              data-action-id="PURCHASE-LINE-DETAIL"
+                              onClick={() => setSelected(line)}
+                              type="button"
+                            >
+                              Ver línea
+                            </Button>
+                            {can('purchases:write') && line.status === 'DRAFT' ? (
+                              <>
+                                <Button
+                                  className="button-secondary"
+                                  data-action-id="PURCHASE-LINE-EDIT"
+                                  onClick={() => {
+                                    setSelected(null);
+                                    edit(line);
+                                  }}
+                                  type="button"
+                                >
+                                  Editar línea
+                                </Button>
+                                <Button
+                                  className="button-secondary danger"
+                                  data-action-id="PURCHASE-LINE-CANCEL"
+                                  onClick={() => {
+                                    setSelected(null);
+                                    setCancelError(null);
+                                    setCancelling(line);
+                                  }}
+                                  type="button"
+                                >
+                                  Anular línea
+                                </Button>
+                              </>
+                            ) : null}
+                            {can('purchases:write') &&
+                            can('inventory:write') &&
+                            line.status === 'DRAFT' &&
+                            line.warehouseId ? (
+                              <Button
+                                className="button-secondary"
+                                data-action-id="PURCHASE-LINE-RECEIVE"
+                                disabled={!warehouseConnected || receiptBusy}
+                                onClick={() => {
+                                  setSelected(null);
+                                  setReceiptError(null);
+                                  setReceiptSelection({
+                                    purchase: line,
+                                    receivedAt: new Date().toISOString(),
+                                  });
+                                }}
+                                type="button"
+                              >
+                                Recibir línea
+                              </Button>
+                            ) : null}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : null}
-            {selected.receivedAt ? (
-              <div>
-                <dt>Recepción física</dt>
-                <dd>{new Date(selected.receivedAt).toLocaleString('es-SV')}</dd>
-              </div>
-            ) : null}
-            <div>
-              <dt>Cantidad y costo</dt>
-              <dd>
-                {selected.quantity ?? 1} × USD {(selected.unitCost ?? 0).toFixed(2)} = USD{' '}
-                {((selected.quantity ?? 1) * (selected.unitCost ?? 0)).toFixed(2)}
-              </dd>
-            </div>
-            <div>
-              <dt>Fecha de creación</dt>
-              <dd>{new Date(selected.createdAt).toLocaleString('es-SV')}</dd>
-            </div>
-            <div>
-              <dt>Nota</dt>
-              <dd>{selected.note || 'Sin nota documentada'}</dd>
-            </div>
-            <div>
-              <dt>Lote / vencimiento</dt>
-              <dd>
-                {selected.lotNumber || 'Sin lote'} · {selected.expirationDate || 'Sin vencimiento'}
-              </dd>
-            </div>
-            <div>
-              <dt>Número de serie</dt>
-              <dd>{selected.serialNumber || 'No aplica'}</dd>
-            </div>
-          </dl>
+          </>
         ) : null}
       </Dialog>
       <Dialog
@@ -1081,7 +1397,11 @@ export default function PurchasesPage() {
         </form>
       </Dialog>
       <Dialog
-        description="Anula únicamente el documento de factura. La compra recibida y sus lotes permanecen registrados; si hubo devolución física, debe registrarse por separado para conservar la trazabilidad."
+        description={
+          voidingInvoice?.status === 'DRAFT'
+            ? 'Anula todas las líneas en borrador de esta factura en una operación. No afecta inventario.'
+            : 'Anula únicamente el documento de factura. La compra recibida y sus lotes permanecen registrados; si hubo devolución física, debe registrarse por separado para conservar la trazabilidad.'
+        }
         footer={
           <>
             <Button
@@ -1098,7 +1418,7 @@ export default function PurchasesPage() {
         }
         onClose={() => setVoidingInvoice(null)}
         open={Boolean(voidingInvoice)}
-        title="Anular factura recibida"
+        title="Anular factura"
       >
         <form action={confirmInvoiceVoid} id="purchase-invoice-void-form">
           <label>

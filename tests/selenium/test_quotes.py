@@ -179,6 +179,8 @@ class Quotes(unittest.TestCase):
         specialty.send_keys('Nutri')
         self.w.until(EC.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Nutricionista']"))).click()
         self.fill('Dirección', 'Dirección sintética Selenium')
+        self.fill('Teléfono fijo (obligatorio)', '2222-0400')
+        Select(self.action('DOCTOR-REFERRAL-CATEGORY')).select_by_value('NEW')
         self.click('DOCTOR-SAVE')
         self.w.until(EC.visibility_of_element_located((By.XPATH, "//*[contains(.,'Médica Selenium Honorarios registrado')]")))
 
@@ -691,7 +693,7 @@ class Quotes(unittest.TestCase):
         self.w.until(EC.url_contains(f'/insurance?quote={quote_id}')); self.pass_('QUOTE-OPEN-INSURANCE', 'SEL-QUOTE-RELATED', insurance_started)
         self.d.back(); self.w.until(EC.url_contains(f'/quotes/{quote_id}'))
         payment_started = time.time(); self.click('QUOTE-OPEN-PAYMENT')
-        self.w.until(EC.url_contains(f'/payments?quote={quote_id}')); self.pass_('QUOTE-OPEN-PAYMENT', 'SEL-QUOTE-RELATED', payment_started)
+        self.w.until(EC.url_contains(f'/receivables?quote={quote_id}')); self.pass_('QUOTE-OPEN-PAYMENT', 'SEL-QUOTE-RELATED', payment_started)
         self.d.back(); self.w.until(EC.url_contains(f'/quotes/{quote_id}'))
         url_before = self.d.current_url
         self.assertFalse(self.d.find_elements(By.CSS_SELECTOR, '[data-action-id="QUOTE-WHATSAPP"]'))

@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import { configurationCategories, type ConfigurationEntry } from '@analiza/contracts';
+import { useSearchParams } from 'next/navigation';
 import { useAuth, useWorkspace } from './providers';
 import { useOperations } from '@/lib/use-operations';
 
@@ -10,12 +11,26 @@ export const categoryLabels = {
   DOSE: 'Dosis registradas',
   INSURER: 'Seguros y descuentos',
   MEDICATION: 'Medicamentos y presentaciones',
+  MEDICAL_VISITOR: 'Visitadores médicos',
 };
-export function OperationalCatalogs() {
+export function OperationalCatalogs({
+  fixedCategory,
+}: {
+  fixedCategory?: ConfigurationEntry['category'];
+}) {
+  const searchParams = useSearchParams();
   const operations = useOperations();
   const { can } = useAuth();
   const { catalogItems } = useWorkspace();
-  const [category, setCategory] = useState<ConfigurationEntry['category']>('SPECIALTY');
+  const requestedCategory = searchParams.get('category');
+  const requested =
+    configurationCategories.find((entry) => entry === requestedCategory) ?? 'SPECIALTY';
+  const [selection, setSelection] = useState({ request: requestedCategory, category: requested });
+  const category =
+    fixedCategory ?? (selection.request === requestedCategory ? selection.category : requested);
+  const setCategory = (category: ConfigurationEntry['category']) =>
+    setSelection({ request: requestedCategory, category });
+  const visitors = fixedCategory === 'MEDICAL_VISITOR';
   const [editing, setEditing] = useState<ConfigurationEntry | null>(null);
   const [query, setQuery] = useState('');
   const [message, setMessage] = useState('');
@@ -36,8 +51,12 @@ export function OperationalCatalogs() {
       <header className="page-header">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
-          <h1>Catálogos operativos</h1>
-          <p>Opciones compartidas para el equipo. Los valores los define la persona encargada.</p>
+          <h1>{visitors ? 'Visitadores médicos' : 'Catálogos operativos'}</h1>
+          <p>
+            {visitors
+              ? 'Registre las personas que dan seguimiento a los médicos y asígnelas desde su ficha.'
+              : 'Opciones compartidas para el equipo. Los valores los define la persona encargada.'}
+          </p>
         </div>
         {can('catalogs:write') ? (
           <Button
@@ -47,27 +66,29 @@ export function OperationalCatalogs() {
               setEditing({ id: crypto.randomUUID(), category, label: '', active: true });
             }}
           >
-            + Agregar opción
+            {visitors ? '+ Agregar visitador' : '+ Agregar opción'}
           </Button>
         ) : null}
       </header>
-      <div className="card-grid">
-        {configurationCategories.map((key) => (
-          <button
-            className={`panel catalog-category-card${category === key ? ' selected' : ''}`}
-            key={key}
-            onClick={() => setCategory(key)}
-          >
-            <span aria-hidden="true">
-              {key === 'INSURER' ? '✓' : key === 'MEDICATION' ? '⊞' : '＋'}
-            </span>
-            <strong>{categoryLabels[key]}</strong>
-            <small>
-              {operations.configuration.filter((item) => item.category === key).length} opciones
-            </small>
-          </button>
-        ))}
-      </div>
+      {!fixedCategory ? (
+        <div className="card-grid">
+          {configurationCategories.map((key) => (
+            <button
+              className={`panel catalog-category-card${category === key ? ' selected' : ''}`}
+              key={key}
+              onClick={() => setCategory(key)}
+            >
+              <span aria-hidden="true">
+                {key === 'INSURER' ? '✓' : key === 'MEDICATION' ? '⊞' : '＋'}
+              </span>
+              <strong>{categoryLabels[key]}</strong>
+              <small>
+                {operations.configuration.filter((item) => item.category === key).length} opciones
+              </small>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <Panel className="studio-toolbar">
         <input
           aria-label="Buscar opción"
@@ -136,7 +157,7 @@ export function OperationalCatalogs() {
           </div>
         ) : (
           <EmptyState
-            title="Sin opciones registradas"
+            title={visitors ? 'Sin visitadores registrados' : 'Sin opciones registradas'}
             detail="La encargada puede agregar opciones; aparecerán en los formularios del equipo."
           />
         )}
@@ -145,14 +166,18 @@ export function OperationalCatalogs() {
         open={Boolean(editing)}
         onClose={() => setEditing(null)}
         title={editing ? categoryLabels[editing.category] : ''}
-        description="Registre únicamente valores aprobados por su organización; no se sugieren dosis ni coberturas."
+        description={
+          visitors
+            ? 'El nombre estará disponible al asignar un visitador en la ficha de cada médico.'
+            : 'Registre únicamente valores aprobados por su organización; no se sugieren dosis ni coberturas.'
+        }
         footer={
           <>
             <Button className="button-secondary" onClick={() => setEditing(null)}>
               Cancelar
             </Button>
             <Button form="configuration-form" type="submit" disabled={operations.busy}>
-              Guardar opción
+              {visitors ? 'Guardar visitador' : 'Guardar opción'}
             </Button>
           </>
         }

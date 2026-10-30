@@ -90,7 +90,7 @@ export function SearchableSelect({
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => {
-            if (query.trim() && !selected) onChange(query.trim());
+            if (allowCustom && query.trim() && !selected) onChange(query.trim());
           }}
           onKeyDown={onKeyDown}
           placeholder={selected?.label ?? placeholder}

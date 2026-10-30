@@ -3,7 +3,13 @@ import { z } from 'zod';
 const id = z.string().trim().min(1).max(120);
 const text = z.string().trim().min(1).max(500);
 const date = z.string().datetime({ offset: true });
-export const configurationCategories = ['SPECIALTY', 'DOSE', 'INSURER', 'MEDICATION'] as const;
+export const configurationCategories = [
+  'SPECIALTY',
+  'DOSE',
+  'INSURER',
+  'MEDICATION',
+  'MEDICAL_VISITOR',
+] as const;
 
 export const warehouseStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);
 export const warehouseInputSchema = z

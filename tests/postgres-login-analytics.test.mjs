@@ -37,10 +37,10 @@ test('successful-login ledger is tenant-scoped, minimal and indexed', () => {
   assert.doesNotMatch(migration, /password_hash|ip_address|user_agent/i);
 });
 
-test('ANALYTICS is a single-purpose, single-active account per organization', () => {
+test('ANALYTICS remains single-active and can review quotes for the client-authorized approval flow', () => {
   assert.match(migration, /memberships_single_active_analytics/);
   assert.match(migration, /WHERE active AND role='ANALYTICS'/);
-  assert.match(permissions, /ANALYTICS: \['login-analytics:read'\]/);
+  assert.match(permissions, /ANALYTICS: \['login-analytics:read', 'quotes:read'\]/);
   assert.doesNotMatch(permissions, /ANALYTICS:[^\n]+patients:read/);
 });
 

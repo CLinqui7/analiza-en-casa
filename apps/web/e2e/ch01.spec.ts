@@ -42,7 +42,7 @@ test('CH01-F002 patient-tabs-import exposes the bulk import surface', async ({ p
     name: 'ch01.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(
-      'document,firstName,lastName,documentType\nCH01-IMPORT,Persona,Prueba,OTHER',
+      'document,firstName,lastName,documentType,referralOrigin\nCH01-IMPORT,Persona,Prueba,OTHER,FAMILY_FRIENDS',
     ),
   });
   await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
@@ -91,8 +91,8 @@ test('CH01-F006 list state represents an empty filtered result safely', async ({
 
 test('CH01-F008 hierarchical menu exposes only live routes', async ({ page }) => {
   await login(page);
-  const clinical = page.getByRole('button', { name: 'Clínico' });
-  if ((await clinical.getAttribute('aria-expanded')) === 'false') await clinical.click();
+  const reports = page.getByRole('button', { name: 'Reportes' });
+  if ((await reports.getAttribute('aria-expanded')) === 'false') await reports.click();
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
 });
@@ -130,6 +130,7 @@ test('CH01-F007 triage-botmaker-status persists as administrative state', async 
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill('7000-0001');
   await dialog.getByLabel('Empresa').fill('Empresa sintética');
+  await dialog.getByLabel('Origen del paciente').selectOption('FAMILY_FRIENDS');
   await dialog
     .getByRole('textbox', { name: 'Dirección obligatorio', exact: true })
     .fill('Dirección sintética');

@@ -18,7 +18,11 @@ export function parseHospitalizationCreate(input: unknown): Hospitalization {
   rejectBrowserAuthority(input);
   const body = object(input);
   if (Object.keys(body).some((key) => key !== 'hospitalization')) throw new MongoInputError();
-  return parseHospitalization(body.hospitalization);
+  const hospitalization = parseHospitalization(body.hospitalization);
+  if (!hospitalization.primaryDoctorId) {
+    throw new MongoInputError('Seleccione el médico tratante principal.');
+  }
+  return hospitalization;
 }
 
 export function parseHospitalizationReplace(input: unknown): {
@@ -33,8 +37,11 @@ export function parseHospitalizationReplace(input: unknown): {
   if (!Number.isInteger(body.expectedVersion) || (body.expectedVersion as number) < 1) {
     throw new MongoInputError('La versión esperada es obligatoria.');
   }
+  const hospitalization = parseHospitalization(body.hospitalization);
+  if (!hospitalization.primaryDoctorId)
+    throw new MongoInputError('Seleccione el médico tratante principal.');
   return {
-    hospitalization: parseHospitalization(body.hospitalization),
+    hospitalization,
     expectedVersion: body.expectedVersion as number,
   };
 }
