@@ -9,6 +9,7 @@ export const corePages = [
   '/doctors',
   '/nursing-team',
   '/catalogs/operational',
+  '/catalogs/medical-visitors',
   '/insurers',
   '/import',
   '/onboarding',

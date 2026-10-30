@@ -1240,8 +1240,8 @@ function QuoteEditor({
                   <th>Concepto</th>
                   <th>Cantidad</th>
                   <th>Precio</th>
-                  <th>Descuento</th>
-                  <th>Subtotal</th>
+                  <th>Descuento de línea</th>
+                  <th>Importe base</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -1310,7 +1310,22 @@ function QuoteEditor({
           </div>
         </fieldset>
         <fieldset className="quote-fieldset full-field">
-          <legend>Descuento general manual</legend>
+          <legend>Descuento por categoría</legend>
+          <div className="discount-preview" aria-live="polite">
+            <span>Descuento aplicado</span>
+            <strong>{money(totals.generalDiscountAmount)}</strong>
+            <span>
+              Total de la cotización <strong>{money(totals.total)}</strong>
+            </span>
+          </div>
+          {draft.discount?.type === 'CATEGORY_PERCENTAGES' &&
+          (draft.discount.value ?? 0) > 0 &&
+          !draft.items.some((line) => (draft.discount?.categories?.[line.category] ?? 0) > 0) ? (
+            <p className="field-help" role="status">
+              El descuento es cero porque aún no hay líneas en las categorías seleccionadas.
+              Seleccione una categoría con líneas o agregue los artículos correspondientes.
+            </p>
+          ) : null}
           {draft.discount && draft.discount.type !== 'CATEGORY_PERCENTAGES' ? (
             <p className="field-help">
               Descuento histórico conservado:{' '}
@@ -1349,43 +1364,55 @@ function QuoteEditor({
                 }
               />
             </label>
-            <fieldset className="full-field">
+            <fieldset className="full-field checkbox-fieldset discount-categories">
               <legend>Aplicar a estas categorías</legend>
-              {quoteCategories.map((category) => (
-                <label key={category.value}>
-                  <input
-                    checked={Object.prototype.hasOwnProperty.call(
-                      draft.discount?.categories ?? {},
-                      category.value,
-                    )}
-                    data-action-id="QUOTE-DISCOUNT-CATEGORY"
-                    onChange={(event) => {
-                      const checked = event.target.checked;
-                      setDraft((current) => {
-                        const categories = { ...current.discount?.categories } as Record<
-                          QuoteItemCategory,
-                          number
-                        >;
-                        if (checked) categories[category.value] = current.discount?.value ?? 0;
-                        else delete categories[category.value];
-                        return {
-                          ...current,
-                          discount: {
-                            type: 'CATEGORY_PERCENTAGES',
-                            value:
-                              current.discount?.type === 'CATEGORY_PERCENTAGES'
-                                ? (current.discount.value ?? 0)
-                                : 0,
-                            categories,
-                          },
-                        };
-                      });
-                    }}
-                    type="checkbox"
-                  />{' '}
-                  {category.label}
-                </label>
-              ))}
+              <div className="checkbox-grid">
+                {quoteCategories.map((category) => (
+                  <label className="checkbox-option" key={category.value}>
+                    <input
+                      checked={Object.prototype.hasOwnProperty.call(
+                        draft.discount?.categories ?? {},
+                        category.value,
+                      )}
+                      data-action-id="QUOTE-DISCOUNT-CATEGORY"
+                      onChange={(event) => {
+                        const checked = event.target.checked;
+                        setDraft((current) => {
+                          const categories = { ...current.discount?.categories } as Record<
+                            QuoteItemCategory,
+                            number
+                          >;
+                          if (checked) categories[category.value] = current.discount?.value ?? 0;
+                          else delete categories[category.value];
+                          return {
+                            ...current,
+                            discount: {
+                              type: 'CATEGORY_PERCENTAGES',
+                              value:
+                                current.discount?.type === 'CATEGORY_PERCENTAGES'
+                                  ? (current.discount.value ?? 0)
+                                  : 0,
+                              categories,
+                            },
+                          };
+                        });
+                      }}
+                      type="checkbox"
+                    />{' '}
+                    <span>
+                      {category.label}
+                      <small>
+                        {draft.items.filter((line) => line.category === category.value).length}{' '}
+                        líneas
+                      </small>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              <p className="field-help">
+                Seleccione las categorías de las líneas que desea descontar. Las demás conservan su
+                precio.
+              </p>
             </fieldset>
             <label>
               Responsabilidad explícita de aseguradora

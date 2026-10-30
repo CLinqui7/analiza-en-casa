@@ -802,13 +802,13 @@ test('agenda rejects invalid intervals and persists scheduled shifts', async ({ 
   await dialog.getByLabel('Inicio').fill('12:00');
   await dialog.getByLabel('Fin').fill('08:00');
   await dialog.getByLabel('Notas del turno').fill('Turno inválido de QA.');
-  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(dialog.getByText('El fin debe ser posterior al inicio.')).toBeVisible();
 
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-START"]').fill('08:00');
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-END"]').fill('12:00');
   await dialog.getByLabel('Notas del turno').fill('Turno programado de QA.');
-  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
   await page.goto('/agenda');
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
 
@@ -845,7 +845,7 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
   await dialog.getByLabel('Inicio').fill('08:00');
   await dialog.getByLabel('Fin').fill('12:00');
   await dialog.getByLabel('Notas del turno').fill('Turno para reporte de QA.');
-  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
 
   await page.goto('/reports/nurse-hours');
   await page.getByLabel('Desde').fill(scheduledDate);
@@ -1267,7 +1267,7 @@ test('clinical hospitalizations keeps search, care actions and accessibility int
   expect(results.violations).toEqual([]);
   await page.getByRole('button', { name: 'Atención' }).click();
   await expect(page.getByRole('dialog', { name: /Atención clínica/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Guardar atención' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Guardar', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect

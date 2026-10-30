@@ -293,7 +293,8 @@ export const quoteItemSchema = z.object({
 export const quoteDiscountSchema = z.object({
   type: z.enum(['PERCENT', 'FIXED', 'CATEGORY_PERCENTAGES']),
   value: z.number().nonnegative().optional(),
-  categories: z.record(quoteItemCategorySchema, z.number().min(0).max(100)).optional(),
+  // Only selected categories are sent; unselected categories receive no discount.
+  categories: z.partialRecord(quoteItemCategorySchema, z.number().min(0).max(100)).optional(),
 });
 
 export const quoteSchema = z.object({

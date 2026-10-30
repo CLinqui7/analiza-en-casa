@@ -32,7 +32,7 @@ const paymentSchema = z
         code: 'custom',
         message:
           payment.paymentMethod === 'CHECK'
-            ? 'Ingrese el número de cheque.'
+            ? 'Ingrese el número de reserva.'
             : 'Ingrese el número de referencia.',
         path: ['reference'],
       });
@@ -579,7 +579,7 @@ export function PaymentsPage() {
           selectedPaymentMethod === 'CARD' ||
           selectedPaymentMethod === 'CHECK' ? (
             <label>
-              {selectedPaymentMethod === 'CHECK' ? 'Número de cheque' : 'Número de referencia'}
+              {selectedPaymentMethod === 'CHECK' ? 'Número de reserva' : 'Número de referencia'}
               <input {...form.register('reference')} autoComplete="off" maxLength={120} />
               <span className="field-help">Obligatorio para identificar este medio de pago.</span>
               {form.formState.errors.reference ? (

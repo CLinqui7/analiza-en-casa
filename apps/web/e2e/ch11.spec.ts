@@ -135,7 +135,7 @@ test('CH11 opens the authorized clinical attention form without creating a visit
   ]);
   const dialog = await openAttention(page);
   await expect(dialog.getByLabel('Paciente ya cuenta con:')).toBeVisible();
-  await expect(dialog.getByRole('button', { name: 'Guardar atención' })).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Guardar', exact: true })).toBeVisible();
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await expect(dialog).toHaveCount(0);
   await page.reload();
@@ -155,7 +155,7 @@ test('CH11 persists an assigned shift from the clinical case', async ({ page }) 
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-DATE"]').fill('2026-11-03');
   await dialog.getByLabel('Notas del turno').fill('CH11 F03 turno sintético vinculado');
-  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
   await page.goto('/agenda');
   await expect
     .poll(() =>
@@ -168,7 +168,7 @@ test('CH11 persists an assigned shift from the clinical case', async ({ page }) 
     .toMatchObject({ patientId: 'patient-demo-001' });
 });
 
-test('CH11 keeps Puntual disabled in clinical scheduling without a visit mutation', async ({
+test('CH11 omits undefined Puntual action in clinical scheduling without a visit mutation', async ({
   page,
 }) => {
   await login(page);
@@ -180,8 +180,9 @@ test('CH11 keeps Puntual disabled in clinical scheduling without a visit mutatio
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
   await expect(
     dialog.getByRole('button', { name: 'Puntual (pendiente de definición)' }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(dialog).toHaveCount(0);
   await page.reload();
   await expect
     .poll(() =>

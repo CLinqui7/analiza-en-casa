@@ -487,7 +487,7 @@ export default function ClinicalHospitalizationsPage() {
               Cancelar
             </Button>
             <Button disabled={careSaving} onClick={() => void saveCare()} type="button">
-              {careSaving ? 'Guardando…' : 'Guardar atención'}
+              {careSaving ? 'Guardando…' : 'Guardar'}
             </Button>
           </>
         }
@@ -500,8 +500,8 @@ export default function ClinicalHospitalizationsPage() {
             {careMessage}
           </p>
         ) : null}
-        <div className="form-grid" id="clinical-attention">
-          <label className="full">
+        <div className="form-grid clinical-attention-form" id="clinical-attention">
+          <label className="full-field">
             Paciente ya cuenta con:
             <textarea
               data-action-id="CLINICAL-PATIENT-HAS"
@@ -510,7 +510,7 @@ export default function ClinicalHospitalizationsPage() {
               value={careDevices}
             />
           </label>
-          <fieldset className="full assignment-fieldset">
+          <fieldset className="full-field assignment-fieldset">
             <legend>Enfermeras asignadas para la atención</legend>
             <div className="assignment-option-grid">
               {nursingResources.map((resource) => (
@@ -542,7 +542,7 @@ export default function ClinicalHospitalizationsPage() {
               <p className="field-help">Primero registre recursos en Equipo de enfermería.</p>
             ) : null}
           </fieldset>
-          <fieldset className="full assignment-fieldset">
+          <fieldset className="full-field assignment-fieldset">
             <legend>Programar turno en Agenda</legend>
             <label>
               Enfermera
@@ -567,51 +567,58 @@ export default function ClinicalHospitalizationsPage() {
               </select>
             </label>
             {scheduleResourceId ? (
-              <div className="form-grid form-grid-compact">
-                <label>
-                  Fecha 1
-                  <input
-                    data-action-id="CLINICAL-SCHEDULE-DATE"
-                    onChange={(event) => setScheduleDate(event.target.value)}
-                    type="date"
-                    value={scheduleDate}
-                  />
-                </label>
-                {scheduleExtraDates.map((date, index) => (
-                  <label key={index}>
-                    Fecha {index + 2}
+              <div className="form-grid form-grid-compact schedule-fields">
+                <div className="schedule-dates full-field">
+                  <label>
+                    Fecha 1
                     <input
-                      aria-label={`Fecha ${index + 2}`}
-                      onChange={(event) =>
-                        setScheduleExtraDates((current) =>
-                          current.map((value, position) =>
-                            position === index ? event.target.value : value,
-                          ),
-                        )
-                      }
+                      data-action-id="CLINICAL-SCHEDULE-DATE"
+                      onChange={(event) => setScheduleDate(event.target.value)}
                       type="date"
-                      value={date}
+                      value={scheduleDate}
                     />
-                    <Button
-                      className="button-secondary"
-                      onClick={() =>
-                        setScheduleExtraDates((current) =>
-                          current.filter((_, position) => position !== index),
-                        )
-                      }
-                      type="button"
-                    >
-                      Quitar fecha {index + 2}
-                    </Button>
                   </label>
-                ))}
-                <Button
-                  className="button-secondary"
-                  onClick={() => setScheduleExtraDates((current) => [...current, ''])}
-                  type="button"
-                >
-                  Agregar fecha
-                </Button>
+                  {scheduleExtraDates.map((date, index) => (
+                    <div className="schedule-date" key={index}>
+                      <label>
+                        Fecha {index + 2}
+                        <input
+                          aria-label={`Fecha ${index + 2}`}
+                          onChange={(event) =>
+                            setScheduleExtraDates((current) =>
+                              current.map((value, position) =>
+                                position === index ? event.target.value : value,
+                              ),
+                            )
+                          }
+                          type="date"
+                          value={date}
+                        />
+                      </label>
+                      <Button
+                        className="button-secondary"
+                        aria-label={`Quitar fecha ${index + 2}`}
+                        onClick={() =>
+                          setScheduleExtraDates((current) =>
+                            current.filter((_, position) => position !== index),
+                          )
+                        }
+                        type="button"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="full-field">
+                  <Button
+                    className="button-secondary"
+                    onClick={() => setScheduleExtraDates((current) => [...current, ''])}
+                    type="button"
+                  >
+                    Agregar fecha
+                  </Button>
+                </div>
                 <label>
                   Turno
                   <select
@@ -653,7 +660,7 @@ export default function ClinicalHospitalizationsPage() {
                     value={scheduleEnd}
                   />
                 </label>
-                <label>
+                <label className="checkbox-option">
                   <input
                     checked={scheduleEndDayOffset === 1}
                     onChange={(event) => setScheduleEndDayOffset(event.target.checked ? 1 : 0)}
@@ -661,7 +668,7 @@ export default function ClinicalHospitalizationsPage() {
                   />{' '}
                   Termina al día siguiente
                 </label>
-                <label className="full">
+                <label className="full-field">
                   Notas del turno
                   <textarea
                     onChange={(event) => setScheduleNote(event.target.value)}
@@ -669,9 +676,6 @@ export default function ClinicalHospitalizationsPage() {
                     value={scheduleNote}
                   />
                 </label>
-                <Button disabled type="button">
-                  Puntual (pendiente de definición)
-                </Button>
               </div>
             ) : null}
           </fieldset>

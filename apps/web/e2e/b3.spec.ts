@@ -81,7 +81,7 @@ test('B3 persists multiple admission and discharge periods without accepting att
   await expect(directEdit.getByLabel('Egreso adicional 1')).toHaveValue('2026-09-26');
 });
 
-test('B3 schedules a multi-day 6h shift from clinical attention and keeps Puntual blocked', async ({
+test('B3 schedules a multi-day 6h shift from clinical attention and omits undefined Puntual action', async ({
   page,
 }) => {
   await login(page, '/clinical/hospitalizations');
@@ -108,21 +108,21 @@ test('B3 schedules a multi-day 6h shift from clinical attention and keeps Puntua
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
   await dialog.getByLabel('Fecha 1').fill('2026-11-01');
   await dialog.getByRole('button', { name: 'Agregar fecha' }).click();
-  await dialog.getByLabel('Fecha 2').fill('2026-11-02');
+  await dialog.getByLabel('Fecha 2', { exact: true }).fill('2026-11-02');
   await dialog.getByRole('button', { name: 'Quitar fecha 2' }).click();
   await expect(dialog.getByLabel('Fecha 1')).toHaveValue('2026-11-01');
-  await expect(dialog.getByLabel('Fecha 2')).toHaveCount(0);
+  await expect(dialog.getByLabel('Fecha 2', { exact: true })).toHaveCount(0);
   await dialog.getByRole('button', { name: 'Agregar fecha' }).click();
-  await dialog.getByLabel('Fecha 2').fill('2026-11-02');
+  await dialog.getByLabel('Fecha 2', { exact: true }).fill('2026-11-02');
   await dialog.getByLabel('Inicio').fill('20:00');
   await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-PRESET"]').selectOption('SIX_HOURS');
   await expect(dialog.getByLabel('Fin')).toHaveValue('02:00');
   await expect(dialog.getByLabel('Termina al día siguiente')).toBeChecked();
   await expect(
     dialog.getByRole('button', { name: 'Puntual (pendiente de definición)' }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await dialog.getByLabel('Notas del turno').fill('B3 multi-day 6h');
-  await dialog.getByRole('button', { name: 'Guardar atención' }).click();
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
   await page.goto('/agenda');
   const persisted = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.shifts') ?? '[]').filter(

@@ -109,40 +109,6 @@ const navigation: NavigationGroup[] = [
     ],
   },
   {
-    label: 'Financiero',
-    icon: 'finance',
-    children: [
-      {
-        label: 'Cuentas por cobrar',
-        icon: 'receivables',
-        href: '/receivables',
-        permission: 'payments:read',
-        actionId: 'RECEIVABLES-NAVIGATE',
-      },
-      {
-        label: 'Ventas confirmadas',
-        icon: 'finance',
-        href: '/sales',
-        permission: 'payments:read',
-        actionId: 'SALES-NAVIGATE',
-      },
-      {
-        label: 'Cuentas por pagar',
-        icon: 'payables',
-        href: '/payables',
-        permission: 'payments:read',
-        actionId: 'PAYABLES-NAVIGATE',
-      },
-      {
-        label: 'Preautorizaciones y reclamos',
-        icon: 'insurance',
-        href: '/insurance',
-        permission: 'insurance:read',
-        actionId: 'INSURANCE-NAVIGATE',
-      },
-    ],
-  },
-  {
     label: 'Clínico',
     icon: 'clinical',
     children: [
@@ -215,6 +181,40 @@ const navigation: NavigationGroup[] = [
         href: '/clinical/evolutions',
         permission: 'clinical:read',
         actionId: 'EVOLUTION-NAVIGATE',
+      },
+    ],
+  },
+  {
+    label: 'Financiero',
+    icon: 'finance',
+    children: [
+      {
+        label: 'Cuentas por cobrar',
+        icon: 'receivables',
+        href: '/receivables',
+        permission: 'payments:read',
+        actionId: 'RECEIVABLES-NAVIGATE',
+      },
+      {
+        label: 'Ventas confirmadas',
+        icon: 'finance',
+        href: '/sales',
+        permission: 'payments:read',
+        actionId: 'SALES-NAVIGATE',
+      },
+      {
+        label: 'Cuentas por pagar',
+        icon: 'payables',
+        href: '/payables',
+        permission: 'payments:read',
+        actionId: 'PAYABLES-NAVIGATE',
+      },
+      {
+        label: 'Preautorizaciones y reclamos',
+        icon: 'insurance',
+        href: '/insurance',
+        permission: 'insurance:read',
+        actionId: 'INSURANCE-NAVIGATE',
       },
     ],
   },
@@ -301,7 +301,7 @@ const navigation: NavigationGroup[] = [
       {
         label: 'Visitadores médicos',
         icon: 'doctors',
-        href: '/catalogs/operational?category=MEDICAL_VISITOR',
+        href: '/catalogs/medical-visitors',
         permission: 'catalogs:read',
         actionId: 'MEDICAL-VISITOR-NAVIGATE',
       },
@@ -472,7 +472,13 @@ function NavigationGlyph({
 function isActive(pathname: string, href: string) {
   return (
     pathname === href ||
-    (href !== '/dashboard' && href !== '/clinical' && pathname.startsWith(`${href}/`))
+    (href !== '/dashboard' &&
+      href !== '/clinical' &&
+      !(
+        href === '/catalogs' &&
+        (pathname === '/catalogs/operational' || pathname === '/catalogs/medical-visitors')
+      ) &&
+      pathname.startsWith(`${href}/`))
   );
 }
 

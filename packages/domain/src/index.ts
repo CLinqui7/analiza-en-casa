@@ -318,6 +318,7 @@ function validateQuoteDiscount(discount?: QuoteDiscount): string | undefined {
   if (
     categoryPercentages.some(
       (percentage) =>
+        typeof percentage !== 'number' ||
         !Number.isFinite(percentage) ||
         !Number.isInteger(percentage) ||
         percentage < 0 ||

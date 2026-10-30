@@ -4,7 +4,7 @@
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
   "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-  "functional_fingerprint": "b9d331e4e28c7771730a83121c21815ad2ea707683c2233a04c6dda16d31956a",
+  "functional_fingerprint": "14bcdcb0602ce72f745756c5ae5a6c3cd82b05fe8844661c41dfe88fffb9499b",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -1743,7 +1743,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Paciente buscable/seleccionable; contacto de solo lectura y hospitalización compatible requerida."
+      "notes": "Paciente buscable y contacto de lectura. Por cambio aprobado del 26/10 la hospitalización es opcional al cotizar; sólo la aprobación de hospitalización crea ingreso clínico. Véase MEETING_2026_10_26_IMPLEMENTATION.md."
     },
     {
       "requirement_id": "CH03-F013",
@@ -1785,7 +1785,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Metadatos de factura persisten sin afectar los cálculos; reglas profundas quedan en CH03-Q007."
+      "notes": "Los metadatos históricos de factura se conservan. El cliente retiró Datos iniciales de factura del formulario nuevo el 26/10; no afecta cálculos ni cierra CH03-Q007. Véase MEETING_2026_10_26_IMPLEMENTATION.md."
     },
     {
       "requirement_id": "CH04-F001",
@@ -5376,7 +5376,7 @@
       ],
       "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "El diálogo autorizado Crear turno a paciente muestra únicamente el paciente seleccionado y sus datos factuales de documento y empresa como lectura sola. Cerrar no crea turnos, visitas ni auditoría; Guardar persiste y recarga sólo el turno sintético B3 con su vínculo factual de paciente. Frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad y toda semántica de visita quedan bloqueados."
+      "notes": "Programación de turnos desde Atención clínica por solicitud del 26/10. Guarda recurso, fechas y horario confirmado por servidor; cancelar no modifica turnos. El 29/10 se ajustó el ancho, las fechas y el único botón Guardar. Véase docs/feedback/UI_REVIEW_2026-10-29.md."
     },
     {
       "requirement_id": "CH11-F04",
@@ -5426,7 +5426,7 @@
       ],
       "blocker_reason": "CH11-E0026/E0027 sólo muestran las etiquetas Puntual y Turno; no definen entidad, duración, frecuencia, autorización, transición, descuento, disponibilidad, tarifa ni persistencia de una visita.",
       "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
-      "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica."
+      "notes": "CH11-E0026/E0027 muestran Puntual/Turno y Guardar sin definir semántica de visita. El cliente pidió retirar el botón gris Puntual de Atención el 29/10; exclusión aprobada de esa superficie. No hay mutación de visita puntual y CR-010 permanece bloqueado. Se conserva PARTIAL."
     },
     {
       "requirement_id": "CH11-F05",

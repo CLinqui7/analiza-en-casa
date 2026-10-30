@@ -7,6 +7,10 @@ flock -n 9 || { echo 'Backup is already running; refusing to continue without a 
 export RESTIC_REPOSITORY=/opt/analiza-contabo-staging/backups/restic
 export RESTIC_PASSWORD_FILE=/opt/analiza-contabo-staging/secrets/restic-password
 test -f "$RESTIC_REPOSITORY/config" || restic init
+# Remove only locks restic verifies as stale, never live locks. Check repository
+# access before interrupting the web; a failed preflight leaves the app running.
+restic unlock --quiet
+restic check --quiet
 web=$(docker compose ps -q web)
 test -n "$web"
 active_database=$(docker exec "$web" sh -c 'printf %s "$PGDATABASE"')

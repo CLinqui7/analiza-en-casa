@@ -109,6 +109,44 @@ describe('private quote form draft boundary', () => {
     ]);
   });
 
+  it('persists discounts for selected categories without requiring unrelated categories', async () => {
+    const discount = { type: 'CATEGORY_PERCENTAGES', value: 10, categories: { SERVICES: 10 } };
+    expect((await PUT(request('PUT', { ...draft, discount }, 'synthetic-csrf'))).status).toBe(200);
+    const insert = query.mock.calls.find(([sql]) =>
+      sql.includes('INSERT INTO analiza.quote_form_drafts'),
+    );
+    expect(JSON.parse(insert?.[1]?.[3] as string).discount).toEqual(discount);
+    expect(
+      (
+        await PUT(
+          request('PUT', { ...draft, discount: { ...discount, categories: {} } }, 'synthetic-csrf'),
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await PUT(
+          request(
+            'PUT',
+            { ...draft, discount: { ...discount, categories: { UNKNOWN: 10 } } },
+            'synthetic-csrf',
+          ),
+        )
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await PUT(
+          request(
+            'PUT',
+            { ...draft, discount: { ...discount, categories: { SERVICES: 101 } } },
+            'synthetic-csrf',
+          ),
+        )
+      ).status,
+    ).toBe(400);
+  });
+
   it('rejects malformed draft data and scopes deletion', async () => {
     expect(
       (await PUT(request('PUT', { ...draft, insurerAmount: -1 }, 'synthetic-csrf'))).status,
