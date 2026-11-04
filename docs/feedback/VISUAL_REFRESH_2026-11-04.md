@@ -39,3 +39,9 @@ Revisión independiente de controles: CH07-E0010 (00:14:49.600), CH07-E0018 (00:
 
 Se usaron como referencias la distinción entre acciones principales y secundarias de [GOV.UK](https://design-system.service.gov.uk/components/button/), los principios de [reflujo y operabilidad WCAG](https://www.w3.org/TR/WCAG22/) y la [preferencia de movimiento reducido](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html). Estas referencias no equivalen a una certificación WCAG integral. Fuente: [Inter](https://fonts.google.com/specimen/Inter), licencia incluida en `apps/web/public/fonts/`.
 
+## Cierre y publicación
+
+Código `dfeed68`, release `81823a6`, ambos subidos a GitHub antes del VPS. Matrices renovadas sin cambiar estados: cliente 32/32, trazabilidad 210/210, CH01–CH03, espejo y auditoría documental 17/17 aprobados. Publicación final saludable; 59 rutas comprobadas con la cuenta sintética, una restringida por permiso y cero errores JavaScript. Detalle en `../deployment/CONTABO_VISUAL_REFRESH_2026-11-04.md`; inventario de pantallas en `VISUAL_COVERAGE_2026-11-04.json`.
+
+El informe documental solicitado después se conserva por separado en `../estimates/2026-11-04/`. No se implementaron pendientes nuevos del PDF consolidado ni se sumó este rediseño al cálculo manual de ese documento.
+

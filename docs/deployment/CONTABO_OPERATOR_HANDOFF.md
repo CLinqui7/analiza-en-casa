@@ -12,6 +12,8 @@ pueden estar trabajando en el mismo VPS.
 
 ## GitHub antes de cada despliegue
 
+**Rediseño visual, 4 de noviembre de 2026:** release activo `81823a6933b027cde0e8b21596612f54741c89b8`, previamente subido a GitHub. Tipografía local, controles, menús con teclado, formularios y QR adaptables. Revisión pública de 59 rutas con cuenta sintética, cero errores JavaScript y sin desbordamiento de página; Analítica conserva su restricción. Respaldo previo `137bbf9a`, web y PostgreSQL saludables. Ver `CONTABO_VISUAL_REFRESH_2026-11-04.md`; las entradas siguientes son históricas. No hay DDL nuevo ni actualización de Ubuntu. La copia externa del nuevo snapshot no se comprobó en este lote.
+
 **Observaciones clínicas, 4 de noviembre de 2026:** release activo `cfc7ceb1fcc53f0e2b9cd7ac260f12f51e2bb967`, publicado después de verificar GitHub, con menú simplificado, expediente y visitas reorganizados, acciones de enfermería funcionales, planes combinados y correcciones auditadas de administración. Respaldo previo `af5a6b94`. Web y PostgreSQL saludables. Ver `CONTABO_CLINICAL_OBSERVATIONS_2026-11-04.md`; las entradas siguientes son históricas. La copia externa de este snapshot no se ha verificado en este lote.
 
 **Facturación, 4 de noviembre de 2026:** la versión activa más reciente es `a9df5c3a93eaabcdfe0effce45ad7142c09a1848`, con saldos por cadena de cotización, reintentos de pago estables, centavos consistentes, protección de versiones, tablero de seguros adaptable y limpieza de textos internos. Respaldo previo `f5bb4f5d`; cinco grupos de prueba pública sintética aprobados y salud HTTP 200. No hay DDL nuevo ni actualización de Ubuntu. Ver `CONTABO_BILLING_RELEASE_2026-11-04.md`; la entrada clínica siguiente es histórica.
