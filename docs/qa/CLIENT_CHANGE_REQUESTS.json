@@ -59,7 +59,7 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "c93751ee81d5aeaa5486dca5ea25e4a81ff352a11b044da1dfc4c4119fca3352",
+      "functional_fingerprint": "9021b8700a6db458a648f188f2597f3c6a63ed6c701deb44b74277136d781e7c",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -619,7 +619,7 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "89246447fc890f08cb3caf7a0f44913b4ff0cc0032152fb492914672d1d1865d",
+      "functional_fingerprint": "da1d3c83b0927edc27fbe890e193dff7a1299fa263c8352b33019ef3f6bbcd27",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -678,7 +678,7 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "f136a1e41980d279f03ecb99b4ab1c3f87d2bce293b471c625b9b4f42dda21cc",
+      "functional_fingerprint": "71bed25b0807795bf393eb360975a1945381f91324a2c0126ddc643377d6a890",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -2196,5 +2196,17 @@
       "playwright:clinical-observations-menus"
     ],
     "production": "Git-first release cfc7ceb1fcc53f0e2b9cd7ac260f12f51e2bb967; both public synthetic verifiers passed (5 + 3 groups). See ../deployment/CONTABO_CLINICAL_OBSERVATIONS_2026-11-04.md."
+  },
+  "supplemental_visual_batch_20261104": {
+    "status": "TECHNICALLY_VERIFIED",
+    "source": "sources/CLIENT_VISUAL_REFRESH_2026-11-04.txt",
+    "scope_and_verification": "../feedback/VISUAL_REFRESH_2026-11-04.md",
+    "verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
+    "tests": [
+      "playwright:visual-dropdown-keyboard",
+      "apps/web/e2e/visual-system.spec.ts",
+      "scripts/verify-visual-release.mjs"
+    ],
+    "production": "See separate release record after Git-first publication."
   }
 }

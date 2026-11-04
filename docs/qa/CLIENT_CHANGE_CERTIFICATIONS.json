@@ -5,14 +5,14 @@
     "CR-001": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "c93751ee81d5aeaa5486dca5ea25e4a81ff352a11b044da1dfc4c4119fca3352",
+      "functional_fingerprint": "9021b8700a6db458a648f188f2597f3c6a63ed6c701deb44b74277136d781e7c",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
         "SEL-PAT-DOCUMENT"
       ],
       "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador.",
-      "regression_verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550"
+      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
     },
     "CR-002": {
       "implementation_sha": null,
@@ -95,24 +95,24 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "89246447fc890f08cb3caf7a0f44913b4ff0cc0032152fb492914672d1d1865d",
+      "functional_fingerprint": "da1d3c83b0927edc27fbe890e193dff7a1299fa263c8352b33019ef3f6bbcd27",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones.",
-      "regression_verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550"
+      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
     },
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "f136a1e41980d279f03ecb99b4ab1c3f87d2bce293b471c625b9b4f42dda21cc",
+      "functional_fingerprint": "71bed25b0807795bf393eb360975a1945381f91324a2c0126ddc643377d6a890",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
       ],
       "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. Huella funcional recalculada 2026-10-14 tras el autoguardado; la selección y actualización de pacientes permanece en la regresión de cotizaciones.",
-      "regression_verification_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d"
+      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
     },
     "CR-013": {
       "implementation_sha": null,
@@ -516,5 +516,10 @@
       "CH17-F15"
     ],
     "scope": "PDF Nov4 clinical observations: nursing menus, multiple care types, visits and append-only administration corrections. New user-approved presentation supersedes card fields; historical records retained. No new EXACT or complete video re-audit."
+  },
+  "visual_regression_20261104": {
+    "verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
+    "evidence": "docs/feedback/VISUAL_REFRESH_2026-11-04.md",
+    "scope": "Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."
   }
 }
