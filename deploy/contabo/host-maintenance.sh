@@ -23,6 +23,12 @@ health() {
   /usr/local/sbin/tuvet-web-health
   systemctl is-active --quiet docker nginx tuvet-web tuvet-postgres
   nginx -t
+  # HTTP can be ready before Docker's periodic healthcheck changes from starting.
+  for attempt in $(seq 1 20); do
+    if [[ $(docker inspect --format '{{.State.Health.Status}}' analiza-contabo-staging-database-1) = healthy &&
+          $(docker inspect --format '{{.State.Health.Status}}' analiza-contabo-staging-web-1) = healthy ]]; then break; fi
+    sleep 2
+  done
   [[ $(docker inspect --format '{{.State.Health.Status}}' analiza-contabo-staging-database-1) = healthy ]]
   [[ $(docker inspect --format '{{.State.Health.Status}}' analiza-contabo-staging-web-1) = healthy ]]
 }

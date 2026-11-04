@@ -6,6 +6,8 @@ root=/opt/tuvet-staging
 mountpoint -q "$root"
 export RESTIC_REPOSITORY=/var/backups/tuvet-restic
 export RESTIC_PASSWORD_FILE=/etc/tuvet-backup/restic-password
+export RESTIC_CACHE_DIR=/var/cache/tuvet-restic
+install -d -m 700 "$RESTIC_CACHE_DIR"
 test -s "$RESTIC_PASSWORD_FILE"
 exec 9>/run/lock/tuvet-host-backup.lock
 flock -n 9 || { echo 'TuVet backup is already running' >&2; exit 1; }
