@@ -48,14 +48,18 @@ test('insurance records manual observations, searches, filters and preserves rel
     'aseguradora de demostracion',
   ]) {
     await search.fill(term);
-    await expect(page.getByTitle('quote-demo-001').first()).toBeVisible();
+    await expect(
+      page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first(),
+    ).toBeVisible();
   }
   await search.fill('sin resultado QA');
   await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
   await expect(search).toHaveValue('');
   await page.getByLabel('Estado observado').first().selectOption('SENT_TO_INSURER');
-  await expect(page.getByTitle('quote-demo-001').first()).toBeVisible();
+  await expect(
+    page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first(),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Restablecer filtro' }).click();
 
   await page.getByRole('button', { name: 'Registrar actualización' }).last().click();
@@ -72,7 +76,7 @@ test('insurance records manual observations, searches, filters and preserves rel
   await expect(
     page.locator('li').filter({ hasText: 'Respuesta administrativa sintética para QA.' }),
   ).toBeVisible();
-  await page.locator('a[title="quote-demo-001"]').first().click();
+  await page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first().click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Borrador');
   await page.goto('/hospitalizations');

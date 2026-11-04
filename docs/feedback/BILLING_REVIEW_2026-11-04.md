@@ -12,12 +12,20 @@ Fuente conservada en `../qa/sources/CLIENT_BILLING_REVIEW_2026-11-04.txt`.
 - Importes nuevos: máximo dos decimales, mínimo 0.01 y referencia de reserva obligatoria para cheque. Los registros históricos siguen siendo legibles; el cálculo agrega cada pago en centavos, como el libro PostgreSQL.
 - Versiones: no se puede cambiar paciente, caso, número de versión, raíz, origen o fecha de creación al editar un borrador. Las revisiones continúan por su flujo específico y las enviadas permanecen inmutables.
 - Seguro: se usa el pagador de la cotización; una cuenta particular/empresa no entra por tener el paciente una aseguradora. Las solicitudes existentes conservan su aseguradora registrada. La fecha inicial del formulario respeta la hora local.
+- Reporte y CSV: los pagos históricos también se suman/redondean por centavos, tanto aplicados como reversados.
+- Regresión adicional: el menú de acciones clínicas heredaba posicionamiento y recorte de estilos antiguos. Se separó el botón del contenedor desplazable; Historia clínica vuelve a ser seleccionable sin controles superpuestos.
 
-## Evidencia en curso
+## Verificación técnica
 
 Preflight aprobado; 331 pruebas unitarias en 67 archivos; seis grupos PostgreSQL con rol restringido, RLS y datos exclusivamente sintéticos aprobados. Incluyen concurrencia, reintentos, sobrepago, centavos, límites por rol/organización, revisiones, reversión auditada y aseguradora. Tablero poblado sin desbordamiento en 320, 390, 768, 1024, 1440 y 1600 px.
 
-La regresión completa de navegador y la simulación HTTP de respuesta perdida se registrarán aquí antes de desplegar. Esta fase de código no constituye confirmación de publicación en producción.
+Regresión amplia: 234 aprobadas, una omitida; tres fallos investigados (hidratación inicial transitoria del acceso, selector de enlace desactualizado y menú clínico recortado). La repetición final de los seis archivos afectados pasó 61/61, incluyendo los tres casos. Revisión de todas las rutas en 1440 y 390 px, seis roles, permisos, descuentos por categorías, lectura/escritura de cotizaciones, recibos PDF, reversión y reporte.
+
+Pruebas conectadas: 2/2 aprobadas sobre imagen `690d680df844d538030b07e09314df82b22bb169`, base PostgreSQL temporal independiente. Una respuesta HTTP 503 se simuló DESPUÉS del commit de un pago; cerrar/reabrir/reintentar conservó el payload completo, un solo pago y el saldo correcto. También se verificaron CSRF, centavos, entidad ajena, aviso de médicos y cierre de sesión. Los ajustes posteriores son reporte/CSV, menú clínico y evidencias; los cubren las pruebas unitarias y los 61 casos finales.
+
+Otros controles: 144/144 pruebas Node, 76/76 QA, compilación Next y standalone, TypeScript, ESLint, formato y escaneo de secretos aprobados. Revisión equivalente de los archivos financieros contra `origin/main` y el lote anterior: validación de entradas, aislamiento, auditoría, versiones y reintentos revisados; sin hallazgos P0/P1 pendientes dentro de este lote. Revisión React aplicada a hooks, estados de envío, formularios, imports y componentes compartidos.
+
+Logs locales fuera de Git: `C:/Temp/analiza-billing-postgres.log`, `analiza-billing-connected-final.log`, `analiza-billing-unit-final.log`, `analiza-billing-check3.log`, `analiza-billing-regression.log`, `analiza-billing-focused-final.log`, `analiza-billing-visual-final.log`. La publicación y comprobación pública se agregan después del despliegue.
 
 ## Evidencia histórica y límites
 

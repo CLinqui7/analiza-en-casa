@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { paymentReportCsv, paymentReportTotals } from './payment-report';
 import { paymentInputSchema, paymentSchema, quoteSchema } from '@analiza/contracts';
 import {
   calculateQuoteBalance,
@@ -6,6 +7,7 @@ import {
   insurerForQuote,
 } from '@analiza/domain';
 
+// test-id: vitest:billing-integrity
 const payment = {
   id: 'p',
   quoteId: 'q',
@@ -48,6 +50,13 @@ describe('Billing precision and immutable version identity', () => {
       paid: 0.02,
       balance: 99.98,
     });
+    const rows = [
+      legacy,
+      { ...legacy, id: 'p2' },
+      { ...legacy, id: 'p3', status: 'VOIDED' as const, amount: 0.015 },
+    ].map((payment) => ({ payment, patientName: 'QA', quoteCode: 'QA' }));
+    expect(paymentReportTotals(rows)).toEqual({ applied: 0.02, voided: 0.02 });
+    expect(paymentReportCsv(rows).split('\n').at(-1)).toContain('0.02');
   });
   it.each([
     'patientId',

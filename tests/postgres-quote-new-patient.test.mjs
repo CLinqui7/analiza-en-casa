@@ -23,9 +23,10 @@ test('new-patient quotes keep patient integrity while allowing no hospitalizatio
   assert.match(repository, /stored\.caseId \?\? null/);
 });
 
-test('draft replacement cannot silently switch patient or hospitalization identity', () => {
-  assert.match(repository, /currentQuote\.patientId !== quote\.patientId/);
-  assert.match(repository, /currentQuote\.caseId !== quote\.caseId/);
+test('draft replacement cannot silently switch patient or hospitalization identity', async () => {
+  assert.match(repository, /hasSameQuoteVersionIdentity\(currentQuote, quote\)/);
+  const domain = await readFile(new URL('../packages/domain/src/index.ts', import.meta.url), 'utf8');
+  assert.match(domain, /\['patientId', 'caseId', 'version', 'rootQuoteId', 'originalQuoteId', 'createdAt'\]/);
   assert.match(repository, /previousQuote\.patientId !== quote\.patientId/);
   assert.match(repository, /previousQuote\.caseId !== quote\.caseId/);
 });

@@ -9,6 +9,7 @@ import {
   paymentMethodLabel,
   paymentReportCsv,
   paymentReportRows,
+  paymentReportTotals,
   paymentStatusLabel,
   type PaymentReportFilters,
 } from '@/lib/payment-report';
@@ -28,14 +29,7 @@ export function PaymentsReportPage() {
     () => paymentReportRows(payments, quotes, patients, filters),
     [payments, quotes, patients, filters],
   );
-  const totals = rows.reduce(
-    (sum, { payment }) => {
-      if (payment.status === 'APPLIED') sum.applied += payment.amount;
-      else sum.voided += payment.amount;
-      return sum;
-    },
-    { applied: 0, voided: 0 },
-  );
+  const totals = paymentReportTotals(rows);
 
   function downloadCsv() {
     const blob = new Blob(['\uFEFF', paymentReportCsv(rows)], { type: 'text/csv;charset=utf-8' });

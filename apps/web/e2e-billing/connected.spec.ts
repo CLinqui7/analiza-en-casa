@@ -9,6 +9,9 @@ async function login(page: Page, path: string, role = 'admin') {
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(secret);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page).toHaveURL(new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), {
+    timeout: 30000,
+  });
   await expect(page.locator('main h1')).toBeVisible({ timeout: 30000 });
 }
 async function api(page: Page, url: string, data?: unknown, csrf?: string) {
@@ -32,6 +35,27 @@ test('a committed payment with lost response retries once even after closing the
   page,
 }) => {
   await login(page, '/receivables?quote=' + fixtures.quoteId);
+  const initial = await api(page, '/api/workspace');
+  expect(initial.status).toBe(200);
+  const initialCsrf = (await api(page, '/api/auth/csrf')).body.csrfToken;
+  for (const payment of initial.body.payments.filter(
+    (p: { quoteId: string; reference?: string; status: string }) =>
+      p.quoteId === fixtures.quoteId &&
+      p.reference?.startsWith('QA-RETRY-') &&
+      p.status === 'APPLIED',
+  )) {
+    expect(
+      (
+        await api(
+          page,
+          '/api/operations',
+          { command: 'payment.void', paymentId: payment.id, reason: 'Restaurar saldo tras QA' },
+          initialCsrf,
+        )
+      ).status,
+    ).toBe(200);
+  }
+  await page.reload();
   const row = page
     .getByRole('row')
     .filter({ has: page.getByTitle(fixtures.quoteId) })
@@ -80,7 +104,7 @@ test('a committed payment with lost response retries once even after closing the
   expect(attempts[1]).toEqual(attempts[0]);
   await page.reload();
   await expect(row).toContainText('79.71');
-  const snapshot = await api(page, '/api/operations');
+  const snapshot = await api(page, '/api/workspace');
   expect(snapshot.status).toBe(200);
   const recorded = snapshot.body.payments.filter(
     (p: { reference?: string }) => p.reference === reference,

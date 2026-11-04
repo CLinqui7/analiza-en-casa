@@ -79,6 +79,18 @@ export function paymentReportRows(
     );
 }
 
+/** Match persisted ledger cents, including legacy fractional amounts. */
+export function paymentReportTotals(rows: PaymentReportRow[]) {
+  const cents = rows.reduce(
+    (sum, { payment }) => {
+      sum[payment.status === 'APPLIED' ? 'applied' : 'voided'] += Math.round(payment.amount * 100);
+      return sum;
+    },
+    { applied: 0, voided: 0 },
+  );
+  return { applied: cents.applied / 100, voided: cents.voided / 100 };
+}
+
 function csvValue(value: string): string {
   return /^[\s\u0000-\u001f]*[=+@-]/.test(value) ? `'${value}` : value;
 }
@@ -101,7 +113,7 @@ export function paymentReportCsv(rows: PaymentReportRow[]): string {
         payment.createdAt,
         patientName,
         quoteCode,
-        payment.amount.toFixed(2),
+        (Math.round(payment.amount * 100) / 100).toFixed(2),
         payment.paymentMethod ? paymentMethodLabel[payment.paymentMethod] : 'No registrado',
         payment.reference ?? '',
         paymentStatusLabel[payment.status],

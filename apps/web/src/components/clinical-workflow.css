@@ -110,6 +110,11 @@
   min-width: 0;
 }
 .clinical-patient-actions > details {
+  position: relative;
+  inset: auto;
+  display: block;
+  overflow: visible;
+  max-height: none;
   flex: 0 0 44px;
   width: 44px;
   min-width: 44px;
@@ -119,6 +124,9 @@
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+.clinical-patient-actions > details[open] {
+  z-index: 30;
 }
 .clinical-row-menu {
   position: relative;
@@ -142,6 +150,9 @@
   position: absolute;
   z-index: 20;
   right: 0;
+  top: calc(100% + 6px);
+  max-height: min(360px, 50dvh);
+  overflow-y: auto;
   width: min(290px, 80vw);
   display: grid;
   gap: 0.5rem;

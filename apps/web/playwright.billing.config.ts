@@ -7,6 +7,7 @@ if (
   throw new Error('Billing QA requires the isolated synthetic database.');
 export default defineConfig({
   testDir: './e2e-billing',
+  outputDir: './test-results-billing',
   timeout: 90000,
   workers: 1,
   fullyParallel: false,

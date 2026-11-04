@@ -8,6 +8,7 @@ async function login(page: Page) {
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 }
+// test-id: playwright:billing-review-responsive
 test('populated insurance cards keep all text and controls inside at six widths', async ({
   page,
 }, info) => {
@@ -59,6 +60,12 @@ test('populated insurance cards keep all text and controls inside at six widths'
   await expect(page.locator('.insurance-pending-card')).toHaveCount(1);
   for (const width of [1600, 1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1000 });
+    if (width <= 390)
+      await expect
+        .poll(() =>
+          page.locator('.sidebar').evaluate((element) => element.getBoundingClientRect().right),
+        )
+        .toBeLessThanOrEqual(1);
     const overflow = await page.evaluate(() => {
       const cards = [
         ...document.querySelectorAll<HTMLElement>('.insurance-card,.insurance-pending-card'),
@@ -81,6 +88,7 @@ test('populated insurance cards keep all text and controls inside at six widths'
   }
 });
 
+// test-id: playwright:billing-review-lifecycle
 test('quote revision, receivables, reservation payment, reversal and report reconcile', async ({
   page,
 }) => {
@@ -145,7 +153,9 @@ test('quote revision, receivables, reservation payment, reversal and report reco
     ).toContainText('(v2)');
   }
   await page.goto('/receivables');
-  const row = page.getByRole('row').filter({ has: page.locator('strong[title="billing-revision"]') });
+  const row = page
+    .getByRole('row')
+    .filter({ has: page.locator('strong[title="billing-revision"]') });
   await expect(row).toContainText('80.00');
   await row.getByRole('button', { name: 'Registrar pago' }).click();
   const dialog = page.getByRole('dialog');
