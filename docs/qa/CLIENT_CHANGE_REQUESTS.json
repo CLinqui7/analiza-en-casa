@@ -59,7 +59,7 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "8d1bbaa85208a989783d1f41c864c977e7b82e96f279001dfdcf05a473417876",
+      "functional_fingerprint": "679df76225e1b8578e449e961dbad557e377f0d3c8039f265775923094fb1334",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -619,7 +619,7 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "ce14eecaee27dc34d91d9c90e69ec7764ba7628a3047fcff34f6a811ff8d9d02",
+      "functional_fingerprint": "c1fc57b45294078d4879de3ae9c50b0319c73e019144e7daf6bbd7b74976328b",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -678,7 +678,7 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "3e687b856d252249bedcd4aa4518dbdbff3efd7bfe043c5881961149c9d593b0",
+      "functional_fingerprint": "f136a1e41980d279f03ecb99b4ab1c3f87d2bce293b471c625b9b4f42dda21cc",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -2168,5 +2168,19 @@
     "postgres_verification": "PASS: 10 assertion groups, 30 records; isolated restricted role, no production data. HTTP/browser evidence in release ledger.",
     "production": "PASS: HTTP 200; synthetic-organization persistence, idempotency, category configuration, twelve authenticated routes and browser reload. See docs/deployment/CONTABO_CLINICAL_RELEASE_2026-11-04.md.",
     "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+  },
+  "supplemental_billing_batch_20261104": {
+    "status": "TECHNICALLY_VERIFIED",
+    "source": "sources/CLIENT_BILLING_REVIEW_2026-11-04.txt",
+    "scope_and_verification": "../feedback/BILLING_REVIEW_2026-11-04.md",
+    "verification_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d",
+    "tests": [
+      "vitest:billing-integrity",
+      "playwright:billing-review-responsive",
+      "playwright:billing-review-lifecycle",
+      "playwright:billing-connected-retry",
+      "playwright:billing-connected-boundaries"
+    ],
+    "production": "Deployment result is recorded in the release ledger after Git-first publication."
   }
 }

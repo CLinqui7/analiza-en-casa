@@ -29,6 +29,12 @@ Logs locales fuera de Git: `C:/Temp/analiza-billing-postgres.log`, `analiza-bill
 
 ## Evidencia histórica y límites
 
+Implementación final: `fdd7f0e771e8598be6eddbabba6b187be7301b7d`. Las matrices conservan las 32 solicitudes y los 210 requisitos históricos con sus estados; se añade este lote y se renuevan las huellas de regresión, sin promociones a EXACT.
+
+![Tablero de seguros con datos sintéticos en escritorio](evidence/billing-20261104/insurance-desktop.png)
+
+[Captura móvil con datos sintéticos](evidence/billing-20261104/insurance-mobile.png).
+
 Revisión de lectura de evidencia financiera: CH08-E0087 (00:19:52.000, resumen y saldo), CH08-E0056 (00:18:06.200, acciones de pagos) y CH16-E0018 (00:50:18.200, descuento por categoría). Archivos bajo los capítulos CH08 y CH16 de `references/video-audit/`, intactos. No se declara una nueva revisión completa de los 17 capítulos ni se eleva ningún requisito a EXACT.
 
 Los porcentajes y responsabilidades de aseguradora siguen capturados por el equipo. No se inventaron reglas de reembolso/crédito cuando una revisión queda por debajo de lo pagado, corte contable ni integración fiscal. Los PDF son comprobantes internos no fiscales. Se mantienen abiertos los límites previamente documentados CH08-Q001/Q003/Q004/Q006 y CH07-Q008/Q009.

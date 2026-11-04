@@ -1,10 +1,11 @@
 {
+  "billing_regression_20261104": {"verification_sha":"fdd7f0e771e8598be6eddbabba6b187be7301b7d","evidence":"docs/feedback/BILLING_REVIEW_2026-11-04.md","requirement_ids":["CH07-F01","CH07-F02","CH07-F03","CH08-F04","CH08-F05","CH08-F07","CH08-F10","CH16-F01","CH16-F03"],"scope":"Financial regression: quote chains, payment retry and cents, version metadata, insurer snapshot, responsive cards and shared clinical menu CSS. Existing statuses/blockers preserved; no new EXACT or full video re-audit."},
   "schema_version": 2,
   "generated_at": "2026-10-13T02:06:23-06:00",
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-  "functional_fingerprint": "6846362657a733008a9ec713fdf069bde387884621173c802ef85dc1ff47aafe",
+  "implementation_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d",
+  "functional_fingerprint": "2c00ed182c18254ae1cbd6aa694c2f6d5f73c730626233ef2582ab060a0e0012",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
