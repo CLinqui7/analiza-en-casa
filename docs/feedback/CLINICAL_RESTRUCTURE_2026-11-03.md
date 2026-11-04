@@ -2,7 +2,7 @@
 
 Source: client-authorized `analizaencasa31oct_.pdf`, 12 pages, SHA256 `38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b`. Source stays outside Git. Screenshot and Nov 3 instruction authorize staff-entered configuration instead of historical blanket blockers. All pages were rendered and inspected. New video review was explicitly withdrawn by the user.
 
-Status: IN PROGRESS. No production completion or new EXACT certification claimed.
+Status: VERIFIED IN ISOLATED POSTGRESQL; production release pending the Git-first deployment gate. No new EXACT certification claimed.
 
 | Requirement | Source | Implementation / acceptance |
 |---|---|---|
@@ -41,3 +41,25 @@ Phase 2 database verification: PASS, ten assertion groups with 30 persisted clin
 Regression findings addressed: patient search again normalizes DUI separators and accents; historical case links open the corresponding new record section; old readings without case IDs remain visible in the patient-wide record without being attributed to a case; legacy pulse values and signed-document workflows remain accessible. Each patient's actions menu and per-medicine administration choices follow the new PDF. Mobile controls wrap long labels. Printing uses a separate clone of the selected section, excluding navigation and hidden page layout. Scale editors tolerate unfinished text while saving still requires a valid versioned definition.
 
 VPS read-only inspection, 2026-11-04 06:10 UTC: public application and database healthy; no failed systemd units; disk 20/193 GB (11%); approximately 10.8 GB RAM available; no reboot-required marker. Nineteen package updates remain, including Docker/containerd. No OS upgrade or daemon restart was performed as part of these clinical changes. Application release still awaits completion of browser verification and the Git-first deployment gate.
+
+## Final verification before release
+
+Tested application commit: `bebe3f6b4697a74be3c1a574207f65fdde743552`, pushed and verified on GitHub before building the isolated VPS QA image. The production instance was not used for these tests.
+
+- React/unit regression: 299 tests in 66 files passed; Node regression: 144 passed; QA: 76 checks passed. Typecheck, lint, production builds on Windows and Linux, standalone build and secret scan passed.
+- Browser regression: the last broad run passed 232 tests, skipped one and exposed two outdated CH17 assertions. The subsequent focused run passed all 29 cases, including those two, clinical actions, historical feedback, accessibility and the 55-route desktop/mobile review. This is not reported as a single clean broad run.
+- PostgreSQL: the final run passed all ten assertion groups and persisted 30 records with a restricted runtime role. It used new schema-validated synthetic fixtures. Direct SQL fixture omissions discovered during integration were corrected in the test harness.
+- Connected black-box browser suite: **6/6 passed in one final run** against the Linux production build colocated with its isolated database. Covered all manual forms, save/reload, nursing configuration, quote discount/revision, CSRF/tenant rejection, card corrections and full/individual printing. A configured 5% medicine discount produced USD 2.85 while the sent original remained USD 3.00. Unfinished JVPE profile edits no longer prevent saving a note; note provenance remains server-resolved.
+- Full-record PDF: all 13 rendered pages inspected; no blank pages. Individual card output excludes unrelated records. Print tables fit their page and use dark text. Final synthetic UI captures below were inspected at 1440 and 390 pixels; reduced-motion rendering was also checked.
+- Equivalent code review against `origin/main` and the task baseline covered new persistence, permission boundaries, immutable records/quotes, inventory allocation and correction paths. No unresolved P0/P1 issue was found in the changed scope. Existing exact-video certification and external integrations are not expanded by this review.
+- Release gates: client 32/32, video traceability 210/210, CH01–CH03, JSON/CSV/certification mirror, repository preflight and 17-chapter evidence-integrity audit passed. The last secret scan checked 1,214 files. These gates validate traceability and existing evidence, not a newly performed full video re-audit.
+
+Evidence logs are local, outside Git: `C:/Temp/analiza-nov04-postgres-final.log`, `C:/Temp/analiza-nov04-connected-final.log`, `C:/Temp/analiza-nov04-focused-browser.log`, `C:/Temp/analiza-nov03-full-browser-final.log`, `C:/Temp/analiza-nov04-react.log`, `C:/Temp/analiza-nov04-check.log`. Secrets and runtime account files are excluded.
+
+![Medical actions, synthetic desktop fixture](evidence/clinical-20261104/orders-desktop.png)
+
+![Fluid-balance form](evidence/clinical-20261104/balance-desktop.png)
+
+[Mobile clinical actions capture](evidence/clinical-20261104/orders-mobile.png) · [Staff guide](GUIA_CLINICA_2026-11-04.md)
+
+The supplied manual workflows are usable; staff supply missing rates, stock mappings and versioned scale definitions. No automated dose selection, extrapolated 24-hour balance, guessed classification intervals, financial credit or professional clinical certification is claimed. Historical requirements outside this PDF retain their residual scope in the matrices.

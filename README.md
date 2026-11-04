@@ -201,3 +201,14 @@ un build de producción configurado con `NEXT_PUBLIC_DATA_MODE=postgresql`.
 Requiere las variables privadas de QA y los identificadores sintéticos
 `CLINICAL_QA_PATIENT_ID` y `CLINICAL_QA_CASE_ID` emitidos por la prueba anterior.
 No apuntar estas pruebas a datos operativos. No guardar credenciales en Git.
+
+Si PostgreSQL se alcanza mediante un túnel SSH, ejecute la aplicación de QA junto
+a esa base aislada y exponga únicamente su puerto de prueba por loopback.
+`CLINICAL_QA_BASE_URL=http://127.0.0.1:55440` permite comprobar ese build sin
+arrancar otra aplicación local. Así no se introduce la latencia del túnel en cada
+consulta entre la aplicación y PostgreSQL. Los límites de conexión de producción
+y los controles de autorización se conservan.
+
+La [guía de uso clínico](docs/feedback/GUIA_CLINICA_2026-11-04.md) explica cómo
+capturar registros, configurar descuentos y escalas, completar JVPE y relacionar
+medicamentos con inventario.

@@ -59,7 +59,7 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "2850bf6f10c89ce3479348f852898c08d3ad679e84c992db7986a7ec3110170d",
+      "functional_fingerprint": "8d1bbaa85208a989783d1f41c864c977e7b82e96f279001dfdcf05a473417876",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -619,7 +619,7 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "1fd4d13d82868546b6ac48bf4687b7fab5e3f78c8de17b1d0540228e9d84d695",
+      "functional_fingerprint": "ce14eecaee27dc34d91d9c90e69ec7764ba7628a3047fcff34f6a811ff8d9d02",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -678,7 +678,7 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "2a940fe1bfd057ffb8433be9924a34a4b84ce2aa3a7cdc494743897a1c6c2bea",
+      "functional_fingerprint": "3e687b856d252249bedcd4aa4518dbdbff3efd7bfe043c5881961149c9d593b0",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
@@ -1047,15 +1047,16 @@
       "normalized_request": "Observaciones por ítem/general en tarjeta clínica autorizada",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Media",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-20"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-20",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "BLOCKED_CLIENT",
-      "production_status": "NEEDS_CLIENT_DEFINITION",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-MEDICAL-ORDERS"
       ],
@@ -1063,28 +1064,59 @@
         "CH10-F04"
       ],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical/medication-cards/page.tsx"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B5"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Aprobar el formulario versionado de tarjeta de medicamentos, el alcance por ítem/general, roles autorizados y la política de auditoría, versionado, corrección y firma; definir el manejo seguro de texto de diluciones/cuidados especiales.",
-      "client_question": "Aprobar el formulario versionado de tarjeta de medicamentos, el alcance por ítem/general, roles autorizados y la política de auditoría, versionado, corrección y firma; definir el manejo seguro de texto de diluciones/cuidados especiales.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Observaciones por ítem/general en tarjeta clínica autorizada",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Medication card instructions and per-medicine administration are retained; no automated dosing rules. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "BLOCKED_CLIENT",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Aprobar el formulario versionado de tarjeta de medicamentos, el alcance por ítem/general, roles autorizados y la política de auditoría, versionado, corrección y firma; definir el manejo seguro de texto de diluciones/cuidados especiales.",
+        "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-020",
@@ -1099,15 +1131,16 @@
       "normalized_request": "Entradas append-only por turno, totales 24h y cierre auditado",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
       "confirmation_required": true,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-21"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-21",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1115,28 +1148,59 @@
         "CH17-F011"
       ],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B5"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
-      "client_question": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": "Automatic shift closure and extrapolation beyond entered hours are outside the supplied manual form.",
       "acceptance_criteria": "Entradas append-only por turno, totales 24h y cierre auditado",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Six balance rows, totals for entered hours and manual endogenous/insensible amounts; no invented 24h extrapolation or automated closure. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Aprobar formulario, reglas de cierre/corrección y permisos por turno.",
+        "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-021",
@@ -1151,42 +1215,74 @@
       "normalized_request": "Escala EVA con versión institucional aprobada y selección única",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-22"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-22",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Aportar formulario/versionado institucional aprobado.",
-      "client_question": "Aportar formulario/versionado institucional aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala EVA con versión institucional aprobada y selección única",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Aportar formulario/versionado institucional aprobado.",
+        "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-022",
@@ -1201,42 +1297,74 @@
       "normalized_request": "Escala de Glasgow confirmada, versionada y con suma configurada",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-23"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-23",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Confirmar Glasgow y proporcionar formulario/versionado aprobado.",
-      "client_question": "Confirmar Glasgow y proporcionar formulario/versionado aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala de Glasgow confirmada, versionada y con suma configurada",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Confirmar Glasgow y proporcionar formulario/versionado aprobado.",
+        "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-023",
@@ -1251,42 +1379,74 @@
       "normalized_request": "Escala Ramsay con formulario aprobado y selección única",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-24"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-24",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
-      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala Ramsay con formulario aprobado y selección única",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni formulario aprobado."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+        "notes": "No existe motor ni formulario aprobado."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-024",
@@ -1301,42 +1461,74 @@
       "normalized_request": "Escala ECOG confirmada, versionada y con selección única",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-25"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-25",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Confirmar ECOG y proporcionar formulario/versionado aprobado.",
-      "client_question": "Confirmar ECOG y proporcionar formulario/versionado aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala ECOG confirmada, versionada y con selección única",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Confirmar ECOG y proporcionar formulario/versionado aprobado.",
+        "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-025",
@@ -1351,42 +1543,74 @@
       "normalized_request": "ESAS con dominios 0–10 según formulario aprobado",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-26"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-26",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
-      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "ESAS con dominios 0–10 según formulario aprobado",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+        "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-026",
@@ -1401,42 +1625,74 @@
       "normalized_request": "Escala Karnofsky confirmada y versionada",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-27"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-27",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Confirmar Karnofsky y proporcionar formulario/versionado aprobado.",
-      "client_question": "Confirmar Karnofsky y proporcionar formulario/versionado aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala Karnofsky confirmada y versionada",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Confirmar Karnofsky y proporcionar formulario/versionado aprobado.",
+        "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-027",
@@ -1451,42 +1707,74 @@
       "normalized_request": "Escala Downton con formulario y cálculo aprobados",
       "source_conflict": {
         "detected": false,
-        "detail": null
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-28"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-28",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
-      "client_question": "Proporcionar formulario/versionado institucional aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala Downton con formulario y cálculo aprobados",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "No existe motor ni versión aprobada."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": false,
+          "detail": null
+        },
+        "blocker_reason": "Proporcionar formulario/versionado institucional aprobado.",
+        "notes": "No existe motor ni versión aprobada."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-028",
@@ -1500,43 +1788,75 @@
       "normalized_interpretation": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
       "normalized_request": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
       "source_conflict": {
-        "detected": true,
-        "detail": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+        "detected": false,
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-29"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-29",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "SOURCE_CONFLICT",
-      "production_status": "SOURCE_CONFLICT",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "SOURCE_CONFLICT",
-      "blocker_reason": "¿La solicitud es Norton o Downton? Aportar versión/formulario institucional.",
-      "client_question": "¿La solicitud es Norton o Downton? Aportar versión/formulario institucional.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "SOURCE_CONFLICT",
+        "source_conflict": {
+          "detected": true,
+          "detail": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+        },
+        "blocker_reason": "¿La solicitud es Norton o Downton? Aportar versión/formulario institucional.",
+        "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-029",
@@ -1550,43 +1870,75 @@
       "normalized_interpretation": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
       "normalized_request": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
       "source_conflict": {
-        "detected": true,
-        "detail": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+        "detected": false,
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-30"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-30",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "SOURCE_CONFLICT",
-      "production_status": "SOURCE_CONFLICT",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "SOURCE_CONFLICT",
-      "blocker_reason": "Confirmar Índice Barthel y versión/puntuación institucional.",
-      "client_question": "Confirmar Índice Barthel y versión/puntuación institucional.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "SOURCE_CONFLICT",
+        "source_conflict": {
+          "detected": true,
+          "detail": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+        },
+        "blocker_reason": "Confirmar Índice Barthel y versión/puntuación institucional.",
+        "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-030",
@@ -1600,43 +1952,75 @@
       "normalized_interpretation": "Escala Braden confirmada y versionada",
       "normalized_request": "Escala Braden confirmada y versionada",
       "source_conflict": {
-        "detected": true,
-        "detail": "El texto dice Branden y la imagen parece Braden."
+        "detected": false,
+        "detail": "Latest client-supplied Oct31 PDF identifies the ten scales and the user authorizes manual staff configuration; original source and prior assessment are preserved."
       },
-      "confirmation_required": true,
+      "confirmation_required": false,
       "priority": "Baja",
       "source_attachments": [
-        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-31"
+        "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-31",
+        "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
-      "status": "MISSING",
-      "production_status": "MISSING",
+      "status": "PARTIAL",
+      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
       "video_requirement_ids": [],
       "react_files": [
-        "apps/web/src/app/(workspace)/clinical"
+        "packages/contracts/src/clinical-records.ts",
+        "apps/web/src/components/clinical-record-editor.tsx",
+        "apps/web/src/components/clinical-record-view.tsx",
+        "apps/web/src/components/clinical-configuration.tsx",
+        "apps/web/src/server/persistence/postgres-clinical-records.ts"
       ],
-      "db_objects": [],
+      "db_objects": [
+        "database/postgresql/migrations/039_clinical_records.sql"
+      ],
       "action_ids": [],
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "unit_test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries"
+      ],
+      "playwright_test_ids": [
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B6"
       ],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Confirmar Braden y proporcionar formulario/versionado aprobado.",
-      "client_question": "Confirmar Braden y proporcionar formulario/versionado aprobado.",
+      "blocker_type": null,
+      "blocker_reason": null,
+      "client_question": null,
       "acceptance_criteria": "Escala Braden confirmada y versionada",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": true,
-      "technical_status": "UNASSESSED",
-      "notes": "El texto dice Branden y la imagen parece Braden."
+      "technical_status": "VERIFIED",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "historical_assessment": {
+        "status": "MISSING",
+        "source_conflict": {
+          "detected": true,
+          "detail": "El texto dice Branden y la imagen parece Braden."
+        },
+        "blocker_reason": "Confirmar Braden y proporcionar formulario/versionado aprobado.",
+        "notes": "El texto dice Branden y la imagen parece Braden."
+      },
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "persistence_status": "VERIFIED"
     },
     {
       "change_id": "CR-031",
@@ -1749,21 +2133,27 @@
     }
   ],
   "supplemental_clinical_batch_20261103": {
-    "status": "IN_PROGRESS",
+    "status": "VERIFIED_PENDING_RELEASE",
     "source": "sources/CLIENT_CLINICAL_2026-10-31.txt",
     "pdf_sha256": "38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b",
     "scope_and_verification": "../feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
     "authorization": "User explicitly requested implementation of the Oct31 PDF and staff configuration of missing definitions on Nov3. No new video required.",
-    "verification_sha": null,
+    "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
     "tests": [
       "vitest:clinical-annex-scores",
       "vitest:clinical-record-boundaries",
       "playwright:clinical-restructure-forms",
       "playwright:clinical-annex-scales",
       "playwright:clinical-restructure-responsive",
-      "playwright:clinical-configuration-all-users"
+      "playwright:clinical-configuration-all-users",
+      "playwright:clinical-connected-persistence",
+      "playwright:clinical-connected-administration",
+      "playwright:clinical-connected-configuration",
+      "playwright:clinical-connected-discount",
+      "playwright:clinical-connected-correction-print",
+      "playwright:clinical-connected-security"
     ],
-    "postgres_verification": "PENDING scripts/verify-clinical-postgres.ts",
+    "postgres_verification": "PASS: 10 assertion groups, 30 records; isolated restricted role, no production data. HTTP/browser evidence in release ledger.",
     "production": "NOT_DEPLOYED"
   }
 }
