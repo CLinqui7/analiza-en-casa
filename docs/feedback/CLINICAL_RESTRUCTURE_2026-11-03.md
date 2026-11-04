@@ -2,7 +2,7 @@
 
 Source: client-authorized `analizaencasa31oct_.pdf`, 12 pages, SHA256 `38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b`. Source stays outside Git. Screenshot and Nov 3 instruction authorize staff-entered configuration instead of historical blanket blockers. All pages were rendered and inspected. New video review was explicitly withdrawn by the user.
 
-Status: DEPLOYED AND VERIFIED on Contabo, release `fc7e4c6206e1f4b01f6e24ad4395d88b8a816640`. No new EXACT certification claimed.
+Status: DEPLOYED AND VERIFIED on Contabo, final release `dfee2dc0dfe22f89fedde3c74fbbd8da26ed240a`. No new EXACT certification claimed.
 
 | Requirement | Source | Implementation / acceptance |
 |---|---|---|
@@ -71,3 +71,5 @@ Git-first release `fc7e4c6206e1f4b01f6e24ad4395d88b8a816640` deployed on Novembe
 `scripts/verify-clinical-release.mjs` passed all five checks: public readiness, verified synthetic organization/account, persisted clinical record with idempotent retry, staff-entered discount configuration, and twelve authenticated routes plus browser reload without JavaScript errors. Writes were limited to the existing synthetic QA organization. No main-organization patient, clinician, financial or clinical data was changed by these tests.
 
 The isolated QA containers, network, image tags and server environment files were removed; their SSH tunnels were closed and three local ephemeral credential files deleted. Production credentials and rollback images remain available. See [deployment and maintenance evidence](../deployment/CONTABO_CLINICAL_RELEASE_2026-11-04.md).
+
+Final follow-up release `dfee2dc0dfe22f89fedde3c74fbbd8da26ed240a` updates the bundled client registry from pending release to verified production. Application behavior is unchanged from the tested implementation. Authenticated read-only verification confirmed the displayed production status, the previously saved record, mobile layout, no JavaScript errors and HTTP 200. Local log: `C:/Temp/analiza-nov04-status-smoke.log`.

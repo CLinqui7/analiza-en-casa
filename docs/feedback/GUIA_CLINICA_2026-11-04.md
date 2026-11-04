@@ -8,8 +8,8 @@ El expediente reúne cinco secciones: **Resumen**, **Acciones médicas**, **Acci
 
 ## Completar la información que falta
 
-- **Catálogos → Diagnósticos y escalas:** agregue un diagnóstico y seleccione las escalas que corresponden. Sin una asociación se muestran todas. Las definiciones de escalas se pueden editar mediante campos o cargar desde un archivo JSON; una definición modificada necesita una nueva versión. Las evaluaciones previas conservan la definición con la que se guardaron.
-- **Perfiles de descuento:** registre los porcentajes por categoría que el equipo haya definido. Seleccione el perfil en la cotización y revise sus importes antes de guardarla. Si la cotización ya se envió, cree una revisión; el documento enviado se conserva.
+- **Administración → Diagnósticos y escalas:** agregue un diagnóstico y seleccione las escalas que corresponden. Sin una asociación se muestran todas. Las definiciones de escalas se pueden editar mediante campos o cargar desde un archivo JSON; una definición modificada necesita una nueva versión. Las evaluaciones previas conservan la definición con la que se guardaron.
+- **Administración → Descuentos:** registre los porcentajes por categoría que el equipo haya definido. Seleccione el perfil en la cotización y revise sus importes antes de guardarla. Si la cotización ya se envió, cree una revisión; el documento enviado se conserva.
 - **JVPE:** complete el número propio en el perfil o desde el formulario de notas. La nota usa el número vinculado a la cuenta que la guarda.
 
 Los usuarios operativos pueden completar los catálogos autorizados, incluidas las enfermeras. Los permisos clínicos y el aislamiento entre organizaciones se conservan.
