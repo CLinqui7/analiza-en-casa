@@ -70,15 +70,12 @@ test('category discount survives recovery and saving with only the selected cate
   await page.screenshot({ path: info.outputPath('discount.png') });
   await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption({ index: 1 });
   await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
-  await dialog
-    .getByLabel('Diagnóstico', { exact: true })
-    .fill('Verificación sintética de descuento');
+  await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(dialog).toHaveCount(0);
   const saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]').find(
-      (quote: { diagnosisSummary: string }) =>
-        quote.diagnosisSummary === 'Verificación sintética de descuento',
+      (quote: { diagnosisSummary: string }) => quote.diagnosisSummary === 'Faringitis aguda',
     ),
   );
   expect(saved.total).toBe(56);

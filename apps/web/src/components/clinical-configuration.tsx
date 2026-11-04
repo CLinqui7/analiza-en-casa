@@ -1,5 +1,6 @@
 'use client';
 import { useState, type FormEvent } from 'react';
+import { z } from 'zod';
 import { Button, Dialog, Panel } from '@analiza/ui';
 import {
   clinicalScales,
@@ -10,6 +11,19 @@ import {
 import { quoteCategories } from '@analiza/domain';
 import { useOperations } from '@/lib/use-operations';
 import './clinical-workflow.css';
+
+// Rendering accepts unfinished text while the save boundary remains strict.
+const definitionDraftSchema = z.object({
+  ...scaleDefinitionSchema.shape,
+  version: z.string(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      options: z.array(z.object({ label: z.string(), score: z.number() })),
+    }),
+  ),
+});
 
 export function ClinicalConfiguration({ discounts = false }: { discounts?: boolean }) {
   const operations = useOperations();
@@ -40,7 +54,7 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
   const [definitionJson, setDefinitionJson] = useState('');
   const parsedDefinition = (() => {
     try {
-      return scaleDefinitionSchema.safeParse(JSON.parse(definitionJson));
+      return definitionDraftSchema.safeParse(JSON.parse(definitionJson));
     } catch {
       return null;
     }

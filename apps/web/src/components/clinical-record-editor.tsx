@@ -38,17 +38,20 @@ export function ClinicalRecordEditor({
   original,
   operations,
   onClose,
+  onSaved,
 }: {
   kind: ClinicalKind;
   patient?: string;
   original?: ClinicalRecord;
   operations: Operations;
   onClose: () => void;
+  onSaved: () => void;
 }) {
   const { patients, hospitalizations, quotes, nursingResources } = useWorkspace();
   const { session } = useAuth();
   const [patientId, setPatientId] = useState(original?.patientId ?? initialPatient);
   const [caseId, setCaseId] = useState(original?.caseId ?? '');
+  const [caseQuery, setCaseQuery] = useState('');
   const [id] = useState(() => crypto.randomUUID());
   const [error, setError] = useState('');
   const [rowCount, setRowCount] = useState(
@@ -114,12 +117,12 @@ export function ClinicalRecordEditor({
   );
   const card = cards[0];
   const nurse = nursingResources.find((resource) => resource.userId === session?.userId);
-  const [applied, setApplied] = useState('');
+  const [applied, setApplied] = useState<Record<string, string>>({});
   const [jvpe, setJvpe] = useState(operations.currentJvpe || nurse?.boardRegistrationNumber || '');
   function changeCase(value: string) {
     setCaseId(value);
     setScaleValues({});
-    setApplied('');
+    setApplied({});
     setRowCount(1);
     setError('');
     if (!original)
@@ -184,7 +187,13 @@ export function ClinicalRecordEditor({
         })),
       };
     else if (kind === 'SCALE')
-      payload = { kind, scaleId: selectedScale.id, values: scaleValues, notes: value('notes') };
+      payload = {
+        kind,
+        scaleId: selectedScale.id,
+        definitionVersion: selectedScale.version,
+        values: scaleValues,
+        notes: value('notes'),
+      };
     else if (kind === 'ADMINISTRATION')
       payload = {
         kind,
@@ -193,15 +202,37 @@ export function ClinicalRecordEditor({
         dose: value('dose'),
         presentation: value('presentation') as (typeof medicationPresentations)[number],
         route: value('route') as (typeof medicationRoutes)[number],
-        items: [
-          {
-            medicationId: value('medication'),
-            applied: applied === 'yes',
-            reason: value('reason'),
-          },
-        ],
+        items: (card?.medications ?? [])
+          .filter((medication) => applied[medication.id])
+          .map((medication) => ({
+            medicationId: medication.id,
+            applied: applied[medication.id] === 'yes',
+            reason: value(`reason-${medication.id}`),
+          })),
       };
     else payload = { kind, summary: value('summary') };
+    if (payload.kind === 'ADMINISTRATION' && (!card || !payload.items.length)) {
+      setError(
+        !card
+          ? 'Cree y guarde la tarjeta de medicamentos de esta hospitalización antes de registrar una aplicación.'
+          : 'Marque al menos un medicamento como aplicado o no aplicado.',
+      );
+      return;
+    }
+    if (
+      payload.kind === 'MEDICATION_CARD' &&
+      payload.stock.some(
+        (entry) =>
+          !entry.warehouseId ||
+          !Number.isInteger(entry.unitsPerApplication) ||
+          entry.unitsPerApplication < 1,
+      )
+    ) {
+      setError(
+        'Complete el origen y las unidades por aplicación de cada medicamento asignado al inventario.',
+      );
+      return;
+    }
     const parsed = clinicalRecordInputSchema.safeParse({
       id,
       patientId,
@@ -224,7 +255,7 @@ export function ClinicalRecordEditor({
         return;
       }
     }
-    if (await operations.execute({ command: 'clinical.record', record: parsed.data })) onClose();
+    if (await operations.execute({ command: 'clinical.record', record: parsed.data })) onSaved();
   }
   return (
     <Dialog
@@ -254,6 +285,7 @@ export function ClinicalRecordEditor({
               required
               onChange={(event) => {
                 setPatientId(event.target.value);
+                setCaseQuery('');
                 changeCase('');
               }}
             >
@@ -266,6 +298,14 @@ export function ClinicalRecordEditor({
             </select>
           </label>
           <label>
+            Filtrar hospitalizaciones por paciente, DUI o código
+            <input
+              type="search"
+              value={caseQuery}
+              onChange={(event) => setCaseQuery(event.target.value)}
+            />
+          </label>
+          <label>
             Hospitalización
             <select
               value={caseId}
@@ -275,7 +315,14 @@ export function ClinicalRecordEditor({
             >
               <option value="">Seleccione hospitalización</option>
               {hospitalizations
-                .filter((record) => record.patientId === patientId)
+                .filter(
+                  (record) =>
+                    record.patientId === patientId &&
+                    (record.id === caseId ||
+                      `${record.id} ${patients.find((p) => p.id === patientId)?.fullName ?? ''} ${patients.find((p) => p.id === patientId)?.documentId ?? ''}`
+                        .toLocaleLowerCase('es')
+                        .includes(caseQuery.toLocaleLowerCase('es'))),
+                )
                 .map((record) => (
                   <option key={record.id} value={record.id}>
                     {record.id} · {record.startDate}
@@ -700,18 +747,6 @@ export function ClinicalRecordEditor({
                   Los crónicos no modifican inventario ni cotización. Para modificar el origen o las
                   unidades, actualice la tarjeta de medicamentos.
                 </p>
-                <label>
-                  Medicamento
-                  <select name="medication" required>
-                    <option value="">Seleccione medicamento</option>
-                    {card.medications?.map((med) => (
-                      <option key={med.id} value={med.id}>
-                        {med.name}
-                        {med.chronic ? ' · Crónico' : ''}
-                      </option>
-                    ))}
-                  </select>
-                </label>
                 <div className="form-grid">
                   <label>
                     Hora
@@ -739,25 +774,38 @@ export function ClinicalRecordEditor({
                       ))}
                     </select>
                   </label>
-                  <label>
-                    Aplicación
-                    <select
-                      value={applied}
-                      required
-                      onChange={(event) => setApplied(event.target.value)}
-                    >
-                      <option value="">Seleccione resultado</option>
-                      <option value="yes">Aplicado</option>
-                      <option value="no">No aplicado</option>
-                    </select>
-                  </label>
-                  {applied === 'no' ? (
-                    <label>
-                      Motivo de no aplicación
-                      <textarea name="reason" required />
-                    </label>
-                  ) : null}
                 </div>
+                <p>
+                  Marque los medicamentos de esta administración. Los que deje sin registrar no se
+                  modificarán.
+                </p>
+                {card.medications?.map((med) => (
+                  <fieldset key={med.id}>
+                    <legend>
+                      {med.name}
+                      {med.chronic ? ' · Crónico' : ''}
+                    </legend>
+                    <label>
+                      Aplicación · {med.name}
+                      <select
+                        value={applied[med.id] ?? ''}
+                        onChange={(event) =>
+                          setApplied({ ...applied, [med.id]: event.target.value })
+                        }
+                      >
+                        <option value="">Sin registrar en esta atención</option>
+                        <option value="yes">Se aplicó</option>
+                        <option value="no">No se aplicó</option>
+                      </select>
+                    </label>
+                    {applied[med.id] === 'no' ? (
+                      <label>
+                        Motivo de no aplicación · {med.name}
+                        <textarea name={`reason-${med.id}`} required />
+                      </label>
+                    ) : null}
+                  </fieldset>
+                ))}
               </>
             ) : (
               <p className="notice">

@@ -245,6 +245,77 @@ try {
     );
   }
   check('all ten scale definitions and persisted arithmetic');
+  for (const role of ['NURSE', 'DOCTOR', 'FINANCE', 'INVENTORY', 'AUDITOR'] as const) {
+    const staff = { ...actor, role, userId: `qa-${role.toLowerCase()}` };
+    const entry = {
+      id: `discount-${role}-${run}`,
+      category: 'DISCOUNT_PROFILE',
+      label: `Perfil sintético ${role}`,
+      active: true,
+      categoryRates: { SERVICES: 12, MEDICATIONS: 5 },
+      notes: 'Datos sintéticos, no aplicar a pacientes reales.',
+    };
+    await backend.operations.execute(staff, { command: 'configuration.save', entry });
+    const restored = (await backend.operations.list(staff)).configuration.find(
+      (item) => item.id === entry.id,
+    );
+    assert.deepEqual(restored?.categoryRates, entry.categoryRates);
+    await assert.rejects(
+      backend.operations.execute(staff, {
+        command: 'configuration.save',
+        entry: { ...entry, category: 'DIAGNOSIS' },
+      }),
+    );
+  }
+  const definition = structuredClone(clinicalScales[0]);
+  definition.version = `qa-version-${run}`;
+  definition.items[0].options[0].label = 'Respuesta sintética QA';
+  const scaleEntry = {
+    id: 'scale-EVA',
+    category: 'SCALE',
+    label: 'EVA',
+    active: true,
+    scaleDefinition: definition,
+  };
+  await backend.operations.execute(actor, { command: 'configuration.save', entry: scaleEntry });
+  const assessment = await save({
+    kind: 'SCALE',
+    scaleId: 'EVA',
+    definitionVersion: definition.version,
+    values: { Dolor: 0 },
+    notes: '',
+  });
+  const changedDefinition = structuredClone(definition);
+  changedDefinition.items[0].options[0].label = 'Nueva respuesta sintética';
+  await assert.rejects(
+    backend.operations.execute(actor, {
+      command: 'configuration.save',
+      entry: { ...scaleEntry, scaleDefinition: changedDefinition },
+    }),
+    /versión/,
+  );
+  changedDefinition.version += '-2';
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: { ...scaleEntry, scaleDefinition: changedDefinition },
+  });
+  await assert.rejects(
+    save({
+      kind: 'SCALE',
+      scaleId: 'EVA',
+      definitionVersion: definition.version,
+      values: { Dolor: 0 },
+      notes: '',
+    }),
+  );
+  assert.equal(assessment.scaleDefinition?.items[0].options[0].label, 'Respuesta sintética QA');
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: { ...scaleEntry, scaleDefinition: clinicalScales[0] },
+  });
+  check(
+    'all staff persist discount configuration; scale versions reject stale forms and preserve snapshots',
+  );
   const card = await save({
     kind: 'MEDICATION_CARD',
     chronic: 'Crónico sintético externo',
@@ -303,6 +374,75 @@ try {
     /Existencias insuficientes/,
   );
   check('concurrent retries consume once; concurrent applications cannot overdraw stock');
+  const traceIds: string[] = [];
+  await transaction(pool, actor, async (c) => {
+    for (const [suffix, expiry, quality] of [
+      ['early', '2026-11-04', 'AVAILABLE'],
+      ['late', '2026-12-01', 'AVAILABLE'],
+      ['expired', '2026-10-01', 'AVAILABLE'],
+      ['quarantined', '2026-11-10', 'QUARANTINED'],
+    ]) {
+      const traceId = `trace-${suffix}-${run}`;
+      traceIds.push(traceId);
+      const trace = {
+        id: traceId,
+        itemId,
+        supplierCatalogItemId: itemId,
+        kind: 'LOT',
+        number: traceId.toUpperCase(),
+        qualityStatus: quality,
+        expiresOn: expiry,
+        receivedAt: `${date}T08:00:00Z`,
+      };
+      await c.query(
+        'INSERT INTO analiza.inventory_trace_records(organization_id,id,kind,item_id,supplier_catalog_item_id,number_normalized,quality_status,expires_on,received_at,body) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8,$9::jsonb)',
+        [
+          actor.organizationId,
+          traceId,
+          'LOT',
+          itemId,
+          trace.number,
+          quality,
+          expiry,
+          trace.receivedAt,
+          JSON.stringify(trace),
+        ],
+      );
+      await c.query(
+        'INSERT INTO analiza.inventory_trace_balances(organization_id,trace_record_id,warehouse_id,quantity) VALUES($1,$2,$3,1)',
+        [actor.organizationId, traceId, warehouseId],
+      );
+      const movement = {
+        id: `entry-${traceId}`,
+        itemId,
+        warehouseId,
+        kind: 'ENTRY',
+        quantity: 1,
+        createdAt: trace.receivedAt,
+        traceRecordId: traceId,
+        reason: 'Entrada sintética de lote',
+        user: actor.userId,
+      };
+      await c.query(
+        'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,trace_record_id) VALUES($1,$2,$3,$4,$2,1,$5::jsonb,$6)',
+        [actor.organizationId, movement.id, itemId, warehouseId, JSON.stringify(movement), traceId],
+      );
+    }
+  });
+  const firstLot = await save(administration(`${quoteId}:medicine`, true));
+  await transaction(pool, actor, async (c) => {
+    const movement = await c.query(
+      'SELECT trace_record_id FROM analiza.inventory_movements WHERE organization_id=$1 AND id=$2',
+      [actor.organizationId, firstLot.stockMovementIds?.[0]],
+    );
+    assert.equal(movement.rows[0].trace_record_id, traceIds[0]);
+  });
+  await save(administration(`${quoteId}:medicine`, true));
+  await assert.rejects(save(administration(`${quoteId}:medicine`, true)), /vigentes suficientes/);
+  assert.equal(await balance(), 2);
+  check(
+    'FEFO consumes released valid lots first and leaves expired or quarantined stock untouched',
+  );
   const updated = await save(
     { kind: 'NURSING_NOTE', rows: [{ time: '08:00', note: 'Corrección sintética' }] },
     { correctionOf: note.id, correctionReason: 'Corrección de texto QA' },

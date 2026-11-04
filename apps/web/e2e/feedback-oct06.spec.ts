@@ -136,18 +136,33 @@ test('clinical case pickers filter by patient or case without dropping the selec
   await login(page, '/clinical/care-plans');
   await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
   const dialog = page.getByRole('dialog');
+  await dialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
   const cases = dialog.getByRole('combobox', { name: 'Hospitalización' });
+  await cases.selectOption('case-demo-001');
   const initial = await cases.inputValue();
   await dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código').fill('no-existe');
-  await expect(cases.locator('option')).toHaveCount(1);
+  await expect(cases.locator('option')).toHaveCount(2);
   await expect(cases).toHaveValue(initial);
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
 
   await page.goto('/clinical/balance');
-  const selectedCase = page.getByLabel('Paciente y hospitalización');
+  await page.getByRole('button', { name: 'Registrar nuevo balance' }).click();
+  const balanceDialog = page.getByRole('dialog');
+  await balanceDialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  const selectedCase = balanceDialog.getByRole('combobox', {
+    name: 'Hospitalización',
+    exact: true,
+  });
+  await selectedCase.selectOption('case-demo-001');
   const initialBalance = await selectedCase.inputValue();
-  await page.getByLabel('Filtrar balances por paciente, DUI o código').fill('no-existe');
-  await expect(selectedCase.locator('option')).toHaveCount(1);
+  await balanceDialog
+    .getByLabel('Filtrar hospitalizaciones por paciente, DUI o código')
+    .fill('no-existe');
+  await expect(selectedCase.locator('option')).toHaveCount(2);
   await expect(selectedCase).toHaveValue(initialBalance);
 });
 

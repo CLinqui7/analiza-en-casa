@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button, EmptyState, Panel } from '@analiza/ui';
+import { normalizeText, normalizeDocument } from '@analiza/domain';
 import {
   clinicalKinds,
   clinicalLabels,
@@ -37,9 +38,8 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
       : clinicalKinds.filter((kind) => !medical.includes(kind) || kind === 'VITALS');
   const visiblePatients = patients.filter(
     (patient) =>
-      `${patient.fullName} ${patient.documentId}`
-        .toLocaleLowerCase('es')
-        .includes(query.toLocaleLowerCase('es')) &&
+      (normalizeText(patient.fullName).includes(normalizeText(query)) ||
+        normalizeDocument(patient.documentId).includes(normalizeDocument(query))) &&
       (kind !== 'MEDICATION_CARD' || quotes.some((quote) => quote.patientId === patient.id)),
   );
   const matchingIds = new Set(visiblePatients.map((patient) => patient.id));
@@ -57,6 +57,17 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
         <Link className="button button-secondary" href="/clinical">
           Ver expedientes
         </Link>
+        {initialKind && can('clinical:write') ? (
+          <Button onClick={() => setEditor({})}>
+            {kind === 'FLUID_BALANCE'
+              ? 'Registrar nuevo balance'
+              : kind === 'CARE_PLAN'
+                ? 'Nuevo plan de cuidado'
+                : kind === 'ADMINISTRATION'
+                  ? 'Registrar nueva administración'
+                  : `Registrar ${clinicalLabels[kind].toLocaleLowerCase('es')}`}
+          </Button>
+        ) : null}
       </header>
       {!initialKind ? (
         <>
@@ -112,21 +123,92 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
                 <strong>{patient.fullName}</strong>
                 <small>{patient.documentId}</small>
               </div>
-              {can('clinical:write') ? (
-                <Button
-                  className="button-secondary"
-                  onClick={() => {
-                    setMessage('');
-                    setEditor({ patient: patient.id });
-                  }}
-                >
-                  {clinicalLabels[kind]}
-                </Button>
-              ) : (
-                <Link href={`/clinical?patient=${encodeURIComponent(patient.id)}`}>
-                  Ver expediente
-                </Link>
-              )}
+              <div className="clinical-patient-actions">
+                {can('clinical:write') ? (
+                  <Button
+                    className="button-secondary"
+                    onClick={() => {
+                      setMessage('');
+                      setEditor({ patient: patient.id });
+                    }}
+                  >
+                    {clinicalLabels[kind]}
+                  </Button>
+                ) : (
+                  <Link
+                    className="button button-secondary"
+                    href={`/clinical?patient=${encodeURIComponent(patient.id)}`}
+                  >
+                    Ver expediente
+                  </Link>
+                )}
+                {can('clinical:write') || kind === 'MEDICATION_CARD' ? (
+                  <details className="clinical-row-menu">
+                    <summary aria-label={`Acciones para ${patient.fullName}`}>⋮</summary>
+                    <div>
+                      {group === 'medical' && can('clinical:write')
+                        ? medical.map((action) => (
+                            <Button
+                              className="button-secondary"
+                              key={action}
+                              onClick={() => {
+                                setKind(action);
+                                setEditor({ patient: patient.id });
+                              }}
+                            >
+                              {clinicalLabels[action]}
+                            </Button>
+                          ))
+                        : null}
+                      {kind === 'MEDICATION_CARD'
+                        ? currentClinicalRecords(operations.clinicalRecords)
+                            .filter(
+                              (record) =>
+                                record.patientId === patient.id &&
+                                record.payload.kind === 'MEDICATION_CARD',
+                            )
+                            .map((record) => (
+                              <div key={record.id}>
+                                <small>
+                                  {record.caseId} · {record.date}
+                                </small>
+                                <Button
+                                  className="button-secondary"
+                                  onClick={() =>
+                                    document
+                                      .getElementById(`clinical-record-${record.id}`)
+                                      ?.scrollIntoView({ block: 'center' })
+                                  }
+                                >
+                                  Ver tarjeta
+                                </Button>
+                                {can('clinical:write') ? (
+                                  <Button
+                                    className="button-secondary"
+                                    onClick={() => setEditor({ original: record })}
+                                  >
+                                    Editar tarjeta
+                                  </Button>
+                                ) : null}
+                                <Button
+                                  className="button-secondary"
+                                  onClick={() =>
+                                    printClinicalSection(`clinical-record-${record.id}`)
+                                  }
+                                >
+                                  Imprimir tarjeta
+                                </Button>
+                              </div>
+                            ))
+                        : null}
+                      {kind === 'MEDICATION_CARD' &&
+                      !records.some((record) => record.patientId === patient.id) ? (
+                        <p>La tarjeta aparecerá aquí después de guardarla.</p>
+                      ) : null}
+                    </div>
+                  </details>
+                ) : null}
+              </div>
             </div>
           ))}
         </div>
@@ -203,7 +285,9 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
         ) : null}
       </section>
       <p>
-        <Link href="/catalogs/clinical">Configurar diagnósticos y escalas</Link>
+        <Link className="button button-secondary" href="/catalogs/clinical">
+          Configurar diagnósticos y escalas
+        </Link>
       </p>
       {editor ? (
         <ClinicalRecordEditor
@@ -212,9 +296,10 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
           patient={editor.patient}
           original={editor.original}
           operations={operations}
-          onClose={() => {
+          onClose={() => setEditor(null)}
+          onSaved={() => {
             setEditor(null);
-            setMessage('El expediente muestra los registros confirmados por el servidor.');
+            setMessage('Registro guardado en el expediente.');
           }}
         />
       ) : null}

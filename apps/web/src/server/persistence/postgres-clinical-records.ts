@@ -280,6 +280,8 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
         configured.rows[0]?.body.scaleDefinition ??
           clinicalScales.find((scale) => scale.id === payload.scaleId),
       );
+      if (payload.definitionVersion && payload.definitionVersion !== record.scaleDefinition.version)
+        throw new MongoConflictError();
       try {
         record.score = scoreScale(record.scaleDefinition, payload.values);
       } catch (error) {
@@ -305,9 +307,17 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
         throw new MongoInputError('No repita medicamentos en la misma administración.');
       record.medications = [];
       record.stockMovementIds = [];
-      // Deterministic order avoids deadlocks between simultaneous multi-item administrations.
+      // Different cards can map different medication IDs to the same stock.
+      // Lock order must follow inventory identity, not the card's line order.
+      const stockKey = (medicationId: string) => {
+        const stock =
+          card.payload.kind === 'MEDICATION_CARD'
+            ? card.payload.stock.find((entry) => entry.quoteItemId === medicationId)
+            : undefined;
+        return stock ? `${stock.inventoryItemId}\u0000${stock.warehouseId}` : medicationId;
+      };
       for (const item of [...payload.items].sort((a, b) =>
-        a.medicationId.localeCompare(b.medicationId),
+        stockKey(a.medicationId).localeCompare(stockKey(b.medicationId)),
       )) {
         const medication = card.medications?.find((med) => med.id === item.medicationId);
         if (!medication)

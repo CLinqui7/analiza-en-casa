@@ -1,5 +1,28 @@
 # Preguntas abiertas y bloqueadores
 
+## CLINICAL-OCT31 · autorización y datos configurables, 3–4 noviembre 2026
+
+El PDF `analizaencasa31oct_.pdf` y la instrucción expresa del cliente sustituyen
+el bloqueo general de formularios de orden médica, tarjeta, balance y escalas.
+El equipo captura los datos; las dosis, indicaciones y descuentos no se infieren.
+Diagnósticos, asociaciones de escalas, definiciones versionadas y perfiles de
+descuento se pueden completar desde la aplicación por los usuarios autenticados
+de cada organización. Se mantienen los permisos de lectura/escritura clínica y
+financiera, la auditoría y las versiones inmutables.
+
+- Los anexos identifican por separado Downton, Norton, Barthel y Braden: resuelven
+  la ambigüedad de nombres de la fuente anterior. Se conserva esa fuente histórica.
+- El anexo de Braden no clasifica los valores 12 y 19. Se calcula la puntuación,
+  sin completar esos rangos por suposición ni generar recomendaciones clínicas.
+- El agua endógena y las pérdidas insensibles son entradas manuales; no se deducen
+  del peso. Un período menor de 24 horas no se extrapola a 24 horas.
+- Para descontar inventario se requiere que el equipo asigne artículo, bodega y
+  unidades por aplicación en la tarjeta. Esto no determina la dosis clínica.
+- Las administraciones asentadas no se sobrescriben: una aclaración se registra
+  en notas y cualquier ajuste de existencias se concilia con un movimiento auditado.
+
+Evidencia y límites: `docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md`.
+
 ## VERCEL-PREVIEW · 14 septiembre 2026
 
 - `VERCEL-Q001` — RESUELTA: el usuario autorizó el acceso de red del cluster de

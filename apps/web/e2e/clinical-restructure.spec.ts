@@ -8,6 +8,37 @@ async function login(page: Page, path: string, role = 'admin') {
   await expect(page).toHaveURL(new RegExp(`${path}$`));
 }
 
+// test-id: playwright:clinical-config-editing-and-dialog-focus
+test('scale editing tolerates unfinished text, rejects malformed uploads and traps dialog focus', async ({
+  page,
+}) => {
+  await login(page, '/catalogs/clinical');
+  await page.getByRole('button', { name: 'Escalas', exact: true }).click();
+  const edit = page
+    .locator('.clinical-patient-list')
+    .getByRole('button', { name: 'Editar' })
+    .first();
+  await edit.click();
+  const dialog = page.getByRole('dialog');
+  await page.keyboard.press('Shift+Tab');
+  await expect(dialog.getByRole('button', { name: 'Guardar', exact: true })).toBeFocused();
+  await dialog.getByLabel('Versión de la definición').fill('');
+  await expect(dialog.getByLabel('Respuesta 1', { exact: true })).toBeVisible();
+  await dialog.getByLabel('Versión de la definición').fill('QA manual');
+  await dialog.getByLabel('Respuesta 1', { exact: true }).fill('');
+  await expect(dialog.getByLabel('Respuesta 2', { exact: true })).toBeVisible();
+  await dialog.getByLabel('Cargar definición JSON').setInputFiles({
+    name: 'invalid.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{"id":"UNKNOWN"}'),
+  });
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('Revise la definición');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(edit).toBeFocused();
+});
+
 // test-id: playwright:clinical-restructure-forms
 test('medical and nursing entry points expose usable manual forms and preserve patient scope', async ({
   page,
@@ -136,7 +167,6 @@ for (const width of [1440, 390])
     await page.locator('.clinical-patient-list').getByRole('button').first().click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCSS('opacity', '1');
-    console.log('Dialog surface', await page.getByRole('dialog').evaluate(element => [element,element.parentElement,element.parentElement?.parentElement].filter(Boolean).map(item => ({ className: item!.className, background: getComputedStyle(item!).backgroundColor, opacity: getComputedStyle(item!).opacity, zIndex: getComputedStyle(item!).zIndex }))));
     expect(
       await page
         .getByRole('dialog')

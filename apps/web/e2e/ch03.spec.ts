@@ -101,14 +101,9 @@ test('CH03-F009-F013 quote tracking and the new clinical fields are usable', asy
   for (const label of ['Buscar paciente', 'Paciente', 'Ingreso clínico'])
     await expect(dialog.getByRole('combobox', { name: label, exact: true })).toBeVisible();
   await expect(dialog.getByLabel('Hospitalización vinculada (opcional)')).toBeVisible();
-  for (const label of [
-    'Documento',
-    'Teléfono',
-    'Correo',
-    'Diagnóstico',
-    'Responsable administrativo',
-  ])
+  for (const label of ['Documento', 'Teléfono', 'Correo', 'Responsable administrativo'])
     await expect(dialog.getByRole('textbox', { name: label, exact: true })).toBeVisible();
+  await expect(dialog.getByRole('combobox', { name: 'Diagnóstico', exact: true })).toBeVisible();
   await expect(dialog.getByRole('searchbox', { name: 'Buscar médico por nombre' })).toBeVisible();
   await expect(dialog.locator('[data-action-id="QUOTE-INVOICE-DOCUMENT-TYPE"]')).toHaveCount(0);
   await expect(dialog.getByRole('combobox', { name: 'Médico tratante principal' })).toBeVisible();

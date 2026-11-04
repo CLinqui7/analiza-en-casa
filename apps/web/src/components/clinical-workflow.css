@@ -2,6 +2,14 @@
   --clinical-accent: #b32c46;
   gap: 1.4rem;
 }
+.clinical-workflow :is(h1, h2, h3, strong) {
+  overflow-wrap: anywhere;
+}
+.clinical-workflow .button {
+  white-space: normal;
+  max-width: 100%;
+  text-align: center;
+}
 .clinical-hero {
   display: flex;
   align-items: center;
@@ -90,6 +98,51 @@
 }
 .clinical-patient-list .button {
   flex-shrink: 0;
+}
+.clinical-patient-actions {
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.clinical-patient-actions > .button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.clinical-patient-actions > details {
+  flex: 0 0 44px;
+}
+.clinical-row-menu {
+  position: relative;
+}
+.clinical-row-menu summary {
+  list-style: none;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #b7cbd3;
+  border-radius: 12px;
+  background: white;
+  font-size: 1.4rem;
+}
+.clinical-row-menu > div {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  width: min(290px, 80vw);
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #d7e2e6;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px #163b5220;
+}
+.clinical-row-menu > div > div {
+  display: grid;
+  gap: 0.4rem;
 }
 .clinical-search {
   min-width: min(100%, 260px);
@@ -307,16 +360,12 @@
   }
 }
 @media print {
-  body.clinical-printing * {
-    visibility: hidden !important;
-  }
-  body.clinical-printing .clinical-print-target,
-  body.clinical-printing .clinical-print-target * {
-    visibility: visible !important;
+  body.clinical-printing > :not(#clinical-print-root) {
+    display: none !important;
   }
   body.clinical-printing .clinical-print-target {
-    position: absolute;
-    inset: 0 auto auto 0;
+    display: block !important;
+    position: static;
     width: 100%;
     padding: 1cm;
     background: white;
@@ -338,5 +387,10 @@
   }
   .clinical-print-target {
     box-shadow: none !important;
+  }
+}
+@media screen {
+  #clinical-print-root {
+    display: none;
   }
 }

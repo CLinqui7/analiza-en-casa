@@ -9,6 +9,8 @@ import {
   shiftSchema,
   configurationEntrySchema,
   initialDiagnoses,
+  clinicalScales,
+  type ConfigurationEntry,
   catalogItemSchema,
   purchaseSchema,
   clinicalDocumentSchema,
@@ -1421,7 +1423,7 @@ export function postgresPersistence(): Persistence {
           await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
             `${actor.organizationId}:configuration:${entry.id}`,
           ]);
-          const previous = await c.query<{ body: { category: string } }>(
+          const previous = await c.query<{ body: ConfigurationEntry }>(
             'SELECT body FROM analiza.configuration_entries WHERE organization_id=$1 AND id=$2',
             [actor.organizationId, entry.id],
           );
@@ -1438,6 +1440,19 @@ export function postgresPersistence(): Persistence {
             );
           if (entry.category !== 'SCALE' && entry.scaleDefinition)
             throw new MongoInputError('La definición corresponde al catálogo de escalas.');
+          if (entry.category === 'SCALE' && entry.scaleDefinition) {
+            const priorDefinition =
+              previous.rows[0]?.body.scaleDefinition ??
+              clinicalScales.find((scale) => scale.id === entry.scaleDefinition?.id);
+            if (
+              priorDefinition &&
+              priorDefinition.version === entry.scaleDefinition.version &&
+              JSON.stringify(priorDefinition) !== JSON.stringify(entry.scaleDefinition)
+            )
+              throw new MongoInputError(
+                'Cambie la versión de la definición antes de modificar sus respuestas o puntuaciones.',
+              );
+          }
           if (entry.category === 'MEDICATION' && entry.inventoryItemId) {
             const item = await c.query(
               "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",

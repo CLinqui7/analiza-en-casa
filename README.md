@@ -185,3 +185,19 @@ seguridad, pruebas y trazabilidad para cambios.
 Las pruebas locales no certifican capacidad productiva ni IAM en Google Cloud.
 Las reglas de negocio pendientes se conservan en
 [OPEN_QUESTIONS](docs/OPEN_QUESTIONS.md).
+
+## Formularios clínicos y verificación aislada
+
+La reestructuración solicitada el 31 de octubre está documentada en
+[el registro de cambios clínicos](docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md).
+Los formularios se guardan en PostgreSQL con aislamiento por organización,
+historial de correcciones y auditoría. El modo demo no simula un guardado exitoso.
+
+`npm run test:clinical:postgres` verifica persistencia, versiones, roles, RLS,
+consumo concurrente, idempotencia y lotes usando exclusivamente una base sintética
+`analiza_qa` por loopback y un usuario sin superusuario ni bypass de RLS.
+`npm run test:clinical:browser` comprueba los formularios y controles HTTP contra
+un build de producción configurado con `NEXT_PUBLIC_DATA_MODE=postgresql`.
+Requiere las variables privadas de QA y los identificadores sintéticos
+`CLINICAL_QA_PATIENT_ID` y `CLINICAL_QA_CASE_ID` emitidos por la prueba anterior.
+No apuntar estas pruebas a datos operativos. No guardar credenciales en Git.

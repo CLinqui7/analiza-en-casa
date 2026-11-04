@@ -18,7 +18,8 @@ async function saveDraft(page: Page, dialog: Locator, summary: string) {
   const patient = dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]');
   if (!(await patient.inputValue())) await patient.selectOption({ index: 1 });
   await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
-  await dialog.getByLabel('Diagnóstico').fill(summary);
+  await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption({ index: 1 });
+  await dialog.getByLabel('Responsable administrativo').fill(summary);
   await dialog.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/quotes$/);
@@ -26,9 +27,7 @@ async function saveDraft(page: Page, dialog: Locator, summary: string) {
     const quotes = JSON.parse(
       window.localStorage.getItem('analiza.en.casa.workspace.v3.quotes') ?? '[]',
     );
-    return quotes.find(
-      (quote: { diagnosisSummary?: string }) => quote.diagnosisSummary === diagnosis,
-    )?.id;
+    return quotes.find((quote: { manager?: string }) => quote.manager === diagnosis)?.id;
   }, summary);
 }
 
@@ -206,12 +205,12 @@ test('unsaved quote draft survives navigation but is removed after explicit disc
 }) => {
   await login(page);
   let dialog = await openNewQuote(page);
-  await dialog.getByLabel('Diagnóstico').fill('Borrador de cotización QA');
+  await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
   await page.waitForTimeout(450);
   await page.goto('/patients');
   await page.goto('/quotes?create=1');
   dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
-  await expect(dialog.getByLabel('Diagnóstico')).toHaveValue('Borrador de cotización QA');
+  await expect(dialog.getByLabel('Diagnóstico')).toHaveValue('Faringitis aguda');
   await dialog.getByRole('button', { name: 'Descartar cambios' }).click();
   await page.goto('/quotes?create=1');
   await expect(
@@ -287,7 +286,7 @@ test('draft can be edited and a previously sent version can be revised without c
   await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();
   await page.getByRole('button', { name: 'Editar borrador' }).click();
   dialog = page.getByRole('dialog', { name: /Editar borrador/ });
-  await dialog.getByLabel('Diagnóstico').fill('Flujo de estados E2E editado');
+  await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
   await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('actualizado y persistido');
   await page.locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="/quotes/${quoteId}"]`).click();

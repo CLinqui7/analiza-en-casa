@@ -19,6 +19,8 @@
     "lint": "npm run lint --workspace=@analiza/web",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,css}\" \"packages/**/*.{ts,tsx}\"",
     "test:react": "npm run test --workspace=@analiza/web",
+    "test:clinical:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-clinical-postgres.ts",
+    "test:clinical:browser": "playwright test -c apps/web/playwright.clinical.config.ts",
     "test:core:mongo": "tsx --tsconfig apps/web/tsconfig.json apps/web/src/server/core-live-verification.ts",
     "test:core:selenium": "node scripts/verify-core-selenium.mjs",
     "docker:build": "docker build --progress=plain -t analiza-web:cloudrun .",

@@ -739,6 +739,7 @@ function QuoteEditor({
               Diagnóstico
               <select
                 data-action-id="QUOTE-DIAGNOSIS"
+                aria-label="Diagnóstico"
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, diagnosisSummary: event.target.value }))
                 }

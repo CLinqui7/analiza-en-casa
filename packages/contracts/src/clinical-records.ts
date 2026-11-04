@@ -521,6 +521,7 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
     .object({
       kind: z.literal('SCALE'),
       scaleId: z.enum(scaleIds),
+      definitionVersion: id.optional(),
       values: z.record(z.string(), z.number().finite()),
       notes: optionalText,
     })

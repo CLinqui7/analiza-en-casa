@@ -4,7 +4,12 @@ import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button, EmptyState, Panel } from '@analiza/ui';
 import { currentClinicalRecords, type ClinicalRecord } from '@analiza/contracts';
-import { quoteDisplayCode, quoteCategories } from '@analiza/domain';
+import {
+  quoteDisplayCode,
+  quoteCategories,
+  normalizeText,
+  normalizeDocument,
+} from '@analiza/domain';
 import { useWorkspace } from './providers';
 import { useOperations } from '@/lib/use-operations';
 import { ClinicalRecordView } from './clinical-record-view';
@@ -43,11 +48,20 @@ function PatientRecordContent() {
   const operations = useOperations();
   const [selectedPatient, setPatient] = useState(params.get('patient') ?? '');
   const [selectedCase, setCase] = useState(params.get('case') ?? '');
-  const [section, setSection] = useState(0);
+  // Keep historical report links useful after the client-approved regrouping.
+  const [section, setSection] = useState(() => {
+    const requested = params.get('section');
+    return requested === 'clinical' || requested === 'nursing'
+      ? 2
+      : requested === 'medical'
+        ? 1
+        : 0;
+  });
   const [query, setQuery] = useState('');
   const [recent, setRecent] = useState(false);
   const [days, setDays] = useState(7);
   const [history, setHistory] = useState(false);
+  const [nursingKind, setNursingKind] = useState('ALL');
   const requestedPatient =
     selectedPatient ||
     hospitalizations.find((record) => record.id === selectedCase)?.patientId ||
@@ -78,9 +92,8 @@ function PatientRecordContent() {
     (patient) =>
       eligible.has(patient.id) &&
       (!recent || recentIds.has(patient.id)) &&
-      `${patient.fullName} ${patient.documentId}`
-        .toLocaleLowerCase('es')
-        .includes(query.toLocaleLowerCase('es')),
+      (normalizeText(patient.fullName).includes(normalizeText(query)) ||
+        normalizeDocument(patient.documentId).includes(normalizeDocument(query))),
   );
   const patient = patients.find((patient) => patient.id === requestedPatient);
   const patientCases = hospitalizations.filter((record) => record.patientId === requestedPatient);
@@ -199,9 +212,23 @@ function PatientRecordContent() {
       {patient ? (
         <>
           <div className="table-heading">
+            {selectedCase ? (
+              <Link
+                className="button button-secondary"
+                href={`/hospitalizations/${encodeURIComponent(selectedCase)}`}
+              >
+                Abrir caso
+              </Link>
+            ) : null}
             <label>
               Hospitalización
-              <select value={selectedCase} onChange={(event) => setCase(event.target.value)}>
+              <select
+                value={selectedCase}
+                onChange={(event) => {
+                  setPatient(requestedPatient);
+                  setCase(event.target.value);
+                }}
+              >
                 <option value="">Todas las hospitalizaciones</option>
                 {patientCases.map((record) => (
                   <option key={record.id} value={record.id}>
@@ -300,7 +327,10 @@ function PatientRecordContent() {
                       {money(quote.patientAmount)}
                     </p>
                     <p>{quote.comments}</p>
-                    <Link className="no-print" href={`/quotes/${encodeURIComponent(quote.id)}`}>
+                    <Link
+                      className="button button-secondary no-print"
+                      href={`/quotes/${encodeURIComponent(quote.id)}`}
+                    >
                       Ver cotización completa
                     </Link>
                   </article>
@@ -328,9 +358,43 @@ function PatientRecordContent() {
             {section === 2 || section === 4 ? (
               <section>
                 <h2>Acciones de enfermería</h2>
-                {renderRecords(records.filter((record) => !medicalKinds.has(record.payload.kind)))}
+                {section === 2 ? (
+                  <nav className="clinical-tabs no-print" aria-label="Registros de enfermería">
+                    {[
+                      ['ALL', 'Todos los registros'],
+                      ['MEDICATION_CARD', 'Tarjetas de medicamentos'],
+                      ['FLUID_BALANCE', 'Balances hídricos'],
+                      ['CARE_PLAN', 'Planes de cuidado'],
+                      ['ADMINISTRATION', 'Administración de medicamentos'],
+                      ['VITALS', 'Signos vitales'],
+                      ['NURSING_NOTE', 'Notas de enfermería'],
+                      ['SCALE', 'Escalas'],
+                    ].map(([key, label]) => (
+                      <button
+                        key={key}
+                        aria-current={nursingKind === key ? 'page' : undefined}
+                        onClick={() => setNursingKind(key)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </nav>
+                ) : null}
+                {renderRecords(
+                  records.filter(
+                    (record) =>
+                      !medicalKinds.has(record.payload.kind) &&
+                      (section === 4 ||
+                        nursingKind === 'ALL' ||
+                        nursingKind === record.payload.kind),
+                  ),
+                )}
                 {documents
-                  .filter((record) => record.type === 'CARE_PLAN')
+                  .filter(
+                    (record) =>
+                      record.type === 'CARE_PLAN' &&
+                      (section === 4 || nursingKind === 'ALL' || nursingKind === 'CARE_PLAN'),
+                  )
                   .map((record) => (
                     <article className="clinical-record-block" key={record.id}>
                       <h3>{record.title}</h3>
@@ -341,14 +405,16 @@ function PatientRecordContent() {
                       <p className="clinical-prose">{record.summary}</p>
                     </article>
                   ))}
-                {readings.length ? (
+                {readings.length &&
+                (section === 4 || nursingKind === 'ALL' || nursingKind === 'VITALS') ? (
                   <article className="clinical-record-block">
                     <h3>Signos vitales registrados anteriormente</h3>
                     {readings.map((reading) => (
                       <p key={reading.id}>
                         {reading.measuredAt} · Origen:{' '}
                         {reading.source === 'patient' ? 'Paciente' : 'Clínico'} ·{' '}
-                        {reading.professional ?? ''} · FC {reading.heartRate ?? '—'} · FR{' '}
+                        {reading.professional ?? ''} · FC{' '}
+                        {reading.heartRate ?? reading.pulse ?? '—'} · FR{' '}
                         {reading.respiratoryRate ?? '—'} · SpO₂ {reading.oxygenSaturation ?? '—'} ·
                         Temperatura {reading.temperature ?? '—'} · PA {reading.systolic ?? '—'}/
                         {reading.diastolic ?? '—'} · HGT {reading.glucose ?? '—'} · {reading.note}
