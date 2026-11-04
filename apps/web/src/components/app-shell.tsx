@@ -127,13 +127,6 @@ const navigation: NavigationGroup[] = [
         actionId: 'CLINICAL-HOSPITALIZATIONS-NAVIGATE',
       },
       {
-        label: 'Expediente clínico',
-        icon: 'clinicalRecord',
-        href: '/clinical',
-        permission: 'clinical:read',
-        actionId: 'CLINICAL-HOME-NAVIGATE',
-      },
-      {
         label: 'Agenda',
         icon: 'agenda',
         href: '/agenda',
@@ -141,7 +134,14 @@ const navigation: NavigationGroup[] = [
         actionId: 'AGENDA-NAVIGATE',
       },
       {
-        label: 'Órdenes y acciones',
+        label: 'Expediente clínico',
+        icon: 'clinicalRecord',
+        href: '/clinical',
+        permission: 'clinical:read',
+        actionId: 'CLINICAL-HOME-NAVIGATE',
+      },
+      {
+        label: 'Órdenes médicas',
         icon: 'orders',
         href: '/clinical/orders',
         permission: 'clinical:read',
@@ -306,6 +306,20 @@ const navigation: NavigationGroup[] = [
         actionId: 'MEDICAL-VISITOR-NAVIGATE',
       },
       {
+        label: 'Diagnósticos y escalas',
+        icon: 'operational',
+        href: '/catalogs/clinical',
+        permission: 'clinical-config:write',
+        actionId: 'CLINICAL-CONFIGURATION-NAVIGATE',
+      },
+      {
+        label: 'Descuentos',
+        icon: 'finance',
+        href: '/catalogs/discounts',
+        permission: 'clinical-config:write',
+        actionId: 'DISCOUNTS-CONFIGURATION-NAVIGATE',
+      },
+      {
         label: 'Catálogos operativos',
         icon: 'operational',
         href: '/catalogs/operational',
@@ -360,6 +374,13 @@ const navigation: NavigationGroup[] = [
     label: 'Reportes',
     icon: 'reports',
     children: [
+      {
+        label: 'Devoluciones',
+        icon: 'reports',
+        href: '/reports/returns',
+        permission: 'payments:read',
+        actionId: 'MEDICATION-RETURNS-NAVIGATE',
+      },
       {
         label: 'Pagos reportados',
         icon: 'payments',

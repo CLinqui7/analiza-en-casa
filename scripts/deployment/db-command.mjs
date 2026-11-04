@@ -195,6 +195,7 @@ try {
     );
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.payments TO ${role}`);
     await client.query(`GRANT SELECT,INSERT ON analiza.home_visits TO ${role}`);
+    await client.query(`GRANT SELECT,INSERT ON analiza.clinical_records TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.visit_goals TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.catalog_items TO ${role}`);
     await client.query(`GRANT SELECT,INSERT,UPDATE ON analiza.warehouses TO ${role}`);

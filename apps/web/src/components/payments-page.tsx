@@ -1,4 +1,5 @@
 'use client';
+import { MedicationReturns } from './medication-returns';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Payment } from '@analiza/contracts';
@@ -179,6 +180,7 @@ export function PaymentsPage() {
   );
   return (
     <div className="page-stack payments-page">
+      <MedicationReturns compact />
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Analiza en Casa</p>

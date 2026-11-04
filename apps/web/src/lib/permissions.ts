@@ -13,6 +13,7 @@ export const roles = [
 export type Role = (typeof roles)[number];
 
 export type Permission =
+  | 'clinical-config:write'
   | 'dashboard:read'
   | 'patients:read'
   | 'patients:write'
@@ -174,6 +175,7 @@ export function isRole(value: unknown): value is Role {
 }
 
 export function can(role: Role | undefined, permission: Permission): boolean {
+  if (permission === 'clinical-config:write') return !!role && roles.includes(role);
   return Boolean(role && permissions[role].includes(permission));
 }
 
@@ -182,6 +184,8 @@ export function isAdministrator(role: Role | undefined): boolean {
 }
 
 const routePermissions: Array<{ prefix: string; permission: Permission }> = [
+  { prefix: '/catalogs/clinical', permission: 'clinical-config:write' },
+  { prefix: '/catalogs/discounts', permission: 'clinical-config:write' },
   { prefix: '/analytics/logins', permission: 'login-analytics:read' },
   { prefix: '/nursing-team', permission: 'nurses:manage' },
   { prefix: '/supply-requests', permission: 'supply-requests:read' },

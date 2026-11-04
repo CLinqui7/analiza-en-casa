@@ -146,6 +146,10 @@ export default function CatalogsPage() {
           <p className="eyebrow">Administración</p>
           <h1>Catálogo general</h1>
           <p>
+            <Link href="/catalogs/clinical">Diagnósticos y escalas</Link> ·{' '}
+            <Link href="/catalogs/discounts">Descuentos configurados por el equipo</Link>
+          </p>
+          <p>
             Cree, edite, active o desactive los conceptos disponibles en cotizaciones e inventario.
           </p>
         </div>

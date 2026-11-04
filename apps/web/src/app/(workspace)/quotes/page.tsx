@@ -23,6 +23,7 @@ import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
 import { mongoMutationHeaders } from '@/lib/auth';
 import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
 import { quoteDecisionSchema, type QuoteDecision } from '@/lib/quote-decision';
+import { useOperations } from '@/lib/use-operations';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -162,6 +163,7 @@ function QuoteEditor({
   onSaved: (message: string) => void;
 }) {
   const { session } = useAuth();
+  const clinicalConfiguration = useOperations();
   const {
     addQuote,
     catalogItems,
@@ -735,14 +737,36 @@ function QuoteEditor({
           <div className="form-grid form-grid-compact">
             <label className="full-field">
               Diagnóstico
-              <textarea
+              <select
                 data-action-id="QUOTE-DIAGNOSIS"
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, diagnosisSummary: event.target.value }))
                 }
-                rows={2}
                 value={draft.diagnosisSummary ?? ''}
-              />
+              >
+                <option value="">Seleccione diagnóstico</option>
+                {draft.diagnosisSummary &&
+                !clinicalConfiguration.configuration.some(
+                  (entry) =>
+                    entry.category === 'DIAGNOSIS' &&
+                    entry.active &&
+                    entry.label === draft.diagnosisSummary,
+                ) ? (
+                  <option value={draft.diagnosisSummary}>
+                    {draft.diagnosisSummary} · registro previo
+                  </option>
+                ) : null}
+                {clinicalConfiguration.configuration
+                  .filter((entry) => entry.category === 'DIAGNOSIS' && entry.active)
+                  .map((entry) => (
+                    <option key={entry.id} value={entry.label}>
+                      {entry.label}
+                    </option>
+                  ))}
+              </select>
+              <Link href="/catalogs/clinical" target="_blank">
+                Agregar o configurar diagnósticos
+              </Link>
             </label>
             <label>
               Buscar médico por nombre
@@ -1334,6 +1358,38 @@ function QuoteEditor({
             </p>
           ) : null}
           <div className="form-grid form-grid-compact">
+            <label>
+              Perfil de descuento
+              <select
+                aria-label="Perfil de descuento"
+                value={draft.discountGroup ?? 'Regular'}
+                onChange={(event) => {
+                  const profile = clinicalConfiguration.configuration.find(
+                    (entry) =>
+                      entry.id === event.target.value && entry.category === 'DISCOUNT_PROFILE',
+                  );
+                  setDraft((current) => ({
+                    ...current,
+                    discountGroup: profile?.id ?? 'Regular',
+                    discount: profile
+                      ? { type: 'CATEGORY_PERCENTAGES', categories: { ...profile.categoryRates } }
+                      : undefined,
+                  }));
+                }}
+              >
+                <option value="Regular">Manual</option>
+                {clinicalConfiguration.configuration
+                  .filter((entry) => entry.category === 'DISCOUNT_PROFILE' && entry.active)
+                  .map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.label}
+                    </option>
+                  ))}
+              </select>
+              <Link href="/catalogs/discounts" target="_blank">
+                Configurar reglas y porcentajes
+              </Link>
+            </label>
             <label>
               Porcentaje único
               <input

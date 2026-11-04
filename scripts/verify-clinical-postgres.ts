@@ -1,0 +1,377 @@
+/** Synthetic QA only. Run against a dedicated PostgreSQL instance through loopback. */
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import {
+  clinicalScales,
+  clinicalRecordInputSchema,
+  quoteSchema,
+  hospitalizationSchema,
+  patientSchema,
+  type ClinicalPayload,
+} from '../packages/contracts/src/index';
+import {
+  postgresPool,
+  transaction,
+  closePostgresPool,
+} from '../apps/web/src/server/persistence/postgres-pool';
+import { postgresPersistence } from '../apps/web/src/server/persistence/postgres';
+import {
+  saveClinicalRecord,
+  listClinicalRecords,
+  medicationReturns,
+} from '../apps/web/src/server/persistence/postgres-clinical-records';
+
+assert.equal(process.env.ANALIZA_QA_MODE, '1');
+assert.equal(process.env.PGDATABASE, 'analiza_qa');
+assert.equal(process.env.PGHOST, '127.0.0.1');
+assert.notEqual(process.env.PGUSER, 'postgres');
+const pool = postgresPool();
+const actor = { userId: 'qa-nurse', organizationId: 'qa-org-a', role: 'NURSE' as const };
+const foreign = { userId: 'qa-foreign', organizationId: 'qa-org-c', role: 'ADMIN' as const };
+const backend = postgresPersistence();
+const run = randomUUID().slice(0, 8),
+  patientId = `clinical-qa-p-${run}`,
+  caseId = `clinical-qa-c-${run}`,
+  quoteId = `clinical-qa-q-${run}`,
+  itemId = `clinical-qa-i-${run}`,
+  warehouseId = `clinical-qa-w-${run}`;
+const date = '2026-11-03';
+const evidence: string[] = [];
+const check = (name: string) => {
+  evidence.push(name);
+  console.log(`PASS ${name}`);
+};
+async function save(payload: ClinicalPayload, extra = {}) {
+  const record = clinicalRecordInputSchema.parse({
+    id: randomUUID(),
+    patientId,
+    caseId,
+    date,
+    payload,
+    ...extra,
+  });
+  return saveClinicalRecord(pool, actor, { command: 'clinical.record', record });
+}
+async function balance() {
+  return transaction(pool, actor, async (c) =>
+    Number(
+      (
+        await c.query(
+          'SELECT coalesce(sum(delta),0) AS n FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+          [actor.organizationId, itemId],
+        )
+      ).rows[0].n,
+    ),
+  );
+}
+try {
+  const identity = await pool.query(
+    'SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user',
+  );
+  assert.equal(identity.rows[0].rolsuper, false);
+  assert.equal(identity.rows[0].rolbypassrls, false);
+  await transaction(pool, actor, async (c) => {
+    const patient = patientSchema.parse({
+      id: patientId,
+      fullName: `Paciente sintético clínica ${run}`,
+      documentType: 'OTHER',
+      documentId: `QA-${run}`,
+      phone: '0000-0000',
+      status: 'ACTIVE',
+      referralOrigin: 'FAMILY_FRIENDS',
+    });
+    await c.query(
+      'INSERT INTO analiza.patients(organization_id,id,document_key,body) VALUES($1,$2,$3,$4::jsonb)',
+      [actor.organizationId, patientId, `QA-${run}`, JSON.stringify(patient)],
+    );
+    const hospitalization = hospitalizationSchema.parse({
+      id: caseId,
+      patientId,
+      startDate: date,
+      status: 'ACTIVE',
+      accountType: 'PARTICULAR',
+      priority: 'MEDIUM',
+    });
+    await c.query(
+      'INSERT INTO analiza.hospitalizations(organization_id,id,patient_id,body) VALUES($1,$2,$3,$4::jsonb)',
+      [actor.organizationId, caseId, patientId, JSON.stringify(hospitalization)],
+    );
+    const quote = quoteSchema.parse({
+      id: quoteId,
+      caseId,
+      patientId,
+      version: 1,
+      status: 'SENT',
+      immutable: true,
+      summary: 'Cotización sintética QA',
+      createdAt: `${date}T08:00:00Z`,
+      items: [
+        {
+          id: 'medicine',
+          category: 'MEDICATIONS',
+          name: 'Medicamento sintético QA',
+          quantity: 3,
+          unitPrice: 1,
+          discountAmount: 0,
+        },
+        {
+          id: 'lab',
+          category: 'STUDIES',
+          name: 'Laboratorio sintético QA',
+          quantity: 1,
+          unitPrice: 0,
+          discountAmount: 0,
+        },
+      ],
+      subtotal: 3,
+      total: 3,
+      patientAmount: 3,
+    });
+    await c.query(
+      'INSERT INTO analiza.quotes(organization_id,id,case_id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$4,$2,1,$5::jsonb)',
+      [actor.organizationId, quoteId, caseId, patientId, JSON.stringify(quote)],
+    );
+    await c.query(
+      'INSERT INTO analiza.catalog_items(organization_id,id,body) VALUES($1,$2,$3::jsonb)',
+      [
+        actor.organizationId,
+        itemId,
+        JSON.stringify({
+          id: itemId,
+          sku: itemId,
+          name: 'Medicamento sintético QA',
+          category: 'MEDICATIONS',
+          status: 'ACTIVE',
+        }),
+      ],
+    );
+    await c.query(
+      'INSERT INTO analiza.warehouses(organization_id,id,code_normalized,status,body) VALUES($1,$2,upper($2),$3,$4::jsonb)',
+      [
+        actor.organizationId,
+        warehouseId,
+        'ACTIVE',
+        JSON.stringify({
+          id: warehouseId,
+          code: warehouseId,
+          name: 'Bodega sintética QA',
+          status: 'ACTIVE',
+          createdAt: `${date}T08:00:00Z`,
+          updatedAt: `${date}T08:00:00Z`,
+        }),
+      ],
+    );
+    const movement = {
+      id: `entry-${run}`,
+      itemId,
+      warehouseId,
+      kind: 'ENTRY',
+      quantity: 3,
+      createdAt: `${date}T08:00:00Z`,
+      reason: 'Entrada sintética QA',
+      user: actor.userId,
+    };
+    await c.query(
+      'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body) VALUES($1,$2,$3,$4,$2,3,$5::jsonb)',
+      [actor.organizationId, movement.id, itemId, warehouseId, JSON.stringify(movement)],
+    );
+  });
+  check('isolated synthetic fixtures and restricted PostgreSQL identity');
+  for (const kind of ['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND'] as const)
+    await save({ kind, summary: `Observación sintética ${kind}` });
+  for (const plan of ['DIET', 'NURSING', 'LABORATORY'] as const) {
+    const result = await save({ kind: 'CARE_PLAN', plan, summary: 'Plan manual sintético' });
+    if (plan === 'LABORATORY') assert.deepEqual(result.laboratories, ['Laboratorio sintético QA']);
+  }
+  await save({
+    kind: 'FLUID_BALANCE',
+    diagnosis: 'QA',
+    weight: '70 kg',
+    rows: Array.from({ length: 6 }, (_, i) => ({
+      time: String(i),
+      values: [10, 0, 0, 0, 5, 0, 0, 0, 0],
+    })),
+    endogenous: 0,
+    insensible: 0,
+    hours: 24,
+    notes: '',
+  });
+  await save({
+    kind: 'VITALS',
+    rows: [
+      {
+        time: '08:00',
+        heartRate: '80',
+        respiratoryRate: '18',
+        oxygen: '98',
+        temperature: '37',
+        pressure: '120/80',
+        hgt: '100',
+      },
+    ],
+  });
+  await backend.operations.execute(actor, { command: 'clinical.jvpe.save', jvpe: '12345' });
+  const note = await save({
+    kind: 'NURSING_NOTE',
+    rows: [{ time: '08:00', note: 'Nota sintética QA' }],
+  });
+  assert.equal(note.jvpe, '12345');
+  await assert.rejects(
+    saveClinicalRecord(pool, actor, {
+      command: 'clinical.record',
+      record: { id: randomUUID(), patientId, caseId, date, payload: note.payload, jvpe: 'FORGED' },
+    }),
+  );
+  check('medical, nursing, balance, laboratory and server-resolved JVPE persistence');
+  for (const definition of clinicalScales) {
+    const values = Object.fromEntries(
+      definition.items.map((item) => [
+        item.id,
+        Math.min(...item.options.map((option) => option.score)),
+      ]),
+    );
+    const result = await save({
+      kind: 'SCALE',
+      scaleId: definition.id,
+      values,
+      notes: 'Evaluación sintética',
+    });
+    assert.equal(result.scaleDefinition?.version, definition.version);
+    assert.equal(
+      result.score,
+      definition.aggregation === 'PROFILE'
+        ? null
+        : Object.values(values).reduce((a, b) => a + b, 0),
+    );
+  }
+  check('all ten scale definitions and persisted arithmetic');
+  const card = await save({
+    kind: 'MEDICATION_CARD',
+    chronic: 'Crónico sintético externo',
+    instructions: 'Indicación manual QA',
+    stock: [
+      {
+        quoteItemId: `${quoteId}:medicine`,
+        inventoryItemId: itemId,
+        warehouseId,
+        unitsPerApplication: 1,
+      },
+    ],
+  });
+  assert.equal(card.medications?.length, 2);
+  const administration = (
+    medicationId: string,
+    applied: boolean,
+    reason = '',
+  ): ClinicalPayload => ({
+    kind: 'ADMINISTRATION',
+    cardId: card.id,
+    time: '08:00',
+    dose: 'Dosis manual QA',
+    presentation: 'Tableta',
+    route: 'Oral',
+    items: [{ medicationId, applied, reason }],
+  });
+  await save(administration(`${quoteId}:medicine`, false, 'No administrado durante prueba'));
+  await save(administration('chronic:0', true));
+  assert.equal(await balance(), 3);
+  check('not-applied and chronic medicines leave inventory untouched');
+  const duplicateId = randomUUID();
+  const duplicateCommand = {
+    command: 'clinical.record',
+    record: {
+      id: duplicateId,
+      patientId,
+      caseId,
+      date,
+      payload: administration(`${quoteId}:medicine`, true),
+    },
+  };
+  const duplicate = await Promise.all([
+    saveClinicalRecord(pool, actor, duplicateCommand),
+    saveClinicalRecord(pool, actor, duplicateCommand),
+  ]);
+  assert.equal(duplicate[0].id, duplicate[1].id);
+  assert.equal(await balance(), 2);
+  await Promise.all([
+    save(administration(`${quoteId}:medicine`, true)),
+    save(administration(`${quoteId}:medicine`, true)),
+  ]);
+  assert.equal(await balance(), 0);
+  await assert.rejects(
+    save(administration(`${quoteId}:medicine`, true)),
+    /Existencias insuficientes/,
+  );
+  check('concurrent retries consume once; concurrent applications cannot overdraw stock');
+  const updated = await save(
+    { kind: 'NURSING_NOTE', rows: [{ time: '08:00', note: 'Corrección sintética' }] },
+    { correctionOf: note.id, correctionReason: 'Corrección de texto QA' },
+  );
+  assert.equal(updated.version, 2);
+  await assert.rejects(
+    save(
+      { kind: 'NURSING_NOTE', rows: [{ time: '08:00', note: 'Intento obsoleto' }] },
+      { correctionOf: note.id, correctionReason: 'QA' },
+    ),
+  );
+  await assert.rejects(
+    transaction(pool, actor, (c) =>
+      c.query('UPDATE analiza.clinical_records SET body=body WHERE organization_id=$1 AND id=$2', [
+        actor.organizationId,
+        note.id,
+      ]),
+    ),
+  );
+  check('append-only corrections preserve originals and reject stale updates');
+  await assert.rejects(
+    saveClinicalRecord(pool, foreign, {
+      command: 'clinical.record',
+      record: {
+        id: randomUUID(),
+        patientId,
+        caseId,
+        date,
+        payload: { kind: 'INDICATION', summary: 'Foreign attempt' },
+      },
+    }),
+  );
+  const foreignRecords = await transaction(pool, foreign, (c) => listClinicalRecords(c, foreign));
+  assert.equal(
+    foreignRecords.some((record) => record.patientId === patientId),
+    false,
+  );
+  assert.equal(
+    (await pool.query('SELECT count(*)::int AS n FROM analiza.clinical_records')).rows[0].n,
+    0,
+  );
+  check('cross-organization write and read isolation plus fail-closed RLS');
+  const persisted = await transaction(pool, actor, (c) => listClinicalRecords(c, actor));
+  const records = persisted.filter((record) => record.patientId === patientId);
+  assert.equal(medicationReturns(records).length, 1);
+  const finance = await backend.operations.list({
+    ...actor,
+    userId: 'qa-finance',
+    role: 'FINANCE',
+  });
+  assert.equal(finance.clinicalRecords.length, 0);
+  assert.ok(finance.medicationReturns.some((item) => item.patientId === patientId));
+  await transaction(pool, actor, async (c) => {
+    const quote = await c.query(
+      'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2',
+      [actor.organizationId, quoteId],
+    );
+    assert.equal(quote.rows[0].body.total, 3);
+  });
+  check('receivable returns without clinical disclosure or sent-quote mutation');
+  console.log(
+    JSON.stringify({
+      status: 'PASS',
+      checks: evidence,
+      records: records.length,
+      syntheticPatientId: patientId,
+      syntheticCaseId: caseId,
+    }),
+  );
+} finally {
+  await closePostgresPool();
+}

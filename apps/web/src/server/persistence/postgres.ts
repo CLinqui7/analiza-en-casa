@@ -8,6 +8,7 @@ import {
   nursingResourceSchema,
   shiftSchema,
   configurationEntrySchema,
+  initialDiagnoses,
   catalogItemSchema,
   purchaseSchema,
   clinicalDocumentSchema,
@@ -76,6 +77,11 @@ import { PostgresSupplyRequestRepository } from './postgres-supply-requests';
 import { PostgresAccountProfileRepository } from './postgres-account-profile';
 import { postgresQuotes } from './postgres-quotes';
 import { postgresInsurance } from './postgres-insurance';
+import {
+  listClinicalRecords,
+  medicationReturns,
+  saveClinicalRecord,
+} from './postgres-clinical-records';
 import {
   commercialScope,
   executeFieldCommand,
@@ -562,14 +568,44 @@ export function postgresPersistence(): Persistence {
     async list(actor) {
       return transaction(pool, actor, async (c) => {
         const result: OperationsSnapshot = emptyOperations();
-        if (can(actor.role, 'catalogs:read') || can(actor.role, 'clinical:read'))
+        if (can(actor.role, 'clinical:read')) {
+          const ownResource = await c.query<{ value: string }>(
+            "SELECT coalesce(body->>'jvpe',body->>'boardRegistrationNumber','') AS value FROM analiza.nursing_resources WHERE organization_id=$1 AND user_id=$2 ORDER BY id LIMIT 1",
+            [actor.organizationId, actor.userId],
+          );
+          result.currentJvpe = ownResource.rows[0]?.value ?? '';
+        }
+        if (can(actor.role, 'clinical-config:write'))
           result.configuration = (
             await c.query(
               'SELECT body FROM analiza.configuration_entries WHERE organization_id=$1 ORDER BY id',
               [actor.organizationId],
             )
           ).rows.map((r) => configurationEntrySchema.parse(r.body));
-        if (can(actor.role, 'inventory:read'))
+        for (const [index, label] of initialDiagnoses.entries()) {
+          const id = `diagnosis-initial-${index + 1}`;
+          if (!result.configuration.some((entry) => entry.id === id))
+            result.configuration.push({
+              id,
+              category: 'DIAGNOSIS',
+              label,
+              active: true,
+              scaleIds: [],
+            });
+        }
+        const records = await listClinicalRecords(c, actor);
+        if (can(actor.role, 'clinical:read')) {
+          result.clinicalRecords = records;
+          result.clinicalStockItems = (
+            await c.query(
+              "SELECT id,body->>'name' AS name FROM analiza.catalog_items WHERE organization_id=$1 AND body->>'category'='MEDICATIONS' AND body->>'status'='ACTIVE' ORDER BY body->>'name'",
+              [actor.organizationId],
+            )
+          ).rows;
+        }
+        if (can(actor.role, 'payments:read') || can(actor.role, 'clinical:read'))
+          result.medicationReturns = medicationReturns(records);
+        if (can(actor.role, 'inventory:read') || can(actor.role, 'clinical:read'))
           result.warehouses = (
             await c.query(
               `SELECT body FROM analiza.warehouses
@@ -639,6 +675,29 @@ export function postgresPersistence(): Persistence {
     async execute(actor, input) {
       rejectBrowserAuthority(input);
       const command = z.object({ command: z.string() }).passthrough().parse(input);
+      if (command.command === 'clinical.record') return saveClinicalRecord(pool, actor, input);
+      if (command.command === 'clinical.jvpe.save') {
+        authorize(actor, 'clinical:write');
+        const data = z
+          .object({
+            command: z.literal('clinical.jvpe.save'),
+            jvpe: z.string().regex(/^\d{1,30}$/, 'Ingrese sólo los números de su JVPE.'),
+          })
+          .strict()
+          .parse(input);
+        return transaction(pool, actor, async (c) => {
+          const updated = await c.query(
+            "UPDATE analiza.nursing_resources SET body=jsonb_set(body,'{jvpe}',to_jsonb($3::text)) WHERE organization_id=$1 AND user_id=$2 RETURNING id",
+            [actor.organizationId, actor.userId, data.jvpe],
+          );
+          if (!updated.rowCount)
+            throw new MongoInputError(
+              'Su cuenta no tiene un perfil de enfermería. Complete la vinculación en Equipo y cuentas.',
+            );
+          await audit(c, actor, 'NURSE_JVPE_UPDATED', 'nursing_resources', updated.rows[0].id);
+          return { jvpe: data.jvpe };
+        });
+      }
       if (isFieldCommand(command.command)) return executeFieldCommand(pool, actor, input);
       if (command.command === 'warehouse.save') {
         authorize(actor, 'inventory:write');
@@ -1348,12 +1407,37 @@ export function postgresPersistence(): Persistence {
         });
       }
       if (command.command === 'configuration.save') {
-        authorize(actor, 'catalogs:write');
         const { entry } = z
           .object({ command: z.literal('configuration.save'), entry: configurationEntrySchema })
           .strict()
           .parse(input);
+        authorize(
+          actor,
+          ['DIAGNOSIS', 'SCALE', 'INSURER', 'DISCOUNT_PROFILE'].includes(entry.category)
+            ? 'clinical-config:write'
+            : 'catalogs:write',
+        );
         return transaction(pool, actor, async (c) => {
+          await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+            `${actor.organizationId}:configuration:${entry.id}`,
+          ]);
+          const previous = await c.query<{ body: { category: string } }>(
+            'SELECT body FROM analiza.configuration_entries WHERE organization_id=$1 AND id=$2',
+            [actor.organizationId, entry.id],
+          );
+          if (previous.rows[0] && previous.rows[0].body.category !== entry.category)
+            throw new MongoInputError('No puede cambiar el tipo de un registro del catálogo.');
+          if (
+            entry.category === 'SCALE' &&
+            (!entry.scaleDefinition ||
+              entry.id !== `scale-${entry.scaleDefinition.id}` ||
+              !entry.active)
+          )
+            throw new MongoInputError(
+              'Seleccione una escala y conserve su identificador; registre una nueva versión de la definición.',
+            );
+          if (entry.category !== 'SCALE' && entry.scaleDefinition)
+            throw new MongoInputError('La definición corresponde al catálogo de escalas.');
           if (entry.category === 'MEDICATION' && entry.inventoryItemId) {
             const item = await c.query(
               "SELECT id FROM analiza.catalog_items WHERE organization_id=$1 AND id=$2 AND body->>'status'='ACTIVE'",

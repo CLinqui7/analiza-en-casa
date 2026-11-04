@@ -12,6 +12,9 @@ export const categoryLabels = {
   INSURER: 'Seguros y descuentos',
   MEDICATION: 'Medicamentos y presentaciones',
   MEDICAL_VISITOR: 'Visitadores médicos',
+  DIAGNOSIS: 'Diagnósticos',
+  SCALE: 'Escalas',
+  DISCOUNT_PROFILE: 'Perfiles de descuento',
 };
 export function OperationalCatalogs({
   fixedCategory,
@@ -72,21 +75,23 @@ export function OperationalCatalogs({
       </header>
       {!fixedCategory ? (
         <div className="card-grid">
-          {configurationCategories.map((key) => (
-            <button
-              className={`panel catalog-category-card${category === key ? ' selected' : ''}`}
-              key={key}
-              onClick={() => setCategory(key)}
-            >
-              <span aria-hidden="true">
-                {key === 'INSURER' ? '✓' : key === 'MEDICATION' ? '⊞' : '＋'}
-              </span>
-              <strong>{categoryLabels[key]}</strong>
-              <small>
-                {operations.configuration.filter((item) => item.category === key).length} opciones
-              </small>
-            </button>
-          ))}
+          {configurationCategories
+            .filter((key) => !['DIAGNOSIS', 'SCALE', 'DISCOUNT_PROFILE'].includes(key))
+            .map((key) => (
+              <button
+                className={`panel catalog-category-card${category === key ? ' selected' : ''}`}
+                key={key}
+                onClick={() => setCategory(key)}
+              >
+                <span aria-hidden="true">
+                  {key === 'INSURER' ? '✓' : key === 'MEDICATION' ? '⊞' : '＋'}
+                </span>
+                <strong>{categoryLabels[key]}</strong>
+                <small>
+                  {operations.configuration.filter((item) => item.category === key).length} opciones
+                </small>
+              </button>
+            ))}
         </div>
       ) : null}
       <Panel className="studio-toolbar">

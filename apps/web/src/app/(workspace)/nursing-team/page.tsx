@@ -289,8 +289,8 @@ export default function NursingTeamPage() {
           {isNursingRole ? (
             <>
               <label>
-                Registro profesional
-                <input name="registration" required />
+                JVPE (número)
+                <input name="registration" inputMode="numeric" pattern="[0-9]+" required />
               </label>
               <fieldset className="full checkbox-fieldset">
                 <legend>Tipos de pacientes que está capacitada para atender</legend>

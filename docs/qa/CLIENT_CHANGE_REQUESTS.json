@@ -1747,5 +1747,23 @@
       "technical_status": "UNASSESSED",
       "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md."
     }
-  ]
+  ],
+  "supplemental_clinical_batch_20261103": {
+    "status": "IN_PROGRESS",
+    "source": "sources/CLIENT_CLINICAL_2026-10-31.txt",
+    "pdf_sha256": "38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b",
+    "scope_and_verification": "../feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+    "authorization": "User explicitly requested implementation of the Oct31 PDF and staff configuration of missing definitions on Nov3. No new video required.",
+    "verification_sha": null,
+    "tests": [
+      "vitest:clinical-annex-scores",
+      "vitest:clinical-record-boundaries",
+      "playwright:clinical-restructure-forms",
+      "playwright:clinical-annex-scales",
+      "playwright:clinical-restructure-responsive",
+      "playwright:clinical-configuration-all-users"
+    ],
+    "postgres_verification": "PENDING scripts/verify-clinical-postgres.ts",
+    "production": "NOT_DEPLOYED"
+  }
 }

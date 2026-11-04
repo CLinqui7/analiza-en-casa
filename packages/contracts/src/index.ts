@@ -1,5 +1,6 @@
 import { z } from 'zod';
 export * from './operations';
+export * from './clinical-records';
 
 export const patientDocumentTypeSchema = z.enum(['DUI', 'PASSPORT', 'RESIDENT_CARD', 'OTHER']);
 export const patientReferralOriginSchema = z.enum(['SOCIAL_MEDIA', 'FAMILY_FRIENDS', 'DOCTOR']);
