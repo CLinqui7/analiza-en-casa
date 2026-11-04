@@ -42,6 +42,23 @@ try {
     assert.equal(r.status(), status, `${path}: ${await r.text()}`);
     return r.json();
   }
+  for (const previous of workspace.payments.filter(
+    (p) =>
+      p.status === 'APPLIED' &&
+      p.reference === 'RES-SINTETICA-RELEASE' &&
+      workspace.quotes.some(
+        (q) =>
+          q.id === p.quoteId &&
+          q.id.startsWith('billing-synthetic-release-') &&
+          q.patientId === patient.id,
+      ),
+  )) {
+    await post('/api/operations', {
+      command: 'payment.void',
+      paymentId: previous.id,
+      reason: 'Cierre de verificación sintética de publicación',
+    });
+  }
   const id = 'billing-synthetic-release-' + Date.now();
   const first = await post(
     '/api/quotes',
@@ -118,13 +135,17 @@ try {
   pass(
     'Synthetic quote versions, one payment across retries and fractional-cent rejection persist',
   );
-  const observed = await post('/api/insurance-observations', {
-    quoteId: revision.id,
-    status: 'INSURER_REVIEW',
-    note: 'Seguimiento sintético de publicación',
-    date: new Date().toISOString(),
-    idempotencyKey: randomUUID(),
-  });
+  const observed = await post(
+    '/api/insurance-observations',
+    {
+      quoteId: revision.id,
+      status: 'INSURER_REVIEW',
+      note: 'Seguimiento sintético de publicación',
+      date: new Date().toISOString(),
+      idempotencyKey: randomUUID(),
+    },
+    201,
+  );
   assert.equal(observed.request.insurer, 'Aseguradora sintética QA');
   pass('Quote insurer persists in administrative follow-up');
   browser = await chromium.launch({ channel: 'chrome', headless: true });

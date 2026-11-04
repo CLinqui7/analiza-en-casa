@@ -41,4 +41,6 @@ Los porcentajes y responsabilidades de aseguradora siguen capturados por el equi
 
 ## Reproducir las pruebas
 
+Publicación completada: `a9df5c3a93eaabcdfe0effce45ad7142c09a1848` está activa en Contabo, tras subida a GitHub y respaldo `f5bb4f5d`. La comprobación pública pasó los cinco grupos de facturación/UI con datos sintéticos, incluido PDF inspeccionado y reversión de los pagos de prueba. [Registro de publicación](../deployment/CONTABO_BILLING_RELEASE_2026-11-04.md).
+
 `npm run test:react` y `npm run test:browser:react` verifican lógica y la compilación demo. Para PostgreSQL aislado: preparar una base temporal con `scripts/prepare-clinical-postgres-qa.mjs`, cargar sus variables privadas fuera de Git y ejecutar `npm run test:billing:postgres`. Guardar su resultado con `BILLING_QA_RESULT`. `npm run test:billing:browser` exige `ANALIZA_QA_MODE=1`, `PGDATABASE=analiza_qa`, `PGHOST=127.0.0.1` y el túnel exclusivo 55440 a la web de QA, nunca a la base activa.
