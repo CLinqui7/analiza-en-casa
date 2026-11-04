@@ -1,360 +1,359 @@
 PAGE 1
-Analiza en Casa — Parte 2 
-Reunión de seguimiento — Reestructuración de la parte clínica 
-Hallazgos 
-1. Para avanzar con la parte clínica, la reunión fue solo con Nelly y Nancy. 
-2. La parte clínica necesita una reestructuración, porque varias ventanas no se conectan con otras. 
-Acciones 
-1. Reordenar las ventanas de Clínico 
-A. Cotizaciones 
-B. Ingresos clínicos 
-C. Agenda 
-D. Expediente clínico 
-E. Órdenes médicas (nueva ventana) 
-2. Correcciones por literal 
-D. Expediente clínico 
-1. Lo que hoy tiene Expediente clínico se reemplaza: la ventana se integra con el Reporte de salud y trae todo su 
-contenido. 
-2. Al entrar, aparecen todos los pacientes con cotización (y expediente). 
-3. Al seleccionar un paciente, aparecen arriba pestañas (mini ventanas): 
-a. 01 · Resumen: la cotización completa del paciente (servicios, laboratorios, medicamentos, etc.). 
-b. 02 · Acciones médicas: en tarjetas, todas las indicaciones médicas, evoluciones clínicas, historia clínica 
-y antecedentes clínicos. 
-c. 03 · Acciones de enfermería: tarjetas de medicamentos, balance hídrico, planes de cuidado, 
-administración de medicamentos, notas de enfermería y escalas; al dar clic en Signos vitales, se ven 
-los signos vitales registrados. 
-d. 04 · Visitas: todas las visitas que las enfermeras le han realizado al paciente. 
-e. 05 · Expediente completo: todo junto, desde la cotización hasta todas las acciones médicas y de 
-enfermería. 
-4. Impresión: cada pestaña se puede imprimir por separado (por ejemplo, solo la 01 o solo la 02). En la 03 se 
-puede elegir imprimir un solo registro (por ejemplo, solo el balance) o todos. La 05 imprime el expediente 
-completo. 
-E. Órdenes médicas (nueva ventana) 
-Va a tener dos sub-botones: 
-1. Acciones médicas: 
-• Debe verse igual a la ventana actual "Órdenes y acciones", pero sin los indicadores de activos, 
-inactivos y hospitalizados. 
-• Siempre debe tener filtro para buscar al paciente por nombre o por DUI. 
-• El título "Pacientes registrados activos" cambia a solo "Pacientes", y abajo aparecen todos los 
-pacientes. 
-• En la columna "Acciones", el botón de tres puntos (⋮) despliega las siguientes opciones: 
-a. Indicación médica 
-b. Evolución clínica 
-c. Historia clínica 
-d. Antecedentes clínicos 
-e. Signos vitales 
-• Indicación médica, Evolución clínica, Historia clínica y Antecedentes clínicos funcionan igual, con 
-estos campos: 
-1. Paciente (selector). 
+Analiza en Casa — Parte 2
+Reunión de seguimiento — Reestructuración de la parte clínica
+Hallazgos
+1. Para avanzar con la parte clínica, la reunión fue solo con Nelly y Nancy.
+2. La parte clínica necesita una reestructuración, porque varias ventanas no se conectan con otras.
+Acciones
+1. Reordenar las ventanas de Clínico
+A. Cotizaciones
+B. Ingresos clínicos
+C. Agenda
+D. Expediente clínico
+E. Órdenes médicas (nueva ventana)
+2. Correcciones por literal
+D. Expediente clínico
+1. Lo que hoy tiene Expediente clínico se reemplaza: la ventana se integra con el Reporte de salud y trae todo su
+contenido.
+2. Al entrar, aparecen todos los pacientes con cotización (y expediente).
+3. Al seleccionar un paciente, aparecen arriba pestañas (mini ventanas):
+a. 01 · Resumen: la cotización completa del paciente (servicios, laboratorios, medicamentos, etc.).
+b. 02 · Acciones médicas: en tarjetas, todas las indicaciones médicas, evoluciones clínicas, historia clínica
+y antecedentes clínicos.
+c. 03 · Acciones de enfermería: tarjetas de medicamentos, balance hídrico, planes de cuidado,
+administración de medicamentos, notas de enfermería y escalas; al dar clic en Signos vitales, se ven
+los signos vitales registrados.
+d. 04 · Visitas: todas las visitas que las enfermeras le han realizado al paciente.
+e. 05 · Expediente completo: todo junto, desde la cotización hasta todas las acciones médicas y de
+enfermería.
+4. Impresión: cada pestaña se puede imprimir por separado (por ejemplo, solo la 01 o solo la 02). En la 03 se
+puede elegir imprimir un solo registro (por ejemplo, solo el balance) o todos. La 05 imprime el expediente
+completo.
+E. Órdenes médicas (nueva ventana)
+Va a tener dos sub-botones:
+1. Acciones médicas:
+• Debe verse igual a la ventana actual "Órdenes y acciones", pero sin los indicadores de activos,
+inactivos y hospitalizados.
+• Siempre debe tener filtro para buscar al paciente por nombre o por DUI.
+• El título "Pacientes registrados activos" cambia a solo "Pacientes", y abajo aparecen todos los
+pacientes.
+• En la columna "Acciones", el botón de tres puntos (⋮) despliega las siguientes opciones:
+a. Indicación médica
+b. Evolución clínica
+c. Historia clínica
+d. Antecedentes clínicos
+e. Signos vitales
+• Indicación médica, Evolución clínica, Historia clínica y Antecedentes clínicos funcionan igual, con
+estos campos:
+1. Paciente (selector).
 
 PAGE 2
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-4. Resumen: cuadro de texto para que el médico escriba sus comentarios. 
-• Signos vitales: funciona igual que en Acciones de enfermería (misma tabla). 
-• Todo lo que se registre aquí debe alimentar automáticamente el Expediente clínico. 
-• En Expediente clínico debe aparecer una mini tarjeta tipo alerta "Recientemente actualizados"; al 
-darle clic, se filtran solo los pacientes con actualizaciones recientes. 
-2. Acciones de enfermería: 
-a. Tarjeta de medicamentos 
-b. Balance hídrico 
-c. Planes de cuidado 
-d. Administración de medicamentos 
-e. Signos vitales 
-f. Notas de enfermería 
-g. Escalas 
-a. Tarjeta de medicamentos 
-• Al entrar, se muestra la lista de todos los pacientes con cotizaciones asignadas. 
-• Agregar la columna "Acciones"; el botón de tres puntos (⋮) despliega: 
-1. Ver tarjeta de medicamentos del paciente. 
-2. Editar tarjeta de medicamentos. 
-3. Imprimir tarjeta de medicamentos. 
-• Al dar clic en Editar, la tarjeta muestra: 
-1. Nombre del paciente. 
-2. Hospitalización (selector): si el paciente tiene varias, al cambiarla se actualizan los 
-medicamentos. 
-3. Medicamentos a aplicar: se cargan automáticamente desde la cotización de la 
-hospitalización seleccionada. 
-4. Crónicos: cuadro de texto libre para que la enfermera los escriba. 
-5. Botón "Guardar tarjeta de medicamentos". 
-• Al guardar la edición, la información debe alimentar automáticamente el Expediente clínico. 
-b. Balance hídrico 
-• Botón "Registrar nuevo balance", con estos campos: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Diagnóstico: aparece por default al seleccionar el paciente. 
-4. Fecha. 
-5. Peso: cuadro de texto. 
-• Debajo, la tabla de balance hídrico que llena la enfermera, con este formato: 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+4. Resumen: cuadro de texto para que el médico escriba sus comentarios.
+• Signos vitales: funciona igual que en Acciones de enfermería (misma tabla).
+• Todo lo que se registre aquí debe alimentar automáticamente el Expediente clínico.
+• En Expediente clínico debe aparecer una mini tarjeta tipo alerta "Recientemente actualizados"; al
+darle clic, se filtran solo los pacientes con actualizaciones recientes.
+2. Acciones de enfermería:
+a. Tarjeta de medicamentos
+b. Balance hídrico
+c. Planes de cuidado
+d. Administración de medicamentos
+e. Signos vitales
+f. Notas de enfermería
+g. Escalas
+a. Tarjeta de medicamentos
+• Al entrar, se muestra la lista de todos los pacientes con cotizaciones asignadas.
+• Agregar la columna "Acciones"; el botón de tres puntos (⋮) despliega:
+1. Ver tarjeta de medicamentos del paciente.
+2. Editar tarjeta de medicamentos.
+3. Imprimir tarjeta de medicamentos.
+• Al dar clic en Editar, la tarjeta muestra:
+1. Nombre del paciente.
+2. Hospitalización (selector): si el paciente tiene varias, al cambiarla se actualizan los
+medicamentos.
+3. Medicamentos a aplicar: se cargan automáticamente desde la cotización de la
+hospitalización seleccionada.
+4. Crónicos: cuadro de texto libre para que la enfermera los escriba.
+5. Botón "Guardar tarjeta de medicamentos".
+• Al guardar la edición, la información debe alimentar automáticamente el Expediente clínico.
+b. Balance hídrico
+• Botón "Registrar nuevo balance", con estos campos:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Diagnóstico: aparece por default al seleccionar el paciente.
+4. Fecha.
+5. Peso: cuadro de texto.
+• Debajo, la tabla de balance hídrico que llena la enfermera, con este formato:
+
+
+
+
+
+
+
+
+
+
+
 
 PAGE 3
- INGRESOS EGRESOS 
-Hora Enteral Parenteral Transfusión Oral Orina Deposición Vómito Drenos Otros 
-7-10          
-11-2          
-3-6          
-7-10          
-11-2          
-3-6          
-Agua endógena: Pérdidas insensibles: 
-BH en ____ horas: ________ BH en 24 horas: ________ 
-Total ingresos (auto) Total egresos (auto) 
-Balance hídrico total = Ingresos − Egresos (auto) 
- 
-• Al final de la tabla se calculan automáticamente tres totales: 
-1. Total de ingresos. 
-2. Total de egresos. 
-3. Balance hídrico total = ingresos − egresos. 
-• Todo balance registrado debe alimentar automáticamente el Expediente clínico. 
-c. Planes de cuidado 
-• Botón "Nuevo plan de cuidado", con estos campos: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-4. Plan de cuidado (selector). Según la opción seleccionada: 
-a. Dieta: se abre un cuadro de texto para escribir la dieta. 
-b. Cuidado de enfermería: se abre un cuadro de texto para escribir los cuidados a 
-realizar. 
-c. Laboratorio: si la cotización de la hospitalización seleccionada incluye laboratorios, 
-aparecen por default los exámenes que se deben tomar. 
-• Todo plan de cuidado registrado debe alimentar automáticamente el Expediente clínico. 
-d. Administración de medicamentos 
-• La tarjeta de medicamentos ya existe para todos los pacientes; la administración es el registro de 
-cuando el medicamento se aplica al paciente. 
-• Botón "Registrar nueva administración", con estos campos en orden: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-4. Hora. 
-5. Dosis: cuadro de texto. 
-6. Presentación: selector (tableta, cápsula, sobre, supositorio, óvulo, crema, pomada, gel, 
-pasta, solución, jarabe, elixir, frasco, ampolla, vial, jeringa precargada). 
-7. Vía de administración: selector (oral, sublingual, rectal, vaginal, intravenosa, intramuscular, 
-subcutánea, intradérmica, cutánea / transdérmica, oftálmica, ótica, nasal, inhalatoria, SNG, 
-gastrostomía). 
-• Quitar los campos "Cantidad de presentaciones" y "Bodega". 
-• Al seleccionar la hospitalización, se despliegan los medicamentos a aplicar y los crónicos; a la par de 
-cada medicamento, una casilla "Se aplicó / No se aplicó". 
+ INGRESOS EGRESOS
+Hora Enteral Parenteral Transfusión Oral Orina Deposición Vómito Drenos Otros
+7-10
+11-2
+3-6
+7-10
+11-2
+3-6
+Agua endógena: Pérdidas insensibles:
+BH en ____ horas: ________ BH en 24 horas: ________
+Total ingresos (auto) Total egresos (auto)
+Balance hídrico total = Ingresos − Egresos (auto)
+
+• Al final de la tabla se calculan automáticamente tres totales:
+1. Total de ingresos.
+2. Total de egresos.
+3. Balance hídrico total = ingresos − egresos.
+• Todo balance registrado debe alimentar automáticamente el Expediente clínico.
+c. Planes de cuidado
+• Botón "Nuevo plan de cuidado", con estos campos:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+4. Plan de cuidado (selector). Según la opción seleccionada:
+a. Dieta: se abre un cuadro de texto para escribir la dieta.
+b. Cuidado de enfermería: se abre un cuadro de texto para escribir los cuidados a
+realizar.
+c. Laboratorio: si la cotización de la hospitalización seleccionada incluye laboratorios,
+aparecen por default los exámenes que se deben tomar.
+• Todo plan de cuidado registrado debe alimentar automáticamente el Expediente clínico.
+d. Administración de medicamentos
+• La tarjeta de medicamentos ya existe para todos los pacientes; la administración es el registro de
+cuando el medicamento se aplica al paciente.
+• Botón "Registrar nueva administración", con estos campos en orden:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+4. Hora.
+5. Dosis: cuadro de texto.
+6. Presentación: selector (tableta, cápsula, sobre, supositorio, óvulo, crema, pomada, gel,
+pasta, solución, jarabe, elixir, frasco, ampolla, vial, jeringa precargada).
+7. Vía de administración: selector (oral, sublingual, rectal, vaginal, intravenosa, intramuscular,
+subcutánea, intradérmica, cutánea / transdérmica, oftálmica, ótica, nasal, inhalatoria, SNG,
+gastrostomía).
+• Quitar los campos "Cantidad de presentaciones" y "Bodega".
+• Al seleccionar la hospitalización, se despliegan los medicamentos a aplicar y los crónicos; a la par de
+cada medicamento, una casilla "Se aplicó / No se aplicó".
 
 PAGE 4
-• Si se aplicó: se descuenta del inventario y el medicamento queda activo en la cuenta por cobrar del 
-paciente. 
-• Si no se aplicó: 
-1. Es obligatorio escribir el motivo. 
-2. Se envía a un reporte nuevo de "Devoluciones". 
-3. Se actualiza la cuenta por cobrar del paciente indicando que ese medicamento no se aplicó, 
-para que el responsable de Cuentas por cobrar lo quite de la cotización. 
-4. No se descuenta del inventario. 
-• Los crónicos no afectan la cotización ni el inventario; solo se registra si se aplicaron o no. 
-• Todo registro de administración debe alimentar automáticamente el Expediente clínico. 
-e. Signos vitales 
-• Botón "Agregar nuevo signo vital", con estos campos: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-• Debajo, la tabla de signos vitales que llena la enfermera, con este formato: 
- 
-Hora Frecuencia cardíaca Frecuencia respiratoria Saturación de oxígeno Temperatura Presión arterial HGT 
-       
-       
-       
-       
- 
-• Todo registro de signos vitales debe alimentar automáticamente el Expediente clínico. 
-f. Notas de enfermería 
-• Mismo comportamiento que Signos vitales: botón "Agregar nueva nota de enfermería", con estos 
-campos: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-• Debajo, la tabla de nota de enfermería que llena la enfermera, con este formato: 
- 
-Hora Nota JVPE 
-   
- 
-• JVPE: es el número de la enfermera y debe aparecer por default, tomado de su perfil de usuario (ver 
-Equipo y cuentas), para no volver a digitarlo y evitar errores. 
-• Toda nota registrada debe alimentar automáticamente el Expediente clínico. 
+• Si se aplicó: se descuenta del inventario y el medicamento queda activo en la cuenta por cobrar del
+paciente.
+• Si no se aplicó:
+1. Es obligatorio escribir el motivo.
+2. Se envía a un reporte nuevo de "Devoluciones".
+3. Se actualiza la cuenta por cobrar del paciente indicando que ese medicamento no se aplicó,
+para que el responsable de Cuentas por cobrar lo quite de la cotización.
+4. No se descuenta del inventario.
+• Los crónicos no afectan la cotización ni el inventario; solo se registra si se aplicaron o no.
+• Todo registro de administración debe alimentar automáticamente el Expediente clínico.
+e. Signos vitales
+• Botón "Agregar nuevo signo vital", con estos campos:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+• Debajo, la tabla de signos vitales que llena la enfermera, con este formato:
+
+Hora Frecuencia cardíaca Frecuencia respiratoria Saturación de oxígeno Temperatura Presión arterial HGT
+
+
+
+
+
+• Todo registro de signos vitales debe alimentar automáticamente el Expediente clínico.
+f. Notas de enfermería
+• Mismo comportamiento que Signos vitales: botón "Agregar nueva nota de enfermería", con estos
+campos:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+• Debajo, la tabla de nota de enfermería que llena la enfermera, con este formato:
+
+Hora Nota JVPE
+
+
+• JVPE: es el número de la enfermera y debe aparecer por default, tomado de su perfil de usuario (ver
+Equipo y cuentas), para no volver a digitarlo y evitar errores.
+• Toda nota registrada debe alimentar automáticamente el Expediente clínico.
 
 PAGE 5
-g. Escalas 
-• Botón "Registrar nueva escala", con estos campos: 
-1. Paciente (selector). 
-2. Hospitalización (selector con las hospitalizaciones del paciente). 
-3. Fecha. 
-4. Escala (selector): EVA, Glasgow, Ramsay, ECOG, ESAS, Karnofsky, Downton, Braden, Norton 
-o Barthel. 
-• Al seleccionar la escala, se despliegan sus ítems y la enfermera selecciona la puntuación numérica de 
-cada uno; el sistema calcula el total cuando aplique. 
-• Al seleccionar el paciente y la hospitalización, el selector muestra solo las escalas vinculadas a su 
-diagnóstico (según el catálogo de Diagnósticos). Mientras un diagnóstico no tenga escalas vinculadas, 
-se muestran todas. Ejemplo: Faringitis aguda → EVA; Gastroenteritis → Ramsay y Glasgow. 
-• No es obligatorio llenar todas las escalas: la enfermera registra solo las que necesite para ese paciente 
-(puede ser una sola). 
-• Botón "Guardar"; todo registro debe alimentar automáticamente el Expediente clínico. 
-• El detalle de cada escala está en el Anexo: Escalas, al final del documento. 
-3. Cambios en otras ventanas 
-Clínico → Cotizaciones 
-1. El campo "Diagnóstico" deja de ser texto y pasa a ser un selector, con estas opciones iniciales: 
-a. Resfriado común / nasofaringitis aguda 
-b. Faringitis aguda 
-c. Gastroenteritis 
-d. Cistitis / infección urinaria 
-e. COVID-19 
-f. Hipertensión esencial 
-g. Diabetes mellitus tipo 2 
-h. Dislipidemia (hiperlipoproteinemia) 
-i. Obesidad 
-j. Anemia por deficiencia de hierro 
-k. Hipotiroidismo 
-l. Cardiopatía isquémica 
-m. Asma 
-n. EPOC 
-o. Rinitis alérgica 
-p. Reflujo gastroesofágico 
-q. Lumbalgia 
-r. Cefalea tensional 
-s. Migraña 
-t. Artrosis de rodilla 
-u. Episodio depresivo único / recurrente 
-v. Trastorno de ansiedad generalizada 
-Administración → Catálogos 
-1. Crear el catálogo de Diagnósticos, cargado con la lista inicial anterior. 
-2. Permitir que el personal agregue nuevos diagnósticos al catálogo, para que aparezcan en el selector de 
-Cotizaciones. 
-3. En cada diagnóstico, poder vincular las escalas que le corresponden (ej.: Faringitis aguda → EVA; 
-Gastroenteritis → Ramsay y Glasgow), para que en Escalas solo aparezcan las que se deben llenar. 
-Administración → Equipo y cuentas 
-1. Al crear un perfil de usuario de enfermería, agregar el campo "JVPE" (número). 
-2. Ese número se carga automáticamente en las Notas de enfermería que registre esa enfermera. 
+g. Escalas
+• Botón "Registrar nueva escala", con estos campos:
+1. Paciente (selector).
+2. Hospitalización (selector con las hospitalizaciones del paciente).
+3. Fecha.
+4. Escala (selector): EVA, Glasgow, Ramsay, ECOG, ESAS, Karnofsky, Downton, Braden, Norton
+o Barthel.
+• Al seleccionar la escala, se despliegan sus ítems y la enfermera selecciona la puntuación numérica de
+cada uno; el sistema calcula el total cuando aplique.
+• Al seleccionar el paciente y la hospitalización, el selector muestra solo las escalas vinculadas a su
+diagnóstico (según el catálogo de Diagnósticos). Mientras un diagnóstico no tenga escalas vinculadas,
+se muestran todas. Ejemplo: Faringitis aguda → EVA; Gastroenteritis → Ramsay y Glasgow.
+• No es obligatorio llenar todas las escalas: la enfermera registra solo las que necesite para ese paciente
+(puede ser una sola).
+• Botón "Guardar"; todo registro debe alimentar automáticamente el Expediente clínico.
+• El detalle de cada escala está en el Anexo: Escalas, al final del documento.
+3. Cambios en otras ventanas
+Clínico → Cotizaciones
+1. El campo "Diagnóstico" deja de ser texto y pasa a ser un selector, con estas opciones iniciales:
+a. Resfriado común / nasofaringitis aguda
+b. Faringitis aguda
+c. Gastroenteritis
+d. Cistitis / infección urinaria
+e. COVID-19
+f. Hipertensión esencial
+g. Diabetes mellitus tipo 2
+h. Dislipidemia (hiperlipoproteinemia)
+i. Obesidad
+j. Anemia por deficiencia de hierro
+k. Hipotiroidismo
+l. Cardiopatía isquémica
+m. Asma
+n. EPOC
+o. Rinitis alérgica
+p. Reflujo gastroesofágico
+q. Lumbalgia
+r. Cefalea tensional
+s. Migraña
+t. Artrosis de rodilla
+u. Episodio depresivo único / recurrente
+v. Trastorno de ansiedad generalizada
+Administración → Catálogos
+1. Crear el catálogo de Diagnósticos, cargado con la lista inicial anterior.
+2. Permitir que el personal agregue nuevos diagnósticos al catálogo, para que aparezcan en el selector de
+Cotizaciones.
+3. En cada diagnóstico, poder vincular las escalas que le corresponden (ej.: Faringitis aguda → EVA;
+Gastroenteritis → Ramsay y Glasgow), para que en Escalas solo aparezcan las que se deben llenar.
+Administración → Equipo y cuentas
+1. Al crear un perfil de usuario de enfermería, agregar el campo "JVPE" (número).
+2. Ese número se carga automáticamente en las Notas de enfermería que registre esa enfermera.
 
 PAGE 6
-Anexo: Escalas 
-En estas escalas la enfermera debe seleccionar las puntuaciones numéricas. 
-Escala EVA 
-Escala verbal simple (EVS) Escala visual analógica (EVA) 
-¿Cuánto dolor tiene?  
-Ninguno EVA = 0 
-Molestias EVA = 1-3 
-Muy poco, ligero dolor EVA = 4-5 
-Moderado EVA = 6-7 
-Mucho, intenso, fuerte EVA = 8-9 
-Insoportable EVA = 10 
- 
-Escala de Glasgow 
-Parámetro Respuesta Puntos 
-Apertura ocular 
-Espontánea 4 
-A estímulos verbales 3 
-A estímulo doloroso 2 
-Ninguno 1 
-Respuesta verbal 
-Orientado 5 
-Confuso 4 
-Inapropiado 3 
-Incomprensible 2 
-Ninguno 1 
-Respuesta motora 
-Obedece 6 
-Localiza el dolor 5 
-Retirada al dolor 4 
-Flexión anormal 3 
-Extensión anormal 2 
-Ninguna 1 
-TOTAL:  
- 
-Trauma leve Trauma moderado Trauma grave 
-13-15 9-12 3-8 
- 
-Escala de sedación de Ramsay 
-Nivel Descripción 
-1 Paciente ansioso, agitado o inquieto 
-2 Paciente cooperador, orientado y tranquilo 
+Anexo: Escalas
+En estas escalas la enfermera debe seleccionar las puntuaciones numéricas.
+Escala EVA
+Escala verbal simple (EVS) Escala visual analógica (EVA)
+¿Cuánto dolor tiene?
+Ninguno EVA = 0
+Molestias EVA = 1-3
+Muy poco, ligero dolor EVA = 4-5
+Moderado EVA = 6-7
+Mucho, intenso, fuerte EVA = 8-9
+Insoportable EVA = 10
+
+Escala de Glasgow
+Parámetro Respuesta Puntos
+Apertura ocular
+Espontánea 4
+A estímulos verbales 3
+A estímulo doloroso 2
+Ninguno 1
+Respuesta verbal
+Orientado 5
+Confuso 4
+Inapropiado 3
+Incomprensible 2
+Ninguno 1
+Respuesta motora
+Obedece 6
+Localiza el dolor 5
+Retirada al dolor 4
+Flexión anormal 3
+Extensión anormal 2
+Ninguna 1
+TOTAL:
+
+Trauma leve Trauma moderado Trauma grave
+13-15 9-12 3-8
+
+Escala de sedación de Ramsay
+Nivel Descripción
+1 Paciente ansioso, agitado o inquieto
+2 Paciente cooperador, orientado y tranquilo
 
 PAGE 7
-3 Paciente dormido, responde órdenes 
-4 Paciente dormido, respuesta rápida a estímulos 
-5 Paciente dormido, respuesta lenta a estímulos 
-6 Paciente dormido. Ausencia de respuestas. 
- 
-Escala de ECOG 
- 
-Escala ESAS 
- 
+3 Paciente dormido, responde órdenes
+4 Paciente dormido, respuesta rápida a estímulos
+5 Paciente dormido, respuesta lenta a estímulos
+6 Paciente dormido. Ausencia de respuestas.
+
+Escala de ECOG
+
+Escala ESAS
+
 
 
 PAGE 8
-Escala de Karnofsky 
- 
+Escala de Karnofsky
+
 
 
 PAGE 9
-Escala de Downton 
- 
+Escala de Downton
+
 
 
 PAGE 10
-Escala de Braden 
- 
+Escala de Braden
+
 
 
 PAGE 11
-Escala de Norton 
- 
-Índice de Barthel 
-Actividad Descripción Puntaje 
-Comer 
-Dependiente 0 
-Necesita ayuda para cortar, extender mantequilla, usar condimentos, etc. 5 
-Independiente (capaz de usar cualquier instrumento) 10 
-Trasladarse entre la silla y 
-la cama 
-Dependiente, no se mantiene sentado 0 
-Necesita ayuda importante (1 persona entrenada o 2 personas), puede 
-estar sentado 5 
-Necesita algo de ayuda (una pequeña ayuda física o ayuda verbal) 10 
-Independiente 15 
-Aseo personal 
-Dependiente 0 
-Independiente para lavarse la cara, las manos y los dientes, peinarse y 
-afeitarse 5 
-Uso del retrete 
-Dependiente 0 
-Necesita alguna ayuda, pero puede hacer algo solo 5 
-Independiente (entrar y salir, limpiarse y vestirse) 10 
-Bañarse o ducharse Dependiente 0 Independiente para bañarse o ducharse 5 
-Desplazarse Inmóvil 0 Independiente en silla de ruedas en 50 m 5 
+Escala de Norton
+
+Índice de Barthel
+Actividad Descripción Puntaje
+Comer
+Dependiente 0
+Necesita ayuda para cortar, extender mantequilla, usar condimentos, etc. 5
+Independiente (capaz de usar cualquier instrumento) 10
+Trasladarse entre la silla y
+la cama
+Dependiente, no se mantiene sentado 0
+Necesita ayuda importante (1 persona entrenada o 2 personas), puede
+estar sentado 5
+Necesita algo de ayuda (una pequeña ayuda física o ayuda verbal) 10
+Independiente 15
+Aseo personal
+Dependiente 0
+Independiente para lavarse la cara, las manos y los dientes, peinarse y
+afeitarse 5
+Uso del retrete
+Dependiente 0
+Necesita alguna ayuda, pero puede hacer algo solo 5
+Independiente (entrar y salir, limpiarse y vestirse) 10
+Bañarse o ducharse Dependiente 0 Independiente para bañarse o ducharse 5
+Desplazarse Inmóvil 0 Independiente en silla de ruedas en 50 m 5
 
 
 PAGE 12
-Anda con pequeña ayuda de una persona (física o verbal) 10 
-Independiente al menos 50 m, con cualquier tipo de muleta, excepto 
-andador 15 
-Subir y bajar escaleras 
-Dependiente 0 
-Necesita ayuda física o verbal, puede llevar cualquier tipo de muleta 5 
-Independiente para subir y bajar 10 
-Vestirse y desvestirse 
-Dependiente 0 
-Necesita ayuda, pero puede hacer la mitad aproximadamente, sin ayuda 5 
-Independiente, incluyendo botones, cremalleras, cordones, etc. 10 
-Control de heces 
-Incontinente (o necesita que le suministren enema) 0 
-Accidente excepcional (uno/semana) 5 
-Continente 10 
-Control de orina 
-Incontinente, o sondado incapaz de cambiarse la bolsa 0 
-Accidente excepcional (máximo uno/24 horas) 5 
-Continente, durante al menos 7 días 10 
- 
+Anda con pequeña ayuda de una persona (física o verbal) 10
+Independiente al menos 50 m, con cualquier tipo de muleta, excepto
+andador 15
+Subir y bajar escaleras
+Dependiente 0
+Necesita ayuda física o verbal, puede llevar cualquier tipo de muleta 5
+Independiente para subir y bajar 10
+Vestirse y desvestirse
+Dependiente 0
+Necesita ayuda, pero puede hacer la mitad aproximadamente, sin ayuda 5
+Independiente, incluyendo botones, cremalleras, cordones, etc. 10
+Control de heces
+Incontinente (o necesita que le suministren enema) 0
+Accidente excepcional (uno/semana) 5
+Continente 10
+Control de orina
+Incontinente, o sondado incapaz de cambiarse la bolsa 0
+Accidente excepcional (máximo uno/24 horas) 5
+Continente, durante al menos 7 días 10
