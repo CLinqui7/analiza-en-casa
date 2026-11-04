@@ -118,7 +118,9 @@ export function ClinicalRecordEditor({
   const card = cards[0];
   const nurse = nursingResources.find((resource) => resource.userId === session?.userId);
   const [applied, setApplied] = useState<Record<string, string>>({});
-  const [jvpe, setJvpe] = useState(operations.currentJvpe || nurse?.boardRegistrationNumber || '');
+  const [jvpeDraft, setJvpe] = useState<string | null>(null);
+  const registeredJvpe = operations.currentJvpe || nurse?.boardRegistrationNumber || '';
+  const jvpe = jvpeDraft ?? (/^\d{1,30}$/.test(registeredJvpe) ? registeredJvpe : '');
   function changeCase(value: string) {
     setCaseId(value);
     setScaleValues({});
@@ -597,7 +599,6 @@ export function ClinicalRecordEditor({
                     Completar mi JVPE
                     <input
                       inputMode="numeric"
-                      pattern="[0-9]+"
                       value={jvpe}
                       onChange={(event) => setJvpe(event.target.value)}
                     />
@@ -610,6 +611,10 @@ export function ClinicalRecordEditor({
                   >
                     Actualizar mi perfil
                   </Button>
+                  <p className="field-help full-field">
+                    Actualizar mi perfil guarda este número. La nota utiliza el JVPE ya registrado,
+                    aunque deje esta edición pendiente.
+                  </p>
                 </div>
               ) : null}
               {Array.from({ length: rowCount }, (_, i) => {

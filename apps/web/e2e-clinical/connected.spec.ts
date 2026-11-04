@@ -4,11 +4,37 @@ const caseId = process.env.CLINICAL_QA_CASE_ID!;
 const secret = process.env.ANALIZA_QA_PASSWORD!;
 if (!patientId?.startsWith('clinical-qa-p-') || !caseId?.startsWith('clinical-qa-c-') || !secret)
   throw new Error('Run the synthetic PostgreSQL verification first.');
+async function browserApi(
+  page: Page,
+  url: string,
+  data?: unknown,
+  headers?: Record<string, string>,
+) {
+  // Production cookies are Secure. Keep localhost HTTP verification in Chrome,
+  // which supports the localhost secure-context exception, instead of Node's cookie jar.
+  return page.evaluate(
+    async ({ url, data, headers }) => {
+      const response = await fetch(url, {
+        method: data === undefined ? 'GET' : 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        ...(data === undefined ? {} : { body: JSON.stringify(data) }),
+      });
+      return { status: response.status, body: await response.json() };
+    },
+    { url, data, headers },
+  );
+}
+async function getJson(page: Page, url: string) {
+  const response = await browserApi(page, url);
+  expect(response.status, JSON.stringify(response.body)).toBe(200);
+  return response.body;
+}
 async function login(page: Page, path: string, role = 'nurse') {
   await page.goto('/login?next=' + encodeURIComponent(path));
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(secret);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page).toHaveURL(new RegExp(path.replaceAll('/', '\\/') + '$'), { timeout: 30000 });
   await expect(page.locator('main h1')).toBeVisible();
 }
 async function editor(page: Page, label: string, nursing = false) {
@@ -61,12 +87,12 @@ test('medical and nursing forms persist through HTTP, reload and record printing
     expect(saved.patientId).toBe(patientId);
     expect(saved.caseId).toBe(caseId);
     await page.reload();
-    const snapshot = await (await page.request.get('/api/operations')).json();
+    const snapshot = await getJson(page, '/api/operations');
     expect(snapshot.clinicalRecords.some((r: { id: string }) => r.id === saved.id)).toBe(true);
   }
   for (const plan of ['DIET', 'NURSING', 'LABORATORY']) {
     const dialog = await editor(page, 'Plan de cuidado', true);
-    await dialog.getByLabel('Plan', { exact: true }).selectOption(plan);
+    await dialog.getByRole('combobox', { name: 'Plan', exact: true }).selectOption(plan);
     if (plan !== 'LABORATORY') await dialog.getByLabel('Descripción').fill('Plan sintético ' + run);
     const saved = await persist(page);
     if (plan === 'LABORATORY') expect(saved.laboratories).toContain('Laboratorio sintético QA');
@@ -84,6 +110,9 @@ test('medical and nursing forms persist through HTTP, reload and record printing
   const note = await editor(page, 'Nota de enfermería', true);
   await note.getByLabel('Hora', { exact: true }).fill('08:10');
   await note.locator('[name="note-0"]').fill('Nota de QA ' + run);
+  await expect(note.getByLabel('Completar mi JVPE')).toHaveValue('12345');
+  await note.getByLabel('Completar mi JVPE').fill('edición pendiente');
+  await expect(note.getByRole('button', { name: 'Actualizar mi perfil' })).toBeDisabled();
   const savedNote = await persist(page);
   expect(savedNote.jvpe).toBe('12345');
   const scale = await editor(page, 'Escala', true);
@@ -122,15 +151,21 @@ test('card edit and mixed administration record each medicine without changing c
   const administration = await editor(page, 'Administración de medicamentos', true);
   await administration.getByLabel('Hora', { exact: true }).fill('09:00');
   await administration.getByLabel('Dosis', { exact: true }).fill('Captura manual sintética');
-  await administration.getByLabel('Presentación', { exact: true }).selectOption('Tableta');
-  await administration.getByLabel('Vía de administración', { exact: true }).selectOption('Oral');
+  await administration
+    .getByRole('combobox', { name: 'Presentación', exact: true })
+    .selectOption('Tableta');
+  await administration
+    .getByRole('combobox', { name: 'Vía de administración', exact: true })
+    .selectOption('Oral');
   const med = card.medications.find((m: { chronic: boolean }) => !m.chronic);
-  await administration.getByLabel('Aplicación · ' + med.name, { exact: true }).selectOption('no');
+  await administration
+    .getByRole('combobox', { name: 'Aplicación · ' + med.name, exact: true })
+    .selectOption('no');
   await administration
     .getByLabel('Motivo de no aplicación · ' + med.name)
     .fill('No aplicado en QA de navegador');
   await administration
-    .getByLabel('Aplicación · Crónico sintético navegador', { exact: true })
+    .getByRole('combobox', { name: 'Aplicación · Crónico sintético navegador', exact: true })
     .selectOption('yes');
   const result = await persist(page);
   expect(result.payload.items).toHaveLength(2);
@@ -154,21 +189,15 @@ test('HTTP rejects missing CSRF, malformed input and cross-tenant clinical write
       payload: { kind: 'INDICATION', summary: 'Intento sintético externo' },
     },
   };
-  expect((await page.request.post('/api/operations', { data: command })).status()).toBe(403);
-  const csrf = await (await page.request.get('/api/auth/csrf')).json();
+  expect((await browserApi(page, '/api/operations', command)).status).toBe(403);
+  const csrf = await getJson(page, '/api/auth/csrf');
   const headers = { 'x-analiza-csrf': csrf.csrfToken };
-  expect((await page.request.post('/api/operations', { data: command, headers })).status()).toBe(
-    400,
-  );
+  expect((await browserApi(page, '/api/operations', command, headers)).status).toBe(400);
   expect(
-    (
-      await page.request.post('/api/operations', {
-        data: { command: 'clinical.record', record: {} },
-        headers,
-      })
-    ).status(),
+    (await browserApi(page, '/api/operations', { command: 'clinical.record', record: {} }, headers))
+      .status,
   ).toBe(400);
-  const snapshot = await (await page.request.get('/api/operations')).json();
+  const snapshot = await getJson(page, '/api/operations');
   expect(
     snapshot.clinicalRecords.some((r: { patientId: string }) => r.patientId === patientId),
   ).toBe(false);
@@ -208,10 +237,12 @@ test('configured category discount creates a quote revision without changing the
   await page.goto('/quotes?revise=' + quoteId);
   const dialog = page.getByRole('dialog');
   await dialog
-    .getByLabel('Perfil de descuento', { exact: true })
+    .getByRole('combobox', { name: 'Perfil de descuento', exact: true })
     .selectOption('discount-FINANCE-' + run);
-  await dialog.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
-  await dialog.getByLabel('Diagnóstico', { exact: true }).selectOption({ index: 1 });
+  await dialog.getByRole('combobox', { name: 'Ingreso clínico' }).selectOption('HOME_OUTPATIENT');
+  await dialog
+    .getByRole('combobox', { name: 'Diagnóstico', exact: true })
+    .selectOption({ index: 1 });
   await dialog.getByLabel('Motivo de revisión').fill('QA de perfil por categoría');
   const responsePromise = page.waitForResponse(
     (r) =>
@@ -224,7 +255,9 @@ test('configured category discount creates a quote revision without changing the
   expect(response.status(), await response.text()).toBeLessThan(300);
   await expect(dialog).toHaveCount(0);
   await page.reload();
-  const { quotes } = await (await page.request.get('/api/quotes')).json();
+  const quotes = (await getJson(page, '/api/quotes')).quotes.map(
+    (entry: { quote: unknown }) => entry.quote,
+  );
   const original = quotes.find((quote: { id: string }) => quote.id === quoteId);
   const revised = quotes.find(
     (quote: { rootQuoteId?: string; originalQuoteId?: string; version: number }) =>
@@ -234,23 +267,82 @@ test('configured category discount creates a quote revision without changing the
   expect(original.status).toBe('SENT');
   expect(revised.discount.categories.MEDICATIONS).toBe(5);
   expect(revised.total).toBe(2.85);
-  const snapshot = await (await page.request.get('/api/operations')).json();
+  const snapshot = await getJson(page, '/api/operations');
   const diagnosis = snapshot.configuration.find(
     (entry: { category: string; label: string }) =>
       entry.category === 'DIAGNOSIS' && entry.label === revised.diagnosisSummary,
   );
   expect(diagnosis).toBeTruthy();
-  const csrf = await (await page.request.get('/api/auth/csrf')).json();
+  const csrf = await getJson(page, '/api/auth/csrf');
   expect(
     (
-      await page.request.post('/api/operations', {
-        headers: { 'x-analiza-csrf': csrf.csrfToken },
-        data: { command: 'configuration.save', entry: { ...diagnosis, scaleIds: ['GLASGOW'] } },
-      })
-    ).status(),
+      await browserApi(
+        page,
+        '/api/operations',
+        { command: 'configuration.save', entry: { ...diagnosis, scaleIds: ['GLASGOW'] } },
+        { 'x-analiza-csrf': csrf.csrfToken },
+      )
+    ).status,
   ).toBe(200);
   const assessment = await editor(page, 'Escala', true);
   await expect(
     assessment.getByRole('combobox', { name: 'Escala', exact: true }).locator('option'),
   ).toHaveText(['Glasgow']);
+});
+
+// test-id: playwright:clinical-connected-correction-print
+test('medication card correction preserves its original and prints only the selected record', async ({
+  page,
+}) => {
+  await login(page, '/clinical/medication-cards');
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    const menu = page.locator('.clinical-row-menu summary').first();
+    await expect(menu).toBeVisible();
+    expect((await menu.boundingBox())!.width).toBeLessThanOrEqual(48);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page
+    .getByRole('searchbox', { name: 'Buscar por nombre o DUI' })
+    .fill(patientId.split('-').at(-1)!);
+  const block = page
+    .locator('.clinical-record-block')
+    .filter({ has: page.locator('article.clinical-record-card') })
+    .first();
+  await expect(block).toBeVisible();
+  const originalId = (await block.locator('article').getAttribute('id'))!.replace(
+    'clinical-record-',
+    '',
+  );
+  const before = (await getJson(page, '/api/operations')).clinicalRecords.find(
+    (r: { id: string }) => r.id === originalId,
+  );
+  await block.getByRole('button', { name: 'Editar tarjeta', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Motivo de actualización').fill('Comprobación sintética de corrección');
+  const instructions = 'Instrucción manual sintética ' + Date.now();
+  await dialog.locator('[name="instructions"]').fill(instructions);
+  const saved = await persist(page);
+  expect(saved.version).toBe(before.version + 1);
+  expect(saved.rootId).toBe(before.rootId);
+  const snapshot = await getJson(page, '/api/operations');
+  expect(snapshot.clinicalRecords.find((r: { id: string }) => r.id === originalId)).toEqual(before);
+  const corrected = page
+    .locator('.clinical-record-block')
+    .filter({ has: page.locator(`[id="clinical-record-${saved.id}"]`) });
+  await page.evaluate(() => {
+    window.print = () => {};
+  });
+  await corrected.getByRole('button', { name: 'Imprimir', exact: true }).click();
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('#clinical-print-root')).toContainText(instructions);
+  await expect(page.locator('#clinical-print-root .clinical-record-card')).toHaveCount(0);
+  await expect(page.locator('#clinical-print-root h3')).toHaveCount(1);
+  await expect(page.locator('.sidebar')).toBeHidden();
+  await page.pdf({ path: './.local/clinical-single-record-qa.pdf', format: 'A4' });
+  await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+  await expect(page.locator('#clinical-print-root')).toHaveCount(0);
 });
