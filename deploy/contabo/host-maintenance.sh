@@ -6,7 +6,7 @@ umask 077
 [[ $(id -u) = 0 ]] || { echo 'Root is required' >&2; exit 1; }
 . /etc/os-release
 [[ $ID = ubuntu && $VERSION_ID = 24.04 ]] || { echo 'Unexpected OS' >&2; exit 1; }
-phase=${1:?Expected refresh, install-tuvet-backup, backup, live-restore, upgrade, services, cache or verify}
+phase=${1:?Expected refresh, install-tuvet-backup, backup, live-restore, upgrade, services, cache, reboot or verify}
 state=/var/lib/analiza-host-maintenance/2026-11-04
 install -d -m 700 "$state"
 exec 9>/run/lock/analiza-host-maintenance.lock
@@ -169,6 +169,28 @@ case "$phase" in
     diff -u "$state/containers.before-service-restarts.txt" "$state/containers.after-service-restarts.txt"
     needrestart -b -r l > "$state/needrestart.final.txt" 2>&1
     cat "$state/needrestart.final.txt"
+    ;;
+  reboot)
+    # A controlled reboot clears remaining session daemons and old containerd
+    # shims without force-restarting dbus underneath active login sessions.
+    test -s "$state/upgrade-completed"
+    test -s "$state/offsite-verified"
+    [[ $(( $(date +%s) - $(stat -c %Y "$state/backup-completed") )) -lt 7200 ]]
+    health
+    [[ -z $(who) ]] || { echo 'An interactive session is active; coordinate first' >&2; exit 1; }
+    ! pgrep -x 'apt|apt-get|dpkg' >/dev/null
+    ! systemctl is-active --quiet analiza-contabo-backup.service tuvet-backup.service
+    for service in docker nginx ssh.socket tuvet-web.service tuvet-postgres.service; do
+      systemctl is-enabled --quiet "$service"
+    done
+    for container in analiza-contabo-staging-web-1 analiza-contabo-staging-database-1; do
+      [[ $(docker inspect --format '{{.HostConfig.RestartPolicy.Name}}' "$container") = unless-stopped ]]
+    done
+    mountpoint -q /opt/tuvet-staging
+    findmnt --verify > "$state/mount-verification.txt" 2>&1
+    cat /proc/sys/kernel/random/boot_id > "$state/boot-id.before.txt"
+    date --utc --iso-8601=seconds > "$state/reboot-requested"
+    systemctl reboot
     ;;
   verify)
     health
