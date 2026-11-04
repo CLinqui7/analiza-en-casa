@@ -2184,7 +2184,7 @@
     "production": "Deployment result is recorded in the release ledger after Git-first publication."
   },
   "supplemental_observations_batch_20261104": {
-    "status": "TECHNICALLY_VERIFIED",
+    "status": "DEPLOYED_VERIFIED",
     "source": "sources/CLIENT_CLINICAL_OBSERVATIONS_2026-11-04.txt",
     "pdf_sha256": "532bc8f79dd9de60f0a0fb11f36e8ac67dbe5c328ea1e852dfd4906fd785bc70",
     "scope_and_verification": "../feedback/CLINICAL_OBSERVATIONS_2026-11-04.md",
@@ -2195,6 +2195,6 @@
       "playwright:clinical-observations-responsive",
       "playwright:clinical-observations-menus"
     ],
-    "production": "See release ledger after Git-first publication."
+    "production": "Git-first release cfc7ceb1fcc53f0e2b9cd7ac260f12f51e2bb967; both public synthetic verifiers passed (5 + 3 groups). See ../deployment/CONTABO_CLINICAL_OBSERVATIONS_2026-11-04.md."
   }
 }

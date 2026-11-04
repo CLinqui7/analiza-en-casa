@@ -12,6 +12,8 @@ pueden estar trabajando en el mismo VPS.
 
 ## GitHub antes de cada despliegue
 
+**Observaciones clínicas, 4 de noviembre de 2026:** release activo `cfc7ceb1fcc53f0e2b9cd7ac260f12f51e2bb967`, publicado después de verificar GitHub, con menú simplificado, expediente y visitas reorganizados, acciones de enfermería funcionales, planes combinados y correcciones auditadas de administración. Respaldo previo `af5a6b94`. Web y PostgreSQL saludables. Ver `CONTABO_CLINICAL_OBSERVATIONS_2026-11-04.md`; las entradas siguientes son históricas. La copia externa de este snapshot no se ha verificado en este lote.
+
 **Facturación, 4 de noviembre de 2026:** la versión activa más reciente es `a9df5c3a93eaabcdfe0effce45ad7142c09a1848`, con saldos por cadena de cotización, reintentos de pago estables, centavos consistentes, protección de versiones, tablero de seguros adaptable y limpieza de textos internos. Respaldo previo `f5bb4f5d`; cinco grupos de prueba pública sintética aprobados y salud HTTP 200. No hay DDL nuevo ni actualización de Ubuntu. Ver `CONTABO_BILLING_RELEASE_2026-11-04.md`; la entrada clínica siguiente es histórica.
 
 **Cierre del 4 de noviembre de 2026:** la imagen final activa es `dfee2dc0dfe22f89fedde3c74fbbd8da26ed240a`. Actualiza el registro visible de solicitudes con el resultado de producción ya comprobado. Respaldo previo `4abf8d50`; comprobación autenticada de estados, persistencia, móvil y salud aprobada. Las imágenes anteriores se conservan para reversión. El informe `CONTABO_CLINICAL_RELEASE_2026-11-04.md` distingue el último respaldo local de los snapshots ya copiados y verificados externamente.
