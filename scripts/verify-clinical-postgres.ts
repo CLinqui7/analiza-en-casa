@@ -229,6 +229,32 @@ try {
     }),
   );
   check('medical, nursing, balance, laboratory and server-resolved JVPE persistence');
+  const multiPlan = await save({
+    kind: 'CARE_PLAN',
+    plans: ['DIET', 'NURSING'],
+    summary: 'Plan combinado sintético',
+  });
+  assert.deepEqual(multiPlan.payload.kind === 'CARE_PLAN' && multiPlan.payload.plans, [
+    'DIET',
+    'NURSING',
+    'LABORATORY',
+  ]);
+  assert.deepEqual(multiPlan.laboratories, ['Laboratorio sintético QA']);
+  await saveClinicalRecord(pool, actor, {
+    command: 'clinical.record',
+    record: {
+      id: multiPlan.id,
+      patientId,
+      caseId,
+      date,
+      payload: {
+        kind: 'CARE_PLAN',
+        plans: ['DIET', 'NURSING'],
+        summary: 'Plan combinado sintético',
+      },
+    },
+  });
+  check('multiple care types include quoted labs server-side and preserve idempotent retry');
   for (const definition of clinicalScales) {
     const values = Object.fromEntries(
       definition.items.map((item) => [
@@ -455,6 +481,102 @@ try {
   check(
     'FEFO consumes released valid lots first and leaves expired or quarantined stock untouched',
   );
+  const correctedAdministration = await save(
+    {
+      ...firstLot.payload,
+      ...(firstLot.payload.kind === 'ADMINISTRATION' ? { dose: 'Texto corregido sintético' } : {}),
+    } as ClinicalPayload,
+    { correctionOf: firstLot.id, correctionReason: 'Aclaración QA' },
+  );
+  assert.equal(await balance(), 2);
+  assert.deepEqual(correctedAdministration.stockMovementIds, firstLot.stockMovementIds);
+  const reversalId = randomUUID();
+  const reversalCommand = {
+    command: 'clinical.record',
+    record: {
+      id: reversalId,
+      patientId,
+      caseId,
+      date,
+      correctionOf: correctedAdministration.id,
+      correctionReason: 'Aplicación registrada por error QA',
+      payload: administration(`${quoteId}:medicine`, false, 'Corrección sintética'),
+    },
+  };
+  const reversals = await Promise.all([
+    saveClinicalRecord(pool, actor, reversalCommand),
+    saveClinicalRecord(pool, actor, reversalCommand),
+  ]);
+  assert.equal(reversals[0].id, reversals[1].id);
+  assert.equal(await balance(), 3);
+  await assert.rejects(
+    save(administration(`${quoteId}:medicine`, false, 'Intento obsoleto'), {
+      correctionOf: correctedAdministration.id,
+      correctionReason: 'QA',
+    }),
+  );
+  const reapplied = await save(administration(`${quoteId}:medicine`, true), {
+    correctionOf: reversalId,
+    correctionReason: 'Rectificación sintética',
+  });
+  assert.equal(await balance(), 2);
+  assert.equal(reapplied.version, 4);
+  await transaction(pool, actor, async (c) => {
+    const lot = await c.query(
+      'SELECT quantity FROM analiza.inventory_trace_balances WHERE organization_id=$1 AND trace_record_id=$2 AND warehouse_id=$3',
+      [actor.organizationId, traceIds[0], warehouseId],
+    );
+    assert.equal(Number(lot.rows[0].quantity), 0);
+  });
+  const bareCard = await save({
+    kind: 'MEDICATION_CARD',
+    chronic: '',
+    instructions: '',
+    stock: [],
+  });
+  const noStockPayload = {
+    ...administration(`${quoteId}:medicine`, true),
+    cardId: bareCard.id,
+  } as Extract<ClinicalPayload, { kind: 'ADMINISTRATION' }>;
+  await assert.rejects(save(noStockPayload), /salida de inventario/);
+  await assert.rejects(
+    save({
+      ...noStockPayload,
+      stock: [
+        {
+          quoteItemId: `${quoteId}:medicine`,
+          inventoryItemId: 'foreign-item',
+          warehouseId,
+          unitsPerApplication: 1,
+        },
+      ],
+    }),
+    /artículo/,
+  );
+  const unapplied = await save({
+    ...noStockPayload,
+    items: [{ medicationId: `${quoteId}:medicine`, applied: false, reason: 'QA' }],
+  });
+  // Restore stock via a correction, then use the new administration-level assignment.
+  const released = await save(administration(`${quoteId}:medicine`, false, 'QA'), {
+    correctionOf: reapplied.id,
+    correctionReason: 'Liberación sintética',
+  });
+  await save({
+    ...noStockPayload,
+    stock: [
+      {
+        quoteItemId: `${quoteId}:medicine`,
+        inventoryItemId: itemId,
+        warehouseId,
+        unitsPerApplication: 1,
+      },
+    ],
+  });
+  assert.equal(await balance(), 2);
+  check(
+    'administration corrections preserve history, avoid repeated consumption, reconcile lots once, reject stale edits and support assignment outside card',
+  );
   const updated = await save(
     { kind: 'NURSING_NOTE', rows: [{ time: '08:00', note: 'Corrección sintética' }] },
     { correctionOf: note.id, correctionReason: 'Corrección de texto QA' },
@@ -499,7 +621,7 @@ try {
   check('cross-organization write and read isolation plus fail-closed RLS');
   const persisted = await transaction(pool, actor, (c) => listClinicalRecords(c, actor));
   const records = persisted.filter((record) => record.patientId === patientId);
-  assert.equal(medicationReturns(records).length, 1);
+  assert.equal(medicationReturns(records).length, 3);
   const finance = await backend.operations.list({
     ...actor,
     userId: 'qa-finance',

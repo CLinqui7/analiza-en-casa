@@ -3,7 +3,12 @@ import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button, EmptyState, Panel } from '@analiza/ui';
-import { currentClinicalRecords, type ClinicalRecord } from '@analiza/contracts';
+import {
+  currentClinicalRecords,
+  clinicalLabels,
+  type ClinicalKind,
+  type ClinicalRecord,
+} from '@analiza/contracts';
 import {
   quoteDisplayCode,
   quoteCategories,
@@ -62,6 +67,7 @@ function PatientRecordContent() {
   const [days, setDays] = useState(7);
   const [history, setHistory] = useState(false);
   const [nursingKind, setNursingKind] = useState('ALL');
+  const [medicalKind, setMedicalKind] = useState<ClinicalKind>('INDICATION');
   const requestedPatient =
     selectedPatient ||
     hospitalizations.find((record) => record.id === selectedCase)?.patientId ||
@@ -138,9 +144,6 @@ function PatientRecordContent() {
           <h1>Expediente clínico</h1>
           <p>Cotizaciones, atención y visitas reunidas por paciente.</p>
         </div>
-        <Link className="button button-secondary" href="/clinical/orders">
-          Registrar atención
-        </Link>
       </header>
       {operations.error ? (
         <p className="notice error" role="alert">
@@ -340,9 +343,75 @@ function PatientRecordContent() {
             {section === 1 || section === 4 ? (
               <section>
                 <h2>Acciones médicas</h2>
-                {renderRecords(records.filter((record) => medicalKinds.has(record.payload.kind)))}
+                {section === 1 ? (
+                  <nav className="clinical-action-grid no-print" aria-label="Registros médicos">
+                    {(['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND', 'VITALS'] as const).map(
+                      (kind) => (
+                        <button
+                          key={kind}
+                          className={medicalKind === kind ? 'selected' : ''}
+                          aria-pressed={medicalKind === kind}
+                          onClick={() => setMedicalKind(kind)}
+                        >
+                          <span aria-hidden="true">+</span>
+                          {clinicalLabels[kind]}
+                        </button>
+                      ),
+                    )}
+                  </nav>
+                ) : null}
+                {renderRecords(
+                  records.filter((record) =>
+                    section === 4
+                      ? medicalKinds.has(record.payload.kind)
+                      : record.payload.kind === medicalKind,
+                  ),
+                )}
+                {section === 1 && !records.some((record) => record.payload.kind === medicalKind) ? (
+                  <p className="notice">
+                    No hay registros de {clinicalLabels[medicalKind].toLocaleLowerCase('es')} para
+                    esta selección.
+                  </p>
+                ) : null}
+                {section === 1 && medicalKind === 'VITALS' && readings.length ? (
+                  <div className="table-wrap">
+                    <table>
+                      <caption>Signos vitales anteriores</caption>
+                      <thead>
+                        <tr>
+                          <th>Fecha y hora</th>
+                          <th>FC</th>
+                          <th>FR</th>
+                          <th>SpO₂</th>
+                          <th>Temperatura</th>
+                          <th>PA</th>
+                          <th>HGT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {readings.map((r) => (
+                          <tr key={r.id}>
+                            <td>{new Date(r.measuredAt).toLocaleString('es-SV')}</td>
+                            <td>{r.heartRate ?? r.pulse ?? '—'}</td>
+                            <td>{r.respiratoryRate ?? '—'}</td>
+                            <td>{r.oxygenSaturation ?? '—'}</td>
+                            <td>{r.temperature ?? '—'}</td>
+                            <td>
+                              {r.systolic ?? '—'}/{r.diastolic ?? '—'}
+                            </td>
+                            <td>{r.glucose ?? '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
                 {documents
-                  .filter((record) => record.type === 'CLINICAL_EVOLUTION')
+                  .filter(
+                    (record) =>
+                      record.type === 'CLINICAL_EVOLUTION' &&
+                      (section === 4 || medicalKind === 'EVOLUTION'),
+                  )
                   .map((record) => (
                     <article className="clinical-record-block" key={record.id}>
                       <h3>{record.title}</h3>
@@ -434,26 +503,120 @@ function PatientRecordContent() {
                   Agenda y visitas registradas por paciente; los turnos no tienen una
                   hospitalización vinculada.
                 </p>
-                {visits.map((visit) => (
-                  <article className="clinical-record-block" key={visit.id}>
-                    <h3>{visit.professionalName}</h3>
-                    <p>
-                      {visit.occurredAt} · {visit.note}
-                    </p>
-                  </article>
-                ))}
-                {patientShifts.map((shift) => (
-                  <article className="clinical-record-block" key={shift.id}>
-                    <h3>
-                      {nursingResources.find((resource) => resource.id === shift.resourceId)
-                        ?.displayName ?? 'Personal asignado'}
-                    </h3>
-                    <p>
-                      {shift.startsAt} — {shift.endsAt} · {shift.status}
-                    </p>
-                    <p>{shift.note}</p>
-                  </article>
-                ))}
+                <div className="table-wrap clinical-visits-table">
+                  <table>
+                    <caption>Visitas registradas de enfermería</caption>
+                    <thead>
+                      <tr>
+                        <th>Nombre de la enfermera</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>JVPE</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visits
+                        .filter((visit) => visit.profession === 'NURSE')
+                        .map((visit) => {
+                          const nurse = nursingResources.find(
+                            (resource) => resource.userId === visit.professionalUserId,
+                          );
+                          return (
+                            <tr key={visit.id}>
+                              <td>
+                                {visit.professionalName}
+                                {visit.note ? (
+                                  <details>
+                                    <summary>Observaciones</summary>
+                                    <p>{visit.note}</p>
+                                  </details>
+                                ) : null}
+                              </td>
+                              <td>{new Date(visit.occurredAt).toLocaleDateString('es-SV')}</td>
+                              <td>
+                                {new Date(visit.occurredAt).toLocaleTimeString('es-SV', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </td>
+                              <td>{nurse?.boardRegistrationNumber || 'No registrado'}</td>
+                            </tr>
+                          );
+                        })}
+                      {!visits.some((v) => v.profession === 'NURSE') ? (
+                        <tr>
+                          <td colSpan={4}>No hay visitas de enfermería registradas.</td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+                {visits
+                  .filter((visit) => visit.profession === 'DOCTOR')
+                  .map((visit) => (
+                    <article className="clinical-record-block" key={visit.id}>
+                      <h3>Visita médica · {visit.professionalName}</h3>
+                      <p>
+                        {new Date(visit.occurredAt).toLocaleString('es-SV')} · {visit.note}
+                      </p>
+                    </article>
+                  ))}
+                <div className="table-wrap clinical-visits-table">
+                  <table>
+                    <caption>Turnos de Agenda</caption>
+                    <thead>
+                      <tr>
+                        <th>Nombre de la enfermera</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>JVPE</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {patientShifts.map((shift) => {
+                        const nurse = nursingResources.find(
+                          (resource) => resource.id === shift.resourceId,
+                        );
+                        return (
+                          <tr key={shift.id}>
+                            <td>
+                              {nurse?.displayName ?? 'Personal asignado'}
+                              {shift.note ? <p>{shift.note}</p> : null}
+                            </td>
+                            <td>{new Date(shift.startsAt).toLocaleDateString('es-SV')}</td>
+                            <td>
+                              {new Date(shift.startsAt).toLocaleTimeString('es-SV', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}{' '}
+                              –{' '}
+                              {new Date(shift.endsAt).toLocaleTimeString('es-SV', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </td>
+                            <td>{nurse?.boardRegistrationNumber || 'No registrado'}</td>
+                            <td>
+                              {
+                                {
+                                  SCHEDULED: 'Programado',
+                                  CANCELLED: 'Cancelado',
+                                  COMPLETED: 'Completado',
+                                }[shift.status]
+                              }
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {!patientShifts.length ? (
+                        <tr>
+                          <td colSpan={5}>No hay turnos registrados.</td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
               </section>
             ) : null}
           </section>

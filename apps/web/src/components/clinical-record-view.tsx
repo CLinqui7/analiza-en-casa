@@ -1,16 +1,25 @@
 'use client';
-import { clinicalLabels, fluidColumns, fluidTotals, type ClinicalRecord } from '@analiza/contracts';
+import {
+  clinicalLabels,
+  carePlanTypes,
+  carePlanLabels,
+  fluidColumns,
+  fluidTotals,
+  type ClinicalRecord,
+} from '@analiza/contracts';
 
 export function ClinicalRecordView({
   record,
   patientName,
+  idPrefix = 'clinical-record',
 }: {
   record: ClinicalRecord;
   patientName?: string;
+  idPrefix?: string;
 }) {
   const payload = record.payload;
   return (
-    <article className="clinical-record-card" id={`clinical-record-${record.id}`}>
+    <article className="clinical-record-card" id={`${idPrefix}-${record.id}`}>
       <header>
         <div>
           <h3>
@@ -25,6 +34,13 @@ export function ClinicalRecordView({
           </p>
         </div>
       </header>
+      {payload.kind === 'CARE_PLAN' ? (
+        <p className="clinical-plan-labels">
+          {carePlanTypes(payload)
+            .map((plan) => carePlanLabels[plan])
+            .join(' · ')}
+        </p>
+      ) : null}
       {'summary' in payload && payload.summary ? (
         <p className="clinical-prose">{payload.summary}</p>
       ) : null}

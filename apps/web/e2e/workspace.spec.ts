@@ -1302,10 +1302,7 @@ test('clinical record hub presents every care tool accessibly on desktop and mob
   await page.goto('/clinical');
   const main = page.locator('main');
   await expect(main.getByRole('heading', { name: 'Expediente clínico' })).toBeVisible();
-  await expect(main.getByRole('link', { name: 'Registrar atención' })).toHaveAttribute(
-    'href',
-    '/clinical/orders',
-  );
+  await expect(main.getByRole('link', { name: 'Registrar atención' })).toHaveCount(0);
   await main
     .getByRole('combobox', { name: 'Paciente', exact: true })
     .selectOption('patient-demo-001');

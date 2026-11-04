@@ -79,6 +79,34 @@ describe('client clinical annex score arithmetic', () => {
 });
 
 describe('clinical record input and downstream integrity', () => {
+  // test-id: vitest:clinical-observations-care-plan
+  it('supports combined care plans without losing legacy records or accepting empty selections', () => {
+    expect(
+      clinicalPayloadSchema.safeParse({ kind: 'CARE_PLAN', plan: 'DIET', summary: 'QA' }).success,
+    ).toBe(true);
+    expect(
+      clinicalPayloadSchema.safeParse({
+        kind: 'CARE_PLAN',
+        plans: ['DIET', 'NURSING', 'LABORATORY'],
+        summary: 'QA',
+      }).success,
+    ).toBe(true);
+    for (const plans of [[], ['DIET', 'DIET']])
+      expect(
+        clinicalPayloadSchema.safeParse({ kind: 'CARE_PLAN', plans, summary: 'QA' }).success,
+      ).toBe(false);
+    expect(
+      clinicalPayloadSchema.safeParse({
+        kind: 'CARE_PLAN',
+        plans: ['DIET', 'LABORATORY'],
+        summary: '',
+      }).success,
+    ).toBe(false);
+    expect(
+      clinicalPayloadSchema.safeParse({ kind: 'CARE_PLAN', plans: ['LABORATORY'], summary: '' })
+        .success,
+    ).toBe(true);
+  });
   // test-id: vitest:clinical-record-boundaries
   it('sums recorded volumes without deriving weight-based fluids or extrapolating', () => {
     const payload = clinicalPayloadSchema.parse({

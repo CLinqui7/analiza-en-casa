@@ -92,7 +92,15 @@ test('medical and nursing forms persist through HTTP, reload and record printing
   }
   for (const plan of ['DIET', 'NURSING', 'LABORATORY']) {
     const dialog = await editor(page, 'Plan de cuidado', true);
-    await dialog.getByRole('combobox', { name: 'Plan', exact: true }).selectOption(plan);
+    if (plan !== 'LABORATORY')
+      await dialog
+        .getByRole('checkbox', {
+          name: plan === 'DIET' ? 'Dieta' : 'Cuidado de enfermería',
+          exact: true,
+        })
+        .check();
+    await expect(dialog.getByRole('checkbox', { name: /Laboratorio/ })).toBeChecked();
+    await expect(dialog.getByRole('checkbox', { name: /Laboratorio/ })).toBeDisabled();
     if (plan !== 'LABORATORY') await dialog.getByLabel('Descripción').fill('Plan sintético ' + run);
     const saved = await persist(page);
     if (plan === 'LABORATORY') expect(saved.laboratories).toContain('Laboratorio sintético QA');
@@ -149,6 +157,13 @@ test('card edit and mixed administration record each medicine without changing c
   const card = await persist(page);
   expect(card.medications).toHaveLength(2);
   const administration = await editor(page, 'Administración de medicamentos', true);
+  const itemsTop = (await administration
+    .getByRole('region', { name: 'Medicamentos de la administración' })
+    .boundingBox())!.y;
+  const detailsTop = (await administration
+    .locator('.clinical-administration-details')
+    .boundingBox())!.y;
+  expect(itemsTop).toBeLessThan(detailsTop);
   await administration.getByLabel('Hora', { exact: true }).fill('09:00');
   await administration.getByLabel('Dosis', { exact: true }).fill('Captura manual sintética');
   await administration
@@ -172,6 +187,58 @@ test('card edit and mixed administration record each medicine without changing c
   expect(result.stockMovementIds).toEqual([]);
   await page.goto('/reports/returns');
   await expect(page.getByText('No aplicado en QA de navegador').first()).toBeVisible();
+});
+
+// test-id: playwright:clinical-observations-menus
+test('all seven nursing menus view, edit with versions, print and survive reload', async ({
+  page,
+}) => {
+  test.setTimeout(240000);
+  await login(page, '/clinical/orders', 'admin');
+  for (const label of [
+    'Tarjeta de medicamentos',
+    'Balance hídrico',
+    'Plan de cuidado',
+    'Administración de medicamentos',
+    'Signos vitales',
+    'Nota de enfermería',
+    'Escala',
+  ]) {
+    await page.goto('/clinical/orders');
+    await page.getByRole('button', { name: 'Acciones de enfermería', exact: true }).click();
+    await page
+      .locator('.clinical-action-grid')
+      .getByRole('button', { name: label, exact: true })
+      .click();
+    await page
+      .getByRole('searchbox', { name: 'Buscar por nombre o DUI' })
+      .fill(patientId.split('-').at(-1)!);
+    const row = page.locator('.clinical-patient-list > div').first();
+    await row.locator('summary').click();
+    await row.getByRole('button', { name: 'Ver', exact: true }).first().click();
+    await expect(page.getByRole('dialog').locator('.clinical-record-card')).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Cerrar', exact: true }).click();
+    await row.locator('summary').click();
+    await row.getByRole('button', { name: 'Editar', exact: true }).first().click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByRole('combobox', { name: 'Paciente', exact: true })).toBeDisabled();
+    await dialog.getByLabel('Motivo de actualización').fill('Corrección sintética de verificación');
+    const saved = await persist(page);
+    expect(saved.correctionOf).toBeTruthy();
+    expect(saved.version).toBeGreaterThan(1);
+    await row.locator('summary').click();
+    await page.evaluate(() => {
+      window.print = () => {};
+    });
+    await row.getByRole('button', { name: 'Imprimir', exact: true }).first().click();
+    await expect(page.locator('#clinical-print-root')).toContainText(label);
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    await page.reload();
+    const snapshot = await getJson(page, '/api/operations');
+    expect(snapshot.clinicalRecords.some((record: { id: string }) => record.id === saved.id)).toBe(
+      true,
+    );
+  }
 });
 
 // test-id: playwright:clinical-connected-security

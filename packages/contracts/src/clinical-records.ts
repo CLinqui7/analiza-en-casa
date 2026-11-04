@@ -463,11 +463,25 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
   z
     .object({
       kind: z.literal('CARE_PLAN'),
-      plan: z.enum(['DIET', 'NURSING', 'LABORATORY']),
+      plan: z.enum(['DIET', 'NURSING', 'LABORATORY']).optional(),
+      plans: z
+        .array(z.enum(['DIET', 'NURSING', 'LABORATORY']))
+        .min(1)
+        .max(3)
+        .optional(),
       summary: optionalText,
     })
     .strict()
-    .refine((v) => v.plan === 'LABORATORY' || !!v.summary, 'Describa el plan de cuidado.'),
+    .refine((v) => !!v.plan || !!v.plans?.length, 'Seleccione al menos un tipo de cuidado.')
+    .refine(
+      (v) => !v.plans || new Set(v.plans).size === v.plans.length,
+      'No repita tipos de cuidado.',
+    )
+    .refine((v) => !v.plan || !v.plans || v.plans.includes(v.plan), 'Revise los tipos de cuidado.')
+    .refine(
+      (v) => !(v.plans ?? [v.plan]).some((p) => p !== 'LABORATORY') || !!v.summary,
+      'Describa el plan de cuidado.',
+    ),
   z
     .object({
       kind: z.literal('ADMINISTRATION'),
@@ -476,6 +490,19 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
       dose: text,
       presentation: z.enum(medicationPresentations),
       route: z.enum(medicationRoutes),
+      stock: z
+        .array(
+          z
+            .object({
+              quoteItemId: id,
+              inventoryItemId: id,
+              warehouseId: id,
+              unitsPerApplication: z.number().int().positive().max(100000),
+            })
+            .strict(),
+        )
+        .max(200)
+        .optional(),
       items: z
         .array(
           z
@@ -560,7 +587,16 @@ export type ClinicalRecord = ClinicalRecordInput & {
   scaleDefinition?: ScaleDefinition;
   score?: number | null;
   stockMovementIds?: string[];
+  stockByMedication?: Record<string, string[]>;
 };
+export const carePlanLabels = {
+  DIET: 'Dieta',
+  NURSING: 'Cuidado de enfermería',
+  LABORATORY: 'Laboratorio',
+} as const;
+export function carePlanTypes(payload: Extract<ClinicalPayload, { kind: 'CARE_PLAN' }>) {
+  return payload.plans ?? (payload.plan ? [payload.plan] : []);
+}
 export function fluidTotals(payload: Extract<ClinicalPayload, { kind: 'FLUID_BALANCE' }>) {
   const intake = payload.rows.reduce(
     (sum, row) => sum + row.values.slice(0, 4).reduce((a, b) => a + b, 0),
