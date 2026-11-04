@@ -16,7 +16,15 @@ Fuente: `obserclini1_.pdf`, SHA-256 `532bc8f79dd9de60f0a0fb11f36e8ac67dbe5c328ea
 
 - Base inicial: preflight aprobado y 331/331 pruebas React aprobadas antes del lote.
 - Revisión de evidencia acotada: `OBSERVATIONS_VIDEO_REVIEW_2026-11-04.md`. El PDF nuevo sustituye la presentación anterior de tarjeta/menú; no cambia reglas clínicas ni implica una nueva certificación EXACT de los 17 capítulos.
-- Pruebas finales, SHA y publicación: pendientes de ejecución al crear este registro; se actualizarán con resultados efectivos.
+- Código funcional verificado: `ae30d5959197e25d77ab9c5d312224afdd8b6550`, subido a GitHub antes de probar la imagen conectada.
+- React: 332/332; comprobación TypeScript, ESLint, formato, seguridad y compilación Next aprobadas. `npm run check`: 144 pruebas base, 76 verificaciones QA y compilación standalone aprobadas.
+- PostgreSQL aislado: 13 grupos, 38 registros sintéticos; rol sin superusuario ni bypass RLS, migraciones ejecutadas dos veces. Cubre planes combinados/laboratorio forzado, reintentos, correcciones, lotes, lecturas estrictas, auditoría e integridad financiera.
+- Navegador: regresión inicial 23/24, con un defecto de encabezados de tabla vacía en móvil corregido; regresión posterior 41/41 y comprobación final de formularios a 1440/390 px 2/2. Incluye seis roles, portal, seguros, cotizaciones, agenda y controles de accesibilidad.
+- Navegador conectado: seis escenarios aprobados y el séptimo de corrección/impresión repetido por separado tras sustituir un selector heredado del campo retirado. Los siete tipos de enfermería se probaron con Ver, Editar, Guardar, Imprimir y recarga. El primer intento también detectó dos movimientos defectuosos de la compilación QA inicial; se corrigió el código, se repitió la prueba PostgreSQL completa y se reparó únicamente ese artefacto en `analiza_qa`, sin tocar producción.
+- Integridad de evidencia 17/17; trazabilidad 210/210, solicitudes 32/32, espejo JSON/CSV y gates CH01 14/14, CH02 16/16, CH03 13/13 aprobados. No se promovieron estados a EXACT ni se declaró revisión visual completa nueva de los 17 capítulos.
+- Capturas sintéticas revisadas: `evidence/clinical-observations-20261104/`. Se revisó también la impresión individual generada.
+- Revisión equivalente contra `origin/main`, acotada a archivos afectados, y comparación incremental con `4cc01ca`: sin P0/P1 pendientes del lote. Se comprobó autorización del servidor, organización, inmutabilidad, compensación de inventario y que el cambio de presentación no elimina rutas ni contenido histórico.
+- Publicación y respaldo: ver `docs/deployment/CONTABO_CLINICAL_OBSERVATIONS_2026-11-04.md` al completar el despliegue.
 
 ## Límites de los datos
 

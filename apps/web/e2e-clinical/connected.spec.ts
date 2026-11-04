@@ -390,11 +390,13 @@ test('medication card correction preserves its original and prints only the sele
   await block.getByRole('button', { name: 'Editar tarjeta', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('Motivo de actualización').fill('Comprobación sintética de corrección');
-  const instructions = 'Instrucción manual sintética ' + Date.now();
-  await dialog.locator('[name="instructions"]').fill(instructions);
+  const chronic = 'Crónico sintético actualizado ' + Date.now();
+  await expect(dialog.locator('[name="instructions"]')).toHaveCount(0);
+  await dialog.getByRole('textbox', { name: 'Crónicos', exact: true }).fill(chronic);
   const saved = await persist(page);
   expect(saved.version).toBe(before.version + 1);
   expect(saved.rootId).toBe(before.rootId);
+  expect(saved.payload.instructions).toBe(before.payload.instructions);
   const snapshot = await getJson(page, '/api/operations');
   expect(snapshot.clinicalRecords.find((r: { id: string }) => r.id === originalId)).toEqual(before);
   const corrected = page
@@ -405,7 +407,7 @@ test('medication card correction preserves its original and prints only the sele
   });
   await corrected.getByRole('button', { name: 'Imprimir', exact: true }).click();
   await page.emulateMedia({ media: 'print' });
-  await expect(page.locator('#clinical-print-root')).toContainText(instructions);
+  await expect(page.locator('#clinical-print-root')).toContainText(chronic);
   await expect(page.locator('#clinical-print-root .clinical-record-card')).toHaveCount(0);
   await expect(page.locator('#clinical-print-root h3')).toHaveCount(1);
   await expect(page.locator('.sidebar')).toBeHidden();

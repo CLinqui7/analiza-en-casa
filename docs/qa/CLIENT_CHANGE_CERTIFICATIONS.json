@@ -5,14 +5,14 @@
     "CR-001": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "679df76225e1b8578e449e961dbad557e377f0d3c8039f265775923094fb1334",
+      "functional_fingerprint": "c93751ee81d5aeaa5486dca5ea25e4a81ff352a11b044da1dfc4c4119fca3352",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
         "SEL-PAT-DOCUMENT"
       ],
       "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador.",
-      "regression_verification_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d"
+      "regression_verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550"
     },
     "CR-002": {
       "implementation_sha": null,
@@ -95,13 +95,13 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "c1fc57b45294078d4879de3ae9c50b0319c73e019144e7daf6bbd7b74976328b",
+      "functional_fingerprint": "89246447fc890f08cb3caf7a0f44913b4ff0cc0032152fb492914672d1d1865d",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones.",
-      "regression_verification_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d"
+      "regression_verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550"
     },
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
@@ -501,5 +501,20 @@
       "CH16-F03"
     ],
     "scope": "Financial regression: quote chains, payment retry and cents, version metadata, insurer snapshot, responsive cards and shared clinical menu CSS. Existing statuses/blockers preserved; no new EXACT or full video re-audit."
+  },
+  "observations_regression_20261104": {
+    "verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550",
+    "evidence": "docs/feedback/CLINICAL_OBSERVATIONS_2026-11-04.md",
+    "requirement_ids": [
+      "CH10-F04",
+      "CH17-F03",
+      "CH17-F07",
+      "CH17-F08",
+      "CH17-F11",
+      "CH17-F12",
+      "CH17-F13",
+      "CH17-F15"
+    ],
+    "scope": "PDF Nov4 clinical observations: nursing menus, multiple care types, visits and append-only administration corrections. New user-approved presentation supersedes card fields; historical records retained. No new EXACT or complete video re-audit."
   }
 }

@@ -59,7 +59,7 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "679df76225e1b8578e449e961dbad557e377f0d3c8039f265775923094fb1334",
+      "functional_fingerprint": "c93751ee81d5aeaa5486dca5ea25e4a81ff352a11b044da1dfc4c4119fca3352",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -619,7 +619,7 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "c1fc57b45294078d4879de3ae9c50b0319c73e019144e7daf6bbd7b74976328b",
+      "functional_fingerprint": "89246447fc890f08cb3caf7a0f44913b4ff0cc0032152fb492914672d1d1865d",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -2182,5 +2182,19 @@
       "playwright:billing-connected-boundaries"
     ],
     "production": "Deployment result is recorded in the release ledger after Git-first publication."
+  },
+  "supplemental_observations_batch_20261104": {
+    "status": "TECHNICALLY_VERIFIED",
+    "source": "sources/CLIENT_CLINICAL_OBSERVATIONS_2026-11-04.txt",
+    "pdf_sha256": "532bc8f79dd9de60f0a0fb11f36e8ac67dbe5c328ea1e852dfd4906fd785bc70",
+    "scope_and_verification": "../feedback/CLINICAL_OBSERVATIONS_2026-11-04.md",
+    "verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550",
+    "tests": [
+      "vitest:clinical-observations-care-plan",
+      "playwright:clinical-observations-navigation",
+      "playwright:clinical-observations-responsive",
+      "playwright:clinical-observations-menus"
+    ],
+    "production": "See release ledger after Git-first publication."
   }
 }
