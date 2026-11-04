@@ -38,6 +38,15 @@ export function SearchableSelect({
     !options.some(
       (option) => option.label.toLocaleLowerCase('es') === customValue.toLocaleLowerCase('es'),
     );
+  const optionCount = visible.length + (showCustom ? 1 : 0);
+  const focusedIndex = Math.min(activeIndex, Math.max(0, optionCount - 1));
+  const activeOptionId = optionCount ? `${listId}-option-${focusedIndex}` : undefined;
+
+  useEffect(() => {
+    if (open && activeOptionId) {
+      document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [open, activeOptionId, query]);
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
@@ -53,31 +62,45 @@ export function SearchableSelect({
     setOpen(false);
   }
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && open) {
+      event.preventDefault();
+      event.stopPropagation();
       setOpen(false);
       return;
     }
+    if (event.key === 'Tab') setOpen(false);
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       setOpen(true);
-      setActiveIndex((index) => Math.min(index + 1, Math.max(visible.length - 1, 0)));
+      setActiveIndex(open ? Math.min(focusedIndex + 1, Math.max(optionCount - 1, 0)) : 0);
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       setOpen(true);
-      setActiveIndex((index) => Math.max(index - 1, 0));
+      setActiveIndex(open ? Math.max(focusedIndex - 1, 0) : Math.max(optionCount - 1, 0));
     }
-    if (event.key === 'Enter' && open && visible[activeIndex]) {
+    if ((event.key === 'Home' || event.key === 'End') && open) {
       event.preventDefault();
-      choose(visible[activeIndex].value);
+      setActiveIndex(event.key === 'Home' ? 0 : Math.max(optionCount - 1, 0));
+    }
+    if (event.key === 'Enter' && open && optionCount) {
+      event.preventDefault();
+      choose(visible[focusedIndex]?.value ?? customValue);
     }
   }
 
   return (
-    <div className="searchable-select" ref={root}>
+    <div
+      className="searchable-select"
+      ref={root}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
+    >
       <div className="searchable-select-input">
         <input
           aria-autocomplete="list"
+          aria-activedescendant={open ? activeOptionId : undefined}
           aria-controls={listId}
           aria-expanded={open}
           aria-label={ariaLabel}
@@ -93,7 +116,7 @@ export function SearchableSelect({
             if (allowCustom && query.trim() && !selected) onChange(query.trim());
           }}
           onKeyDown={onKeyDown}
-          placeholder={selected?.label ?? placeholder}
+          placeholder={selected?.label ?? (value || placeholder)}
           role="combobox"
           value={query}
         />
@@ -114,7 +137,8 @@ export function SearchableSelect({
             visible.map((option, index) => (
               <li
                 aria-selected={option.value === value}
-                className={index === activeIndex ? 'active' : undefined}
+                className={index === focusedIndex ? 'active' : undefined}
+                id={`${listId}-option-${index}`}
                 key={option.value}
                 onMouseDown={(event) => {
                   event.preventDefault();
@@ -133,6 +157,8 @@ export function SearchableSelect({
           {showCustom ? (
             <li
               aria-selected="false"
+              className={focusedIndex === visible.length ? 'active' : undefined}
+              id={`${listId}-option-${visible.length}`}
               onMouseDown={(event) => {
                 event.preventDefault();
                 choose(customValue);

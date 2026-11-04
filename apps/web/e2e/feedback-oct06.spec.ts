@@ -130,7 +130,7 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await expect(amount.locator('option[value="301"]')).toHaveCount(0);
 });
 
-test('clinical case pickers filter by patient or case without dropping the selected record', async ({
+test('clinical case pickers preserve patient scope after the redundant filter was removed', async ({
   page,
 }) => {
   await login(page, '/clinical/care-plans');
@@ -142,7 +142,10 @@ test('clinical case pickers filter by patient or case without dropping the selec
   const cases = dialog.getByRole('combobox', { name: 'Hospitalización' });
   await cases.selectOption('case-demo-001');
   const initial = await cases.inputValue();
-  await dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código').fill('no-existe');
+  // obserclini1_.pdf: remove the redundant search, retain patient-scoped case selection.
+  await expect(
+    dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código'),
+  ).toHaveCount(0);
   await expect(cases.locator('option')).toHaveCount(2);
   await expect(cases).toHaveValue(initial);
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
@@ -159,11 +162,16 @@ test('clinical case pickers filter by patient or case without dropping the selec
   });
   await selectedCase.selectOption('case-demo-001');
   const initialBalance = await selectedCase.inputValue();
-  await balanceDialog
-    .getByLabel('Filtrar hospitalizaciones por paciente, DUI o código')
-    .fill('no-existe');
+  await expect(
+    balanceDialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código'),
+  ).toHaveCount(0);
   await expect(selectedCase.locator('option')).toHaveCount(2);
   await expect(selectedCase).toHaveValue(initialBalance);
+  await balanceDialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-002');
+  await expect(selectedCase).toHaveValue('');
+  await expect(selectedCase.locator('option[value="case-demo-001"]')).toHaveCount(0);
 });
 
 test('individual statement scopes charges to the selected patient', async ({ page }) => {

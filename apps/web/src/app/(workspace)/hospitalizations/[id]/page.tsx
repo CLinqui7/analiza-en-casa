@@ -418,7 +418,12 @@ export default function HospitalizationDetailPage() {
             <ul className="full">
               {caseFiles.map((file) => (
                 <li key={file.id}>
-                  <a href={privateFileDownloadHref(file.id)} rel="noreferrer" target="_blank">
+                  <a
+                    className="action-link-button"
+                    href={privateFileDownloadHref(file.id)}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
                     {file.name}
                   </a>
                 </li>

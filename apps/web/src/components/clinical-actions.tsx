@@ -16,6 +16,7 @@ import { ClinicalRecordEditor } from './clinical-record-editor';
 import { ClinicalRecordView } from './clinical-record-view';
 import { printClinicalSection } from '@/lib/clinical-queries';
 import './clinical-workflow.css';
+import { ActionMenu } from './common/action-menu';
 
 const medical: ClinicalKind[] = ['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND', 'VITALS'];
 export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind }) {
@@ -141,69 +142,70 @@ export function ClinicalActions({ initialKind }: { initialKind?: ClinicalKind })
                     Ver expediente
                   </Link>
                 )}
-                <details className="clinical-row-menu">
-                  <summary aria-label={`Acciones para ${patient.fullName}`}>⋮</summary>
-                  <div>
-                    {group === 'medical' && can('clinical:write')
-                      ? medical.map((action) => (
+                <ActionMenu
+                  className="clinical-row-menu"
+                  label={`Acciones para ${patient.fullName}`}
+                  trigger="⋮"
+                >
+                  {group === 'medical' && can('clinical:write')
+                    ? medical.map((action) => (
+                        <Button
+                          className="button-secondary"
+                          key={action}
+                          onClick={(event) => {
+                            event.currentTarget.closest('details')?.removeAttribute('open');
+                            setKind(action);
+                            setEditor({ patient: patient.id });
+                          }}
+                        >
+                          {clinicalLabels[action]}
+                        </Button>
+                      ))
+                    : null}
+                  {currentClinicalRecords(operations.clinicalRecords)
+                    .filter(
+                      (record) => record.patientId === patient.id && record.payload.kind === kind,
+                    )
+                    .map((record) => (
+                      <div key={record.id}>
+                        <small>
+                          {record.caseId} · {record.date} · v{record.version}
+                        </small>
+                        <Button
+                          className="button-secondary"
+                          onClick={(event) => {
+                            event.currentTarget.closest('details')?.removeAttribute('open');
+                            setViewed(record);
+                          }}
+                        >
+                          Ver
+                        </Button>
+                        {can('clinical:write') ? (
                           <Button
                             className="button-secondary"
-                            key={action}
                             onClick={(event) => {
                               event.currentTarget.closest('details')?.removeAttribute('open');
-                              setKind(action);
-                              setEditor({ patient: patient.id });
+                              setEditor({ original: record });
                             }}
                           >
-                            {clinicalLabels[action]}
+                            Editar
                           </Button>
-                        ))
-                      : null}
-                    {currentClinicalRecords(operations.clinicalRecords)
-                      .filter(
-                        (record) => record.patientId === patient.id && record.payload.kind === kind,
-                      )
-                      .map((record) => (
-                        <div key={record.id}>
-                          <small>
-                            {record.caseId} · {record.date} · v{record.version}
-                          </small>
-                          <Button
-                            className="button-secondary"
-                            onClick={(event) => {
-                              event.currentTarget.closest('details')?.removeAttribute('open');
-                              setViewed(record);
-                            }}
-                          >
-                            Ver
-                          </Button>
-                          {can('clinical:write') ? (
-                            <Button
-                              className="button-secondary"
-                              onClick={(event) => {
-                                event.currentTarget.closest('details')?.removeAttribute('open');
-                                setEditor({ original: record });
-                              }}
-                            >
-                              Editar
-                            </Button>
-                          ) : null}
-                          <Button
-                            className="button-secondary"
-                            onClick={() => printClinicalSection(`clinical-record-${record.id}`)}
-                          >
-                            Imprimir
-                          </Button>
-                        </div>
-                      ))}
-                    {!records.some((record) => record.patientId === patient.id) ? (
-                      <p>
-                        Todavía no hay registros de {clinicalLabels[kind].toLocaleLowerCase('es')}.
-                        Guarde el primero para verlo, editarlo o imprimirlo.
-                      </p>
-                    ) : null}
-                  </div>
-                </details>
+                        ) : null}
+                        <Button
+                          className="button-secondary"
+                          onClick={() => printClinicalSection(`clinical-record-${record.id}`)}
+                        >
+                          Imprimir
+                        </Button>
+                      </div>
+                    ))}
+                  {!records.some((record) => record.patientId === patient.id) ? (
+                    <p>
+                      Todavía no hay registros de {clinicalLabels[kind].toLocaleLowerCase('es')}.
+                      Guarde el primero para verlo, editarlo o imprimirlo.
+                    </p>
+                  ) : null}
+                </ActionMenu>
               </div>
             </div>
           ))}

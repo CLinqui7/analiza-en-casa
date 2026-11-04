@@ -765,7 +765,11 @@ function QuoteEditor({
                     </option>
                   ))}
               </select>
-              <Link href="/catalogs/clinical" target="_blank">
+              <Link
+                className="action-link-button action-link-button--inline"
+                href="/catalogs/clinical"
+                target="_blank"
+              >
                 Agregar o configurar diagnósticos
               </Link>
             </label>
@@ -1387,7 +1391,11 @@ function QuoteEditor({
                     </option>
                   ))}
               </select>
-              <Link href="/catalogs/discounts" target="_blank">
+              <Link
+                className="action-link-button action-link-button--inline"
+                href="/catalogs/discounts"
+                target="_blank"
+              >
                 Configurar reglas y porcentajes
               </Link>
             </label>
@@ -1853,7 +1861,7 @@ export default function QuotesPage() {
               <span>
                 Página {currentPage} de {totalPages}
               </span>
-              <div>
+              <div className="action-row">
                 <Button
                   className="button-secondary"
                   data-action-id="QUOTE-PAGE-PREV"

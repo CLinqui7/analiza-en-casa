@@ -115,9 +115,13 @@ export default function SurveysPage() {
   return (
     <div className="page-stack">
       <header className="page-header">
-        <p className="eyebrow">Reportes y control</p>
-        <h1>Encuestas de satisfacción</h1>
-        <p>Encuestas para pacientes y médicos tratantes. Los resultados se agregan por pregunta.</p>
+        <div>
+          <p className="eyebrow">Reportes y control</p>
+          <h1>Encuestas de satisfacción</h1>
+          <p>
+            Encuestas para pacientes y médicos tratantes. Los resultados se agregan por pregunta.
+          </p>
+        </div>
       </header>
       {error ? (
         <p className="notice danger" role="alert">
@@ -210,7 +214,7 @@ export default function SurveysPage() {
             {busy ? 'Creando…' : 'Crear invitación'}
           </Button>
           {inviteUrl ? (
-            <div className="notice success" role="status">
+            <div className="notice success survey-invitation" role="status">
               <p>Invitación creada. Entréguela sólo a la persona elegida antes de que venza.</p>
               {shareMode === 'LINK' ? (
                 <>
@@ -242,7 +246,11 @@ export default function SurveysPage() {
                     width={320}
                   />
                   <p>
-                    <a download="encuesta-analiza-qr.png" href={qrDataUrl}>
+                    <a
+                      className="action-link-button"
+                      download="encuesta-analiza-qr.png"
+                      href={qrDataUrl}
+                    >
                       Descargar QR
                     </a>
                   </p>

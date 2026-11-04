@@ -460,11 +460,15 @@ function isActive(pathname: string, href: string) {
     pathname === href ||
     (href !== '/dashboard' &&
       href !== '/clinical' &&
-      !(
-        href === '/catalogs' &&
-        (pathname === '/catalogs/operational' || pathname === '/catalogs/medical-visitors')
-      ) &&
-      pathname.startsWith(`${href}/`))
+      pathname.startsWith(`${href}/`) &&
+      !navigation.some((group) =>
+        (group.children ?? []).some(
+          (child) =>
+            child.href !== href &&
+            child.href.startsWith(`${href}/`) &&
+            (pathname === child.href || pathname.startsWith(`${child.href}/`)),
+        ),
+      ))
   );
 }
 

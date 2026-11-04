@@ -939,15 +939,14 @@ export default function HospitalizationsPage() {
             Próxima acción
             <textarea {...form.register('nextAction')} rows={2} />
           </label>
-          <p className="notice full" role="status">
-            Los dispositivos, accesos y enfermeras asignadas se completan después en{' '}
+          <p className="notice notice-with-action full" role="status">
+            <span>Los dispositivos, accesos y enfermeras asignadas se completan después en </span>
             <Link
               className="action-link-button action-link-button--inline"
               href="/clinical/hospitalizations"
             >
               Abrir hospitalización clínica
             </Link>
-            .
           </p>
         </form>
       </Dialog>

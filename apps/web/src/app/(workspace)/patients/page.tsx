@@ -22,6 +22,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Controller, type FieldErrors, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
+import { ActionMenu } from '@/components/common/action-menu';
 import { useAuth, useWorkspace } from '@/components/providers';
 import {
   companyOptions,
@@ -1124,32 +1125,33 @@ export default function PatientsPage() {
               + Nuevo paciente
             </Button>
           ) : null}
-          <details className="patient-more-actions">
-            <summary>Más</summary>
-            <div>
-              <Button
-                className="button-secondary"
-                data-action-id="PATIENT-REFRESH"
-                onClick={() => {
-                  void refreshPatients().then((refreshed) => {
-                    if (refreshed)
-                      setResult('Listado de pacientes actualizado desde el origen autorizado.');
-                  });
-                }}
-                type="button"
-              >
-                Actualizar lista
-              </Button>
-              <Button
-                className="button-secondary"
-                data-action-id="PATIENT-EXPORT-CSV"
-                onClick={exportPatientsCsv}
-                type="button"
-              >
-                Exportar CSV
-              </Button>
-            </div>
-          </details>
+          <ActionMenu
+            className="patient-more-actions"
+            label="Más acciones de pacientes"
+            trigger="Más"
+          >
+            <Button
+              className="button-secondary"
+              data-action-id="PATIENT-REFRESH"
+              onClick={() => {
+                void refreshPatients().then((refreshed) => {
+                  if (refreshed)
+                    setResult('Listado de pacientes actualizado desde el origen autorizado.');
+                });
+              }}
+              type="button"
+            >
+              Actualizar lista
+            </Button>
+            <Button
+              className="button-secondary"
+              data-action-id="PATIENT-EXPORT-CSV"
+              onClick={exportPatientsCsv}
+              type="button"
+            >
+              Exportar CSV
+            </Button>
+          </ActionMenu>
         </div>
       </header>
       {result ? (

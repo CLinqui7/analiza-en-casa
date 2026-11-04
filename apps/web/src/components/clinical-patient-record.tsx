@@ -497,7 +497,7 @@ function PatientRecordContent() {
                     ))}
                   </article>
                 ) : null}
-                <Link className="no-print" href="/clinical/document-versions">
+                <Link className="action-link-button no-print" href="/clinical/document-versions">
                   Firmas y correcciones de documentos anteriores
                 </Link>
               </section>

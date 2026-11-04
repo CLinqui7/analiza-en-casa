@@ -11,7 +11,11 @@ export function MedicationReturns({ compact = false }: { compact?: boolean }) {
     <Panel>
       <div className="table-heading">
         <h2>Medicamentos no aplicados</h2>
-        {compact ? <Link href="/reports/returns">Ver devoluciones</Link> : null}
+        {compact ? (
+          <Link className="action-link-button" href="/reports/returns">
+            Ver devoluciones <span aria-hidden="true">↗</span>
+          </Link>
+        ) : null}
       </div>
       <p>
         Revise si corresponde retirar el cargo. Las cotizaciones enviadas requieren una nueva
@@ -43,6 +47,7 @@ export function MedicationReturns({ compact = false }: { compact?: boolean }) {
                   <td>{item.reason}</td>
                   <td>
                     <Link
+                      className="action-link-button"
                       href={`/quotes?${quote?.status === 'DRAFT' ? 'edit' : 'revise'}=${encodeURIComponent(item.quoteId)}`}
                     >
                       Revisar cotización

@@ -1050,18 +1050,20 @@ export default function PurchasesPage() {
               <span className="field-error">{form.formState.errors.unitCost.message}</span>
             ) : null}
           </label>
-          <label>
+          <label className="checkbox-with-help full">
             <input
               checked={applyPerception}
               data-action-id="PURCHASE-PERCEPTION"
               disabled={Boolean(editing)}
               onChange={(event) => setApplyPerception(event.target.checked)}
               type="checkbox"
-            />{' '}
-            Aplicar percepción del 1% a esta factura
-            <span className="field-help">
-              Los precios ingresados son sin IVA. El IVA solicitado del 13% se calcula
-              automáticamente; la percepción se activa sólo cuando corresponda.
+            />
+            <span>
+              Aplicar percepción del 1% a esta factura
+              <span className="field-help">
+                Los precios ingresados son sin IVA. El IVA solicitado del 13% se calcula
+                automáticamente; la percepción se activa sólo cuando corresponda.
+              </span>
             </span>
           </label>
           <label>

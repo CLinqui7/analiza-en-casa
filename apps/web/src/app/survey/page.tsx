@@ -72,7 +72,7 @@ export default function PublicSurveyPage() {
     }
   }
   return (
-    <main className="page-stack" style={{ maxWidth: 760, margin: '3rem auto', padding: '1rem' }}>
+    <main className="page-stack public-survey">
       <Panel>
         <h1>Encuesta de satisfacción</h1>
         {done ? (

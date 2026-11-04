@@ -37,7 +37,11 @@ test('CH17 preserves original signed document correction workflow links', async 
   await expect(
     page.getByRole('link', { name: 'Firmas y correcciones de documentos anteriores' }),
   ).toHaveAttribute('href', '/clinical/document-versions');
-  await expect(page.getByRole('link', { name: 'Registrar atención' })).toHaveAttribute(
+  // The Nov 4 client PDF removes this duplicate entry, preserving the clinical menu route.
+  await expect(page.getByRole('link', { name: 'Registrar atención' })).toHaveCount(0);
+  const clinicalMenu = page.locator('.sidebar').getByRole('button', { name: /Clínico/ });
+  if ((await clinicalMenu.getAttribute('aria-expanded')) === 'false') await clinicalMenu.click();
+  await expect(page.getByRole('link', { name: 'Órdenes médicas', exact: true })).toHaveAttribute(
     'href',
     '/clinical/orders',
   );
