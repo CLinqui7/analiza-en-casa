@@ -44,3 +44,18 @@ los reinicios. La limpieza usa sólo [docker builder prune](https://docs.docker.
 
 Pendientes de ejecución y verificación. Este documento no certifica todavía
 la instalación de actualizaciones ni la recuperación de la copia externa.
+
+## Hallazgo adicional: TuVet
+
+La unidad anterior mostraba `Result=success`, pero `ConditionResult=no`: se
+omitía porque no existía el hook `tuvet-daily-backup`. No era un respaldo válido.
+Se prepara un servicio real que conserva el timer existente y toma un dump
+consistente de PostgreSQL 18, roles, código, archivos y configuración en un
+repositorio restic separado, cifrado con clave propia. Detiene brevemente sólo
+la web de TuVet, la reinicia incluso si falla el respaldo y comprueba su salud.
+No modifica permisos de base ni RLS. La clave y el repositorio permanecen fuera
+de Git. La copia externa de este repositorio se verificará antes de actualizar.
+
+APT actualizado propone 28 paquetes del plan versionado
+`deploy/contabo/host-packages-2026-11-04.txt`. SQLite permanece aplazado por el
+despliegue gradual de Ubuntu; no se fuerza. No hay actualización de kernel.

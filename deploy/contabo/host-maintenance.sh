@@ -6,7 +6,7 @@ umask 077
 [[ $(id -u) = 0 ]] || { echo 'Root is required' >&2; exit 1; }
 . /etc/os-release
 [[ $ID = ubuntu && $VERSION_ID = 24.04 ]] || { echo 'Unexpected OS' >&2; exit 1; }
-phase=${1:?Expected refresh, backup, live-restore, upgrade, cache or verify}
+phase=${1:?Expected refresh, install-tuvet-backup, backup, live-restore, upgrade, cache or verify}
 state=/var/lib/analiza-host-maintenance/2026-11-04
 install -d -m 700 "$state"
 exec 9>/run/lock/analiza-host-maintenance.lock
@@ -28,6 +28,20 @@ health() {
 }
 
 case "$phase" in
+  install-tuvet-backup)
+    source_dir=${2:?Directory containing the published TuVet backup files}
+    health
+    cp -n /etc/systemd/system/tuvet-backup.service "$state/tuvet-backup.original.service"
+    install -d -m 700 /etc/tuvet-backup /var/backups/tuvet-restic
+    if [[ ! -f /etc/tuvet-backup/restic-password ]]; then
+      openssl rand -base64 48 > /etc/tuvet-backup/restic-password
+      chmod 600 /etc/tuvet-backup/restic-password
+    fi
+    install -m 700 "$source_dir/tuvet-host-backup.sh" /usr/local/sbin/tuvet-host-backup
+    install -m 644 "$source_dir/tuvet-backup.service" /etc/systemd/system/tuvet-backup.service
+    systemctl daemon-reload
+    systemd-analyze verify /etc/systemd/system/tuvet-backup.service
+    ;;
   refresh)
     health
     dpkg-query -W -f='${binary:Package}\t${Version}\n' > "$state/packages.before.tsv"
@@ -46,11 +60,17 @@ case "$phase" in
     tar -C / -czf "$state/host-config.tgz" etc/docker etc/nginx etc/systemd/system etc/apt
     systemctl start tuvet-backup.service
     [[ $(systemctl show tuvet-backup.service -p Result --value) = success ]]
+    [[ $(systemctl show tuvet-backup.service -p ConditionResult --value) = yes ]]
+    RESTIC_REPOSITORY=/var/backups/tuvet-restic \
+      RESTIC_PASSWORD_FILE=/etc/tuvet-backup/restic-password \
+      restic snapshots --json | jq 'max_by(.time) | {id,time}' > "$state/tuvet-backup.json"
+    jq -e '.id != null' "$state/tuvet-backup.json" >/dev/null
     systemctl start analiza-contabo-backup.service
     [[ $(systemctl show analiza-contabo-backup.service -p Result --value) = success ]]
     RESTIC_REPOSITORY=/opt/analiza-contabo-staging/backups/restic \
       RESTIC_PASSWORD_FILE=/opt/analiza-contabo-staging/secrets/restic-password \
       restic snapshots --json | jq 'max_by(.time) | {id,time,paths}' > "$state/backup.json"
+    jq -e '.id != null' "$state/backup.json" >/dev/null
     health
     container_state > "$state/containers.before-upgrade.txt"
     date --utc --iso-8601=seconds > "$state/backup-completed"
