@@ -391,7 +391,17 @@
   }
   .clinical-print-target table {
     width: 100%;
+    min-width: 0;
+    table-layout: fixed;
     font-size: 9pt;
+  }
+  .clinical-print-target :is(th, td) {
+    padding: 0.25rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .clinical-print-target :is(p, li, th, td, h2, h3, dt, dd, small, strong, span) {
+    color: #111 !important;
   }
   .clinical-print-target article {
     break-inside: avoid;

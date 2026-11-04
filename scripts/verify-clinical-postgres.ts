@@ -7,6 +7,9 @@ import {
   quoteSchema,
   hospitalizationSchema,
   patientSchema,
+  catalogItemSchema,
+  inventoryTraceRecordSchema,
+  inventoryMovementSchema,
   type ClinicalPayload,
 } from '../packages/contracts/src/index';
 import {
@@ -136,13 +139,16 @@ try {
       [
         actor.organizationId,
         itemId,
-        JSON.stringify({
-          id: itemId,
-          sku: itemId,
-          name: 'Medicamento sintético QA',
-          category: 'MEDICATIONS',
-          status: 'ACTIVE',
-        }),
+        JSON.stringify(
+          catalogItemSchema.parse({
+            id: itemId,
+            sku: itemId,
+            name: 'Medicamento sintético QA',
+            category: 'MEDICATIONS',
+            status: 'ACTIVE',
+            createdAt: `${date}T08:00:00Z`,
+          }),
+        ),
       ],
     );
     await c.query(
@@ -161,7 +167,7 @@ try {
         }),
       ],
     );
-    const movement = {
+    const movement = inventoryMovementSchema.parse({
       id: `entry-${run}`,
       itemId,
       warehouseId,
@@ -170,7 +176,7 @@ try {
       createdAt: `${date}T08:00:00Z`,
       reason: 'Entrada sintética QA',
       user: actor.userId,
-    };
+    });
     await c.query(
       'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body) VALUES($1,$2,$3,$4,$2,3,$5::jsonb)',
       [actor.organizationId, movement.id, itemId, warehouseId, JSON.stringify(movement)],
@@ -384,7 +390,7 @@ try {
     ]) {
       const traceId = `trace-${suffix}-${run}`;
       traceIds.push(traceId);
-      const trace = {
+      const trace = inventoryTraceRecordSchema.parse({
         id: traceId,
         itemId,
         supplierCatalogItemId: itemId,
@@ -393,7 +399,12 @@ try {
         qualityStatus: quality,
         expiresOn: expiry,
         receivedAt: `${date}T08:00:00Z`,
-      };
+        receivedQuantity: 1,
+        receiptReference: `QA-${run}`,
+        createdAt: `${date}T08:00:00Z`,
+        updatedAt: `${date}T08:00:00Z`,
+        balances: [{ warehouseId, quantity: 1 }],
+      });
       await c.query(
         'INSERT INTO analiza.inventory_trace_records(organization_id,id,kind,item_id,supplier_catalog_item_id,number_normalized,quality_status,expires_on,received_at,body) VALUES($1,$2,$3,$4,$4,$5,$6,$7,$8,$9::jsonb)',
         [
@@ -412,7 +423,7 @@ try {
         'INSERT INTO analiza.inventory_trace_balances(organization_id,trace_record_id,warehouse_id,quantity) VALUES($1,$2,$3,1)',
         [actor.organizationId, traceId, warehouseId],
       );
-      const movement = {
+      const movement = inventoryMovementSchema.parse({
         id: `entry-${traceId}`,
         itemId,
         warehouseId,
@@ -420,9 +431,10 @@ try {
         quantity: 1,
         createdAt: trace.receivedAt,
         traceRecordId: traceId,
+        traceNumber: trace.number,
         reason: 'Entrada sintética de lote',
         user: actor.userId,
-      };
+      });
       await c.query(
         'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,trace_record_id) VALUES($1,$2,$3,$4,$2,1,$5::jsonb,$6)',
         [actor.organizationId, movement.id, itemId, warehouseId, JSON.stringify(movement), traceId],
