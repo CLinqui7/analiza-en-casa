@@ -2,7 +2,7 @@
 
 Source: client-authorized `analizaencasa31oct_.pdf`, 12 pages, SHA256 `38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b`. Source stays outside Git. Screenshot and Nov 3 instruction authorize staff-entered configuration instead of historical blanket blockers. All pages were rendered and inspected. New video review was explicitly withdrawn by the user.
 
-Status: VERIFIED IN ISOLATED POSTGRESQL; production release pending the Git-first deployment gate. No new EXACT certification claimed.
+Status: DEPLOYED AND VERIFIED on Contabo, release `fc7e4c6206e1f4b01f6e24ad4395d88b8a816640`. No new EXACT certification claimed.
 
 | Requirement | Source | Implementation / acceptance |
 |---|---|---|
@@ -63,3 +63,11 @@ Evidence logs are local, outside Git: `C:/Temp/analiza-nov04-postgres-final.log`
 [Mobile clinical actions capture](evidence/clinical-20261104/orders-mobile.png) · [Staff guide](GUIA_CLINICA_2026-11-04.md)
 
 The supplied manual workflows are usable; staff supply missing rates, stock mappings and versioned scale definitions. No automated dose selection, extrapolated 24-hour balance, guessed classification intervals, financial credit or professional clinical certification is claimed. Historical requirements outside this PDF retain their residual scope in the matrices.
+
+## Production verification
+
+Git-first release `fc7e4c6206e1f4b01f6e24ad4395d88b8a816640` deployed on November 4. Migration 039 applied with forced RLS and append-only records; the runtime role has SELECT/INSERT on the new table. Public health returned HTTP 200 and both production containers are healthy.
+
+`scripts/verify-clinical-release.mjs` passed all five checks: public readiness, verified synthetic organization/account, persisted clinical record with idempotent retry, staff-entered discount configuration, and twelve authenticated routes plus browser reload without JavaScript errors. Writes were limited to the existing synthetic QA organization. No main-organization patient, clinician, financial or clinical data was changed by these tests.
+
+The isolated QA containers, network, image tags and server environment files were removed; their SSH tunnels were closed and three local ephemeral credential files deleted. Production credentials and rollback images remain available. See [deployment and maintenance evidence](../deployment/CONTABO_CLINICAL_RELEASE_2026-11-04.md).

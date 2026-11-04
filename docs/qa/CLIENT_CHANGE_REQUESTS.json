@@ -1056,7 +1056,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-MEDICAL-ORDERS"
       ],
@@ -1116,7 +1116,8 @@
         "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-020",
@@ -1140,7 +1141,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1200,7 +1201,8 @@
         "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-021",
@@ -1224,7 +1226,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1282,7 +1284,8 @@
         "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-022",
@@ -1306,7 +1309,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1364,7 +1367,8 @@
         "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-023",
@@ -1388,7 +1392,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1446,7 +1450,8 @@
         "notes": "No existe motor ni formulario aprobado."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-024",
@@ -1470,7 +1475,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1528,7 +1533,8 @@
         "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-025",
@@ -1552,7 +1558,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1610,7 +1616,8 @@
         "notes": "No existe motor ni definición institucional de dominios/incompletos."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-026",
@@ -1634,7 +1641,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1692,7 +1699,8 @@
         "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-027",
@@ -1716,7 +1724,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1774,7 +1782,8 @@
         "notes": "No existe motor ni versión aprobada."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-028",
@@ -1798,7 +1807,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1856,7 +1865,8 @@
         "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-029",
@@ -1880,7 +1890,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -1938,7 +1948,8 @@
         "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-030",
@@ -1962,7 +1973,7 @@
         "docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt"
       ],
       "status": "PARTIAL",
-      "production_status": "VERIFIED_ISOLATED_POSTGRES_PENDING_RELEASE",
+      "production_status": "DEPLOYED_VERIFIED",
       "route_ids": [
         "ROUTE-CLINICAL-HOSPITALIZATIONS"
       ],
@@ -2020,7 +2031,8 @@
         "notes": "El texto dice Branden y la imagen parece Braden."
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
     },
     {
       "change_id": "CR-031",
@@ -2133,7 +2145,7 @@
     }
   ],
   "supplemental_clinical_batch_20261103": {
-    "status": "VERIFIED_PENDING_RELEASE",
+    "status": "DEPLOYED_VERIFIED",
     "source": "sources/CLIENT_CLINICAL_2026-10-31.txt",
     "pdf_sha256": "38528620ea90f313a4b4de8ba88c7cba1aeec5a3a0e7f75c087578fd8022c65b",
     "scope_and_verification": "../feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
@@ -2154,6 +2166,7 @@
       "playwright:clinical-connected-security"
     ],
     "postgres_verification": "PASS: 10 assertion groups, 30 records; isolated restricted role, no production data. HTTP/browser evidence in release ledger.",
-    "production": "NOT_DEPLOYED"
+    "production": "PASS: HTTP 200; synthetic-organization persistence, idempotency, category configuration, twelve authenticated routes and browser reload. See docs/deployment/CONTABO_CLINICAL_RELEASE_2026-11-04.md.",
+    "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
   }
 }
