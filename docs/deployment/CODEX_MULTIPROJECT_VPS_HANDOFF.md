@@ -1,6 +1,6 @@
 # Entrega del VPS Contabo a otros chats de Codex y proyectos
 
-Estado revisado el 27 de octubre de 2026, 23:52 (El Salvador). Este archivo se
+Estado revisado el 4 de noviembre de 2026, 16:49 (El Salvador). Este archivo se
 puede compartir por GitHub: **no contiene contraseñas ni claves**. El anexo
 privado local está en
 `C:\Temp\analiza-contabo-private\CODEX_MULTIPROJECT_VPS_PRIVATE.md`.
@@ -13,20 +13,27 @@ no se deben pegar en chats, issues, PR, logs o repositorios.
 | --- | --- |
 | Código de Analiza | `https://github.com/CLinqui7/analiza-en-casa`, PR de trabajo `#20` sin fusionar; confirmar rama y SHA actuales en GitHub |
 | VPS | Contabo `vmi3659839`, IP `207.244.227.122`, Ubuntu 24.04.5, 6 vCPU, 11 GiB RAM, disco raíz 193 GiB |
-| Capacidad observada | 174 GiB libres en `/` y unos 10 GiB de RAM disponibles; medir de nuevo antes de instalar |
+| Capacidad observada | 167 GiB libres en `/` y unos 10 GiB de RAM disponibles; medir de nuevo antes de instalar |
 | Entrada pública | Nginx en 80/443, UFW activo; HTTPS de Analiza en `https://analiza.207.244.227.122.sslip.io/` |
 | Analiza | `/opt/analiza-contabo-staging`; web Docker en `127.0.0.1:18081`, proxy interno en `127.0.0.1:18080`; PostgreSQL 18 por socket Unix |
 | Base activa de Analiza | `analiza_live_20261014`; no usar `analiza_en_casa`, `analiza_candidate_20261014` ni `analiza_source_quarantine` como base activa |
-| TuVet | `/opt/tuvet-staging`, usuario `tuvet-deploy`, base `tuvet_staging` y servicio `tuvet-postgres.service`; sin web pública habilitada en la última revisión documentada |
+| TuVet | `/opt/tuvet-staging`, usuario `tuvet-deploy`, base `tuvet_staging`, servicios `tuvet-postgres.service` y `tuvet-web.service`; web activa en `https://staging.tuvetbi.com/`, socket Unix `/run/tuvet-proxy/tuvet-web.sock` |
 | Copia de Analiza | restic cifrado en `/opt/analiza-contabo-staging/backups/restic`, timer `analiza-contabo-backup.timer`; copia externa local `Analiza-Contabo-Offsite-Restic` |
+| Copia de TuVet | repositorio separado `/var/backups/tuvet-restic`, servicio y timer `tuvet-backup`; copia externa local `TuVet-Contabo-Offsite-Restic`; clave independiente en `/etc/tuvet-backup/restic-password`, nunca en Git |
 
 La URL de Vercel `https://analiza-en-casa-demo.vercel.app/` responde HTTP 307
 hacia el VPS; no sirve la base antigua. El dominio `sslip.io` es temporal.
-El 27 de octubre, los dos contenedores de Analiza estaban `healthy`, con cero
-reinicios, `/api/health` devolvió HTTP 200, no había unidades `systemd`
-fallidas, el respaldo local terminó con resultado satisfactorio y la tarea
-externa de Windows registró código 0. La siguiente ejecución automática
-externa sigue sin comprobarse. Consultar el estado de nuevo antes de actuar.
+El 4 de noviembre se instalaron 28 paquetes del host, Docker 29.9.3 y
+containerd 2.4.2, se habilitó live restore y se completó un reinicio controlado.
+Ambos proyectos arrancaron automáticamente y sus bases y accesos pasaron las
+comprobaciones. No hay servicios fallidos ni reinicios pendientes. El respaldo
+de TuVet antes se omitía por faltar el hook: ahora su servicio root toma un
+respaldo cifrado real, sin cambiar el usuario de aplicación ni los roles SQL.
+Las dos copias externas fueron verificadas íntegramente y sus tareas Windows
+terminaron con código 0. Requieren una sesión del operador y la siguiente
+ejecución automática aún debe observarse. Consultar
+[el informe de mantenimiento](CONTABO_HOST_MAINTENANCE_2026-11-04.md) y medir el
+estado de nuevo antes de actuar. No confundir datos históricos con el estado actual.
 
 ## Acceso sin mostrar secretos
 
