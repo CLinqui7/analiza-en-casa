@@ -367,7 +367,13 @@ function PatientRecordContent() {
                       : record.payload.kind === medicalKind,
                   ),
                 )}
-                {section === 1 && !records.some((record) => record.payload.kind === medicalKind) ? (
+                {section === 1 &&
+                !records.some((record) => record.payload.kind === medicalKind) &&
+                !(medicalKind === 'VITALS' && readings.length) &&
+                !(
+                  medicalKind === 'EVOLUTION' &&
+                  documents.some((document) => document.type === 'CLINICAL_EVOLUTION')
+                ) ? (
                   <p className="notice">
                     No hay registros de {clinicalLabels[medicalKind].toLocaleLowerCase('es')} para
                     esta selección.
@@ -539,7 +545,9 @@ function PatientRecordContent() {
                                   minute: '2-digit',
                                 })}
                               </td>
-                              <td>{nurse?.boardRegistrationNumber || 'No registrado'}</td>
+                              <td>
+                                {nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}
+                              </td>
                             </tr>
                           );
                         })}
@@ -596,7 +604,9 @@ function PatientRecordContent() {
                                 minute: '2-digit',
                               })}
                             </td>
-                            <td>{nurse?.boardRegistrationNumber || 'No registrado'}</td>
+                            <td>
+                              {nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}
+                            </td>
                             <td>
                               {
                                 {

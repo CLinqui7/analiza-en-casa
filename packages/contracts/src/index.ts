@@ -92,6 +92,7 @@ export const vitalReadingSchema = z.object({
 });
 
 export const nursingResourceSchema = z.object({
+  jvpe: z.string().optional(),
   id: z.string(),
   userId: z.string().optional(),
   displayName: z.string().trim().min(1),

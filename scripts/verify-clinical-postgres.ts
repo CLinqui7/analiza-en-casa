@@ -637,6 +637,14 @@ try {
     assert.equal(quote.rows[0].body.total, 3);
   });
   check('receivable returns without clinical disclosure or sent-quote mutation');
+  await transaction(pool, actor, async (c) => {
+    const rows = await c.query(
+      'SELECT body FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+      [actor.organizationId, itemId],
+    );
+    for (const row of rows.rows) inventoryMovementSchema.parse(row.body);
+  });
+  check('all generated inventory movements remain readable through the strict contract');
   console.log(
     JSON.stringify({
       status: 'PASS',

@@ -176,8 +176,9 @@ async function reverseConsumption(
       warehouse_id: string;
       delta: number;
       trace_record_id: string | null;
+      trace_number: string | null;
     }>(
-      'SELECT item_id,warehouse_id,delta,trace_record_id FROM analiza.inventory_movements WHERE organization_id=$1 AND id=$2 AND delta<0',
+      "SELECT item_id,warehouse_id,delta,trace_record_id,body->>'traceNumber' AS trace_number FROM analiza.inventory_movements WHERE organization_id=$1 AND id=$2 AND delta<0",
       [actor.organizationId, sourceId],
     );
     const source = result.rows[0];
@@ -195,7 +196,9 @@ async function reverseConsumption(
       reversalOf: sourceId,
       user: actor.userId,
       createdAt: record.createdAt,
-      ...(source.trace_record_id ? { traceRecordId: source.trace_record_id } : {}),
+      ...(source.trace_record_id
+        ? { traceRecordId: source.trace_record_id, traceNumber: source.trace_number }
+        : {}),
     };
     if (source.trace_record_id) {
       await c.query(
