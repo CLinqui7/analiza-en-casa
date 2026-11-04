@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { quoteSchema, paymentSchema } from '@analiza/contracts';
-import { receivableAccounts } from './receivables';
+import { balanceForQuote, receivableAccounts } from './receivables';
 const quote = quoteSchema.parse({
   id: 'q1',
   rootQuoteId: 'q1',
@@ -43,4 +43,26 @@ describe('Receivables from recorded quote versions and payments', () => {
   });
   it('keeps overpayment visible as credit rather than silently dropping it', () =>
     expect(receivableAccounts([quote], [{ ...payment, amount: 20 }])[0].balance).toBe(-9.9));
+  it('shows the same current account balance in every version without changing historic totals', () => {
+    const first = { ...quote, patientAmount: 100, total: 100 };
+    const second = { ...first, id: 'q2', version: 2, patientAmount: 120, total: 120 };
+    const draft = { ...second, id: 'q3', version: 3, status: 'DRAFT' as const, patientAmount: 999 };
+    const payments = [{ ...payment, amount: 40 }];
+    const accounts = receivableAccounts([first, second, draft], payments);
+    for (const version of [first, second, draft])
+      expect(balanceForQuote(version, accounts, payments)).toMatchObject({
+        paid: 40,
+        balance: 80,
+        version: 2,
+      });
+    expect(first.total).toBe(100);
+    expect(second.total).toBe(120);
+    expect(
+      balanceForQuote(
+        { ...quote, id: 'unrelated', rootQuoteId: 'unrelated', status: 'DRAFT' },
+        accounts,
+        payments,
+      ),
+    ).toMatchObject({ paid: 0, balance: 10.1, version: null });
+  });
 });

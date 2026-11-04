@@ -6,6 +6,8 @@ import {
   normalizePhone,
   normalizeText,
   searchInsuranceRequests,
+  insurerForQuote,
+  quoteDisplayCode,
 } from '@analiza/domain';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
 import Link from 'next/link';
@@ -39,9 +41,6 @@ const tone = (status: InsuranceRequestStatus) =>
         : 'neutral';
 const displayDate = (value: string) => new Date(value).toLocaleString('es-SV');
 type UpdateDraft = { quoteId: string; status: InsuranceRequestStatus; note: string; date: string };
-function insurerFor(patient: { insurer?: string; insurance?: { insurer?: string } } | undefined) {
-  return patient?.insurer ?? patient?.insurance?.insurer;
-}
 
 export default function InsurancePage() {
   const { can } = useAuth();
@@ -82,7 +81,7 @@ export default function InsurancePage() {
       .filter((candidate) => !insuranceRequests.some((request) => request.quoteId === candidate.id))
       .filter((candidate) => {
         const patient = patients.find((item) => item.id === candidate.patientId);
-        const insurer = insurerFor(patient);
+        const insurer = insurerForQuote(candidate, patient);
         if (!patient || !insurer) return false;
         return (
           !needle ||
@@ -102,11 +101,12 @@ export default function InsurancePage() {
     setMessage(null);
     setLocalError(null);
     const request = insuranceRequests.find((candidate) => candidate.quoteId === target.id);
+    const now = new Date();
     setDraft({
       quoteId: target.id,
       status: request?.status ?? 'SENT_TO_INSURER',
       note: '',
-      date: new Date().toISOString().slice(0, 16),
+      date: new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16),
     });
   }
   function closeUpdate() {
@@ -141,7 +141,7 @@ export default function InsurancePage() {
   const selectedPatient = quote
     ? patients.find((candidate) => candidate.id === quote.patientId)
     : undefined;
-  const selectedInsurer = insurerFor(selectedPatient);
+  const selectedInsurer = contextRequest?.insurer ?? insurerForQuote(quote, selectedPatient);
   const activeQuote = draft
     ? quotes.find((candidate) => candidate.id === draft.quoteId)
     : undefined;
@@ -154,13 +154,9 @@ export default function InsurancePage() {
         <div>
           <p className="eyebrow">Operaciones</p>
           <h1>Preautorizaciones y seguros</h1>
-          <p>
-            Seguimiento de hechos administrativos observados. No ejecuta autorizaciones, cobertura
-            ni transiciones automáticas.
-          </p>
+          <p>Registre respuestas de las aseguradoras y consulte el historial de cada cotización.</p>
         </div>
         <div className="header-actions">
-          <StatusTag tone="warning">Reglas de seguro pendientes</StatusTag>
           {can('quotes:read') ? (
             <Link className="button" data-action-id="INSURANCE-OPEN-QUOTES" href="/quotes">
               + Elegir cotización
@@ -188,12 +184,13 @@ export default function InsurancePage() {
             {quote && selectedPatient && selectedInsurer ? (
               <>
                 <p>
-                  <strong>{quote.id}</strong> · {selectedPatient.fullName} · {selectedInsurer}
+                  <strong title={quote.id}>{quoteDisplayCode(quote.id)}</strong> ·{' '}
+                  {selectedPatient.fullName} · {selectedInsurer}
                 </p>
                 <p>
                   {contextRequest
                     ? `Solicitud relacionada: ${labels[contextRequest.status]}.`
-                    : 'No existe una solicitud persistida todavía. Visitar este enlace no crea una preautorización.'}
+                    : 'Todavía no hay una solicitud. Registre la respuesta recibida de la aseguradora para iniciar el seguimiento.'}
                 </p>
                 <div className="action-row">
                   {can('insurance:write') ? (
@@ -331,13 +328,13 @@ export default function InsurancePage() {
                       className="action-link-button action-link-button--compact"
                       href={`/quotes/${candidate.id}`}
                     >
-                      Consultar {candidate.id}
+                      Consultar {quoteDisplayCode(candidate.id)}
                     </Link>
                     <StatusTag>Sin solicitud</StatusTag>
                   </div>
                   <strong>{patient?.fullName ?? 'Paciente no disponible'}</strong>
-                  <span>{insurerFor(patient) ?? 'Sin aseguradora'}</span>
-                  <span>Total {candidate.total.toFixed(2)}</span>
+                  <span>{insurerForQuote(candidate, patient) ?? 'Sin aseguradora'}</span>
+                  <span>Total USD {candidate.total.toFixed(2)}</span>
                   {can('insurance:write') ? (
                     <Button
                       className="button-secondary"
@@ -368,8 +365,8 @@ export default function InsurancePage() {
       <Panel>
         <h2>Acciones externas y reclamos</h2>
         <p>
-          Los controles se mantienen visibles como superficies seguras: no afirman envíos,
-          recepción, entrega ni procesamiento de reclamos.
+          Los envíos externos requieren configurar el canal correspondiente. Mientras tanto, puede
+          registrar las respuestas recibidas mediante «Registrar actualización».
         </p>
         <div className="action-row">
           {can('insurance:write') ? (
@@ -403,7 +400,11 @@ export default function InsurancePage() {
           <Button
             className="button-secondary"
             data-action-id="INSURANCE-CLAIM"
-            onClick={() => setMessage('Flujo de reclamo pendiente de definición CH08-Q002.')}
+            onClick={() =>
+              setMessage(
+                'El envío de reclamos todavía no está configurado. Registre su seguimiento como una actualización administrativa.',
+              )
+            }
             type="button"
           >
             Reclamo
@@ -434,7 +435,9 @@ export default function InsurancePage() {
         onClose={closeUpdate}
         open={Boolean(draft)}
         title={
-          activeQuote ? `Registrar actualización · ${activeQuote.id}` : 'Registrar actualización'
+          activeQuote
+            ? `Registrar actualización · ${quoteDisplayCode(activeQuote.id)}`
+            : 'Registrar actualización'
         }
       >
         {activeQuote && activePatient ? (
@@ -445,8 +448,10 @@ export default function InsurancePage() {
           >
             <p className="full">
               <strong>Contexto:</strong> {activePatient.fullName} ·{' '}
-              {insurerFor(activePatient) ?? 'Sin aseguradora'} · total{' '}
-              {activeQuote.total.toFixed(2)}
+              {insuranceRequests.find((request) => request.quoteId === activeQuote.id)?.insurer ??
+                insurerForQuote(activeQuote, activePatient) ??
+                'Sin aseguradora'}{' '}
+              · total {activeQuote.total.toFixed(2)}
             </p>
             <label>
               Estado observado
@@ -531,21 +536,23 @@ function InsuranceCard({
             data-action-id="INSURANCE-OPEN-QUOTE"
             href={`/quotes/${quote.id}`}
           >
-            Consultar {quote.id}
+            Consultar {quoteDisplayCode(quote.id)}
           </Link>
         ) : (
-          <strong>{request?.quoteId}</strong>
+          <strong>
+            {request?.quoteId ? quoteDisplayCode(request.quoteId) : 'Cotización no disponible'}
+          </strong>
         )}
         {request ? (
           <StatusTag tone={tone(request.status)}>{labels[request.status]}</StatusTag>
         ) : null}
       </div>
       <h3>{patient?.fullName ?? 'Paciente no disponible'}</h3>
-      <p>{request?.insurer ?? insurerFor(patient) ?? 'Aseguradora no disponible'}</p>
+      <p>{request?.insurer ?? insurerForQuote(quote, patient) ?? 'Aseguradora no disponible'}</p>
       <dl>
         <div>
           <dt>Total</dt>
-          <dd>{quote ? quote.total.toFixed(2) : 'No disponible'}</dd>
+          <dd>{quote ? `USD ${quote.total.toFixed(2)}` : 'No disponible'}</dd>
         </div>
         <div>
           <dt>Documento</dt>

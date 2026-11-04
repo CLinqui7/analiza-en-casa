@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  calculateQuoteBalance,
-  canEditQuote,
-  quoteCategories,
-  quoteDisplayCode,
-} from '@analiza/domain';
+import { canEditQuote, quoteCategories, quoteDisplayCode } from '@analiza/domain';
 import { Button, EmptyState, Panel } from '@analiza/ui';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,6 +10,7 @@ import QRCode from 'qrcode';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { mongoMutationHeaders } from '@/lib/auth';
 import { usdAmountInSpanishWords } from '@/lib/money-in-words';
+import { balanceForQuote, receivableAccounts } from '@/lib/receivables';
 import {
   quoteDecisionReasonLabels,
   quoteDecisionSchema,
@@ -72,7 +68,7 @@ export default function QuoteDetailPage() {
     );
   const currentQuote = quote;
   const patient = patients.find((candidate) => candidate.id === currentQuote.patientId);
-  const balance = calculateQuoteBalance(currentQuote, payments);
+  const balance = balanceForQuote(currentQuote, receivableAccounts(quotes, payments), payments);
   const whatsappPhone = patient?.phone?.replace(/\D/g, '') ?? '';
   const whatsappAllowed = Boolean(
     whatsappPhone && patient?.notifications?.botmakerConsent === true,
@@ -377,6 +373,12 @@ export default function QuoteDetailPage() {
       <div className="two-column">
         <Panel>
           <h2>Resumen financiero</h2>
+          {balance.version !== null ? (
+            <p className="field-help">
+              El total corresponde a esta versión. Los pagos y el saldo de la cuenta corresponden a
+              la última versión enviada (v{balance.version}) y se comparten entre sus revisiones.
+            </p>
+          ) : null}
           <dl className="definition-list">
             <div>
               <dt>Subtotal</dt>
@@ -403,11 +405,11 @@ export default function QuoteDetailPage() {
               <dd>{money(quote.patientAmount)}</dd>
             </div>
             <div>
-              <dt>Pagado</dt>
+              <dt>Pagado en la cuenta</dt>
               <dd>{money(balance.paid)}</dd>
             </div>
             <div>
-              <dt>Saldo</dt>
+              <dt>{balance.version === null ? 'Saldo estimado' : 'Saldo actual de cuenta'}</dt>
               <dd>{money(balance.balance)}</dd>
             </div>
           </dl>

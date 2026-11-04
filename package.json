@@ -20,6 +20,8 @@
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,css}\" \"packages/**/*.{ts,tsx}\"",
     "test:react": "npm run test --workspace=@analiza/web",
     "test:clinical:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-clinical-postgres.ts",
+    "test:billing:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-billing-postgres.ts",
+    "test:billing:browser": "playwright test -c apps/web/playwright.billing.config.ts",
     "test:clinical:browser": "playwright test -c apps/web/playwright.clinical.config.ts",
     "test:core:mongo": "tsx --tsconfig apps/web/tsconfig.json apps/web/src/server/core-live-verification.ts",
     "test:core:selenium": "node scripts/verify-core-selenium.mjs",

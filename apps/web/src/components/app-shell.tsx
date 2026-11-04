@@ -1034,9 +1034,6 @@ export function AppShell({ children }: PropsWithChildren) {
             onClick={() => void logout().then(() => router.replace('/login'))}
             type="button"
           >
-            <span aria-hidden="true" className="account-logout-icon">
-              Salir
-            </span>
             <span>Cerrar sesión</span>
           </button>
         </footer>

@@ -344,6 +344,17 @@ export const quoteSchema = z.object({
   revisionReason: z.string().trim().optional(),
 });
 
+export const paymentAmountSchema = z
+  .number()
+  .finite()
+  .min(0.01, 'Ingrese al menos USD 0.01.')
+  .refine(
+    (amount) =>
+      Number.isSafeInteger(Math.round(amount * 100)) &&
+      Math.abs(amount * 100 - Math.round(amount * 100)) < 1e-7,
+    'Ingrese un importe con un máximo de dos decimales.',
+  );
+
 export const paymentSchema = z
   .object({
     id: z.string(),
@@ -367,6 +378,18 @@ export const paymentSchema = z
         path: ['reference'],
       });
     }
+  });
+
+// Validate new commands strictly without making legacy financial records unreadable.
+export const paymentInputSchema = paymentSchema
+  .safeExtend({ amount: paymentAmountSchema })
+  .superRefine((payment, context) => {
+    if (payment.paymentMethod === 'CHECK' && !payment.reference)
+      context.addIssue({
+        code: 'custom',
+        message: 'Ingrese el número de reserva.',
+        path: ['reference'],
+      });
   });
 
 export const clinicalDocumentSchema = z.object({

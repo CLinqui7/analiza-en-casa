@@ -2,9 +2,9 @@
 import { MedicationReturns } from './medication-returns';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { Payment } from '@analiza/contracts';
+import { paymentAmountSchema, type Payment } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { quoteDisplayCode } from '@analiza/domain';
@@ -18,7 +18,7 @@ const money = (value: number) =>
 const paymentSchema = z
   .object({
     quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
-    amount: z.number().positive('Ingrese un monto positivo.'),
+    amount: paymentAmountSchema,
     paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']),
     reference: z.string().trim().max(120, 'Use un máximo de 120 caracteres.').optional(),
   })
@@ -47,7 +47,8 @@ export function PaymentsPage() {
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [statementPatientId, setStatementPatientId] = useState('');
-  const [paymentCommandKey, setPaymentCommandKey] = useState(() => crypto.randomUUID());
+  const paymentAttempt = useRef<Payment | null>(null);
+  const [hasPendingPayment, setHasPendingPayment] = useState(false);
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
   const sentQuotes = openAccounts.map((account) => account.quote);
@@ -92,24 +93,32 @@ export function PaymentsPage() {
   }
   async function submit(values: PaymentForm) {
     const account = accounts.find((candidate) => candidate.quote.id === values.quoteId);
-    if (!account || account.balance <= 0) {
+    if (!paymentAttempt.current && (!account || account.balance <= 0)) {
       form.setError('quoteId', { message: 'La cuenta seleccionada ya está pagada.' });
       return;
     }
-    if (Math.round(values.amount * 100) > Math.round(account.balance * 100)) {
+    if (
+      !paymentAttempt.current &&
+      account &&
+      Math.round(values.amount * 100) > Math.round(account.balance * 100)
+    ) {
       form.setError('amount', {
         message: `El monto no puede superar el saldo de ${money(account.balance)}.`,
       });
       return;
     }
     const payment: Payment = {
-      id: crypto.randomUUID(),
+      id: paymentAttempt.current?.id ?? crypto.randomUUID(),
       ...values,
       reference: values.reference || undefined,
-      idempotencyKey: paymentCommandKey,
+      idempotencyKey: paymentAttempt.current?.idempotencyKey ?? crypto.randomUUID(),
       status: 'APPLIED',
-      createdAt: new Date().toISOString(),
+      createdAt: paymentAttempt.current?.createdAt ?? new Date().toISOString(),
     };
+    // A lost response must be retried with the same identity and timestamp.
+    // Edited values retain the key so the server rejects a conflicting replay.
+    paymentAttempt.current = payment;
+    setHasPendingPayment(true);
     if (!(await addPayment(payment))) {
       form.setError('root', {
         message: 'No se pudo guardar el pago; no se confirmó la operación.',
@@ -117,6 +126,8 @@ export function PaymentsPage() {
       return;
     }
     setMessage('Pago aplicado correctamente y registrado en auditoría.');
+    paymentAttempt.current = null;
+    setHasPendingPayment(false);
     close();
   }
   async function voidSubmit(values: { reason: string }) {
@@ -191,13 +202,17 @@ export function PaymentsPage() {
           {can('payments:write') ? (
             <Button
               data-action-id="PAYMENT-APPLY"
-              disabled={!openAccounts.length}
+              disabled={!openAccounts.length && !hasPendingPayment}
               onClick={() => {
                 const requestedQuote = new URLSearchParams(window.location.search).get('quote');
                 const account = openAccounts.find((item) => item.quote.id === requestedQuote);
-                form.setValue('quoteId', account?.quote.id ?? sentQuotes[0]?.id ?? '');
-                if (account) form.setValue('amount', account.balance);
-                setPaymentCommandKey(crypto.randomUUID());
+                const pending = paymentAttempt.current;
+                form.reset({
+                  quoteId: pending?.quoteId ?? account?.quote.id ?? sentQuotes[0]?.id ?? '',
+                  amount: pending?.amount ?? account?.balance ?? 1,
+                  paymentMethod: pending?.paymentMethod ?? 'CASH',
+                  reference: pending?.reference ?? '',
+                });
                 setMessage(null);
                 setOpen(true);
               }}
@@ -357,9 +372,13 @@ export function PaymentsPage() {
                           className="button-secondary"
                           data-action-id="PAYMENT-APPLY"
                           onClick={() => {
-                            form.setValue('quoteId', account.quote.id);
-                            form.setValue('amount', account.balance);
-                            setPaymentCommandKey(crypto.randomUUID());
+                            const pending = paymentAttempt.current;
+                            form.reset({
+                              quoteId: pending?.quoteId ?? account.quote.id,
+                              amount: pending?.amount ?? account.balance,
+                              paymentMethod: pending?.paymentMethod ?? 'CASH',
+                              reference: pending?.reference ?? '',
+                            });
                             setOpen(true);
                           }}
                         >
@@ -519,7 +538,7 @@ export function PaymentsPage() {
           className="form-grid"
           id="payment-form"
           noValidate
-          onSubmit={form.handleSubmit(submit)}
+          onSubmit={(event) => void form.handleSubmit(submit)(event)}
         >
           {form.formState.errors.root ? (
             <p className="field-error full" role="alert">

@@ -16,6 +16,7 @@ import {
   clinicalDocumentSchema,
   inventoryMovementSchema,
   paymentSchema,
+  paymentInputSchema,
   visitInputSchema,
   visitSchema,
   goalInputSchema,
@@ -1952,7 +1953,7 @@ export function postgresPersistence(): Persistence {
       if (command.command === 'payment.apply') {
         authorize(actor, 'payments:write');
         const { payment } = z
-          .object({ command: z.literal('payment.apply'), payment: paymentSchema.strict() })
+          .object({ command: z.literal('payment.apply'), payment: paymentInputSchema.strict() })
           .strict()
           .parse(input);
         if (payment.status !== 'APPLIED' || payment.voidReason)
@@ -1981,7 +1982,7 @@ export function postgresPersistence(): Persistence {
             return paymentSchema.parse(existing.body);
           }
           if (payment.paymentMethod === 'CHECK' && !payment.reference)
-            throw new MongoInputError('Ingrese el número de cheque.');
+            throw new MongoInputError('Ingrese el número de reserva.');
           const latestQuote = (
             await c.query<{ body: Quote }>(
               `SELECT body FROM analiza.quotes

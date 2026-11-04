@@ -215,11 +215,6 @@ export default function DoctorsPage() {
           Los médicos y archivos en este modo son datos demo locales. No se presentan como
           integración compartida ni como almacenamiento privado.
         </p>
-      ) : mongoMode ? (
-        <p className="notice warning">
-          En Mongo, guarde primero el médico. Los adjuntos privados se cargan por bytes mediante la
-          ruta autorizada y no se registran sólo por nombre.
-        </p>
       ) : null}
       {result ? (
         <p className="notice success" role="status">
@@ -324,7 +319,7 @@ export default function DoctorsPage() {
       <Dialog
         description={
           mongoMode
-            ? 'Guarde el médico antes de cargar archivos privados. Un nombre de archivo no acredita una carga.'
+            ? 'Complete los datos y seleccione los documentos que desea adjuntar al médico.'
             : 'Los archivos demo conservan únicamente nombre, tipo y tamaño; su contenido no se carga a un almacenamiento privado.'
         }
         footer={

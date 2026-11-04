@@ -35,6 +35,7 @@ import {
   canEditQuote,
   hasValidInsuranceRequestContext,
   isInsuranceRequestStatus,
+  insurerForQuote,
 } from '@analiza/domain';
 import {
   loadSession,
@@ -683,11 +684,11 @@ function WorkspaceProvider({ children }: PropsWithChildren) {
       const quote = snapshot.quotes.find((candidate) => candidate.id === input.quoteId);
       const patient =
         quote && snapshot.patients.find((candidate) => candidate.id === quote.patientId);
-      const insurer = patient?.insurer ?? patient?.insurance?.insurer;
-      if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
       const existing = snapshot.insuranceRequests.find(
-        (candidate) => candidate.quoteId === quote.id,
+        (candidate) => candidate.quoteId === quote?.id,
       );
+      const insurer = existing?.insurer ?? insurerForQuote(quote, patient);
+      if (provider.mode !== 'mock' || !quote || !patient || !insurer) return false;
       const request: InsuranceRequest = existing ?? {
         id: crypto.randomUUID(),
         quoteId: quote.id,

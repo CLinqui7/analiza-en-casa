@@ -1,6 +1,6 @@
 import type { Pool, PoolClient } from 'pg';
 import { quoteSchema, type Quote } from '@analiza/contracts';
-import { canEditQuote } from '@analiza/domain';
+import { canEditQuote, hasSameQuoteVersionIdentity } from '@analiza/domain';
 import { can } from '@/lib/permissions';
 import { MongoAccessError, MongoConflictError, MongoInputError } from '../validation/patients';
 import { parseQuoteCreate, parseQuoteReplace } from '../mongo-quotes';
@@ -172,9 +172,9 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
         ).rows[0];
         const currentQuote = current ? quoteSchema.parse(current.body) : null;
         if (!currentQuote || !canEditQuote(currentQuote)) throw new MongoConflictError();
-        if (currentQuote.patientId !== quote.patientId || currentQuote.caseId !== quote.caseId)
+        if (!hasSameQuoteVersionIdentity(currentQuote, quote))
           throw new MongoInputError(
-            'El paciente y la hospitalización no pueden cambiar dentro del mismo borrador.',
+            'Conserve el paciente, la hospitalización, la versión y el origen del borrador. Cree una revisión para cambiar de versión.',
           );
         await requireCatalogPrices(client, actor, quote, currentQuote);
         const updated = await client.query(

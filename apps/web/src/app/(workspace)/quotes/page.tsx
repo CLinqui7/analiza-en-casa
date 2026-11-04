@@ -2,7 +2,6 @@
 
 import type { Quote, QuoteItem, QuoteItemCategory } from '@analiza/contracts';
 import {
-  calculateQuoteBalance,
   calculateQuoteTotals,
   createQuoteRevision,
   currentInventoryBalance,
@@ -24,6 +23,7 @@ import { mongoMutationHeaders } from '@/lib/auth';
 import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
 import { quoteDecisionSchema, type QuoteDecision } from '@/lib/quote-decision';
 import { useOperations } from '@/lib/use-operations';
+import { balanceForQuote, receivableAccounts } from '@/lib/receivables';
 
 type EditorMode = 'create' | 'edit' | 'revise';
 type QuoteDraft = Pick<
@@ -1524,6 +1524,7 @@ function QuoteEditor({
 
 export default function QuotesPage() {
   const { patients, payments, providerMode, quotes, refreshWorkspace } = useWorkspace();
+  const accounts = useMemo(() => receivableAccounts(quotes, payments), [quotes, payments]);
   const { can, session } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1762,14 +1763,14 @@ export default function QuotesPage() {
                     <th>Total</th>
                     <th>Seguro</th>
                     <th>Paciente</th>
-                    <th>Saldo</th>
+                    <th>Saldo actual de cuenta</th>
                     <th>Estado</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pagedQuotes.map((quote) => {
-                    const balance = calculateQuoteBalance(quote, payments);
+                    const balance = balanceForQuote(quote, accounts, payments);
                     return (
                       <tr key={quote.id}>
                         <td>
