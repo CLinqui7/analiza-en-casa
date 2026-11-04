@@ -6,7 +6,7 @@ umask 077
 [[ $(id -u) = 0 ]] || { echo 'Root is required' >&2; exit 1; }
 . /etc/os-release
 [[ $ID = ubuntu && $VERSION_ID = 24.04 ]] || { echo 'Unexpected OS' >&2; exit 1; }
-phase=${1:?Expected refresh, install-tuvet-backup, backup, live-restore, upgrade, cache or verify}
+phase=${1:?Expected refresh, install-tuvet-backup, backup, live-restore, upgrade, services, cache or verify}
 state=/var/lib/analiza-host-maintenance/2026-11-04
 install -d -m 700 "$state"
 exec 9>/run/lock/analiza-host-maintenance.lock
@@ -153,6 +153,22 @@ case "$phase" in
     df -B1 / > "$state/disk.after.txt"
     tail -1 "$state/cache-prune.log"
     health
+    ;;
+  services)
+    test -s "$state/upgrade-completed"
+    health
+    container_state > "$state/containers.before-service-restarts.txt"
+    # Respect needrestart's built-in exclusions for disruptive session services.
+    # In particular, do not run its dbus helper: it terminates login sessions.
+    needrestart -r a > "$state/service-restarts.log" 2>&1
+    if [[ -S /run/user/0/bus ]]; then
+      XDG_RUNTIME_DIR=/run/user/0 systemctl --user daemon-reexec
+    fi
+    health
+    container_state > "$state/containers.after-service-restarts.txt"
+    diff -u "$state/containers.before-service-restarts.txt" "$state/containers.after-service-restarts.txt"
+    needrestart -b -r l > "$state/needrestart.final.txt" 2>&1
+    cat "$state/needrestart.final.txt"
     ;;
   verify)
     health
