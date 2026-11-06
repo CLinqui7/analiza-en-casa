@@ -19,6 +19,8 @@
     "lint": "npm run lint --workspace=@analiza/web",
     "format:check": "prettier --check \"apps/**/*.{ts,tsx,css}\" \"packages/**/*.{ts,tsx}\"",
     "test:react": "npm run test --workspace=@analiza/web",
+    "doctors:prepare": "tsx --tsconfig apps/web/tsconfig.json scripts/prepare-doctor-import.ts",
+    "test:doctors:prepare": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-doctor-import-preparation.ts",
     "test:clinical:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-clinical-postgres.ts",
     "test:billing:postgres": "tsx --tsconfig apps/web/tsconfig.json scripts/verify-billing-postgres.ts",
     "test:billing:browser": "playwright test -c apps/web/playwright.billing.config.ts",

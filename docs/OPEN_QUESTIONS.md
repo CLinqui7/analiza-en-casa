@@ -1,5 +1,11 @@
 # Preguntas abiertas y bloqueadores
 
+## DOCTORS-NOV05 · preparación del nuevo lote Excel
+
+El 5 de noviembre de 2026 el cliente pidió preparar más de 650 médicos y confirmó formato `.xlsx`; el archivo fuente aún no fue entregado. Esta nueva petición autoriza preparar ese lote, sin reactivar la copia histórica de médicos/expedientes retirada el 20 de octubre. Se conservan los requisitos actuales (nombre, especialidad, teléfono fijo y nuevo/recurrente); DUI y dirección siguen opcionales. No se inventan valores para completar filas.
+
+Quedan por conocer hoja, encabezados, organización de destino y coincidencias con los médicos actuales. La plantilla y el prevalidador local están documentados en `docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md`, con QA de 700 filas sintéticas. La escritura masiva, su conciliación de producción e idempotencia aún no se han implementado/certificado. CR-032 sigue abierto; no hay importación de datos reales ni cambios de estados de feedback.
+
 ## CLINICAL-OCT31 · autorización y datos configurables, 3–4 noviembre 2026
 
 El PDF `analizaencasa31oct_.pdf` y la instrucción expresa del cliente sustituyen

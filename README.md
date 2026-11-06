@@ -22,6 +22,11 @@ verificación. Nunca incluir contraseñas, claves ni archivos privados en Git.
 [guía operativa vigente](docs/deployment/CONTABO_OPERATOR_HANDOFF.md),
 [revisión del feedback](docs/feedback/REVIEW_2026-10-14.md).
 
+**Preparación de médicos desde Excel:**
+[plantilla, prevalidación privada y estado del lote de más de 650 médicos](docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md).
+`npm run doctors:prepare -- --help` muestra el comando sin escrituras en la aplicación.
+`npm run test:doctors:prepare` verifica el flujo local con 700 registros sintéticos.
+
 **Para preparar un VPS Hostinger con la navegación completa:**
 [lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
 
