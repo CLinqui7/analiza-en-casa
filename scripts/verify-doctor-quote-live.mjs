@@ -126,6 +126,9 @@ try {
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     assert.ok(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 2));
+    const selectedName = dialog.locator('#quote-primary-doctor-summary');
+    await expect(selectedName).toHaveText(example.fullName);
+    assert.ok(await selectedName.evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await primary.scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(output, `quote-doctors-${width}-private.png`) });
@@ -140,6 +143,7 @@ try {
     doctors: doctors.length,
     importedAvailableInBothSelectors: importedIds.size,
     uniqueOptionIds: true,
+    fullSelectedNameReadable: true,
     normalizedNameSearch: true,
     professionalIdentifierSearch: true,
     additionalClinicSearch: Boolean(clinic),

@@ -800,6 +800,10 @@ function QuoteEditor({
               Médico tratante principal
               <select
                 data-action-id="QUOTE-PRIMARY-DOCTOR"
+                aria-label="Médico tratante principal"
+                aria-describedby={
+                  draft.primaryDoctorId ? 'quote-primary-doctor-summary' : undefined
+                }
                 onChange={(event) => {
                   const doctorId = event.target.value;
                   const doctorName = doctors.find((doctor) => doctor.id === doctorId)?.fullName;
@@ -820,6 +824,15 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              {draft.primaryDoctorId && doctorLabels.has(draft.primaryDoctorId) ? (
+                <span
+                  id="quote-primary-doctor-summary"
+                  className="field-help"
+                  style={{ overflowWrap: 'anywhere' }}
+                >
+                  {doctorLabels.get(draft.primaryDoctorId)}
+                </span>
+              ) : null}
               {errors.primaryDoctorId ? (
                 <span className="field-error" role="alert">
                   {errors.primaryDoctorId}
@@ -830,6 +843,10 @@ function QuoteEditor({
               Médico tratante secundario
               <select
                 data-action-id="QUOTE-SECONDARY-DOCTOR"
+                aria-label="Médico tratante secundario"
+                aria-describedby={
+                  draft.secondaryDoctorId ? 'quote-secondary-doctor-summary' : undefined
+                }
                 onChange={(event) =>
                   setDraft((current) => ({ ...current, secondaryDoctorId: event.target.value }))
                 }
@@ -842,6 +859,15 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              {draft.secondaryDoctorId && doctorLabels.has(draft.secondaryDoctorId) ? (
+                <span
+                  id="quote-secondary-doctor-summary"
+                  className="field-help"
+                  style={{ overflowWrap: 'anywhere' }}
+                >
+                  {doctorLabels.get(draft.secondaryDoctorId)}
+                </span>
+              ) : null}
               {errors.secondaryDoctorId ? (
                 <span className="field-error" role="alert">
                   {errors.secondaryDoctorId}

@@ -81,6 +81,12 @@ test('700 historical doctors support normalized searches, distinct choices and s
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 2)).toBe(true);
+    const selectedName = dialog.locator('#quote-primary-doctor-summary');
+    await expect(selectedName).toHaveText('Ángela Núñez · JVPM 000145 · Cardiología QA');
+    await expect(primary).toHaveAccessibleDescription(
+      'Ángela Núñez · JVPM 000145 · Cardiología QA',
+    );
+    expect(await selectedName.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
   }
   await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
   // Selecting the patient can populate its doctors; explicitly choose this quote's doctors afterwards.
