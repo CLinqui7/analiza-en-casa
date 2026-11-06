@@ -16,7 +16,11 @@ import {
 } from '@analiza/domain';
 import type { ClientSession, Db } from 'mongodb';
 import { can } from '@/lib/permissions';
-import { quoteCatalogPriceError } from './quote-catalog-policy';
+import {
+  quoteCatalogPriceError,
+  quoteDoctorIds,
+  quoteDoctorSelectionError,
+} from './quote-catalog-policy';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -73,7 +77,7 @@ async function requireCatalogPrices(
   const catalogIds = quote.items.flatMap((line) =>
     line.inventoryItemId ? [line.inventoryItemId] : [],
   );
-  const doctorIds = quote.items.flatMap((line) => (line.doctorId ? [line.doctorId] : []));
+  const doctorIds = quoteDoctorIds(quote);
   const [catalog, doctors] = await Promise.all([
     database
       .collection<{
@@ -311,6 +315,22 @@ export class MongoQuoteRepository {
           { returnDocument: 'after', session },
         );
         if (!updated) throw new MongoConflictError();
+        const doctors = await this.database
+          .collection<{ organizationId: string; id: string }>('doctors')
+          .find(
+            {
+              organizationId: actor.organizationId,
+              id: {
+                $in: [updated.primaryDoctorId, updated.secondaryDoctorId].filter(
+                  (value): value is string => Boolean(value),
+                ),
+              },
+            },
+            { session },
+          )
+          .toArray();
+        const doctorError = quoteDoctorSelectionError(updated, doctors);
+        if (doctorError) throw new MongoInputError(doctorError);
         await this.database.collection('auditEvents').insertOne(
           {
             id: crypto.randomUUID(),

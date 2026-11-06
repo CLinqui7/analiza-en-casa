@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { Quote } from '@analiza/contracts';
-import { quoteCatalogPriceError } from './quote-catalog-policy';
+import {
+  quoteCatalogPriceError,
+  quoteDoctorIds,
+  quoteDoctorSelectionError,
+} from './quote-catalog-policy';
 
 const base: Quote = {
   id: 'quote-policy',
@@ -29,6 +33,24 @@ const base: Quote = {
 };
 
 describe('quote catalog price policy', () => {
+  it('requires both selected doctors in the scoped directory even without fee lines', () => {
+    const quote = {
+      ...base,
+      primaryDoctorId: 'primary',
+      secondaryDoctorId: 'secondary',
+      items: [],
+    };
+    expect(quoteDoctorIds(quote)).toEqual(['primary', 'secondary']);
+    expect(quoteDoctorSelectionError(quote, [{ id: 'primary' }])).toContain('organización');
+    expect(quoteCatalogPriceError(quote, [], [{ id: 'secondary' }])).toContain('organización');
+    expect(quoteCatalogPriceError(quote, [], [{ id: 'primary' }, { id: 'secondary' }])).toBeNull();
+    expect(
+      quoteDoctorSelectionError(
+        { ...quote, primaryDoctorId: undefined, secondaryDoctorId: undefined },
+        [],
+      ),
+    ).toBeNull();
+  });
   const catalog = [
     {
       id: 'catalog-1',

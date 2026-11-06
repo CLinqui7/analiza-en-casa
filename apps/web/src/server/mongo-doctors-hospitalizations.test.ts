@@ -41,6 +41,55 @@ function collection() {
 }
 
 describe('Mongo doctor and hospitalization commands', () => {
+  // test-id: vitest:doctor-quote-reader-scope
+  it('gives quote authors scoped selection fields without private profile data or edit rights', async () => {
+    const stored = {
+      ...doctor,
+      birthDate: '1980-01-01',
+      nit: 'QA-NIT',
+      secretaryName: 'Secretaria QA',
+      practiceLocations: [{ id: 'qa-clinic', clinicName: 'Clínica QA', phone: '7777-0101' }],
+      organizationId: 'org-a',
+      version: 1,
+    };
+    const doctors = collection();
+    doctors.find.mockReturnValue({ toArray: vi.fn(async () => [stored]) } as never);
+    doctors.findOne.mockResolvedValue(stored as never);
+    const repository = new MongoDoctorRepository(doctors as never);
+    for (const role of ['FINANCE', 'DOCTOR', 'MANAGER'] as const) {
+      const actor = { ...administrator, role };
+      const result = (await repository.listWithVersions(actor))[0].doctor;
+      expect(result).toMatchObject({
+        id: doctor.id,
+        fullName: doctor.fullName,
+        jvpm: doctor.jvpm,
+        attachments: [],
+      });
+      for (const key of [
+        'documentId',
+        'birthDate',
+        'nit',
+        'secretaryName',
+        'address',
+        'landlinePhone',
+      ])
+        expect(result).not.toHaveProperty(key);
+      expect(result.practiceLocations?.[0]).toEqual({ id: 'qa-clinic', clinicName: 'Clínica QA' });
+      expect(await repository.get(actor, doctor.id)).toEqual(result);
+      expect(doctors.find).toHaveBeenLastCalledWith({ organizationId: 'org-a' });
+      expect(doctors.findOne).toHaveBeenLastCalledWith({ organizationId: 'org-a', id: doctor.id });
+      await expect(repository.create(actor, { doctor })).rejects.toThrow();
+      await expect(
+        repository.replace(actor, doctor.id, { doctor, expectedVersion: 1 }),
+      ).rejects.toThrow();
+    }
+    expect((await repository.get(administrator, doctor.id))?.documentId).toBe(doctor.documentId);
+    await expect(
+      repository.listWithVersions({ ...administrator, role: 'NURSE' }),
+    ).rejects.toThrow();
+    expect(doctors.insertOne).not.toHaveBeenCalled();
+    expect(doctors.findOneAndUpdate).not.toHaveBeenCalled();
+  });
   // test-id: vitest:feedback-doctor-optional-profile
   it('accepts a doctor without DUI or address and retains the requested optional profile', async () => {
     const doctors = collection();

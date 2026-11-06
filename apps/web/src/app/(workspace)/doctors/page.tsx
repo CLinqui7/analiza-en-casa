@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { Doctor } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { searchDoctors } from '@/lib/doctor-search';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { SearchableSelect } from '@/components/common/searchable-select';
@@ -92,11 +93,7 @@ export default function DoctorsPage() {
     defaultValues: emptyDoctor,
   });
   const mongoMode = isServerDataMode(providerMode);
-  const visibleDoctors = doctors.filter((doctor) =>
-    `${doctor.fullName} ${doctor.documentId ?? ''} ${doctor.jvpm ?? ''} ${doctor.conadem ?? ''} ${doctor.clinicName ?? ''} ${(doctor.practiceLocations ?? []).map((location) => location.clinicName ?? '').join(' ')}`
-      .toLocaleLowerCase('es')
-      .includes(doctorQuery.trim().toLocaleLowerCase('es')),
-  );
+  const visibleDoctors = useMemo(() => searchDoctors(doctors, doctorQuery), [doctors, doctorQuery]);
 
   function closeDialog() {
     form.reset(emptyDoctor);
@@ -228,13 +225,16 @@ export default function DoctorsPage() {
         </p>
       ) : null}
       <label>
-        Buscar médico por nombre, DUI, JVPM, CONADEM o clínica
+        Buscar médico por nombre, DUI, JVPM, CONADEM, especialidad o clínica
         <input
           onChange={(event) => setDoctorQuery(event.target.value)}
           type="search"
           value={doctorQuery}
         />
       </label>
+      <p className="field-help" aria-live="polite">
+        {visibleDoctors.length} de {doctors.length} médicos
+      </p>
       {visibleDoctors.length ? (
         <Panel>
           <div className="table-wrap">
@@ -247,7 +247,7 @@ export default function DoctorsPage() {
                   <th>DUI</th>
                   <th>Especialidad / profesión</th>
                   <th>Visitador médico</th>
-                  <th>Teléfono fijo</th>
+                  <th>Contacto</th>
                   <th>Relación</th>
                   <th>Archivos</th>
                   <th>Acción</th>
@@ -266,7 +266,11 @@ export default function DoctorsPage() {
                         (entry) => entry.id === doctor.medicalVisitorId,
                       )?.label ?? 'Sin asignar'}
                     </td>
-                    <td>{doctor.landlinePhone || 'Pendiente'}</td>
+                    <td>
+                      {doctor.landlinePhone ? <div>Fijo: {doctor.landlinePhone}</div> : null}
+                      {doctor.phone ? <div>Celular: {doctor.phone}</div> : null}
+                      {!doctor.landlinePhone && !doctor.phone ? 'Pendiente' : null}
+                    </td>
                     <td>
                       {doctor.referralCategory === 'RECURRENT'
                         ? 'Recurrente'

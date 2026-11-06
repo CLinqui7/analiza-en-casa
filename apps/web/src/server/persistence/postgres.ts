@@ -58,6 +58,7 @@ import {
   type ServerActor,
 } from '../validation/patients';
 import { parseDoctorCreate, parseDoctorReplace } from '../validation/doctors';
+import { doctorForReader } from '../doctor-read-model';
 import {
   parseHospitalizationCreate,
   parseHospitalizationReplace,
@@ -138,6 +139,7 @@ function entityRepository<T extends Entity, K extends string>(
   writePermission: Permission,
   create: (input: unknown) => T,
   replace: (input: unknown) => { value: T; expectedVersion: number },
+  projectRead: (value: T, actor: ServerActor) => T = (value) => value,
 ): EntityRepository<T, K> {
   // SQL identifiers come exclusively from this static allowlist, never HTTP or environment values.
   const table = tables[kind];
@@ -241,7 +243,10 @@ function entityRepository<T extends Entity, K extends string>(
           )
         ).rows.map(
           (r) =>
-            ({ [key]: schema.parse(r.body), version: r.version }) as Record<K, T> & {
+            ({ [key]: projectRead(schema.parse(r.body), actor), version: r.version }) as Record<
+              K,
+              T
+            > & {
               version: number;
             },
         ),
@@ -256,7 +261,7 @@ function entityRepository<T extends Entity, K extends string>(
             id,
           ])
         ).rows[0];
-        return row ? schema.parse(row.body) : null;
+        return row ? projectRead(schema.parse(row.body), actor) : null;
       });
     },
     async create(actor, input) {
@@ -362,13 +367,14 @@ export function postgresPersistence(): Persistence {
     'doctors',
     'doctor',
     doctorSchema,
-    'settings:write',
+    'doctors:read',
     'settings:write',
     parseDoctorCreate,
     (input) => {
       const p = parseDoctorReplace(input);
       return { value: p.doctor, expectedVersion: p.expectedVersion };
     },
+    (doctor, actor) => doctorForReader(doctor, actor.role),
   );
   const hospitalizations = entityRepository(
     pool,
@@ -2688,7 +2694,7 @@ export function postgresPersistence(): Persistence {
         audits,
       ] = await Promise.all([
         can(actor.role, 'patients:read') ? patients.listWithVersions(actor) : [],
-        can(actor.role, 'settings:write') ? doctors.listWithVersions(actor) : [],
+        can(actor.role, 'doctors:read') ? doctors.listWithVersions(actor) : [],
         can(actor.role, 'cases:read') ? hospitalizations.listWithVersions(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.list(actor) : [],
         can(actor.role, 'agenda:read') ? shifts.listResources(actor) : [],

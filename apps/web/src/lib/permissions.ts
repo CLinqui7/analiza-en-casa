@@ -14,6 +14,7 @@ export type Role = (typeof roles)[number];
 
 export type Permission =
   | 'clinical-config:write'
+  | 'doctors:read'
   | 'dashboard:read'
   | 'patients:read'
   | 'patients:write'
@@ -176,6 +177,8 @@ export function isRole(value: unknown): value is Role {
 
 export function can(role: Role | undefined, permission: Permission): boolean {
   if (permission === 'clinical-config:write') return !!role && roles.includes(role);
+  if (permission === 'doctors:read')
+    return can(role, 'settings:write') || can(role, 'quotes:write');
   return Boolean(role && permissions[role].includes(permission));
 }
 

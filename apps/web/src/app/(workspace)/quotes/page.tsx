@@ -19,6 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth, useWorkspace } from '@/components/providers';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { quoteMedicalFeeOptions } from '@/lib/quote-medical-fees';
+import { doctorSelectionLabels, searchDoctors } from '@/lib/doctor-search';
 import { mongoMutationHeaders } from '@/lib/auth';
 import { quoteFormDraftSchema } from '@/lib/quote-form-draft';
 import { quoteDecisionSchema, type QuoteDecision } from '@/lib/quote-decision';
@@ -177,6 +178,16 @@ function QuoteEditor({
   } = useWorkspace();
   const [draft, setDraft] = useState<QuoteDraft>(() =>
     source ? cloneDraft(source) : emptyDraft(),
+  );
+  const doctorLabels = useMemo(() => doctorSelectionLabels(doctors), [doctors]);
+  const primaryOptions = useMemo(
+    () =>
+      searchDoctors(doctors, draft.doctorQuery, [draft.primaryDoctorId, draft.secondaryDoctorId]),
+    [doctors, draft.doctorQuery, draft.primaryDoctorId, draft.secondaryDoctorId],
+  );
+  const secondaryOptions = useMemo(
+    () => searchDoctors(doctors, draft.doctorQuery, [draft.secondaryDoctorId]),
+    [doctors, draft.doctorQuery, draft.secondaryDoctorId],
   );
   const [item, setItem] = useState<QuoteItem>(() => emptyItem());
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -774,7 +785,7 @@ function QuoteEditor({
               </Link>
             </label>
             <label>
-              Buscar médico por nombre
+              Buscar médico por nombre, JVPM, CONADEM, especialidad o clínica
               <input
                 data-action-id="QUOTE-DOCTOR-SEARCH"
                 onChange={(event) =>
@@ -782,6 +793,7 @@ function QuoteEditor({
                 }
                 type="search"
                 value={draft.doctorQuery}
+                placeholder="Puede buscar sin tildes o por partes del nombre"
               />
             </label>
             <label>
@@ -802,20 +814,11 @@ function QuoteEditor({
                 value={draft.primaryDoctorId ?? ''}
               >
                 <option value="">Seleccione un médico</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(draft.doctorQuery.toLocaleLowerCase('es-SV')) ||
-                      doctor.id === draft.primaryDoctorId ||
-                      doctor.id === draft.secondaryDoctorId,
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
+                {primaryOptions.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctorLabels.get(doctor.id)}
+                  </option>
+                ))}
               </select>
               {errors.primaryDoctorId ? (
                 <span className="field-error" role="alert">
@@ -833,19 +836,11 @@ function QuoteEditor({
                 value={draft.secondaryDoctorId ?? ''}
               >
                 <option value="">Sin asignar</option>
-                {doctors
-                  .filter(
-                    (doctor) =>
-                      doctor.fullName
-                        .toLocaleLowerCase('es-SV')
-                        .includes(draft.doctorQuery.toLocaleLowerCase('es-SV')) ||
-                      doctor.id === draft.secondaryDoctorId,
-                  )
-                  .map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      {doctor.fullName}
-                    </option>
-                  ))}
+                {secondaryOptions.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctorLabels.get(doctor.id)}
+                  </option>
+                ))}
               </select>
               {errors.secondaryDoctorId ? (
                 <span className="field-error" role="alert">

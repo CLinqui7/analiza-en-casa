@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
+import { patientSchema, quoteSchema } from '../packages/contracts/src/index';
+import { postgresQuotes } from '../apps/web/src/server/persistence/postgres-quotes';
+import { postgresPersistence } from '../apps/web/src/server/persistence/postgres';
 import {
   directoryHeaders,
   planDoctorDirectory,
@@ -77,6 +80,13 @@ function manifest(
 async function main() {
   try {
     await admin.query(await readFile('database/postgresql/migrations/001_core.sql', 'utf8'));
+    await admin.query(await readFile('database/postgresql/migrations/008_quotes.sql', 'utf8'));
+    await admin.query(
+      await readFile(
+        'database/postgresql/migrations/021_quotes_without_hospitalization.sql',
+        'utf8',
+      ),
+    );
     const connection = await admin.connect();
     try {
       await connection.query(
@@ -206,6 +216,120 @@ async function main() {
       0,
     );
     pass('mid-batch SQL failure rolls back doctors, command and audit atomically');
+    const quotes = postgresQuotes(runtime);
+    const quoteActor = { userId: actor, organizationId: org, role: 'ADMIN' as const };
+    const imported = (await snap()).doctors;
+    const primary = imported[0].doctor.id,
+      secondary = imported.at(-1)!.doctor.id;
+    (globalThis as typeof globalThis & { analizaPgPool?: Pool }).analizaPgPool = runtime;
+    const doctorRepository = postgresPersistence().doctors;
+    for (const role of ['FINANCE', 'DOCTOR', 'MANAGER'] as const) {
+      const reader = { ...quoteActor, role };
+      const choices = await doctorRepository.listWithVersions(reader);
+      assert.equal(choices.length, 700);
+      assert.ok(!choices.some(({ doctor }) => doctor.id === 'foreign'));
+      const choice = choices.find(({ doctor }) => doctor.id === primary)!.doctor;
+      assert.ok(choice.jvpm);
+      assert.ok(!('phone' in choice));
+      assert.ok(!('address' in choice));
+      assert.ok(!choice.practiceLocations?.some((p) => 'phone' in p || 'address' in p));
+      assert.deepEqual(await doctorRepository.get(reader, primary), choice);
+      assert.equal(await doctorRepository.get(reader, 'foreign'), null);
+      await assert.rejects(doctorRepository.create(reader, { doctor: choice }));
+      await assert.rejects(
+        doctorRepository.replace(reader, primary, { doctor: choice, expectedVersion: 1 }),
+      );
+    }
+    await assert.rejects(doctorRepository.listWithVersions({ ...quoteActor, role: 'NURSE' }));
+    assert.ok((await doctorRepository.get(quoteActor, primary))?.phone);
+    pass(
+      'quote-author roles read all 700 scoped selections without personal data or doctor edit rights',
+    );
+    const patient = patientSchema.parse({
+      id: 'doctor-quote-patient',
+      fullName: 'Paciente QA directorio',
+      documentType: 'OTHER',
+      documentId: 'QA-DIRECTORY',
+      phone: '0000-0000',
+      status: 'ACTIVE',
+      referralOrigin: 'FAMILY_FRIENDS',
+    });
+    await admin.query(
+      'INSERT INTO analiza.patients(organization_id,id,document_key,body) VALUES($1,$2,$3,$4::jsonb)',
+      [org, patient.id, patient.documentId, JSON.stringify(patient)],
+    );
+    const template = quoteSchema.parse({
+      id: 'doctor-quote-valid',
+      patientId: patient.id,
+      version: 1,
+      status: 'DRAFT',
+      careSetting: 'HOME_OUTPATIENT',
+      summary: 'Cotización QA directorio',
+      primaryDoctorId: primary,
+      secondaryDoctorId: secondary,
+      items: [],
+      createdAt: new Date().toISOString(),
+    });
+    const created = await quotes.create(quoteActor, { quote: template });
+    assert.equal((await quotes.get(quoteActor, created.id))?.primaryDoctorId, primary);
+    assert.equal((await quotes.get(quoteActor, created.id))?.secondaryDoctorId, secondary);
+    const edited = await quotes.replace(quoteActor, created.id, {
+      quote: { ...created, primaryDoctorId: secondary, secondaryDoctorId: primary },
+      expectedVersion: 1,
+    });
+    assert.equal(edited.primaryDoctorId, secondary);
+    assert.equal(
+      (await quotes.listWithVersions(quoteActor)).find((x) => x.quote.id === created.id)?.version,
+      2,
+    );
+    pass('historical doctors with pending fields save, reload and change in quotes');
+    for (const field of ['primaryDoctorId', 'secondaryDoctorId']) {
+      for (const invalid of ['foreign', 'nonexistent']) {
+        await assert.rejects(
+          quotes.create(quoteActor, {
+            quote: { ...template, id: `invalid-${field}-${invalid}`, [field]: invalid },
+          }),
+          /médicos registrados/,
+        );
+        await assert.rejects(
+          quotes.replace(quoteActor, edited.id, {
+            quote: { ...edited, [field]: invalid },
+            expectedVersion: 2,
+          }),
+          /médicos registrados/,
+        );
+      }
+    }
+    assert.equal((await quotes.listWithVersions(quoteActor)).length, 1);
+    assert.equal((await quotes.get(quoteActor, edited.id))?.primaryDoctorId, secondary);
+    assert.equal(
+      await quotes.get({ ...quoteActor, organizationId: 'qa-directory-b' }, edited.id),
+      null,
+    );
+    pass(
+      'quotes reject foreign or nonexistent primary and secondary doctors without partial writes',
+    );
+    const damaged = {
+      ...template,
+      id: 'doctor-quote-legacy-invalid',
+      secondaryDoctorId: 'foreign',
+    };
+    await admin.query(
+      'INSERT INTO analiza.quotes(organization_id,id,patient_id,root_quote_id,quote_version,body) VALUES($1,$2,$3,$2,1,$4::jsonb)',
+      [org, damaged.id, patient.id, JSON.stringify(damaged)],
+    );
+    await assert.rejects(quotes.send(quoteActor, damaged.id, 1), /médicos registrados/);
+    assert.equal((await quotes.get(quoteActor, damaged.id))?.status, 'DRAFT');
+    const sent = await quotes.send(quoteActor, edited.id, 2);
+    assert.equal(sent.status, 'SENT');
+    await assert.rejects(
+      quotes.replace(quoteActor, sent.id, {
+        quote: { ...edited, primaryDoctorId: primary },
+        expectedVersion: 3,
+      }),
+    );
+    assert.equal((await quotes.get(quoteActor, sent.id))?.primaryDoctorId, secondary);
+    pass('sending validates doctor references and preserves the immutable sent selection');
     console.log(
       JSON.stringify({
         status: 'PASS',

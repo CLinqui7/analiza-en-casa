@@ -8,7 +8,11 @@ import type { ServerActor } from '../validation/patients';
 import type { Persistence } from './contracts';
 import { transaction } from './postgres-pool';
 import { audit } from './postgres';
-import { quoteCatalogPriceError } from '../quote-catalog-policy';
+import {
+  quoteCatalogPriceError,
+  quoteDoctorIds,
+  quoteDoctorSelectionError,
+} from '../quote-catalog-policy';
 
 function authorize(actor: ServerActor, permission: 'quotes:read' | 'quotes:write') {
   if (!can(actor.role, permission)) throw new MongoAccessError();
@@ -23,7 +27,7 @@ async function requireCatalogPrices(
   const catalogIds = quote.items.flatMap((line) =>
     line.inventoryItemId ? [line.inventoryItemId] : [],
   );
-  const doctorIds = quote.items.flatMap((line) => (line.doctorId ? [line.doctorId] : []));
+  const doctorIds = quoteDoctorIds(quote);
   const [catalog, doctors] = await Promise.all([
     client.query<{
       id: string;
@@ -200,6 +204,15 @@ export function postgresQuotes(pool: Pool): Persistence['quotes'] {
         if (!current) throw new MongoConflictError();
         const parsed = quoteSchema.parse(current.body);
         if (!canEditQuote(parsed)) throw new MongoConflictError();
+        const doctors = await client.query<{ id: string }>(
+          'SELECT id FROM analiza.doctors WHERE organization_id=$1 AND id=ANY($2::text[]) FOR SHARE',
+          [
+            actor.organizationId,
+            [parsed.primaryDoctorId, parsed.secondaryDoctorId].filter(Boolean),
+          ],
+        );
+        const doctorError = quoteDoctorSelectionError(parsed, doctors.rows);
+        if (doctorError) throw new MongoInputError(doctorError);
         const sent: Quote = {
           ...parsed,
           status: 'SENT',
