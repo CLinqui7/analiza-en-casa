@@ -2,6 +2,8 @@
 
 Fecha: 5 de noviembre de 2026, America/El_Salvador. Las comprobaciones nocturnas tienen fecha UTC del 6 de noviembre.
 
+Implementación verificada y publicada en GitHub: `d4c2fa9b9138e66513a0e221e3423a0e858d6cdb`. El registro posterior sólo agrega trazabilidad; no despliega ni carga datos.
+
 ## Alcance y estado
 
 El cliente pidió revisar los cambios de otro Codex y preparar una importación de más de 650 médicos. Aclaró que ese Codex sólo revisó commits/VPS y que el archivo llegará en Excel `.xlsx`. Aún no entregó el archivo de médicos. Esta solicitud habilita la preparación del nuevo lote; no reactiva una copia indiscriminada de bases históricas ni incluye expedientes clínicos.
@@ -61,6 +63,7 @@ Códigos de salida: `0`, prevalidación sin incidencias y con conciliación sumi
 | `npm run audit:verify` | PASS de los 17 ledgers existentes; no es una nueva revisión visual completa |
 | `npm run security:scan` | PASS |
 | `npm run qa:client-changes` / `npm run qa:video-parity` | PASS, 32/32 cambios y 210/210 requisitos trazados; estados existentes conservados |
+| Gates por capítulo CH01 / CH02 / CH03 | PASS, 14/14, 16/16 y 13/13; certificaciones históricas conservadas |
 | Formato / `npm run react:boundaries` | PASS |
 | Inspección de la plantilla | Tres vistas renderizadas revisadas; encabezados, guía y desplegable legibles |
 

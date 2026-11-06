@@ -1,4 +1,10 @@
 {
+  "doctor_import_preparation_20261105": {
+    "verification_sha": "d4c2fa9b9138e66513a0e221e3423a0e858d6cdb",
+    "status": "PREPARED_NOT_IMPORTED",
+    "evidence": "docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md",
+    "scope": "Client confirmed a future XLSX of more than 650 doctors. Empty template, offline prevalidation and private report tested with 700 synthetic rows. 341 React/server tests and operator CLI checks passed. No real source received, no database writes or deployment. CR-032 remains MISSING/NOT_CERTIFIED."
+  },
   "schema_version": 1,
   "canonical_source": {
     "path": "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx",
