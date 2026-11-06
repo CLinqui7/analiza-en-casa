@@ -34,10 +34,19 @@ Usar `--historical-pending-approved` sólo para la decisión efectivamente confi
 
 La recuperación de una importación ya confirmada debe revisar la evidencia antes/después y cualquier referencia nueva. No borrar médicos ni reemplazar datos editados posteriormente para simular un rollback. Un fallo dentro de la transacción no deja filas ni auditorías parciales.
 
-## Verificación antes de publicar
+## Verificación antes de aplicar
+
+Código de aplicación y operador publicado en GitHub: `30795d76d4e35daa8e0c0df7545e44c867efc5a2`. Los operadores ejecutados en el VPS provienen de ese commit; hashes del bundle local y remoto cotejados. La base de integración fue desechable, aislada de producción y eliminada al terminar.
 
 - 349/349 pruebas React/servidor; 17 pruebas focalizadas entre el prevalidador y el directorio.
 - TypeScript y ESLint aprobados.
-- Preparadas pruebas PostgreSQL desechables de 701 filas / 700 médicos, permisos, RLS, idempotencia concurrente, versiones, cambios posteriores y rollback íntegro ante fallo intermedio.
-- Preparada regresión de navegador: 700 médicos sintéticos, búsqueda, clínicas adicionales, datos obligatorios, conservación tras editar y anchos 1440/768/390.
-- Faltan registrar resultados conectados, respaldo previo, SHA publicado/desplegado y conciliación final. No se declara todavía una importación efectuada.
+- Seis grupos PostgreSQL aprobados: 701 filas / 700 médicos, permisos, RLS, idempotencia concurrente, versiones, cambios posteriores y rollback íntegro ante fallo intermedio.
+- 22/22 escenarios de navegador aprobados: CH01–CH03 y el directorio con 700 médicos sintéticos, búsqueda, clínicas adicionales, datos obligatorios, conservación tras editar y anchos 1440/768/390. Capturas sintéticas en `docs/imports/evidence/`.
+- Seguridad y formato aprobados. El primer arranque de navegador usó un nombre de modo incorrecto (`demo`); se corrigió la configuración de ejecución a `mock`, sin relajar pruebas ni alterar producción.
+- Faltan respaldo previo, SHA desplegado y conciliación final. No se declara todavía una importación efectuada.
+
+## Dependencias de la entrega
+
+La instalación detectó avisos previos en Next.js 16.3.8 y Zod. Se actualizan a Next.js / eslint-config-next 16.4.1 y Zod 4.6.6, versiones corregidas indicadas en [el aviso de Next.js](https://github.com/advisories/GHSA-2464-fhr4-w9xw) y [el aviso de Zod](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5). No se ha comprobado una explotación ni se afirma que todos los escenarios del aviso estén expuestos en esta aplicación. La actualización requiere repetir pruebas y compilación antes del despliegue; el informe final registrará el resultado.
+
+Con esas versiones pasaron nuevamente 349/349 pruebas React/servidor, 22/22 escenarios de navegador, TypeScript, ESLint, 144/144 pruebas del sistema anterior y 76/76 controles de QA. `npm audit --omit=dev` informa cero vulnerabilidades conocidas; no implica ausencia absoluta de vulnerabilidades. Pasaron también los gates de 210 requisitos, 32 solicitudes, el espejo de trazabilidad y la comprobación de los 17 ledgers existentes. No se declara una nueva revisión visual completa de los videos.

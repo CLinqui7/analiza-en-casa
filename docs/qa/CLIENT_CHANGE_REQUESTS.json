@@ -65,13 +65,14 @@
       "acceptance_criteria": "DUI en la plantilla de nuevo paciente",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "9021b8700a6db458a648f188f2597f3c6a63ed6c701deb44b74277136d781e7c",
+      "functional_fingerprint": "6b538d4850882cfc32c054f81f4b6b83013cb820127bf3a87cc656a25095357e",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
+      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-002",
@@ -349,13 +350,14 @@
       "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
       "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "b5cf1d38eadadeaf9ad3c4486fddacc13acf5d8c7d75f2b0faca3b6c00950d71",
+      "functional_fingerprint": "57519d3c8e0c2ce8785cb84cded62357cc9cf89153ad0461ffac9c41fec11bc6",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "La instrucción directa del 20 de octubre de 2026 permite DUI y dirección vacíos, exige nombre, especialidad y teléfono fijo y agrega campos opcionales. Se retiró la petición de importar médicos antiguos. El formulario, la API, la persistencia JSON y pruebas focalizadas cubren este cambio; la certificación global de CR-006 sigue parcial."
+      "notes": "La instrucción directa del 20 de octubre de 2026 permite DUI y dirección vacíos, exige nombre, especialidad y teléfono fijo y agrega campos opcionales. Se retiró la petición de importar médicos antiguos. El formulario, la API, la persistencia JSON y pruebas focalizadas cubren este cambio; la certificación global de CR-006 sigue parcial.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-007",
@@ -625,13 +627,14 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "da1d3c83b0927edc27fbe890e193dff7a1299fa263c8352b33019ef3f6bbcd27",
+      "functional_fingerprint": "d7ad589e8c0f9ca43b7d795f215381b3848c1032d4704824b7772006e322e3df",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-012",
@@ -1032,13 +1035,14 @@
       "client_question": "CR-010 debe definir la entidad Puntual, sus campos, duración, estados y relación antes de habilitarla.",
       "acceptance_criteria": "Presets 6h/8h y Puntual sujeto a regla aprobada",
       "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
-      "functional_fingerprint": "623fcc340682a71988f2998d771c62cf551c16bb6ee81a02a034319ca9111c2f",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010."
+      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-019",
@@ -1105,7 +1109,7 @@
       "client_question": null,
       "acceptance_criteria": "Observaciones por ítem/general en tarjeta clínica autorizada",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1123,7 +1127,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-020",
@@ -1190,7 +1195,7 @@
       "client_question": "Automatic shift closure and extrapolation beyond entered hours are outside the supplied manual form.",
       "acceptance_criteria": "Entradas append-only por turno, totales 24h y cierre auditado",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1208,7 +1213,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-021",
@@ -1273,7 +1279,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala EVA con versión institucional aprobada y selección única",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1291,7 +1297,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-022",
@@ -1356,7 +1363,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala de Glasgow confirmada, versionada y con suma configurada",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1374,7 +1381,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-023",
@@ -1439,7 +1447,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala Ramsay con formulario aprobado y selección única",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1457,7 +1465,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-024",
@@ -1522,7 +1531,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala ECOG confirmada, versionada y con selección única",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1540,7 +1549,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-025",
@@ -1605,7 +1615,7 @@
       "client_question": null,
       "acceptance_criteria": "ESAS con dominios 0–10 según formulario aprobado",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1623,7 +1633,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-026",
@@ -1688,7 +1699,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala Karnofsky confirmada y versionada",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1706,7 +1717,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-027",
@@ -1771,7 +1783,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala Downton con formulario y cálculo aprobados",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1789,7 +1801,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-028",
@@ -1854,7 +1867,7 @@
       "client_question": null,
       "acceptance_criteria": "La captura parece ser Norton; confirmar nombre y versión antes de modelar",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1872,7 +1885,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-029",
@@ -1937,7 +1951,7 @@
       "client_question": null,
       "acceptance_criteria": "Índice Barthel por confirmar, incluida versión/puntuación institucional",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -1955,7 +1969,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-030",
@@ -2020,7 +2035,7 @@
       "client_question": null,
       "acceptance_criteria": "Escala Braden confirmada y versionada",
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
@@ -2038,7 +2053,8 @@
       },
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "persistence_status": "VERIFIED",
-      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640"
+      "deployment_sha": "fc7e4c6206e1f4b01f6e24ad4395d88b8a816640",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     {
       "change_id": "CR-031",
@@ -2119,13 +2135,18 @@
       "source_attachments": [
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-35"
       ],
-      "status": "MISSING",
+      "status": "PARTIAL",
       "production_status": "MISSING",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
       "video_requirement_ids": [],
-      "react_files": [],
+      "react_files": [
+        "apps/web/src/server/doctor-directory-import.ts",
+        "apps/web/src/server/persistence/postgres-doctor-directory.ts",
+        "apps/web/src/app/(workspace)/doctors/page.tsx",
+        "packages/contracts/src/index.ts"
+      ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
@@ -2137,17 +2158,18 @@
         "B7"
       ],
       "blocker_type": "SOURCE_DATA",
-      "blocker_reason": "Entregar export/dump autorizado y diccionario de la fuente para un dry-run.",
-      "client_question": "Entregar export/dump autorizado y diccionario de la fuente para un dry-run.",
+      "blocker_reason": "El directorio Excel de médicos ya fue entregado. La carga histórica con campos pendientes está en consulta; no se entregó una fuente de expedientes.",
+      "client_question": "Confirmar carga histórica de médicos incompletos. Los expedientes no forman parte del lote autorizado.",
       "acceptance_criteria": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+      "functional_fingerprint": "4ac15c76efdf5181f4f59f71a3dc571ebc08050e4468d85e525efd050354cac4",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
-      "technical_status": "UNASSESSED",
-      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md."
+      "technical_status": "VERIFIED",
+      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md. Posteriormente, el 5 de noviembre, el cliente entregó un ZIP con 650 filas y autorizó una ficha por médico conservando clínicas/contactos. Plan: 619 altas y 4 enriquecimientos, sin cambios destructivos. Código, pruebas y procedencia documentados en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md; importación real aún no ejecutada.",
+      "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     }
   ],
   "supplemental_clinical_batch_20261103": {
@@ -2214,5 +2236,10 @@
       "scripts/verify-visual-release.mjs"
     ],
     "production": "See separate release record after Git-first publication."
+  },
+  "doctor_directory_import_20261105": {
+    "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+    "evidence": "docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md",
+    "scope": "Historical doctor directory, additional practices and scoped transactional operator. 349 unit/server tests, 22 focused browser tests including CH01-CH03 and desktop/mobile practices, and six PostgreSQL integration groups with 701 synthetic rows passed. No new EXACT or full video re-audit. Production import awaits the pending-field decision."
   }
 }

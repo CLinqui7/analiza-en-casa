@@ -27,6 +27,13 @@ verificación. Nunca incluir contraseñas, claves ni archivos privados en Git.
 `npm run doctors:prepare -- --help` muestra el comando sin escrituras en la aplicación.
 `npm run test:doctors:prepare` verifica el flujo local con 700 registros sintéticos.
 
+**Carga del directorio autorizado:** el [procedimiento del lote](docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md)
+describe `npm run doctors:directory`, la conciliación de clínicas por médico, el manifiesto privado,
+la autorización de datos históricos pendientes y la carga transaccional con auditoría e idempotencia.
+No ejecutar `--apply` sin revisar el plan y comprobar un respaldo restaurable de la base activa.
+`deploy/contabo/test-doctor-directory.sh` verifica el operador con 701 filas sintéticas en una base
+desechable; `deploy/contabo/verify-doctor-backup.sh` prueba la restauración sin conectividad de red.
+
 **Para preparar un VPS Hostinger con la navegación completa:**
 [lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
 

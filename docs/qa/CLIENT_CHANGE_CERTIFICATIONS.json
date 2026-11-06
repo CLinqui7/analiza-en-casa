@@ -5,14 +5,14 @@
     "CR-001": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "9021b8700a6db458a648f188f2597f3c6a63ed6c701deb44b74277136d781e7c",
+      "functional_fingerprint": "6b538d4850882cfc32c054f81f4b6b83013cb820127bf3a87cc656a25095357e",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
         "SEL-PAT-DOCUMENT"
       ],
       "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador.",
-      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-002": {
       "implementation_sha": null,
@@ -51,13 +51,14 @@
     "CR-006": {
       "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "b5cf1d38eadadeaf9ad3c4486fddacc13acf5d8c7d75f2b0faca3b6c00950d71",
+      "functional_fingerprint": "57519d3c8e0c2ce8785cb84cded62357cc9cf89153ad0461ffac9c41fec11bc6",
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [
         "vitest:feedback-doctor-optional-profile",
         "playwright:feedback-doctor-optional-profile"
       ],
-      "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original."
+      "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-007": {
       "implementation_sha": null,
@@ -95,13 +96,13 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "da1d3c83b0927edc27fbe890e193dff7a1299fa263c8352b33019ef3f6bbcd27",
+      "functional_fingerprint": "d7ad589e8c0f9ca43b7d795f215381b3848c1032d4704824b7772006e322e3df",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones.",
-      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
@@ -168,7 +169,7 @@
     },
     "CR-018": {
       "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
-      "functional_fingerprint": "623fcc340682a71988f2998d771c62cf551c16bb6ee81a02a034319ca9111c2f",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "production_status": "PARTIAL",
       "blocker_type": "CLIENT_DEFINITION",
@@ -179,12 +180,13 @@
         "playwright:cr018-shift-presets",
         "SEL-B3-AGENDA-SERIES"
       ],
-      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010."
+      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-019": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -203,12 +205,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Medication card instructions and per-medicine administration are retained; no automated dosing rules. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Medication card instructions and per-medicine administration are retained; no automated dosing rules. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-020": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -227,12 +230,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Six balance rows, totals for entered hours and manual endogenous/insensible amounts; no invented 24h extrapolation or automated closure. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Six balance rows, totals for entered hours and manual endogenous/insensible amounts; no invented 24h extrapolation or automated closure. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-021": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -251,12 +255,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-022": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -275,12 +280,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-023": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -299,12 +305,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-024": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -323,12 +330,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-025": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -347,12 +355,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-026": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -371,12 +380,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-027": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -395,12 +405,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-028": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -419,12 +430,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-029": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -443,12 +455,13 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-030": {
       "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
       "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
-      "functional_fingerprint": "2076bf14b972c7ff8f06a728b387bea809bf2b114929206ea220a67c1589b95a",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
       "technical_status": "VERIFIED",
       "persistence_status": "VERIFIED",
@@ -467,7 +480,8 @@
         "playwright:clinical-connected-security"
       ],
       "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
-      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md"
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-031": {
       "implementation_sha": null,
@@ -521,5 +535,10 @@
     "verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
     "evidence": "docs/feedback/VISUAL_REFRESH_2026-11-04.md",
     "scope": "Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."
+  },
+  "doctor_directory_import_20261105": {
+    "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+    "evidence": "docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md",
+    "scope": "Historical doctor directory, additional practices and scoped transactional operator. 349 unit/server tests, 22 focused browser tests including CH01-CH03 and desktop/mobile practices, and six PostgreSQL integration groups with 701 synthetic rows passed. No new EXACT or full video re-audit. Production import awaits the pending-field decision."
   }
 }

@@ -1,4 +1,5 @@
 {
+  "doctor_directory_import_20261105": {"verification_sha":"30795d76d4e35daa8e0c0df7545e44c867efc5a2","evidence":"docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md","scope":"Historical doctor directory, additional practices and scoped transactional operator. 349 unit/server tests, 22 focused browser tests including CH01-CH03 and desktop/mobile practices, and six PostgreSQL integration groups with 701 synthetic rows passed. No new EXACT or full video re-audit. Production import awaits the pending-field decision."},
   "doctor_import_preparation_20261105": {"verification_sha":"d4c2fa9b9138e66513a0e221e3423a0e858d6cdb","evidence":"docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md","scope":"Offline doctor Excel prevalidation only, 700 synthetic rows; 341 React/server tests. No route, permissions or persistence changes, no real import, no new EXACT or full video re-audit."},
   "visual_regression_20261104": {"verification_sha":"dfeed6862ce49f1848abfe9ab002bdde0dcc3e05","evidence":"docs/feedback/VISUAL_REFRESH_2026-11-04.md","scope":"Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."},
   "observations_regression_20261104": {"verification_sha":"ae30d5959197e25d77ab9c5d312224afdd8b6550","evidence":"docs/feedback/CLINICAL_OBSERVATIONS_2026-11-04.md","requirement_ids":["CH10-F04","CH17-F03","CH17-F07","CH17-F08","CH17-F11","CH17-F12","CH17-F13","CH17-F15"],"scope":"PDF Nov4 clinical observations: nursing menus, multiple care types, visits and append-only administration corrections. New user-approved presentation supersedes card fields; historical records retained. No new EXACT or complete video re-audit."},
@@ -7,8 +8,8 @@
   "generated_at": "2026-10-13T02:06:23-06:00",
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
-  "functional_fingerprint": "b10d1f17ed2f4d130b487150555d44d2dcd3854a4f725f84dba10ac73197a7af",
+  "implementation_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+  "functional_fingerprint": "39b3a51485434c66f6570b4badfbd6df7398e333a2f4c3eb0354e353dc9b0619",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
