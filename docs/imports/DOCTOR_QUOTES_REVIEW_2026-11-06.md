@@ -25,4 +25,12 @@ El cliente pidió que revisáramos esas coincidencias. La evidencia disponible n
 - 144/144 pruebas del sistema anterior y 76/76 controles QA aprobados. ESLint y escaneo de secretos aprobados.
 - Incidencias de verificación corregidas: el contador de búsqueda ya no compite con el mensaje de estado de guardado; el nuevo escenario sigue el enlace real de edición y sale de `?create=1` antes de recargar. TypeScript se repite después de detener el servidor de pruebas, que regeneraba tipos simultáneamente.
 
-Las pruebas de PostgreSQL se ejecutarán en una base desechable desde código publicado en GitHub antes de desplegar. La comprobación real posterior debe verificar ambos selectores, todos los IDs importados, búsqueda, conservación de selección y el borrador previo del usuario. No se crean cotizaciones ni se editan médicos reales para probar. No se declara una nueva auditoría completa de los 17 videos ni un ensayo de MongoDB en producción.
+TypeScript también aprobó al finalizar el servidor de pruebas. Se revisaron los cambios de UI, proyección por rol, validación de referencias y persistencia; no quedaron hallazgos P0/P1 dentro del alcance.
+
+## PostgreSQL desde código publicado
+
+Commit publicado y verificado en GitHub antes de ejecutar: `db001857ebeb8ed1b73e764254738ba809ef1a47`. Bundle local/remoto SHA-256 `02a1c8d4fe03a1a6acc522a5bfa68db77fcbb97090aef3582f822c44caca0cf3`.
+
+Diez grupos aprobaron en un contenedor desechable con 701 filas fuente / 700 médicos sintéticos: permisos y RLS, reintentos concurrentes, enriquecimiento/versiones, snapshot obsoleto, rollback de lote, lectura limitada por rol, guardado/recarga/edición de ambos médicos, rechazo de referencias inexistentes o extranjeras y selección inmutable al enviar. La base desechable fue eliminada; no hubo escrituras de prueba en producción.
+
+La comprobación real posterior debe verificar ambos selectores, todos los IDs importados, búsqueda, conservación de selección y el borrador previo del usuario. No se crean cotizaciones ni se editan médicos reales para probar. No se declara una nueva auditoría completa de los 17 videos ni un ensayo de MongoDB en producción.

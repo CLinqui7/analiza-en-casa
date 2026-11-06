@@ -51,14 +51,14 @@
     "CR-006": {
       "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "57519d3c8e0c2ce8785cb84cded62357cc9cf89153ad0461ffac9c41fec11bc6",
+      "functional_fingerprint": "e2af7a20cfc75a773c716ce97db8c43723d37d567117d9f9d78ca28b6b95b981",
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [
         "vitest:feedback-doctor-optional-profile",
         "playwright:feedback-doctor-optional-profile"
       ],
       "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original.",
-      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     "CR-007": {
       "implementation_sha": null,
@@ -96,24 +96,24 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "d7ad589e8c0f9ca43b7d795f215381b3848c1032d4704824b7772006e322e3df",
+      "functional_fingerprint": "e901bcc2fc7292bc5d2425dbdc4fe9e9a3248411fd8d70dff824d30cd62dfad2",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones.",
-      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "71bed25b0807795bf393eb360975a1945381f91324a2c0126ddc643377d6a890",
+      "functional_fingerprint": "d2c3720834204a865aa5c1a0ddf5e473aa49cf025682c4b9f6d3223d84eddee1",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
       ],
       "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. Huella funcional recalculada 2026-10-14 tras el autoguardado; la selección y actualización de pacientes permanece en la regresión de cotizaciones.",
-      "regression_verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05"
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     "CR-013": {
       "implementation_sha": null,
@@ -494,10 +494,11 @@
     },
     "CR-032": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
+      "functional_fingerprint": "2e05cf4a92b685ee196a33effc5fae4f5bd4d266ff0f0582a715fda75ce604bc",
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación.",
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     }
   },
   "billing_regression_20261104": {
@@ -549,5 +550,10 @@
     "missing_relation": 622,
     "missing_landline": 446,
     "identifier_field_review": 2
+  },
+  "doctor_quote_review_20261106": {
+    "verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
+    "evidence": "docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md",
+    "scope": "Doctor selection and directory review: 356 unit/server tests, 35 focused browser scenarios including CH01-CH03, 144 legacy tests, 76 QA checks and ten isolated PostgreSQL groups passed. 700 synthetic doctors; quote-author scoped read projection, immutable sent selection, invalid references and rollback verified. Existing source records preserved; old ambiguous identities remain unresolved. No new EXACT or full video re-audit."
   }
 }

@@ -350,14 +350,14 @@
       "acceptance_criteria": "Alta/edición de médico con adjuntos privados y auditoría",
       "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "57519d3c8e0c2ce8785cb84cded62357cc9cf89153ad0461ffac9c41fec11bc6",
+      "functional_fingerprint": "e2af7a20cfc75a773c716ce97db8c43723d37d567117d9f9d78ca28b6b95b981",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
       "notes": "La instrucción directa del 20 de octubre de 2026 permite DUI y dirección vacíos, exige nombre, especialidad y teléfono fijo y agrega campos opcionales. Se retiró la petición de importar médicos antiguos. El formulario, la API, la persistencia JSON y pruebas focalizadas cubren este cambio; la certificación global de CR-006 sigue parcial.",
-      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     {
       "change_id": "CR-007",
@@ -627,14 +627,14 @@
       "acceptance_criteria": "Conservar categoría por línea de cotización",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
       "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
-      "functional_fingerprint": "d7ad589e8c0f9ca43b7d795f215381b3848c1032d4704824b7772006e322e3df",
+      "functional_fingerprint": "e901bcc2fc7292bc5d2425dbdc4fe9e9a3248411fd8d70dff824d30cd62dfad2",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
       "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción.",
-      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     {
       "change_id": "CR-012",
@@ -687,13 +687,14 @@
       "client_question": null,
       "acceptance_criteria": "Refrescar pacientes autorizados, incluso creados por otro usuario",
       "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "71bed25b0807795bf393eb360975a1945381f91324a2c0126ddc643377d6a890",
+      "functional_fingerprint": "d2c3720834204a865aa5c1a0ddf5e473aa49cf025682c4b9f6d3223d84eddee1",
       "certification_status": "DEMO_CERTIFIED",
       "write_required": true,
       "multiuser_required": true,
       "clinical_change": false,
       "technical_status": "UNASSESSED",
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario.",
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     {
       "change_id": "CR-013",
@@ -2145,15 +2146,21 @@
         "apps/web/src/server/doctor-directory-import.ts",
         "apps/web/src/server/persistence/postgres-doctor-directory.ts",
         "apps/web/src/app/(workspace)/doctors/page.tsx",
-        "packages/contracts/src/index.ts"
+        "packages/contracts/src/index.ts",
+        "apps/web/src/lib/doctor-search.ts",
+        "apps/web/src/server/doctor-read-model.ts",
+        "apps/web/src/server/quote-catalog-policy.ts"
       ],
       "db_objects": [
         "supabase/migrations/202608260001_initial_schema.sql"
       ],
       "action_ids": [],
-      "unit_test_ids": [],
+      "unit_test_ids": [
+        "vitest:doctor-quote-reader-scope"
+      ],
       "playwright_test_ids": [
-        "playwright:doctor-directory-practices"
+        "playwright:doctor-directory-practices",
+        "playwright:doctor-quote-selection"
       ],
       "selenium_test_ids": [],
       "dependency_ids": [
@@ -2164,16 +2171,17 @@
       "client_question": "No hay decisión pendiente para este lote de médicos; los expedientes requieren su propia fuente.",
       "acceptance_criteria": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
       "implementation_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
-      "functional_fingerprint": "4ac15c76efdf5181f4f59f71a3dc571ebc08050e4468d85e525efd050354cac4",
+      "functional_fingerprint": "2e05cf4a92b685ee196a33effc5fae4f5bd4d266ff0f0582a715fda75ce604bc",
       "certification_status": "NOT_CERTIFIED",
       "write_required": true,
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "VERIFIED",
-      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md. Posteriormente, el 5 de noviembre, el cliente entregó un ZIP con 650 filas y autorizó una ficha por médico conservando clínicas/contactos. Plan: 619 altas y 4 enriquecimientos, sin cambios destructivos. Código, pruebas y procedencia documentados en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md; importación real aún no ejecutada. Cierre del 5–6 de noviembre: autorización de históricos pendientes recibida; lote aplicado, reintentado y conciliado sin duplicados. Datos y credenciales permanecen privados. Se conservan 622 clasificaciones y 446 teléfonos fijos pendientes, sin inventarlos. Evidencia final en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md.",
-      "verification_sha": "596108970705f2bd69eb11415181820fdd0c99ed",
+      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md. Posteriormente, el 5 de noviembre, el cliente entregó un ZIP con 650 filas y autorizó una ficha por médico conservando clínicas/contactos. Plan: 619 altas y 4 enriquecimientos, sin cambios destructivos. Código, pruebas y procedencia documentados en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md; importación real aún no ejecutada. Cierre del 5–6 de noviembre: autorización de históricos pendientes recibida; lote aplicado, reintentado y conciliado sin duplicados. Datos y credenciales permanecen privados. Se conservan 622 clasificaciones y 446 teléfonos fijos pendientes, sin inventarlos. Evidencia final en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md. Revisión 6 de noviembre: los 623 perfiles del lote conservan sus campos y clínicas. Búsqueda y selección en cotizaciones corregidas, permisos de lectura mínimos para autores de cotizaciones y validación de referencias por organización. Se documentan posibles identidades repetidas anteriores a la carga; no se confunden con duplicación del lote ni se borran historiales. docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md",
+      "verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
       "deployment_sha": "c141d4a543b930cd573e4cc40f7355581eb296c2",
-      "persistence_status": "VERIFIED"
+      "persistence_status": "VERIFIED",
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     }
   ],
   "supplemental_clinical_batch_20261103": {
@@ -2254,5 +2262,10 @@
     "missing_relation": 622,
     "missing_landline": 446,
     "identifier_field_review": 2
+  },
+  "doctor_quote_review_20261106": {
+    "verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
+    "evidence": "docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md",
+    "scope": "Doctor selection and directory review: 356 unit/server tests, 35 focused browser scenarios including CH01-CH03, 144 legacy tests, 76 QA checks and ten isolated PostgreSQL groups passed. 700 synthetic doctors; quote-author scoped read projection, immutable sent selection, invalid references and rollback verified. Existing source records preserved; old ambiguous identities remain unresolved. No new EXACT or full video re-audit."
   }
 }
