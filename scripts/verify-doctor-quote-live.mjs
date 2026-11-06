@@ -101,6 +101,8 @@ try {
   const secondary = dialog.locator('[data-action-id="QUOTE-SECONDARY-DOCTOR"]');
   await expect(primary).toBeEnabled();
   for (const select of [primary, secondary]) {
+    // The dialog can mount before the authenticated workspace finishes loading.
+    await expect(select.locator('option')).toHaveCount(doctors.length + 1, { timeout: 30000 });
     const available = await select
       .locator('option')
       .evaluateAll((options) =>
