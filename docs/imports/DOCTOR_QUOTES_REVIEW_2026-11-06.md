@@ -33,4 +33,23 @@ Commit publicado y verificado en GitHub antes de ejecutar: `db001857ebeb8ed1b73e
 
 Diez grupos aprobaron en un contenedor desechable con 701 filas fuente / 700 médicos sintéticos: permisos y RLS, reintentos concurrentes, enriquecimiento/versiones, snapshot obsoleto, rollback de lote, lectura limitada por rol, guardado/recarga/edición de ambos médicos, rechazo de referencias inexistentes o extranjeras y selección inmutable al enviar. La base desechable fue eliminada; no hubo escrituras de prueba en producción.
 
-La comprobación real posterior debe verificar ambos selectores, todos los IDs importados, búsqueda, conservación de selección y el borrador previo del usuario. No se crean cotizaciones ni se editan médicos reales para probar. No se declara una nueva auditoría completa de los 17 videos ni un ensayo de MongoDB en producción.
+No se crean cotizaciones ni se editan médicos reales para probar. No se declara una nueva auditoría completa de los 17 videos ni un ensayo de MongoDB en producción.
+
+## Primera comprobación pública y ajuste visual
+
+Se desplegó `47f4c3f88417b742b589ab528d29f64309290d8d` después de confirmar su presencia en GitHub. El script de revisión autenticada se corrigió en `de376cce65f11d2ed80cc3c9faebe4ac1868bcf8` para esperar la carga del workspace: inicialmente inspeccionaba las opciones antes de que llegaran por red. No se relajó el requisito de 633 opciones distintas.
+
+La ejecución posterior aprobó: 633 médicos, los 623 IDs importados en ambos selectores, búsquedas sin tildes/por identificador/clínica adicional, selección de principal y secundario, conservación al cambiar el filtro, anchos 1440/768/390 y cero errores JavaScript. Se interceptaron dos intentos de autoguardado de formulario y se comprobó que el borrador original del usuario permaneciera idéntico. Cero escrituras de negocio. La autenticación conserva su auditoría normal.
+
+La organización sintética completó 59 rutas públicas en tres anchos, una restricción esperada y cero errores JavaScript. No se ejercitó «Ver devoluciones», pues esa organización no tenía devoluciones. La inspección visual detectó el recorte normal de un nombre largo dentro del selector nativo móvil; se añadió la etiqueta completa debajo, con ajuste de línea y descripción accesible. Ese ajuste `5ce9431f1ae6e643c0df111c399c8b4a04b0b968` aprobó 11/11 escenarios afectados de navegador, TypeScript y ESLint. No modifica persistencia ni permisos.
+
+## Cierre verificado
+
+- Release final activo: `ac44496b0bd05561c51ea06db978e8ebd5e19a24`, confirmado en GitHub antes del despliegue y en la etiqueta de la imagen activa después. Imagen `sha256:eb82a4372bcdd51a61c14091b2e27c1084135d5caead1747215354e5d9270b81`.
+- Se repitió la prueba autenticada en ese release: los 623 importados siguen disponibles entre 633 opciones únicas; búsqueda, ambos selectores, nombre completo legible y tres anchos aprobados. Borrador original intacto, cero escrituras de negocio y cero errores JavaScript. Capturas finales inspeccionadas y conservadas sólo en la carpeta privada.
+- Snapshot de lectura posterior al despliegue: 633 médicos; los 623 del archivo coinciden exactamente con el plan, sin campos ni clínicas alterados. Persisten los dos grupos antiguos de nombre repetido, ninguno creado por el lote, y ningún JVPM/CONADEM repetido entre perfiles. Las identidades dudosas continúan documentadas, no resueltas por suposición.
+- Respaldo previo al release final: `1db45cbdc945a1933bea72b44ce575842040aa4aea1fb909b0e14f579a7d5a86`; el primer despliegue de esta revisión creó `6952b0bf3a8a9b93bf6b11927950b46646a6fe2f1a440665ec7fc514b46e9179`. No se certifica restauración ni copia externa de estos dos nuevos snapshots; la restauración posterior a la importación está documentada en el informe anterior.
+- Web y PostgreSQL saludables y salud pública HTTP 200. El despliegue pausa brevemente la web para respaldar, y se observó una conexión reiniciada durante el arranque; no se afirma disponibilidad ininterrumpida. No hay DDL nuevo ni actualización de Ubuntu.
+- Los gates de 32 solicitudes, 210 requisitos, espejo, auditoría documental, formato y seguridad pasaron. No se promovieron estados históricos a EXACT. La cuenta temporal local utilizada por la prueba se eliminó al finalizar; las credenciales originales no cambiaron.
+
+Para revertir sólo la interfaz, se conserva la imagen `47f4c3f`; el release anterior al lote de correcciones es `14ef0d1`. No eliminar perfiles con referencias para simular una reversión. La rama y el PR siguen abiertos sin fusionar `main` ni ejecutar GitHub Actions.

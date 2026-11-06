@@ -1,5 +1,9 @@
 # Preguntas abiertas y bloqueadores
 
+## DOCTORS-NOV06 · identidades antiguas contradictorias
+
+La conciliación posterior confirma los 623 perfiles del archivo y sus clínicas, pero encuentra dos grupos de nombres repetidos anteriores al lote, documentos contradictorios y un DUI compartido por nombres distintos. Se contrastaron fuente, auditoría y referencias en pacientes, ingresos, cotizaciones y visitas. Dos nombres completos del Excel podrían corresponder a grupos antiguos abreviados; no hay identificador profesional o contacto compartido que lo demuestre. El cliente pidió que lo revisáramos; los datos disponibles no determinan una identidad o documento correcto. Se conservan las fichas, se distinguen las opciones de selección y no se modifican historiales firmados/enviados. Detalle privado en `C:/Temp/analiza-doctor-review-private-20261106/fichas-anteriores-por-revisar.csv`; evidencia pública sin datos personales en `docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md`. La búsqueda y selección en cotizaciones no dependen de resolver estas identidades.
+
 ## DOCTORS-NOV05 · preparación del nuevo lote Excel
 
 Actualización de cierre del 5–6 de noviembre: el cliente entregó el ZIP de 650 filas y confirmó una ficha por médico con todas sus clínicas/contactos y carga histórica con campos pendientes. Lote completado y conciliado: 619 altas, 4 fichas enriquecidas y 633 médicos totales. Quedan para el equipo 622 clasificaciones, 446 teléfonos fijos y dos ubicaciones de identificador JVPM/CONADEM por revisar; estos datos no impidieron la carga autorizada. Véase `docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md`. La nota siguiente describe la fase histórica anterior a la recepción del archivo; sus bloqueos de este lote ya están resueltos. Los expedientes clínicos no forman parte de la fuente entregada.

@@ -1,5 +1,7 @@
 # Analiza en Casa en Contabo: entrega para el siguiente Codex
 
+**Médicos y cotizaciones, 6 de noviembre de 2026:** release activo `ac44496b0bd05561c51ea06db978e8ebd5e19a24`, publicado primero en GitHub. Corrige búsquedas sin tildes, contacto, distinción de homónimos y nombre completo en móvil; permite lectura mínima del directorio a los roles que crean cotizaciones y valida ambos médicos por organización. Comprobación pública final: 633 médicos, los 623 del Excel disponibles en ambos selectores, tres anchos, borrador del usuario intacto y cero errores JavaScript. Conciliación posterior: los 623 perfiles conservan exactamente el plan. Diez grupos PostgreSQL aislados, 356 pruebas unitarias/servidor, 35 escenarios de navegador y 11 de seguimiento aprobados; 59 rutas públicas aprobadas antes del último ajuste sólo visual. Hay coincidencias antiguas de identidad sin resolver: no borrar ni fusionar historiales por nombre. Detalle en `../imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md` y archivo privado referido allí. Respaldo previo final `1db45cbd`; web y PostgreSQL saludables, HTTP 200, sin DDL ni cambios de Ubuntu. Copia externa/restauración de ese nuevo snapshot no verificadas. Las entradas siguientes son históricas.
+
 Para instalar **otros proyectos** en este VPS, usar también
 `CODEX_MULTIPROJECT_VPS_HANDOFF.md`. Su anexo sensible permanece únicamente
 en la PC del operador, fuera de Git.
