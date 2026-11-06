@@ -13,6 +13,7 @@ import {
 } from '../apps/web/src/server/persistence/postgres-doctor-directory';
 import { postgresPool, closePostgresPool } from '../apps/web/src/server/persistence/postgres-pool';
 
+let stage = 'PARAMETERS';
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -30,11 +31,13 @@ async function main() {
     },
   });
   if (!values.input) throw new Error('Falta fuente.');
+  stage = 'SOURCE_READ';
   const bytes = await readFile(values.input);
   const sha256 = createHash('sha256').update(bytes).digest('hex');
   const read = await readDoctorImportFile(bytes, '.xlsx', values.sheet);
   const source = { sha256, sheet: read.sheet, rows: read.rows };
   if (values.apply) {
+    stage = 'MANIFEST_VERIFY';
     if (
       !values.manifest ||
       !values['manifest-sha256'] ||
@@ -46,6 +49,7 @@ async function main() {
     if (createHash('sha256').update(raw).digest('hex') !== values['manifest-sha256'])
       throw new Error('El manifiesto cambió.');
     const manifest = JSON.parse(raw.toString('utf8')) as DirectoryManifest;
+    stage = 'DATABASE_APPLY';
     console.log(JSON.stringify(await applyDoctorDirectory(postgresPool(), source, manifest)));
   } else {
     if (!values.snapshot || !values.organization || !values.actor || !values.output)
@@ -90,7 +94,30 @@ async function main() {
   }
 }
 main()
-  .catch(() => {
+  .catch((error: unknown) => {
+    const safeMessages = new Set([
+      'Se requiere un rol SQL sin privilegios elevados.',
+      'Operador no autorizado para esta organización.',
+      'RLS debe permanecer habilitado y forzado.',
+      'La fuente no coincide con el plan revisado.',
+      'El archivo ya tiene un lote con un plan distinto.',
+      'El directorio cambió: debe conciliar de nuevo antes de cargar.',
+      'El plan calculado no coincide con el revisado.',
+      'No hay perfiles conciliados para cargar.',
+      'Falta configuración privada PostgreSQL.',
+      'Una versión cambió antes de guardar.',
+      'La conciliación del total de médicos falló.',
+      'La conciliación por registro falló.',
+    ]);
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+    console.error(
+      JSON.stringify({
+        stage,
+        code: /^[0-9A-Z]{5}$/.test(code) ? code : undefined,
+        reason:
+          error instanceof Error && safeMessages.has(error.message) ? error.message : undefined,
+      }),
+    );
     console.error(
       'Importación detenida. Revise autorización, procedencia, plan, organización y vigencia de la conciliación. No se imprimen datos privados.',
     );
