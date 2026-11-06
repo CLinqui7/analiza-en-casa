@@ -537,8 +537,17 @@
     "scope": "Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."
   },
   "doctor_directory_import_20261105": {
-    "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+    "verification_sha": "596108970705f2bd69eb11415181820fdd0c99ed",
     "evidence": "docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md",
-    "scope": "Historical doctor directory, additional practices and scoped transactional operator. 349 unit/server tests, 22 focused browser tests including CH01-CH03 and desktop/mobile practices, and six PostgreSQL integration groups with 701 synthetic rows passed. No new EXACT or full video re-audit. Production import awaits the pending-field decision."
+    "scope": "Authorized directory imported and reconciled: 650 source rows, 619 inserts, 4 enrichments, 633 total doctors, exact retry without duplicates, 623 doctor audits and one batch audit. All 623 profiles and practices checked via public authenticated API. 59 synthetic public routes checked, no JavaScript errors. 349 unit/server, 144 legacy tests, 76 QA checks, 22 focused browser scenarios, six PostgreSQL groups passed. No new EXACT or full video re-audit.",
+    "deployment_sha": "c141d4a543b930cd573e4cc40f7355581eb296c2",
+    "source_rows": 650,
+    "profiles": 623,
+    "inserted": 619,
+    "enriched": 4,
+    "total_doctors": 633,
+    "missing_relation": 622,
+    "missing_landline": 446,
+    "identifier_field_review": 2
   }
 }

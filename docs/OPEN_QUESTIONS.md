@@ -2,7 +2,7 @@
 
 ## DOCTORS-NOV05 · preparación del nuevo lote Excel
 
-Actualización posterior del mismo día: ya se recibió el ZIP autorizado de 650 filas. El cliente confirmó una ficha por médico con todas sus clínicas/contactos. La pregunta sobre cargar los campos ausentes como históricos pendientes sigue abierta. Las pruebas de importación y prácticas adicionales están aprobadas; véase `docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md`. La nota siguiente describe la fase de preparación anterior a la recepción del archivo.
+Actualización de cierre del 5–6 de noviembre: el cliente entregó el ZIP de 650 filas y confirmó una ficha por médico con todas sus clínicas/contactos y carga histórica con campos pendientes. Lote completado y conciliado: 619 altas, 4 fichas enriquecidas y 633 médicos totales. Quedan para el equipo 622 clasificaciones, 446 teléfonos fijos y dos ubicaciones de identificador JVPM/CONADEM por revisar; estos datos no impidieron la carga autorizada. Véase `docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md`. La nota siguiente describe la fase histórica anterior a la recepción del archivo; sus bloqueos de este lote ya están resueltos. Los expedientes clínicos no forman parte de la fuente entregada.
 
 El 5 de noviembre de 2026 el cliente pidió preparar más de 650 médicos y confirmó formato `.xlsx`; el archivo fuente aún no fue entregado. Esta nueva petición autoriza preparar ese lote, sin reactivar la copia histórica de médicos/expedientes retirada el 20 de octubre. Se conservan los requisitos actuales (nombre, especialidad, teléfono fijo y nuevo/recurrente); DUI y dirección siguen opcionales. No se inventan valores para completar filas.
 

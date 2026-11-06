@@ -2136,7 +2136,7 @@
         "docs/client-change-requests/source/cambiosparte1analizacasa_AUDITADO.xlsx#Hoja1!fila-35"
       ],
       "status": "PARTIAL",
-      "production_status": "MISSING",
+      "production_status": "PARTIAL",
       "route_ids": [
         "ROUTE-DOCTORS"
       ],
@@ -2152,14 +2152,16 @@
       ],
       "action_ids": [],
       "unit_test_ids": [],
-      "playwright_test_ids": [],
+      "playwright_test_ids": [
+        "playwright:doctor-directory-practices"
+      ],
       "selenium_test_ids": [],
       "dependency_ids": [
         "B7"
       ],
       "blocker_type": "SOURCE_DATA",
-      "blocker_reason": "El directorio Excel de médicos ya fue entregado. La carga histórica con campos pendientes está en consulta; no se entregó una fuente de expedientes.",
-      "client_question": "Confirmar carga histórica de médicos incompletos. Los expedientes no forman parte del lote autorizado.",
+      "blocker_reason": "Lote de médicos importado y conciliado: 619 altas, 4 fichas enriquecidas y 633 médicos totales. Los datos ausentes se cargaron como históricos por confirmación del cliente. Falta una fuente autorizada de expedientes clínicos para ese alcance distinto.",
+      "client_question": "No hay decisión pendiente para este lote de médicos; los expedientes requieren su propia fuente.",
       "acceptance_criteria": "ETL idempotente con dry-run, conciliación, rollback y aprobación",
       "implementation_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
       "functional_fingerprint": "4ac15c76efdf5181f4f59f71a3dc571ebc08050e4468d85e525efd050354cac4",
@@ -2168,8 +2170,10 @@
       "multiuser_required": false,
       "clinical_change": false,
       "technical_status": "VERIFIED",
-      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md. Posteriormente, el 5 de noviembre, el cliente entregó un ZIP con 650 filas y autorizó una ficha por médico conservando clínicas/contactos. Plan: 619 altas y 4 enriquecimientos, sin cambios destructivos. Código, pruebas y procedencia documentados en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md; importación real aún no ejecutada.",
-      "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
+      "notes": "CR-032 sigue MISSING/NOT_CERTIFIED para médicos y expedientes: el inventario de origen se consultó sólo por metadatos, se implementó un planificador de procedencia de sólo lectura y un importador de catálogos oficiales en un destino aislado. No se copió un expediente ni médico original; falta evidencia por fila, diccionario, conciliación de dos migraciones y autorización de datos sensibles. Véanse docs/deployment/DATA_PROVENANCE_AUDIT.md y CLEAN_DATA_MIGRATION.md. El 5 de noviembre el cliente autorizó preparar un nuevo lote de más de 650 médicos en Excel, todavía no entregado. Se añadieron plantilla y prevalidación offline con 700 filas sintéticas, sin escrituras ni certificación de importación real; evidencia: docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md. Posteriormente, el 5 de noviembre, el cliente entregó un ZIP con 650 filas y autorizó una ficha por médico conservando clínicas/contactos. Plan: 619 altas y 4 enriquecimientos, sin cambios destructivos. Código, pruebas y procedencia documentados en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md; importación real aún no ejecutada. Cierre del 5–6 de noviembre: autorización de históricos pendientes recibida; lote aplicado, reintentado y conciliado sin duplicados. Datos y credenciales permanecen privados. Se conservan 622 clasificaciones y 446 teléfonos fijos pendientes, sin inventarlos. Evidencia final en docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md.",
+      "verification_sha": "596108970705f2bd69eb11415181820fdd0c99ed",
+      "deployment_sha": "c141d4a543b930cd573e4cc40f7355581eb296c2",
+      "persistence_status": "VERIFIED"
     }
   ],
   "supplemental_clinical_batch_20261103": {
@@ -2238,8 +2242,17 @@
     "production": "See separate release record after Git-first publication."
   },
   "doctor_directory_import_20261105": {
-    "verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2",
+    "verification_sha": "596108970705f2bd69eb11415181820fdd0c99ed",
     "evidence": "docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md",
-    "scope": "Historical doctor directory, additional practices and scoped transactional operator. 349 unit/server tests, 22 focused browser tests including CH01-CH03 and desktop/mobile practices, and six PostgreSQL integration groups with 701 synthetic rows passed. No new EXACT or full video re-audit. Production import awaits the pending-field decision."
+    "scope": "Authorized directory imported and reconciled: 650 source rows, 619 inserts, 4 enrichments, 633 total doctors, exact retry without duplicates, 623 doctor audits and one batch audit. All 623 profiles and practices checked via public authenticated API. 59 synthetic public routes checked, no JavaScript errors. 349 unit/server, 144 legacy tests, 76 QA checks, 22 focused browser scenarios, six PostgreSQL groups passed. No new EXACT or full video re-audit.",
+    "deployment_sha": "c141d4a543b930cd573e4cc40f7355581eb296c2",
+    "source_rows": 650,
+    "profiles": 623,
+    "inserted": 619,
+    "enriched": 4,
+    "total_doctors": 633,
+    "missing_relation": 622,
+    "missing_landline": 446,
+    "identifier_field_review": 2
   }
 }
