@@ -65,3 +65,9 @@ Con esas versiones pasaron nuevamente 349/349 pruebas React/servidor, 22/22 esce
 El equipo debe completar 622 clasificaciones y 446 teléfonos fijos. Dos perfiles requieren revisar el identificador que la fuente coloca en JVPM y CONADEM. El listado privado `C:/Temp/analiza-doctor-import-private-20261105/pendientes-de-completar.csv` permite localizar cada ficha y sus filas originales. Fuente, snapshots, plan detallado y conciliación permanecen en esa carpeta privada y fuera de Git; en el VPS están fuera del directorio público.
 
 No se importaron expedientes clínicos: no forman parte de este Excel. CR-032 permanece parcial por ese alcance pendiente, mientras que este lote de médicos sí está importado y conciliado. Para revertir únicamente la web después de esta carga, usar como mínimo `c141d4a`; una versión anterior sin conservación de `practiceLocations` podría perder esas ubicaciones al editar. No borrar perfiles importados que puedan haber recibido nuevas referencias.
+
+## Comprobación final del release
+
+Release activo confirmado: `14ef0d19d44630661c5239b7d270bbc4bc6ea17b`, que publica además el estado conciliado de CR-032. La comprobación autenticada se repitió después de ese despliegue: 633 médicos, 623 perfiles/prácticas coincidentes, búsqueda, diálogo en tres anchos y detalle actualizado de CR-032 aprobados. Salud pública HTTP 200.
+
+El respaldo posterior a la importación `b760c9e22906e40aff373ff34d10e076795e7e50317ecc5ce076cbf9de6ed054` se restauró también en un contenedor desechable sin red: 633 médicos recuperados. SHA-256 del dump: `c9b9e8b821a3a8e834d69eb98a68e6d8db00efe2979a3ea76e7dcc5c1ef2695e`. Se eliminó la copia temporal de variables de conexión utilizada por el operador; los secretos originales no se modificaron. El procedimiento de respaldo pausa brevemente la web y la reinicia; no se afirma disponibilidad ininterrumpida. La copia externa de este nuevo snapshot queda sin verificar en esta entrega.
