@@ -93,7 +93,7 @@ export default function DoctorsPage() {
   });
   const mongoMode = isServerDataMode(providerMode);
   const visibleDoctors = doctors.filter((doctor) =>
-    `${doctor.fullName} ${doctor.documentId ?? ''} ${doctor.jvpm ?? ''} ${doctor.conadem ?? ''} ${doctor.clinicName ?? ''}`
+    `${doctor.fullName} ${doctor.documentId ?? ''} ${doctor.jvpm ?? ''} ${doctor.conadem ?? ''} ${doctor.clinicName ?? ''} ${(doctor.practiceLocations ?? []).map((location) => location.clinicName ?? '').join(' ')}`
       .toLocaleLowerCase('es')
       .includes(doctorQuery.trim().toLocaleLowerCase('es')),
   );
@@ -160,6 +160,7 @@ export default function DoctorsPage() {
       zone: values.zone || undefined,
       secretaryName: values.secretaryName || undefined,
       secretaryBirthday: values.secretaryBirthday || undefined,
+      practiceLocations: editingDoctor?.practiceLocations,
       attachments: mongoMode ? [] : attachments,
     };
     const saved = editingDoctor ? await updateDoctor(doctor) : await addDoctor(doctor);
@@ -340,6 +341,37 @@ export default function DoctorsPage() {
         open={isOpen}
         title={editingDoctor ? 'Editar médico' : 'Nuevo médico'}
       >
+        {editingDoctor?.practiceLocations?.length ? (
+          <details className="panel" style={{ marginBottom: '1rem' }}>
+            <summary>
+              Clínicas y contactos del directorio ({editingDoctor.practiceLocations.length})
+            </summary>
+            <p className="muted">
+              Estas ubicaciones se conservan al actualizar la ficha principal.
+            </p>
+            <div className="form-grid">
+              {editingDoctor.practiceLocations.map((location, index) => (
+                <section className="panel" key={location.id}>
+                  <h3>{location.clinicName || `Consulta ${index + 1}`}</h3>
+                  {location.specialty ? <p>{location.specialty}</p> : null}
+                  {location.address ? (
+                    <p style={{ whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>
+                      {location.address}
+                    </p>
+                  ) : null}
+                  {location.city || location.department ? (
+                    <p>{[location.city, location.department].filter(Boolean).join(' · ')}</p>
+                  ) : null}
+                  {location.landlinePhone ? <p>Teléfono fijo: {location.landlinePhone}</p> : null}
+                  {location.phone ? <p>Celular: {location.phone}</p> : null}
+                  {location.email ? (
+                    <p style={{ overflowWrap: 'anywhere' }}>Correo: {location.email}</p>
+                  ) : null}
+                </section>
+              ))}
+            </div>
+          </details>
+        ) : null}
         <form
           className="form-grid"
           id="doctor-form"

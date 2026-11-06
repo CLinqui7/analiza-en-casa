@@ -116,6 +116,18 @@ export const doctorAttachmentSchema = z.object({
   size: z.number().int().nonnegative(),
 });
 
+export const doctorPracticeLocationSchema = z.object({
+  id: z.string().min(1),
+  specialty: z.string().trim().optional(),
+  clinicName: z.string().trim().optional(),
+  address: z.string().trim().optional(),
+  city: z.string().trim().optional(),
+  department: z.string().trim().optional(),
+  landlinePhone: z.string().trim().optional(),
+  phone: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+});
+
 export const doctorSchema = z.object({
   id: z.string(),
   fullName: z.string().trim().min(1),
@@ -141,6 +153,8 @@ export const doctorSchema = z.object({
   secretaryBirthday: z.string().trim().optional(),
   email: z.string().trim().optional(),
   address: z.string().trim().optional(),
+  /** Additional source practices remain attached when the primary profile is edited. */
+  practiceLocations: z.array(doctorPracticeLocationSchema).max(100).optional(),
   attachments: z.array(doctorAttachmentSchema).default([]),
 });
 
