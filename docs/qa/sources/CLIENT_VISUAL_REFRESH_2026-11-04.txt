@@ -1,0 +1,7 @@
+# Solicitud visual del cliente · 4 de noviembre de 2026
+
+Fuente: mensaje directo del cliente en este chat.
+
+«revisa cada pagina y mejorala visualmente por favor, marcos, letra, botones , animaciones, necesito aue se vea bien, no vieja, ya que veo que siguen habiendo botones como una oracion subrayada como si fuera un link pero como boton en ver devoluciones, necesito que se vea hermoso porfa , tardate pero hazlo muy bien , estas en astra, date el tiempo de ver y de ir paso a paso por cada pagina que hay oara mejorsrla y cada menu desplegable y cada menu que haya»
+
+Alcance interpretado: presentación coherente en las páginas existentes, marcos y tipografía, acciones con aspecto de botón, menús accesibles, adaptación a móvil y movimiento discreto con preferencia de movimiento reducido. Conservar permisos, datos, reglas y funciones. Publicar código en GitHub antes del VPS, según la instrucción persistente del cliente.

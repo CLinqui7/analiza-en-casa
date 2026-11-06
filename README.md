@@ -2,9 +2,15 @@
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en
-PostgreSQL 18, incluido registro individual y cuestionario. La variante activa de
-Vercel comprobada el 2026-10-13 usa PostgreSQL; también permanece código histórico
-para MongoDB.
+PostgreSQL 18, incluido registro individual y cuestionario. La aplicación
+pública opera en Contabo con PostgreSQL; la URL anterior de Vercel redirige al
+VPS. También permanece código histórico para MongoDB.
+
+**Regla de publicación:** antes de cualquier despliegue, hacer commit y push
+del código, migraciones y configuración a una rama `codex/*` de GitHub.
+Verificar que el SHA remoto contiene exactamente el SHA que se va a desplegar.
+Si el push falla, detener el despliegue. Después, subir también el informe de
+verificación. Nunca incluir contraseñas, claves ni archivos privados en Git.
 
 **Para desplegar en Cloud Run / Cloud SQL:**
 [guía del ingeniero, imágenes y variables](docs/deployment/CLOUD_SQL_HANDOFF.md).
@@ -12,17 +18,28 @@ para MongoDB.
 **Para desplegar en Ubuntu / Docker / PostgreSQL local:**
 [guía self-hosted](docs/deployment/UBUNTU_SELF_HOSTED.md).
 
-**Segunda instancia aislada en Contabo:**
-[estado y acceso privado](docs/deployment/CONTABO_DEPLOYMENT.md),
-[auditoría y límites de la migración](docs/deployment/CONTABO_FINAL_REPORT.md).
+**Instancia activa en Contabo:**
+[guía operativa vigente](docs/deployment/CONTABO_OPERATOR_HANDOFF.md),
+[revisión del feedback](docs/feedback/REVIEW_2026-10-14.md).
+
+**Preparación de médicos desde Excel:**
+[plantilla, prevalidación privada y estado del lote de más de 650 médicos](docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md).
+`npm run doctors:prepare -- --help` muestra el comando sin escrituras en la aplicación.
+`npm run test:doctors:prepare` verifica el flujo local con 700 registros sintéticos.
+
+**Carga del directorio autorizado:** el [procedimiento del lote](docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md)
+describe `npm run doctors:directory`, la conciliación de clínicas por médico, el manifiesto privado,
+la autorización de datos históricos pendientes y la carga transaccional con auditoría e idempotencia.
+No ejecutar `--apply` sin revisar el plan y comprobar un respaldo restaurable de la base activa.
+`deploy/contabo/test-doctor-directory.sh` verifica el operador con 701 filas sintéticas en una base
+desechable; `deploy/contabo/verify-doctor-backup.sh` prueba la restauración sin conectividad de red.
 
 **Para preparar un VPS Hostinger con la navegación completa:**
 [lista de verificación y plan de traslado](docs/deployment/HOSTINGER_VPS_READINESS_20261012.md).
 
-**Estado de esta rama:** la instancia Contabo está desplegada de forma privada;
-la migración de datos clínicos y el cambio de dominio siguen pendientes. Vercel
-continúa con su despliegue independiente. Las pruebas sintéticas de integración
-se ejecutan en contenedores descartables separados de la base operativa.
+**Estado de esta rama:** la aplicación pública y su base PostgreSQL están en
+Contabo. El dominio propio sigue pendiente; Vercel sólo redirige al VPS. Las
+pruebas de escritura usan datos sintéticos en una organización QA separada.
 
 ## Registro, cuestionario y migraciones
 
@@ -180,3 +197,30 @@ seguridad, pruebas y trazabilidad para cambios.
 Las pruebas locales no certifican capacidad productiva ni IAM en Google Cloud.
 Las reglas de negocio pendientes se conservan en
 [OPEN_QUESTIONS](docs/OPEN_QUESTIONS.md).
+
+## Formularios clínicos y verificación aislada
+
+La reestructuración solicitada el 31 de octubre está documentada en
+[el registro de cambios clínicos](docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md).
+Los formularios se guardan en PostgreSQL con aislamiento por organización,
+historial de correcciones y auditoría. El modo demo no simula un guardado exitoso.
+
+`npm run test:clinical:postgres` verifica persistencia, versiones, roles, RLS,
+consumo concurrente, idempotencia y lotes usando exclusivamente una base sintética
+`analiza_qa` por loopback y un usuario sin superusuario ni bypass de RLS.
+`npm run test:clinical:browser` comprueba los formularios y controles HTTP contra
+un build de producción configurado con `NEXT_PUBLIC_DATA_MODE=postgresql`.
+Requiere las variables privadas de QA y los identificadores sintéticos
+`CLINICAL_QA_PATIENT_ID` y `CLINICAL_QA_CASE_ID` emitidos por la prueba anterior.
+No apuntar estas pruebas a datos operativos. No guardar credenciales en Git.
+
+Si PostgreSQL se alcanza mediante un túnel SSH, ejecute la aplicación de QA junto
+a esa base aislada y exponga únicamente su puerto de prueba por loopback.
+`CLINICAL_QA_BASE_URL=http://127.0.0.1:55440` permite comprobar ese build sin
+arrancar otra aplicación local. Así no se introduce la latencia del túnel en cada
+consulta entre la aplicación y PostgreSQL. Los límites de conexión de producción
+y los controles de autorización se conservan.
+
+La [guía de uso clínico](docs/feedback/GUIA_CLINICA_2026-11-04.md) explica cómo
+capturar registros, configurar descuentos y escalas, completar JVPE y relacionar
+medicamentos con inventario.

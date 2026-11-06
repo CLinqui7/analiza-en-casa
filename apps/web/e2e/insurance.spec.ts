@@ -19,7 +19,11 @@ test('insurance records manual observations, searches, filters and preserves rel
 }) => {
   await login(page);
   await page.goto('/insurance?quote=quote-demo-001');
-  await expect(page.getByText('Visitar este enlace no crea una preautorización.')).toBeVisible();
+  await expect(
+    page.getByText(
+      'Todavía no hay una solicitud. Registre la respuesta recibida de la aseguradora para iniciar el seguimiento.',
+    ),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Registrar actualización' }).first().click();
   const dialog = page.getByRole('dialog', { name: /Registrar actualización/ });
   await dialog
@@ -44,14 +48,18 @@ test('insurance records manual observations, searches, filters and preserves rel
     'aseguradora de demostracion',
   ]) {
     await search.fill(term);
-    await expect(page.getByRole('link', { name: 'quote-demo-001' }).first()).toBeVisible();
+    await expect(
+      page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first(),
+    ).toBeVisible();
   }
   await search.fill('sin resultado QA');
   await expect(page.getByText('Sin resultados', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Limpiar búsqueda' }).click();
   await expect(search).toHaveValue('');
   await page.getByLabel('Estado observado').first().selectOption('SENT_TO_INSURER');
-  await expect(page.getByRole('link', { name: 'quote-demo-001' }).first()).toBeVisible();
+  await expect(
+    page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first(),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Restablecer filtro' }).click();
 
   await page.getByRole('button', { name: 'Registrar actualización' }).last().click();
@@ -68,7 +76,7 @@ test('insurance records manual observations, searches, filters and preserves rel
   await expect(
     page.locator('li').filter({ hasText: 'Respuesta administrativa sintética para QA.' }),
   ).toBeVisible();
-  await page.getByRole('link', { name: 'quote-demo-001' }).first().click();
+  await page.locator('.insurance-card a[href="/quotes/quote-demo-001"]').first().click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
   await expect(page.locator('dt', { hasText: /^Estado$/ }).locator('+ dd')).toHaveText('Borrador');
   await page.goto('/hospitalizations');
@@ -87,9 +95,7 @@ test('insurance cancellation, invalid quote, safe channels and role guards are e
   await admin.getByRole('button', { name: 'Registrar actualización' }).first().click();
   await admin.getByRole('button', { name: 'Cancelar' }).click();
   await admin.reload();
-  await expect(
-    admin.getByText('No existe una solicitud persistida todavía.', { exact: false }),
-  ).toBeVisible();
+  await expect(admin.getByText('Todavía no hay una solicitud.', { exact: false })).toBeVisible();
   await admin.goto('/insurance?quote=missing-quote');
   await expect(admin.getByText('Cotización no disponible')).toBeVisible();
   await admin.getByRole('button', { name: 'WhatsApp' }).click();
@@ -105,7 +111,9 @@ test('insurance cancellation, invalid quote, safe channels and role guards are e
     'proveedor/canal externo no configurado',
   );
   await admin.getByRole('button', { name: 'Reclamo' }).click();
-  await expect(admin.locator('.notice.warning')).toContainText('CH08-Q002');
+  await expect(admin.locator('.notice.warning')).toContainText(
+    'El envío de reclamos todavía no está configurado.',
+  );
   await expect(admin.locator('.notice.success')).toHaveCount(0);
   await adminContext.close();
 

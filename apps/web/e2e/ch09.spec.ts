@@ -158,8 +158,9 @@ test('CH09 row actions open the scoped quote and omit undefined clinical workflo
 }) => {
   await loginToClinicalHospitalizations(page);
 
-  const quoteLink = page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]');
-  await expect(quoteLink).toHaveAttribute('href', '/quotes/quote-demo-001');
+  await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-QUOTE-VIEW"]')).toHaveCount(
+    0,
+  );
   await expect(page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-CARE-EDIT"]')).toBeVisible();
   await expect(
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-PROFILE-OPEN"]'),
@@ -180,7 +181,9 @@ test('CH09 row actions open the scoped quote and omit undefined clinical workflo
     page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-NEAR-MISS-OPEN"]'),
   ).toHaveCount(0);
 
-  await quoteLink.click();
+  await page.locator('[data-action-id="CLINICAL-HOSPITALIZATION-DETAIL"]').click();
+  await expect(page.getByRole('heading', { name: 'Cotización y seguro' })).toBeVisible();
+  await page.getByRole('link', { name: /Consultar quote-demo-001/ }).click();
   await expect(page).toHaveURL(/\/quotes\/quote-demo-001$/);
   await expect(page.getByRole('heading').first()).toHaveAttribute('title', 'quote-demo-001');
 });

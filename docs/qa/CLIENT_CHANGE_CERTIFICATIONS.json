@@ -1,16 +1,18 @@
 {
   "schema_version": 1,
-  "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
+  "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
   "certifications": {
     "CR-001": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "7c0323ce9517fbaa68d11f2ea7d752af9ed6d73762787aeb1ef653e397aba62a",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "6b538d4850882cfc32c054f81f4b6b83013cb820127bf3a87cc656a25095357e",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:ch02-patient-form",
         "SEL-PAT-DOCUMENT"
       ],
-      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador."
+      "notes": "DUI ya existe en contrato y formulario React; el modo actual es demo por navegador.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-002": {
       "implementation_sha": null,
@@ -47,11 +49,16 @@
       "notes": "Existe recurso de enfermería; no hay alta independiente de médico."
     },
     "CR-006": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "verification_sha": "b2ba1ef206e20eff729ff87552cf44e82b837696",
+      "functional_fingerprint": "e2af7a20cfc75a773c716ce97db8c43723d37d567117d9f9d78ca28b6b95b981",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "Hay fundamentos SQL/recurso, no una función React de médico."
+      "test_ids": [
+        "vitest:feedback-doctor-optional-profile",
+        "playwright:feedback-doctor-optional-profile"
+      ],
+      "notes": "Cambio de campos de médico verificado en código y pruebas focalizadas. Se conserva NOT_CERTIFIED para los demás criterios del requerimiento original.",
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
     },
     "CR-007": {
       "implementation_sha": null,
@@ -87,22 +94,26 @@
       "notes": "No se sabe si Puntual es hospitalización, visita, turno o servicio."
     },
     "CR-011": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "fc47b204b61aa1aa004bffc22834f7bbddd001c6366be423c6e87f106c3980ea",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "2bba1cb0c2ae50dde16130adc3e04139373ead0273f9a830862c0034fa1519d3",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
       ],
-      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción."
+      "notes": "Las siete categorías están en la UI React, persistidas sólo en el proveedor demo sin certificación de producción. Huella funcional recalculada 2026-10-14 tras el autoguardado; la categoría por línea permanece cubierta por la regresión de cotizaciones.",
+      "regression_verification_sha": "5ce9431f1ae6e643c0df111c399c8b4a04b0b968"
     },
     "CR-012": {
-      "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-      "functional_fingerprint": "d1ffda9ad04823897aaaf017ef7ea4a4e6bd95968031b2cfcf18236f9af650ac",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "2773edd7e93f872edfadc9d4f60bdd1cc8de63dcfdaa1c80f1f2aab54305c3ba",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"
       ],
-      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario."
+      "notes": "El mismo navegador ve el array actual; localStorage no demuestra multiusuario. Huella funcional recalculada 2026-10-14 tras el autoguardado; la selección y actualización de pacientes permanece en la regresión de cotizaciones.",
+      "regression_verification_sha": "5ce9431f1ae6e643c0df111c399c8b4a04b0b968"
     },
     "CR-013": {
       "implementation_sha": null,
@@ -145,19 +156,20 @@
       "notes": "El dato existe en Patient; Dashboard no lo muestra."
     },
     "CR-017": {
-      "implementation_sha": "4b9e3c0fb6100cbe757ef8c524d4d95336eec40e",
-      "functional_fingerprint": "f00cd5fdb601e1782a181bc0a733b77eb45cff04e166314af66cde150b39a21d",
+      "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "vitest:cr017-multi-day-shifts",
         "playwright:cr017-multi-day-shifts",
         "SEL-B3-AGENDA-SERIES"
       ],
-      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador."
+      "notes": "La agenda demo crea un turno auditable por cada fecha, rechaza fechas repetidas y colisiones del recurso; la persistencia es local por navegador.",
+      "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025"
     },
     "CR-018": {
       "implementation_sha": "b13115e2c3c6b9fcc3b46c49b09e9297b22fe944",
-      "functional_fingerprint": "623fcc340682a71988f2998d771c62cf551c16bb6ee81a02a034319ca9111c2f",
+      "functional_fingerprint": "fa5f3a067aa2c286121b4ca170e23fd0ffd399304cadc8696ea8ddfe800fe341",
       "certification_status": "PARTIAL_CLIENT_DEFINITION",
       "production_status": "PARTIAL",
       "blocker_type": "CLIENT_DEFINITION",
@@ -168,95 +180,308 @@
         "playwright:cr018-shift-presets",
         "SEL-B3-AGENDA-SERIES"
       ],
-      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010."
+      "notes": "Los presets 6h/8h calculan y persisten la duración exacta incluso al cruzar medianoche. Puntual permanece bloqueado por CR-010.",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-019": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "production_status": "NEEDS_CLIENT_DEFINITION",
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_reason": "Aprobar el formulario versionado de tarjeta de medicamentos, el alcance por ítem/general, roles autorizados y la política de auditoría, versionado, corrección y firma; definir el manejo seguro de texto de diluciones/cuidados especiales.",
-      "technical_status": "NEEDS_CLIENT_DEFINITION",
-      "test_ids": [],
-      "notes": "No se captura texto de diluciones ni cuidados especiales sin un formulario de tarjeta de medicamentos versionado, autorizado y auditable."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Medication card instructions and per-medicine administration are retained; no automated dosing rules. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-020": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe contrato, ruta ni colección; requiere aprobación clínica."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Six balance rows, totals for entered hours and manual endogenous/insensible amounts; no invented 24h extrapolation or automated closure. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-021": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe motor de escalas; no se inventa formulario ni interpretación."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-022": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "“Gasglow” probablemente se refiere a Glasgow; faltan formulario y versión."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-023": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe motor ni formulario aprobado."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-024": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "“Ecof” probablemente significa ECOG; faltan confirmación y formulario."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-025": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe motor ni definición institucional de dominios/incompletos."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-026": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "“karnofky” probablemente significa Karnofsky; faltan formulario y versión."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-027": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "No existe motor ni versión aprobada."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-028": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "El texto dice Downton y la captura muestra dominios compatibles con Norton."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-029": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "La fila no tiene nombre; la captura está titulada Índice Barthel."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-030": {
-      "implementation_sha": null,
-      "functional_fingerprint": null,
+      "implementation_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "verification_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+      "functional_fingerprint": "9e4fa4cb6a07781d0fbcf4fbecfbe47bb45f90900660bdd75a66bc7dd267d6b2",
       "certification_status": "NOT_CERTIFIED",
-      "test_ids": [],
-      "notes": "El texto dice Branden y la imagen parece Braden."
+      "technical_status": "VERIFIED",
+      "persistence_status": "VERIFIED",
+      "test_ids": [
+        "vitest:clinical-annex-scores",
+        "vitest:clinical-record-boundaries",
+        "playwright:clinical-restructure-forms",
+        "playwright:clinical-annex-scales",
+        "playwright:clinical-restructure-responsive",
+        "playwright:clinical-configuration-all-users",
+        "playwright:clinical-connected-persistence",
+        "playwright:clinical-connected-administration",
+        "playwright:clinical-connected-configuration",
+        "playwright:clinical-connected-discount",
+        "playwright:clinical-connected-correction-print",
+        "playwright:clinical-connected-security"
+      ],
+      "evidence": "docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "notes": "Implemented and tested manual capture, append-only corrections and versioned source definitions from the Oct31 PDF. Ten source scales with numerical options and immutable definition snapshots; ESAS stays a profile and unprovided classification intervals are not invented. Technical verification is distinct from professional clinical validation and full historical video parity. docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md",
+      "regression_verification_sha": "30795d76d4e35daa8e0c0df7545e44c867efc5a2"
     },
     "CR-031": {
       "implementation_sha": null,
@@ -269,10 +494,70 @@
     },
     "CR-032": {
       "implementation_sha": null,
-      "functional_fingerprint": null,
+      "functional_fingerprint": "2e05cf4a92b685ee196a33effc5fae4f5bd4d266ff0f0582a715fda75ce604bc",
       "certification_status": "NOT_CERTIFIED",
       "test_ids": [],
-      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación."
+      "notes": "Hay esquema destino, no fuente, diccionario ni pipeline de importación.",
+      "regression_verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47"
+    }
+  },
+  "billing_regression_20261104": {
+    "verification_sha": "fdd7f0e771e8598be6eddbabba6b187be7301b7d",
+    "evidence": "docs/feedback/BILLING_REVIEW_2026-11-04.md",
+    "requirement_ids": [
+      "CH07-F01",
+      "CH07-F02",
+      "CH07-F03",
+      "CH08-F04",
+      "CH08-F05",
+      "CH08-F07",
+      "CH08-F10",
+      "CH16-F01",
+      "CH16-F03"
+    ],
+    "scope": "Financial regression: quote chains, payment retry and cents, version metadata, insurer snapshot, responsive cards and shared clinical menu CSS. Existing statuses/blockers preserved; no new EXACT or full video re-audit."
+  },
+  "observations_regression_20261104": {
+    "verification_sha": "ae30d5959197e25d77ab9c5d312224afdd8b6550",
+    "evidence": "docs/feedback/CLINICAL_OBSERVATIONS_2026-11-04.md",
+    "requirement_ids": [
+      "CH10-F04",
+      "CH17-F03",
+      "CH17-F07",
+      "CH17-F08",
+      "CH17-F11",
+      "CH17-F12",
+      "CH17-F13",
+      "CH17-F15"
+    ],
+    "scope": "PDF Nov4 clinical observations: nursing menus, multiple care types, visits and append-only administration corrections. New user-approved presentation supersedes card fields; historical records retained. No new EXACT or complete video re-audit."
+  },
+  "visual_regression_20261104": {
+    "verification_sha": "dfeed6862ce49f1848abfe9ab002bdde0dcc3e05",
+    "evidence": "docs/feedback/VISUAL_REFRESH_2026-11-04.md",
+    "scope": "Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."
+  },
+  "doctor_directory_import_20261105": {
+    "verification_sha": "596108970705f2bd69eb11415181820fdd0c99ed",
+    "evidence": "docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md",
+    "scope": "Authorized directory imported and reconciled: 650 source rows, 619 inserts, 4 enrichments, 633 total doctors, exact retry without duplicates, 623 doctor audits and one batch audit. All 623 profiles and practices checked via public authenticated API. 59 synthetic public routes checked, no JavaScript errors. 349 unit/server, 144 legacy tests, 76 QA checks, 22 focused browser scenarios, six PostgreSQL groups passed. No new EXACT or full video re-audit.",
+    "deployment_sha": "c141d4a543b930cd573e4cc40f7355581eb296c2",
+    "source_rows": 650,
+    "profiles": 623,
+    "inserted": 619,
+    "enriched": 4,
+    "total_doctors": 633,
+    "missing_relation": 622,
+    "missing_landline": 446,
+    "identifier_field_review": 2
+  },
+  "doctor_quote_review_20261106": {
+    "verification_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
+    "evidence": "docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md",
+    "scope": "Doctor selection and directory review: 356 unit/server tests, 35 focused browser scenarios including CH01-CH03, 144 legacy tests, 76 QA checks and ten isolated PostgreSQL groups passed. 700 synthetic doctors; quote-author scoped read projection, immutable sent selection, invalid references and rollback verified. Existing source records preserved; old ambiguous identities remain unresolved. No new EXACT or full video re-audit.",
+    "readable_names_followup": {
+      "verification_sha": "5ce9431f1ae6e643c0df111c399c8b4a04b0b968",
+      "scope": "Selected doctor full labels wrap below native selectors and are exposed as accessible descriptions. Eleven affected browser scenarios, TypeScript and ESLint passed. Prior 356 unit/server, 35 browser, ten PostgreSQL groups and 59 public routes remain separately recorded. No changes to server logic, clinical or financial data."
     }
   }
 }

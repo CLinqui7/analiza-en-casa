@@ -23,6 +23,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/inter-latin-variable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

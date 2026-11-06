@@ -66,7 +66,41 @@ test('one purchase invoice saves multiple product lines together', async ({ page
   await dialog.getByRole('button', { name: 'Guardar factura (2)' }).click();
   await expect(page.getByRole('status')).toContainText('Factura guardada con 2 línea(s)');
   await page.getByLabel('Buscar compras').fill('COMPRA-MULTI-QA');
-  await expect(page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' })).toHaveCount(2);
+  const invoice = page.getByRole('row').filter({ hasText: 'COMPRA-MULTI-QA' });
+  await expect(invoice).toHaveCount(1);
+  await expect(invoice).toContainText('2 línea(s) en esta factura');
+  await expect(invoice.getByRole('button', { name: 'Editar líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Recibir líneas' })).toBeVisible();
+  await expect(invoice.getByRole('button', { name: 'Anular factura' })).toBeVisible();
+  if (process.env.ANALIZA_CAPTURE_FEEDBACK_SCREENSHOTS === '1') {
+    await page.screenshot({
+      path: 'docs/feedback/purchases-grouped-synthetic.png',
+      fullPage: true,
+      animations: 'disabled',
+    });
+  }
+  await invoice.getByRole('button', { name: 'Abrir' }).click();
+  const detail = page.getByRole('dialog', { name: 'Detalle de factura o compra' });
+  await expect(detail.getByRole('row')).toHaveCount(3);
+  if (process.env.ANALIZA_CAPTURE_FEEDBACK_SCREENSHOTS === '1') {
+    await detail.getByRole('table', { name: 'Líneas de la factura' }).scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: 'docs/feedback/purchases-detail-synthetic.png',
+      fullPage: true,
+      animations: 'disabled',
+    });
+  }
+  await expect(detail.getByRole('button', { name: 'Editar línea' })).toHaveCount(2);
+  await expect(detail.getByRole('button', { name: 'Recibir línea' })).toHaveCount(2);
+  await detail.getByRole('button', { name: 'Ver línea' }).nth(1).click();
+  await expect(detail).toContainText('SERIE-MULTI-B');
+  await detail.getByRole('button', { name: 'Anular línea' }).first().click();
+  const cancellation = page.getByRole('dialog', { name: 'Anular borrador de compra' });
+  await cancellation.getByLabel('Motivo de anulación').fill('Línea de prueba sustituida');
+  await cancellation.getByRole('button', { name: 'Confirmar anulación' }).click();
+  await invoice.getByRole('button', { name: 'Abrir' }).click();
+  await expect(detail.getByRole('row')).toHaveCount(3);
+  await expect(detail.getByRole('button', { name: 'Recibir línea' })).toHaveCount(1);
 });
 
 test('quote honorarium is selected for each quote, not fixed on the doctor', async ({ page }) => {
@@ -76,43 +110,68 @@ test('quote honorarium is selected for each quote, not fixed on the doctor', asy
   await doctorDialog.getByLabel('Nombre completo').fill('Médico QA Catálogo');
   await doctorDialog.getByLabel('JVPM').fill('JVPM-QA-CATALOG');
   await doctorDialog.getByLabel('DUI').fill('DUI-QA-CATALOG');
+  await doctorDialog.getByLabel('Relación del médico').selectOption('NEW');
   await doctorDialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await doctorDialog.getByRole('option', { name: 'Nutricionista' }).click();
   await doctorDialog.getByLabel('Dirección').fill('Dirección sintética QA');
+  await doctorDialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0600');
   await doctorDialog.getByRole('button', { name: 'Guardar médico' }).click();
   await page.goto('/quotes?create=1');
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
+  await dialog
+    .locator('[data-action-id="QUOTE-PRIMARY-DOCTOR"]')
+    .selectOption({ label: 'Médico QA Catálogo' });
   await dialog.getByRole('tab', { name: 'Honorarios' }).click();
   const amount = dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]');
   await expect(amount).toHaveValue('0');
-  await dialog
-    .locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]')
-    .selectOption({ label: 'Médico QA Catálogo' });
   await amount.selectOption('75');
   await expect(amount).toHaveValue('75');
   await expect(amount.locator('option[value="300"]')).toHaveCount(1);
   await expect(amount.locator('option[value="301"]')).toHaveCount(0);
 });
 
-test('clinical case pickers filter by patient or case without dropping the selected record', async ({
+test('clinical case pickers preserve patient scope after the redundant filter was removed', async ({
   page,
 }) => {
   await login(page, '/clinical/care-plans');
   await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
   const dialog = page.getByRole('dialog');
+  await dialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
   const cases = dialog.getByRole('combobox', { name: 'Hospitalización' });
+  await cases.selectOption('case-demo-001');
   const initial = await cases.inputValue();
-  await dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código').fill('no-existe');
-  await expect(cases.locator('option')).toHaveCount(1);
+  // obserclini1_.pdf: remove the redundant search, retain patient-scoped case selection.
+  await expect(
+    dialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código'),
+  ).toHaveCount(0);
+  await expect(cases.locator('option')).toHaveCount(2);
   await expect(cases).toHaveValue(initial);
   await dialog.getByRole('button', { name: 'Cancelar' }).click();
 
   await page.goto('/clinical/balance');
-  const selectedCase = page.getByLabel('Paciente y hospitalización');
+  await page.getByRole('button', { name: 'Registrar nuevo balance' }).click();
+  const balanceDialog = page.getByRole('dialog');
+  await balanceDialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  const selectedCase = balanceDialog.getByRole('combobox', {
+    name: 'Hospitalización',
+    exact: true,
+  });
+  await selectedCase.selectOption('case-demo-001');
   const initialBalance = await selectedCase.inputValue();
-  await page.getByLabel('Filtrar balances por paciente, DUI o código').fill('no-existe');
-  await expect(selectedCase.locator('option')).toHaveCount(1);
+  await expect(
+    balanceDialog.getByLabel('Filtrar hospitalizaciones por paciente, DUI o código'),
+  ).toHaveCount(0);
+  await expect(selectedCase.locator('option')).toHaveCount(2);
   await expect(selectedCase).toHaveValue(initialBalance);
+  await balanceDialog
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-002');
+  await expect(selectedCase).toHaveValue('');
+  await expect(selectedCase.locator('option[value="case-demo-001"]')).toHaveCount(0);
 });
 
 test('individual statement scopes charges to the selected patient', async ({ page }) => {
@@ -156,7 +215,7 @@ test('quote print layout paginates long content instead of clipping at viewport 
   page,
 }) => {
   await login(page, '/quotes');
-  await page.getByRole('link', { name: 'Consultar' }).first().click();
+  await page.getByRole('link', { name: 'Editar' }).first().click();
   await expect(page.locator('.quote-print-area')).toBeVisible();
   await page.evaluate(() => {
     const area = document.querySelector('.quote-print-area');

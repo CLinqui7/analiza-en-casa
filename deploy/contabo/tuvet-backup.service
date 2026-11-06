@@ -1,0 +1,19 @@
+[Unit]
+Description=Verified encrypted backup of TuVet database, application and private configuration
+OnFailure=tuvet-backup-alert.service
+RequiresMountsFor=/opt/tuvet-staging
+After=tuvet-postgres.service
+Requires=tuvet-postgres.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tuvet-host-backup
+TimeoutStartSec=15min
+UMask=0077
+Nice=10
+IOWeight=20
+MemoryMax=768M
+PrivateTmp=yes
+NoNewPrivileges=yes
+StandardOutput=journal
+StandardError=journal

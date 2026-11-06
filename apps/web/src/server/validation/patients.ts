@@ -65,7 +65,9 @@ export function parsePatientCreate(input: unknown): Patient {
   const body = object(input);
   if ('role' in body) throw new MongoInputError('El rol se resuelve en el servidor.');
   if (Object.keys(body).some((key) => key !== 'patient')) throw new MongoInputError();
-  return parsePatientDto(body.patient);
+  const patient = parsePatientDto(body.patient);
+  if (!patient.referralOrigin) throw new MongoInputError('Seleccione el origen del paciente.');
+  return patient;
 }
 
 export function parsePatientReplace(input: unknown): { patient: Patient; expectedVersion: number } {

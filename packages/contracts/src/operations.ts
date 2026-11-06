@@ -1,9 +1,19 @@
 import { z } from 'zod';
+import { scaleIds, scaleDefinitionSchema, type ClinicalRecord } from './clinical-records';
 
 const id = z.string().trim().min(1).max(120);
 const text = z.string().trim().min(1).max(500);
 const date = z.string().datetime({ offset: true });
-export const configurationCategories = ['SPECIALTY', 'DOSE', 'INSURER', 'MEDICATION'] as const;
+export const configurationCategories = [
+  'SPECIALTY',
+  'DOSE',
+  'INSURER',
+  'MEDICATION',
+  'MEDICAL_VISITOR',
+  'DIAGNOSIS',
+  'SCALE',
+  'DISCOUNT_PROFILE',
+] as const;
 
 export const warehouseStatusSchema = z.enum(['ACTIVE', 'INACTIVE']);
 export const warehouseInputSchema = z
@@ -147,6 +157,24 @@ export const configurationEntrySchema = z
     inventoryItemId: id.optional(),
     tabletsPerBlister: z.number().int().positive().max(10000).optional(),
     tabletsPerBox: z.number().int().positive().max(100000).optional(),
+    scaleIds: z.array(z.enum(scaleIds)).max(10).optional(),
+    scaleDefinition: scaleDefinitionSchema.optional(),
+    categoryRates: z
+      .partialRecord(
+        z.enum([
+          'SERVICES',
+          'STUDIES',
+          'MEDICATIONS',
+          'SUPPLIES',
+          'EQUIPMENT',
+          'FEES',
+          'EXTRAS',
+          'IMAGING',
+        ]),
+        z.number().min(0).max(100),
+      )
+      .optional(),
+    notes: z.string().trim().max(4000).optional(),
   })
   .strict();
 export type ConfigurationEntry = z.infer<typeof configurationEntrySchema>;
@@ -334,6 +362,18 @@ export const confirmedSaleInputSchema = z
 export const confirmedSaleSchema = confirmedSaleInputSchema.extend({ confirmedBy: id });
 export type ConfirmedSale = z.infer<typeof confirmedSaleSchema>;
 export type OperationsSnapshot = {
+  currentJvpe: string;
+  clinicalRecords: ClinicalRecord[];
+  clinicalStockItems: Array<{ id: string; name: string }>;
+  medicationReturns: Array<{
+    id: string;
+    date: string;
+    patientId: string;
+    caseId: string;
+    quoteId: string;
+    medication: string;
+    reason: string;
+  }>;
   professionals: Array<{ userId: string; name: string; profession: 'NURSE' | 'DOCTOR' }>;
   configuration: ConfigurationEntry[];
   periods: BalancePeriod[];
@@ -353,6 +393,10 @@ export type OperationsSnapshot = {
   confirmedSales: ConfirmedSale[];
 };
 export const emptyOperations = (): OperationsSnapshot => ({
+  currentJvpe: '',
+  clinicalRecords: [],
+  clinicalStockItems: [],
+  medicationReturns: [],
   professionals: [],
   configuration: [],
   periods: [],

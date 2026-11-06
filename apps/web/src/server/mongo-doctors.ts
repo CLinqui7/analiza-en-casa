@@ -2,6 +2,7 @@ import { parseDoctorCreate, parseDoctorReplace } from './validation/doctors';
 export { parseDoctorCreate, parseDoctorReplace } from './validation/doctors';
 import { doctorSchema, type Doctor } from '@analiza/contracts';
 import { can, type Permission } from '@/lib/permissions';
+import { doctorForReader } from './doctor-read-model';
 import {
   MongoAccessError,
   MongoConflictError,
@@ -41,15 +42,18 @@ export class MongoDoctorRepository {
   constructor(private readonly doctors: DoctorCollection) {}
 
   async listWithVersions(actor: ServerActor): Promise<DoctorWithVersion[]> {
-    authorize(actor, 'settings:write');
+    authorize(actor, 'doctors:read');
     const rows = await this.doctors.find({ organizationId: actor.organizationId }).toArray();
-    return rows.map((row) => ({ doctor: publicDoctor(row), version: row.version }));
+    return rows.map((row) => ({
+      doctor: doctorForReader(publicDoctor(row), actor.role),
+      version: row.version,
+    }));
   }
 
   async get(actor: ServerActor, id: string): Promise<Doctor | null> {
-    authorize(actor, 'settings:write');
+    authorize(actor, 'doctors:read');
     const doctor = await this.doctors.findOne({ id, organizationId: actor.organizationId });
-    return doctor ? publicDoctor(doctor) : null;
+    return doctor ? doctorForReader(publicDoctor(doctor), actor.role) : null;
   }
 
   async create(actor: ServerActor, input: unknown, now = new Date()): Promise<Doctor> {

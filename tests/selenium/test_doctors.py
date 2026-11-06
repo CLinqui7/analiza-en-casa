@@ -15,7 +15,7 @@ from urllib.request import urlopen
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as conditions
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 from helpers.action_recorder import record_pass, reset
 
@@ -89,7 +89,8 @@ class Doctors(unittest.TestCase):
         self.assertFalse(self.driver.find_elements(By.XPATH, "//*[normalize-space()='Médicos y recursos']"))
 
     def field(self, label: str):
-        return self.driver.find_element(By.XPATH, f"//label[contains(., '{label}')]//*[self::input or self::textarea]")
+        dialog = self.driver.find_element(By.CSS_SELECTOR, '[role="dialog"]')
+        return dialog.find_element(By.XPATH, f".//label[contains(., '{label}')]//*[self::input or self::textarea]")
 
     def test_doctor_resource_lifecycle_persists_and_edits(self) -> None:
         navigation_started = time.time()
@@ -106,6 +107,8 @@ class Doctors(unittest.TestCase):
         specialty.send_keys('Nutri')
         self.wait.until(conditions.element_to_be_clickable((By.XPATH, "//*[@role='option' and normalize-space()='Nutricionista']"))).click()
         self.field('Dirección').send_keys('Dirección Selenium B2')
+        self.field('Teléfono fijo (obligatorio)').send_keys('2222-0200')
+        Select(self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="DOCTOR-REFERRAL-CATEGORY"]')).select_by_value('NEW')
         self.driver.find_element(By.CSS_SELECTOR, 'input[type=file]').send_keys(str(self.attachment.resolve()))
         self.driver.find_element(By.CSS_SELECTOR, '[data-action-id="DOCTOR-SAVE"]').click()
         self.wait.until(conditions.visibility_of_element_located((By.XPATH, "//*[contains(., 'Médica Selenium B2 registrado')]")))

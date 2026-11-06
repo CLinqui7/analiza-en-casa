@@ -42,6 +42,7 @@ import {
 import { can, isAdministrator } from '@/lib/permissions';
 import { commercialScopeForMember } from './commercial-access';
 import { normalizePurchaseTraceability } from '@/lib/purchase-catalog';
+import { samePurchaseTaxRates } from '@/lib/purchase-totals';
 import { hashPassword } from './mongo-auth';
 import {
   MongoAccessError,
@@ -1244,6 +1245,7 @@ export class MongoOperationsRepository {
               input.purchases.length ||
             input.purchases.some(
               (purchase) =>
+                !purchase.taxRates ||
                 purchase.status !== 'DRAFT' ||
                 purchase.receivedAt ||
                 purchase.traceRecordId ||
@@ -1255,7 +1257,8 @@ export class MongoOperationsRepository {
                 purchase.invoiceGroupId !== first.invoiceGroupId ||
                 purchase.reference !== first.reference ||
                 purchase.supplierCatalogItemId !== first.supplierCatalogItemId ||
-                purchase.warehouseId !== first.warehouseId,
+                purchase.warehouseId !== first.warehouseId ||
+                !samePurchaseTaxRates(purchase.taxRates, first.taxRates),
             )
           )
             throw new MongoInputError(
@@ -1313,6 +1316,7 @@ export class MongoOperationsRepository {
           permission('purchases:write');
           const purchase = input.purchase;
           if (
+            (input.command === 'purchase.create' && !purchase.taxRates) ||
             purchase.status !== 'DRAFT' ||
             purchase.receivedAt ||
             purchase.traceRecordId ||
@@ -1331,6 +1335,14 @@ export class MongoOperationsRepository {
           }
           if (input.command === 'purchase.update' && previous?.status !== 'DRAFT')
             throw new MongoConflictError();
+          if (
+            input.command === 'purchase.update' &&
+            previous &&
+            !samePurchaseTaxRates(purchase.taxRates, previous.taxRates)
+          )
+            throw new MongoInputError(
+              'Los impuestos de una compra registrada no se cambian al editarla.',
+            );
           if (input.command === 'purchase.update' && previous?.invoiceGroupId) {
             const linked = await this.database
               .collection('purchases')
@@ -1342,7 +1354,8 @@ export class MongoOperationsRepository {
                 purchase.invoiceNumber !== previous.invoiceNumber ||
                 purchase.reference !== previous.reference ||
                 purchase.supplierCatalogItemId !== previous.supplierCatalogItemId ||
-                purchase.warehouseId !== previous.warehouseId)
+                purchase.warehouseId !== previous.warehouseId ||
+                !samePurchaseTaxRates(purchase.taxRates, previous.taxRates))
             )
               throw new MongoInputError(
                 'El número, proveedor, referencia y bodega de una factura con varias líneas no se editan por separado.',
@@ -1452,7 +1465,12 @@ export class MongoOperationsRepository {
             .collection('purchases')
             .findOne({ ...scoped, id: input.purchaseId }, { session });
           if (!purchase) throw new MongoAccessError();
-          if (purchase.status !== 'RECEIVED' || !purchase.invoiceNumber || purchase.invoiceVoidedAt)
+          const draftGroup = purchase.status === 'DRAFT' && Boolean(purchase.invoiceGroupId);
+          if (
+            (!draftGroup && purchase.status !== 'RECEIVED') ||
+            !purchase.invoiceNumber ||
+            purchase.invoiceVoidedAt
+          )
             throw new MongoConflictError();
           const lines = purchase.invoiceGroupId
             ? await this.database
@@ -1462,9 +1480,12 @@ export class MongoOperationsRepository {
             : [purchase];
           if (
             !lines.length ||
+            (draftGroup && lines.length < 2) ||
             lines.some(
               (line) =>
-                !['RECEIVED', 'CANCELLED'].includes(line.status) ||
+                (draftGroup
+                  ? line.status !== 'DRAFT'
+                  : !['RECEIVED', 'CANCELLED'].includes(line.status)) ||
                 line.invoiceVoidedAt ||
                 line.invoiceNumber !== purchase.invoiceNumber ||
                 line.supplierCatalogItemId !== purchase.supplierCatalogItemId ||
@@ -1475,6 +1496,15 @@ export class MongoOperationsRepository {
             throw new MongoConflictError();
           const occurredAt = new Date().toISOString();
           for (const line of lines) {
+            const update = draftGroup
+              ? {
+                  status: 'CANCELLED' as const,
+                  cancelledAt: occurredAt,
+                  cancelReason: input.reason,
+                  invoiceVoidedAt: occurredAt,
+                  invoiceVoidReason: input.reason,
+                }
+              : { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason };
             const updated = await this.database.collection('purchases').updateOne(
               {
                 ...scoped,
@@ -1482,11 +1512,14 @@ export class MongoOperationsRepository {
                 status: line.status,
                 invoiceVoidedAt: { $exists: false },
               },
-              { $set: { invoiceVoidedAt: occurredAt, invoiceVoidReason: input.reason } },
+              { $set: update },
               { session },
             );
             if (updated.matchedCount !== 1) throw new MongoConflictError();
-            await audit('PURCHASE_INVOICE_VOIDED', line.id);
+            await audit(
+              draftGroup ? 'PURCHASE_DRAFT_INVOICE_CANCELLED' : 'PURCHASE_INVOICE_VOIDED',
+              line.id,
+            );
           }
           return { ids: lines.map((line) => line.id) };
         }

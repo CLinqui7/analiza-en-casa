@@ -1,8 +1,26 @@
 import type { Payment, Quote } from '@analiza/contracts';
+import { calculateQuoteBalance } from '@analiza/domain';
+
+export const quoteAccountRoot = (quote: Quote) =>
+  quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+
+/** Quotes and accounts display the same current balance; drafts never replace a sent charge. */
+export function balanceForQuote(
+  quote: Quote,
+  accounts: ReturnType<typeof receivableAccounts>,
+  payments: readonly Payment[],
+) {
+  const account = accounts.find(
+    (candidate) => quoteAccountRoot(candidate.quote) === quoteAccountRoot(quote),
+  );
+  return account
+    ? { paid: account.paid, balance: account.balance, version: account.quote.version }
+    : { ...calculateQuoteBalance(quote, payments), version: null };
+}
 
 /** Last sent version per quote chain, with payments across that same chain. No inferred taxes. */
 export function receivableAccounts(quotes: readonly Quote[], payments: readonly Payment[]) {
-  const root = (quote: Quote) => quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id;
+  const root = quoteAccountRoot;
   const byId = new Map(quotes.map((quote) => [quote.id, quote]));
   const latest = new Map<string, Quote>();
   for (const quote of quotes) {

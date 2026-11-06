@@ -232,7 +232,7 @@ class ReleaseCoverage(unittest.TestCase):
 
     def test_payment_and_clinical_document_actions_preserve_auditability(self) -> None:
         self.create_sent_quote()
-        self.d.get(f'{BASE}/payments')
+        self.d.get(f'{BASE}/receivables')
         self.click('PAYMENT-APPLY')
         self.fill('Monto ingresado', '125.50')
         self.fill('Referencia', 'REF-RELEASE-SELENIUM')

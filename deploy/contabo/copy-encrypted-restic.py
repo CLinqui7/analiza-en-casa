@@ -10,9 +10,11 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shlex
 import stat
 import subprocess
 import sys
+import time
 
 
 parser = argparse.ArgumentParser()
@@ -48,11 +50,28 @@ client.connect(
     timeout=15, auth_timeout=15, banner_timeout=15,
     look_for_keys=False, allow_agent=False,
 )
-files = []
+files = {}
 sftp = client.open_sftp()
 
 
-def copy_tree(remote, local):
+def source_hashes():
+    command = (
+        f'cd -- {shlex.quote(args.remote_repository)} '
+        '&& find . -type f -print0 | xargs -0 sha256sum'
+    )
+    _, output, errors = client.exec_command(command)
+    values = output.read().decode('utf-8')
+    message = errors.read().decode('utf-8')
+    if output.channel.recv_exit_status() != 0:
+        raise RuntimeError(f'Could not hash encrypted source repository: {message.strip()}')
+    return {
+        name.removeprefix('./'): digest
+        for line in values.splitlines()
+        for digest, name in [line.split('  ', 1)]
+    }
+
+
+def copy_tree(remote, local, hashes):
     for entry in sftp.listdir_attr(remote):
         if entry.filename in ('.', '..') or '/' in entry.filename or '\\' in entry.filename:
             raise RuntimeError('Unsafe repository entry name')
@@ -60,41 +79,55 @@ def copy_tree(remote, local):
         target = local / entry.filename
         if target.resolve().parent != local.resolve():
             raise RuntimeError('Repository entry leaves the offsite directory')
+        relative = target.relative_to(partial).as_posix()
+        # Restic lock files are transient and are not needed for restoration.
+        if relative.startswith('locks/'):
+            continue
         if stat.S_ISDIR(entry.st_mode):
-            target.mkdir()
-            copy_tree(source, target)
+            target.mkdir(exist_ok=True)
+            copy_tree(source, target, hashes)
         elif stat.S_ISREG(entry.st_mode):
+            # A new pack may appear between listing and hashing; the next pass picks it up.
+            if relative not in hashes:
+                continue
+            if relative in files and target.is_file() and target.stat().st_size == entry.st_size:
+                continue
             sftp.get(source, str(target))
-            source_hash = hashlib.sha256()
-            with sftp.open(source, 'rb') as stream:
-                while block := stream.read(65536):
-                    source_hash.update(block)
             copied_hash = hashlib.sha256(target.read_bytes()).hexdigest()
-            if source_hash.hexdigest() != copied_hash:
+            if hashes[relative] != copied_hash:
                 raise RuntimeError('Encrypted repository copy failed SHA-256 comparison')
-            files.append({'path': target.relative_to(partial).as_posix(), 'sha256': copied_hash, 'bytes': entry.st_size})
+            files[relative] = {'path': relative, 'sha256': copied_hash, 'bytes': entry.st_size}
         else:
             raise RuntimeError('Unexpected file type in encrypted repository')
 
 
+environment = os.environ.copy()
+environment['RESTIC_PASSWORD_FILE'] = str(args.restic_password_file)
 try:
-    copy_tree(args.remote_repository, partial)
+    for attempt in range(3):
+        # A VPS backup may append packs or indexes during the offsite transfer.
+        # Rescan before each integrity check, copying only newly added files.
+        copy_tree(args.remote_repository, partial, source_hashes())
+        check = subprocess.run(
+            [str(args.restic), '--no-cache', '-r', str(partial), 'check', '--read-data'],
+            env=environment, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
+        )
+        if check.returncode == 0:
+            break
+        if attempt == 2:
+            raise RuntimeError(f'Encrypted offsite copy failed restic verification: {check.stderr.strip()}')
+        time.sleep(3)
 finally:
     sftp.close()
     client.close()
 
-environment = os.environ.copy()
-environment['RESTIC_PASSWORD_FILE'] = str(args.restic_password_file)
-subprocess.run(
-    [str(args.restic), '--no-cache', '-r', str(partial), 'check', '--read-data'],
-    env=environment, check=True, stdout=subprocess.DEVNULL,
-)
+verified_files = [files[name] for name in sorted(files)]
 manifest = {
     'copied_at': dt.datetime.now(dt.timezone.utc).isoformat(),
     'source': 'encrypted Contabo restic repository',
-    'files': files,
+    'files': verified_files,
     'restic_read_data_check': 'passed',
 }
 (partial / 'copy-verification.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
 partial.rename(final)
-print(json.dumps({'offsite_path': str(final), 'files': len(files), 'bytes': sum(item['bytes'] for item in files), 'restic_check': 'passed'}))
+print(json.dumps({'offsite_path': str(final), 'files': len(verified_files), 'bytes': sum(item['bytes'] for item in verified_files), 'restic_check': 'passed'}))

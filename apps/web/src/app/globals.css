@@ -3820,7 +3820,7 @@ body {
   }
 }
 
-/* Preauthorization board follows the dense six-stage desktop reference. */
+/* Keep all six stages readable at the available content width. */
 .insurance-page {
   gap: 18px;
 }
@@ -3846,21 +3846,19 @@ body {
 
 .insurance-board-shell {
   width: 100%;
-  overflow-x: auto;
-  padding-bottom: 5px;
-  overscroll-behavior-inline: contain;
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .insurance-board {
   display: grid;
-  min-width: 1060px;
-  min-height: 450px;
-  grid-template-columns: repeat(6, minmax(165px, 1fr));
-  gap: 10px;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .insurance-column {
-  overflow: hidden;
+  min-width: 0;
   border: 1px solid #ccdde3;
   border-radius: 15px;
   background: #eaf2f5;
@@ -3877,7 +3875,7 @@ body {
 
 .insurance-column > header strong {
   color: #092f43;
-  font-size: 0.63rem;
+  font-size: 0.78rem;
   font-weight: 850;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -3892,7 +3890,7 @@ body {
   border-radius: 50%;
   background: #fff;
   color: #244e5c;
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -3905,14 +3903,15 @@ body {
 
 .insurance-column-empty {
   display: grid;
-  min-height: 150px;
+  min-height: 72px;
   place-items: center;
   color: #70848e;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
 }
 
 .insurance-card {
   display: grid;
+  min-width: 0;
   gap: 9px;
   padding: 12px;
   border: 1px solid #d4e2e6;
@@ -3926,35 +3925,38 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .insurance-card-topline > a,
 .insurance-card-topline > strong {
   color: #087b74;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 850;
 }
 
 .insurance-card .status-tag {
   padding: 3px 6px;
-  font-size: 0.5rem;
+  font-size: 0.7rem;
 }
 
 .insurance-card h3 {
   margin: 0;
   color: #082f45;
-  font-size: 0.77rem;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .insurance-card > p {
   margin: 0;
   color: #6f828d;
-  font-size: 0.59rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
 
 .insurance-card dl {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
   margin: 0;
 }
@@ -3969,25 +3971,24 @@ body {
 
 .insurance-card dt {
   color: #778a94;
-  font-size: 0.51rem;
+  font-size: 0.75rem;
 }
 
 .insurance-card dd {
   margin: 0;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: #274c5a;
-  font-size: 0.58rem;
+  font-size: 0.85rem;
   font-weight: 750;
   text-overflow: ellipsis;
 }
 
 .insurance-card-history summary {
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: #6b7f89;
   cursor: pointer;
-  font-size: 0.56rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.85rem;
+  white-space: normal;
 }
 
 .insurance-card-history ol {
@@ -3996,32 +3997,35 @@ body {
   margin: 7px 0 0;
   padding-left: 16px;
   color: #5d737f;
-  font-size: 0.55rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
 
 .insurance-card > .button {
   width: 100%;
-  min-height: 31px;
-  padding: 6px 8px;
-  font-size: 0.6rem;
+  min-height: 42px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
 }
 
 .insurance-unrequested-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
   gap: 10px;
   margin-top: 12px;
 }
 
 .insurance-pending-card {
   display: grid;
+  min-width: 0;
   gap: 7px;
   padding: 12px;
   border: 1px solid #dbe6ea;
   border-radius: 12px;
   background: #f8fbfc;
   color: #687d88;
-  font-size: 0.66rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
 }
 
 .insurance-pending-card > div {
@@ -4029,6 +4033,30 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.insurance-page :is(.insurance-card, .insurance-pending-card) :is(.button, .action-link-button) {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@container (max-width: 900px) {
+  .insurance-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 580px) {
+  .insurance-board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@container (min-width: 1850px) {
+  .insurance-board {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 
 .insurance-pending-card strong,
@@ -4090,10 +4118,6 @@ body {
 
   .mobile-nav-overlay {
     position: fixed;
-  }
-
-  .insurance-board {
-    min-height: 405px;
   }
 
   .insurance-page > .panel:has(#insurance-search) .form-grid {
@@ -4550,7 +4574,7 @@ body {
   .sales-mini-charts {
     grid-template-columns: 1fr;
   }
-  .screen-help-trigger {
+  .button.screen-help-trigger {
     font-size: 0;
     gap: 0;
   }
@@ -4571,5 +4595,226 @@ body {
   .sales-mini-row > div > span,
   .commercial-goal-track > span {
     transition: none;
+  }
+}
+
+/* Shared form ergonomics: stable actions, readable labels and viewport containment. */
+.button {
+  min-height: 42px;
+  max-width: 100%;
+  height: auto;
+  gap: 8px;
+  padding: 10px 16px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  flex-shrink: 0;
+}
+.button:disabled {
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.form-grid > .button,
+.form-grid > label > .button {
+  align-self: end;
+  justify-self: start;
+  width: auto;
+}
+.form-grid > *,
+.page-stack > *,
+.panel,
+fieldset,
+.dialog-header > div {
+  min-width: 0;
+}
+.form-grid > .full,
+.form-grid > .full-field {
+  grid-column: 1 / -1;
+}
+.form-grid label:has(> input[type='checkbox']),
+.form-grid label:has(> input[type='radio']) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  padding: 0;
+  accent-color: #17586b;
+}
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+.dialog-header,
+.dialog-footer {
+  flex-shrink: 0;
+}
+.dialog-header .icon-button {
+  flex: 0 0 40px;
+}
+.dialog-header h2 {
+  overflow-wrap: anywhere;
+}
+.dialog-footer,
+.action-row,
+.page-header,
+.table-heading {
+  flex-wrap: wrap;
+}
+.dialog-content {
+  overscroll-behavior: contain;
+  min-width: 0;
+}
+.table-wrap {
+  max-width: 100%;
+}
+.clinical-attention-form {
+  gap: 22px;
+}
+.clinical-attention-form .assignment-fieldset {
+  padding: 18px;
+}
+.clinical-attention-form .assignment-fieldset legend {
+  padding: 0 8px;
+  font-weight: 700;
+}
+.schedule-fields {
+  margin-top: 18px;
+  align-items: start;
+}
+.discount-categories {
+  margin: 0;
+  border-color: #d5e2e8;
+}
+.discount-categories .checkbox-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.discount-categories .checkbox-option {
+  border: 1px solid #d5e2e8;
+  background: #fff;
+  margin: 0;
+}
+.discount-categories .checkbox-option:has(input:checked) {
+  border-color: #208477;
+  background: #eef9f6;
+  color: #14564c;
+}
+.discount-categories .checkbox-option:focus-within {
+  outline: 2px solid #207f91;
+  outline-offset: 2px;
+}
+.discount-categories small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #546d7b;
+}
+.discount-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: #edf6f8;
+  color: #173e54;
+}
+.discount-preview > strong {
+  font-size: 1.35rem;
+}
+.discount-preview > span:last-child {
+  margin-left: auto;
+}
+@media (max-width: 900px) {
+  .discount-categories .checkbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .dialog-backdrop {
+    padding: 8px;
+  }
+  .dialog {
+    max-height: calc(100dvh - 16px);
+    border-radius: 16px;
+  }
+  .dialog-header,
+  .dialog-content,
+  .dialog-footer {
+    padding: 16px;
+  }
+  .dialog-footer .button {
+    flex: 1 1 110px;
+  }
+  .assignment-option-grid {
+    grid-template-columns: 1fr;
+  }
+  .clinical-attention-form .assignment-fieldset {
+    padding: 12px;
+  }
+  .discount-preview > span:last-child {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+.quote-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+}
+.quote-item-actions > .button {
+  width: auto;
+}
+.schedule-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  align-items: start;
+}
+.schedule-date {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+.schedule-date > .button {
+  padding-inline: 12px;
+  min-width: 42px;
+  font-size: 1.15rem;
+}
+@media (max-width: 600px) {
+  .schedule-dates {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Empty tables should not force mobile users to scroll to read their status. */
+@media (max-width: 760px) {
+  .table-wrap table:has(> tbody > tr:only-child > td[colspan]) {
+    min-width: 0;
+    width: 100%;
+    table-layout: auto;
+  }
+  .table-wrap table:has(> tbody > tr:only-child > td[colspan]) > thead {
+    display: none;
+  }
+  .table-wrap table:has(> tbody > tr:only-child > td[colspan]) td[colspan] {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }

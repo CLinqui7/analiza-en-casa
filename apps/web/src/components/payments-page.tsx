@@ -1,14 +1,16 @@
 'use client';
+import { MedicationReturns } from './medication-returns';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { Payment } from '@analiza/contracts';
+import { paymentAmountSchema, type Payment } from '@analiza/contracts';
 import { Button, Dialog, EmptyState, Panel, StatusTag } from '@analiza/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { quoteDisplayCode } from '@analiza/domain';
 import { SearchableSelect } from '@/components/common/searchable-select';
 import { useAuth, useWorkspace } from '@/components/providers';
+import { paymentMethodLabel, paymentStatusLabel } from '@/lib/payment-report';
 import { receivableAccounts } from '@/lib/receivables';
 const money = (value: number) =>
   new Intl.NumberFormat('es-SV', { style: 'currency', currency: 'USD' }).format(value);
@@ -16,42 +18,43 @@ const money = (value: number) =>
 const paymentSchema = z
   .object({
     quoteId: z.string().min(1, 'Seleccione una cotización enviada.'),
-    amount: z.number().positive('Ingrese un monto positivo.'),
+    amount: paymentAmountSchema,
     paymentMethod: z.enum(['CASH', 'CHECK', 'TRANSFER', 'CARD']),
     reference: z.string().trim().max(120, 'Use un máximo de 120 caracteres.').optional(),
   })
   .superRefine((payment, context) => {
     if (
-      (payment.paymentMethod === 'TRANSFER' || payment.paymentMethod === 'CARD') &&
+      (payment.paymentMethod === 'TRANSFER' ||
+        payment.paymentMethod === 'CARD' ||
+        payment.paymentMethod === 'CHECK') &&
       !payment.reference
     ) {
       context.addIssue({
         code: 'custom',
-        message: 'Ingrese el número de referencia.',
+        message:
+          payment.paymentMethod === 'CHECK'
+            ? 'Ingrese el número de reserva.'
+            : 'Ingrese el número de referencia.',
         path: ['reference'],
       });
     }
   });
 type PaymentForm = z.infer<typeof paymentSchema>;
-const paymentStatus = { APPLIED: 'Aplicado', VOIDED: 'Reversado' };
-const paymentMethods = {
-  CASH: 'Efectivo',
-  CHECK: 'Cheque',
-  TRANSFER: 'Transferencia',
-  CARD: 'Tarjeta',
-} as const;
-
-export function PaymentsPage({ receivables = false }: { receivables?: boolean }) {
+export function PaymentsPage() {
   const { addPayment, payments, quotes, patients, voidPayment, error } = useWorkspace();
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const [voiding, setVoiding] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [statementPatientId, setStatementPatientId] = useState('');
-  const [paymentCommandKey, setPaymentCommandKey] = useState(() => crypto.randomUUID());
+  const paymentAttempt = useRef<Payment | null>(null);
+  const [hasPendingPayment, setHasPendingPayment] = useState(false);
   const accounts = receivableAccounts(quotes, payments);
   const openAccounts = accounts.filter((account) => account.balance > 0);
   const sentQuotes = openAccounts.map((account) => account.quote);
+  const insurerAccounts = accounts.filter(
+    (account) => account.quote.accountType === 'SEGURO' || account.quote.insurerAmount > 0,
+  );
   const quoteOptions = openAccounts.map((account) => ({
     value: account.quote.id,
     label:
@@ -90,24 +93,32 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
   }
   async function submit(values: PaymentForm) {
     const account = accounts.find((candidate) => candidate.quote.id === values.quoteId);
-    if (!account || account.balance <= 0) {
+    if (!paymentAttempt.current && (!account || account.balance <= 0)) {
       form.setError('quoteId', { message: 'La cuenta seleccionada ya está pagada.' });
       return;
     }
-    if (Math.round(values.amount * 100) > Math.round(account.balance * 100)) {
+    if (
+      !paymentAttempt.current &&
+      account &&
+      Math.round(values.amount * 100) > Math.round(account.balance * 100)
+    ) {
       form.setError('amount', {
         message: `El monto no puede superar el saldo de ${money(account.balance)}.`,
       });
       return;
     }
     const payment: Payment = {
-      id: crypto.randomUUID(),
+      id: paymentAttempt.current?.id ?? crypto.randomUUID(),
       ...values,
       reference: values.reference || undefined,
-      idempotencyKey: paymentCommandKey,
+      idempotencyKey: paymentAttempt.current?.idempotencyKey ?? crypto.randomUUID(),
       status: 'APPLIED',
-      createdAt: new Date().toISOString(),
+      createdAt: paymentAttempt.current?.createdAt ?? new Date().toISOString(),
     };
+    // A lost response must be retried with the same identity and timestamp.
+    // Edited values retain the key so the server rejects a conflicting replay.
+    paymentAttempt.current = payment;
+    setHasPendingPayment(true);
     if (!(await addPayment(payment))) {
       form.setError('root', {
         message: 'No se pudo guardar el pago; no se confirmó la operación.',
@@ -115,6 +126,8 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
       return;
     }
     setMessage('Pago aplicado correctamente y registrado en auditoría.');
+    paymentAttempt.current = null;
+    setHasPendingPayment(false);
     close();
   }
   async function voidSubmit(values: { reason: string }) {
@@ -176,23 +189,30 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
     }),
     { responsibility: 0, paid: 0, balance: 0 },
   );
-  const title = receivables ? 'Cuentas por cobrar' : 'Pagos';
   return (
     <div className="page-stack payments-page">
+      <MedicationReturns compact />
       <header className="page-header page-header-actions">
         <div>
           <p className="eyebrow">Analiza en Casa</p>
-          <h1>{title}</h1>
+          <h1>Cuentas por cobrar</h1>
           <p>Responsabilidad del paciente, pagos, comprobantes y estado de cuenta.</p>
         </div>
         <div className="header-actions">
           {can('payments:write') ? (
             <Button
               data-action-id="PAYMENT-APPLY"
-              disabled={!openAccounts.length}
+              disabled={!openAccounts.length && !hasPendingPayment}
               onClick={() => {
-                form.setValue('quoteId', sentQuotes[0]?.id ?? '');
-                setPaymentCommandKey(crypto.randomUUID());
+                const requestedQuote = new URLSearchParams(window.location.search).get('quote');
+                const account = openAccounts.find((item) => item.quote.id === requestedQuote);
+                const pending = paymentAttempt.current;
+                form.reset({
+                  quoteId: pending?.quoteId ?? account?.quote.id ?? sentQuotes[0]?.id ?? '',
+                  amount: pending?.amount ?? account?.balance ?? 1,
+                  paymentMethod: pending?.paymentMethod ?? 'CASH',
+                  reference: pending?.reference ?? '',
+                });
                 setMessage(null);
                 setOpen(true);
               }}
@@ -352,9 +372,13 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                           className="button-secondary"
                           data-action-id="PAYMENT-APPLY"
                           onClick={() => {
-                            form.setValue('quoteId', account.quote.id);
-                            form.setValue('amount', account.balance);
-                            setPaymentCommandKey(crypto.randomUUID());
+                            const pending = paymentAttempt.current;
+                            form.reset({
+                              quoteId: pending?.quoteId ?? account.quote.id,
+                              amount: pending?.amount ?? account.balance,
+                              paymentMethod: pending?.paymentMethod ?? 'CASH',
+                              reference: pending?.reference ?? '',
+                            });
                             setOpen(true);
                           }}
                         >
@@ -378,9 +402,50 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           />
         )}
       </Panel>
+      <Panel>
+        <div className="table-heading">
+          <h2>Cotizaciones de aseguradora</h2>
+          <StatusTag>{insurerAccounts.length} cotizaciones</StatusTag>
+        </div>
+        <p className="field-help">
+          Los importes de deducible, coaseguro y responsabilidad de aseguradora se capturan por
+          cotización. La aplicación no infiere cobertura ni descuenta pagos de aseguradora que no
+          estén registrados en un flujo aprobado.
+        </p>
+        {insurerAccounts.length ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cotización</th>
+                  <th>Aseguradora</th>
+                  <th>Deducible declarado</th>
+                  <th>Coaseguro declarado</th>
+                  <th>Responsabilidad de aseguradora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insurerAccounts.map((account) => (
+                  <tr key={account.quote.id}>
+                    <td>
+                      {quoteDisplayCode(account.quote.id)} · v{account.quote.version}
+                    </td>
+                    <td>{account.quote.insurer || 'Sin registrar'}</td>
+                    <td>{money(account.quote.deductibleAmount ?? 0)}</td>
+                    <td>{money(account.quote.coinsuranceAmount ?? 0)}</td>
+                    <td>{money(account.quote.insurerAmount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="field-help">Sin cotizaciones de aseguradora enviadas.</p>
+        )}
+      </Panel>
       {!sentQuotes.length ? (
         <p className="notice" role="status">
-          Envíe una cotización antes de aplicar un pago.
+          Apruebe una cotización antes de aplicar un pago.
         </p>
       ) : null}
       {message ? (
@@ -415,11 +480,11 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
                     <td>{money(payment.amount)}</td>
                     <td>
                       {payment.paymentMethod
-                        ? paymentMethods[payment.paymentMethod]
+                        ? paymentMethodLabel[payment.paymentMethod]
                         : 'No registrado'}
                     </td>
                     <td>{payment.reference || 'No aplica'}</td>
-                    <td>{paymentStatus[payment.status]}</td>
+                    <td>{paymentStatusLabel[payment.status]}</td>
                     <td>
                       <div className="action-row">
                         <Button
@@ -473,7 +538,7 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
           className="form-grid"
           id="payment-form"
           noValidate
-          onSubmit={form.handleSubmit(submit)}
+          onSubmit={(event) => void form.handleSubmit(submit)(event)}
         >
           {form.formState.errors.root ? (
             <p className="field-error full" role="alert">
@@ -514,26 +579,30 @@ export function PaymentsPage({ receivables = false }: { receivables?: boolean })
             <select
               {...form.register('paymentMethod', {
                 onChange: (event) => {
-                  if (event.target.value !== 'TRANSFER' && event.target.value !== 'CARD') {
+                  if (
+                    event.target.value !== 'TRANSFER' &&
+                    event.target.value !== 'CARD' &&
+                    event.target.value !== 'CHECK'
+                  ) {
                     form.setValue('reference', '');
                   }
                 },
               })}
             >
-              {Object.entries(paymentMethods).map(([value, label]) => (
+              {Object.entries(paymentMethodLabel).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
                 </option>
               ))}
             </select>
           </label>
-          {selectedPaymentMethod === 'TRANSFER' || selectedPaymentMethod === 'CARD' ? (
+          {selectedPaymentMethod === 'TRANSFER' ||
+          selectedPaymentMethod === 'CARD' ||
+          selectedPaymentMethod === 'CHECK' ? (
             <label>
-              Número de referencia
+              {selectedPaymentMethod === 'CHECK' ? 'Número de reserva' : 'Número de referencia'}
               <input {...form.register('reference')} autoComplete="off" maxLength={120} />
-              <span className="field-help">
-                Obligatorio para identificar transferencias y pagos con tarjeta.
-              </span>
+              <span className="field-help">Obligatorio para identificar este medio de pago.</span>
               {form.formState.errors.reference ? (
                 <span className="field-error">{form.formState.errors.reference.message}</span>
               ) : null}

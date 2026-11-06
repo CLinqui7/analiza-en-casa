@@ -9,6 +9,28 @@ type CatalogPrice = Readonly<{
 }>;
 type DoctorFee = Readonly<{ id: string; medicalFee?: number }>;
 
+export function quoteDoctorIds(quote: Quote): string[] {
+  return [
+    ...new Set(
+      [
+        quote.primaryDoctorId,
+        quote.secondaryDoctorId,
+        ...quote.items.map((line) => line.doctorId),
+      ].filter((id): id is string => Boolean(id)),
+    ),
+  ];
+}
+
+export function quoteDoctorSelectionError(
+  quote: Quote,
+  doctors: readonly { id: string }[],
+): string | null {
+  const ids = new Set(doctors.map((doctor) => doctor.id));
+  return [quote.primaryDoctorId, quote.secondaryDoctorId].some((id) => id && !ids.has(id))
+    ? 'Seleccione médicos registrados en esta organización.'
+    : null;
+}
+
 const catalogCategory: Record<Exclude<Quote['items'][number]['category'], 'FEES'>, string> = {
   SERVICES: 'SERVICES',
   STUDIES: 'LABORATORY',
@@ -26,6 +48,8 @@ export function quoteCatalogPriceError(
   doctors: readonly DoctorFee[],
   previous?: Quote | null,
 ): string | null {
+  const selectionError = quoteDoctorSelectionError(quote, doctors);
+  if (selectionError) return selectionError;
   const items = new Map(catalogItems.map((entry) => [entry.id, entry]));
   const doctorIds = new Set(doctors.map((entry) => entry.id));
   for (const line of quote.items) {
