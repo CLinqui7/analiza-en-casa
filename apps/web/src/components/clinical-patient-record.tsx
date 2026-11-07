@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Button, EmptyState, Panel } from '@analiza/ui';
+import { Button, Dialog, EmptyState, Panel } from '@analiza/ui';
 import {
   currentClinicalRecords,
   clinicalLabels,
@@ -66,6 +66,8 @@ function PatientRecordContent() {
   const [recent, setRecent] = useState(false);
   const [days, setDays] = useState(7);
   const [history, setHistory] = useState(false);
+  const [printOpen, setPrintOpen] = useState(false);
+  const [printSections, setPrintSections] = useState([0, 1, 2, 3]);
   const [nursingKind, setNursingKind] = useState('ALL');
   const [medicalKind, setMedicalKind] = useState<ClinicalKind>('INDICATION');
   const requestedPatient =
@@ -123,10 +125,14 @@ function PatientRecordContent() {
   );
   const visits = operations.visits.filter((visit) => visit.patientId === requestedPatient);
   const patientShifts = shifts.filter((shift) => shift.patientId === requestedPatient);
-  function renderRecords(entries: ClinicalRecord[]) {
+  function renderRecords(entries: ClinicalRecord[], printing = false) {
     return entries.map((record) => (
       <div className="clinical-record-block" key={record.id}>
-        <ClinicalRecordView record={record} patientName={patient?.fullName} />
+        <ClinicalRecordView
+          record={record}
+          patientName={patient?.fullName}
+          idPrefix={printing ? 'print-source-record' : 'clinical-record'}
+        />
         <Button
           className="button-secondary no-print"
           onClick={() => printClinicalSection(`clinical-record-${record.id}`)}
@@ -135,6 +141,380 @@ function PatientRecordContent() {
         </Button>
       </div>
     ));
+  }
+  function renderContent(printing: boolean) {
+    const show = (index: number) =>
+      printing ? printSections.includes(index) : section === index || section === 4;
+    return (
+      <section id={printing ? 'patient-record-selection-print' : 'patient-record-print'}>
+        <header>
+          <h2>{patient?.fullName}</h2>
+          <p>
+            {patient?.documentId} · {selectedCase || 'Todas las hospitalizaciones'} ·{' '}
+            {printing ? printSections.map((i) => sections[i]).join(' · ') : sections[section]}
+          </p>
+        </header>
+        {show(0) ? (
+          <section>
+            <h2>Resumen · cotizaciones</h2>
+            {patientCases
+              .filter((record) => inCase(record.id))
+              .map((record) => (
+                <p key={record.id}>
+                  {record.id} · Diagnóstico: {record.diagnosisSummary || 'Sin registrar'} · Médico:{' '}
+                  {doctors.find((doctor) => doctor.id === record.primaryDoctorId)?.fullName ??
+                    'Sin asignar'}
+                </p>
+              ))}
+            {patientQuotes.map((quote) => (
+              <article className="clinical-record-block" key={quote.id}>
+                <h3>
+                  {quoteDisplayCode(quote.id)} · Versión {quote.version} ·{' '}
+                  {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
+                </h3>
+                <p>{quote.diagnosisSummary}</p>
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Categoría</th>
+                        <th>Concepto</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Descuento</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {quote.items.map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            {
+                              quoteCategories.find((category) => category.value === item.category)
+                                ?.label
+                            }
+                          </td>
+                          <td>{item.name}</td>
+                          <td>{item.quantity}</td>
+                          <td>{money(item.unitPrice)}</td>
+                          <td>{money(item.discountAmount ?? 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p>
+                  Subtotal: {money(quote.subtotal)} · Descuento: {money(quote.discountAmount)} ·
+                  Total: {money(quote.total)}
+                </p>
+                <p>
+                  Aseguradora: {money(quote.insurerAmount)} · Paciente: {money(quote.patientAmount)}
+                </p>
+                <p>{quote.comments}</p>
+                <Link
+                  className="button button-secondary no-print"
+                  href={`/quotes/${encodeURIComponent(quote.id)}`}
+                >
+                  Ver cotización completa
+                </Link>
+              </article>
+            ))}
+          </section>
+        ) : null}
+        {show(1) ? (
+          <section>
+            <h2>Acciones médicas</h2>
+            {!printing && section === 1 ? (
+              <nav className="clinical-action-grid no-print" aria-label="Registros médicos">
+                {(['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND', 'VITALS'] as const).map(
+                  (kind) => (
+                    <button
+                      key={kind}
+                      className={medicalKind === kind ? 'selected' : ''}
+                      aria-pressed={medicalKind === kind}
+                      onClick={() => setMedicalKind(kind)}
+                    >
+                      <span aria-hidden="true">+</span>
+                      {clinicalLabels[kind]}
+                    </button>
+                  ),
+                )}
+              </nav>
+            ) : null}
+            {renderRecords(
+              records.filter((record) =>
+                printing || section === 4
+                  ? medicalKinds.has(record.payload.kind)
+                  : record.payload.kind === medicalKind,
+              ),
+              printing,
+            )}
+            {!printing &&
+            section === 1 &&
+            !records.some((record) => record.payload.kind === medicalKind) &&
+            !(medicalKind === 'VITALS' && readings.length) &&
+            !(
+              medicalKind === 'EVOLUTION' &&
+              documents.some((document) => document.type === 'CLINICAL_EVOLUTION')
+            ) ? (
+              <p className="notice">
+                No hay registros de {clinicalLabels[medicalKind].toLocaleLowerCase('es')} para esta
+                selección.
+              </p>
+            ) : null}
+            {!printing && section === 1 && medicalKind === 'VITALS' && readings.length ? (
+              <div className="table-wrap">
+                <table>
+                  <caption>Signos vitales anteriores</caption>
+                  <thead>
+                    <tr>
+                      <th>Fecha y hora</th>
+                      <th>FC</th>
+                      <th>FR</th>
+                      <th>SpO₂</th>
+                      <th>Temperatura</th>
+                      <th>PA</th>
+                      <th>HGT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {readings.map((r) => (
+                      <tr key={r.id}>
+                        <td>{new Date(r.measuredAt).toLocaleString('es-SV')}</td>
+                        <td>{r.heartRate ?? r.pulse ?? '—'}</td>
+                        <td>{r.respiratoryRate ?? '—'}</td>
+                        <td>{r.oxygenSaturation ?? '—'}</td>
+                        <td>{r.temperature ?? '—'}</td>
+                        <td>
+                          {r.systolic ?? '—'}/{r.diastolic ?? '—'}
+                        </td>
+                        <td>{r.glucose ?? '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+            {documents
+              .filter(
+                (record) =>
+                  record.type === 'CLINICAL_EVOLUTION' &&
+                  (printing || section === 4 || medicalKind === 'EVOLUTION'),
+              )
+              .map((record) => (
+                <article className="clinical-record-block" key={record.id}>
+                  <h3>{record.title}</h3>
+                  <p>
+                    {record.createdAt} · {record.author} ·{' '}
+                    {record.status === 'SIGNED' ? 'Firmado' : 'Borrador'} · v{record.version}
+                  </p>
+                  <p className="clinical-prose">{record.summary}</p>
+                </article>
+              ))}
+          </section>
+        ) : null}
+        {show(2) ? (
+          <section>
+            <h2>Acciones de enfermería</h2>
+            {!printing && section === 2 ? (
+              <nav className="clinical-tabs no-print" aria-label="Registros de enfermería">
+                {[
+                  ['ALL', 'Todos los registros'],
+                  ['MEDICATION_CARD', 'Tarjetas de medicamentos'],
+                  ['FLUID_BALANCE', 'Balances hídricos'],
+                  ['CARE_PLAN', 'Planes de cuidado'],
+                  ['ADMINISTRATION', 'Administración de medicamentos'],
+                  ['VITALS', 'Signos vitales'],
+                  ['NURSING_NOTE', 'Notas de enfermería'],
+                  ['SCALE', 'Escalas'],
+                ].map(([key, label]) => (
+                  <button
+                    key={key}
+                    aria-current={nursingKind === key ? 'page' : undefined}
+                    onClick={() => setNursingKind(key)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
+            ) : null}
+            {renderRecords(
+              records.filter(
+                (record) =>
+                  !medicalKinds.has(record.payload.kind) &&
+                  (printing ||
+                    section === 4 ||
+                    nursingKind === 'ALL' ||
+                    nursingKind === record.payload.kind),
+              ),
+              printing,
+            )}
+            {documents
+              .filter(
+                (record) =>
+                  record.type === 'CARE_PLAN' &&
+                  (printing ||
+                    section === 4 ||
+                    nursingKind === 'ALL' ||
+                    nursingKind === 'CARE_PLAN'),
+              )
+              .map((record) => (
+                <article className="clinical-record-block" key={record.id}>
+                  <h3>{record.title}</h3>
+                  <p>
+                    {record.createdAt} · {record.author} ·{' '}
+                    {record.status === 'SIGNED' ? 'Firmado' : 'Borrador'} · v{record.version}
+                  </p>
+                  <p className="clinical-prose">{record.summary}</p>
+                </article>
+              ))}
+            {readings.length &&
+            (printing || section === 4 || nursingKind === 'ALL' || nursingKind === 'VITALS') ? (
+              <article className="clinical-record-block">
+                <h3>Signos vitales registrados anteriormente</h3>
+                {readings.map((reading) => (
+                  <p key={reading.id}>
+                    {reading.measuredAt} · Origen:{' '}
+                    {reading.source === 'patient' ? 'Paciente' : 'Clínico'} ·{' '}
+                    {reading.professional ?? ''} · FC {reading.heartRate ?? reading.pulse ?? '—'} ·
+                    FR {reading.respiratoryRate ?? '—'} · SpO₂ {reading.oxygenSaturation ?? '—'} ·
+                    Temperatura {reading.temperature ?? '—'} · PA {reading.systolic ?? '—'}/
+                    {reading.diastolic ?? '—'} · HGT {reading.glucose ?? '—'} · {reading.note}
+                  </p>
+                ))}
+              </article>
+            ) : null}
+            <Link className="action-link-button no-print" href="/clinical/document-versions">
+              Firmas y correcciones de documentos anteriores
+            </Link>
+          </section>
+        ) : null}
+        {show(3) ? (
+          <section>
+            <h2>Visitas del paciente</h2>
+            <p>
+              Agenda y visitas registradas por paciente; los turnos no tienen una hospitalización
+              vinculada.
+            </p>
+            <div className="table-wrap clinical-visits-table">
+              <table>
+                <caption>Visitas registradas de enfermería</caption>
+                <thead>
+                  <tr>
+                    <th>Nombre de la enfermera</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>JVPE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visits
+                    .filter((visit) => visit.profession === 'NURSE')
+                    .map((visit) => {
+                      const nurse = nursingResources.find(
+                        (resource) => resource.userId === visit.professionalUserId,
+                      );
+                      return (
+                        <tr key={visit.id}>
+                          <td>
+                            {visit.professionalName}
+                            {visit.note ? (
+                              <details>
+                                <summary>Observaciones</summary>
+                                <p>{visit.note}</p>
+                              </details>
+                            ) : null}
+                          </td>
+                          <td>{new Date(visit.occurredAt).toLocaleDateString('es-SV')}</td>
+                          <td>
+                            {new Date(visit.occurredAt).toLocaleTimeString('es-SV', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td>
+                            {nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {!visits.some((v) => v.profession === 'NURSE') ? (
+                    <tr>
+                      <td colSpan={4}>No hay visitas de enfermería registradas.</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+            {visits
+              .filter((visit) => visit.profession === 'DOCTOR')
+              .map((visit) => (
+                <article className="clinical-record-block" key={visit.id}>
+                  <h3>Visita médica · {visit.professionalName}</h3>
+                  <p>
+                    {new Date(visit.occurredAt).toLocaleString('es-SV')} · {visit.note}
+                  </p>
+                </article>
+              ))}
+            <div className="table-wrap clinical-visits-table">
+              <table>
+                <caption>Turnos de Agenda</caption>
+                <thead>
+                  <tr>
+                    <th>Nombre de la enfermera</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>JVPE</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {patientShifts.map((shift) => {
+                    const nurse = nursingResources.find(
+                      (resource) => resource.id === shift.resourceId,
+                    );
+                    return (
+                      <tr key={shift.id}>
+                        <td>
+                          {nurse?.displayName ?? 'Personal asignado'}
+                          {shift.note ? <p>{shift.note}</p> : null}
+                        </td>
+                        <td>{new Date(shift.startsAt).toLocaleDateString('es-SV')}</td>
+                        <td>
+                          {new Date(shift.startsAt).toLocaleTimeString('es-SV', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}{' '}
+                          –{' '}
+                          {new Date(shift.endsAt).toLocaleTimeString('es-SV', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </td>
+                        <td>{nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}</td>
+                        <td>
+                          {
+                            {
+                              SCHEDULED: 'Programado',
+                              CANCELLED: 'Cancelado',
+                              COMPLETED: 'Completado',
+                            }[shift.status]
+                          }
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {!patientShifts.length ? (
+                    <tr>
+                      <td colSpan={5}>No hay turnos registrados.</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+      </section>
+    );
   }
   return (
     <div className="page-stack clinical-workflow">
@@ -248,7 +628,12 @@ function PatientRecordContent() {
               />
               Mostrar versiones anteriores
             </label>
-            <Button onClick={() => printClinicalSection('patient-record-print')}>
+            <Button
+              onClick={() => {
+                setPrintSections(section === 4 ? [0, 1, 2, 3] : [section]);
+                setPrintOpen(true);
+              }}
+            >
               Imprimir {section === 4 ? 'expediente completo' : 'sección'}
             </Button>
           </div>
@@ -263,373 +648,73 @@ function PatientRecordContent() {
               </button>
             ))}
           </nav>
-          <section id="patient-record-print">
-            <header>
-              <h2>{patient.fullName}</h2>
-              <p>
-                {patient.documentId} · {selectedCase || 'Todas las hospitalizaciones'} ·{' '}
-                {sections[section]}
-              </p>
-            </header>
-            {section === 0 || section === 4 ? (
-              <section>
-                <h2>Resumen · cotizaciones</h2>
-                {patientCases
-                  .filter((record) => inCase(record.id))
-                  .map((record) => (
-                    <p key={record.id}>
-                      {record.id} · Diagnóstico: {record.diagnosisSummary || 'Sin registrar'} ·
-                      Médico:{' '}
-                      {doctors.find((doctor) => doctor.id === record.primaryDoctorId)?.fullName ??
-                        'Sin asignar'}
-                    </p>
-                  ))}
-                {patientQuotes.map((quote) => (
-                  <article className="clinical-record-block" key={quote.id}>
-                    <h3>
-                      {quoteDisplayCode(quote.id)} · Versión {quote.version} ·{' '}
-                      {quote.status === 'SENT' ? 'Enviada' : 'Borrador'}
-                    </h3>
-                    <p>{quote.diagnosisSummary}</p>
-                    <div className="table-wrap">
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Categoría</th>
-                            <th>Concepto</th>
-                            <th>Cantidad</th>
-                            <th>Precio</th>
-                            <th>Descuento</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {quote.items.map((item) => (
-                            <tr key={item.id}>
-                              <td>
-                                {
-                                  quoteCategories.find(
-                                    (category) => category.value === item.category,
-                                  )?.label
-                                }
-                              </td>
-                              <td>{item.name}</td>
-                              <td>{item.quantity}</td>
-                              <td>{money(item.unitPrice)}</td>
-                              <td>{money(item.discountAmount ?? 0)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <p>
-                      Subtotal: {money(quote.subtotal)} · Descuento: {money(quote.discountAmount)} ·
-                      Total: {money(quote.total)}
-                    </p>
-                    <p>
-                      Aseguradora: {money(quote.insurerAmount)} · Paciente:{' '}
-                      {money(quote.patientAmount)}
-                    </p>
-                    <p>{quote.comments}</p>
-                    <Link
-                      className="button button-secondary no-print"
-                      href={`/quotes/${encodeURIComponent(quote.id)}`}
-                    >
-                      Ver cotización completa
-                    </Link>
-                  </article>
+          {renderContent(false)}
+          {printOpen ? (
+            <div hidden aria-hidden="true">
+              {renderContent(true)}
+            </div>
+          ) : null}
+          <Dialog
+            open={printOpen}
+            title="Imprimir expediente"
+            description="Elija las secciones que desea incluir. Se respetan el paciente, la hospitalización y las versiones seleccionadas."
+            onClose={() => setPrintOpen(false)}
+            footer={
+              <>
+                <Button className="button-secondary" onClick={() => setPrintOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  disabled={!printSections.length}
+                  onClick={() => printClinicalSection('patient-record-selection-print')}
+                >
+                  Imprimir selección
+                </Button>
+              </>
+            }
+          >
+            <div className="clinical-print-picker">
+              <Button className="button-secondary" onClick={() => setPrintSections([0, 1, 2, 3])}>
+                Seleccionar expediente completo
+              </Button>
+              <fieldset>
+                <legend>Secciones a imprimir</legend>
+                {sections.slice(0, 4).map((label, index) => (
+                  <label className="clinical-print-option" key={label}>
+                    <input
+                      type="checkbox"
+                      checked={printSections.includes(index)}
+                      onChange={(event) =>
+                        setPrintSections((current) =>
+                          event.target.checked
+                            ? [...current, index].sort()
+                            : current.filter((i) => i !== index),
+                        )
+                      }
+                    />
+                    <span>
+                      <strong>{label}</strong>
+                      <small>
+                        {
+                          [
+                            'Datos de atención y cotizaciones',
+                            'Indicaciones, evoluciones, historia y antecedentes',
+                            'Tarjetas, aplicaciones, notas, balances y cuidados',
+                            'Visitas y turnos del paciente',
+                          ][index]
+                        }
+                      </small>
+                    </span>
+                  </label>
                 ))}
-              </section>
-            ) : null}
-            {section === 1 || section === 4 ? (
-              <section>
-                <h2>Acciones médicas</h2>
-                {section === 1 ? (
-                  <nav className="clinical-action-grid no-print" aria-label="Registros médicos">
-                    {(['INDICATION', 'EVOLUTION', 'HISTORY', 'BACKGROUND', 'VITALS'] as const).map(
-                      (kind) => (
-                        <button
-                          key={kind}
-                          className={medicalKind === kind ? 'selected' : ''}
-                          aria-pressed={medicalKind === kind}
-                          onClick={() => setMedicalKind(kind)}
-                        >
-                          <span aria-hidden="true">+</span>
-                          {clinicalLabels[kind]}
-                        </button>
-                      ),
-                    )}
-                  </nav>
-                ) : null}
-                {renderRecords(
-                  records.filter((record) =>
-                    section === 4
-                      ? medicalKinds.has(record.payload.kind)
-                      : record.payload.kind === medicalKind,
-                  ),
-                )}
-                {section === 1 &&
-                !records.some((record) => record.payload.kind === medicalKind) &&
-                !(medicalKind === 'VITALS' && readings.length) &&
-                !(
-                  medicalKind === 'EVOLUTION' &&
-                  documents.some((document) => document.type === 'CLINICAL_EVOLUTION')
-                ) ? (
-                  <p className="notice">
-                    No hay registros de {clinicalLabels[medicalKind].toLocaleLowerCase('es')} para
-                    esta selección.
-                  </p>
-                ) : null}
-                {section === 1 && medicalKind === 'VITALS' && readings.length ? (
-                  <div className="table-wrap">
-                    <table>
-                      <caption>Signos vitales anteriores</caption>
-                      <thead>
-                        <tr>
-                          <th>Fecha y hora</th>
-                          <th>FC</th>
-                          <th>FR</th>
-                          <th>SpO₂</th>
-                          <th>Temperatura</th>
-                          <th>PA</th>
-                          <th>HGT</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {readings.map((r) => (
-                          <tr key={r.id}>
-                            <td>{new Date(r.measuredAt).toLocaleString('es-SV')}</td>
-                            <td>{r.heartRate ?? r.pulse ?? '—'}</td>
-                            <td>{r.respiratoryRate ?? '—'}</td>
-                            <td>{r.oxygenSaturation ?? '—'}</td>
-                            <td>{r.temperature ?? '—'}</td>
-                            <td>
-                              {r.systolic ?? '—'}/{r.diastolic ?? '—'}
-                            </td>
-                            <td>{r.glucose ?? '—'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : null}
-                {documents
-                  .filter(
-                    (record) =>
-                      record.type === 'CLINICAL_EVOLUTION' &&
-                      (section === 4 || medicalKind === 'EVOLUTION'),
-                  )
-                  .map((record) => (
-                    <article className="clinical-record-block" key={record.id}>
-                      <h3>{record.title}</h3>
-                      <p>
-                        {record.createdAt} · {record.author} ·{' '}
-                        {record.status === 'SIGNED' ? 'Firmado' : 'Borrador'} · v{record.version}
-                      </p>
-                      <p className="clinical-prose">{record.summary}</p>
-                    </article>
-                  ))}
-              </section>
-            ) : null}
-            {section === 2 || section === 4 ? (
-              <section>
-                <h2>Acciones de enfermería</h2>
-                {section === 2 ? (
-                  <nav className="clinical-tabs no-print" aria-label="Registros de enfermería">
-                    {[
-                      ['ALL', 'Todos los registros'],
-                      ['MEDICATION_CARD', 'Tarjetas de medicamentos'],
-                      ['FLUID_BALANCE', 'Balances hídricos'],
-                      ['CARE_PLAN', 'Planes de cuidado'],
-                      ['ADMINISTRATION', 'Administración de medicamentos'],
-                      ['VITALS', 'Signos vitales'],
-                      ['NURSING_NOTE', 'Notas de enfermería'],
-                      ['SCALE', 'Escalas'],
-                    ].map(([key, label]) => (
-                      <button
-                        key={key}
-                        aria-current={nursingKind === key ? 'page' : undefined}
-                        onClick={() => setNursingKind(key)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </nav>
-                ) : null}
-                {renderRecords(
-                  records.filter(
-                    (record) =>
-                      !medicalKinds.has(record.payload.kind) &&
-                      (section === 4 ||
-                        nursingKind === 'ALL' ||
-                        nursingKind === record.payload.kind),
-                  ),
-                )}
-                {documents
-                  .filter(
-                    (record) =>
-                      record.type === 'CARE_PLAN' &&
-                      (section === 4 || nursingKind === 'ALL' || nursingKind === 'CARE_PLAN'),
-                  )
-                  .map((record) => (
-                    <article className="clinical-record-block" key={record.id}>
-                      <h3>{record.title}</h3>
-                      <p>
-                        {record.createdAt} · {record.author} ·{' '}
-                        {record.status === 'SIGNED' ? 'Firmado' : 'Borrador'} · v{record.version}
-                      </p>
-                      <p className="clinical-prose">{record.summary}</p>
-                    </article>
-                  ))}
-                {readings.length &&
-                (section === 4 || nursingKind === 'ALL' || nursingKind === 'VITALS') ? (
-                  <article className="clinical-record-block">
-                    <h3>Signos vitales registrados anteriormente</h3>
-                    {readings.map((reading) => (
-                      <p key={reading.id}>
-                        {reading.measuredAt} · Origen:{' '}
-                        {reading.source === 'patient' ? 'Paciente' : 'Clínico'} ·{' '}
-                        {reading.professional ?? ''} · FC{' '}
-                        {reading.heartRate ?? reading.pulse ?? '—'} · FR{' '}
-                        {reading.respiratoryRate ?? '—'} · SpO₂ {reading.oxygenSaturation ?? '—'} ·
-                        Temperatura {reading.temperature ?? '—'} · PA {reading.systolic ?? '—'}/
-                        {reading.diastolic ?? '—'} · HGT {reading.glucose ?? '—'} · {reading.note}
-                      </p>
-                    ))}
-                  </article>
-                ) : null}
-                <Link className="action-link-button no-print" href="/clinical/document-versions">
-                  Firmas y correcciones de documentos anteriores
-                </Link>
-              </section>
-            ) : null}
-            {section === 3 || section === 4 ? (
-              <section>
-                <h2>Visitas del paciente</h2>
-                <p>
-                  Agenda y visitas registradas por paciente; los turnos no tienen una
-                  hospitalización vinculada.
-                </p>
-                <div className="table-wrap clinical-visits-table">
-                  <table>
-                    <caption>Visitas registradas de enfermería</caption>
-                    <thead>
-                      <tr>
-                        <th>Nombre de la enfermera</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>JVPE</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visits
-                        .filter((visit) => visit.profession === 'NURSE')
-                        .map((visit) => {
-                          const nurse = nursingResources.find(
-                            (resource) => resource.userId === visit.professionalUserId,
-                          );
-                          return (
-                            <tr key={visit.id}>
-                              <td>
-                                {visit.professionalName}
-                                {visit.note ? (
-                                  <details>
-                                    <summary>Observaciones</summary>
-                                    <p>{visit.note}</p>
-                                  </details>
-                                ) : null}
-                              </td>
-                              <td>{new Date(visit.occurredAt).toLocaleDateString('es-SV')}</td>
-                              <td>
-                                {new Date(visit.occurredAt).toLocaleTimeString('es-SV', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </td>
-                              <td>
-                                {nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      {!visits.some((v) => v.profession === 'NURSE') ? (
-                        <tr>
-                          <td colSpan={4}>No hay visitas de enfermería registradas.</td>
-                        </tr>
-                      ) : null}
-                    </tbody>
-                  </table>
-                </div>
-                {visits
-                  .filter((visit) => visit.profession === 'DOCTOR')
-                  .map((visit) => (
-                    <article className="clinical-record-block" key={visit.id}>
-                      <h3>Visita médica · {visit.professionalName}</h3>
-                      <p>
-                        {new Date(visit.occurredAt).toLocaleString('es-SV')} · {visit.note}
-                      </p>
-                    </article>
-                  ))}
-                <div className="table-wrap clinical-visits-table">
-                  <table>
-                    <caption>Turnos de Agenda</caption>
-                    <thead>
-                      <tr>
-                        <th>Nombre de la enfermera</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                        <th>JVPE</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {patientShifts.map((shift) => {
-                        const nurse = nursingResources.find(
-                          (resource) => resource.id === shift.resourceId,
-                        );
-                        return (
-                          <tr key={shift.id}>
-                            <td>
-                              {nurse?.displayName ?? 'Personal asignado'}
-                              {shift.note ? <p>{shift.note}</p> : null}
-                            </td>
-                            <td>{new Date(shift.startsAt).toLocaleDateString('es-SV')}</td>
-                            <td>
-                              {new Date(shift.startsAt).toLocaleTimeString('es-SV', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}{' '}
-                              –{' '}
-                              {new Date(shift.endsAt).toLocaleTimeString('es-SV', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </td>
-                            <td>
-                              {nurse?.jvpe || nurse?.boardRegistrationNumber || 'No registrado'}
-                            </td>
-                            <td>
-                              {
-                                {
-                                  SCHEDULED: 'Programado',
-                                  CANCELLED: 'Cancelado',
-                                  COMPLETED: 'Completado',
-                                }[shift.status]
-                              }
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {!patientShifts.length ? (
-                        <tr>
-                          <td colSpan={5}>No hay turnos registrados.</td>
-                        </tr>
-                      ) : null}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            ) : null}
-          </section>
+              </fieldset>
+              <p role="status">
+                {printSections.length
+                  ? `${printSections.length} de 4 secciones seleccionadas`
+                  : 'Seleccione al menos una sección.'}
+              </p>
+            </div>
+          </Dialog>
         </>
       ) : (
         <EmptyState

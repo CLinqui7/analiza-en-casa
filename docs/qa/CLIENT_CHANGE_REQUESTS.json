@@ -2271,5 +2271,12 @@
       "verification_sha": "5ce9431f1ae6e643c0df111c399c8b4a04b0b968",
       "scope": "Selected doctor full labels wrap below native selectors and are exposed as accessible descriptions. Eleven affected browser scenarios, TypeScript and ESLint passed. Prior 356 unit/server, 35 browser, ten PostgreSQL groups and 59 public routes remain separately recorded. No changes to server logic, clinical or financial data."
     }
+  },
+  "clinical_nov07_regression": {
+    "status": "IMPLEMENTED_PENDING_CONNECTED_QA",
+    "verification_sha": null,
+    "evidence": "docs/feedback/CLINICAL_CHANGES_2026-11-07.md",
+    "source": "docs/qa/sources/CLIENT_CLINICAL_CHANGES_2026-11-07.txt",
+    "scope": "Explicit per-medication times and dilution, per-occurrence administration and stock correction, reusable user-configured stock consumption, complete print group selection. 362 unit/server and 60 broad browser tests plus 18 clinical regression tests passed. Connected persistence and deployment are pending; no new EXACT or full video audit."
   }
 }

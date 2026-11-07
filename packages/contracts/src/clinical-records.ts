@@ -434,6 +434,25 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
       kind: z.literal('MEDICATION_CARD'),
       chronic: optionalText,
       instructions: optionalText,
+      schedule: z
+        .array(
+          z
+            .object({
+              medicationId: id,
+              times: z
+                .array(time)
+                .max(48)
+                .refine((v) => new Set(v).size === v.length, 'No repita horas de aplicación.'),
+              dilution: optionalText,
+            })
+            .strict(),
+        )
+        .max(200)
+        .refine(
+          (v) => new Set(v.map((s) => s.medicationId)).size === v.length,
+          'No repita medicamentos en el horario.',
+        )
+        .optional(),
       stock: z
         .array(
           z
@@ -506,12 +525,21 @@ export const clinicalPayloadSchema = z.discriminatedUnion('kind', [
       items: z
         .array(
           z
-            .object({ medicationId: id, applied: z.boolean(), reason: optionalText })
+            .object({
+              medicationId: id,
+              scheduledTime: time.optional(),
+              applied: z.boolean(),
+              reason: optionalText,
+            })
             .strict()
             .refine((v) => v.applied || !!v.reason, 'Indique por qué no se aplicó.'),
         )
         .min(1)
-        .max(200),
+        .max(9600)
+        .refine(
+          (items) => new Set(items.map(medicationApplicationKey)).size === items.length,
+          'No repita una aplicación del mismo medicamento y horario.',
+        ),
     })
     .strict(),
   z
@@ -574,6 +602,9 @@ export type MedicationSnapshot = {
   chronic: boolean;
   quoteId?: string;
   quoteItemId?: string;
+  inventoryItemId?: string;
+  applicationTimes?: string[];
+  dilution?: string;
 };
 export type ClinicalRecord = ClinicalRecordInput & {
   createdAt: string;
@@ -588,7 +619,25 @@ export type ClinicalRecord = ClinicalRecordInput & {
   score?: number | null;
   stockMovementIds?: string[];
   stockByMedication?: Record<string, string[]>;
+  stockByApplication?: Record<string, string[]>;
 };
+/** Historical, unscheduled applications keep their original identity. */
+export function medicationApplicationKey(item: { medicationId: string; scheduledTime?: string }) {
+  return item.scheduledTime
+    ? JSON.stringify([item.medicationId, item.scheduledTime])
+    : item.medicationId;
+}
+export function medicationApplications(card?: ClinicalRecord) {
+  return (card?.medications ?? []).flatMap((medication) =>
+    (medication.applicationTimes?.length ? medication.applicationTimes : [undefined]).map(
+      (scheduledTime) => ({
+        medication,
+        medicationId: medication.id,
+        ...(scheduledTime ? { scheduledTime } : {}),
+      }),
+    ),
+  );
+}
 export const carePlanLabels = {
   DIET: 'Dieta',
   NURSING: 'Cuidado de enfermería',

@@ -10,6 +10,7 @@ import {
   catalogItemSchema,
   inventoryTraceRecordSchema,
   inventoryMovementSchema,
+  medicationApplicationKey,
   type ClinicalPayload,
 } from '../packages/contracts/src/index';
 import {
@@ -113,6 +114,7 @@ try {
           id: 'medicine',
           category: 'MEDICATIONS',
           name: 'Medicamento sintético QA',
+          inventoryItemId: itemId,
           quantity: 3,
           unitPrice: 1,
           discountAmount: 0,
@@ -538,7 +540,7 @@ try {
     ...administration(`${quoteId}:medicine`, true),
     cardId: bareCard.id,
   } as Extract<ClinicalPayload, { kind: 'ADMINISTRATION' }>;
-  await assert.rejects(save(noStockPayload), /salida de inventario/);
+  await assert.rejects(save(noStockPayload), /Configure el origen/);
   await assert.rejects(
     save({
       ...noStockPayload,
@@ -645,6 +647,161 @@ try {
     for (const row of rows.rows) inventoryMovementSchema.parse(row.body);
   });
   check('all generated inventory movements remain readable through the strict contract');
+  const rule = {
+    id: `stock-rule-${run}`,
+    category: 'MEDICATION_STOCK',
+    label: 'Medicamento sintético QA',
+    active: true,
+    inventoryItemId: itemId,
+    warehouseId,
+    unitsPerApplication: 2,
+  };
+  await assert.rejects(
+    backend.operations.execute(foreign, { command: 'configuration.save', entry: rule }),
+    /organización/,
+  );
+  await backend.operations.execute(actor, { command: 'configuration.save', entry: rule });
+  await assert.rejects(
+    backend.operations.execute(actor, {
+      command: 'configuration.save',
+      entry: { ...rule, id: `duplicate-${run}` },
+    }),
+    /ya tiene configuración/,
+  );
+  await assert.rejects(
+    backend.operations.execute(actor, {
+      command: 'configuration.save',
+      entry: { ...rule, warehouseId: 'foreign-warehouse' },
+    }),
+    /organización/,
+  );
+  await transaction(pool, actor, async (c) => {
+    const movement = inventoryMovementSchema.parse({
+      id: `schedule-entry-${run}`,
+      itemId,
+      warehouseId,
+      kind: 'ENTRY',
+      quantity: 20,
+      createdAt: `${date}T09:00:00Z`,
+      reason: 'Entrada sintética para horarios',
+      user: actor.userId,
+      traceRecordId: traceIds[1],
+      traceNumber: traceIds[1].toUpperCase(),
+    });
+    await c.query(
+      'UPDATE analiza.inventory_trace_balances SET quantity=quantity+20 WHERE organization_id=$1 AND trace_record_id=$2 AND warehouse_id=$3',
+      [actor.organizationId, traceIds[1], warehouseId],
+    );
+    await c.query(
+      'INSERT INTO analiza.inventory_movements(organization_id,id,item_id,warehouse_id,idempotency_key,delta,body,trace_record_id) VALUES($1,$2,$3,$4,$2,20,$5::jsonb,$6)',
+      [
+        actor.organizationId,
+        movement.id,
+        itemId,
+        warehouseId,
+        JSON.stringify(movement),
+        traceIds[1],
+      ],
+    );
+  });
+  const scheduledCard = await save({
+    kind: 'MEDICATION_CARD',
+    chronic: '',
+    instructions: '',
+    stock: [],
+    schedule: [
+      {
+        medicationId: `${quoteId}:medicine`,
+        times: ['08:00', '16:00', '22:00'],
+        dilution: 'Dilución capturada por usuario QA',
+      },
+    ],
+  });
+  assert.equal(scheduledCard.medications?.[0].inventoryItemId, itemId);
+  assert.deepEqual(scheduledCard.medications?.[0].applicationTimes, ['08:00', '16:00', '22:00']);
+  const slots = ['08:00', '16:00', '22:00'].map((scheduledTime, i) => ({
+    medicationId: `${quoteId}:medicine`,
+    scheduledTime,
+    applied: i < 2,
+    reason: i < 2 ? '' : 'Omisión sintética',
+  }));
+  const scheduledPayload = { ...noStockPayload, cardId: scheduledCard.id, items: slots };
+  const beforeSlots = await balance();
+  const scheduledId = randomUUID();
+  const scheduledCommand = {
+    command: 'clinical.record',
+    record: { id: scheduledId, patientId, caseId, date, payload: scheduledPayload },
+  };
+  const applications = await Promise.all([
+    saveClinicalRecord(pool, actor, scheduledCommand),
+    saveClinicalRecord(pool, actor, scheduledCommand),
+  ]);
+  assert.equal(applications[0].id, applications[1].id);
+  assert.equal(await balance(), beforeSlots - 4);
+  assert.equal(new Set(applications[0].stockMovementIds).size, 2);
+  assert.equal(
+    applications[0].payload.kind === 'ADMINISTRATION' &&
+      applications[0].payload.stock?.[0].unitsPerApplication,
+    2,
+  );
+  await assert.rejects(save(scheduledPayload), /ya están registrados/);
+  await assert.rejects(
+    save({ ...scheduledPayload, items: [{ ...slots[0], scheduledTime: '09:00' }] }),
+    /hora de aplicación/,
+  );
+  await assert.rejects(
+    save({
+      ...scheduledPayload,
+      items: [{ medicationId: slots[0].medicationId, applied: true, reason: '' }],
+    }),
+    /hora de aplicación/,
+  );
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: { ...rule, unitsPerApplication: 3 },
+  });
+  const correctedSlots = await save(
+    {
+      ...scheduledPayload,
+      items: slots.map((slot, i) =>
+        i === 0 ? { ...slot, applied: false, reason: 'Corrección de primera hora' } : slot,
+      ),
+    },
+    { correctionOf: scheduledId, correctionReason: 'Corrección sintética por horario' },
+  );
+  assert.equal(await balance(), beforeSlots - 2);
+  assert.deepEqual(
+    correctedSlots.stockByApplication?.[medicationApplicationKey(slots[1])],
+    applications[0].stockByApplication?.[medicationApplicationKey(slots[1])],
+  );
+  assert.equal(medicationReturns([applications[0], correctedSlots]).length, 2);
+  const nextDate = '2026-11-04';
+  const concurrentSlots = await Promise.allSettled([
+    save({ ...scheduledPayload, items: [slots[0]] }, { date: nextDate }),
+    save({ ...scheduledPayload, items: [slots[0]] }, { date: nextDate }),
+  ]);
+  assert.equal(concurrentSlots.filter((r) => r.status === 'fulfilled').length, 1);
+  assert.equal(await balance(), beforeSlots - 5);
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: { ...rule, unitsPerApplication: 100 },
+  });
+  const beforeRejected = await balance();
+  await assert.rejects(
+    save({ ...scheduledPayload, items: [slots[1]] }, { date: nextDate }),
+    /vigentes suficientes/,
+  );
+  assert.equal(await balance(), beforeRejected);
+  await backend.operations.execute(actor, {
+    command: 'configuration.save',
+    entry: { ...rule, unitsPerApplication: 2 },
+  });
+  check(
+    'scheduled applications resolve configured stock, deduplicate retries and concurrent slots, preserve per-slot corrections and reject invalid hours or insufficient stock',
+  );
+  check(
+    'medication stock configuration enforces organization, unique medicine and immutable consumed rule snapshots',
+  );
   console.log(
     JSON.stringify({
       status: 'PASS',

@@ -137,14 +137,53 @@ test('medical and nursing forms persist through HTTP, reload and record printing
     window.print = () => {};
   });
   await page.getByRole('button', { name: 'Imprimir expediente completo', exact: true }).click();
+  const selection = page.getByRole('dialog');
+  await selection.getByRole('checkbox', { name: /^Resumen/ }).uncheck();
+  await selection.getByRole('checkbox', { name: /^Visitas/ }).uncheck();
+  await page.getByRole('dialog').getByRole('button', { name: 'Imprimir selección' }).click();
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('#clinical-print-root')).toBeVisible();
   await expect(page.locator('#clinical-print-root')).toContainText('Paciente sintético');
   await expect(page.locator('#clinical-print-root')).toContainText('Nota de QA ' + run);
+  for (const label of [
+    'Indicación médica',
+    'Evolución clínica',
+    'Historia clínica',
+    'Antecedentes clínicos',
+  ])
+    await expect(page.locator('#clinical-print-root')).toContainText(
+      `Texto sintético ${run} ${label}`,
+    );
+  await expect(page.locator('#clinical-print-root')).not.toContainText('Resumen · cotizaciones');
+  await expect(page.locator('#clinical-print-root')).not.toContainText('Visitas del paciente');
   await expect(page.locator('.sidebar')).toBeHidden();
   await page.pdf({ path: './.local/clinical-record-qa.pdf', format: 'A4' });
   await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
   await expect(page.locator('#clinical-print-root')).toHaveCount(0);
+});
+
+// test-id: playwright:clinical-stock-configuration
+test('nurse configures reusable medication consumption through the UI and reloads it', async ({
+  page,
+}) => {
+  await login(page, '/catalogs/clinical');
+  await page.getByRole('button', { name: 'Consumo de medicamentos', exact: true }).click();
+  const row = page
+    .locator('.clinical-patient-list > div')
+    .filter({ hasText: 'Medicamento sintético QA' })
+    .first();
+  await row.getByRole('button', { name: 'Editar', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel('Medicamento de inventario')).toBeDisabled();
+  await dialog.getByLabel('Unidades de inventario por aplicación').fill('3');
+  await persist(page);
+  await page.reload();
+  await page.getByRole('button', { name: 'Consumo de medicamentos', exact: true }).click();
+  await expect(row).toContainText('3 unidades por aplicación');
+  await row.getByRole('button', { name: 'Editar', exact: true }).click();
+  await dialog.getByLabel('Unidades de inventario por aplicación').fill('2');
+  await persist(page);
+  await expect(row).toContainText('2 unidades por aplicación');
 });
 
 // test-id: playwright:clinical-connected-administration
@@ -153,6 +192,10 @@ test('card edit and mixed administration record each medicine without changing c
 }) => {
   await login(page, '/clinical/orders');
   const dialog = await editor(page, 'Tarjeta de medicamentos', true);
+  await dialog.getByLabel(/^Hora 1/).fill('09:00');
+  await dialog.getByRole('button', { name: 'Agregar hora' }).click();
+  await dialog.getByLabel(/^Hora 2/).fill('17:00');
+  await dialog.getByLabel(/^Dilución/).fill('Dilución manual sintética de navegador');
   await dialog.getByLabel('Crónicos', { exact: true }).fill('Crónico sintético navegador');
   const card = await persist(page);
   expect(card.medications).toHaveLength(2);
@@ -174,17 +217,30 @@ test('card edit and mixed administration record each medicine without changing c
     .selectOption('Oral');
   const med = card.medications.find((m: { chronic: boolean }) => !m.chronic);
   await administration
-    .getByRole('combobox', { name: 'Aplicación · ' + med.name, exact: true })
+    .getByRole('combobox', { name: 'Aplicación · ' + med.name + ' · 09:00', exact: true })
     .selectOption('no');
   await administration
-    .getByLabel('Motivo de no aplicación · ' + med.name)
+    .getByLabel('Motivo de no aplicación · ' + med.name + ' · 09:00')
     .fill('No aplicado en QA de navegador');
+  await administration
+    .getByRole('combobox', { name: 'Aplicación · ' + med.name + ' · 17:00', exact: true })
+    .selectOption('yes');
+  await expect(administration.getByText(/Salida de inventario/)).toHaveCount(0);
+  await expect(
+    administration.getByText('Dilución: Dilución manual sintética de navegador'),
+  ).toHaveCount(2);
   await administration
     .getByRole('combobox', { name: 'Aplicación · Crónico sintético navegador', exact: true })
     .selectOption('yes');
   const result = await persist(page);
-  expect(result.payload.items).toHaveLength(2);
-  expect(result.stockMovementIds).toEqual([]);
+  expect(result.payload.items).toHaveLength(3);
+  expect(result.stockMovementIds).toHaveLength(1);
+  expect(result.payload.stock[0].unitsPerApplication).toBe(2);
+  await page.reload();
+  const repeat = await editor(page, 'Administración de medicamentos', true);
+  await expect(repeat.getByText('Aplicación registrada', { exact: true })).toHaveCount(1);
+  await expect(repeat.getByText('No aplicación registrada', { exact: true })).toHaveCount(1);
+  await repeat.getByRole('button', { name: 'Cancelar', exact: true }).click();
   await page.goto('/reports/returns');
   await expect(page.getByText('No aplicado en QA de navegador').first()).toBeVisible();
 });

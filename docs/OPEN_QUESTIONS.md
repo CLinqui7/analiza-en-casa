@@ -1,5 +1,9 @@
 # Preguntas abiertas y bloqueadores
 
+## CLINICAL-NOV07 · origen y consumo de medicamentos
+
+Decisión recibida del usuario: configurar origen y unidades una vez por medicamento. Se implementa configuración reutilizable por artículo y organización, con referencia exacta desde la cotización, sin inferir consumo a partir de dosis ni asumir una unidad. Si falta la referencia o la configuración, el usuario debe completarla antes de registrar una aplicación que descuente inventario. No es una definición clínica pendiente del desarrollador; los valores los captura el equipo. El PDF del 7 de noviembre autoriza horarios y dilución por medicamento y sustituye la salida manual en Administración. No cierra las preguntas de PRN, reglas terapéuticas ni identidades de médicos de otras fuentes.
+
 ## DOCTORS-NOV06 · identidades antiguas contradictorias
 
 La conciliación posterior confirma los 623 perfiles del archivo y sus clínicas, pero encuentra dos grupos de nombres repetidos anteriores al lote, documentos contradictorios y un DUI compartido por nombres distintos. Se contrastaron fuente, auditoría y referencias en pacientes, ingresos, cotizaciones y visitas. Dos nombres completos del Excel podrían corresponder a grupos antiguos abreviados; no hay identificador profesional o contacto compartido que lo demuestre. El cliente pidió que lo revisáramos; los datos disponibles no determinan una identidad o documento correcto. Se conservan las fichas, se distinguen las opciones de selección y no se modifican historiales firmados/enviados. Detalle privado en `C:/Temp/analiza-doctor-review-private-20261106/fichas-anteriores-por-revisar.csv`; evidencia pública sin datos personales en `docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md`. La búsqueda y selección en cotizaciones no dependen de resolver estas identidades.

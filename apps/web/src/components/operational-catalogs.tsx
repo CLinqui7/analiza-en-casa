@@ -11,6 +11,7 @@ export const categoryLabels = {
   DOSE: 'Dosis registradas',
   INSURER: 'Seguros y descuentos',
   MEDICATION: 'Medicamentos y presentaciones',
+  MEDICATION_STOCK: 'Consumo de medicamentos',
   MEDICAL_VISITOR: 'Visitadores médicos',
   DIAGNOSIS: 'Diagnósticos',
   SCALE: 'Escalas',
@@ -76,7 +77,10 @@ export function OperationalCatalogs({
       {!fixedCategory ? (
         <div className="card-grid">
           {configurationCategories
-            .filter((key) => !['DIAGNOSIS', 'SCALE', 'DISCOUNT_PROFILE'].includes(key))
+            .filter(
+              (key) =>
+                !['DIAGNOSIS', 'SCALE', 'DISCOUNT_PROFILE', 'MEDICATION_STOCK'].includes(key),
+            )
             .map((key) => (
               <button
                 className={`panel catalog-category-card${category === key ? ' selected' : ''}`}

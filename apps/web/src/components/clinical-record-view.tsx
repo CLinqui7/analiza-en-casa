@@ -5,6 +5,7 @@ import {
   carePlanLabels,
   fluidColumns,
   fluidTotals,
+  medicationApplicationKey,
   type ClinicalRecord,
 } from '@analiza/contracts';
 
@@ -51,6 +52,12 @@ export function ClinicalRecordView({
               <li key={med.id}>
                 {med.name}
                 {med.chronic ? ' · Crónico' : ''}
+                {med.applicationTimes?.length ? (
+                  <p className="medication-time-summary">
+                    Horas de aplicación: {med.applicationTimes.join(' · ')}
+                  </p>
+                ) : null}
+                {med.dilution ? <p className="clinical-prose">Dilución: {med.dilution}</p> : null}
               </li>
             ))}
           </ul>
@@ -155,11 +162,12 @@ export function ClinicalRecordView({
             {payload.route}
           </p>
           {payload.items.map((item) => (
-            <p key={item.medicationId}>
+            <p key={medicationApplicationKey(item)}>
               <strong>
                 {record.medications?.find((med) => med.id === item.medicationId)?.name}
               </strong>{' '}
-              · {item.applied ? 'Aplicado' : `No aplicado: ${item.reason}`}
+              {item.scheduledTime ? `· Hora programada ${item.scheduledTime} ` : ''}·{' '}
+              {item.applied ? 'Aplicado' : `No aplicado: ${item.reason}`}
             </p>
           ))}
         </>

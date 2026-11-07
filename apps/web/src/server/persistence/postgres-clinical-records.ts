@@ -5,6 +5,7 @@ import {
   clinicalRecordInputSchema,
   carePlanTypes,
   currentClinicalRecords,
+  medicationApplicationKey,
   clinicalScales,
   scaleDefinitionSchema,
   scoreScale,
@@ -59,6 +60,7 @@ export function quoteMedications(quotes: Quote[]): MedicationSnapshot[] {
         chronic: false,
         quoteId: quote.id,
         quoteItemId: item.id,
+        ...(item.inventoryItemId ? { inventoryItemId: item.inventoryItemId } : {}),
       })),
   );
 }
@@ -69,6 +71,7 @@ async function deductStock(
   record: ClinicalRecord,
   stock: { inventoryItemId: string; warehouseId: string; unitsPerApplication: number },
   medicationId: string,
+  applicationKey = medicationId,
 ) {
   const itemId = stock.inventoryItemId;
   const warehouseId = stock.warehouseId;
@@ -80,7 +83,9 @@ async function deductStock(
     [actor.organizationId, itemId, warehouseId],
   );
   if (!valid.rowCount)
-    throw new MongoInputError('Actualice el artículo y la bodega en la tarjeta de medicamentos.');
+    throw new MongoInputError(
+      'Revise el artículo y el origen en Configuración clínica → Consumo de medicamentos.',
+    );
   const traced = await c.query(
     'SELECT 1 FROM analiza.inventory_trace_records WHERE organization_id=$1 AND item_id=$2 LIMIT 1',
     [actor.organizationId, itemId],
@@ -100,7 +105,7 @@ async function deductStock(
     }
     if (remaining)
       throw new MongoInputError(
-        'No hay existencias liberadas y vigentes suficientes. Registre la entrada o corrija la asignación en la tarjeta.',
+        'No hay existencias liberadas y vigentes suficientes. Registre la entrada o revise la configuración de consumo del medicamento.',
       );
   } else {
     const balance = await c.query<{ balance: string }>(
@@ -109,13 +114,13 @@ async function deductStock(
     );
     if (Number(balance.rows[0]?.balance) < stock.unitsPerApplication)
       throw new MongoInputError(
-        'Existencias insuficientes. Registre la entrada o corrija la asignación en la tarjeta.',
+        'Existencias insuficientes. Registre la entrada o revise la configuración de consumo del medicamento.',
       );
     allocations.push({ id: null, number: undefined, quantity: stock.unitsPerApplication });
   }
   for (const [index, allocation] of allocations.entries()) {
     const movementId = createHash('sha256')
-      .update(`${record.id}:${medicationId}:${index}`)
+      .update(`${record.id}:${applicationKey}:${index}`)
       .digest('hex');
     const movement = {
       id: movementId,
@@ -160,6 +165,7 @@ async function deductStock(
     );
     record.stockMovementIds!.push(movementId);
     (record.stockByMedication![medicationId] ??= []).push(movementId);
+    (record.stockByApplication![applicationKey] ??= []).push(movementId);
   }
 }
 
@@ -232,7 +238,12 @@ async function reverseConsumption(
   }
 }
 
-function medicationMovementIds(record: ClinicalRecord, medicationId: string) {
+function medicationMovementIds(
+  record: ClinicalRecord,
+  medicationId: string,
+  applicationKey = medicationId,
+) {
+  if (record.stockByApplication) return record.stockByApplication[applicationKey] ?? [];
   if (record.stockByMedication) return record.stockByMedication[medicationId] ?? [];
   // Backward compatibility with records saved before per-medication movement indexing.
   return (record.stockMovementIds ?? []).filter((id) =>
@@ -325,6 +336,17 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
           .filter(Boolean)
           .map((name, i) => ({ id: `chronic:${i}`, name, chronic: true })),
       ];
+      for (const scheduled of payload.schedule ?? []) {
+        const medication = record.medications.find(
+          (med) => med.id === scheduled.medicationId && !med.chronic,
+        );
+        if (!medication)
+          throw new MongoInputError(
+            'El horario debe corresponder a un medicamento de esta hospitalización.',
+          );
+        medication.applicationTimes = [...scheduled.times].sort();
+        medication.dilution = scheduled.dilution;
+      }
       if (new Set(payload.stock.map((item) => item.quoteItemId)).size !== payload.stock.length)
         throw new MongoInputError('No repita la asignación de un medicamento.');
       for (const entry of payload.stock) {
@@ -392,16 +414,50 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
       if (previousPayload && previousPayload.cardId !== payload.cardId)
         throw new MongoInputError('La corrección debe conservar la tarjeta original.');
       if (replaced.rowCount && !previousPayload) throw new MongoConflictError();
-      if (new Set(payload.items.map((item) => item.medicationId)).size !== payload.items.length)
-        throw new MongoInputError('No repita medicamentos en la misma administración.');
-      record.medications = [];
+      const currentRows = await c.query<{ body: ClinicalRecord }>(
+        "SELECT body FROM analiza.clinical_records WHERE organization_id=$1 AND case_id=$2 AND kind='ADMINISTRATION'",
+        [actor.organizationId, record.caseId],
+      );
+      const occupied = new Set(
+        currentClinicalRecords(currentRows.rows.map((r) => r.body))
+          .filter((r) => r.date === record.date && r.rootId !== record.rootId)
+          .flatMap((r) =>
+            r.payload.kind === 'ADMINISTRATION'
+              ? r.payload.items.filter((i) => i.scheduledTime).map(medicationApplicationKey)
+              : [],
+          ),
+      );
+      for (const item of payload.items) {
+        const medication = card.medications?.find((med) => med.id === item.medicationId);
+        if (!medication)
+          throw new MongoInputError('El medicamento no pertenece a la tarjeta seleccionada.');
+        if (
+          medication.applicationTimes?.length
+            ? !item.scheduledTime || !medication.applicationTimes.includes(item.scheduledTime)
+            : !!item.scheduledTime
+        )
+          throw new MongoInputError('Seleccione una hora de aplicación registrada en la tarjeta.');
+        if (item.scheduledTime && occupied.has(medicationApplicationKey(item)))
+          throw new MongoInputError(
+            'Este medicamento y horario ya están registrados para la fecha. Actualice el registro existente si necesita corregirlo.',
+          );
+      }
+      record.medications = (card.medications ?? []).filter((med) =>
+        payload.items.some((item) => item.medicationId === med.id),
+      );
       record.stockMovementIds = [];
       record.stockByMedication = {};
-      const assignment = (medicationId: string) =>
-        payload.stock?.find((entry) => entry.quoteItemId === medicationId) ??
-        (card.payload.kind === 'MEDICATION_CARD'
-          ? card.payload.stock.find((entry) => entry.quoteItemId === medicationId)
-          : undefined);
+      record.stockByApplication = {};
+      const configured = await c.query<{ body: ConfigurationEntry }>(
+        "SELECT body FROM analiza.configuration_entries WHERE organization_id=$1 AND body->>'category'='MEDICATION_STOCK' AND body->>'active'='true'",
+        [actor.organizationId],
+      );
+      const cardStock = card.payload.stock;
+      const oldAssignment = (medicationId: string) =>
+        previousPayload?.stock?.find((entry) => entry.quoteItemId === medicationId) ??
+        cardStock.find((entry) => entry.quoteItemId === medicationId);
+      type Stock = (typeof cardStock)[number];
+      const resolved = new Map<string, Stock>();
       if (
         new Set(payload.stock?.map((entry) => entry.quoteItemId)).size !==
         (payload.stock?.length ?? 0)
@@ -413,14 +469,47 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
           !card.medications?.some((m) => m.id === entry.quoteItemId && !m.chronic)
         )
           throw new MongoInputError('La asignación no corresponde a un medicamento aplicado.');
-      const oldAssignment = (medicationId: string) =>
-        previousPayload?.stock?.find((entry) => entry.quoteItemId === medicationId) ??
-        (card.payload.kind === 'MEDICATION_CARD'
-          ? card.payload.stock.find((entry) => entry.quoteItemId === medicationId)
-          : undefined);
+      for (const med of record.medications.filter(
+        (m) => !m.chronic && payload.items.some((i) => i.medicationId === m.id && i.applied),
+      )) {
+        const existing =
+          payload.stock?.find((entry) => entry.quoteItemId === med.id) ?? oldAssignment(med.id);
+        if (existing) {
+          resolved.set(med.id, existing);
+          continue;
+        }
+        // A historical card may predate inventory snapshots. Resolve only its exact source line.
+        let inventoryItemId = med.inventoryItemId;
+        if (!inventoryItemId && med.quoteId && med.quoteItemId) {
+          const source = await c.query<{ body: Quote }>(
+            'SELECT body FROM analiza.quotes WHERE organization_id=$1 AND id=$2 AND patient_id=$3',
+            [actor.organizationId, med.quoteId, record.patientId],
+          );
+          inventoryItemId = source.rows[0]?.body.items.find(
+            (i) => i.id === med.quoteItemId,
+          )?.inventoryItemId;
+        }
+        const rules = configured.rows
+          .map((r) => r.body)
+          .filter((r) => r.inventoryItemId === inventoryItemId);
+        const rule = rules.length === 1 ? rules[0] : undefined;
+        if (!inventoryItemId || !rule?.warehouseId || !rule.unitsPerApplication)
+          throw new MongoInputError(
+            `Configure el origen y las unidades por aplicación de «${med.name}» en Configuración clínica → Consumo de medicamentos. El artículo debe estar vinculado en la cotización.`,
+          );
+        resolved.set(med.id, {
+          quoteItemId: med.id,
+          inventoryItemId,
+          warehouseId: rule.warehouseId,
+          unitsPerApplication: rule.unitsPerApplication,
+        });
+      }
+      const assignment = (medicationId: string) => resolved.get(medicationId);
+      // Snapshot the applied rule. Later configuration edits never rewrite prior consumption.
+      record.payload = { ...payload, stock: [...resolved.values()] };
       const lockKeys = new Set(
         [
-          ...payload.items.map((item) => assignment(item.medicationId)),
+          ...resolved.values(),
           ...(previousPayload?.items.map((item) => oldAssignment(item.medicationId)) ?? []),
         ]
           .filter((s) => !!s)
@@ -430,37 +519,25 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
         await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [key]);
       if (corrected && previousPayload)
         for (const old of previousPayload.items.filter((item) => item.applied)) {
-          if (!payload.items.some((item) => item.medicationId === old.medicationId && item.applied))
+          const key = medicationApplicationKey(old);
+          if (!payload.items.some((item) => medicationApplicationKey(item) === key && item.applied))
             await reverseConsumption(
               c,
               actor,
               record,
-              medicationMovementIds(corrected, old.medicationId),
+              medicationMovementIds(corrected, old.medicationId, key),
             );
         }
-      // Different cards can map different medication IDs to the same stock.
-      // Lock order must follow inventory identity, not the card's line order.
-      const stockKey = (medicationId: string) => {
-        const stock =
-          card.payload.kind === 'MEDICATION_CARD'
-            ? card.payload.stock.find((entry) => entry.quoteItemId === medicationId)
-            : undefined;
-        return stock ? `${stock.inventoryItemId}\u0000${stock.warehouseId}` : medicationId;
-      };
-      for (const item of [...payload.items].sort((a, b) =>
-        stockKey(a.medicationId).localeCompare(stockKey(b.medicationId)),
-      )) {
-        const medication = card.medications?.find((med) => med.id === item.medicationId);
-        if (!medication)
-          throw new MongoInputError('El medicamento no pertenece a la tarjeta seleccionada.');
-        record.medications.push(medication);
+      for (const item of payload.items) {
+        const medication = record.medications.find((med) => med.id === item.medicationId)!;
+        const key = medicationApplicationKey(item);
         if (item.applied && !medication.chronic) {
-          const stock = assignment(medication.id);
-          if (!stock)
-            throw new MongoInputError('Complete la salida de inventario del medicamento aplicado.');
+          const stock = assignment(medication.id)!;
           if (
             corrected &&
-            previousPayload?.items.some((old) => old.medicationId === medication.id && old.applied)
+            previousPayload?.items.some(
+              (old) => medicationApplicationKey(old) === key && old.applied,
+            )
           ) {
             const prior = oldAssignment(medication.id);
             if (
@@ -472,10 +549,11 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
               throw new MongoInputError(
                 'La corrección conserva el origen y unidades del consumo ya registrado.',
               );
-            const ids = medicationMovementIds(corrected, medication.id);
-            record.stockByMedication[medication.id] = ids;
+            const ids = medicationMovementIds(corrected, medication.id, key);
+            (record.stockByMedication[medication.id] ??= []).push(...ids);
+            record.stockByApplication[key] = ids;
             record.stockMovementIds.push(...ids);
-          } else await deductStock(c, actor, record, stock, medication.id);
+          } else await deductStock(c, actor, record, stock, medication.id, key);
         }
       }
     }
@@ -515,12 +593,13 @@ export function medicationReturns(records: ClinicalRecord[]) {
             return medication && !medication.chronic
               ? [
                   {
-                    id: `${record.id}:${item.medicationId}`,
+                    id: `${record.id}:${medicationApplicationKey(item)}`,
                     date: record.date,
                     patientId: record.patientId,
                     caseId: record.caseId,
                     quoteId: medication.quoteId!,
-                    medication: medication.name,
+                    medication:
+                      medication.name + (item.scheduledTime ? ` · ${item.scheduledTime}` : ''),
                     reason: item.reason,
                   },
                 ]

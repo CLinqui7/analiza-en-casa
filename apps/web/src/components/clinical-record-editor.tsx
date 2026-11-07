@@ -1,5 +1,10 @@
 'use client';
 import { useState, type FormEvent } from 'react';
+import Link from 'next/link';
+import {
+  MedicationScheduleFields,
+  type MedicationScheduleDraft,
+} from './medication-schedule-fields';
 import { Button, Dialog } from '@analiza/ui';
 import {
   clinicalLabels,
@@ -11,6 +16,8 @@ import {
   fluidColumns,
   fluidTotals,
   medicationPresentations,
+  medicationApplicationKey,
+  medicationApplications,
   medicationRoutes,
   scoreScale,
   type ClinicalKind,
@@ -128,10 +135,33 @@ export function ClinicalRecordEditor({
   const [applied, setApplied] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       previousAdministration?.items.map((item) => [
-        item.medicationId,
+        medicationApplicationKey(item),
         item.applied ? 'yes' : 'no',
       ]) ?? [],
     ),
+  );
+  const [recordDate, setRecordDate] = useState(original?.date ?? clinicalDate());
+  const [schedule, setSchedule] = useState<Record<string, MedicationScheduleDraft>>(() =>
+    Object.fromEntries(
+      original?.payload.kind === 'MEDICATION_CARD'
+        ? (original.payload.schedule ?? []).map((s) => [
+            s.medicationId,
+            { times: s.times, dilution: s.dilution },
+          ])
+        : [],
+    ),
+  );
+  const applications = medicationApplications(card);
+  const recorded = new Map(
+    currentClinicalRecords(operations.clinicalRecords)
+      .filter((r) => r.caseId === caseId && r.date === recordDate && r.rootId !== original?.rootId)
+      .flatMap((r) =>
+        r.payload.kind === 'ADMINISTRATION'
+          ? r.payload.items
+              .filter((i) => i.scheduledTime)
+              .map((i) => [medicationApplicationKey(i), i] as const)
+          : [],
+      ),
   );
   const [jvpeDraft, setJvpe] = useState<string | null>(null);
   const registeredJvpe = operations.currentJvpe || nurse?.boardRegistrationNumber || '';
@@ -140,6 +170,7 @@ export function ClinicalRecordEditor({
     setCaseId(value);
     setScaleValues({});
     setApplied({});
+    setSchedule({});
     setPlans([]);
     setRowCount(1);
     setError('');
@@ -165,6 +196,10 @@ export function ClinicalRecordEditor({
       payload = {
         kind,
         chronic: value('chronic'),
+        schedule: quotedMeds.map((med) => ({
+          medicationId: med.key,
+          ...(schedule[med.key] ?? { times: [''], dilution: '' }),
+        })),
         instructions:
           original?.payload.kind === 'MEDICATION_CARD' ? original.payload.instructions : '',
         stock:
@@ -220,29 +255,17 @@ export function ClinicalRecordEditor({
         dose: value('dose'),
         presentation: value('presentation') as (typeof medicationPresentations)[number],
         route: value('route') as (typeof medicationRoutes)[number],
-        stock: (card?.medications ?? [])
-          .filter((med) => applied[med.id] === 'yes' && !med.chronic)
-          .map((med) => {
-            const existing =
-              previousAdministration?.stock?.find((entry) => entry.quoteItemId === med.id) ??
-              (card?.payload.kind === 'MEDICATION_CARD'
-                ? card.payload.stock.find((entry) => entry.quoteItemId === med.id)
-                : undefined);
-            return (
-              existing ?? {
-                quoteItemId: med.id,
-                inventoryItemId: value(`stock-item-${med.id}`),
-                warehouseId: value(`stock-warehouse-${med.id}`),
-                unitsPerApplication: Number(value(`stock-units-${med.id}`)),
-              }
-            );
-          }),
-        items: (card?.medications ?? [])
-          .filter((medication) => applied[medication.id])
-          .map((medication) => ({
-            medicationId: medication.id,
-            applied: applied[medication.id] === 'yes',
-            reason: value(`reason-${medication.id}`),
+        items: applications
+          .filter(
+            (application) =>
+              applied[medicationApplicationKey(application)] &&
+              !recorded.has(medicationApplicationKey(application)),
+          )
+          .map((application) => ({
+            medicationId: application.medicationId,
+            ...(application.scheduledTime ? { scheduledTime: application.scheduledTime } : {}),
+            applied: applied[medicationApplicationKey(application)] === 'yes',
+            reason: value(`reason-${medicationApplicationKey(application)}`),
           })),
       };
     else payload = { kind, summary: value('summary') };
@@ -355,7 +378,11 @@ export function ClinicalRecordEditor({
               name="date"
               type="date"
               required
-              defaultValue={original?.date ?? clinicalDate()}
+              value={recordDate}
+              onChange={(event) => {
+                setRecordDate(event.target.value);
+                if (!original) setApplied({});
+              }}
             />
           </label>
           {original ? (
@@ -383,11 +410,18 @@ export function ClinicalRecordEditor({
             <>
               <h3>Medicamentos de la cotización</h3>
               {quotedMeds.length ? (
-                <ul className="clinical-medication-list">
+                <div className="medication-schedule-list">
                   {quotedMeds.map((med) => (
-                    <li key={med.key}>{med.name}</li>
+                    <MedicationScheduleFields
+                      key={med.key}
+                      name={med.name}
+                      value={schedule[med.key] ?? { times: [''], dilution: '' }}
+                      onChange={(value) =>
+                        setSchedule((current) => ({ ...current, [med.key]: value }))
+                      }
+                    />
                   ))}
-                </ul>
+                </div>
               ) : (
                 <p className="notice">
                   La hospitalización no tiene medicamentos cotizados. Puede registrar los crónicos.
@@ -734,96 +768,85 @@ export function ClinicalRecordEditor({
                     Indique si se aplicó cada medicamento. Para los no aplicados, registre el
                     motivo.
                   </p>
-                  {card.medications?.map((med) => {
-                    const stock =
-                      previousAdministration?.stock?.find(
-                        (entry) => entry.quoteItemId === med.id,
-                      ) ??
-                      (card.payload.kind === 'MEDICATION_CARD'
-                        ? card.payload.stock.find((entry) => entry.quoteItemId === med.id)
-                        : undefined);
+                  {applications.map((application) => {
+                    const med = application.medication;
+                    const key = medicationApplicationKey(application);
+                    const existing = recorded.get(key);
+                    const label = `${med.name}${application.scheduledTime ? ` · ${application.scheduledTime}` : ''}`;
                     return (
-                      <fieldset key={med.id}>
+                      <fieldset key={key} className="medication-application-card">
                         <legend>
                           {med.name}
                           {med.chronic ? ' · Crónico' : ''}
                         </legend>
-                        <label>
-                          Aplicación · {med.name}
-                          <select
-                            value={applied[med.id] ?? ''}
-                            onChange={(event) =>
-                              setApplied({ ...applied, [med.id]: event.target.value })
-                            }
-                          >
-                            <option value="">Sin registrar en esta atención</option>
-                            <option value="yes">Se aplicó</option>
-                            <option value="no">No se aplicó</option>
-                          </select>
-                        </label>
-                        {applied[med.id] === 'no' ? (
-                          <label>
-                            Motivo de no aplicación · {med.name}
-                            <textarea
-                              name={'reason-' + med.id}
-                              required
-                              defaultValue={
-                                previousAdministration?.items.find(
-                                  (item) => item.medicationId === med.id,
-                                )?.reason ?? ''
-                              }
-                            />
-                          </label>
+                        <div className="medication-application-heading">
+                          <span className="medication-time-badge">
+                            {application.scheduledTime
+                              ? `Hora programada · ${application.scheduledTime}`
+                              : 'Sin horario programado'}
+                          </span>
+                          {existing ? (
+                            <span className="medication-recorded-badge">
+                              {existing.applied
+                                ? 'Aplicación registrada'
+                                : 'No aplicación registrada'}
+                            </span>
+                          ) : null}
+                        </div>
+                        {med.dilution ? (
+                          <p className="clinical-prose">Dilución: {med.dilution}</p>
                         ) : null}
-                        {applied[med.id] === 'yes' && !med.chronic && !stock ? (
-                          <fieldset>
-                            <legend>Salida de inventario · {med.name}</legend>
-                            <p className="field-help">
-                              Complete la salida para registrar el consumo. Las unidades de
-                              inventario no se calculan a partir de la dosis.
-                            </p>
-                            <div className="form-grid">
+                        {existing ? (
+                          <p className="field-help">
+                            {existing.reason ||
+                              'Este horario ya está registrado para la fecha seleccionada.'}{' '}
+                            Para corregirlo, actualice el registro existente.
+                          </p>
+                        ) : (
+                          <>
+                            <label>
+                              Aplicación · {label}
+                              <select
+                                value={applied[key] ?? ''}
+                                onChange={(event) =>
+                                  setApplied({ ...applied, [key]: event.target.value })
+                                }
+                              >
+                                <option value="">Sin registrar en esta atención</option>
+                                <option value="yes">Se aplicó</option>
+                                <option value="no">No se aplicó</option>
+                              </select>
+                            </label>
+                            {applied[key] === 'no' ? (
                               <label>
-                                Artículo de inventario
-                                <select name={'stock-item-' + med.id} required>
-                                  <option value="">Seleccione</option>
-                                  {operations.clinicalStockItems.map((item) => (
-                                    <option key={item.id} value={item.id}>
-                                      {item.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                              <label>
-                                Origen de inventario
-                                <select name={'stock-warehouse-' + med.id} required>
-                                  <option value="">Seleccione</option>
-                                  {operations.warehouses
-                                    .filter((w) => w.status === 'ACTIVE')
-                                    .map((w) => (
-                                      <option key={w.id} value={w.id}>
-                                        {w.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </label>
-                              <label>
-                                Unidades de inventario por aplicación
-                                <input
-                                  name={'stock-units-' + med.id}
-                                  type="number"
-                                  min={1}
-                                  max={100000}
-                                  step={1}
+                                Motivo de no aplicación · {label}
+                                <textarea
+                                  name={'reason-' + key}
                                   required
+                                  defaultValue={
+                                    previousAdministration?.items.find(
+                                      (i) => medicationApplicationKey(i) === key,
+                                    )?.reason ?? ''
+                                  }
                                 />
                               </label>
-                            </div>
-                          </fieldset>
-                        ) : null}
+                            ) : null}
+                          </>
+                        )}
                       </fieldset>
                     );
                   })}
+                  <p className="field-help">
+                    El consumo utiliza el origen y las unidades configurados para cada medicamento.
+                  </p>
+                  <Link
+                    className="button button-secondary"
+                    href="/catalogs/clinical"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Configurar consumo de medicamentos ↗
+                  </Link>
                 </section>
                 <fieldset className="clinical-administration-details">
                   <legend>Detalle de la administración</legend>

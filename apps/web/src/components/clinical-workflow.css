@@ -490,3 +490,139 @@
     display: none;
   }
 }
+
+/* Medication schedules keep each indication and occurrence together on every width. */
+.medication-schedule-list,
+.clinical-print-picker,
+.clinical-print-picker fieldset {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.clinical-editor .medication-schedule-card,
+.clinical-editor .medication-application-card {
+  min-width: 0;
+  border: 1px solid #d4e2e6;
+  border-radius: 18px;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #fff, #f6fafb);
+  box-shadow: 0 5px 16px #163f4d06;
+}
+.medication-schedule-card legend,
+.medication-application-card legend {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  color: #183f4d;
+}
+.medication-schedule-heading,
+.medication-application-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.medication-schedule-heading .button,
+.medication-time-field .button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 42px;
+  align-self: end;
+}
+.medication-time-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.medication-time-field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: end;
+  min-width: 0;
+}
+.medication-time-field label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+.medication-time-badge,
+.medication-recorded-badge {
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #214e5f;
+  background: #eaf2f5;
+}
+.medication-recorded-badge {
+  color: #146249;
+  background: #e8f5ee;
+}
+.medication-time-summary {
+  color: #214e5f;
+  font-weight: 600;
+}
+.clinical-print-picker fieldset {
+  padding: 0;
+  border: 0;
+}
+.clinical-print-picker legend {
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+}
+.clinical-print-option {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #d4e2e6;
+  border-radius: 14px;
+  cursor: pointer;
+  background: #fff;
+}
+.clinical-print-option:has(input:checked) {
+  background: #f0f7f8;
+  border-color: #477986;
+}
+.clinical-print-option:focus-within {
+  outline: 2px solid #b32c46;
+  outline-offset: 3px;
+}
+.clinical-print-option input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  accent-color: #1c5265;
+}
+.clinical-print-option span {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.clinical-print-option small {
+  color: #526b76;
+  line-height: 1.5;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .medication-time-field {
+    animation: clinical-appear 160ms ease-out;
+  }
+  .clinical-print-option {
+    transition:
+      background-color 160ms,
+      border-color 160ms;
+  }
+}
+@media (max-width: 480px) {
+  .clinical-editor .medication-schedule-card,
+  .clinical-editor .medication-application-card {
+    padding: 0.85rem;
+  }
+  .medication-schedule-heading {
+    align-items: flex-start;
+  }
+}

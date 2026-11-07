@@ -27,9 +27,9 @@ const definitionDraftSchema = z.object({
 
 export function ClinicalConfiguration({ discounts = false }: { discounts?: boolean }) {
   const operations = useOperations();
-  const [category, setCategory] = useState<'DIAGNOSIS' | 'SCALE' | 'DISCOUNT_PROFILE'>(
-    discounts ? 'DISCOUNT_PROFILE' : 'DIAGNOSIS',
-  );
+  const [category, setCategory] = useState<
+    'DIAGNOSIS' | 'SCALE' | 'DISCOUNT_PROFILE' | 'MEDICATION_STOCK'
+  >(discounts ? 'DISCOUNT_PROFILE' : 'DIAGNOSIS');
   const [editing, setEditing] = useState<ConfigurationEntry | null>(null);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
@@ -113,7 +113,12 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
               })
             }
           >
-            Agregar {category === 'DIAGNOSIS' ? 'diagnóstico' : 'perfil'}
+            Agregar{' '}
+            {category === 'DIAGNOSIS'
+              ? 'diagnóstico'
+              : category === 'MEDICATION_STOCK'
+                ? 'configuración de consumo'
+                : 'perfil'}
           </Button>
         ) : null}
       </header>
@@ -131,6 +136,12 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
           >
             Escalas
           </button>
+          <button
+            aria-current={category === 'MEDICATION_STOCK' ? 'page' : undefined}
+            onClick={() => setCategory('MEDICATION_STOCK')}
+          >
+            Consumo de medicamentos
+          </button>
         </nav>
       ) : null}
       {message ? (
@@ -144,6 +155,13 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
         </p>
       ) : null}
       <Panel>
+        {category === 'MEDICATION_STOCK' ? (
+          <p className="notice">
+            Defina una vez el origen y las unidades de inventario por aplicación de cada
+            medicamento. Se usarán en nuevas aplicaciones; los consumos anteriores conservan su
+            configuración.
+          </p>
+        ) : null}
         <label>
           Buscar
           <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
@@ -160,12 +178,14 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
                       ? entry.scaleIds?.join(', ') || 'Sin vínculos: se muestran todas las escalas'
                       : entry.category === 'SCALE'
                         ? entry.scaleDefinition?.version
-                        : Object.entries(entry.categoryRates ?? {})
-                            .map(
-                              ([key, rate]) =>
-                                `${quoteCategories.find((category) => category.value === key)?.label}: ${rate}%`,
-                            )
-                            .join(' · ') || 'Sin porcentajes'}
+                        : entry.category === 'MEDICATION_STOCK'
+                          ? `${operations.warehouses.find((w) => w.id === entry.warehouseId)?.name ?? 'Origen no disponible'} · ${entry.unitsPerApplication} unidades por aplicación`
+                          : Object.entries(entry.categoryRates ?? {})
+                              .map(
+                                ([key, rate]) =>
+                                  `${quoteCategories.find((category) => category.value === key)?.label}: ${rate}%`,
+                              )
+                              .join(' · ') || 'Sin porcentajes'}
                 </small>
               </div>
               <Button className="button-secondary" onClick={() => edit(entry)}>
@@ -182,7 +202,9 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
             ? 'Diagnóstico'
             : category === 'SCALE'
               ? 'Definición de escala'
-              : 'Perfil de descuento'
+              : category === 'MEDICATION_STOCK'
+                ? 'Consumo de medicamento'
+                : 'Perfil de descuento'
         }
         onClose={() => setEditing(null)}
         footer={
@@ -198,14 +220,85 @@ export function ClinicalConfiguration({ discounts = false }: { discounts?: boole
       >
         {editing ? (
           <form id="clinical-configuration-form" className="clinical-editor" onSubmit={submit}>
-            <label>
-              Nombre
-              <input
-                value={editing.label}
-                required
-                onChange={(event) => setEditing({ ...editing, label: event.target.value })}
-              />
-            </label>
+            {category === 'MEDICATION_STOCK' ? (
+              <div className="form-grid">
+                <label>
+                  Medicamento de inventario
+                  <select
+                    required
+                    value={editing.inventoryItemId ?? ''}
+                    disabled={operations.configuration.some((e) => e.id === editing.id)}
+                    onChange={(event) =>
+                      setEditing({
+                        ...editing,
+                        inventoryItemId: event.target.value,
+                        label:
+                          operations.clinicalStockItems.find((i) => i.id === event.target.value)
+                            ?.name ?? '',
+                      })
+                    }
+                  >
+                    <option value="">Seleccione medicamento</option>
+                    {operations.clinicalStockItems.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Origen de inventario
+                  <select
+                    required
+                    value={editing.warehouseId ?? ''}
+                    onChange={(event) =>
+                      setEditing({ ...editing, warehouseId: event.target.value })
+                    }
+                  >
+                    <option value="">Seleccione bodega</option>
+                    {operations.warehouses
+                      .filter((w) => w.status === 'ACTIVE')
+                      .map((w) => (
+                        <option key={w.id} value={w.id}>
+                          {w.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <label>
+                  Unidades de inventario por aplicación
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    max={100000}
+                    step={1}
+                    value={editing.unitsPerApplication ?? ''}
+                    onChange={(event) =>
+                      setEditing({
+                        ...editing,
+                        unitsPerApplication: event.target.value
+                          ? Number(event.target.value)
+                          : undefined,
+                      })
+                    }
+                  />
+                </label>
+                <p className="field-help">
+                  Registre las unidades que realmente se consumen. La dosis y la cantidad cotizada
+                  no determinan este valor.
+                </p>
+              </div>
+            ) : (
+              <label>
+                Nombre
+                <input
+                  value={editing.label}
+                  required
+                  onChange={(event) => setEditing({ ...editing, label: event.target.value })}
+                />
+              </label>
+            )}
             <label>
               Estado
               <select

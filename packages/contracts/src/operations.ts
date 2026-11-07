@@ -9,6 +9,7 @@ export const configurationCategories = [
   'DOSE',
   'INSURER',
   'MEDICATION',
+  'MEDICATION_STOCK',
   'MEDICAL_VISITOR',
   'DIAGNOSIS',
   'SCALE',
@@ -155,6 +156,8 @@ export const configurationEntrySchema = z
     active: z.boolean(),
     discountPercent: z.number().min(0).max(100).optional(),
     inventoryItemId: id.optional(),
+    warehouseId: id.optional(),
+    unitsPerApplication: z.number().int().positive().max(100000).optional(),
     tabletsPerBlister: z.number().int().positive().max(10000).optional(),
     tabletsPerBox: z.number().int().positive().max(100000).optional(),
     scaleIds: z.array(z.enum(scaleIds)).max(10).optional(),
@@ -176,7 +179,13 @@ export const configurationEntrySchema = z
       .optional(),
     notes: z.string().trim().max(4000).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (v) =>
+      v.category !== 'MEDICATION_STOCK' ||
+      !!(v.inventoryItemId && v.warehouseId && v.unitsPerApplication),
+    'Seleccione el medicamento, su origen y las unidades por aplicación.',
+  );
 export type ConfigurationEntry = z.infer<typeof configurationEntrySchema>;
 
 export const balancePeriodSchema = z.object({

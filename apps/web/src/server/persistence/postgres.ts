@@ -603,8 +603,8 @@ export function postgresPersistence(): Persistence {
             });
         }
         const records = await listClinicalRecords(c, actor);
-        if (can(actor.role, 'clinical:read')) {
-          result.clinicalRecords = records;
+        if (can(actor.role, 'clinical:read')) result.clinicalRecords = records;
+        if (can(actor.role, 'clinical-config:write')) {
           result.clinicalStockItems = (
             await c.query(
               "SELECT id,body->>'name' AS name FROM analiza.catalog_items WHERE organization_id=$1 AND body->>'category'='MEDICATIONS' AND body->>'status'='ACTIVE' ORDER BY body->>'name'",
@@ -614,7 +614,7 @@ export function postgresPersistence(): Persistence {
         }
         if (can(actor.role, 'payments:read') || can(actor.role, 'clinical:read'))
           result.medicationReturns = medicationReturns(records);
-        if (can(actor.role, 'inventory:read') || can(actor.role, 'clinical:read'))
+        if (can(actor.role, 'inventory:read') || can(actor.role, 'clinical-config:write'))
           result.warehouses = (
             await c.query(
               `SELECT body FROM analiza.warehouses
@@ -1422,7 +1422,9 @@ export function postgresPersistence(): Persistence {
           .parse(input);
         authorize(
           actor,
-          ['DIAGNOSIS', 'SCALE', 'INSURER', 'DISCOUNT_PROFILE'].includes(entry.category)
+          ['DIAGNOSIS', 'SCALE', 'INSURER', 'DISCOUNT_PROFILE', 'MEDICATION_STOCK'].includes(
+            entry.category,
+          )
             ? 'clinical-config:write'
             : 'catalogs:write',
         );
@@ -1467,6 +1469,34 @@ export function postgresPersistence(): Persistence {
             );
             if (!item.rowCount)
               throw new MongoInputError('Seleccione un artículo activo del inventario.');
+          }
+          if (entry.category === 'MEDICATION_STOCK') {
+            if (
+              previous.rows[0]?.body.inventoryItemId &&
+              previous.rows[0].body.inventoryItemId !== entry.inventoryItemId
+            )
+              throw new MongoInputError(
+                'Conserve el medicamento de esta configuración. Cree otra para un artículo diferente.',
+              );
+            await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
+              `${actor.organizationId}:medication-stock:${entry.inventoryItemId}`,
+            ]);
+            const valid = await c.query(
+              "SELECT 1 FROM analiza.catalog_items i JOIN analiza.warehouses w ON w.organization_id=i.organization_id WHERE i.organization_id=$1 AND i.id=$2 AND i.body->>'category'='MEDICATIONS' AND i.body->>'status'='ACTIVE' AND w.id=$3 AND w.status='ACTIVE'",
+              [actor.organizationId, entry.inventoryItemId, entry.warehouseId],
+            );
+            if (!valid.rowCount)
+              throw new MongoInputError(
+                'Seleccione un medicamento y una bodega activos de esta organización.',
+              );
+            const duplicate = await c.query(
+              "SELECT 1 FROM analiza.configuration_entries WHERE organization_id=$1 AND body->>'category'='MEDICATION_STOCK' AND body->>'inventoryItemId'=$2 AND id<>$3",
+              [actor.organizationId, entry.inventoryItemId, entry.id],
+            );
+            if (duplicate.rowCount)
+              throw new MongoInputError(
+                'Este medicamento ya tiene configuración. Edite la existente.',
+              );
           }
           await c.query(
             'INSERT INTO analiza.configuration_entries(organization_id,id,body) VALUES($1,$2,$3) ON CONFLICT(organization_id,id) DO UPDATE SET body=EXCLUDED.body',
