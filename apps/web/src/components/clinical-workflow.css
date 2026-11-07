@@ -446,20 +446,32 @@
   }
 }
 @media print {
+  @page clinical-record {
+    margin: 12mm;
+  }
   body.clinical-printing > :not(#clinical-print-root) {
     display: none !important;
   }
   body.clinical-printing .clinical-print-target {
+    page: clinical-record;
     display: block !important;
     position: static;
     width: 100%;
-    padding: 1cm;
+    padding: 0;
     background: white;
     color: black;
   }
   .clinical-print-target button,
   .clinical-print-target .no-print {
     display: none !important;
+  }
+  .clinical-print-target,
+  .clinical-print-target * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .clinical-print-target :is(h2, h3, caption) {
+    break-after: avoid;
   }
   .clinical-print-target .table-wrap {
     overflow: visible !important;

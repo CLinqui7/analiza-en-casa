@@ -227,6 +227,9 @@ try {
     'Horas de aplicación: 08:00 · 16:00',
   );
   await expect(page.locator('#clinical-print-root')).not.toContainText('Resumen · cotizaciones');
+  await page.emulateMedia({ media: 'print' });
+  await page.pdf({ path: '.local/clinical-nov07-live-print.pdf', format: 'A4' });
+  await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
   await print.getByRole('button', { name: 'Cancelar', exact: true }).click();
   for (const width of [1440, 390]) {
