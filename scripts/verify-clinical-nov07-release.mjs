@@ -256,7 +256,10 @@ try {
     await expect(dialog.getByText('No aplicación registrada', { exact: true })).toHaveCount(2);
     await expect(dialog.getByText(/Salida de inventario/)).toHaveCount(0);
     assert.ok(await dialog.evaluate((e) => e.scrollWidth <= e.clientWidth + 1));
-    await page.screenshot({ path: `.local/clinical-nov07-live-${width}.png`, fullPage: true });
+    await page.screenshot({
+      path: `.local/clinical-nov07-live-${width}.png`,
+      animations: 'disabled',
+    });
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
   }
   await page.goto('/catalogs/clinical');
