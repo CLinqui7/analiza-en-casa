@@ -5,7 +5,9 @@ import { readFileSync, writeFileSync, openSync, closeSync } from 'node:fs';
 import { resolve, relative } from 'node:path';
 
 const directory = resolve(process.env.ANALIZA_QA_PRIVATE_DIRECTORY || '');
-assert.ok(process.env.ANALIZA_QA_PRIVATE_DIRECTORY && relative(process.cwd(), directory).startsWith('..'));
+assert.ok(
+  process.env.ANALIZA_QA_PRIVATE_DIRECTORY && relative(process.cwd(), directory).startsWith('..'),
+);
 const statePath = resolve(directory, 'clinical-qa-state.json');
 const state = JSON.parse(readFileSync(statePath, 'utf8'));
 const key = process.env.ANALIZA_QA_SSH_KEY;
@@ -20,11 +22,31 @@ function run(binary, params) {
 const sha = run('git', ['rev-parse', 'HEAD']).trim();
 const branch = run('git', ['branch', '--show-current']).trim();
 assert.match(branch, /^codex\/[a-zA-Z0-9._/-]+$/);
-assert.ok(run('git', ['ls-remote', 'origin', `refs/heads/${branch}`]).startsWith(sha), 'Publish source to GitHub first');
+assert.ok(
+  run('git', ['ls-remote', 'origin', `refs/heads/${branch}`]).startsWith(sha),
+  'Publish source to GitHub first',
+);
 const archive = resolve(directory, 'web-source.tar');
 const remote = `/root/${state.container}-source.tar`;
 const release = `/opt/analiza-contabo-staging/qa/${sha}`;
-run('git', ['archive', '--format=tar', '-o', archive, sha, '.dockerignore', 'Dockerfile', 'package.json', 'package-lock.json', 'apps/web', 'packages', 'docs/qa', 'database/postgresql', 'database/mongodb', 'scripts/deployment', 'deploy/contabo']);
+run('git', [
+  'archive',
+  '--format=tar',
+  '-o',
+  archive,
+  sha,
+  '.dockerignore',
+  'Dockerfile',
+  'package.json',
+  'package-lock.json',
+  'apps/web',
+  'packages',
+  'docs/qa',
+  'database/postgresql',
+  'database/mongodb',
+  'scripts/deployment',
+  'deploy/contabo',
+]);
 run('scp', [...args, archive, `${host}:${remote}`]);
 run('ssh', [...args, host, `mkdir -p ${release} && tar -xf ${remote} -C ${release}`]);
 state.web = `${state.container}-web`;
@@ -32,12 +54,25 @@ state.network = state.container;
 state.sourceSha = sha;
 state.webRemoteEnv = `/root/${state.web}.env`;
 const envFile = resolve(directory, 'web.env');
-writeFileSync(envFile, [
-  'ANALIZA_DATA_MODE=postgresql', 'NEXT_PUBLIC_DATA_MODE=postgresql', 'NEXT_PUBLIC_RELEASE_PROFILE=full',
-  'ANALIZA_REGISTRATION_MODE=disabled', 'NEXT_PUBLIC_REGISTRATION_MODE=disabled',
-  'ANALIZA_DB_TRANSPORT=tcp', 'ANALIZA_QA_MODE=1', `PGHOST=${state.container}`, 'PGPORT=5432',
-  'PGDATABASE=analiza_qa', 'PGUSER=analiza_clinical_qa_runtime', `PGPASSWORD=${state.runtimeSecret}`, '',
-].join('\n'), { mode: 0o600 });
+writeFileSync(
+  envFile,
+  [
+    'ANALIZA_DATA_MODE=postgresql',
+    'NEXT_PUBLIC_DATA_MODE=postgresql',
+    'NEXT_PUBLIC_RELEASE_PROFILE=full',
+    'ANALIZA_REGISTRATION_MODE=disabled',
+    'NEXT_PUBLIC_REGISTRATION_MODE=disabled',
+    'ANALIZA_DB_TRANSPORT=tcp',
+    'ANALIZA_QA_MODE=1',
+    `PGHOST=${state.container}`,
+    'PGPORT=5432',
+    'PGDATABASE=analiza_qa',
+    'PGUSER=analiza_clinical_qa_runtime',
+    `PGPASSWORD=${state.runtimeSecret}`,
+    '',
+  ].join('\n'),
+  { mode: 0o600 },
+);
 run('scp', [...args, envFile, `${host}:${state.webRemoteEnv}`]);
 run('ssh', [...args, host, `chmod 600 ${state.webRemoteEnv}`]);
 writeFileSync(statePath, JSON.stringify(state, null, 2), { mode: 0o600 });
@@ -55,8 +90,22 @@ const remoteScript = `/root/${state.container}-build.sh`;
 run('scp', [...args, scriptFile, `${host}:${remoteScript}`]);
 run('ssh', [...args, host, `bash ${remoteScript} > /root/${state.container}-build.log 2>&1`]);
 const log = openSync(resolve(directory, 'web-tunnel.log'), 'a');
-const tunnel = spawn('ssh', [...args, '-o', 'ExitOnForwardFailure=yes', '-N', '-L', '127.0.0.1:55440:127.0.0.1:15440', host], { detached: true, windowsHide: true, stdio: ['ignore', log, log] });
-tunnel.unref(); closeSync(log);
+const tunnel = spawn(
+  'ssh',
+  [...args, '-o', 'ExitOnForwardFailure=yes', '-N', '-L', '127.0.0.1:55440:127.0.0.1:15440', host],
+  { detached: true, windowsHide: true, stdio: ['ignore', log, log] },
+);
+tunnel.unref();
+closeSync(log);
 state.webTunnelPid = tunnel.pid;
 writeFileSync(statePath, JSON.stringify(state, null, 2), { mode: 0o600 });
-console.log(JSON.stringify({ status: 'QA_WEB_STARTED', sha, container: state.web, localPort: 55440, productionChanged: false, credentialsPrinted: false }));
+console.log(
+  JSON.stringify({
+    status: 'QA_WEB_STARTED',
+    sha,
+    container: state.web,
+    localPort: 55440,
+    productionChanged: false,
+    credentialsPrinted: false,
+  }),
+);
