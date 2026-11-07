@@ -17,6 +17,8 @@ import {
   fluidTotals,
   medicationPresentations,
   medicationApplicationKey,
+  medicationScheduleKey,
+  medicationSourceKey,
   medicationApplications,
   medicationRoutes,
   scoreScale,
@@ -100,7 +102,15 @@ export function ClinicalRecordEditor({
   const quotedMeds = selectedQuotes.flatMap((quote) =>
     quote.items
       .filter((item) => item.category === 'MEDICATIONS')
-      .map((item) => ({ ...item, key: `${quote.id}:${item.id}` })),
+      .map((item) => ({
+        ...item,
+        key: `${quote.id}:${item.id}`,
+        sourceMedicationId: JSON.stringify([
+          quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+          item.id,
+          item.inventoryItemId ?? item.name,
+        ]),
+      })),
   );
   const laboratories = selectedQuotes.flatMap((quote) =>
     quote.items.filter((item) => item.category === 'STUDIES'),
@@ -152,6 +162,20 @@ export function ClinicalRecordEditor({
     ),
   );
   const applications = medicationApplications(card);
+  const previousSchedules = new Map(
+    (original?.medications ?? []).map((med) => [
+      medicationSourceKey(med, quotes),
+      original?.payload.kind === 'MEDICATION_CARD'
+        ? original.payload.schedule?.find((s) => s.medicationId === med.id)
+        : undefined,
+    ]),
+  );
+  const scheduleFor = (med: (typeof quotedMeds)[number]): MedicationScheduleDraft => {
+    const previous = schedule[med.key] ?? previousSchedules.get(med.sourceMedicationId);
+    return previous
+      ? { times: previous.times, dilution: previous.dilution }
+      : { times: [''], dilution: '' };
+  };
   const recorded = new Map(
     currentClinicalRecords(operations.clinicalRecords)
       .filter((r) => r.caseId === caseId && r.date === recordDate && r.rootId !== original?.rootId)
@@ -159,7 +183,17 @@ export function ClinicalRecordEditor({
         r.payload.kind === 'ADMINISTRATION'
           ? r.payload.items
               .filter((i) => i.scheduledTime)
-              .map((i) => [medicationApplicationKey(i), i] as const)
+              .map(
+                (i) =>
+                  [
+                    medicationScheduleKey(
+                      r.medications?.find((m) => m.id === i.medicationId),
+                      i,
+                      quotes,
+                    ),
+                    i,
+                  ] as const,
+              )
           : [],
       ),
   );
@@ -198,15 +232,24 @@ export function ClinicalRecordEditor({
         chronic: value('chronic'),
         schedule: quotedMeds.map((med) => ({
           medicationId: med.key,
-          ...(schedule[med.key] ?? { times: [''], dilution: '' }),
+          ...scheduleFor(med),
         })),
         instructions:
           original?.payload.kind === 'MEDICATION_CARD' ? original.payload.instructions : '',
         stock:
           original?.payload.kind === 'MEDICATION_CARD'
-            ? original.payload.stock.filter((entry) =>
-                quotedMeds.some((med) => med.key === entry.quoteItemId),
-              )
+            ? original.payload.stock.flatMap((entry) => {
+                const oldMedication = original.medications?.find(
+                  (med) => med.id === entry.quoteItemId,
+                );
+                const currentMedication = quotedMeds.find(
+                  (med) =>
+                    med.key === entry.quoteItemId ||
+                    (oldMedication &&
+                      med.sourceMedicationId === medicationSourceKey(oldMedication, quotes)),
+                );
+                return currentMedication ? [{ ...entry, quoteItemId: currentMedication.key }] : [];
+              })
             : [],
       };
     else if (kind === 'FLUID_BALANCE')
@@ -259,7 +302,7 @@ export function ClinicalRecordEditor({
           .filter(
             (application) =>
               applied[medicationApplicationKey(application)] &&
-              !recorded.has(medicationApplicationKey(application)),
+              !recorded.has(medicationScheduleKey(application.medication, application, quotes)),
           )
           .map((application) => ({
             medicationId: application.medicationId,
@@ -415,7 +458,7 @@ export function ClinicalRecordEditor({
                     <MedicationScheduleFields
                       key={med.key}
                       name={med.name}
-                      value={schedule[med.key] ?? { times: [''], dilution: '' }}
+                      value={scheduleFor(med)}
                       onChange={(value) =>
                         setSchedule((current) => ({ ...current, [med.key]: value }))
                       }
@@ -771,7 +814,7 @@ export function ClinicalRecordEditor({
                   {applications.map((application) => {
                     const med = application.medication;
                     const key = medicationApplicationKey(application);
-                    const existing = recorded.get(key);
+                    const existing = recorded.get(medicationScheduleKey(med, application, quotes));
                     const label = `${med.name}${application.scheduledTime ? ` · ${application.scheduledTime}` : ''}`;
                     return (
                       <fieldset key={key} className="medication-application-card">

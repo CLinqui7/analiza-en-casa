@@ -445,6 +445,9 @@ test('medication card correction preserves its original and prints only the sele
   );
   await block.getByRole('button', { name: 'Editar tarjeta', exact: true }).click();
   const dialog = page.getByRole('dialog');
+  await expect(dialog.getByLabel(/^Hora 1/)).toHaveValue('09:00');
+  await expect(dialog.getByLabel(/^Hora 2/)).toHaveValue('17:00');
+  await expect(dialog.getByLabel(/^Dilución/)).toHaveValue(before.payload.schedule[0].dilution);
   await dialog.getByLabel('Motivo de actualización').fill('Comprobación sintética de corrección');
   const chronic = 'Crónico sintético actualizado ' + Date.now();
   await expect(dialog.locator('[name="instructions"]')).toHaveCount(0);
@@ -453,8 +456,57 @@ test('medication card correction preserves its original and prints only the sele
   expect(saved.version).toBe(before.version + 1);
   expect(saved.rootId).toBe(before.rootId);
   expect(saved.payload.instructions).toBe(before.payload.instructions);
+  expect(saved.payload.schedule[0].times).toEqual(['09:00', '17:00']);
+  expect(saved.payload.schedule[0].dilution).toBe(before.payload.schedule[0].dilution);
+  expect(saved.payload.schedule[0].medicationId).not.toBe(before.payload.schedule[0].medicationId);
   const snapshot = await getJson(page, '/api/operations');
   expect(snapshot.clinicalRecords.find((r: { id: string }) => r.id === originalId)).toEqual(before);
+  const recorded = snapshot.clinicalRecords.find(
+    (r: {
+      payload: { kind: string; items?: Array<{ medicationId: string; scheduledTime?: string }> };
+    }) =>
+      r.payload.kind === 'ADMINISTRATION' &&
+      r.payload.items?.some(
+        (item) =>
+          item.medicationId === before.payload.schedule[0].medicationId &&
+          item.scheduledTime === '17:00',
+      ),
+  );
+  expect(recorded).toBeTruthy();
+  const csrf = await getJson(page, '/api/auth/csrf');
+  const duplicate = await browserApi(
+    page,
+    '/api/operations',
+    {
+      command: 'clinical.record',
+      record: {
+        id: crypto.randomUUID(),
+        patientId,
+        caseId,
+        date: recorded.date,
+        payload: {
+          kind: 'ADMINISTRATION',
+          cardId: saved.id,
+          time: '17:00',
+          dose: 'Captura sintética',
+          presentation: 'Tableta',
+          route: 'Oral',
+          items: [
+            {
+              medicationId: saved.payload.schedule[0].medicationId,
+              scheduledTime: '17:00',
+              applied: true,
+              reason: '',
+            },
+          ],
+        },
+      },
+    },
+    { 'x-analiza-csrf': csrf.csrfToken },
+  );
+  expect(duplicate.status).toBe(400);
+  const afterDuplicate = await getJson(page, '/api/operations');
+  expect(afterDuplicate.clinicalRecords).toEqual(snapshot.clinicalRecords);
   const corrected = page
     .locator('.clinical-record-block')
     .filter({ has: page.locator(`[id="clinical-record-${saved.id}"]`) });

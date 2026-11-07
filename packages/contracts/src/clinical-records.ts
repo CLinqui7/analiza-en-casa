@@ -603,6 +603,7 @@ export type MedicationSnapshot = {
   quoteId?: string;
   quoteItemId?: string;
   inventoryItemId?: string;
+  sourceMedicationId?: string;
   applicationTimes?: string[];
   dilution?: string;
 };
@@ -626,6 +627,38 @@ export function medicationApplicationKey(item: { medicationId: string; scheduled
   return item.scheduledTime
     ? JSON.stringify([item.medicationId, item.scheduledTime])
     : item.medicationId;
+}
+/** A new version of the same quote line is not a new scheduled clinical application. */
+type MedicationSourceQuote = {
+  id: string;
+  rootQuoteId?: string;
+  originalQuoteId?: string;
+  items?: ReadonlyArray<{ id: string; inventoryItemId?: string; name: string }>;
+};
+export function medicationSourceKey(
+  medication: MedicationSnapshot,
+  quotes: ReadonlyArray<MedicationSourceQuote> = [],
+) {
+  const quote = medication?.quoteId ? quotes.find((q) => q.id === medication.quoteId) : undefined;
+  const line = quote?.items?.find((i) => i.id === medication.quoteItemId);
+  return (
+    medication.sourceMedicationId ??
+    (medication.quoteItemId && quote
+      ? JSON.stringify([
+          quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+          medication.quoteItemId,
+          medication.inventoryItemId ?? line?.inventoryItemId ?? medication.name,
+        ])
+      : medication.id)
+  );
+}
+export function medicationScheduleKey(
+  medication: MedicationSnapshot | undefined,
+  item: { medicationId: string; scheduledTime?: string },
+  quotes: ReadonlyArray<MedicationSourceQuote> = [],
+) {
+  const source = medication ? medicationSourceKey(medication, quotes) : item.medicationId;
+  return medicationApplicationKey({ medicationId: source, scheduledTime: item.scheduledTime });
 }
 export function medicationApplications(card?: ClinicalRecord) {
   return (card?.medications ?? []).flatMap((medication) =>

@@ -6,6 +6,7 @@ import {
   carePlanTypes,
   currentClinicalRecords,
   medicationApplicationKey,
+  medicationScheduleKey,
   clinicalScales,
   scaleDefinitionSchema,
   scoreScale,
@@ -60,6 +61,11 @@ export function quoteMedications(quotes: Quote[]): MedicationSnapshot[] {
         chronic: false,
         quoteId: quote.id,
         quoteItemId: item.id,
+        sourceMedicationId: JSON.stringify([
+          quote.rootQuoteId ?? quote.originalQuoteId ?? quote.id,
+          item.id,
+          item.inventoryItemId ?? item.name,
+        ]),
         ...(item.inventoryItemId ? { inventoryItemId: item.inventoryItemId } : {}),
       })),
   );
@@ -423,7 +429,15 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
           .filter((r) => r.date === record.date && r.rootId !== record.rootId)
           .flatMap((r) =>
             r.payload.kind === 'ADMINISTRATION'
-              ? r.payload.items.filter((i) => i.scheduledTime).map(medicationApplicationKey)
+              ? r.payload.items
+                  .filter((i) => i.scheduledTime)
+                  .map((item) =>
+                    medicationScheduleKey(
+                      r.medications?.find((m) => m.id === item.medicationId),
+                      item,
+                      quoteRows.rows.map((q) => q.body),
+                    ),
+                  )
               : [],
           ),
       );
@@ -437,7 +451,16 @@ export async function saveClinicalRecord(pool: Pool, actor: ServerActor, input: 
             : !!item.scheduledTime
         )
           throw new MongoInputError('Seleccione una hora de aplicación registrada en la tarjeta.');
-        if (item.scheduledTime && occupied.has(medicationApplicationKey(item)))
+        if (
+          item.scheduledTime &&
+          occupied.has(
+            medicationScheduleKey(
+              medication,
+              item,
+              quoteRows.rows.map((q) => q.body),
+            ),
+          )
+        )
           throw new MongoInputError(
             'Este medicamento y horario ya están registrados para la fecha. Actualice el registro existente si necesita corregirlo.',
           );

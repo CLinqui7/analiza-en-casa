@@ -3,6 +3,8 @@ import {
   clinicalPayloadSchema,
   configurationEntrySchema,
   medicationApplicationKey,
+  medicationSourceKey,
+  medicationScheduleKey,
   medicationApplications,
   type ClinicalRecord,
 } from '@analiza/contracts';
@@ -62,6 +64,31 @@ const administration = {
 };
 
 describe('November 7 clinical schedules and reusable consumption rules', () => {
+  it('recognizes the same medicine across quote versions without merging different drugs or quote roots', () => {
+    const quotes = [
+      { id: 'q', items: [{ id: 'med', name: medication.name, inventoryItemId: 'inventory' }] },
+      { id: 'q-v2', rootQuoteId: 'q' },
+      { id: 'another-quote' },
+    ];
+    const revised = { ...medication, id: 'q-v2:med', quoteId: 'q-v2' };
+    expect(medicationSourceKey(medication, quotes)).toBe(medicationSourceKey(revised, quotes));
+    expect(medicationSourceKey({ ...medication, inventoryItemId: undefined }, quotes)).toBe(
+      medicationSourceKey(revised, quotes),
+    );
+    const slot = { medicationId: medication.id, scheduledTime: '08:00' };
+    expect(medicationScheduleKey(medication, slot, quotes)).toBe(
+      medicationScheduleKey(revised, { ...slot, medicationId: revised.id }, quotes),
+    );
+    expect(medicationSourceKey({ ...revised, inventoryItemId: 'different-drug' }, quotes)).not.toBe(
+      medicationSourceKey(medication, quotes),
+    );
+    expect(medicationSourceKey({ ...revised, quoteId: 'another-quote' }, quotes)).not.toBe(
+      medicationSourceKey(medication, quotes),
+    );
+    expect(medicationSourceKey({ ...medication, sourceMedicationId: 'immutable-source' })).toBe(
+      'immutable-source',
+    );
+  });
   it('preserves all explicitly supplied hours and dilution without clinical inference', () => {
     expect(clinicalPayloadSchema.parse(card.payload)).toEqual(card.payload);
     expect(medicationApplications(card).map((i) => i.scheduledTime)).toEqual(['08:00', '16:00']);

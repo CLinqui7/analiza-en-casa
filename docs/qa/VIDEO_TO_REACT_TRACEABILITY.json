@@ -11,7 +11,7 @@
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
   "implementation_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
-  "functional_fingerprint": "8f5ba87d951c5ecb20022c89f06339464d731f75bc3dc69ec8929e560ae17d00",
+  "functional_fingerprint": "8c624cd1f9a6f335fbc4575929decadf65755fc542d050ae520649a8c9001ad2",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
