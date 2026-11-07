@@ -25,73 +25,25 @@ async function login(
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
 }
 
-test('CH15 renders the factual empty discount matrix without mutation', async ({ page }) => {
+test('CH15 editable discount profile keeps category inputs and cancels without mutation', async ({
+  page,
+}) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/discounts');
-  await expect(page).toHaveURL(/\/catalogs\/discounts$/);
-  const auditBefore = await page.evaluate(() =>
-    localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
-  );
-  await expect(page.getByRole('heading', { name: 'Descuentos' })).toBeVisible();
-  for (const header of [
-    'Acciones',
-    'Nombre',
-    'Descripción',
-    'Servicios',
-    'Laboratorios',
-    'Medicamentos',
-    'Equipos',
-    'Insumos',
-    'Honorarios',
-  ]) {
-    await expect(page.getByRole('columnheader', { name: header })).toBeVisible();
-  }
-  await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-EXPORT"]')).toBeDisabled();
-  await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-CREATE"]')).toBeDisabled();
-  await expect(page.getByLabel('Registros de descuentos por página')).toBeDisabled();
-  await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-PAGE-PREV"]')).toBeDisabled();
-  await expect(page.locator('[data-action-id="CATALOG-DISCOUNTS-PAGE-NEXT"]')).toBeDisabled();
-  await page.getByLabel('Buscar descuentos').fill('sin-descuento-ch15');
-  await expect(page.locator('tbody .empty-state')).toContainText(
-    'Sin perfiles de descuento documentados',
-  );
-  await expect(page.locator('tbody .empty-state')).toContainText('sin-descuento-ch15');
+  await page.getByRole('button', { name: 'Agregar perfil' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Perfil de descuento' });
+  await dialog.getByLabel('Nombre', { exact: true }).fill('QA descuento');
+  await dialog.getByLabel('Medicamentos · %').fill('15');
+  await expect(dialog.getByLabel('Medicamentos · %')).toHaveValue('15');
+  await dialog.getByRole('button', { name: 'Cancelar' }).click();
   await page.reload();
-  await expect
-    .poll(() =>
-      page.evaluate(() => localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries')),
-    )
-    .toBe(auditBefore);
+  await expect(page.getByText('QA descuento')).toHaveCount(0);
 });
-
-test('CH15 lets INVENTORY open the discount matrix', async ({ page }) => {
-  await login(page, 'inventory@demo.local', 'demo-inventory', '/catalogs/discounts');
-  await expect(page.getByRole('heading', { name: 'Descuentos' })).toBeVisible();
-  await expect(page.getByLabel('Buscar descuentos')).toBeVisible();
-});
-
-test('CH15 lets AUDITOR search the discount matrix', async ({ page }) => {
-  await login(page, 'auditor@demo.local', 'demo-auditor', '/catalogs/discounts');
-  await page.getByLabel('Buscar descuentos').fill('sin-descuento-auditor');
-  await expect(page.locator('tbody .empty-state')).toContainText('sin-descuento-auditor');
-});
-
-test('CH15 denies DOCTOR direct discount matrix access', async ({ page }) => {
-  await login(page, 'doctor@demo.local', 'demo-doctor', '/catalogs/discounts');
-  await expect(page.locator('main[role="alert"]')).toContainText('DOCTOR');
-  await expect(page.getByLabel('Buscar descuentos')).toHaveCount(0);
-});
-
-test('CH15 denies NURSE direct discount matrix access', async ({ page }) => {
-  await login(page, 'nurse@demo.local', 'demo-nurse', '/catalogs/discounts');
-  await expect(page.locator('main[role="alert"]')).toContainText('NURSE');
-  await expect(page.getByLabel('Buscar descuentos')).toHaveCount(0);
-});
-
-test('CH15 denies FINANCE direct discount matrix access', async ({ page }) => {
-  await login(page, 'finance@demo.local', 'demo-finance', '/catalogs/discounts');
-  await expect(page.locator('main[role="alert"]')).toContainText('FINANCE');
-  await expect(page.getByLabel('Buscar descuentos')).toHaveCount(0);
-});
+for (const role of ['inventory', 'auditor', 'doctor', 'nurse', 'finance'])
+  test('CH15 authorized staff configures discounts: ' + role, async ({ page }) => {
+    await login(page, role + '@demo.local', 'demo-' + role, '/catalogs/discounts');
+    await expect(page.getByRole('heading', { name: 'Descuentos' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Agregar perfil' })).toBeEnabled();
+  });
 
 test('CH15 renders the factual empty services catalog without mutation', async ({ page }) => {
   await login(page, 'admin@demo.local', 'demo-admin', '/catalogs/services');

@@ -1,9 +1,15 @@
-/* Analiza en Casa palette layer.
- *
- * The logo establishes the visual hierarchy: navy for structure, teal for
- * healthcare-oriented interaction, and coral only for the medical brand accent.
- * This file is loaded last so the palette stays isolated from feature layouts.
+/* Shared presentation contract. This final layer owns typography, controls,
+ * surfaces and motion; feature styles continue to own their layout and state.
+ * Inter is served locally under OFL (public/fonts/OFL-Inter.txt).
  */
+@font-face {
+  font-family: 'Analiza Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin-variable.woff2') format('woff2');
+}
+
 :root {
   --analiza-navy-950: #0a2636;
   --analiza-navy-900: #12394e;
@@ -19,11 +25,11 @@
   --analiza-coral-100: #fde5e8;
   --analiza-cloud-100: #e4edef;
   --analiza-cloud-50: #f5f9fa;
-  --ink: #102f43;
-  --muted: #607583;
-  --line: #dce7e9;
+  --ink: #193746;
+  --muted: #566c78;
+  --line: #dce5e9;
   --line-strong: #c8d8dc;
-  --canvas: var(--analiza-cloud-50);
+  --canvas: #f4f7f8;
   --blue: var(--analiza-navy-800);
   --blue-dark: var(--analiza-navy-950);
   --brand-navy: var(--analiza-navy-800);
@@ -40,14 +46,41 @@
   --danger: #b73743;
   --info: var(--analiza-navy-700);
   --focus-ring: 0 0 0 4px rgb(22 135 127 / 15%);
-  --shadow-sm: 0 4px 14px rgb(16 47 67 / 6%);
-  --shadow-md: 0 16px 42px rgb(16 47 67 / 10%);
+  --shadow-sm: 0 2px 6px rgb(16 47 67 / 3%), 0 8px 24px rgb(16 47 67 / 3%);
+  --shadow-md: 0 12px 36px rgb(16 47 67 / 11%);
+  --ui-font: 'Analiza Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ui-control-radius: 11px;
+  --ui-control-height: 42px;
+  --ui-surface-radius: 18px;
 }
 
+html,
 body {
-  background:
-    radial-gradient(circle at 88% -8%, rgb(40 163 154 / 8%), transparent 27rem),
-    radial-gradient(circle at 38% 110%, rgb(226 87 99 / 4%), transparent 32rem), var(--canvas);
+  font-family: var(--ui-font);
+  font-size: 14px;
+  line-height: 1.55;
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--ui-font);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+button,
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection {
@@ -84,16 +117,40 @@ body {
 .button.referral-catalog-toggle,
 .button.referral-catalog-toggle:hover,
 .button.referral-catalog-toggle:focus-visible {
+  min-height: var(--ui-control-height);
+  max-width: 100%;
+  align-self: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: var(--ui-control-radius);
   border-color: var(--analiza-navy-800);
   background: var(--analiza-navy-800);
-  box-shadow: 0 8px 20px rgb(27 80 104 / 16%);
+  color: #fff;
+  box-shadow:
+    0 2px 3px rgb(16 47 67 / 5%),
+    inset 0 1px 0 rgb(255 255 255 / 10%);
+  font-size: 0.93rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  flex-shrink: 0;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .button:hover,
 .button.referral-catalog-toggle:hover {
   border-color: var(--analiza-navy-950);
   background: var(--analiza-navy-950);
-  box-shadow: 0 10px 24px rgb(10 38 54 / 18%);
+  box-shadow: 0 3px 9px rgb(10 38 54 / 12%);
+  transform: none;
 }
 
 .button.button-secondary,
@@ -101,6 +158,7 @@ body {
   border-color: #c9d9dd;
   background: #ffffff;
   color: var(--analiza-navy-900);
+  box-shadow: 0 1px 2px rgb(16 47 67 / 3%);
 }
 
 .button.button-secondary:hover,
@@ -118,24 +176,27 @@ body {
 .action-link-button,
 .text-link {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 40px;
+  max-width: 100%;
+  align-self: center;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
-  padding: 8px 13px;
+  padding: 9px 14px;
   border: 1px solid #bfd2d7;
-  border-radius: 10px;
+  border-radius: var(--ui-control-radius);
   background: #ffffff;
   color: var(--analiza-navy-900);
-  box-shadow: 0 4px 12px rgb(16 47 67 / 6%);
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1.15;
+  box-shadow: 0 1px 2px rgb(16 47 67 / 4%);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
   text-align: center;
   text-decoration: none !important;
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   cursor: pointer;
   transition:
     transform 150ms ease,
@@ -149,9 +210,9 @@ body {
   border-color: #79aaa8;
   background: var(--analiza-teal-50);
   color: var(--analiza-navy-950);
-  box-shadow: 0 7px 18px rgb(16 47 67 / 10%);
+  box-shadow: 0 3px 9px rgb(16 47 67 / 7%);
   text-decoration: none !important;
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .action-link-button:active,
@@ -243,8 +304,707 @@ body {
 }
 
 .panel:hover {
-  border-color: #d4e2e5;
-  box-shadow: 0 12px 32px rgb(16 47 67 / 8%);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Page hierarchy: a quiet header frame, then content cards with consistent rhythm. */
+.main-content {
+  padding: 28px;
+}
+.page-stack {
+  gap: 22px;
+}
+.page-stack > .page-header:not(.dashboard-hero, .clinical-module-header, .tutorial-hero),
+.clinical-hero {
+  align-items: center;
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--ui-surface-radius);
+  background: linear-gradient(110deg, #fff 60%, #f3f9f8);
+  box-shadow: 0 2px 5px rgb(16 47 67 / 2%);
+}
+.page-header > div,
+.section-header > div,
+.table-heading > div {
+  min-width: 0;
+}
+.page-header h1,
+.clinical-hero h1 {
+  margin: 4px 0 8px;
+  font-size: clamp(24px, 2.15vw, 32px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+.page-header p,
+.clinical-hero p {
+  font-size: 13px;
+  line-height: 1.65;
+}
+.page-header .eyebrow {
+  margin: 0 0 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.header-actions,
+.page-header-actions > .action-row,
+.patient-header-actions,
+.table-heading,
+.section-header-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.page-header .header-actions {
+  justify-content: flex-end;
+}
+.table-heading h2,
+.panel h2,
+.dashboard-card-heading h2 {
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+.panel,
+.card,
+.dashboard-kpi-card,
+.inventory-ledger-metrics article {
+  border-color: var(--line);
+  border-radius: var(--ui-surface-radius);
+  box-shadow: var(--shadow-sm);
+}
+.panel {
+  padding: 22px;
+}
+.panel p,
+.field-help {
+  line-height: 1.65;
+}
+.empty-state {
+  padding: 32px 24px;
+  border-color: #c8d7de;
+  background: #fafcfc;
+  color: var(--muted);
+}
+.empty-state strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Controls keep their dimensions when rows or dates are appended. */
+.button.button-danger {
+  border-color: #b73743;
+  background: #b73743;
+  color: white;
+}
+.button.button-success {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+.button.button-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+}
+.button.button-ghost:hover {
+  background: #eaf1f3;
+}
+.button:disabled,
+.button[aria-disabled='true'] {
+  box-shadow: none;
+  opacity: 0.6;
+}
+.icon-button {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--ui-control-radius);
+}
+.button > svg,
+.action-link-button > svg {
+  flex-shrink: 0;
+}
+.form-grid > .button,
+.form-grid-compact > .button {
+  align-self: end;
+  justify-self: start;
+  width: auto;
+}
+.form-grid label,
+.form-grid-compact label {
+  gap: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #465e6b;
+}
+:where(input, select, textarea):not(
+  [type='checkbox'],
+  [type='radio'],
+  [type='file'],
+  [type='range'],
+  [type='color']
+) {
+  max-width: 100%;
+  min-width: 0;
+  min-height: var(--ui-control-height);
+  padding: 10px 12px;
+  border: 1px solid #bdccd3;
+  border-radius: var(--ui-control-radius);
+  background-color: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.form-grid input:not([type='checkbox'], [type='radio']),
+.form-grid select,
+.form-grid textarea {
+  border-color: #bdccd3;
+  border-radius: var(--ui-control-radius);
+}
+select:not([multiple], [size]) {
+  appearance: none;
+  padding-right: 34px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23566c78' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+textarea {
+  resize: vertical;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #72838d;
+  opacity: 1;
+}
+input[type='file']::file-selector-button {
+  margin-right: 12px;
+  padding: 10px 14px;
+  border: 1px solid #bdccd3;
+  border-radius: 9px;
+  background: #f6f9fa;
+  color: var(--ink);
+  font: 600 12px var(--ui-font);
+  cursor: pointer;
+}
+.form-grid fieldset,
+.form-grid-compact fieldset {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background-color: #fcfdfd;
+}
+.form-grid legend,
+.form-grid-compact legend {
+  padding-inline: 7px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+.field-help {
+  font-size: 12px;
+  font-weight: 400;
+}
+.form-grid .checkbox-with-help {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.form-grid > label,
+.form-grid-compact > label {
+  align-content: start;
+}
+.checkbox-with-help > input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+.checkbox-with-help > span {
+  min-width: 0;
+}
+.checkbox-with-help .field-help {
+  display: block;
+  margin-top: 6px;
+}
+.notice-with-action {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.notice-with-action > .action-link-button {
+  flex: 0 1 auto;
+  overflow-wrap: normal;
+}
+
+/* Data remains dense enough to scan, without tiny action labels. */
+table td,
+.patient-directory-panel td,
+.inventory-ledger-table td {
+  font-size: 13px;
+  line-height: 1.55;
+}
+table th,
+.patient-directory-panel th,
+.inventory-ledger-table th {
+  padding-block: 14px;
+  background: #f5f8f9;
+  color: #536b78;
+  font-size: 10px;
+  letter-spacing: 0.065em;
+}
+table td .button,
+table td .action-link-button,
+.patient-row-actions .action-link-button {
+  min-height: 36px;
+  padding: 7px 11px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.quotes-page > .panel > .table-wrap td:nth-child(n + 4):nth-child(-n + 7) {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.table-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.table-controls > label {
+  display: grid;
+  gap: 6px;
+}
+.table-controls > label:has(input) {
+  flex: 1 1 240px;
+}
+.table-controls > label:has(select) {
+  flex: 0 1 140px;
+}
+.table-controls > .action-row {
+  margin-left: auto;
+}
+.table-controls input,
+.table-controls select {
+  width: 100%;
+}
+.commercial-period-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+}
+.commercial-period-toolbar > label {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.commercial-period-toolbar > .field-help {
+  flex: 1 1 260px;
+  white-space: normal;
+}
+.hospitalization-next-action {
+  border-radius: 15px;
+  background: linear-gradient(145deg, #234d60, #143747);
+}
+.hospitalization-next-action .eyebrow {
+  color: #a7e8df;
+}
+.status-tag {
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.studio-metrics strong,
+.dashboard-kpi-value,
+.financial-total,
+td.amount,
+td.numeric {
+  font-variant-numeric: tabular-nums;
+}
+.tabs .tab,
+.patient-status-tabs .tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  min-height: 40px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tabs .tab.active,
+.patient-status-tabs .tab.active {
+  border-color: #bad7d5;
+  background: #eef8f6;
+  box-shadow: 0 1px 3px rgb(15 116 111 / 6%);
+}
+.tabs .tab.active::after,
+.patient-status-tabs .tab.active::after {
+  display: none;
+}
+
+.survey-invitation {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.survey-invitation > * {
+  min-width: 0;
+  margin: 0;
+}
+
+.survey-invitation img {
+  display: block;
+  width: min(100%, 320px);
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.survey-invitation button {
+  justify-self: start;
+}
+
+.public-survey {
+  max-width: 760px;
+  margin: 3rem auto;
+  padding: 1rem;
+}
+
+.public-survey form {
+  margin-top: 24px;
+}
+
+.public-survey fieldset {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fbfdfd;
+  padding: 18px;
+}
+
+.public-survey legend {
+  max-width: 100%;
+  padding: 0 6px;
+  line-height: 1.6;
+}
+
+.public-survey fieldset label:has(input[type='radio']) {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  min-height: 44px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.public-survey fieldset label:has(input:checked) {
+  background: #edf8f6;
+  border-color: #80b9b1;
+}
+
+.public-survey fieldset label:has(input:focus-visible) {
+  outline: 2px solid #3c8f94;
+  outline-offset: 2px;
+}
+
+.public-survey small {
+  display: block;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+/* Menus share a surface, comfortable rows, and a visible selected state. */
+.user-menu-popover,
+.searchable-select-options,
+.patient-more-actions > div,
+details.clinical-row-menu > div {
+  padding: 7px;
+  border: 1px solid #cedce2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow:
+    0 6px 12px rgb(16 47 67 / 4%),
+    0 18px 48px rgb(16 47 67 / 14%);
+}
+.searchable-select-options {
+  top: calc(var(--ui-control-height) + 5px);
+  max-height: min(260px, 40dvh);
+  overscroll-behavior: contain;
+  scroll-padding: 7px;
+}
+.searchable-select-options li,
+.user-menu-popover :is(a, button) {
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.user-menu-popover :is(a, button) {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid transparent;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--ui-font);
+  font-weight: 550;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.user-menu-popover :is(a, button):hover {
+  border-color: #d5e8e5;
+  background: #eef8f6;
+  color: #125d59;
+}
+.searchable-select-options li.active,
+.searchable-select-options li:hover,
+.searchable-select-options li[aria-selected='true'] {
+  background: #eaf6f3;
+  color: #125d59;
+}
+.searchable-select-options li[aria-selected='true'] {
+  font-weight: 650;
+}
+.patient-more-actions summary {
+  min-height: var(--ui-control-height);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.patient-more-actions summary::after {
+  content: '⌄';
+  color: var(--muted);
+}
+.patient-more-actions > div {
+  width: min(240px, calc(100vw - 40px));
+}
+details[data-action-menu][data-side='top'] > [data-action-menu-panel] {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.clinical-patient-actions details.clinical-row-menu > div > div {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.clinical-patient-actions details.clinical-row-menu > div > div > small {
+  grid-column: 1 / -1;
+  padding-bottom: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.clinical-patient-actions details.clinical-row-menu > div > div > .button {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 6px;
+  font-size: 12px;
+}
+main details:not(.clinical-row-menu, .patient-more-actions, .clinical-filter-disclosure) > summary {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f6f9fa;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+main details[open]:not(.clinical-row-menu, .patient-more-actions) > summary {
+  margin-bottom: 12px;
+  background: #edf5f5;
+}
+
+/* Dialogs: restrained frame, spacious body, persistent and readable actions. */
+.login-card {
+  background: #fff;
+  border-color: #e0e9ee;
+  box-shadow: 0 24px 80px rgb(8 31 44 / 22%);
+}
+.login-card .login-submit {
+  width: 100%;
+  min-height: 46px;
+}
+.login-form-grid > .text-link,
+.auth-fields > .text-link {
+  width: auto;
+  justify-self: end;
+}
+.login-card .login-utilities {
+  text-align: center;
+}
+.login-card footer {
+  text-align: center;
+  padding-top: 8px;
+  font-size: 12px;
+}
+.dialog,
+.patients-page .dialog,
+.inventory-ledger-page .dialog {
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 22px;
+  box-shadow: 0 24px 80px rgb(8 31 44 / 25%);
+}
+.dialog-header {
+  gap: 18px;
+  padding: 23px 26px 20px;
+  background: linear-gradient(110deg, #fff 65%, #f5f9fa);
+}
+.dialog-header h2 {
+  font-size: clamp(20px, 1.7vw, 25px);
+  font-weight: 650;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.dialog-header p {
+  max-width: 78ch;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.dialog-content,
+.patients-page .dialog-content {
+  padding: 24px 26px;
+}
+.dialog-footer {
+  gap: 10px;
+  padding: 16px 26px;
+  background: #f9fbfc;
+  box-shadow: 0 -4px 12px rgb(16 47 67 / 3%);
+}
+.dialog .icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f0f5f6;
+  border-color: transparent;
+  font-size: 23px;
+  font-weight: 400;
+}
+.dialog .icon-button:hover {
+  background: #e4edef;
+}
+
+@media (max-width: 740px) {
+  .main-content {
+    padding: 18px 14px;
+  }
+  .page-stack {
+    gap: 16px;
+  }
+  .page-stack > .page-header:not(.dashboard-hero, .clinical-module-header, .tutorial-hero),
+  .clinical-hero {
+    padding: 20px;
+  }
+  .page-header .header-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .panel {
+    padding: 18px;
+  }
+  .button,
+  .action-link-button {
+    min-height: 44px;
+  }
+  .dialog-header {
+    padding: 20px 18px 16px;
+  }
+  .dialog-content,
+  .patients-page .dialog-content {
+    padding: 20px 18px;
+  }
+  .dialog-footer {
+    padding: 14px 18px max(14px, env(safe-area-inset-bottom));
+  }
+  .dialog-footer .button {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .form-grid fieldset,
+  .form-grid-compact fieldset {
+    padding: 14px;
+  }
+  :where(input, select, textarea):not([type='checkbox'], [type='radio'], [type='file']) {
+    font-size: 16px;
+  }
+  .form-grid input:not([type='checkbox'], [type='radio']),
+  .form-grid select,
+  .form-grid textarea {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-stack {
+    animation: ui-page-reveal 220ms ease-out;
+  }
+  .searchable-select-options,
+  .user-menu-popover,
+  .patient-more-actions[open] > div,
+  details.clinical-row-menu[open] > div {
+    animation: ui-menu-reveal 140ms ease-out;
+  }
+  .clinical-action-grid button,
+  .interactive-card {
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+}
+@keyframes ui-page-reveal {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ui-menu-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media print {
+  .page-stack {
+    animation: none;
+  }
+  .panel,
+  .card,
+  .clinical-hero {
+    box-shadow: none;
+  }
 }
 
 .topbar-profile .account-avatar {
@@ -328,6 +1088,35 @@ body {
 }
 
 /* Client-change register: reviewed workflow and technical truth are separate. */
+.sidebar .nav-sublink,
+.sidebar .nav-link {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.sidebar .nav-group-trigger {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+}
+.sidebar .nav-link[aria-current='page'],
+.sidebar .nav-sublink[aria-current='page'] {
+  font-weight: 650;
+  box-shadow: 0 2px 6px rgb(5 30 43 / 12%);
+}
+.sidebar .account-logout-quick,
+.sidebar .account-card {
+  font-family: var(--ui-font);
+  font-size: 12px;
+  font-weight: 550;
+}
+.sidebar .brand {
+  box-shadow: none;
+}
+.workspace-topbar {
+  box-shadow: 0 1px 3px rgb(16 47 67 / 2%);
+}
+
 .client-changes-page {
   max-width: 1480px;
 }

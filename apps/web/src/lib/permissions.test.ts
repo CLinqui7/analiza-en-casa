@@ -4,6 +4,16 @@ import { can, isAdministrator, permissionForPath, roles } from './permissions';
 // test-id: vitest:b2-doctors-admin-only
 
 describe('doctor administration authorization', () => {
+  it('allows quote authors to read selectable doctors without granting directory edits', () => {
+    for (const role of roles) {
+      expect(can(role, 'doctors:read')).toBe(can(role, 'quotes:write'));
+    }
+    expect(can(undefined, 'doctors:read')).toBe(false);
+    for (const role of ['FINANCE', 'DOCTOR', 'MANAGER'] as const) {
+      expect(can(role, 'doctors:read')).toBe(true);
+      expect(can(role, 'settings:write')).toBe(false);
+    }
+  });
   it('isolates login analytics in its dedicated role', () => {
     expect(permissionForPath('/analytics/logins')).toBe('login-analytics:read');
     expect(can('ANALYTICS', 'login-analytics:read')).toBe(true);

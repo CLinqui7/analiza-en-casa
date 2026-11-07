@@ -14,23 +14,30 @@ test('health report links to the real hospitalization route and exposes clinical
   page,
 }) => {
   await login(page);
-  await page.getByRole('button', { name: /Paciente Demo Aurora/ }).click();
-
-  const openCase = page.getByRole('link', { name: 'Abrir caso' });
-  await expect(openCase).toHaveAttribute('href', '/hospitalizations/case-demo-001');
-
-  await page.getByRole('tab', { name: /Signos vitales/ }).click();
-  await expect(page.getByRole('heading', { name: 'Evaluación clínica' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: '118/76' })).toBeVisible();
-  await expect(page.getByRole('cell', { name: 'Registro sintético de QA.' })).toBeVisible();
-
-  await page.getByRole('tab', { name: /Notas de enfermería/ }).click();
-  await expect(page.getByRole('heading', { name: 'Notas de enfermería' })).toBeVisible();
-  await expect(page.getByText('Sin notas de enfermería')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Abrir evoluciones' })).toHaveAttribute(
+  await page
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  await page
+    .getByRole('combobox', { name: 'Hospitalización', exact: true })
+    .selectOption('case-demo-001');
+  await expect(page.getByRole('link', { name: 'Abrir caso' })).toHaveAttribute(
     'href',
-    '/clinical/evolutions?case=case-demo-001',
+    '/hospitalizations/case-demo-001',
   );
+  await page
+    .getByRole('navigation', { name: 'Secciones del expediente' })
+    .getByRole('button', { name: /Acciones de enfermería/ })
+    .click();
+  await page.getByRole('button', { name: 'Signos vitales', exact: true }).click();
+  await expect(page.locator('#patient-record-print')).not.toContainText('118/76');
+  await page.getByRole('combobox', { name: 'Hospitalización', exact: true }).selectOption('');
+  await expect(page.locator('#patient-record-print')).toContainText('118/76');
+  await expect(page.locator('#patient-record-print')).toContainText('Registro sintético de QA.');
+  await page.getByRole('button', { name: 'Notas de enfermería', exact: true }).click();
+  await expect(page.locator('#patient-record-print')).not.toContainText('118/76');
+  await expect(
+    page.getByRole('link', { name: 'Firmas y correcciones de documentos anteriores' }),
+  ).toHaveAttribute('href', '/clinical/document-versions');
 });
 
 test('hospitalization detail opens the selected vital and nursing sections', async ({ page }) => {
@@ -39,16 +46,18 @@ test('hospitalization detail opens the selected vital and nursing sections', asy
 
   await page.locator('[data-action-id="HOSPITALIZATION-VITALS-OPEN"]').click();
   await expect(page).toHaveURL(/\/clinical\/reports\?case=case-demo-001&section=clinical$/);
-  await expect(page.getByRole('tab', { name: /Signos vitales/ })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Secciones del expediente' })
+      .getByRole('button', { name: /Acciones de enfermería/ }),
+  ).toHaveAttribute('aria-current', 'page');
 
   await page.goto('/hospitalizations/case-demo-001');
   await page.locator('[data-action-id="HOSPITALIZATION-NURSING-NOTES-OPEN"]').click();
   await expect(page).toHaveURL(/\/clinical\/reports\?case=case-demo-001&section=nursing$/);
-  await expect(page.getByRole('tab', { name: /Notas de enfermería/ })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Secciones del expediente' })
+      .getByRole('button', { name: /Acciones de enfermería/ }),
+  ).toHaveAttribute('aria-current', 'page');
 });

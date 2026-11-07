@@ -109,7 +109,7 @@ export async function closePostgresPool() {
 }
 export async function transaction<T>(
   pool: Pool,
-  actor: ServerActor | null,
+  actor: Pick<ServerActor, 'organizationId'> | null,
   operation: (client: PoolClient) => Promise<T>,
 ): Promise<T> {
   const client = await pool.connect();

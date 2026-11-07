@@ -37,7 +37,7 @@ export function assertProvisionTarget(env) {
     !env.CLOUD_RUN_JOB &&
     env.ANALIZA_DB_TRANSPORT === 'unix' &&
     env.PGHOST === '/var/run/postgresql' &&
-    env.PGDATABASE === 'analiza_en_casa';
+    ['analiza_en_casa', 'analiza_live_20261014'].includes(env.PGDATABASE);
   if (!selfHosted) {
     const target = {
       ...env,

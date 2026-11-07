@@ -42,7 +42,22 @@ rollback() {
 
 # The database is backed up before additive DDL. The old web image stays
 # available and running while the new operator migrates the local database.
+export RESTIC_REPOSITORY="$base/backups/restic"
+export RESTIC_PASSWORD_FILE="$base/secrets/restic-password"
+snapshot_before=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("analiza-contabo-staging"))] | max_by(.time).id // empty')
 ./backup.sh
+snapshot_after=$(restic snapshots --json | jq -r '[.[] | select(.tags | index("analiza-contabo-staging"))] | max_by(.time).id // empty')
+[[ -n "$snapshot_after" && "$snapshot_after" != "$snapshot_before" ]] || {
+  echo 'No new verified backup snapshot; refusing database migration' >&2
+  exit 1
+}
+for required_file in active-database.dump active-database.name active-database.sha256; do
+  restic ls "$snapshot_after" --json | jq -e --arg name "/$required_file" \
+    'select((.path? // "") | endswith($name))' >/dev/null || {
+    echo "Verified backup is missing $required_file; refusing database migration" >&2
+    exit 1
+  }
+done
 trap rollback ERR
 sed -i "s/^OPERATOR_IMAGE=.*/OPERATOR_IMAGE=analiza-contabo-operator:$sha/" .env
 docker compose --profile operator run --rm --no-deps migrate
@@ -50,7 +65,7 @@ sed -i "s/^WEB_IMAGE=.*/WEB_IMAGE=analiza-contabo-web:$sha/" .env
 docker compose up -d --no-deps web
 healthy=0
 for attempt in $(seq 1 40); do
-  if curl -fsS http://127.0.0.1:18080/api/health >/dev/null 2>&1; then healthy=1; break; fi
+  if curl -fsS http://127.0.0.1:18081/api/health >/dev/null 2>&1; then healthy=1; break; fi
   sleep 2
 done
 test "$healthy" = 1

@@ -15,6 +15,44 @@ async function loginAs(page: import('@playwright/test').Page, email: string, pas
 async function login(page: import('@playwright/test').Page) {
   await loginAs(page, 'admin@demo.local', 'demo-admin');
 }
+async function openSchedulingFromAttention(page: import('@playwright/test').Page) {
+  await page.goto('/clinical/hospitalizations');
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.nursingResources',
+      JSON.stringify([
+        {
+          id: 'nurse-demo-001',
+          userId: 'nurse-user-qa',
+          displayName: 'Enfermería Demo Norte',
+          territory: 'Zona demo norte',
+          shift: 'MORNING',
+          availability: 'AVAILABLE',
+          capacity: 3,
+          boardRegistrationNumber: 'REG-DEMO-001',
+        },
+      ]),
+    ),
+  );
+  await page.reload();
+  await page.getByRole('button', { name: 'Atención' }).first().click();
+  const dialog = page.getByRole('dialog', { name: /Atención clínica/ });
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-NURSE"]').selectOption('nurse-demo-001');
+  return dialog;
+}
+async function markSyntheticQuoteSent(page: import('@playwright/test').Page, diagnosis: string) {
+  return page.evaluate((expected) => {
+    const key = 'analiza.en.casa.workspace.v3.quotes';
+    const quotes = JSON.parse(window.localStorage.getItem(key) ?? '[]');
+    const quote = quotes.find((item: { manager?: string }) => item.manager === expected);
+    if (!quote) throw new Error('No se encontró la cotización sintética.');
+    quote.status = 'SENT';
+    quote.immutable = true;
+    quote.sentAt = new Date().toISOString();
+    window.localStorage.setItem(key, JSON.stringify(quotes));
+    return quote.id as string;
+  }, diagnosis);
+}
 
 async function openPatientDetail(page: import('@playwright/test').Page, fullName: string) {
   const row = page.getByRole('row').filter({ hasText: fullName });
@@ -31,7 +69,9 @@ async function fillRequiredPatientData(
   await dialog.getByLabel('Fecha de nacimiento').fill('1985-04-20');
   await dialog.getByLabel('Femenino').check();
   await dialog.getByLabel('Teléfono celular').fill(values.phone);
-  await dialog.getByLabel('Empresa').fill('Empresa QA Sintética');
+  await dialog.getByLabel('Empresa').fill('Organización sintética QA');
+  await dialog.getByRole('option', { name: 'Organización sintética QA' }).click();
+  await dialog.getByLabel('Origen del paciente').selectOption('FAMILY_FRIENDS');
   await dialog.getByLabel('Correo').fill(values.email ?? 'paciente.qa@example.test');
   await dialog.locator('input[name="address.line"]').fill('Calle sintética 123');
   await dialog.locator('input[name="address.comments"]').fill('Referencia sintética para QA');
@@ -53,11 +93,13 @@ test('sidebar accordions preserve stable clinical and inventory routes', async (
   await clinical.click();
   await expect(clinical).toHaveAttribute('aria-expanded', 'false');
   await expect(page.getByRole('link', { name: 'Reporte de salud' })).toHaveCount(0);
-  await clinical.click();
-  await expect(clinical).toHaveAttribute('aria-expanded', 'true');
+  const reports = page.getByRole('button', { name: 'Reportes' });
+  if ((await reports.getAttribute('aria-expanded')) === 'false') await reports.click();
   await page.getByRole('link', { name: 'Reporte de salud' }).click();
   await expect(page).toHaveURL(/\/clinical\/reports$/);
-  await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Expediente clínico', exact: true }),
+  ).toBeVisible();
   const inventory = page.getByRole('button', { name: 'Inventario y compras' });
   if ((await inventory.getAttribute('aria-expanded')) === 'false') await inventory.click();
   await expect(inventory).toHaveAttribute('aria-expanded', 'true');
@@ -159,8 +201,17 @@ test('patient duplicate validation and read-only health-report data are enforced
   await expect(page.getByText('Ya existe un registro con este documento')).toBeVisible();
 
   await page.goto('/clinical/reports');
-  await expect(page.getByRole('heading', { name: 'Reporte de salud' })).toBeVisible();
-  await expect(page.getByRole('tab', { name: /Signos vitales/ })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Expediente clínico', exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  await page
+    .getByRole('navigation', { name: 'Secciones del expediente' })
+    .getByRole('button', { name: /Acciones de enfermería/ })
+    .click();
+  await expect(page.getByRole('button', { name: 'Signos vitales', exact: true })).toBeVisible();
   await expect(page.locator('[data-action-id^="CLINICAL-VITAL"]')).toHaveCount(0);
 });
 
@@ -181,7 +232,8 @@ test('patient registration persists complete administrative, insurance, contacts
   await dialog.getByLabel('Jubilado').check();
   await dialog.getByLabel('Tipo de sangre').selectOption('O+');
   await dialog.getByLabel('Estado civil').selectOption('Soltero/a (demo)');
-  await dialog.getByLabel('Nacionalidad').fill('Nacionalidad sintética');
+  await dialog.getByLabel('Nacionalidad').fill('Salvadoreña');
+  await dialog.getByRole('option', { name: 'Salvadoreña (demo)' }).click();
   await dialog.getByLabel('Ocupación').fill('Ocupación sintética');
   await dialog.getByLabel('Tipo de paciente').selectOption('INSURED');
   await dialog.getByRole('combobox', { name: 'Aseguradora' }).fill('Aseguradora demo A');
@@ -218,7 +270,8 @@ test('patient registration persists complete administrative, insurance, contacts
   await page.reload();
   await page.getByLabel('Buscar paciente').fill('Paciente QA Integral');
   await openPatientDetail(page, 'Paciente QA Integral');
-  await expect(page.getByText('Empresa QA Sintética')).toBeVisible();
+  await expect(page.getByText('Organización sintética QA')).toBeVisible();
+  await expect(page.getByText('Salvadoreña (demo)')).toBeVisible();
   await expect(page.getByText('POL-QA-001')).toBeVisible();
   await expect(page.getByText('Contacto QA Uno')).toBeVisible();
   await expect(page.getByText('Contacto QA Dos')).toBeVisible();
@@ -308,14 +361,16 @@ test('patient import validates CSV rows, persists valid rows, and exports filter
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'invalido.csv',
     mimeType: 'text/csv',
-    buffer: Buffer.from('document,firstName,lastName\n,Sin,Documento'),
+    buffer: Buffer.from(
+      'document,firstName,lastName,referralOrigin\n,Sin,Documento,FAMILY_FRIENDS',
+    ),
   });
   await expect(dialog.getByRole('alert')).toContainText('Fila 2');
   await dialog.locator('[data-action-id="PATIENT-IMPORT-FILE"]').setInputFiles({
     name: 'pacientes-validos.csv',
     mimeType: 'text/csv',
     buffer: Buffer.from(
-      'document,firstName,lastName,documentType,phone,email,company,status\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE',
+      'document,firstName,lastName,documentType,phone,email,company,status,referralOrigin\nIMPORT-001,Importado,Uno,OTHER,7000-5001,uno.import@example.test,Empresa Importada,ACTIVE,FAMILY_FRIENDS\nIMPORT-002,Importado,Dos,OTHER,7000-5002,dos.import@example.test,Empresa Importada,INACTIVE,SOCIAL_MEDIA',
     ),
   });
   await expect(dialog.locator('[data-action-id="PATIENT-IMPORT-PREVIEW"]')).toContainText(
@@ -348,6 +403,7 @@ test('patient Excel import previews extended fields and persists the selected ro
     'documentType',
     'firstName',
     'lastName',
+    'referralOrigin',
     'phone',
     'company',
     'addressLine',
@@ -363,6 +419,7 @@ test('patient Excel import previews extended fields and persists the selected ro
         documentType: 'OTHER',
         firstName: 'Excel',
         lastName: 'Sintético',
+        referralOrigin: 'FAMILY_FRIENDS',
         phone: '7000-5678',
         company: 'Empresa QA',
         addressLine: 'Dirección QA',
@@ -413,7 +470,7 @@ test('unsaved patient details survive navigation within the same signed-in tab',
   ).toBeVisible();
 });
 
-test('patient doctor pickers filter names while retaining the chosen doctor', async ({ page }) => {
+test('quote doctor pickers filter names while retaining the chosen doctor', async ({ page }) => {
   await login(page);
   await page.evaluate(() => {
     const key = 'analiza.en.casa.workspace.v3.doctors';
@@ -439,13 +496,13 @@ test('patient doctor pickers filter names while retaining the chosen doctor', as
       ]),
     );
   });
-  await page.goto('/patients?create=1');
-  const dialog = page.getByRole('dialog', { name: 'Agregar paciente' });
-  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Alba');
+  await page.goto('/quotes?create=1');
+  const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
+  await dialog.getByRole('searchbox', { name: 'Buscar médico por nombre' }).fill('Alba');
   const primary = dialog.getByLabel('Médico tratante principal');
   await expect(primary.locator('option')).toHaveCount(2);
   await primary.selectOption('doctor-filter-a');
-  await dialog.getByRole('searchbox', { name: 'Filtrar médicos por nombre' }).fill('Bruno');
+  await dialog.getByRole('searchbox', { name: 'Buscar médico por nombre' }).fill('Bruno');
   await expect(primary.locator('option')).toHaveCount(3);
   await expect(primary).toHaveValue('doctor-filter-a');
 });
@@ -624,11 +681,26 @@ test('patient detail edits persist after refresh', async ({ page }) => {
     .toBe('2222 3333');
 });
 
-test('hospitalization route provides legacy listing controls, persistence, detail and edit', async ({
+test('hospitalization route retains listing and limits case editing to clinical fields', async ({
   page,
   browser,
 }) => {
   await login(page);
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'analiza.en.casa.workspace.v3.doctors',
+      JSON.stringify([
+        {
+          id: 'doctor-workspace-qa',
+          fullName: 'Médico Workspace QA',
+          documentId: 'DUI-WORKSPACE',
+          specialty: 'General',
+          address: 'Dirección sintética',
+          attachments: [],
+        },
+      ]),
+    ),
+  );
   await page.goto('/hospitalizations');
   await expect(page.getByRole('columnheader', { name: 'Identificador' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Paciente' })).toBeVisible();
@@ -647,6 +719,7 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   await page.getByRole('button', { name: 'Guardar hospitalización' }).click();
   await expect(createDialog.getByText('Seleccione un paciente.')).toBeVisible();
   await createDialog.getByLabel('Paciente').selectOption('patient-demo-001');
+  await createDialog.getByLabel('Médico tratante principal').selectOption({ index: 1 });
   await createDialog.getByLabel('Tipo de cuenta').selectOption('EMPRESA');
   await createDialog.getByLabel('Responsable administrativo').fill('Responsable QA');
   await createDialog.getByLabel('Próxima acción').fill('Confirmar visita de QA');
@@ -661,21 +734,23 @@ test('hospitalization route provides legacy listing controls, persistence, detai
   await expect(createdDetailLink).toHaveCount(2);
   const createdPath = await createdDetailLink.first().getAttribute('href');
   expect(createdPath).not.toBeNull();
-  const createdId = createdPath!.split('/').at(-1)!;
   await page.goto(createdPath!);
   await expect(page).toHaveURL(new RegExp(`${createdPath}$`));
   await expect(page.getByText('Responsable QA')).toBeVisible();
-  await page.getByRole('button', { name: 'Editar hospitalización' }).click();
-  await expect(page.getByRole('dialog', { name: `Editar ${createdId}` })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Editar hospitalización' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Editar caso' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Editar caso' })).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.goto(createdPath!);
-  await page.getByRole('button', { name: 'Editar hospitalización' }).click();
-  const editDialog = page.getByRole('dialog', { name: `Editar ${createdId}` });
-  await editDialog.getByLabel('Responsable administrativo').fill('Responsable QA actualizado');
-  await page.getByRole('button', { name: 'Guardar cambios' }).click();
+  await page.getByRole('button', { name: 'Editar caso' }).first().click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar caso' });
+  await expect(editDialog.getByLabel('Responsable administrativo')).toHaveCount(0);
+  await editDialog.getByLabel('Resumen diagnóstico').fill('Diagnóstico sintético actualizado');
+  await editDialog.getByRole('button', { name: 'Guardar caso' }).click();
   await page.goto(createdPath!);
-  await expect(page.getByText('Responsable QA actualizado')).toBeVisible();
+  await expect(page.getByText('Diagnóstico sintético actualizado')).toBeVisible();
+  await expect(page.getByText('Responsable QA')).toBeVisible();
 
   const mobileContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const mobilePage = await mobileContext.newPage();
@@ -732,21 +807,18 @@ test('hospitalization permissions preserve read-only roles and deny inventory', 
 
 test('agenda rejects invalid intervals and persists scheduled shifts', async ({ page }) => {
   await login(page);
-  await page.goto('/agenda');
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
+  const dialog = await openSchedulingFromAttention(page);
   await dialog.getByLabel('Inicio').fill('12:00');
   await dialog.getByLabel('Fin').fill('08:00');
-  await dialog.getByLabel('Notas').fill('Turno inválido de QA.');
-  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await dialog.getByLabel('Notas del turno').fill('Turno inválido de QA.');
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
   await expect(dialog.getByText('El fin debe ser posterior al inicio.')).toBeVisible();
 
-  await dialog.locator('input[name="startTime"]').fill('08:00');
-  await dialog.locator('input[name="endTime"]').fill('12:00');
-  await dialog.getByLabel('Notas').fill('Turno programado de QA.');
-  await dialog.getByRole('button', { name: 'Guardar' }).click();
-  await expect(page.getByRole('status')).toContainText('turno persistido');
-  await page.reload();
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-START"]').fill('08:00');
+  await dialog.locator('[data-action-id="CLINICAL-SCHEDULE-END"]').fill('12:00');
+  await dialog.getByLabel('Notas del turno').fill('Turno programado de QA.');
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+  await page.goto('/agenda');
   await expect(page.getByText('Turno programado de QA.')).toBeVisible();
 
   const shiftRow = page.getByRole('row').filter({ hasText: 'Turno programado de QA.' });
@@ -775,14 +847,14 @@ test('nurse-hours report filters scheduled shifts and exports planned-hour data'
   page,
 }) => {
   await login(page);
-  await page.goto('/agenda');
-  await page.getByRole('button', { name: 'Crear turno' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Crear turno a paciente' });
-  const scheduledDate = await dialog.getByLabel('Fecha 1').inputValue();
+  const dialog = await openSchedulingFromAttention(page);
+  const scheduledDate = await dialog
+    .locator('[data-action-id="CLINICAL-SCHEDULE-DATE"]')
+    .inputValue();
   await dialog.getByLabel('Inicio').fill('08:00');
   await dialog.getByLabel('Fin').fill('12:00');
-  await dialog.getByLabel('Notas').fill('Turno para reporte de QA.');
-  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await dialog.getByLabel('Notas del turno').fill('Turno para reporte de QA.');
+  await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
 
   await page.goto('/reports/nurse-hours');
   await page.getByLabel('Desde').fill(scheduledDate);
@@ -831,43 +903,47 @@ test('nursing resources require professional registration, persist, and honor ro
   await expect(page.getByRole('button', { name: 'Nuevo recurso' })).toHaveCount(0);
 });
 
-test('medical-order factual search is normalized and document choice is limited to authorized roles', async ({
+test('medical-order search normalizes DUI and clinical authors keep manual entry', async ({
   page,
 }) => {
   await login(page);
   await page.goto('/clinical/orders');
-  await page.getByLabel('Buscar orden médica').fill('123456789');
+  await page.getByLabel('Buscar por nombre o DUI').fill('123456789');
   await expect(page.getByText('Paciente Demo Aurora')).toBeVisible();
-  await page.getByLabel('Buscar orden médica').fill('sin coincidencia QA');
-  await expect(page.getByText('No hay registros disponibles')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
-  await loginAs(page, 'doctor@demo.local', 'demo-doctor');
-  await page.goto('/clinical/orders');
-  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
-  await expect(page.getByRole('button', { name: 'Nuevo' })).toBeVisible();
-  await page.getByRole('button', { name: 'Cerrar sesión' }).click();
-  await loginAs(page, 'nurse@demo.local', 'demo-nurse');
-  await page.goto('/clinical/orders');
-  await page.getByRole('button', { name: 'Acciones para Paciente Demo Aurora' }).click();
-  await expect(page.getByRole('button', { name: 'Nuevo' })).toHaveCount(0);
+  await page.getByLabel('Buscar por nombre o DUI').fill('sin coincidencia QA');
+  await expect(page.getByText('No hay pacientes para mostrar')).toBeVisible();
+  for (const role of ['doctor', 'nurse']) {
+    await page.getByRole('button', { name: 'Cerrar sesión' }).click();
+    await loginAs(page, role + '@demo.local', 'demo-' + role);
+    await page.goto('/clinical/orders');
+    const menu = page.locator('.clinical-row-menu').first();
+    await menu.locator('summary').click();
+    await menu.getByRole('button', { name: 'Historia clínica', exact: true }).click();
+    await expect(page.getByRole('dialog').getByLabel('Resumen', { exact: true })).toBeVisible();
+    await page.getByRole('dialog').getByRole('button', { name: 'Cancelar' }).click();
+  }
 });
 
-test('quote draft becomes an immutable sent version', async ({ page }) => {
+test('an already sent quote version remains immutable and has no manual send button', async ({
+  page,
+}) => {
   await login(page);
   await page.goto('/quotes');
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
-  await page.getByRole('option', { name: 'Amigos & Familia' }).click();
+  await page.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
+  await page.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
   await page
-    .getByLabel('Resumen operativo')
+    .getByLabel('Responsable administrativo')
     .fill('Coordinación sintética para prueba de inmutabilidad.');
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
   await expect(page.getByText('Borrador de cotización persistido.', { exact: true })).toBeVisible();
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
-  await page.getByRole('button', { name: 'Enviar versión' }).click();
-  await expect(page.getByRole('status')).toContainText('enviada e inmutable');
+  const quoteId = await markSyntheticQuoteSent(
+    page,
+    'Coordinación sintética para prueba de inmutabilidad.',
+  );
+  await page.goto(`/quotes/${quoteId}`);
+  await expect(page.getByRole('button', { name: 'Enviar versión' })).toHaveCount(0);
   await expect(page.locator('[data-action-id="QUOTE-PDF-DOWNLOAD"]')).toBeVisible();
   await expect(page.locator('[data-action-id="QUOTE-WHATSAPP-DIRECT"]')).toHaveCount(0);
   await page.reload();
@@ -895,9 +971,11 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.reload();
   await page.getByRole('button', { name: '+ Nuevo', exact: true }).click();
   await page.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await page.getByLabel('Origen del contacto (opcional)').fill('Amigos');
-  await page.getByRole('option', { name: 'Amigos & Familia' }).click();
-  await page.getByLabel('Resumen operativo').fill('Flujo sintético para validar pago idempotente.');
+  await page.getByLabel('Ingreso clínico').selectOption('HOME_OUTPATIENT');
+  await page.getByLabel('Diagnóstico', { exact: true }).selectOption('Faringitis aguda');
+  await page
+    .getByLabel('Responsable administrativo')
+    .fill('Flujo sintético para validar pago idempotente.');
   const catalog = page.getByRole('combobox', {
     name: 'Buscar ítem de catálogo por código o nombre',
   });
@@ -906,10 +984,9 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.getByLabel('Cantidad').fill('1');
   await page.locator('[data-action-id="QUOTE-ITEM-ADD"]').click();
   await page.getByRole('button', { name: 'Guardar borrador' }).click();
-  await page.locator('[data-action-id="QUOTE-DETAIL-NAVIGATE"]').last().click();
-  await page.getByRole('button', { name: 'Enviar versión' }).click();
+  await markSyntheticQuoteSent(page, 'Flujo sintético para validar pago idempotente.');
 
-  await page.goto('/payments');
+  await page.goto('/receivables');
   await page.getByRole('button', { name: 'Aplicar pago' }).click();
   const quoteSearch = page.getByRole('combobox', { name: 'Buscar paciente o cotización' });
   await quoteSearch.fill('Paciente Demo Aurora');
@@ -938,15 +1015,31 @@ test('payment application is idempotent and reversal preserves its reason', asyn
   await page.getByRole('button', { name: 'Confirmar reversión' }).click();
   await expect(page.getByRole('status')).toContainText('Pago reversado con motivo');
   await page.reload();
-  await expect(page.getByText('Reversado')).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Reversado' })).toBeVisible();
   await expect(page.getByText('Corrección de QA sintética.')).toBeVisible();
+  await page.goto('/payments');
+  await expect(page.getByRole('heading', { name: 'Reporte de pagos' })).toBeVisible();
+  await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Reversado' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Aplicar pago' })).toHaveCount(0);
+  await page.getByLabel('Estado').selectOption('APPLIED');
+  await expect(page.getByText('REF-PAGO-E2E')).toHaveCount(0);
+  await page.getByLabel('Estado').selectOption('VOIDED');
+  await expect(page.getByText('REF-PAGO-E2E')).toBeVisible();
+  const reportDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Descargar CSV' }).click();
+  await expect((await reportDownload).suggestedFilename()).toBe('reporte-pagos.csv');
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
 });
 
 test('signed clinical documents remain immutable and corrections create a new version', async ({
   page,
 }) => {
   await login(page);
-  await page.goto('/clinical/care-plans');
+  await page.goto('/clinical/document-versions');
   await page.getByRole('button', { name: 'Nuevo plan de cuidado' }).click();
   await page.getByLabel('Título').fill('Plan sintético de QA');
   await page
@@ -1156,9 +1249,15 @@ test('health report exposes stored vital records read-only without inventing cap
 }) => {
   await login(page);
   await page.goto('/clinical/reports');
-  await page.getByRole('tab', { name: /Signos vitales/ }).click();
-  await expect(page.getByRole('tabpanel')).toContainText('Evaluación clínica');
-  await expect(page.getByRole('cell', { name: '118/76' })).toBeVisible();
+  await page
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  await page
+    .getByRole('navigation', { name: 'Secciones del expediente' })
+    .getByRole('button', { name: /Acciones de enfermería/ })
+    .click();
+  await page.getByRole('button', { name: 'Signos vitales', exact: true }).click();
+  await expect(page.locator('#patient-record-print')).toContainText('118/76');
   await expect(page.locator('[data-action-id^="CLINICAL-VITAL"]')).toHaveCount(0);
 });
 
@@ -1175,7 +1274,7 @@ test('clinical hospitalizations keeps search, care actions and accessibility int
 }) => {
   await login(page);
   await page.goto('/clinical/hospitalizations');
-  await expect(page.getByRole('heading', { name: 'Hospitalizaciones clínicas' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ingresos clínicos' })).toBeVisible();
   const search = page.getByRole('searchbox', { name: 'Buscar hospitalización o paciente' });
   await search.fill('Paciente Demo Aurora');
   await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
@@ -1188,7 +1287,7 @@ test('clinical hospitalizations keeps search, care actions and accessibility int
   expect(results.violations).toEqual([]);
   await page.getByRole('button', { name: 'Atención' }).click();
   await expect(page.getByRole('dialog', { name: /Atención clínica/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Guardar atención' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Guardar', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect
@@ -1203,11 +1302,13 @@ test('clinical record hub presents every care tool accessibly on desktop and mob
   await page.goto('/clinical');
   const main = page.locator('main');
   await expect(main.getByRole('heading', { name: 'Expediente clínico' })).toBeVisible();
-  await expect(main.getByRole('link', { name: /Hospitalizaciones clínicas/ })).toBeVisible();
-  await expect(main.getByRole('link', { name: /Reporte de salud/ })).toBeVisible();
-  await expect(main.getByRole('link', { name: /Órdenes y acciones/ })).toBeVisible();
-  await expect(main.getByRole('link', { name: /Administración de medicamentos/ })).toBeVisible();
-  await expect(main.getByRole('progressbar', { name: /documentos firmados/ })).toBeVisible();
+  await expect(main.getByRole('link', { name: 'Registrar atención' })).toHaveCount(0);
+  await main
+    .getByRole('combobox', { name: 'Paciente', exact: true })
+    .selectOption('patient-demo-001');
+  await expect(
+    main.getByRole('navigation', { name: 'Secciones del expediente' }).getByRole('button'),
+  ).toHaveCount(5);
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations).toEqual([]);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -1221,11 +1322,14 @@ test('clinical orders and medication cards share the polished accessible visual 
 }) => {
   await login(page);
   await page.goto('/clinical/orders');
-  await expect(page.getByRole('heading', { name: 'Orden Médica' })).toBeVisible();
-  await expect(page.getByRole('tab', { name: /Activos/ })).toHaveAttribute('aria-selected', 'true');
-  await page.getByLabel('Buscar orden médica').fill('Paciente Demo Aurora');
+  await expect(page.getByRole('heading', { name: 'Órdenes médicas', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Acciones médicas', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await page.getByLabel('Buscar por nombre o DUI').fill('Paciente Demo Aurora');
   await expect(page.getByText('Paciente Demo Aurora', { exact: true })).toBeVisible();
-  await page.getByLabel('Buscar orden médica').fill('');
+  await page.getByLabel('Buscar por nombre o DUI').fill('');
   const orderResults = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(orderResults.violations).toEqual([]);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -1234,9 +1338,19 @@ test('clinical orders and medication cards share the polished accessible visual 
     .toBe(true);
 
   await page.goto('/clinical/medication-cards');
-  await expect(page.getByRole('heading', { name: 'Tarjetas de medicamentos' })).toBeVisible();
-  await expect(page.getByText('La captura permanece protegida')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Hospitalizaciones' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Tarjeta de medicamentos', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .locator('.clinical-patient-list')
+      .getByRole('button', { name: 'Tarjeta de medicamentos', exact: true })
+      .first(),
+  ).toBeEnabled();
+  await expect(page.getByRole('link', { name: 'Ver expedientes' })).toHaveAttribute(
+    'href',
+    '/clinical',
+  );
   const medicationResults = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa'])
     .analyze();

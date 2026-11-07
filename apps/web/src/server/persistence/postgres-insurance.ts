@@ -6,7 +6,10 @@ import {
   insuranceRequestStatusSchema,
   type InsuranceEvent,
   type InsuranceRequest,
+  type Patient,
+  type Quote,
 } from '@analiza/contracts';
+import { insurerForQuote } from '@analiza/domain';
 import { can } from '@/lib/permissions';
 import {
   MongoAccessError,
@@ -100,34 +103,26 @@ export function postgresInsurance(pool: Pool) {
             throw new MongoConflictError();
           return { request, event };
         }
-        const quote = await client.query<{ patient_id: string }>(
-          'SELECT patient_id FROM analiza.quotes WHERE organization_id=$1 AND id=$2 FOR UPDATE',
+        const quote = await client.query<{ patient_id: string; body: Quote }>(
+          'SELECT patient_id,body FROM analiza.quotes WHERE organization_id=$1 AND id=$2 FOR UPDATE',
           [actor.organizationId, observed.quoteId],
         );
         if (!quote.rowCount) throw new MongoInputError('La cotización no está disponible.');
-        const patient = await client.query<{ body: Record<string, unknown> }>(
+        const patient = await client.query<{ body: Patient }>(
           'SELECT body FROM analiza.patients WHERE organization_id=$1 AND id=$2',
           [actor.organizationId, quote.rows[0].patient_id],
         );
-        const profile = patient.rows[0]?.body;
-        const insurance = profile?.insurance;
-        const insurer =
-          typeof profile?.insurer === 'string'
-            ? profile.insurer
-            : insurance && typeof insurance === 'object' && 'insurer' in insurance
-              ? (insurance as { insurer?: unknown }).insurer
-              : null;
-        if (
-          typeof insurer !== 'string' ||
-          !insurer.trim() ||
-          insurer.toLocaleLowerCase('es').includes('sin aseguradora')
-        )
-          throw new MongoInputError('El paciente no tiene aseguradora registrada.');
-
         const existing = await client.query<{ body: InsuranceRequest }>(
           'SELECT body FROM analiza.insurance_requests WHERE organization_id=$1 AND quote_id=$2 FOR UPDATE',
           [actor.organizationId, observed.quoteId],
         );
+        const insurer =
+          existing.rows[0]?.body.insurer ??
+          insurerForQuote(quote.rows[0].body, patient.rows[0]?.body);
+        if (!insurer)
+          throw new MongoInputError(
+            'Seleccione una aseguradora en la cotización y use el tipo de cuenta Seguro.',
+          );
         const request: InsuranceRequest = existing.rowCount
           ? {
               ...insuranceRequestSchema.parse(existing.rows[0].body),

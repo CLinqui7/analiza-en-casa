@@ -9,9 +9,9 @@ HEAD auditado: `b13115e2c3c6b9fcc3b46c49b09e9297b22fe944`
 | Estado | Cantidad |
 |---|---:|
 | IMPLEMENTED_DEMO_ONLY | 4 |
-| PARTIAL | 8 |
+| PARTIAL | 10 |
 | MISSING | 14 |
-| BLOCKED_CLIENT | 4 |
+| BLOCKED_CLIENT | 2 |
 | SOURCE_CONFLICT | 2 |
 
 ## Confirmaciones requeridas

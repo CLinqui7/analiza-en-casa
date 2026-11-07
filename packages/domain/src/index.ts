@@ -170,6 +170,32 @@ export function isInsuranceRequestStatus(value: unknown): value is InsuranceRequ
   return insuranceRequestStatusSchema.safeParse(value).success;
 }
 
+/** Use the payer recorded on this quote; legacy quotes may inherit the patient profile. */
+export function insurerForQuote(
+  quote: Pick<Quote, 'accountType' | 'insurer'> | undefined,
+  patient: { insurer?: string; insurance?: { insurer?: string } } | undefined,
+): string | undefined {
+  if (quote?.accountType === 'PARTICULAR' || quote?.accountType === 'EMPRESA') return undefined;
+  const insurer = (
+    quote?.insurer?.trim() ||
+    patient?.insurer ||
+    patient?.insurance?.insurer
+  )?.trim();
+  if (
+    !insurer ||
+    [
+      'particular',
+      'sin aseguradora',
+      'sin aseguradora registrada',
+      'sin seguro',
+      'ninguna',
+      'no aplica',
+    ].includes(normalizeText(insurer))
+  )
+    return undefined;
+  return insurer;
+}
+
 export function hasValidInsuranceRequestContext(
   request: InsuranceRequest,
   quotes: readonly Quote[],
@@ -178,7 +204,7 @@ export function hasValidInsuranceRequestContext(
   if (!insuranceRequestSchema.safeParse(request).success) return false;
   const quote = quotes.find((candidate) => candidate.id === request.quoteId);
   const patient = patients.find((candidate) => candidate.id === request.patientId);
-  const insurer = patient?.insurer ?? patient?.insurance?.insurer;
+  const insurer = insurerForQuote(quote, patient);
   return Boolean(
     quote && patient && quote.patientId === patient.id && insurer && insurer === request.insurer,
   );
@@ -318,6 +344,7 @@ function validateQuoteDiscount(discount?: QuoteDiscount): string | undefined {
   if (
     categoryPercentages.some(
       (percentage) =>
+        typeof percentage !== 'number' ||
         !Number.isFinite(percentage) ||
         !Number.isInteger(percentage) ||
         percentage < 0 ||
@@ -397,11 +424,10 @@ export function calculateQuoteBalance(
   quote: Pick<Quote, 'id' | 'patientAmount'>,
   payments: readonly Payment[],
 ) {
-  const paid = roundMoney(
+  const paid =
     payments
       .filter((payment) => payment.quoteId === quote.id && payment.status === 'APPLIED')
-      .reduce((sum, payment) => sum + payment.amount, 0),
-  );
+      .reduce((sum, payment) => sum + Math.round(payment.amount * 100), 0) / 100;
   return { paid, balance: roundMoney(quote.patientAmount - paid) };
 }
 
@@ -409,6 +435,12 @@ export function calculateQuoteBalance(
 export function quoteDisplayCode(id: string) {
   const compact = id.replace(/[^a-z0-9]/gi, '').toUpperCase();
   return `COT-${compact.slice(-8).padStart(8, '0')}`;
+}
+
+export function hasSameQuoteVersionIdentity(previous: Quote, next: Quote): boolean {
+  return (
+    ['patientId', 'caseId', 'version', 'rootQuoteId', 'originalQuoteId', 'createdAt'] as const
+  ).every((key) => previous[key] === next[key]);
 }
 
 export function searchQuotes(

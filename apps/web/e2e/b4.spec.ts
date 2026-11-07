@@ -15,9 +15,11 @@ async function createDoctorFixture(page: import('@playwright/test').Page) {
   await dialog.getByLabel('Nombre completo').fill('Médica B4 Honorarios');
   await dialog.getByLabel('JVPM').fill('JVPM-B4-FEE');
   await dialog.getByLabel('DUI').fill('DUI-B4-FEE');
+  await dialog.getByLabel('Relación del médico').selectOption('NEW');
   await dialog.getByLabel('Especialidad o profesión').fill('Nutri');
   await dialog.getByRole('option', { name: 'Nutricionista' }).click();
   await dialog.getByLabel('Dirección').fill('Dirección sintética B4');
+  await dialog.getByLabel('Teléfono fijo (obligatorio)').fill('2222-0400');
   await dialog.getByRole('button', { name: 'Guardar médico' }).click();
   await expect(page.getByRole('status')).toContainText('Médica B4 Honorarios registrado');
 }
@@ -34,14 +36,11 @@ test('a cataloged doctor fee keeps its selected doctor after save and reload', a
   await page.getByRole('button', { name: '+ Nuevo' }).click();
   const dialog = page.getByRole('dialog', { name: 'Nueva cotización' });
   await dialog.locator('[data-action-id="QUOTE-PATIENT-SELECT"]').selectOption('patient-demo-001');
-  await dialog.getByLabel('Origen del contacto (opcional)').fill('Amigos');
-  await dialog.getByRole('option', { name: 'Amigos & Familia' }).click();
-  await dialog.getByLabel('Resumen operativo').fill('Honorario médico B4');
-  await dialog.getByRole('tab', { name: 'Honorarios' }).click();
-  const doctor = dialog.locator('[data-action-id="QUOTE-FEE-DOCTOR-SELECT"]');
-  await doctor.selectOption({ index: 1 });
+  const doctor = dialog.locator('[data-action-id="QUOTE-PRIMARY-DOCTOR"]');
+  await doctor.selectOption({ label: 'Médica B4 Honorarios' });
   const doctorName = await doctor.locator('option:checked').textContent();
-  await dialog.getByLabel('Concepto').fill('Honorario B4');
+  await dialog.getByRole('tab', { name: 'Honorarios' }).click();
+  await dialog.getByLabel('Servicio de honorario').selectOption({ label: 'Visita' });
   await dialog.getByLabel('Cantidad').fill('1');
   await dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]').selectOption('55');
   await expect(dialog.locator('[data-action-id="QUOTE-FEE-AMOUNT"]')).toHaveValue('55');
@@ -63,11 +62,11 @@ test('a cataloged doctor fee keeps its selected doctor after save and reload', a
   await page
     .locator(`[data-action-id="QUOTE-DETAIL-NAVIGATE"][href="${createdQuoteHref}"]`)
     .click();
-  await expect(page.getByText('Honorario B4')).toBeVisible();
+  await expect(page.getByText('Visita', { exact: true }).first()).toBeVisible();
   await expect(page.getByText(`Médico: ${doctorName}`)).toBeVisible();
   await expect(
     page
-      .getByRole('row', { name: /Honorario B4/ })
+      .getByRole('row', { name: /Visita/ })
       .getByRole('cell')
       .nth(2),
   ).toHaveText('USD 55.00');

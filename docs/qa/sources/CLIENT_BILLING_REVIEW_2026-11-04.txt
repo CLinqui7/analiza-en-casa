@@ -1,0 +1,13 @@
+Source: client message in this Codex chat, 2026-11-04.
+"revisa errores pasados y revisa si si se corrigieron y si no hazlo porfa y mejoralo"
+"Revisa el responsive del sitio porque mira como se ve esta parte"
+"Decile que quite la cosa amarilla porque es interno para vos nada más o no les aparece a las demas users?"
+"y decile que aquí solo diga o salir o cerrar sesión no ambos"
+"y los ultimos cambios enfocate en la facturazion por favor , necesito que este perfecta"
+
+Attached screenshots reviewed in chat, not copied to Git because they show live identities:
+codex-clipboard-5774b151-b826-4d89-8960-62f1758b729f.jpg: insurance board squeezed cards and long identifiers.
+codex-clipboard-0dd148c5-7f32-490a-b761-41dbc5a974d2.jpg: internal Mongo/file-bytes notice on doctors page.
+codex-clipboard-c9d95c3b-2bdd-4813-9046-9fafe766b6a5.jpg: duplicate logout labels.
+
+Authorized scope: correct those issues, review prior fixes and financial consistency; push every release to GitHub before VPS deployment. No invented insurance rates, taxes, credit/refund rules or fiscal invoicing integration.

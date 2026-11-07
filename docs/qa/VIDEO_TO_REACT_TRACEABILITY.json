@@ -1,10 +1,17 @@
 {
+  "clinical_nov07_regression": {"status":"DEPLOYED_VERIFIED","verification_sha":"e1223d3f121d3718c9e08e1dfdd049f3dc4f4c34","evidence":"docs/feedback/CLINICAL_CHANGES_2026-11-07.md","source":"docs/qa/sources/CLIENT_CLINICAL_CHANGES_2026-11-07.txt","scope":"Explicit medication times/dilution, per-hour administration and stock compensation, reusable user-configured stock, complete print group selection. Final 363 unit/server tests, 20 clinical browser scenarios, 15 isolated PostgreSQL groups and 8 connected scenarios passed; earlier 60-scenario broad regression passed. Quote revisions preserve schedules and reject duplicate applications. Final print margins/contrast reviewed and 2 print/mobile scenarios repeated. Nine public synthetic groups passed on Contabo, healthy web/database and HTTP 200. QA environment retired. No new EXACT or full video audit; external copy/restore of the latest backup not verified.","deployment_sha":"eaa4fbc55a9a0389ff90e134b186c48f0c8a498b","print_verification_sha":"eaa4fbc55a9a0389ff90e134b186c48f0c8a498b","public_verifier_sha":"0c48419e52e4f5af2e1d29d3fa59ed3dc41229d5","deployment_evidence":"docs/deployment/CONTABO_CLINICAL_CHANGES_2026-11-07.md"},
+  "doctor_quote_review_20261106": {"verification_sha":"db001857ebeb8ed1b73e764254738ba809ef1a47","evidence":"docs/imports/DOCTOR_QUOTES_REVIEW_2026-11-06.md","scope":"Doctor selection and directory review: 356 unit/server tests, 35 focused browser scenarios including CH01-CH03, 144 legacy tests, 76 QA checks and ten isolated PostgreSQL groups passed. 700 synthetic doctors; quote-author scoped read projection, immutable sent selection, invalid references and rollback verified. Existing source records preserved; old ambiguous identities remain unresolved. No new EXACT or full video re-audit.","readable_names_followup":{"verification_sha":"5ce9431f1ae6e643c0df111c399c8b4a04b0b968","scope":"Selected doctor full labels wrap below native selectors and are exposed as accessible descriptions. Eleven affected browser scenarios, TypeScript and ESLint passed. Prior 356 unit/server, 35 browser, ten PostgreSQL groups and 59 public routes remain separately recorded. No changes to server logic, clinical or financial data."}},
+  "doctor_directory_import_20261105": {"verification_sha":"596108970705f2bd69eb11415181820fdd0c99ed","evidence":"docs/imports/DOCTOR_DIRECTORY_IMPORT_2026-11-05.md","scope":"Authorized directory imported and reconciled: 650 source rows, 619 inserts, 4 enrichments, 633 total doctors, exact retry without duplicates, 623 doctor audits and one batch audit. All 623 profiles and practices checked via public authenticated API. 59 synthetic public routes checked, no JavaScript errors. 349 unit/server, 144 legacy tests, 76 QA checks, 22 focused browser scenarios, six PostgreSQL groups passed. No new EXACT or full video re-audit.","deployment_sha":"c141d4a543b930cd573e4cc40f7355581eb296c2","source_rows":650,"profiles":623,"inserted":619,"enriched":4,"total_doctors":633,"missing_relation":622,"missing_landline":446,"identifier_field_review":2},
+  "doctor_import_preparation_20261105": {"verification_sha":"d4c2fa9b9138e66513a0e221e3423a0e858d6cdb","evidence":"docs/imports/DOCTOR_IMPORT_READINESS_2026-11-05.md","scope":"Offline doctor Excel prevalidation only, 700 synthetic rows; 341 React/server tests. No route, permissions or persistence changes, no real import, no new EXACT or full video re-audit."},
+  "visual_regression_20261104": {"verification_sha":"dfeed6862ce49f1848abfe9ab002bdde0dcc3e05","evidence":"docs/feedback/VISUAL_REFRESH_2026-11-04.md","scope":"Presentation-only refresh, local Inter, consistent controls, keyboard menus, native route semantics and responsive survey/toolbar. 332 React tests, complete demo browser regression with focused fixes, 25 final focused tests, 59 route inventory and supplemental synthetic server fixtures. No persistence/permission changes, no new EXACT, no full new video audit."},
+  "observations_regression_20261104": {"verification_sha":"ae30d5959197e25d77ab9c5d312224afdd8b6550","evidence":"docs/feedback/CLINICAL_OBSERVATIONS_2026-11-04.md","requirement_ids":["CH10-F04","CH17-F03","CH17-F07","CH17-F08","CH17-F11","CH17-F12","CH17-F13","CH17-F15"],"scope":"PDF Nov4 clinical observations: nursing menus, multiple care types, visits and append-only administration corrections. New user-approved presentation supersedes card fields; historical records retained. No new EXACT or complete video re-audit."},
+  "billing_regression_20261104": {"verification_sha":"fdd7f0e771e8598be6eddbabba6b187be7301b7d","evidence":"docs/feedback/BILLING_REVIEW_2026-11-04.md","requirement_ids":["CH07-F01","CH07-F02","CH07-F03","CH08-F04","CH08-F05","CH08-F07","CH08-F10","CH16-F01","CH16-F03"],"scope":"Financial regression: quote chains, payment retry and cents, version metadata, insurer snapshot, responsive cards and shared clinical menu CSS. Existing statuses/blockers preserved; no new EXACT or full video re-audit."},
   "schema_version": 2,
   "generated_at": "2026-10-13T02:06:23-06:00",
   "metadata_generated_from_commit": "93d89035854c4b5ac0966dff5ee3ce1af6ab3ac1",
   "source_sha256": "b1bff2e98a388a157fec47084017d101899e92d136945002aa68c730c4ef9ebf",
-  "implementation_sha": "b993553c30856a86ad98fc4eee1427c9c145c96b",
-  "functional_fingerprint": "abf2db0179cb5b7e2406da3e846b474044437d46bf5d476912ed99d05f5f8375",
+  "implementation_sha": "db001857ebeb8ed1b73e764254738ba809ef1a47",
+  "functional_fingerprint": "8c624cd1f9a6f335fbc4575929decadf65755fc542d050ae520649a8c9001ad2",
   "requirements": [
     {
       "requirement_id": "CH01-F001",
@@ -1743,7 +1750,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Paciente buscable/seleccionable; contacto de solo lectura y hospitalización compatible requerida."
+      "notes": "Paciente buscable y contacto de lectura. Por cambio aprobado del 26/10 la hospitalización es opcional al cotizar; sólo la aprobación de hospitalización crea ingreso clínico. Véase MEETING_2026_10_26_IMPLEMENTATION.md."
     },
     {
       "requirement_id": "CH03-F013",
@@ -1785,7 +1792,7 @@
       "blocker_ids": [],
       "blocker_reason": null,
       "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Metadatos de factura persisten sin afectar los cálculos; reglas profundas quedan en CH03-Q007."
+      "notes": "Los metadatos históricos de factura se conservan. El cliente retiró Datos iniciales de factura del formulario nuevo el 26/10; no afecta cálculos ni cierra CH03-Q007. Véase MEETING_2026_10_26_IMPLEMENTATION.md."
     },
     {
       "requirement_id": "CH04-F001",
@@ -3904,7 +3911,7 @@
       ],
       "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH08-Q009.",
       "last_verified_sha": "aab60742affdda3fae466c9844d093858f258966",
-      "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado."
+      "notes": "Pagos parciales impiden sobrepago, conservan idempotencia y reversión auditada, muestran Pagado y generan comprobante interno no fiscal. PostgreSQL runtime queda pendiente de aplicar la migración 016 en el entorno autorizado. La solicitud posterior del cliente mueve Pagos a un reporte de sólo lectura y concentra las operaciones en Cuentas por cobrar; CH08-F04 permanece PARTIAL y CH08-Q009 sigue abierto."
     },
     {
       "requirement_id": "CH08-F05",
@@ -4772,191 +4779,297 @@
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
     },
     {
-      "requirement_id": "CH10-F01",
-      "chapter_id": "CH10",
-      "feature": "Listado de pacientes de Orden Médica",
-      "detailed_behavior": "Pestañas Activos, Inactivos, Tratamientos con cambios y Actualizaciones; búsqueda, paginación, columnas Nombre, Cédula, Fecha Nac., Triage, Hospitalización y Estatus; acciones Nuevo, Ver Órdenes y Registro XPO.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0008_00h27m37s600ms_stable_change.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0009_00h27m42s200ms_settled.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0009_00h27m42s200ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q011"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [
-        "MEDICAL-ORDER-TAB-ACTIVE",
-        "MEDICAL-ORDER-TAB-INACTIVE",
-        "MEDICAL-ORDER-TAB-CHANGES",
-        "MEDICAL-ORDER-TAB-UPDATES",
-        "MEDICAL-ORDER-SEARCH",
-        "MEDICAL-ORDER-MENU-OPEN",
-        "MEDICAL-ORDER-CREATE",
-        "MEDICAL-ORDER-VIEW",
-        "MEDICAL-ORDER-XPO",
-        "MEDICAL-ORDER-PAGE-PREV",
-        "MEDICAL-ORDER-PAGE-NEXT"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
-      "permissions_status": "VERIFIED",
-      "performance_status": "VERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:ch10-medical-order-list",
-        "playwright:ch10-medical-order-menu-and-guards"
-      ],
-      "selenium_test_ids": [
-        "SEL-CH10-MEDICAL-ORDER-LIST"
-      ],
-      "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [
-        "CH10-Q011",
-        "CH10-Q012"
-      ],
-      "blocker_reason": "Tratamientos con cambios y Actualizaciones no tienen unidad de versionado definida; Registro XPO no tiene contrato, permisos ni auditoría definidos.",
-      "last_verified_sha": null,
-      "notes": "CH10-E0008/E0009 factual list behavior is covered without deriving triage or starting clinical records. Read roles are exercised distinctly; inventory and finance direct routes are denied. Visible version/history and XPO actions remain blocked; Selenium runtime is pending."
-    },
+  "requirement_id": "CH10-F01",
+  "chapter_id": "CH10",
+  "feature": "Listado de pacientes de Orden Médica",
+  "detailed_behavior": "Pestañas Activos, Inactivos, Tratamientos con cambios y Actualizaciones; búsqueda, paginación, columnas Nombre, Cédula, Fecha Nac., Triage, Hospitalización y Estatus; acciones Nuevo, Ver Órdenes y Registro XPO.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0008_00h27m37s600ms_stable_change.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0009_00h27m42s200ms_settled.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0009_00h27m42s200ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q011"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [
+    "MEDICAL-ORDER-TAB-ACTIVE",
+    "MEDICAL-ORDER-TAB-INACTIVE",
+    "MEDICAL-ORDER-TAB-CHANGES",
+    "MEDICAL-ORDER-TAB-UPDATES",
+    "MEDICAL-ORDER-SEARCH",
+    "MEDICAL-ORDER-MENU-OPEN",
+    "MEDICAL-ORDER-CREATE",
+    "MEDICAL-ORDER-VIEW",
+    "MEDICAL-ORDER-XPO",
+    "MEDICAL-ORDER-PAGE-PREV",
+    "MEDICAL-ORDER-PAGE-NEXT"
+  ],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:ch10-medical-order-list",
+    "playwright:ch10-medical-order-menu-and-guards",
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [
+    "SEL-CH10-MEDICAL-ORDER-LIST"
+  ],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Patient list supports normalized name/DUI search and per-patient actions. The new PDF explicitly replaces old active/inactive counters. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "PARTIAL",
+    "blocker_ids": [
+      "CH10-Q011",
+      "CH10-Q012"
+    ],
+    "blocker_reason": "Tratamientos con cambios y Actualizaciones no tienen unidad de versionado definida; Registro XPO no tiene contrato, permisos ni auditoría definidos.",
+    "notes": "CH10-E0008/E0009 factual list behavior is covered without deriving triage or starting clinical records. Read roles are exercised distinctly; inventory and finance direct routes are denied. Visible version/history and XPO actions remain blocked; Selenium runtime is pending.",
+    "last_verified_sha": null
+  }
+},
     {
-      "requirement_id": "CH10-F02",
-      "chapter_id": "CH10",
-      "feature": "Elección de tipo de documento",
-      "detailed_behavior": "La acción Nuevo permite escoger Orden Médica o Tarjeta de medicamentos.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0011_00h27m43s800ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q001"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [
-        "MEDICAL-ORDER-CREATE"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
-      "permissions_status": "VERIFIED",
-      "performance_status": "VERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:ch10-medical-order-menu-and-guards"
-      ],
-      "selenium_test_ids": [
-        "SEL-CH10-MEDICAL-ORDER-LIST"
-      ],
-      "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [
-        "CH10-Q001"
-      ],
-      "blocker_reason": "El video no define autorización, datos, firma ni auditoría para iniciar documentos clínicos.",
-      "last_verified_sha": null,
-      "notes": "CH10-E0011: el selector de dos tipos es visible y está cubierto, pero ambas opciones se mantienen deshabilitadas sin crear registros clínicos hasta cerrar CH10-Q001."
-    },
+  "requirement_id": "CH10-F02",
+  "chapter_id": "CH10",
+  "feature": "Elección de tipo de documento",
+  "detailed_behavior": "La acción Nuevo permite escoger Orden Médica o Tarjeta de medicamentos.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0011_00h27m43s800ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q001"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [
+    "MEDICAL-ORDER-CREATE"
+  ],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:ch10-medical-order-menu-and-guards",
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [
+    "SEL-CH10-MEDICAL-ORDER-LIST"
+  ],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Previously disabled medical/nursing selectors open the manual forms authorized by the new PDF. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "PARTIAL",
+    "blocker_ids": [
+      "CH10-Q001"
+    ],
+    "blocker_reason": "El video no define autorización, datos, firma ni auditoría para iniciar documentos clínicos.",
+    "notes": "CH10-E0011: el selector de dos tipos es visible y está cubierto, pero ambas opciones se mantienen deshabilitadas sin crear registros clínicos hasta cerrar CH10-Q001.",
+    "last_verified_sha": null
+  }
+},
     {
-      "requirement_id": "CH10-F03",
-      "chapter_id": "CH10",
-      "feature": "Encabezado y tratamientos de tarjeta",
-      "detailed_behavior": "Formulario con paciente, cédula, hospitalización, triage, médicos y diagnósticos; pestañas y tabla de tratamientos; Agregar tratamiento, Guardar y Atrás.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q001",
-        "CH10-Q003",
-        "CH10-Q005",
-        "CH10-Q006"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": null,
-      "blocker_ids": [
-        "CH10-Q001",
-        "CH10-Q003",
-        "CH10-Q005",
-        "CH10-Q006"
-      ],
-      "blocker_reason": "La tarjeta clínica, sus catálogos, reglas y autorización no se pueden derivar del video; el flujo React actual no expone un formulario de tarjeta.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "CH10-E0013 se conserva como evidencia visible. Se retiró la certificación EXACT: el flujo React no expone encabezado de tarjeta, tratamientos, Guardar ni Atrás. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
-    },
+  "requirement_id": "CH10-F03",
+  "chapter_id": "CH10",
+  "feature": "Encabezado y tratamientos de tarjeta",
+  "detailed_behavior": "Formulario con paciente, cédula, hospitalización, triage, médicos y diagnósticos; pestañas y tabla de tratamientos; Agregar tratamiento, Guardar y Atrás.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0013_00h27m55s600ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q001",
+    "CH10-Q003",
+    "CH10-Q005",
+    "CH10-Q006"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Card records retain quote medicine snapshots and manually entered chronic medicines; read/print and versioned corrections are available. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH10-Q001",
+      "CH10-Q003",
+      "CH10-Q005",
+      "CH10-Q006"
+    ],
+    "blocker_reason": "La tarjeta clínica, sus catálogos, reglas y autorización no se pueden derivar del video; el flujo React actual no expone un formulario de tarjeta.",
+    "notes": "CH10-E0013 se conserva como evidencia visible. Se retiró la certificación EXACT: el flujo React no expone encabezado de tarjeta, tratamientos, Guardar ni Atrás. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video.",
+    "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b"
+  }
+},
     {
-      "requirement_id": "CH10-F04",
-      "chapter_id": "CH10",
-      "feature": "Editor detallado de tratamiento",
-      "detailed_behavior": "Modal con medicamento, médico, vía, dosis, frecuencia, duración, fechas, crónico, horarios, indicaciones enriquecidas y control Mostrar diluciones.",
-      "classification": "VISIBLE",
-      "priority": "P0",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0020_00h27m59s800ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0050_00h29m08s800ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0050_00h29m08s800ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q006",
-        "CR-019-Q001"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_ids": [
-        "CH10-Q003",
-        "CH10-Q005",
-        "CH10-Q006",
-        "CR-019-Q001"
-      ],
-      "blocker_reason": "CR-019 requiere un formulario versionado de tarjeta de medicamentos, alcance por ítem/general, roles autorizados y política de auditoría, versionado, corrección y firma antes de capturar texto clínico de diluciones o cuidados especiales.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "CH10-E0050 muestra Indicaciones y Mostrar diluciones. CR-019 se asocia a este editor, no a la lista factual CH10-F01; permanece BLOCKED_CLIENT/CLINICAL_APPROVAL sin capturar ni interpretar texto de diluciones o cuidados especiales. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
-    },
+  "requirement_id": "CH10-F04",
+  "chapter_id": "CH10",
+  "feature": "Editor detallado de tratamiento",
+  "detailed_behavior": "Modal con medicamento, médico, vía, dosis, frecuencia, duración, fechas, crónico, horarios, indicaciones enriquecidas y control Mostrar diluciones.",
+  "classification": "VISIBLE",
+  "priority": "P0",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0020_00h27m59s800ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0050_00h29m08s800ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0050_00h29m08s800ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q006",
+    "CR-019-Q001"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Manual instructions and inventory mapping are editable; administration captures dose, route and time. No inferred dose or automatic treatment dates. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH10-Q003",
+      "CH10-Q005",
+      "CH10-Q006",
+      "CR-019-Q001"
+    ],
+    "blocker_reason": "CR-019 requiere un formulario versionado de tarjeta de medicamentos, alcance por ítem/general, roles autorizados y política de auditoría, versionado, corrección y firma antes de capturar texto clínico de diluciones o cuidados especiales.",
+    "notes": "CH10-E0050 muestra Indicaciones y Mostrar diluciones. CR-019 se asocia a este editor, no a la lista factual CH10-F01; permanece BLOCKED_CLIENT/CLINICAL_APPROVAL sin capturar ni interpretar texto de diluciones o cuidados especiales. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video.",
+    "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b"
+  }
+},
     {
       "requirement_id": "CH10-F05",
       "chapter_id": "CH10",
@@ -5082,130 +5195,211 @@
       "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
     },
     {
-      "requirement_id": "CH10-F08",
-      "chapter_id": "CH10",
-      "feature": "Consulta de órdenes, tarjetas e historial",
-      "detailed_behavior": "Modal con pestañas Órdenes médicas, Tarjetas de medicamentos e Historial de tratamientos; tabla de código, estatus, actualización y estatus PMC.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q009",
-        "CH10-Q010",
-        "CH10-Q013"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLINICAL_APPROVAL",
-      "blocker_ids": [
-        "CH10-Q001",
-        "CH10-Q002",
-        "CH10-Q009",
-        "CH10-Q010",
-        "CH10-Q011",
-        "CH10-Q013"
-      ],
-      "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH10-Q001, CH10-Q002, CH10-Q009, CH10-Q010, CH10-Q011, CH10-Q013.",
-      "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video."
-    },
+  "requirement_id": "CH10-F08",
+  "chapter_id": "CH10",
+  "feature": "Consulta de órdenes, tarjetas e historial",
+  "detailed_behavior": "Modal con pestañas Órdenes médicas, Tarjetas de medicamentos e Historial de tratamientos; tabla de código, estatus, actualización y estatus PMC.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q009",
+    "CH10-Q010",
+    "CH10-Q013"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Record shows medical history and versioned medication cards for the selected patient/case, including legacy documents. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH10-Q001",
+      "CH10-Q002",
+      "CH10-Q009",
+      "CH10-Q010",
+      "CH10-Q011",
+      "CH10-Q013"
+    ],
+    "blocker_reason": "La implementación permanece parcial; las limitaciones verificadas se documentan en las notas y requieren CH10-Q001, CH10-Q002, CH10-Q009, CH10-Q010, CH10-Q011, CH10-Q013.",
+    "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente. Reauditoría independiente 2026-09-10: La reauditoría no encontró una superficie y prueba React que implementen este comportamiento del video.",
+    "last_verified_sha": "4572c898518c9fef049451e926e57b21ed57e63b"
+  }
+},
     {
-      "requirement_id": "CH10-F09",
-      "chapter_id": "CH10",
-      "feature": "Impresiones de tarjeta de medicamentos",
-      "detailed_behavior": "El menú abierto de una tarjeta ofrece Imprimir tarjeta completa, Imprimir tarjeta simple e Imprimir conteo presencial. El frame no prueba las acciones del menú de una orden médica.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q009",
-        "CH10-Q010",
-        "CH10-Q013"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [
-        "CH10-Q009",
-        "CH10-Q010",
-        "CH10-Q013"
-      ],
-      "blocker_reason": "CH10-Q009 y CH10-Q010; la composición exacta no aparece visualmente en el video.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
-    },
+  "requirement_id": "CH10-F09",
+  "chapter_id": "CH10",
+  "feature": "Impresiones de tarjeta de medicamentos",
+  "detailed_behavior": "El menú abierto de una tarjeta ofrece Imprimir tarjeta completa, Imprimir tarjeta simple e Imprimir conteo presencial. El frame no prueba las acciones del menú de una orden médica.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0109_00h30m13s200ms_settled.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0109_00h30m13s200ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q009",
+    "CH10-Q010",
+    "CH10-Q013"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Card and record printing use an isolated print clone; original video print format remains unconfirmed. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH10-Q009",
+      "CH10-Q010",
+      "CH10-Q013"
+    ],
+    "blocker_reason": "CH10-Q009 y CH10-Q010; la composición exacta no aparece visualmente en el video.",
+    "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.",
+    "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63"
+  }
+},
     {
-      "requirement_id": "CH10-F10",
-      "chapter_id": "CH10",
-      "feature": "Permisos y corrección clínica",
-      "detailed_behavior": "No se evidencia qué roles pueden crear, finalizar, modificar, eliminar o imprimir, ni la política de corrección de documentos clínicos firmados.",
-      "classification": "UNCERTAIN",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0112_00h31m12s200ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0112_00h31m12s200ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH10-Q001"
-      ],
-      "route_id": "ROUTE-MEDICAL-ORDERS",
-      "react_route": "/clinical/orders",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/orders/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "NOT_TESTABLE",
-      "blocker_ids": [
-        "CH10-Q001"
-      ],
-      "blocker_reason": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección.",
-      "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63",
-      "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente."
-    },
+  "requirement_id": "CH10-F10",
+  "chapter_id": "CH10",
+  "feature": "Permisos y corrección clínica",
+  "detailed_behavior": "No se evidencia qué roles pueden crear, finalizar, modificar, eliminar o imprimir, ni la política de corrección de documentos clínicos firmados.",
+  "classification": "UNCERTAIN",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/event_frames/CH10-E0112_00h31m12s200ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH10_orden_medica_tratamientos_y_tarjeta_de_medicamentos/detail_crops/CH10-E0112_00h31m12s200ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH10-Q001"
+  ],
+  "route_id": "ROUTE-MEDICAL-ORDERS",
+  "react_route": "/clinical/orders",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/orders/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Clinical write/read roles, tenant RLS, author provenance and append-only corrections are tested. Original signed workflow is retained separately. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH10-Q001"
+    ],
+    "blocker_reason": "SAFE-P0-003 implementa una salvaguarda que no puede elevar este requisito a paridad exacta porque el video no demuestra la política de permisos o corrección.",
+    "notes": "Estado inicial desde MASTER_VIDEO_REQUIREMENTS; falta certificación actual independiente.",
+    "last_verified_sha": "b1ab00379ec7e5478292449779b08a2ab88a3d63"
+  }
+},
     {
       "requirement_id": "CH11-F01",
       "chapter_id": "CH11",
@@ -5376,7 +5570,7 @@
       ],
       "blocker_reason": "El video no define frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad, autorizaciones ni la entidad o ciclo de vida de una visita.",
       "last_verified_sha": "PENDING_COMMIT",
-      "notes": "El diálogo autorizado Crear turno a paciente muestra únicamente el paciente seleccionado y sus datos factuales de documento y empresa como lectura sola. Cerrar no crea turnos, visitas ni auditoría; Guardar persiste y recarga sólo el turno sintético B3 con su vínculo factual de paciente. Frecuencia/cantidad, clasificación, tipo, descuento, disponibilidad y toda semántica de visita quedan bloqueados."
+      "notes": "Programación de turnos desde Atención clínica por solicitud del 26/10. Guarda recurso, fechas y horario confirmado por servidor; cancelar no modifica turnos. El 29/10 se ajustó el ancho, las fechas y el único botón Guardar. Véase docs/feedback/UI_REVIEW_2026-10-29.md."
     },
     {
       "requirement_id": "CH11-F04",
@@ -5426,7 +5620,7 @@
       ],
       "blocker_reason": "CH11-E0026/E0027 sólo muestran las etiquetas Puntual y Turno; no definen entidad, duración, frecuencia, autorización, transición, descuento, disponibilidad, tarifa ni persistencia de una visita.",
       "last_verified_sha": "c371d47f43096b76b26d2eadc5dbfa48924322a6",
-      "notes": "El formulario autorizado muestra Puntual y Turno como texto factual no seleccionable. Playwright confirma ambas etiquetas y recarga sin cambios en turnos ni auditoría. No se habilita Puntual ni se certifica clasificación o semántica clínica."
+      "notes": "CH11-E0026/E0027 muestran Puntual/Turno y Guardar sin definir semántica de visita. El cliente pidió retirar el botón gris Puntual de Atención el 29/10; exclusión aprobada de esa superficie. No hay mutación de visita puntual y CR-010 permanece bloqueado. Se conserva PARTIAL."
     },
     {
       "requirement_id": "CH11-F05",
@@ -7890,62 +8084,88 @@
       "notes": "No se crea ni liquida un honorario vinculado a un profesional."
     },
     {
-      "requirement_id": "CH16-F01",
-      "chapter_id": "CH16",
-      "feature": "Matriz de descuentos por familia",
-      "detailed_behavior": "Cada perfil contiene Nombre, Descripción y porcentajes independientes para Servicios, Laboratorios, Medicamentos, Equipos, Insumos y Honorarios.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0001_00h49m45s000ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0018_00h50m18s200ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q003",
-        "CH16-Q005"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": "/catalogs/discounts",
-      "react_files": [
-        "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx"
-      ],
-      "component_ids": [
-        "CATALOG-DISCOUNTS-FACTUAL-MATRIX"
-      ],
-      "action_ids": [
-        "CATALOG-DISCOUNTS-SEARCH",
-        "CATALOG-DISCOUNTS-EXPORT",
-        "CATALOG-DISCOUNTS-CREATE",
-        "CATALOG-DISCOUNTS-PAGE-SIZE",
-        "CATALOG-DISCOUNTS-PAGE-PREV",
-        "CATALOG-DISCOUNTS-PAGE-NEXT"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "VERIFIED",
-      "persistence_status": "NOT_APPLICABLE",
-      "permissions_status": "VERIFIED",
-      "performance_status": "NOT_APPLICABLE",
-      "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:ch16-discount-matrix"
-      ],
-      "selenium_test_ids": [
-        "SEL-CH16-DISCOUNT-MATRIX"
-      ],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q003",
-        "CH16-Q005"
-      ],
-      "blocker_reason": "CH16-E0001/E0018 muestran la matriz y sus seis familias, pero CH16-Q001/Q002/Q003/Q005 no definen fuente autorizada, perfiles, categorías, valores, precedencia, cálculo, roles de escritura, validación ni auditoría. React no copia filas ni aplica efectos financieros.",
-      "last_verified_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff",
-      "notes": "React reutiliza sólo la matriz factual vacía de /catalogs/discounts: columnas, búsqueda local y controles visibles/deshabilitados. Playwright cubre lectura ADMIN/INVENTORY/AUDITOR y denegación directa de DOCTOR/NURSE/FINANCE; Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en 02c901a."
-    },
+  "requirement_id": "CH16-F01",
+  "chapter_id": "CH16",
+  "feature": "Matriz de descuentos por familia",
+  "detailed_behavior": "Cada perfil contiene Nombre, Descripción y porcentajes independientes para Servicios, Laboratorios, Medicamentos, Equipos, Insumos y Honorarios.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0001_00h49m45s000ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0018_00h50m18s200ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q001",
+    "CH16-Q002",
+    "CH16-Q003",
+    "CH16-Q005"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": "/catalogs/discounts",
+  "react_files": [
+    "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [
+    "CATALOG-DISCOUNTS-FACTUAL-MATRIX"
+  ],
+  "action_ids": [
+    "CATALOG-DISCOUNTS-SEARCH",
+    "CATALOG-DISCOUNTS-EXPORT",
+    "CATALOG-DISCOUNTS-CREATE",
+    "CATALOG-DISCOUNTS-PAGE-SIZE",
+    "CATALOG-DISCOUNTS-PAGE-PREV",
+    "CATALOG-DISCOUNTS-PAGE-NEXT"
+  ],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:ch16-discount-matrix",
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [
+    "SEL-CH16-DISCOUNT-MATRIX"
+  ],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Staff enter explicit per-category discount profiles; selected profile copies rates into a quote. Numerical totals and immutable sent original tested with PostgreSQL. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "PARTIAL",
+    "blocker_ids": [
+      "CH16-Q001",
+      "CH16-Q002",
+      "CH16-Q003",
+      "CH16-Q005"
+    ],
+    "blocker_reason": "CH16-E0001/E0018 muestran la matriz y sus seis familias, pero CH16-Q001/Q002/Q003/Q005 no definen fuente autorizada, perfiles, categorías, valores, precedencia, cálculo, roles de escritura, validación ni auditoría. React no copia filas ni aplica efectos financieros.",
+    "notes": "React reutiliza sólo la matriz factual vacía de /catalogs/discounts: columnas, búsqueda local y controles visibles/deshabilitados. Playwright cubre lectura ADMIN/INVENTORY/AUDITOR y denegación directa de DOCTOR/NURSE/FINANCE; Selenium fuente es específica y PENDING_RUNTIME por falta de Python. Verificado en 02c901a.",
+    "last_verified_sha": "02c901a522e3bc0603c1b3c34501836928acf5ff"
+  }
+},
     {
       "requirement_id": "CH16-F02",
       "chapter_id": "CH16",
@@ -7987,88 +8207,142 @@
       "notes": "Sólo F01 certifica la anatomía factual; no se certifican páginas, filas o exportación."
     },
     {
-      "requirement_id": "CH16-F03",
-      "chapter_id": "CH16",
-      "feature": "Perfiles con categorías excluidas",
-      "detailed_behavior": "Los ejemplos visibles usan cero en categorías no cubiertas y porcentajes distintos en las incluidas; esos valores son datos de configuración, no reglas universales.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0024_00h50m25s800ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q003"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": "/catalogs/discounts",
-      "react_files": [
-        "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q003"
-      ],
-      "blocker_reason": "Los ceros y porcentajes visibles son datos de configuración; fuente, precedencia, precisión, cálculo y efectos no están definidos.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "React no fabrica perfiles, categorías excluidas o porcentajes."
-    },
+  "requirement_id": "CH16-F03",
+  "chapter_id": "CH16",
+  "feature": "Perfiles con categorías excluidas",
+  "detailed_behavior": "Los ejemplos visibles usan cero en categorías no cubiertas y porcentajes distintos en las incluidas; esos valores son datos de configuración, no reglas universales.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0003_00h49m58s000ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0024_00h50m25s800ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q001",
+    "CH16-Q002",
+    "CH16-Q003"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": "/catalogs/discounts",
+  "react_files": [
+    "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Per-category profile rates and zero/excluded categories are explicit user inputs; historical negotiated rules are not invented. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q001",
+      "CH16-Q002",
+      "CH16-Q003"
+    ],
+    "blocker_reason": "Los ceros y porcentajes visibles son datos de configuración; fuente, precedencia, precisión, cálculo y efectos no están definidos.",
+    "notes": "React no fabrica perfiles, categorías excluidas o porcentajes.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
-      "requirement_id": "CH16-F04",
-      "chapter_id": "CH16",
-      "feature": "Alta de perfil de descuento",
-      "detailed_behavior": "Nuevo Descuento captura nombre obligatorio, descripción y porcentajes de las seis familias, con Atrás y Guardar.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q001",
-        "CH16-Q003",
-        "CH16-Q005"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": "/catalogs/discounts",
-      "react_files": [
-        "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q001",
-        "CH16-Q003",
-        "CH16-Q005"
-      ],
-      "blocker_reason": "El formulario visible no define fuente, campos aprobados, valores, validación, roles de escritura ni auditoría.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Nuevo permanece deshabilitado; no se implementa alta de perfiles."
-    },
+  "requirement_id": "CH16-F04",
+  "chapter_id": "CH16",
+  "feature": "Alta de perfil de descuento",
+  "detailed_behavior": "Nuevo Descuento captura nombre obligatorio, descripción y porcentajes de las seis familias, con Atrás y Guardar.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0035_00h50m42s400ms_stable_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q001",
+    "CH16-Q003",
+    "CH16-Q005"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": "/catalogs/discounts",
+  "react_files": [
+    "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "All operational staff roles can persist tenant-scoped discount profiles; nurse browser save/reload and raw five-role checks passed. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q001",
+      "CH16-Q003",
+      "CH16-Q005"
+    ],
+    "blocker_reason": "El formulario visible no define fuente, campos aprobados, valores, validación, roles de escritura ni auditoría.",
+    "notes": "Nuevo permanece deshabilitado; no se implementa alta de perfiles.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
       "requirement_id": "CH16-F05",
       "chapter_id": "CH16",
@@ -8110,155 +8384,265 @@
       "notes": "React no expone ni persiste esta marca."
     },
     {
-      "requirement_id": "CH16-F06",
-      "chapter_id": "CH16",
-      "feature": "Perfiles negociados por categoría",
-      "detailed_behavior": "La conversación explica perfiles con un porcentaje para servicios y exclusión de medicamentos, y menciona porcentajes pactados distintos por cliente; no define precedencia ni elegibilidad.",
-      "classification": "VERBAL",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q006"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": null,
-      "react_files": [],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q001",
-        "CH16-Q002",
-        "CH16-Q006"
-      ],
-      "blocker_reason": "La narración no define perfil receptor, precedencia, elegibilidad ni si la exclusión de medicamentos es global o negociable.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se implementan perfiles negociados ni reglas por familia."
-    },
+  "requirement_id": "CH16-F06",
+  "chapter_id": "CH16",
+  "feature": "Perfiles negociados por categoría",
+  "detailed_behavior": "La conversación explica perfiles con un porcentaje para servicios y exclusión de medicamentos, y menciona porcentajes pactados distintos por cliente; no define precedencia ni elegibilidad.",
+  "classification": "VERBAL",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0003_00h49m58s000ms_settled.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q001",
+    "CH16-Q002",
+    "CH16-Q006"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": null,
+  "react_files": [
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Negotiated category rates are entered by staff and copied into quote revisions; no fabricated insurer agreements. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH16-Q001",
+      "CH16-Q002",
+      "CH16-Q006"
+    ],
+    "blocker_reason": "La narración no define perfil receptor, precedencia, elegibilidad ni si la exclusión de medicamentos es global o negociable.",
+    "notes": "No se implementan perfiles negociados ni reglas por familia.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
-      "requirement_id": "CH16-F07",
-      "chapter_id": "CH16",
-      "feature": "Recarga del catálogo después del alta",
-      "detailed_behavior": "Al volver de Nuevo Descuento, el listado atraviesa estado vacío y Cargando antes de recuperar la matriz.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0036_00h50m48s000ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q005"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": "/catalogs/discounts",
-      "react_files": [
-        "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q005"
-      ],
-      "blocker_reason": "La carga posterior a alta depende de una creación y de estados/errores cuya autorización y semántica no están definidas.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se crea perfil ni se simula recarga de catálogo."
-    },
+  "requirement_id": "CH16-F07",
+  "chapter_id": "CH16",
+  "feature": "Recarga del catálogo después del alta",
+  "detailed_behavior": "Al volver de Nuevo Descuento, el listado atraviesa estado vacío y Cargando antes de recuperar la matriz.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0036_00h50m48s000ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0039_00h50m49s400ms_stable_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q005"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": "/catalogs/discounts",
+  "react_files": [
+    "apps/web/src/app/(workspace)/catalogs/discounts/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Saved configuration reloads from PostgreSQL and appears in the quote selector. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q005"
+    ],
+    "blocker_reason": "La carga posterior a alta depende de una creación y de estados/errores cuya autorización y semántica no están definidas.",
+    "notes": "No se crea perfil ni se simula recarga de catálogo.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
-      "requirement_id": "CH16-F08",
-      "chapter_id": "CH16",
-      "feature": "Acceso al reporte de salud",
-      "detailed_behavior": "Desde Clínica se abre Reporte de salud, que empieza a listar hospitalizaciones con periodo, auditoría, triage y estatus.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0041_00h50m54s000ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008"
-      ],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008"
-      ],
-      "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, campos sensibles permitidos, roles, filtros, auditoría de acceso, retención ni minimización para el Reporte de salud.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "CH16 sólo prueba navegación y columnas visibles; la ruta clínica y los datos de CH09 no autorizan ni certifican un reporte clínico; la reparación de trazabilidad espera su SHA de commit."
-    },
+  "requirement_id": "CH16-F08",
+  "chapter_id": "CH16",
+  "feature": "Acceso al reporte de salud",
+  "detailed_behavior": "Desde Clínica se abre Reporte de salud, que empieza a listar hospitalizaciones con periodo, auditoría, triage y estatus.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/detail_crops/CH16-E0041_00h50m54s000ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0044_00h51m07s200ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008"
+  ],
+  "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
+  "react_route": "/clinical/hospitalizations",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Health-report links reach the patient/case-scoped unified record; historical deep links map to the new five-section layout. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008"
+    ],
+    "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, campos sensibles permitidos, roles, filtros, auditoría de acceso, retención ni minimización para el Reporte de salud.",
+    "notes": "CH16 sólo prueba navegación y columnas visibles; la ruta clínica y los datos de CH09 no autorizan ni certifican un reporte clínico; la reparación de trazabilidad espera su SHA de commit.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
-      "requirement_id": "CH16-F09",
-      "chapter_id": "CH16",
-      "feature": "Bloqueo de edición clínica tras guardar",
-      "detailed_behavior": "La narración afirma que enfermería no podía volver a editar después de guardar por motivos legales, mientras otro rol sí corregía errores ortográficos; no se muestra el flujo ni la preservación de versiones.",
-      "classification": "VERBAL",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0040_00h50m52s200ms_settled.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q007"
-      ],
-      "route_id": "ROUTE-DISCOUNTS",
-      "react_route": null,
-      "react_files": [],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q007"
-      ],
-      "blocker_reason": "La narración no demuestra firma, versión, motivo, autorización ni preservación del original para una corrección clínica.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se implementa bloqueo ni corrección clínica."
-    },
+  "requirement_id": "CH16-F09",
+  "chapter_id": "CH16",
+  "feature": "Bloqueo de edición clínica tras guardar",
+  "detailed_behavior": "La narración afirma que enfermería no podía volver a editar después de guardar por motivos legales, mientras otro rol sí corregía errores ortográficos; no se muestra el flujo ni la preservación de versiones.",
+  "classification": "VERBAL",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH16_descuentos_y_reglas_por_categoria/event_frames/CH16-E0040_00h50m52s200ms_settled.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q007"
+  ],
+  "route_id": "ROUTE-DISCOUNTS",
+  "react_route": null,
+  "react_files": [
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "New clinical records are append-only; correction creates a version and requires a reason. Administration is immutable and reconciliation stays separately audited. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH16-Q007"
+    ],
+    "blocker_reason": "La narración no demuestra firma, versión, motivo, autorización ni preservación del original para una corrección clínica.",
+    "notes": "No se implementa bloqueo ni corrección clínica.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
       "requirement_id": "CH17-F01",
       "chapter_id": "CH17",
@@ -8353,133 +8737,213 @@
       "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: el menú del caso seleccionado enlaza a hospitalización, visitas y evoluciones; ya no es un menú local inerte. Los siete destinos y condiciones del video, roles y auditoría siguen sin contrato/certificación clínica. Contabo no tiene casos reales."
     },
     {
-      "requirement_id": "CH17-F03",
-      "chapter_id": "CH17",
-      "feature": "Reporte clínico por hospitalización",
-      "detailed_behavior": "El detalle organiza Información Principal, Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos y Evidencia y Documentos.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0008_00h51m16s600ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [
-        "HEALTH-REPORT-EMPTY-SECTIONS"
-      ],
-      "action_ids": [
-        "HEALTH-REPORT-SECTION-INFORMATION",
-        "HEALTH-REPORT-SECTION-CLINICAL",
-        "HEALTH-REPORT-SECTION-MEDICAL",
-        "HEALTH-REPORT-SECTION-TREATMENTS",
-        "HEALTH-REPORT-SECTION-EVENTS",
-        "HEALTH-REPORT-SECTION-EVIDENCE"
-      ],
-      "parity_status": "PARTIAL",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [
-        "playwright:ch17-health-report-empty-sections"
-      ],
-      "selenium_test_ids": [
-        "SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS"
-      ],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008"
-      ],
-      "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, retención, minimización ni redacción de ninguna sección del Reporte de salud.",
-      "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9",
-      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: las secciones leen signos vitales, médicos y documentos clínicos del workspace; las notas de enfermería se infieren con una expresión regular sobre título/resumen. No son secciones siempre vacías. Falta validar taxonomía clínica, acceso, procedencia y formato frente al video antes de copiar pacientes."
-    },
+  "requirement_id": "CH17-F03",
+  "chapter_id": "CH17",
+  "feature": "Reporte clínico por hospitalización",
+  "detailed_behavior": "El detalle organiza Información Principal, Evaluación Clínica, Atención Médica, Tratamientos y Órdenes, Eventos Clínicos y Evidencia y Documentos.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0008_00h51m16s600ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [
+    "HEALTH-REPORT-EMPTY-SECTIONS"
+  ],
+  "action_ids": [
+    "HEALTH-REPORT-SECTION-INFORMATION",
+    "HEALTH-REPORT-SECTION-CLINICAL",
+    "HEALTH-REPORT-SECTION-MEDICAL",
+    "HEALTH-REPORT-SECTION-TREATMENTS",
+    "HEALTH-REPORT-SECTION-EVENTS",
+    "HEALTH-REPORT-SECTION-EVIDENCE"
+  ],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:ch17-health-report-empty-sections",
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [
+    "SEL-CH17-HEALTH-REPORT-EMPTY-SECTIONS"
+  ],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Patient/case-scoped five-section record retains medical/nursing history, existing readings and legacy signed documents. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "PARTIAL",
+    "blocker_ids": [
+      "CH16-Q008"
+    ],
+    "blocker_reason": "CH16-Q008 no define la fuente autorizada por organización, roles, campos sensibles, filtros, auditoría de acceso, retención, minimización ni redacción de ninguna sección del Reporte de salud.",
+    "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: las secciones leen signos vitales, médicos y documentos clínicos del workspace; las notas de enfermería se infieren con una expresión regular sobre título/resumen. No son secciones siempre vacías. Falta validar taxonomía clínica, acceso, procedencia y formato frente al video antes de copiar pacientes.",
+    "last_verified_sha": "fec4aef2d984afc95e4f54c2703d20651116c8c9"
+  }
+},
     {
-      "requirement_id": "CH17-F04",
-      "chapter_id": "CH17",
-      "feature": "Cambio de rango temporal",
-      "detailed_behavior": "Cambiar rango de fechas abre un calendario doble, permite seleccionar intervalo, Cargarlo y muestra Procesando antes de actualizar el encabezado.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0012_00h51m18s800ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0017_00h51m32s000ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q008"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q008"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles ni roles del Reporte de salud; CH17-Q008 no define rango permitido, inclusividad, zona horaria, carga/error/reintento, auditoría, retención ni redacción. Las fechas visibles son ejemplos y no se codifican.",
-      "last_verified_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc",
-      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: existe un botón que llama a window.print() para el reporte visible. El calendario/rango y el flujo del video siguen ausentes; el formato y la autorización de impresión de datos sensibles no están certificados. Se conserva MISSING."
-    },
+  "requirement_id": "CH17-F04",
+  "chapter_id": "CH17",
+  "feature": "Cambio de rango temporal",
+  "detailed_behavior": "Cambiar rango de fechas abre un calendario doble, permite seleccionar intervalo, Cargarlo y muestra Procesando antes de actualizar el encabezado.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0012_00h51m18s800ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0017_00h51m32s000ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q008"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Recent-date filtering is available; the original video calendar/range behavior is not claimed exact. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q008"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles ni roles del Reporte de salud; CH17-Q008 no define rango permitido, inclusividad, zona horaria, carga/error/reintento, auditoría, retención ni redacción. Las fechas visibles son ejemplos y no se codifican.",
+    "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: existe un botón que llama a window.print() para el reporte visible. El calendario/rango y el flujo del video siguen ausentes; el formato y la autorización de impresión de datos sensibles no están certificados. Se conserva MISSING.",
+    "last_verified_sha": "98840f19538f15efa4ee6f85e8f864ba753478fc"
+  }
+},
     {
-      "requirement_id": "CH17-F05",
-      "chapter_id": "CH17",
-      "feature": "Información principal del paciente",
-      "detailed_behavior": "El reporte presenta identidad, fecha de nacimiento, edad, sexo, periodo de hospitalización, estado, tipo de paciente, tipo de módulo y adicional.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, alcance organizacional, campos sensibles permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
-      "last_verified_sha": "7214fe01af9545cac5dc6e269b594ecf946a35ba",
-      "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: el reporte seleccionado muestra nombre, documento, estado del caso y otros campos del workspace. No se ha comparado ni aprobado el conjunto exacto de identidad/demografía del video, por lo que permanece MISSING y sin certificación clínica."
-    },
+  "requirement_id": "CH17-F05",
+  "chapter_id": "CH17",
+  "feature": "Información principal del paciente",
+  "detailed_behavior": "El reporte presenta identidad, fecha de nacimiento, edad, sexo, periodo de hospitalización, estado, tipo de paciente, tipo de módulo y adicional.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0019_00h51m33s000ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Patient identity is shown only within clinical route permissions and organization scope; original demographic layout remains partial. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, alcance organizacional, campos sensibles permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud.",
+    "notes": "Revisión de código en b993553c30856a86ad98fc4eee1427c9c145c96b: el reporte seleccionado muestra nombre, documento, estado del caso y otros campos del workspace. No se ha comparado ni aprobado el conjunto exacto de identidad/demografía del video, por lo que permanece MISSING y sin certificación clínica.",
+    "last_verified_sha": "7214fe01af9545cac5dc6e269b594ecf946a35ba"
+  }
+},
     {
       "requirement_id": "CH17-F06",
       "chapter_id": "CH17",
@@ -8520,123 +8984,204 @@
       "notes": "Precheck factual verified at 999e2d71216006e0e178aa1693a85d954b320bfe: CH17-E0021 muestra Imprimir, Seguro, Póliza, Certificado, Fecha efectiva, Titular y DUI/NIT. React no expone, consulta ni reutiliza seguros, identificadores o impresión; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
-      "requirement_id": "CH17-F07",
-      "chapter_id": "CH17",
-      "feature": "Salida imprimible configurable",
-      "detailed_behavior": "El encabezado ofrece Imprimir y varias tablas incluyen casillas Imprimir, pero no se observa el documento final ni su formato.",
-      "classification": "UNCERTAIN",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0008_00h51m16s600ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0043_00h52m08s400ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH17-Q001"
-      ],
-      "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
-      "react_route": "/clinical/hospitalizations",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH17-Q001"
-      ],
-      "blocker_reason": "La evidencia no define la plantilla, campos, firmas, validez ni minimización de la salida imprimible.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "No se imprime ni exporta contenido clínico."
-    },
+  "requirement_id": "CH17-F07",
+  "chapter_id": "CH17",
+  "feature": "Salida imprimible configurable",
+  "detailed_behavior": "El encabezado ofrece Imprimir y varias tablas incluyen casillas Imprimir, pero no se observa el documento final ni su formato.",
+  "classification": "UNCERTAIN",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0008_00h51m16s600ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0021_00h51m34s400ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0043_00h52m08s400ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH17-Q001"
+  ],
+  "route_id": "ROUTE-CLINICAL-HOSPITALIZATIONS",
+  "react_route": "/clinical/hospitalizations",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/hospitalizations/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Print current section, individual nursing record or complete record through an isolated clone. Browser PDF output inspected; original video layout remains partial. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH17-Q001"
+    ],
+    "blocker_reason": "La evidencia no define la plantilla, campos, firmas, validez ni minimización de la salida imprimible.",
+    "notes": "No se imprime ni exporta contenido clínico.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
-      "requirement_id": "CH17-F08",
-      "chapter_id": "CH17",
-      "feature": "Navegación de Evaluación Clínica",
-      "detailed_behavior": "Evaluación Clínica separa antecedentes y evaluaciones, signos vitales, perfiles clínicos, notas de evolución, interconsultas, notas de enfermería y bitácoras.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0024_00h51m37s200ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q002"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q002"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto de organización, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción; CH17-Q002 no define formularios, permisos de Agregar, catálogo, versionado ni auditoría de antecedentes/alergias.",
-      "last_verified_sha": "998875f4694d070598ea63f52619f66bfed426a1",
-      "notes": "Precheck factual verified at 998875f4694d070598ea63f52619f66bfed426a1: CH17-E0024 muestra Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería y Bitácoras, además de paneles y controles Agregar. React no expone navegación clínica, paneles, datos o mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
-    },
+  "requirement_id": "CH17-F08",
+  "chapter_id": "CH17",
+  "feature": "Navegación de Evaluación Clínica",
+  "detailed_behavior": "Evaluación Clínica separa antecedentes y evaluaciones, signos vitales, perfiles clínicos, notas de evolución, interconsultas, notas de enfermería y bitácoras.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0024_00h51m37s200ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q002"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "PDF-authorized five-section layout groups medical and nursing entries; old deep links preserve patient/case selection. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q002"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto de organización, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción; CH17-Q002 no define formularios, permisos de Agregar, catálogo, versionado ni auditoría de antecedentes/alergias.",
+    "notes": "Precheck factual verified at 998875f4694d070598ea63f52619f66bfed426a1: CH17-E0024 muestra Antecedentes y evaluaciones, Signos vitales, Perfiles clínicos, Notas de evolución, Notas médicas de interconsulta, Notas de enfermería y Bitácoras, además de paneles y controles Agregar. React no expone navegación clínica, paneles, datos o mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud.",
+    "last_verified_sha": "998875f4694d070598ea63f52619f66bfed426a1"
+  }
+},
     {
-      "requirement_id": "CH17-F09",
-      "chapter_id": "CH17",
-      "feature": "Antecedentes clínicos estructurados",
-      "detailed_behavior": "Los paneles cubren alergias, antecedentes personales patológicos, hábitos personales, antecedentes quirúrgicos, antecedentes familiares y tarjeta de vacunas.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0026_00h51m43s400ms_abrupt_change.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0027_00h51m44s200ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q002"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q002"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q002 no define formularios, catálogos, permisos de Agregar, reacción/estado, contradicción con No registrado, versionado, corrección ni auditoría para antecedentes, alergias y vacunas.",
-      "last_verified_sha": "1bbec9f62b414e0da0c0e6468a6bfc8766f53504",
-      "notes": "Precheck factual verified at 1bbec9f62b414e0da0c0e6468a6bfc8766f53504: CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con Agregar. React no expone paneles, contenido, catálogos, formularios, controles Agregar, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
-    },
+  "requirement_id": "CH17-F09",
+  "chapter_id": "CH17",
+  "feature": "Antecedentes clínicos estructurados",
+  "detailed_behavior": "Los paneles cubren alergias, antecedentes personales patológicos, hábitos personales, antecedentes quirúrgicos, antecedentes familiares y tarjeta de vacunas.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0026_00h51m43s400ms_abrupt_change.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0027_00h51m44s200ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q002"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Manual background/history records are versioned; structured allergy and vaccine catalogs from the original video remain outside this PDF scope. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q002"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos clínicos permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q002 no define formularios, catálogos, permisos de Agregar, reacción/estado, contradicción con No registrado, versionado, corrección ni auditoría para antecedentes, alergias y vacunas.",
+    "notes": "Precheck factual verified at 1bbec9f62b414e0da0c0e6468a6bfc8766f53504: CH17-E0026/E0027 muestran únicamente Alergias, Antecedentes personales patológicos, Hábitos personales, Antecedentes quirúrgicos, Antecedentes familiares y Tarjeta de vacunas, cada uno con Agregar. React no expone paneles, contenido, catálogos, formularios, controles Agregar, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud.",
+    "last_verified_sha": "1bbec9f62b414e0da0c0e6468a6bfc8766f53504"
+  }
+},
     {
       "requirement_id": "CH17-F10",
       "chapter_id": "CH17",
@@ -8678,128 +9223,209 @@
       "notes": "Precheck factual verified at fc48a0ed1a849b335a3b6c7897153386f701c098: CH17-E0029 muestra Alergias con No registrado, Seleccione, un segundo selector vacío y Agregar; CH17-E0030 muestra una lista de sustancias/medicamentos. React no expone catálogo, nombres de medicamentos, selector, estado, control Agregar, datos de pacientes, consultas, impresión/exportación ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
     },
     {
-      "requirement_id": "CH17-F11",
-      "chapter_id": "CH17",
-      "feature": "Signos vitales agrupados por origen",
-      "detailed_behavior": "La subpestaña separa gráficos, registros clínicos de signos vitales y signos cargados por el paciente.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0038_00h52m00s600ms_DETAIL.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q009"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q009"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
-      "last_verified_sha": "dae09855e9f10dbebf231a98e449d1dc62970839",
-      "notes": "Precheck factual verified at dae09855e9f10dbebf231a98e449d1dc62970839: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
-    },
+  "requirement_id": "CH17-F11",
+  "chapter_id": "CH17",
+  "feature": "Signos vitales agrupados por origen",
+  "detailed_behavior": "La subpestaña separa gráficos, registros clínicos de signos vitales y signos cargados por el paciente.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0038_00h52m00s600ms_DETAIL.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q009"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Entered vital rows persist and show in nursing/full record; historical readings retain their source. No fabricated clinical interpretation or patient-upload rules. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q009"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q009 no define campos, unidades, rangos, validación/interpretación, procedencia clínica frente a cargas del paciente, roles, formularios, persistencia, corrección/versionado ni auditoría para signos vitales.",
+    "notes": "Precheck factual verified at dae09855e9f10dbebf231a98e449d1dc62970839: CH17-E0038 muestra únicamente los grupos expandibles Gráficos de Signos vitales, Signos vitales y Signos vitales cargados por el paciente. React no expone valores, unidades, rangos, gráficas, cargas del paciente, controles, registros, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud.",
+    "last_verified_sha": "dae09855e9f10dbebf231a98e449d1dc62970839"
+  }
+},
     {
-      "requirement_id": "CH17-F12",
-      "chapter_id": "CH17",
-      "feature": "Listado de notas de enfermería",
-      "detailed_behavior": "Notas de enfermería muestra fecha, turno, recurso y nota clínica, con búsqueda, paginación, selección para impresión y acciones por fila.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0043_00h52m08s400ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q001",
-        "CH17-Q010"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q001",
-        "CH17-Q010"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
-      "last_verified_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638",
-      "notes": "Precheck factual verified at 740b6bde8177d078fda24602a7c1e9e2d980b638: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud."
-    },
+  "requirement_id": "CH17-F12",
+  "chapter_id": "CH17",
+  "feature": "Listado de notas de enfermería",
+  "detailed_behavior": "Notas de enfermería muestra fecha, turno, recurso y nota clínica, con búsqueda, paginación, selección para impresión y acciones por fila.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0043_00h52m08s400ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q001",
+    "CH17-Q010"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Nursing notes retain date/time, author and server-resolved JVPE; patient/case scope and print output tested. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q001",
+      "CH17-Q010"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, contexto organizacional, campos de salud permitidos por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q001 no define selección por fila ni contenido, formato, destino, autorización, auditoría o retención de impresión; CH17-Q010 no define contenido/campos de notas de enfermería, turno/recurso, ciclo de vida, firma, corrección/versionado ni auditoría.",
+    "notes": "Precheck factual verified at 740b6bde8177d078fda24602a7c1e9e2d980b638: CH17-E0043/E0046 muestran sólo anatomía de Notas de enfermería, selección visible para Imprimir, Acciones, Fecha nota, Información, Nota, búsqueda/paginación y narrativa clínica sensible. React no expone notas, contexto de turno/recurso, tabla, búsqueda, paginación, selección, acciones, impresión, consultas ni mutaciones; /clinical/hospitalizations no es una fuente autorizada para el Reporte de salud.",
+    "last_verified_sha": "740b6bde8177d078fda24602a7c1e9e2d980b638"
+  }
+},
     {
-      "requirement_id": "CH17-F13",
-      "chapter_id": "CH17",
-      "feature": "Edición de nota clínica",
-      "detailed_behavior": "El menú ofrece Editar y la secuencia de seguridad muestra un área de texto editable con control de guardado; no se demuestra versión, motivo ni preservación del original.",
-      "classification": "VISIBLE",
-      "priority": "P1",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0048_00h52m14s800ms_DETAIL.jpg",
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/contact_sheets_safety/safety_005.jpg"
-      ],
-      "open_question_ids": [
-        "CH16-Q008",
-        "CH17-Q010",
-        "CH17-Q011"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "MISSING",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH16-Q008",
-        "CH17-Q010",
-        "CH17-Q011"
-      ],
-      "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q010 no define el ciclo y campos de la Nota de enfermería; CH17-Q011 no define autorización, motivo, firma, preservación inmutable del original, versión de reemplazo, conflictos ni auditoría append-only de una corrección clínica.",
-      "last_verified_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3",
-      "notes": "Precheck factual verified at 7b4faa1ee26d68633dff5374507ded72cf98d7d3: CH17-E0048 y safety_005 muestran sólo afinidad de editar/guardar sobre una nota clínica sensible. React no expone notas, editor, guardado, lectura, consulta ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports."
-    },
+  "requirement_id": "CH17-F13",
+  "chapter_id": "CH17",
+  "feature": "Edición de nota clínica",
+  "detailed_behavior": "El menú ofrece Editar y la secuencia de seguridad muestra un área de texto editable con control de guardado; no se demuestra versión, motivo ni preservación del original.",
+  "classification": "VISIBLE",
+  "priority": "P1",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/detail_crops/CH17-E0048_00h52m14s800ms_DETAIL.jpg",
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/contact_sheets_safety/safety_005.jpg"
+  ],
+  "open_question_ids": [
+    "CH16-Q008",
+    "CH17-Q010",
+    "CH17-Q011"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Corrections require a reason, preserve the original and reject stale versions; historical signed-document correction flow retained. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "MISSING",
+    "blocker_ids": [
+      "CH16-Q008",
+      "CH17-Q010",
+      "CH17-Q011"
+    ],
+    "blocker_reason": "CH16-Q008 no define fuente tenant-scoped, campos sensibles por rol, auditoría de acceso, retención, minimización ni redacción del Reporte de salud; CH17-Q010 no define el ciclo y campos de la Nota de enfermería; CH17-Q011 no define autorización, motivo, firma, preservación inmutable del original, versión de reemplazo, conflictos ni auditoría append-only de una corrección clínica.",
+    "notes": "Precheck factual verified at 7b4faa1ee26d68633dff5374507ded72cf98d7d3: CH17-E0048 y safety_005 muestran sólo afinidad de editar/guardar sobre una nota clínica sensible. React no expone notas, editor, guardado, lectura, consulta ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports.",
+    "last_verified_sha": "7b4faa1ee26d68633dff5374507ded72cf98d7d3"
+  }
+},
     {
       "requirement_id": "CH17-F14",
       "chapter_id": "CH17",
@@ -8838,79 +9464,133 @@
       "notes": "Precheck factual verified at 3b34e5ba5e6365dd2377da108ef83b49952ff546: CH17-E0048 muestra sólo la afinidad Auditar con IA en contexto de nota clínica sensible. React no expone control, nota, solicitud, prompt, proveedor, transferencia externa ni salida de IA; /clinical/hospitalizations no es una fuente ni puente de autorización para /clinical/reports."
     },
     {
-      "requirement_id": "CH17-F15",
-      "chapter_id": "CH17",
-      "feature": "Restricción de edición por rol",
-      "detailed_behavior": "La conversación indica que personal de enfermería no puede volver a editar después de guardar, mientras otro rol puede corregir ortografía; la pantalla no demuestra la matriz de permisos.",
-      "classification": "VERBAL",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH17-Q005"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH17-Q005"
-      ],
-      "blocker_reason": "CH17-Q005 no define matriz de roles ni precondiciones para crear, firmar, corregir o anular una nota; tampoco define motivos, versiones, conflictos, auditoría append-only ni contrato runtime. Es distinto de CH17-Q010/Q011, que controlan el ciclo y las salvaguardas de corrección de F13.",
-      "last_verified_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7",
-      "notes": "Precheck verbal: el transcript describe una restricción posterior al guardado y una posible corrección ortográfica por otro rol, pero no identifica rol, estado firmado, autorización ni resultado. React no expone nota, editor, guardado, roles, consulta clínica ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports. Static verification passed at 6b8592e3e6db5e3363305d01b3d34fd087951bf7; functional, permission, persistence, and performance remain UNVERIFIED because Q005 supplies no approved runtime matrix."
-    },
+  "requirement_id": "CH17-F15",
+  "chapter_id": "CH17",
+  "feature": "Restricción de edición por rol",
+  "detailed_behavior": "La conversación indica que personal de enfermería no puede volver a editar después de guardar, mientras otro rol puede corregir ortografía; la pantalla no demuestra la matriz de permisos.",
+  "classification": "VERBAL",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0048_00h52m14s800ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH17-Q005"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Read-only audit and denied financial/inventory clinical routes remain enforced; user-editable catalogs are scoped separately. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH17-Q005"
+    ],
+    "blocker_reason": "CH17-Q005 no define matriz de roles ni precondiciones para crear, firmar, corregir o anular una nota; tampoco define motivos, versiones, conflictos, auditoría append-only ni contrato runtime. Es distinto de CH17-Q010/Q011, que controlan el ciclo y las salvaguardas de corrección de F13.",
+    "notes": "Precheck verbal: el transcript describe una restricción posterior al guardado y una posible corrección ortográfica por otro rol, pero no identifica rol, estado firmado, autorización ni resultado. React no expone nota, editor, guardado, roles, consulta clínica ni mutación; /clinical/hospitalizations no es fuente ni puente de autorización para /clinical/reports. Static verification passed at 6b8592e3e6db5e3363305d01b3d34fd087951bf7; functional, permission, persistence, and performance remain UNVERIFIED because Q005 supplies no approved runtime matrix.",
+    "last_verified_sha": "6b8592e3e6db5e3363305d01b3d34fd087951bf7"
+  }
+},
     {
-      "requirement_id": "CH17-F16",
-      "chapter_id": "CH17",
-      "feature": "Aplicación operativa de enfermería",
-      "detailed_behavior": "La narración describe una aplicación donde enfermería ve paciente asignado, hora, diagnóstico, médico, supervisores, registra signos vitales, evaluaciones y nota de enfermería; no se muestra esa aplicación.",
-      "classification": "VERBAL",
-      "priority": "P2",
-      "evidence_paths": [
-        "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
-      ],
-      "open_question_ids": [
-        "CH17-Q006"
-      ],
-      "route_id": "ROUTE-HEALTH-REPORTS",
-      "react_route": "/clinical/reports",
-      "react_files": [
-        "apps/web/src/app/(workspace)/clinical/reports/page.tsx"
-      ],
-      "component_ids": [],
-      "action_ids": [],
-      "parity_status": "NOT_TESTABLE",
-      "functional_status": "UNVERIFIED",
-      "persistence_status": "UNVERIFIED",
-      "permissions_status": "UNVERIFIED",
-      "performance_status": "UNVERIFIED",
-      "unit_test_ids": [],
-      "playwright_test_ids": [],
-      "selenium_test_ids": [],
-      "visual_test_ids": [],
-      "blocker_type": "CLIENT_DEFINITION",
-      "blocker_ids": [
-        "CH17-Q006"
-      ],
-      "blocker_reason": "CH17-Q006 no define fuente tenant-scoped, asignación, matriz de roles, campos mínimos por rol, offline, sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización ni redacción para la aplicación operativa de enfermería. CR-020 sólo define una futura aprobación de Balance Hídrico y no autoriza esta aplicación.",
-      "last_verified_sha": "PENDING_COMMIT",
-      "notes": "Precheck verbal: CH17-E0046 muestra una tabla de notas dentro de Reporte de salud, no una aplicación operativa ni una asignación. React no expone aplicación, datos clínicos, capturas, offline, sincronización ni escritura. /clinical/nursing y los datos genéricos de recursos/signos no son una fuente o puente de autorización."
-    },
+  "requirement_id": "CH17-F16",
+  "chapter_id": "CH17",
+  "feature": "Aplicación operativa de enfermería",
+  "detailed_behavior": "La narración describe una aplicación donde enfermería ve paciente asignado, hora, diagnóstico, médico, supervisores, registra signos vitales, evaluaciones y nota de enfermería; no se muestra esa aplicación.",
+  "classification": "VERBAL",
+  "priority": "P2",
+  "evidence_paths": [
+    "references/video-audit/chapters/CH17_reporte_de_salud_detallado_e_impresion/event_frames/CH17-E0046_00h52m09s800ms_abrupt_change.jpg"
+  ],
+  "open_question_ids": [
+    "CH17-Q006"
+  ],
+  "route_id": "ROUTE-HEALTH-REPORTS",
+  "react_route": "/clinical/reports",
+  "react_files": [
+    "apps/web/src/app/(workspace)/clinical/reports/page.tsx",
+    "packages/contracts/src/clinical-records.ts",
+    "apps/web/src/components/clinical-record-editor.tsx",
+    "apps/web/src/components/clinical-record-view.tsx",
+    "apps/web/src/components/clinical-configuration.tsx",
+    "apps/web/src/server/persistence/postgres-clinical-records.ts",
+    "apps/web/src/components/clinical-patient-record.tsx"
+  ],
+  "component_ids": [],
+  "action_ids": [],
+  "parity_status": "PARTIAL",
+  "functional_status": "VERIFIED",
+  "persistence_status": "VERIFIED",
+  "permissions_status": "VERIFIED",
+  "performance_status": "UNVERIFIED",
+  "unit_test_ids": [
+    "vitest:clinical-annex-scores",
+    "vitest:clinical-record-boundaries"
+  ],
+  "playwright_test_ids": [
+    "playwright:clinical-restructure-forms",
+    "playwright:clinical-annex-scales",
+    "playwright:clinical-restructure-responsive",
+    "playwright:clinical-configuration-all-users",
+    "playwright:clinical-connected-persistence",
+    "playwright:clinical-connected-administration",
+    "playwright:clinical-connected-configuration",
+    "playwright:clinical-connected-discount",
+    "playwright:clinical-connected-correction-print",
+    "playwright:clinical-connected-security"
+  ],
+  "selenium_test_ids": [],
+  "visual_test_ids": [],
+  "blocker_type": null,
+  "blocker_ids": [],
+  "blocker_reason": null,
+  "last_verified_sha": "bebe3f6b4697a74be3c1a574207f65fdde743552",
+  "notes": "Nursing forms for plans, administration, fluids, vitals, notes and scales persist through HTTP/PostgreSQL; no invented clinical automation. Superseding source: docs/qa/sources/CLIENT_CLINICAL_2026-10-31.txt. Technical checks: docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md. No new EXACT or professional clinical certification; historical evidence and residual scope retained.",
+  "historical_assessment": {
+    "parity_status": "NOT_TESTABLE",
+    "blocker_ids": [
+      "CH17-Q006"
+    ],
+    "blocker_reason": "CH17-Q006 no define fuente tenant-scoped, asignación, matriz de roles, campos mínimos por rol, offline, sincronización, idempotencia, conflictos/corrección, auditoría, retención, minimización ni redacción para la aplicación operativa de enfermería. CR-020 sólo define una futura aprobación de Balance Hídrico y no autoriza esta aplicación.",
+    "notes": "Precheck verbal: CH17-E0046 muestra una tabla de notas dentro de Reporte de salud, no una aplicación operativa ni una asignación. React no expone aplicación, datos clínicos, capturas, offline, sincronización ni escritura. /clinical/nursing y los datos genéricos de recursos/signos no son una fuente o puente de autorización.",
+    "last_verified_sha": "PENDING_COMMIT"
+  }
+},
     {
       "requirement_id": "CH17-F17",
       "chapter_id": "CH17",

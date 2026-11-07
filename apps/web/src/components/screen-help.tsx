@@ -265,9 +265,9 @@ const guides: Array<{ path: string; guide: Guide }> = [
     },
   },
   {
-    path: '/payments',
+    path: '/receivables',
     guide: {
-      title: 'Pagos',
+      title: 'Cuentas por cobrar',
       steps: [
         {
           title: 'Identificar saldo',
@@ -275,11 +275,33 @@ const guides: Array<{ path: string; guide: Guide }> = [
         },
         {
           title: 'Aplicar pago',
-          detail: 'Seleccione medio y guarde. Las referencias evitan aplicar pagos duplicados.',
+          detail:
+            'Seleccione medio y guarde. El sistema controla el saldo y evita aplicar el mismo comando dos veces.',
         },
         {
           title: 'Distinguir métricas',
           detail: 'Un cobro aplicado no se suma automáticamente como venta confirmada.',
+        },
+      ],
+    },
+  },
+  {
+    path: '/payments',
+    guide: {
+      title: 'Reporte de pagos',
+      steps: [
+        {
+          title: 'Consultar',
+          detail: 'Revise todos los pagos reportados, incluidos los reversados.',
+        },
+        {
+          title: 'Filtrar',
+          detail: 'Busque por paciente, cotización o referencia y acote por fecha o estado.',
+        },
+        {
+          title: 'Exportar',
+          detail:
+            'Descargue los registros visibles en CSV. Aplique o reverse pagos desde Cuentas por cobrar.',
         },
       ],
     },

@@ -189,6 +189,7 @@ describe('assigned clinical operations', () => {
       invoiceGroupId: 'group-1',
       quantity: 2,
       unitCost: 10,
+      taxRates: { iva: 0.13, perception: 0 },
       lotNumber: 'LOT-A',
       expirationDate: '2027-12-31',
       status: 'DRAFT',
@@ -223,6 +224,12 @@ describe('assigned clinical operations', () => {
     await expect(
       repository.execute(actor, { command: 'purchase.batch.create', purchases: [first, second] }),
     ).resolves.toEqual({ ids: ['line-a', 'line-b'] });
+    await expect(
+      repository.execute(actor, {
+        command: 'purchase.batch.create',
+        purchases: [{ ...first, taxRates: undefined }, second],
+      }),
+    ).rejects.toThrow();
     expect(insertMany).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ id: 'line-a', organizationId: 'org-a' }),
@@ -237,6 +244,53 @@ describe('assigned clinical operations', () => {
       }),
     ).rejects.toThrow('misma factura');
     expect(insertMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels every draft invoice line atomically without receiving stock', async () => {
+    const lines: Purchase[] = ['draft-a', 'draft-b'].map((id) => ({
+      id,
+      catalogItemId: 'item-a',
+      supplierCatalogItemId: 'supplier-a',
+      warehouseId: 'warehouse-a',
+      reference: 'REF-DRAFT',
+      invoiceNumber: 'INV-DRAFT',
+      invoiceGroupId: 'group-draft',
+      status: 'DRAFT',
+      createdAt: '2026-10-20T00:00:00.000Z',
+    }));
+    const session = {
+      withTransaction: vi.fn(async (callback: () => Promise<unknown>) => callback()),
+      endSession: vi.fn(),
+    };
+    const updateOne = vi.fn(async (filter: { id: string }, update: { $set: Partial<Purchase> }) => {
+      const line = lines.find((item) => item.id === filter.id)!;
+      Object.assign(line, update.$set);
+      return { matchedCount: 1 };
+    });
+    const auditInsert = vi.fn().mockResolvedValue({ acknowledged: true });
+    const database = {
+      client: { startSession: () => session },
+      collection: vi.fn((name: string) => {
+        if (name === 'purchases')
+          return {
+            findOne: vi.fn(async () => lines[0]),
+            find: vi.fn(() => ({ toArray: vi.fn(async () => lines) })),
+            updateOne,
+          };
+        if (name === 'auditEvents') return { insertOne: auditInsert };
+        throw new Error(`Unexpected collection ${name}`);
+      }),
+    } as unknown as Db;
+    const actor: ServerActor = { userId: 'buyer-qa', organizationId: 'org-a', role: 'INVENTORY' };
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.invoice.void',
+        purchaseId: 'draft-a',
+        reason: 'Factura duplicada',
+      }),
+    ).resolves.toEqual({ ids: ['draft-a', 'draft-b'] });
+    expect(lines.every((item) => item.status === 'CANCELLED' && item.invoiceVoidedAt)).toBe(true);
+    expect(auditInsert).toHaveBeenCalledTimes(2);
   });
   it('voids every received line of one invoice group and keeps both receipts', async () => {
     const base: Purchase = {
@@ -387,6 +441,7 @@ describe('assigned clinical operations', () => {
       note: 'Datos sintéticos',
       quantity: 1,
       unitCost: 25,
+      taxRates: { iva: 0.13, perception: 0 },
       expirationDate: '2027-01-01',
       lotNumber: 'LOT-SYNTHETIC-01',
       serialNumber: 'SERIAL-SYNTHETIC-01',
@@ -432,6 +487,12 @@ describe('assigned clinical operations', () => {
         purchase,
       }),
     ).resolves.toEqual({ id: purchase.id });
+    await expect(
+      new MongoOperationsRepository(database).execute(actor, {
+        command: 'purchase.create',
+        purchase: { ...purchase, taxRates: undefined },
+      }),
+    ).rejects.toThrow();
     expect(catalogFind).toHaveBeenCalledWith(
       { organizationId: 'org-a', id: purchase.catalogItemId, status: 'ACTIVE' },
       { session },
