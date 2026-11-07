@@ -561,10 +561,10 @@
     }
   },
   "clinical_nov07_regression": {
-    "status": "IMPLEMENTED_PENDING_CONNECTED_QA",
-    "verification_sha": null,
+    "status": "VERIFIED_PENDING_PUBLICATION",
+    "verification_sha": "e1223d3f121d3718c9e08e1dfdd049f3dc4f4c34",
     "evidence": "docs/feedback/CLINICAL_CHANGES_2026-11-07.md",
     "source": "docs/qa/sources/CLIENT_CLINICAL_CHANGES_2026-11-07.txt",
-    "scope": "Explicit per-medication times and dilution, per-occurrence administration and stock correction, reusable user-configured stock consumption, complete print group selection. 362 unit/server and 60 broad browser tests plus 18 clinical regression tests passed. Connected persistence and deployment are pending; no new EXACT or full video audit."
+    "scope": "Explicit per-medication times and dilution, per-hour administration and stock correction, reusable user-configured stock, complete print group selection. Final: 363 unit/server tests, 20 clinical browser scenarios, 15 isolated PostgreSQL groups and 8 connected browser scenarios passed. Earlier broad 60-scenario regression also passed. Same-medication quote revisions preserve schedules and reject duplicate applications. Publication pending; no new EXACT or full video audit."
   }
 }
