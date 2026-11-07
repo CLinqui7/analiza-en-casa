@@ -561,10 +561,14 @@
     }
   },
   "clinical_nov07_regression": {
-    "status": "VERIFIED_PENDING_PUBLICATION",
+    "status": "DEPLOYED_VERIFIED",
     "verification_sha": "e1223d3f121d3718c9e08e1dfdd049f3dc4f4c34",
     "evidence": "docs/feedback/CLINICAL_CHANGES_2026-11-07.md",
     "source": "docs/qa/sources/CLIENT_CLINICAL_CHANGES_2026-11-07.txt",
-    "scope": "Explicit per-medication times and dilution, per-hour administration and stock correction, reusable user-configured stock, complete print group selection. Final: 363 unit/server tests, 20 clinical browser scenarios, 15 isolated PostgreSQL groups and 8 connected browser scenarios passed. Earlier broad 60-scenario regression also passed. Same-medication quote revisions preserve schedules and reject duplicate applications. Publication pending; no new EXACT or full video audit."
+    "scope": "Explicit medication times/dilution, per-hour administration and stock compensation, reusable user-configured stock, complete print group selection. Final 363 unit/server tests, 20 clinical browser scenarios, 15 isolated PostgreSQL groups and 8 connected scenarios passed; earlier 60-scenario broad regression passed. Quote revisions preserve schedules and reject duplicate applications. Final print margins/contrast reviewed and 2 print/mobile scenarios repeated. Nine public synthetic groups passed on Contabo, healthy web/database and HTTP 200. QA environment retired. No new EXACT or full video audit; external copy/restore of the latest backup not verified.",
+    "deployment_sha": "eaa4fbc55a9a0389ff90e134b186c48f0c8a498b",
+    "print_verification_sha": "eaa4fbc55a9a0389ff90e134b186c48f0c8a498b",
+    "public_verifier_sha": "0c48419e52e4f5af2e1d29d3fa59ed3dc41229d5",
+    "deployment_evidence": "docs/deployment/CONTABO_CLINICAL_CHANGES_2026-11-07.md"
   }
 }

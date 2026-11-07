@@ -32,10 +32,12 @@ financiera, la auditoría y las versiones inmutables.
   sin completar esos rangos por suposición ni generar recomendaciones clínicas.
 - El agua endógena y las pérdidas insensibles son entradas manuales; no se deducen
   del peso. Un período menor de 24 horas no se extrapola a 24 horas.
-- Para descontar inventario se requiere que el equipo asigne artículo, bodega y
-  unidades por aplicación en la tarjeta. Esto no determina la dosis clínica.
-- Las administraciones asentadas no se sobrescriben: una aclaración se registra
-  en notas y cualquier ajuste de existencias se concilia con un movimiento auditado.
+- Actualizado el 7 de noviembre: el origen y las unidades se configuran una vez
+  por medicamento en Consumo de medicamentos. Se conservan las asignaciones de
+  tarjetas históricas. Estos datos no determinan la dosis clínica.
+- Las administraciones asentadas no se sobrescriben: Editar crea una versión
+  con motivo y conserva el original. El ajuste de existencias se compensa por
+  aplicación mediante movimientos auditados.
 
 Evidencia y límites: `docs/feedback/CLINICAL_RESTRUCTURE_2026-11-03.md`.
 

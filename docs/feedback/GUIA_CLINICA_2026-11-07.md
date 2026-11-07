@@ -8,6 +8,8 @@
 
 Estos valores los define el equipo. Las unidades de inventario no se deducen de la dosis ni de la cantidad cotizada. La cotización debe tener vinculado el artículo de inventario correspondiente. Las configuraciones nuevas se aplican a consumos nuevos; el historial conserva el origen y las unidades que se utilizaron.
 
+Las tarjetas históricas que ya tenían una asignación propia de inventario la conservan. Para utilizar la configuración común en ese caso, cree una nueva tarjeta con las indicaciones del equipo.
+
 ## Tarjeta y administración
 
 En **Clínico → Órdenes médicas → Acciones de enfermería → Tarjeta de medicamentos**, seleccione paciente e ingreso. Aparecen los medicamentos cotizados. Para cada uno, capture las horas indicadas, use **Agregar hora** si necesita más y escriba la dilución cuando corresponda. **Crónicos** permanece al final.
