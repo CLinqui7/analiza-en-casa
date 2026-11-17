@@ -2,7 +2,7 @@
   "nov17_part1_regression": {
     "source": "docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt",
     "report": "docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md",
-    "status": "TECHNICALLY_VERIFIED",
+    "status": "DEPLOYED_VERIFIED",
     "verification_sha": "0d4990de09b77eba5de07de17c464a888019338b",
     "test_ids": [
       "vitest:nov17-workflows",
@@ -24,7 +24,9 @@
       "Delivery records nurse receipt without inventory movement"
     ],
     "historical_certifications": "Historical requirement statuses preserved; no new EXACT or full video re-audit.",
-    "scope": "Six DOCX changes with 370 unit/server tests, 144 legacy tests, 76 QA checks, 28 PostgreSQL groups, 47 mock browser scenarios and 11 connected scenarios approved after focused reruns. Source conflict: approved quote expansion remains unconfirmed; assignment permits draft/sent only."
+    "scope": "Six DOCX changes with 370 unit/server tests, 144 legacy tests, 76 QA checks, 28 PostgreSQL groups, 47 mock browser scenarios and 11 connected scenarios approved after focused reruns. Source conflict: approved quote expansion remains unconfirmed; assignment permits draft/sent only.",
+    "deployment_sha": "2629daaa362d665080de9c52f5ba666d2bd6e7bd",
+    "deployment_evidence": "docs/deployment/CONTABO_PART1_2026-11-17.md"
   },
   "schema_version": 1,
   "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",

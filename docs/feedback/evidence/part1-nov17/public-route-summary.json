@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "sha": "2629daaa362d665080de9c52f5ba666d2bd6e7bd",
+  "routes": 62,
+  "availableAtThreeWidths": 61,
+  "restricted": 1,
+  "errors": 0,
+  "keyboardMenu": "PASS",
+  "returnsLinkChecked": true,
+  "health": 200,
+  "syntheticOnly": true
+}

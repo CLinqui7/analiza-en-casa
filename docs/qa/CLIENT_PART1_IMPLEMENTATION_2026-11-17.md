@@ -2,10 +2,12 @@
 
 Fuente: `docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt` (transcripción de `parte1ana_.docx`, documento fechado 03/11/2026). SHA256 original: `4B86E52C72DFDC36A7F7C5707331EBE1D1FC66ACA65B36CEDEC3E83BFB1F512C`.
 
-Estado: implementación verificada técnicamente; publicación pendiente de comprobación pública.
+Estado: implementado, subido a GitHub, publicado en Contabo y comprobado en la URL pública.
 
 Código de aplicación verificado: `0d4990de09b77eba5de07de17c464a888019338b`.
+Release publicado: `2629daaa362d665080de9c52f5ba666d2bd6e7bd` (añade guía, evidencia y ajustes menores de texto/conteo, también comprobados).
 Guía operativa: `../feedback/GUIA_PARTE1_2026-11-17.md`.
+Despliegue y límites operativos: `../deployment/CONTABO_PART1_2026-11-17.md`.
 
 Primera fase local: 370 pruebas React/servidor, typecheck, lint, 144 pruebas legacy,
 76 controles QA, build standalone y compilación Next pasaron. Gates CH01–CH03,
@@ -38,6 +40,8 @@ Fuentes: [aviso oficial de caché](https://github.com/advisories/GHSA-mfr8-8qww-
 - Compilación de producción con Next.js 16.4.6 aprobada en contenedor aislado; cero avisos en la auditoría de dependencias de producción. No se afirma que las dependencias exclusivas de desarrollo tengan cero avisos.
 - Gates CH01/CH02/CH03, trazabilidad 210/210, contrato 32/32, espejo JSON/CSV, auditoría de ledgers, fronteras React y escaneo de secretos aprobados.
 - Capturas sintéticas revisadas en `../feedback/evidence/part1-nov17/`. Las tablas nuevas se convierten en tarjetas en móvil para mostrar las acciones sin desplazamiento horizontal interno.
+- Producción: documentos privados de dos tipos guardados y descargados con bytes idénticos en la organización sintética; siete páginas afectadas verificadas en tres anchos. Sin cargos, pagos ni aprobaciones financieras de prueba en producción.
+- Recorrido público de 62 rutas: 61 disponibles a 1440/768/390 px sin desbordamiento de página, una restringida por permisos y cero errores JavaScript. Menú por teclado y botón «Ver devoluciones» aprobados. Es una comprobación de renderizado y navegación; no implica ejecutar cada operación de cada módulo en producción.
 
 La revisión contra la línea base no dejó P0/P1 confirmados pendientes dentro del alcance. Las pruebas descubrieron y corrigieron: bloqueo SQL incompatible con el rol runtime al asignar solicitudes; carrera entre pagos y versiones; edición mediante URL antigua después de Enviada; campos auxiliares de totales rechazados por la API; y generación indebida de un cargo al rechazar un borrador. Una línea asignada que se retire antes de entregar se identifica en ambas bandejas, conservando su evidencia. Las líneas entregadas no pueden borrarse o reducirse por debajo de lo recibido.
 
@@ -58,4 +62,4 @@ Preflight inicial correcto; 363 pruebas React/servidor iniciales pasaron. VPS re
 
 Revisión de video acotada: CH03/04/07 y CH14/15, con frames abiertos por agentes de auditoría de solo lectura. Se preservan los ledgers originales y los requisitos no cerrados. Este lote no afirma nueva paridad total ni promueve estados EXACT.
 
-La publicación seguirá el orden: código y pruebas en GitHub, QA aislada con PostgreSQL y rol runtime, copia de seguridad, VPS, comprobación pública. No se fusiona a main ni se ejecuta GitHub Actions.
+Se cumplió el orden: código y pruebas en GitHub, QA aislada con PostgreSQL y rol runtime, copia de seguridad, VPS y comprobación pública. Las migraciones 040/041 están aplicadas. Web y PostgreSQL saludables; HTTP 200. Se retiraron contenedores, red, imágenes, túneles y credenciales del entorno QA temporal. No se fusionó a main ni se ejecutó GitHub Actions.
