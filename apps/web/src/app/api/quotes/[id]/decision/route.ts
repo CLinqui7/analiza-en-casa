@@ -192,7 +192,9 @@ export async function POST(request: NextRequest, { params }: Context) {
           if (!validDate || !doctor?.rowCount) throw new IncompleteAdmission();
         }
       }
-      if (quote.status === 'DRAFT') {
+      // Rejecting an unshared draft closes it through the decision guard;
+      // it must not manufacture a sent charge in accounts receivable.
+      if (quote.status === 'DRAFT' && input.decision === 'APPROVED') {
         const sent = quoteSchema.parse({
           ...quote,
           status: 'SENT',

@@ -97,13 +97,11 @@ test('Nov17 dependents save with private documents, reload and mobile layout', a
   await child.getByLabel('Género').selectOption('M');
   await child.getByLabel('Fecha de nacimiento').fill('2021-05-01');
   for (const label of ['Partida de nacimiento', 'Consentimiento'])
-    await child
-      .getByLabel(label)
-      .setInputFiles({
-        name: `qa-${label}.pdf`,
-        mimeType: 'application/pdf',
-        buffer: Buffer.from('%PDF-1.4\nSynthetic QA only\n%%EOF'),
-      });
+    await child.getByLabel(label).setInputFiles({
+      name: `qa-${label}.pdf`,
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('%PDF-1.4\nSynthetic QA only\n%%EOF'),
+    });
   await page.setViewportSize({ width: 390, height: 844 });
   await saveScreenshot(page, 'dependents-mobile');
   await dialog.locator('[data-action-id="PATIENT-EDIT-SUBMIT"]').click();
@@ -137,7 +135,12 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   const search = page.locator('[data-action-id="QUOTE-SEARCH"]');
   await search.fill(code);
   await page.getByRole('button', { name: 'Enviada', exact: true }).click();
-  await expect(page.getByRole('row').filter({ hasText: code })).toContainText('Enviada');
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Cotización marcada como enviada' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('row').filter({ hasText: code }).getByText('Enviada', { exact: true }),
+  ).toBeVisible();
   await page.getByRole('link', { name: 'Editar', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -177,6 +180,23 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   }
   await page.locator('[data-action-id="CLINICAL-CARE-SETTING-FILTER"]').selectOption('');
   await saveScreenshot(page, 'clinical-all-settings');
+  const rejected = await makeQuote(page, 'HOME_OUTPATIENT');
+  expect(
+    (
+      await api(page, `/api/quotes/${rejected.id}/decision`, {
+        id: randomUUID(),
+        decision: 'NOT_APPROVED',
+        reason: 'Propuesta sintética no aceptada',
+      })
+    ).status,
+  ).toBe(201);
+  const rejectedRecord = (await api(page, `/api/quotes/${rejected.id}`)).body.quote;
+  expect(rejectedRecord.status).toBe('DRAFT');
+  await page.goto('/quotes?search=' + rejected.id);
+  await expect(page.locator('tbody tr')).toContainText('Rechazada');
+  await expect(
+    page.locator('tbody tr').getByRole('link', { name: 'Editar', exact: true }),
+  ).toHaveCount(0);
 });
 
 test('Nov17 prequote assignment, nurse delivery, supplier CRUD and responsive screens', async ({

@@ -29,6 +29,8 @@ export type PrequoteEntry = {
   requestedBy: string;
   unitPrice: number | null;
   assignedQuoteId: string | null;
+  currentQuoteId: string | null;
+  assignmentPresent: boolean;
   rootQuoteId: string | null;
 };
 export type PrequoteChoice = {

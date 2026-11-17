@@ -108,7 +108,7 @@ export default function ReceivedOrdersPage() {
           <p role="status">Consultando pedidos…</p>
         ) : inbox?.entries.length ? (
           <div className="table-wrap">
-            <table>
+            <table className="fulfillment-table">
               <thead>
                 <tr>
                   <th>Fecha de cotización</th>
@@ -122,16 +122,16 @@ export default function ReceivedOrdersPage() {
               <tbody>
                 {inbox.entries.map((entry) => (
                   <tr key={`${entry.rootId}-${entry.lineId}`}>
-                    <td>
+                    <td data-label="Fecha de cotización">
                       {new Date(entry.createdAt).toLocaleDateString('es-SV')}
                       <small className="cell-secondary">{quoteDisplayCode(entry.rootId)}</small>
                     </td>
-                    <td>
+                    <td data-label="Paciente">
                       <strong>{entry.patientName}</strong>
                     </td>
-                    <td>{entry.itemName}</td>
-                    <td>{entry.quantity}</td>
-                    <td>
+                    <td data-label="Ítem">{entry.itemName}</td>
+                    <td data-label="Cantidad">{entry.quantity}</td>
+                    <td data-label="Entrega">
                       <StatusTag tone={entry.delivered >= entry.quantity ? 'success' : 'warning'}>
                         {entry.delivered >= entry.quantity
                           ? 'Entregado'
@@ -145,7 +145,7 @@ export default function ReceivedOrdersPage() {
                         {entry.delivered} de {entry.quantity}
                       </small>
                     </td>
-                    <td>
+                    <td data-label="Acciones">
                       <Button className="button-secondary" onClick={() => open(entry)}>
                         Visualizar pedido
                       </Button>

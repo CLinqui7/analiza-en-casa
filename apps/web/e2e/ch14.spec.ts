@@ -209,7 +209,7 @@ test('CH14 exposes read-only Cierres tabs with factual empty sources and no audi
     .toBe(auditBefore);
 });
 
-test('CH14 exposes registered suppliers read-only without supplier mutations', async ({
+test('CH14 preserves supplier contacts in the dedicated directory without mutating on search', async ({
   browser,
 }) => {
   const admin = await browser.newPage();
@@ -218,21 +218,23 @@ test('CH14 exposes registered suppliers read-only without supplier mutations', a
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   );
   await admin.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
-  await expect(admin.getByRole('heading', { name: 'Inventario / Proveedores' })).toBeVisible();
   await expect(admin.getByRole('heading', { name: 'Proveedores', exact: true })).toBeVisible();
-  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-CREATE"]')).toBeDisabled();
-  await expect(admin.getByLabel('Registros de proveedores por página')).toBeDisabled();
-  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-PAGE-PREV"]')).toBeDisabled();
-  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-PAGE-NEXT"]')).toBeDisabled();
-  await expect(admin.getByRole('columnheader', { name: 'Código' })).toBeVisible();
-  await expect(admin.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
-  await expect(admin.getByRole('columnheader', { name: 'Contacto' })).toBeVisible();
-  await expect(admin.getByRole('columnheader', { name: 'Teléfono' })).toBeVisible();
-  await expect(admin.getByRole('columnheader', { name: 'Correo' })).toBeVisible();
-  await expect(admin.getByRole('columnheader', { name: 'Dirección' })).toBeVisible();
+  await expect(admin.locator('[data-action-id="INVENTORY-SUPPLIERS-CREATE"]')).toBeEnabled();
+  await expect(
+    admin.locator('.supplier-card').first().getByText('Contacto', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    admin.locator('.supplier-card').first().getByText('Teléfonos', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    admin.locator('.supplier-card').first().getByText('Correo', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    admin.locator('.supplier-card').first().getByText('Dirección y notas', { exact: true }),
+  ).toBeVisible();
   await expect(admin.getByText('Proveedor sintético de QA')).toBeVisible();
-  await admin.getByLabel('Buscar proveedores').fill('sin-proveedor-ch14');
-  await expect(admin.locator('tbody .empty-state')).toContainText('sin-proveedor-ch14');
+  await admin.getByLabel('Buscar proveedor', { exact: true }).fill('sin-proveedor-ch14');
+  await expect(admin.getByText('Sin proveedores', { exact: true })).toBeVisible();
   await admin.reload();
   await expect
     .poll(() =>
@@ -253,9 +255,10 @@ test('CH14 lets AUDITOR search the empty supplier surface without mutation', asy
     localStorage.getItem('analiza.en.casa.workspace.v3.auditEntries'),
   );
   await page.locator('[data-action-id="INVENTORY-SUPPLIERS-OPEN"]').click();
-  await expect(page.getByRole('heading', { name: 'Inventario / Proveedores' })).toBeVisible();
-  await page.getByLabel('Buscar proveedores').fill('sin-proveedor-auditor');
-  await expect(page.locator('tbody .empty-state')).toContainText('sin-proveedor-auditor');
+  await expect(page.getByRole('heading', { name: 'Proveedores', exact: true })).toBeVisible();
+  await expect(page.locator('[data-action-id="INVENTORY-SUPPLIERS-CREATE"]')).toHaveCount(0);
+  await page.getByLabel('Buscar proveedor', { exact: true }).fill('sin-proveedor-auditor');
+  await expect(page.getByText('Sin proveedores', { exact: true })).toBeVisible();
   await page.reload();
   await expect
     .poll(() =>

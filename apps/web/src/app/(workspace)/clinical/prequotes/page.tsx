@@ -105,7 +105,7 @@ export default function PrequotesPage() {
           <p role="status">Consultando solicitudes…</p>
         ) : inbox?.entries.length ? (
           <div className="table-wrap">
-            <table>
+            <table className="fulfillment-table">
               <thead>
                 <tr>
                   <th>Fecha</th>
@@ -118,20 +118,24 @@ export default function PrequotesPage() {
               <tbody>
                 {inbox.entries.map((entry) => (
                   <tr key={entry.id}>
-                    <td>{new Date(entry.createdAt).toLocaleString('es-SV')}</td>
-                    <td>
+                    <td data-label="Fecha">{new Date(entry.createdAt).toLocaleString('es-SV')}</td>
+                    <td data-label="Paciente">
                       <strong>{entry.patientName}</strong>
                     </td>
-                    <td>
+                    <td data-label="Ítems">
                       {entry.itemName}
                       <small className="cell-secondary">Cantidad: {entry.quantity}</small>
                     </td>
-                    <td>
-                      <StatusTag tone={entry.assignedQuoteId ? 'success' : 'warning'}>
-                        {entry.assignedQuoteId ? 'Asignada' : 'Pendiente'}
+                    <td data-label="Estado">
+                      <StatusTag tone={entry.assignmentPresent ? 'success' : 'warning'}>
+                        {entry.assignedQuoteId
+                          ? entry.assignmentPresent
+                            ? 'Asignada'
+                            : 'Retirada de cotización'
+                          : 'Pendiente'}
                       </StatusTag>
                     </td>
-                    <td>
+                    <td data-label="Acciones">
                       <Button
                         className="button-secondary"
                         onClick={() => {
@@ -221,12 +225,21 @@ export default function PrequotesPage() {
               </p>
             ) : null}
             {selected.assignedQuoteId ? (
-              <Link
-                className="button button-secondary"
-                href={`/quotes/${selected.assignedQuoteId}`}
-              >
-                Ver cotización {quoteDisplayCode(selected.rootQuoteId ?? selected.assignedQuoteId)}
-              </Link>
+              <>
+                {!selected.assignmentPresent ? (
+                  <p className="notice warning">
+                    La línea se retiró en una edición posterior. La asignación original se conserva
+                    en el historial; revise la cotización vigente antes de generar otra solicitud.
+                  </p>
+                ) : null}
+                <Link
+                  className="button button-secondary"
+                  href={`/quotes/${selected.currentQuoteId ?? selected.assignedQuoteId}`}
+                >
+                  Ver cotización{' '}
+                  {quoteDisplayCode(selected.rootQuoteId ?? selected.assignedQuoteId)}
+                </Link>
+              </>
             ) : (
               <>
                 <label>

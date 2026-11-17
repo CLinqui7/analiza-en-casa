@@ -482,7 +482,7 @@ function QuoteEditor({
     if (!selectedPatient) nextErrors.patientId = 'Seleccione un paciente válido.';
     if (draft.caseId && !selectedCase)
       nextErrors.caseId = 'La hospitalización seleccionada no corresponde al paciente.';
-    if (!draft.primaryDoctorId)
+    if (draft.careSetting === 'HOSPITALIZATION' && !draft.primaryDoctorId)
       nextErrors.primaryDoctorId = 'Seleccione el médico tratante principal.';
     if (draft.primaryDoctorId && !doctors.some((doctor) => doctor.id === draft.primaryDoctorId))
       nextErrors.primaryDoctorId = 'Seleccione un médico registrado.';
@@ -612,7 +612,7 @@ function QuoteEditor({
     mode === 'create'
       ? 'Nueva cotización'
       : mode === 'edit'
-        ? `Editar ${quoteDisplayCode(source ? quoteRoot(source) : '')}`
+        ? `Editar borrador ${quoteDisplayCode(source ? quoteRoot(source) : '')}`
         : `Editar ${quoteDisplayCode(source ? quoteRoot(source) : '')}`;
   const saveAction =
     mode === 'create'
@@ -894,6 +894,10 @@ function QuoteEditor({
                   </option>
                 ))}
               </select>
+              <span className="field-help">
+                Para aprobar y crear el ingreso clínico, complete el médico principal y la fecha de
+                atención.
+              </span>
               {draft.primaryDoctorId && doctorLabels.has(draft.primaryDoctorId) ? (
                 <span
                   id="quote-primary-doctor-summary"
@@ -1659,11 +1663,11 @@ export default function QuotesPage() {
   const mode: EditorMode | null =
     searchParams.get('create') === '1'
       ? 'create'
-      : editId && sourceEditable
-        ? 'edit'
-        : reviseId && sourceEditable
+      : (editId || reviseId) && sourceEditable
+        ? source.immutable
           ? 'revise'
-          : null;
+          : 'edit'
+        : null;
   const visibleQuotes = filterQuotes(searchQuotes(logicalQuotes, patients, query), {
     ...appliedFilters,
     status: '',
@@ -1928,6 +1932,10 @@ export default function QuotesPage() {
                                 <Link
                                   className="action-link-button action-link-button--compact"
                                   href={`/quotes?${quote.immutable ? 'revise' : 'edit'}=${quote.id}`}
+                                  aria-disabled={Boolean(decisionBusy)}
+                                  onClick={(event) => {
+                                    if (decisionBusy) event.preventDefault();
+                                  }}
                                 >
                                   Editar
                                 </Link>
@@ -1953,7 +1961,7 @@ export default function QuotesPage() {
                                     }}
                                     type="button"
                                   >
-                                    Enviada
+                                    {decisionBusy === quote.id ? 'Guardando…' : 'Enviada'}
                                   </Button>
                                 ) : null}
                               </>

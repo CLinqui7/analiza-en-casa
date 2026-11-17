@@ -164,7 +164,7 @@ describe('quote approval boundary', () => {
     ).toBe(false);
   });
 
-  it('freezes a rejected draft with its reason and creates no admission', async () => {
+  it('closes a rejected draft with its reason without creating a sent charge or admission', async () => {
     const reason = 'El paciente rechazó la propuesta sintética.';
     const queries: Array<{ sql: string; params?: unknown[] }> = [];
     const query = vi.fn(async (sql: string, params?: unknown[]) => {
@@ -194,7 +194,7 @@ describe('quote approval boundary', () => {
       context,
     );
     expect(response.status).toBe(201);
-    expect(queries.some(({ sql }) => sql.includes('UPDATE analiza.quotes'))).toBe(true);
+    expect(queries.some(({ sql }) => sql.includes('UPDATE analiza.quotes'))).toBe(false);
     expect(queries.some(({ sql }) => sql.includes('INSERT INTO analiza.hospitalizations'))).toBe(
       false,
     );

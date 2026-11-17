@@ -28,6 +28,12 @@ const latestQuotes = `SELECT DISTINCT ON (root_quote_id) id,root_quote_id,patien
   FROM analiza.quotes WHERE organization_id=$1 ORDER BY root_quote_id,quote_version DESC`;
 const terminal = `SELECT 1 FROM analiza.quote_decisions d JOIN analiza.quotes qd ON qd.organization_id=d.organization_id AND qd.id=d.quote_id
   WHERE qd.organization_id=$1 AND qd.root_quote_id=q.root_quote_id`;
+const orderLines = `WITH q AS (${latestQuotes}), lines AS (
+  SELECT q.id AS "quoteId",q.root_quote_id AS "rootId",q.created_at AS "createdAt",p.body->>'fullName' AS "patientName",line->>'id' AS "lineId",
+  line->>'name' AS "itemName",(line->>'quantity')::numeric AS quantity,q.body->>'status' AS status
+  FROM q JOIN analiza.patients p ON p.organization_id=$1 AND p.id=q.patient_id CROSS JOIN LATERAL jsonb_array_elements(q.body->'items') line
+  WHERE line->>'category' IN ('MEDICATIONS','SUPPLIES') AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED')
+)`;
 
 export async function prequoteInbox(
   pool: Pool,
@@ -40,10 +46,12 @@ export async function prequoteInbox(
       `SELECT r.id,r.created_at AS "createdAt",r.patient_id AS "patientId",p.body->>'fullName' AS "patientName",
       i.body->>'name' AS "itemName",r.quantity,r.note,r.priority,r.requested_by AS "requestedBy",
       CASE WHEN i.body->>'status'='ACTIVE' THEN (i.body->>'salePriceExcludingTax')::numeric ELSE NULL END AS "unitPrice",
-      a.quote_id AS "assignedQuoteId",a.root_quote_id AS "rootQuoteId"
+      a.quote_id AS "assignedQuoteId",a.root_quote_id AS "rootQuoteId",latest.id AS "currentQuoteId",
+      EXISTS(SELECT 1 FROM jsonb_array_elements(latest.body->'items') line WHERE line->>'id'=a.line_id) AS "assignmentPresent"
       FROM analiza.supply_requests r JOIN analiza.patients p ON p.organization_id=r.organization_id AND p.id=r.patient_id
       JOIN analiza.catalog_items i ON i.organization_id=r.organization_id AND i.id=r.catalog_item_id
       LEFT JOIN analiza.supply_request_assignments a ON a.organization_id=r.organization_id AND a.request_id=r.id
+      LEFT JOIN LATERAL (SELECT q.id,q.body FROM analiza.quotes q WHERE q.organization_id=r.organization_id AND q.root_quote_id=a.root_quote_id ORDER BY q.quote_version DESC LIMIT 1) latest ON true
       WHERE r.organization_id=$1 ORDER BY r.created_at DESC,r.id LIMIT 50 OFFSET $2`,
       [actor.organizationId, (page - 1) * 50],
     );
@@ -222,14 +230,12 @@ export async function receivedOrders(
   if (!can(actor.role, 'inventory:read')) throw new MongoAccessError();
   return transaction(pool, actor, async (c) => {
     const rows = await c.query(
-      `WITH q AS (${latestQuotes}), lines AS (
-      SELECT q.id AS "quoteId",q.root_quote_id AS "rootId",q.created_at AS "createdAt",p.body->>'fullName' AS "patientName",line->>'id' AS "lineId",
-      line->>'name' AS "itemName",(line->>'quantity')::numeric AS quantity,q.body->>'status' AS status
-      FROM q JOIN analiza.patients p ON p.organization_id=$1 AND p.id=q.patient_id CROSS JOIN LATERAL jsonb_array_elements(q.body->'items') line
-      WHERE line->>'category' IN ('MEDICATIONS','SUPPLIES') AND NOT EXISTS (${terminal} AND d.decision='NOT_APPROVED')
-    ) SELECT *,count(*) OVER()::integer AS total FROM lines ORDER BY "createdAt" DESC,"quoteId","lineId" LIMIT 50 OFFSET $2`,
+      `${orderLines} SELECT * FROM lines ORDER BY "createdAt" DESC,"quoteId","lineId" LIMIT 50 OFFSET $2`,
       [actor.organizationId, (page - 1) * 50],
     );
+    const count = await c.query(`${orderLines} SELECT count(*)::integer AS count FROM lines`, [
+      actor.organizationId,
+    ]);
     const roots = [...new Set(rows.rows.map((row) => row.rootId))];
     const deliveries = await c.query(
       `SELECT d.*,n.body->>'displayName' AS nurse_name FROM analiza.received_order_deliveries d
@@ -263,7 +269,7 @@ export async function receivedOrders(
       }),
       nurses: nurses.rows,
       page,
-      total: rows.rows[0]?.total ?? 0,
+      total: count.rows[0].count,
     };
   });
 }

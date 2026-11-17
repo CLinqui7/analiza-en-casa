@@ -301,14 +301,17 @@ test('draft can be edited and a previously sent version can be revised without c
     target.sentAt = new Date().toISOString();
     window.localStorage.setItem(key, JSON.stringify(quotes));
   }, quoteId);
+  // A stale edit URL must follow the stored sent state and require a revision reason.
+  await page.goto(`/quotes?edit=${quoteId}`);
+  await expect(page.getByRole('dialog').getByLabel('Motivo de revisión')).toBeVisible();
   await page.goto(`/quotes/${quoteId}`);
   await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Revisar / nueva versión' }).click();
-  dialog = page.getByRole('dialog', { name: /Revisar/ });
-  await dialog.getByRole('button', { name: 'Crear revisión' }).click();
+  await page.getByRole('button', { name: 'Editar cotización' }).click();
+  dialog = page.getByRole('dialog', { name: /Editar/ });
+  await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(dialog.getByText('El motivo de revisión es obligatorio.')).toBeVisible();
   await dialog.getByLabel('Motivo de revisión').fill('Ajuste E2E documentado');
-  await dialog.getByRole('button', { name: 'Crear revisión' }).click();
+  await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('status')).toContainText('Nueva versión');
 });
 

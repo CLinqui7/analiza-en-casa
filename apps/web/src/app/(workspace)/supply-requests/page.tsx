@@ -203,7 +203,11 @@ export default function SupplyRequestsPage() {
                       <td>{patient?.fullName ?? 'Destino protegido'}</td>
                       <td>
                         <StatusTag tone={request.status === 'ASSIGNED' ? 'success' : 'warning'}>
-                          {request.status === 'ASSIGNED' ? 'Asignada a cotización' : 'Recibida'}
+                          {request.status === 'ASSIGNED'
+                            ? 'Asignada a cotización'
+                            : request.status === 'REMOVED'
+                              ? 'Retirada de cotización'
+                              : 'Recibida'}
                         </StatusTag>
                       </td>
                     </tr>

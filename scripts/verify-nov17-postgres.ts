@@ -275,8 +275,8 @@ try {
     async (c) =>
       (
         await c.query(
-          'SELECT count(*)::integer AS count FROM analiza.inventory_movements WHERE organization_id=$1',
-          [actor.organizationId],
+          'SELECT count(*)::integer AS count FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+          [actor.organizationId, itemId],
         )
       ).rows[0].count,
   );
@@ -310,8 +310,8 @@ try {
     async (c) =>
       (
         await c.query(
-          'SELECT count(*)::integer AS count FROM analiza.inventory_movements WHERE organization_id=$1',
-          [actor.organizationId],
+          'SELECT count(*)::integer AS count FROM analiza.inventory_movements WHERE organization_id=$1 AND item_id=$2',
+          [actor.organizationId, itemId],
         )
       ).rows[0].count,
   );
@@ -382,6 +382,39 @@ try {
     false,
   );
   pass('approved family cannot be edited through revision, legacy creation or precotization');
+  const removableDraft = await backend.quotes.create(actor, {
+    quote: { ...draft, id: `nov17-remove-${run}`, rootQuoteId: `nov17-remove-${run}` },
+  });
+  await assignSupplyRequest(pool, actor, {
+    ...assignment,
+    requestId: nextRequest.id,
+    quoteId: removableDraft.id,
+    expectedRecordVersion: 1,
+    idempotencyKey: randomUUID(),
+  });
+  const assignedDraft = await storedQuote(removableDraft.id);
+  await backend.quotes.replace(actor, removableDraft.id, {
+    quote: {
+      ...assignedDraft,
+      items: assignedDraft.items.filter((line) => line.id !== `supply-request-${nextRequest.id}`),
+    },
+    expectedVersion: 2,
+  });
+  const removed = (await prequoteInbox(pool, actor, 1)).entries.find(
+    (entry) => entry.id === nextRequest.id,
+  )!;
+  assert.equal(removed.assignmentPresent, false);
+  assert.equal(removed.currentQuoteId, removableDraft.id);
+  assert.equal(
+    (await requestRepo.list(nurse)).find((entry) => entry.id === nextRequest.id)?.status,
+    'REMOVED',
+  );
+  const emptyPage = await receivedOrders(pool, actor, 999);
+  assert.equal(emptyPage.entries.length, 0);
+  assert.ok(emptyPage.total > 0);
+  pass(
+    'removed unfulfilled assignment is explicit in both inboxes; empty pagination retains total',
+  );
   const result = {
     status: 'PASS',
     checks,

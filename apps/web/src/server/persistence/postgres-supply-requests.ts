@@ -27,6 +27,7 @@ type Row = {
   created_at: Date;
   idempotency_key: string;
   assigned_quote_id?: string | null;
+  assignment_present?: boolean;
 };
 
 function publicRequest(row: Row): SupplyRequest {
@@ -38,7 +39,7 @@ function publicRequest(row: Row): SupplyRequest {
     quantity: row.quantity,
     priority: row.priority,
     note: row.note,
-    status: row.assigned_quote_id ? 'ASSIGNED' : row.status,
+    status: row.assigned_quote_id ? (row.assignment_present ? 'ASSIGNED' : 'REMOVED') : row.status,
     assignedQuoteId: row.assigned_quote_id ?? undefined,
     createdAt: row.created_at.toISOString(),
   });
@@ -64,8 +65,10 @@ export class PostgresSupplyRequestRepository {
     if (!can(actor.role, 'supply-requests:read')) throw new MongoAccessError();
     return transaction(this.pool, actor, async (client) => {
       const rows = await client.query<Row>(
-        `SELECT r.*,a.quote_id AS assigned_quote_id
+        `SELECT r.*,a.quote_id AS assigned_quote_id,
+         EXISTS(SELECT 1 FROM jsonb_array_elements(latest.body->'items') line WHERE line->>'id'=a.line_id) AS assignment_present
          FROM analiza.supply_requests r LEFT JOIN analiza.supply_request_assignments a ON a.organization_id=r.organization_id AND a.request_id=r.id
+         LEFT JOIN LATERAL (SELECT q.body FROM analiza.quotes q WHERE q.organization_id=r.organization_id AND q.root_quote_id=a.root_quote_id ORDER BY q.quote_version DESC LIMIT 1) latest ON true
          WHERE r.organization_id=$1 AND ($2::boolean OR r.requested_by=$3)
          ORDER BY r.created_at DESC,r.id LIMIT 500`,
         [actor.organizationId, actor.role !== 'NURSE', actor.userId],
