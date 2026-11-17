@@ -1785,7 +1785,7 @@ export default function QuotesPage() {
         <div className="table-heading">
           <div>
             <h2>Listado de cotizaciones</h2>
-            <p>{quotes.length} registros persistidos</p>
+            <p>{logicalQuotes.length} cotizaciones registradas</p>
           </div>
           <StatusTag>{visibleQuotes.length} visibles</StatusTag>
         </div>

@@ -5,6 +5,10 @@ La solicitud `parte1ana_.docx` recibida el 17/11/2026 se sigue en
 Su regresión se ejecuta con `npm run test:react` y `npm run test:nov17:postgres`;
 el segundo exige la base sintética aislada `analiza_qa`, transporte loopback
 y un rol runtime sin bypass de RLS.
+Los recorridos conectados usan `npx playwright test -c apps/web/playwright.clinical.config.ts`
+con las variables de fixtures de QA. `scripts/verify-part1-release.mjs` verifica la publicación
+únicamente en la organización sintética autorizada; recibe `PART1_RELEASE_ACCOUNT_FILE`,
+`PART1_RELEASE_SHA` y `PART1_RELEASE_OUTPUT`. Las credenciales permanecen fuera del repositorio.
 
 Aplicación para la gestión de atención domiciliar, con frontend y API integrados
 en Next.js. La entrega actual comprende los módulos Core y su persistencia en

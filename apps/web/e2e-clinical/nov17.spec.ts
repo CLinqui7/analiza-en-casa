@@ -153,10 +153,17 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   await page.getByRole('link', { name: 'Editar', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
+  await expect(dialog.locator('[data-action-id="QUOTE-REVISE-SUBMIT"]')).toBeEnabled();
   await dialog.getByLabel('Motivo de revisión').fill('Edición sintética de navegador');
+  await expect(dialog.getByLabel('Motivo de revisión')).toHaveValue(
+    'Edición sintética de navegador',
+  );
   await dialog.locator('[data-action-id="QUOTE-ITEM-EDIT"]').first().click();
   await dialog.getByRole('spinbutton', { name: /^Cantidad/ }).fill('3');
   await dialog.getByRole('button', { name: /Guardar línea|Actualizar línea/ }).click();
+  await expect(dialog.getByLabel('Motivo de revisión')).toHaveValue(
+    'Edición sintética de navegador',
+  );
   await dialog.locator('[data-action-id="QUOTE-REVISE-SUBMIT"]').click();
   await expect(dialog).toHaveCount(0);
   await search.fill(code);

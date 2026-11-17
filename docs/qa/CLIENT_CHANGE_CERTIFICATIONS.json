@@ -2,11 +2,14 @@
   "nov17_part1_regression": {
     "source": "docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt",
     "report": "docs/qa/CLIENT_PART1_IMPLEMENTATION_2026-11-17.md",
-    "status": "IMPLEMENTED_PENDING_INTEGRATION_QA",
-    "verification_sha": null,
+    "status": "TECHNICALLY_VERIFIED",
+    "verification_sha": "0d4990de09b77eba5de07de17c464a888019338b",
     "test_ids": [
       "vitest:nov17-workflows",
-      "postgres:nov17-workflows"
+      "postgres:nov17-workflows",
+      "apps/web/e2e-clinical/nov17.spec.ts",
+      "apps/web/e2e-clinical/connected.spec.ts",
+      "scripts/verify-part1-release.mjs"
     ],
     "requirements": [
       "NOV17-01",
@@ -20,7 +23,8 @@
       "Approval creates admission in all three care settings",
       "Delivery records nurse receipt without inventory movement"
     ],
-    "historical_certifications": "Prior certificates preserved; this batch is not certified until its focused and regression gates pass."
+    "historical_certifications": "Historical requirement statuses preserved; no new EXACT or full video re-audit.",
+    "scope": "Six DOCX changes with 370 unit/server tests, 144 legacy tests, 76 QA checks, 28 PostgreSQL groups, 47 mock browser scenarios and 11 connected scenarios approved after focused reruns. Source conflict: approved quote expansion remains unconfirmed; assignment permits draft/sent only."
   },
   "schema_version": 1,
   "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
@@ -119,7 +123,7 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "5f801b69dadf2bbfaea8ffa577770e8a2dea813fb18b2de58a3fef8c98d9df0e",
+      "functional_fingerprint": "5a5914a19f18f41f72baa9ffd8b2fe927a4924c10b55b839d22704e3c3ce22f1",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -130,7 +134,7 @@
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "553b8a5fb66e08297b451db07d4f4b60d4a0bbab93c32a4e02156d00d24ce60a",
+      "functional_fingerprint": "ae80cf30539afc19c75ab7ec9dc0704b273a53468759270cba594bf96ef19eda",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"

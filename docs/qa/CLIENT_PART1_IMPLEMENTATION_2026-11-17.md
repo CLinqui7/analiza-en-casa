@@ -2,13 +2,16 @@
 
 Fuente: `docs/qa/sources/CLIENT_PART1_CHANGES_2026-11-17.txt` (transcripción de `parte1ana_.docx`, documento fechado 03/11/2026). SHA256 original: `4B86E52C72DFDC36A7F7C5707331EBE1D1FC66ACA65B36CEDEC3E83BFB1F512C`.
 
-Estado: implementación en verificación; todavía no desplegada ni certificada.
+Estado: implementación verificada técnicamente; publicación pendiente de comprobación pública.
+
+Código de aplicación verificado: `0d4990de09b77eba5de07de17c464a888019338b`.
+Guía operativa: `../feedback/GUIA_PARTE1_2026-11-17.md`.
 
 Primera fase local: 370 pruebas React/servidor, typecheck, lint, 144 pruebas legacy,
 76 controles QA, build standalone y compilación Next pasaron. Gates CH01–CH03,
 trazabilidad 210/210, contrato de cambios 32/32, auditoría de evidencia, fronteras
 React y escaneo de secretos también pasaron. La validación PostgreSQL y de navegador
-del lote sigue pendiente en esta fase.
+del lote estaba pendiente en esa primera fase; los resultados finales se detallan abajo.
 
 La compilación detectó avisos nuevos de Next.js. Se actualizó 16.4.1 → 16.4.6
 (también eslint-config-next) y fast-xml-parser 5.11.1 → 5.12.1, sin cambios mayores
@@ -16,14 +19,29 @@ forzados. `npm audit --omit=dev` devuelve cero vulnerabilidades tras la actualiz
 Fuentes: [aviso oficial de caché](https://github.com/advisories/GHSA-mfr8-8qww-v76h),
 [release 16.4.6](https://github.com/vercel/next.js/releases/tag/v16.4.6).
 
-| ID | Solicitud conservada en fuente | Implementación | Verificación pendiente |
+| ID | Solicitud conservada en fuente | Implementación | Verificación realizada |
 |---|---|---|---|
-| NOV17-01 | Dependientes Sí/No, varios hijos, nombres/apellidos/género/nacimiento y dos documentos | Dependientes administrativos y archivos privados vinculados al paciente e hijo | PostgreSQL, autorización, carga/descarga, navegador móvil |
-| NOV17-02 | Responsable por defecto; Enviada; cuatro estados; editar Borrador/Enviada sin otra cotización visible | Usuario actual, estados derivados, una fila/código por raíz, edición enviada atómica con historial inmutable y saldo actualizado; terminales bloqueados en servidor | Concurrencia, pagos y versiones, API, navegador |
-| NOV17-03 | Tres modalidades de ingreso y filtro Todos | Modalidad en ingreso, creación al aprobar las tres, filtro y etiqueta | Aprobación real idempotente y filtros |
-| NOV17-04 | Precotización: solicitudes enfermería, revisar/asignar y actualizar cotización/CxC | Asignación transaccional a cotización del paciente con precio del catálogo, historial y control de duplicados | Rol runtime, RLS, falta/cambio de precio, concurrencia |
-| NOV17-05 | Pedidos recibidos: medicamentos/insumos, visualizar y entregar a enfermera | Proyección de versión vigente, entrega auditada, acumulados y rechazo de sobreentrega | Dos entregas simultáneas, enfermera ajena/inactiva, inventario sin cambios |
-| NOV17-06 | Proveedores sale de Catálogos y se crea desde Existencias | Directorio con alta/edición y contactos en Inventario → Existencias → Proveedores | Persistencia y regresión de compras/catálogos |
+| NOV17-01 | Dependientes Sí/No, varios hijos, nombres/apellidos/género/nacimiento y dos documentos | Dependientes administrativos y archivos privados vinculados al paciente e hijo | PASS: PostgreSQL, autorización por hijo/organización, carga/descarga de bytes, recarga y móvil |
+| NOV17-02 | Responsable por defecto; Enviada; cuatro estados; editar Borrador/Enviada sin otra cotización visible | Usuario actual, estados derivados, una fila/código por raíz, edición enviada atómica con historial inmutable y saldo actualizado; terminales bloqueados en servidor | PASS: concurrencia, pagos/versiones, API y edición real por navegador; rechazo de borrador sin nuevo cargo |
+| NOV17-03 | Tres modalidades de ingreso y filtro Todos | Modalidad en ingreso, creación al aprobar las tres, filtro y etiqueta | PASS: aprobación HTTP de las tres, reintento sin duplicar ingreso, modalidad persistida y filtros |
+| NOV17-04 | Precotización: solicitudes enfermería, revisar/asignar y actualizar cotización/CxC | Asignación transaccional a cotización del paciente con precio del catálogo, historial y control de duplicados | PASS: rol runtime, RLS, falta/cambio de precio, paciente ajeno y concurrencia; UI conectada |
+| NOV17-05 | Pedidos recibidos: medicamentos/insumos, visualizar y entregar a enfermera | Proyección de versión vigente, entrega auditada, acumulados y rechazo de sobreentrega | PASS: entregas simultáneas, enfermera no disponible, rol/organización, inventario sin cambios y persistencia por navegador |
+| NOV17-06 | Proveedores sale de Catálogos y se crea desde Existencias | Directorio con alta/edición y contactos en Inventario → Existencias → Proveedores | PASS: crear/editar/recargar contactos, búsquedas, permisos y ruta anterior |
+
+## Resultado de QA y revisión
+
+- 370 pruebas unitarias/servidor en 72 archivos; TypeScript y ESLint aprobados.
+- 144 pruebas legacy, 76 controles QA y build standalone aprobados.
+- 28 grupos PostgreSQL aislados: 7 del lote, 15 clínicos y 6 financieros. Rol sin superusuario ni bypass de RLS; migraciones 040/041 repetidas correctamente.
+- 47 escenarios de regresión mock: cotizaciones, CxC/pagos, ingresos clínicos, inventario, proveedores y ergonomía. Tras ajustar las expectativas del antiguo directorio de proveedores, los dos escenarios afectados y tres controles relacionados pasaron en repetición focalizada.
+- 11 escenarios conectados de navegador aprobados entre la ejecución inicial y las repeticiones focalizadas: 8 clínicos anteriores y 3 del lote. Incluyen documentos privados, las tres modalidades, edición enviada, descuento por categoría, continuidad de la tarjeta de medicamentos, entregas y proveedores.
+- Compilación de producción con Next.js 16.4.6 aprobada en contenedor aislado; cero avisos en la auditoría de dependencias de producción. No se afirma que las dependencias exclusivas de desarrollo tengan cero avisos.
+- Gates CH01/CH02/CH03, trazabilidad 210/210, contrato 32/32, espejo JSON/CSV, auditoría de ledgers, fronteras React y escaneo de secretos aprobados.
+- Capturas sintéticas revisadas en `../feedback/evidence/part1-nov17/`. Las tablas nuevas se convierten en tarjetas en móvil para mostrar las acciones sin desplazamiento horizontal interno.
+
+La revisión contra la línea base no dejó P0/P1 confirmados pendientes dentro del alcance. Las pruebas descubrieron y corrigieron: bloqueo SQL incompatible con el rol runtime al asignar solicitudes; carrera entre pagos y versiones; edición mediante URL antigua después de Enviada; campos auxiliares de totales rechazados por la API; y generación indebida de un cargo al rechazar un borrador. Una línea asignada que se retire antes de entregar se identifica en ambas bandejas, conservando su evidencia. Las líneas entregadas no pueden borrarse o reducirse por debajo de lo recibido.
+
+Las primeras ejecuciones de navegador también identificaron selectores de pruebas que aún usaban textos anteriores y una interacción automática antes de terminar la recuperación del formulario. Se actualizaron para esperar controles habilitados y verificar que el motivo de revisión permanezca escrito. Los reintentos excedieron el límite de acceso de la cuenta de QA; se reiniciaron sólo los contadores sintéticos de la base aislada, sin cambiar los límites ni la autenticación de producción.
 
 ## Confirmaciones del usuario
 

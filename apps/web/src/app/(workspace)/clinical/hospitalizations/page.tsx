@@ -392,7 +392,7 @@ export default function ClinicalHospitalizationsPage() {
         <div className="clinical-directory-heading">
           <div>
             <p className="eyebrow">Directorio clínico</p>
-            <h2>Casos hospitalizados</h2>
+            <h2>Ingresos registrados</h2>
             <p>Selecciona un caso para consultar su expediente o actualizar la atención.</p>
           </div>
           <StatusTag tone={activeCount ? 'warning' : 'neutral'}>
