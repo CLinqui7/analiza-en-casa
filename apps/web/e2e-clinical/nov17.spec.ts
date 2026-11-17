@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { readFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -10,7 +10,15 @@ if (!evidence?.patientId?.startsWith('nov17-p-') || !secret)
   throw new Error('Run isolated Nov17 integration first.');
 const screenshots = resolve('.local/nov17-screenshots');
 mkdirSync(screenshots, { recursive: true });
+const sessions = new Map<string, Awaited<ReturnType<BrowserContext['cookies']>>>();
 async function login(page: Page, path: string, role = 'admin') {
+  const cookies = sessions.get(role);
+  if (cookies) {
+    await page.context().addCookies(cookies);
+    await page.goto(path);
+    await expect(page.locator('main h1')).toBeVisible();
+    return;
+  }
   await page.goto('/login?next=' + encodeURIComponent(path));
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(secret!);
@@ -20,6 +28,7 @@ async function login(page: Page, path: string, role = 'admin') {
     .catch(() => {
       throw new Error('No se pudo iniciar la sesión sintética de QA.');
     });
+  sessions.set(role, await page.context().cookies());
 }
 async function api(
   page: Page,
@@ -146,7 +155,7 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
   await expect(dialog).toBeVisible();
   await dialog.getByLabel('Motivo de revisión').fill('Edición sintética de navegador');
   await dialog.locator('[data-action-id="QUOTE-ITEM-EDIT"]').first().click();
-  await dialog.getByLabel('Cantidad', { exact: true }).fill('3');
+  await dialog.getByRole('spinbutton', { name: /^Cantidad/ }).fill('3');
   await dialog.getByRole('button', { name: /Guardar línea|Actualizar línea/ }).click();
   await dialog.locator('[data-action-id="QUOTE-REVISE-SUBMIT"]').click();
   await expect(dialog).toHaveCount(0);
@@ -165,6 +174,14 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
     const approved = await api(page, `/api/quotes/${item.id}/decision`, decision);
     expect(approved.status, JSON.stringify(approved.body)).toBe(201);
     expect((await api(page, `/api/quotes/${item.id}/decision`, decision)).status).toBe(200);
+    const admissions = (await api(page, '/api/hospitalizations')).body.hospitalizations
+      .map(
+        (entry: { hospitalization: { linkedQuoteIds: string[]; careSetting: string } }) =>
+          entry.hospitalization,
+      )
+      .filter((entry: { linkedQuoteIds?: string[] }) => entry.linkedQuoteIds?.includes(item.id));
+    expect(admissions).toHaveLength(1);
+    expect(admissions[0].careSetting).toBe(careSetting);
     await page.goto('/quotes?search=' + item.id);
     await expect(page.locator('tbody tr')).toHaveCount(1);
     await expect(
@@ -190,7 +207,9 @@ test('Nov17 quote owner, manual Enviada, edit one logical quote and approve all 
       })
     ).status,
   ).toBe(201);
-  const rejectedRecord = (await api(page, `/api/quotes/${rejected.id}`)).body.quote;
+  const rejectedRecord = (await api(page, '/api/quotes')).body.quotes.find(
+    (entry: { quote: { id: string } }) => entry.quote.id === rejected.id,
+  ).quote;
   expect(rejectedRecord.status).toBe('DRAFT');
   await page.goto('/quotes?search=' + rejected.id);
   await expect(page.locator('tbody tr')).toContainText('Rechazada');

@@ -1,6 +1,11 @@
 'use client';
 
-import type { Quote, QuoteItem, QuoteItemCategory } from '@analiza/contracts';
+import {
+  quoteSchema,
+  type Quote,
+  type QuoteItem,
+  type QuoteItemCategory,
+} from '@analiza/contracts';
 import {
   calculateQuoteTotals,
   createQuoteRevision,
@@ -576,11 +581,11 @@ function QuoteEditor({
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...mongoMutationHeaders() },
             body: JSON.stringify({
-              quote: {
+              quote: quoteSchema.parse({
                 ...revision,
                 ...common,
                 ...calculateQuoteTotals(draft.items, draft.discount, draft.insurerAmount),
-              },
+              }),
             }),
           });
           const payload = await response.json();

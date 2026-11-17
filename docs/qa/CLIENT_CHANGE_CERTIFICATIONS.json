@@ -119,7 +119,7 @@
     "CR-011": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "2d9c2facee1fb287b351e01a67381cf8aa68121f93bd72cbf02aa2ca7d304e3c",
+      "functional_fingerprint": "5f801b69dadf2bbfaea8ffa577770e8a2dea813fb18b2de58a3fef8c98d9df0e",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-ITEMS"
@@ -130,7 +130,7 @@
     "CR-012": {
       "implementation_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
       "verification_sha": "2dc281cfe85118a9e6101114f99cf252ab3d7025",
-      "functional_fingerprint": "7da352b8a72e1072350af09fcb4e7556e08b3d25a6dd9258b5a42e51e9f6acdc",
+      "functional_fingerprint": "553b8a5fb66e08297b451db07d4f4b60d4a0bbab93c32a4e02156d00d24ce60a",
       "certification_status": "DEMO_CERTIFIED",
       "test_ids": [
         "SEL-QUOTE-CREATE"

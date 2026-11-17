@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 const patientId = process.env.CLINICAL_QA_PATIENT_ID!;
 const caseId = process.env.CLINICAL_QA_CASE_ID!;
 const secret = process.env.ANALIZA_QA_PASSWORD!;
@@ -29,13 +29,26 @@ async function getJson(page: Page, url: string) {
   expect(response.status, JSON.stringify(response.body)).toBe(200);
   return response.body;
 }
+const sessions = new Map<string, Awaited<ReturnType<BrowserContext['cookies']>>>();
 async function login(page: Page, path: string, role = 'nurse') {
+  const cookies = sessions.get(role);
+  if (cookies) {
+    await page.context().addCookies(cookies);
+    await page.goto(path);
+    await expect(page.locator('main h1')).toBeVisible();
+    return;
+  }
   await page.goto('/login?next=' + encodeURIComponent(path));
   await page.getByLabel('Usuario o correo').fill(`qa-${role}@example.test`);
   await page.getByLabel('Clave').fill(secret);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page).toHaveURL(new RegExp(path.replaceAll('/', '\\/') + '$'), { timeout: 30000 });
+  await page
+    .waitForURL((url) => url.pathname === path, { timeout: 30000 })
+    .catch(() => {
+      throw new Error('No se pudo iniciar la sesión sintética de QA.');
+    });
   await expect(page.locator('main h1')).toBeVisible();
+  sessions.set(role, await page.context().cookies());
 }
 async function editor(page: Page, label: string, nursing = false) {
   await page.goto('/clinical/orders');
@@ -373,7 +386,7 @@ test('configured category discount creates a quote revision without changing the
       r.request().method() === 'POST' &&
       !r.url().includes('form-draft'),
   );
-  await dialog.getByRole('button', { name: 'Crear revisión' }).click();
+  await dialog.getByRole('button', { name: 'Guardar cambios' }).click();
   const response = await responsePromise;
   expect(response.status(), await response.text()).toBeLessThan(300);
   await expect(dialog).toHaveCount(0);
